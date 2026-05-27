@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FCosta PTAM Pro — Laudos de Avaliação Imobiliária Profissionais</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky:#3B9BD6;--sky-l:#6cb8e6;--sky-ll:#e4f2fc;
+  --dark:#1E3A5F;--dark-l:#2a4f7a;
+  --gold:#c8a84b;--gold-l:#f5e6c0;
+  --white:#fff;--off:#f7f9fc;--text:#1a2b3c;--muted:#6b7e91;
+  --border:#dce8f0;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"DM Sans",sans-serif;background:var(--white);color:var(--text);overflow-x:hidden}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(30,58,95,.97);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.08)}
+.nav-inner{max-width:1140px;margin:0 auto;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-family:"Cormorant Garamond",serif;font-size:1.25rem;font-weight:700;color:#fff;letter-spacing:.5px}
+.nav-logo span{color:var(--gold)}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{color:rgba(255,255,255,.75);text-decoration:none;font-size:.82rem;font-weight:500;transition:color .2s}
+.nav-links a:hover{color:#fff}
+.nav-cta{background:var(--gold);color:var(--dark)!important;padding:7px 18px;border-radius:6px;font-weight:700!important;font-size:.78rem!important}
+.nav-cta:hover{background:#d4b05a!important}
+
+/* ── HERO ── */
+#hero{min-height:100vh;background:linear-gradient(160deg,var(--dark) 0%,#0d2340 60%,#162e4a 100%);display:flex;align-items:center;padding-top:60px;position:relative;overflow:hidden}
+#hero::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233B9BD6' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+#hero::after{content:"";position:absolute;right:-200px;top:50%;transform:translateY(-50%);width:700px;height:700px;background:radial-gradient(circle,rgba(59,155,214,.15) 0%,transparent 70%);pointer-events:none}
+.hero-inner{max-width:1140px;margin:0 auto;padding:80px 24px;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(200,168,75,.15);border:1px solid rgba(200,168,75,.35);color:var(--gold);font-size:.7rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:5px 13px;border-radius:20px;margin-bottom:20px}
+.hero-h1{font-family:"Cormorant Garamond",serif;font-size:3.4rem;font-weight:700;line-height:1.12;color:#fff;margin-bottom:16px}
+.hero-h1 em{color:var(--sky-l);font-style:italic}
+.hero-sub{font-size:1rem;color:rgba(255,255,255,.65);line-height:1.7;margin-bottom:28px;max-width:480px}
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#d4b05a);color:var(--dark);padding:13px 28px;border-radius:8px;font-size:.88rem;font-weight:700;text-decoration:none;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px;box-shadow:0 4px 20px rgba(200,168,75,.35)}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(200,168,75,.45)}
+.btn-ghost{background:transparent;color:#fff;padding:13px 28px;border-radius:8px;font-size:.88rem;font-weight:600;text-decoration:none;border:1px solid rgba(255,255,255,.25);cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.4)}
+.hero-stats{display:flex;gap:32px;margin-top:36px;padding-top:28px;border-top:1px solid rgba(255,255,255,.1)}
+.stat .n{font-family:"Cormorant Garamond",serif;font-size:2rem;font-weight:700;color:#fff;line-height:1}
+.stat .l{font-size:.72rem;color:rgba(255,255,255,.5);margin-top:3px;line-height:1.3}
+
+/* Hero mockup */
+.hero-mockup{position:relative}
+.mockup-frame{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:20px;backdrop-filter:blur(8px);box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.mockup-bar{display:flex;gap:6px;margin-bottom:14px}
+.mockup-bar span{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.2)}
+.mockup-bar span:first-child{background:#ff5f57}
+.mockup-bar span:nth-child(2){background:#febc2e}
+.mockup-bar span:nth-child(3){background:#28c840}
+.mock-sec{background:rgba(255,255,255,.05);border-radius:8px;padding:14px;margin-bottom:8px}
+.mock-lbl{font-size:.58rem;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.mock-val{font-family:"Cormorant Garamond",serif;font-size:1.6rem;font-weight:700;color:#fff}
+.mock-sub{font-size:.65rem;color:rgba(59,155,214,.8);margin-top:2px}
+.mock-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px}
+.mock-cell{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;padding:10px;text-align:center}
+.mock-cell .mv{font-family:"DM Mono",monospace;font-size:.82rem;font-weight:700;color:var(--sky-l)}
+.mock-cell .ml{font-size:.55rem;color:rgba(255,255,255,.35);margin-top:2px}
+.mock-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}
+.mtag{font-size:.58rem;padding:3px 8px;border-radius:10px;font-weight:600}
+.mtag.cnai{background:rgba(200,168,75,.2);color:var(--gold);border:1px solid rgba(200,168,75,.3)}
+.mtag.cef{background:rgba(0,102,153,.3);color:#6bd4ff;border:1px solid rgba(0,102,153,.4)}
+.mtag.cpc{background:rgba(123,63,160,.3);color:#d4a4ff;border:1px solid rgba(123,63,160,.4)}
+.mtag.nbr{background:rgba(39,174,96,.2);color:#7eeaaa;border:1px solid rgba(39,174,96,.3)}
+
+/* ── SEÇÕES GERAIS ── */
+section{padding:90px 0}
+.container{max-width:1140px;margin:0 auto;padding:0 24px}
+.sec-label{font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--sky);margin-bottom:10px}
+.sec-title{font-family:"Cormorant Garamond",serif;font-size:2.6rem;font-weight:700;color:var(--dark);line-height:1.2;margin-bottom:14px}
+.sec-sub{font-size:.95rem;color:var(--muted);line-height:1.7;max-width:580px}
+.text-center{text-align:center}.text-center .sec-sub{margin:0 auto}
+
+/* ── PARA QUEM ── */
+#para-quem{background:var(--off)}
+.pq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:50px}
+.pq-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:28px;position:relative;overflow:hidden;transition:all .25s}
+.pq-card:hover{transform:translateY(-4px);box-shadow:0 16px 50px rgba(30,58,95,.12);border-color:var(--sky)}
+.pq-card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--sky),var(--sky-l))}
+.pq-icon{font-size:2rem;margin-bottom:14px}
+.pq-title{font-family:"Cormorant Garamond",serif;font-size:1.2rem;font-weight:700;color:var(--dark);margin-bottom:8px}
+.pq-desc{font-size:.82rem;color:var(--muted);line-height:1.65}
+.pq-list{list-style:none;margin-top:12px;display:flex;flex-direction:column;gap:5px}
+.pq-list li{font-size:.78rem;color:var(--text);display:flex;align-items:flex-start;gap:6px}
+.pq-list li::before{content:"✓";color:var(--sky);font-weight:700;flex-shrink:0;margin-top:1px}
+
+/* ── SERVIÇO (para clientes) ── */
+#servico{background:#fff}
+.srv-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center;margin-top:50px}
+.srv-items{display:flex;flex-direction:column;gap:20px}
+.srv-item{display:flex;gap:16px;align-items:flex-start}
+.srv-ico{width:46px;height:46px;border-radius:10px;background:var(--sky-ll);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.srv-txt .st{font-size:.9rem;font-weight:700;color:var(--dark);margin-bottom:3px}
+.srv-txt .ss{font-size:.8rem;color:var(--muted);line-height:1.6}
+.srv-cta-box{background:linear-gradient(135deg,var(--dark),var(--dark-l));border-radius:14px;padding:32px;color:#fff}
+.srv-cta-box h3{font-family:"Cormorant Garamond",serif;font-size:1.6rem;font-weight:700;margin-bottom:8px}
+.srv-cta-box p{font-size:.83rem;opacity:.75;line-height:1.65;margin-bottom:20px}
+.srv-preco{display:flex;align-items:baseline;gap:6px;margin-bottom:20px}
+.srv-preco .de{font-size:.75rem;opacity:.6;text-decoration:line-through}
+.srv-preco .por{font-family:"DM Mono",monospace;font-size:2rem;font-weight:700;color:var(--gold)}
+.srv-preco .mes{font-size:.72rem;opacity:.6}
+.wa-btn{display:flex;align-items:center;gap:9px;background:#25d366;color:#fff;padding:12px 22px;border-radius:8px;font-size:.85rem;font-weight:700;text-decoration:none;transition:all .2s;justify-content:center}
+.wa-btn:hover{background:#1fb859;transform:translateY(-2px)}
+
+/* ── FEATURES (para corretores) ── */
+#features{background:var(--dark);position:relative;overflow:hidden}
+#features::before{content:"";position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233B9BD6' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+.feat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:50px;position:relative;z-index:1}
+.feat-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px;transition:all .25s}
+.feat-card:hover{background:rgba(59,155,214,.1);border-color:rgba(59,155,214,.3)}
+.feat-ico{font-size:1.6rem;margin-bottom:12px}
+.feat-title{font-size:.88rem;font-weight:700;color:#fff;margin-bottom:6px}
+.feat-desc{font-size:.75rem;color:rgba(255,255,255,.5);line-height:1.65}
+.feat-tag{display:inline-block;font-size:.55rem;font-weight:700;padding:2px 7px;border-radius:8px;margin-top:8px;letter-spacing:.4px}
+.feat-tag.gold{background:rgba(200,168,75,.2);color:var(--gold);border:1px solid rgba(200,168,75,.25)}
+.feat-tag.blue{background:rgba(59,155,214,.2);color:var(--sky-l);border:1px solid rgba(59,155,214,.25)}
+
+/* ── PLANOS ── */
+#planos{background:var(--off)}
+.planos-grid{display:grid;grid-template-columns:1fr 1.1fr 1fr;gap:20px;margin-top:50px;align-items:start}
+.plano{background:#fff;border:2px solid var(--border);border-radius:14px;padding:30px;position:relative;transition:all .25s}
+.plano:hover{transform:translateY(-4px);box-shadow:0 20px 60px rgba(30,58,95,.12)}
+.plano.dest{border-color:var(--sky);box-shadow:0 8px 40px rgba(59,155,214,.2)}
+.plano-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--sky);color:#fff;font-size:.62rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:4px 14px;border-radius:10px;white-space:nowrap}
+.plano-nome{font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.plano-preco{display:flex;align-items:baseline;gap:4px;margin-bottom:16px}
+.plano-preco .cur{font-size:.85rem;font-weight:700;color:var(--dark);margin-top:6px}
+.plano-preco .val{font-family:"DM Mono",monospace;font-size:2.6rem;font-weight:700;color:var(--dark);line-height:1}
+.plano-preco .per{font-size:.72rem;color:var(--muted)}
+.plano-desc{font-size:.78rem;color:var(--muted);margin-bottom:20px;line-height:1.6;min-height:40px}
+.plano-feats{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.plano-feats li{font-size:.8rem;color:var(--text);display:flex;align-items:flex-start;gap:8px;line-height:1.45}
+.plano-feats li .ck{color:var(--sky);font-weight:700;flex-shrink:0}
+.plano-feats li .xk{color:#ccc;flex-shrink:0}
+.btn-plano{width:100%;padding:12px;border-radius:8px;font-size:.85rem;font-weight:700;cursor:pointer;border:none;transition:all .2s;font-family:"DM Sans",sans-serif}
+.btn-plano.pri{background:linear-gradient(135deg,var(--sky),var(--sky-l));color:#fff;box-shadow:0 4px 20px rgba(59,155,214,.3)}
+.btn-plano.pri:hover{transform:translateY(-1px);box-shadow:0 8px 30px rgba(59,155,214,.4)}
+.btn-plano.sec{background:transparent;color:var(--sky);border:2px solid var(--sky)}
+.btn-plano.sec:hover{background:var(--sky-ll)}
+.btn-plano.ghost{background:transparent;color:var(--muted);border:2px solid var(--border)}
+.btn-plano.ghost:hover{border-color:var(--muted)}
+.economy{text-align:center;font-size:.68rem;font-weight:700;color:var(--sky);margin-top:8px}
+
+/* ── PAGAMENTO MP ── */
+#pagamento{background:#fff;display:none}
+#pagamento.open{display:block}
+.mp-box{max-width:480px;margin:0 auto;background:var(--off);border:1px solid var(--border);border-radius:16px;padding:36px}
+.mp-title{font-family:"Cormorant Garamond",serif;font-size:1.5rem;font-weight:700;color:var(--dark);margin-bottom:6px}
+.mp-sub{font-size:.8rem;color:var(--muted);margin-bottom:24px}
+.mp-plan-sel{display:flex;gap:10px;margin-bottom:24px}
+.mp-plan-btn{flex:1;padding:12px;border-radius:8px;border:2px solid var(--border);background:#fff;cursor:pointer;font-family:"DM Sans",sans-serif;font-size:.8rem;font-weight:600;color:var(--muted);transition:all .2s;text-align:center}
+.mp-plan-btn.sel{border-color:var(--sky);background:var(--sky-ll);color:var(--sky)}
+.mp-form{display:flex;flex-direction:column;gap:14px}
+.mp-field{display:flex;flex-direction:column;gap:4px}
+.mp-field label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+.mp-field input{border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:.85rem;font-family:"DM Sans",sans-serif;color:var(--text);background:#fff;transition:border .15s}
+.mp-field input:focus{outline:none;border-color:var(--sky);box-shadow:0 0 0 3px rgba(59,155,214,.1)}
+.mp-total{background:var(--dark);color:#fff;border-radius:10px;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+.mp-total .ml{font-size:.78rem;opacity:.7}
+.mp-total .mv{font-family:"DM Mono",monospace;font-size:1.4rem;font-weight:700;color:var(--gold)}
+.mp-submit{background:linear-gradient(135deg,#009ee3,#0077b6);color:#fff;border:none;border-radius:8px;padding:14px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.mp-submit:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,158,227,.35)}
+.mp-safe{text-align:center;font-size:.65rem;color:var(--muted);margin-top:10px;display:flex;align-items:center;justify-content:center;gap:5px}
+.mp-logo{display:flex;align-items:center;gap:6px;justify-content:center;margin-bottom:18px}
+.mp-logo .mp-icon{width:36px;height:36px;background:linear-gradient(135deg,#009ee3,#0077b6);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:.9rem}
+.mp-logo span{font-size:.8rem;font-weight:700;color:var(--dark)}
+
+/* ── DEPOIMENTOS ── */
+#depoimentos{background:var(--dark)}
+.dep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:50px}
+.dep-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:24px}
+.dep-stars{color:var(--gold);font-size:.85rem;margin-bottom:10px;letter-spacing:2px}
+.dep-txt{font-size:.82rem;color:rgba(255,255,255,.75);line-height:1.7;margin-bottom:16px;font-style:italic}
+.dep-author{display:flex;align-items:center;gap:10px}
+.dep-av{width:38px;height:38px;border-radius:50%;background:var(--sky);display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:.85rem;flex-shrink:0}
+.dep-name{font-size:.8rem;font-weight:700;color:#fff}
+.dep-role{font-size:.68rem;color:rgba(255,255,255,.45)}
+
+/* ── FAQ ── */
+#faq{background:var(--off)}
+.faq-list{max-width:760px;margin:40px auto 0;display:flex;flex-direction:column;gap:12px}
+.faq-item{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.faq-q{padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:.88rem;font-weight:600;color:var(--dark);gap:12px;transition:background .15s}
+.faq-q:hover{background:var(--sky-ll)}
+.faq-q .arr{color:var(--sky);font-size:1rem;flex-shrink:0;transition:transform .25s}
+.faq-item.open .faq-q .arr{transform:rotate(180deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;font-size:.82rem;color:var(--muted);line-height:1.7}
+.faq-item.open .faq-a{max-height:200px}
+.faq-a p{padding:0 20px 16px}
+
+/* ── CTA FINAL ── */
+#cta-final{background:linear-gradient(135deg,var(--dark),#0d2340);text-align:center;padding:100px 0}
+.cta-final-inner{max-width:600px;margin:0 auto;padding:0 24px}
+.cta-final-inner h2{font-family:"Cormorant Garamond",serif;font-size:2.8rem;font-weight:700;color:#fff;margin-bottom:14px;line-height:1.2}
+.cta-final-inner p{font-size:.92rem;color:rgba(255,255,255,.6);margin-bottom:32px;line-height:1.7}
+
+/* ── FOOTER ── */
+footer{background:#0a1e35;padding:40px 0;border-top:1px solid rgba(255,255,255,.06)}
+.footer-inner{max-width:1140px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-brand{font-family:"Cormorant Garamond",serif;font-size:1.1rem;font-weight:700;color:#fff}
+.footer-brand span{color:var(--gold)}
+.footer-info{font-size:.7rem;color:rgba(255,255,255,.35);text-align:center;line-height:1.7}
+.footer-links{display:flex;gap:16px}
+.footer-links a{color:rgba(255,255,255,.4);text-decoration:none;font-size:.72rem;transition:color .2s}
+.footer-links a:hover{color:rgba(255,255,255,.8)}
+
+/* ── ANIMAÇÕES ── */
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+
+/* ── MODAL ── */
+#modal-checkout{display:none;position:fixed;inset:0;z-index:500;background:rgba(10,30,53,.85);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px}
+#modal-checkout.open{display:flex}
+.modal-box{background:#fff;border-radius:16px;width:100%;max-width:460px;max-height:92vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.modal-hd{background:var(--dark);color:#fff;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;border-radius:16px 16px 0 0}
+.modal-hd h3{font-family:"Cormorant Garamond",serif;font-size:1.25rem;font-weight:700}
+.modal-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:1.3rem;cursor:pointer;transition:color .2s}
+.modal-close:hover{color:#fff}
+.modal-bd{padding:28px}
+.plano-sel-info{background:var(--sky-ll);border:1px solid rgba(59,155,214,.3);border-radius:8px;padding:14px 16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+.psi-nome{font-size:.78rem;font-weight:700;color:var(--dark)}
+.psi-preco{font-family:"DM Mono",monospace;font-size:1.1rem;font-weight:700;color:var(--sky)}
+.form-group{display:flex;flex-direction:column;gap:4px;margin-bottom:14px}
+.form-group label{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
+.form-group input{border:1px solid var(--border);border-radius:7px;padding:10px 12px;font-size:.85rem;font-family:"DM Sans",sans-serif;color:var(--text);width:100%}
+.form-group input:focus{outline:none;border-color:var(--sky);box-shadow:0 0 0 3px rgba(59,155,214,.1)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.divider{border:none;border-top:1px solid var(--border);margin:16px 0}
+.pay-methods{display:flex;gap:8px;margin-bottom:16px}
+.pm-btn{flex:1;padding:10px;border-radius:7px;border:2px solid var(--border);background:#fff;cursor:pointer;font-size:.75rem;font-weight:600;color:var(--muted);transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:3px}
+.pm-btn.sel{border-color:var(--sky);background:var(--sky-ll);color:var(--sky)}
+.pm-btn .pm-ico{font-size:1.1rem}
+.btn-pagar{width:100%;padding:14px;background:linear-gradient(135deg,#009ee3,#0077b6);color:#fff;border:none;border-radius:8px;font-size:.9rem;font-weight:700;cursor:pointer;font-family:"DM Sans",sans-serif;transition:all .2s;margin-top:6px}
+.btn-pagar:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,158,227,.35)}
+.safe-note{text-align:center;font-size:.62rem;color:var(--muted);margin-top:10px;display:flex;align-items:center;justify-content:center;gap:4px}
+
+@media(max-width:900px){
+  .hero-inner,.srv-grid{grid-template-columns:1fr}
+  .hero-mockup{display:none}
+  .pq-grid,.feat-grid,.planos-grid,.dep-grid{grid-template-columns:1fr}
+  .planos-grid{grid-template-columns:1fr}
+  .hero-h1{font-size:2.4rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">FCosta <span>PTAM</span> Pro</div>
+    <div class="nav-links">
+      <a href="#servico">Solicitar Avaliação</a>
+      <a href="#planos">Planos</a>
+      <a href="#features">Recursos</a>
+      <a href="#faq">FAQ</a>
+      <a href="#" class="nav-cta" onclick="abrirApp()">Acessar Sistema →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="hero-badge">🏆 CNAI 52708 · COFECI · NBR 14653</div>
+      <h1 class="hero-h1">Laudos de Avaliação<br><em>aceitos em qualquer lugar</em></h1>
+      <p class="hero-sub">PTAM profissional conforme NBR 14653, aceito pela Caixa Econômica Federal, sistema financeiro e judiciário. Emitido por Corretor habilitado com CNAI ativo.</p>
+      <div class="hero-ctas">
+        <a href="#servico" class="btn-gold">📋 Solicitar Avaliação</a>
+        <a href="#planos" class="btn-ghost">🚀 Para Corretores</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><div class="n">NBR</div><div class="l">14653<br>Compliant</div></div>
+        <div class="stat"><div class="n">CEF</div><div class="l">SFH/SBPE/<br>FGTS/MCMV</div></div>
+        <div class="stat"><div class="n">CPC</div><div class="l">Art. 464–480<br>Judicial</div></div>
+        <div class="stat"><div class="n">15</div><div class="l">Seções<br>técnicas</div></div>
+      </div>
+    </div>
+    <div class="hero-mockup">
+      <div class="mockup-frame">
+        <div class="mockup-bar"><span></span><span></span><span></span></div>
+        <div class="mock-sec">
+          <div class="mock-lbl">Valor de Mercado</div>
+          <div class="mock-val">R$ 485.000,00</div>
+          <div class="mock-sub">Quatrocentos e oitenta e cinco mil reais</div>
+        </div>
+        <div class="mock-row">
+          <div class="mock-cell"><div class="mv">R$/m²</div><div class="ml">5.388,88</div></div>
+          <div class="mock-cell"><div class="mv" style="color:#7eeaaa">CV 14%</div><div class="ml">Grau III</div></div>
+          <div class="mock-cell"><div class="mv" style="color:#febc2e">±15%</div><div class="ml">Intervalo</div></div>
+        </div>
+        <div class="mock-tags" style="margin-top:12px">
+          <span class="mtag cnai">⭐ CNAI 52708</span>
+          <span class="mtag cef">🏦 CEF</span>
+          <span class="mtag cpc">⚖️ CPC</span>
+          <span class="mtag nbr">📐 NBR 14653</span>
+        </div>
+        <div style="margin-top:12px;background:rgba(255,255,255,.06);border-radius:6px;padding:10px">
+          <div style="font-size:.58rem;color:rgba(255,255,255,.4);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px">Checklist de Conformidade</div>
+          <div style="background:rgba(255,255,255,.1);border-radius:4px;height:5px;overflow:hidden">
+            <div style="width:92%;height:100%;background:linear-gradient(90deg,#27ae60,#4cd080);border-radius:4px"></div>
+          </div>
+          <div style="font-size:.6rem;color:rgba(255,255,255,.4);margin-top:3px">23 de 25 itens · 92%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PARA QUEM -->
+<section id="para-quem">
+  <div class="container">
+    <div class="text-center">
+      <div class="sec-label">Para quem é</div>
+      <h2 class="sec-title">Uma solução completa para<br>cada necessidade</h2>
+      <p class="sec-sub">Do proprietário que precisa de um laudo para venda até o corretor que quer emitir PTAMs profissionais para seus clientes.</p>
+    </div>
+    <div class="pq-grid">
+      <div class="pq-card fade-up">
+        <div class="pq-icon">🏠</div>
+        <div class="pq-title">Proprietários e Compradores</div>
+        <div class="pq-desc">Precisa de um laudo para venda, compra, inventário ou declaração de IRPF?</div>
+        <ul class="pq-list">
+          <li>Laudo com validade jurídica</li>
+          <li>Aceito em cartórios e bancos</li>
+          <li>Entrega em até 3 dias úteis</li>
+          <li>Assinado por CRECI + CNAI</li>
+        </ul>
+      </div>
+      <div class="pq-card fade-up" style="transition-delay:.1s">
+        <div class="pq-icon">🏦</div>
+        <div class="pq-title">Financiamento Imobiliário</div>
+        <div class="pq-desc">Laudo específico para garantia junto à Caixa Econômica Federal e outros bancos.</div>
+        <ul class="pq-list">
+          <li>Atende checklist COT CEF</li>
+          <li>SBPE · FGTS · MCMV</li>
+          <li>LTV calculado automaticamente</li>
+          <li>CNAI obrigatório — incluso</li>
+        </ul>
+      </div>
+      <div class="pq-card fade-up" style="transition-delay:.2s">
+        <div class="pq-icon">⚖️</div>
+        <div class="pq-title">Advogados e Judiciário</div>
+        <div class="pq-desc">Laudo pericial para inventário, divórcio, execução, desapropriação e demais ações.</div>
+        <ul class="pq-list">
+          <li>Conforme CPC art. 464–480</li>
+          <li>Quesitos e respostas periciais</li>
+          <li>Data-base histórica se necessário</li>
+          <li>Responsabilidade técnica do perito</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVIÇO -->
+<section id="servico">
+  <div class="container">
+    <div class="srv-grid">
+      <div>
+        <div class="sec-label">Solicite seu laudo</div>
+        <h2 class="sec-title">Avaliação profissional<br>com entrega rápida</h2>
+        <p class="sec-sub" style="margin-bottom:32px">Vistoria presencial, pesquisa de mercado, laudo completo em PDF assinado e carimbado. Pronto para CEF, judiciário e cartório.</p>
+        <div class="srv-items">
+          <div class="srv-item">
+            <div class="srv-ico">📍</div>
+            <div class="srv-txt"><div class="st">Vistoria presencial</div><div class="ss">Visito o imóvel, fotografo todos os ambientes, verifico documentação e coleto dados para o laudo.</div></div>
+          </div>
+          <div class="srv-item">
+            <div class="srv-ico">🔍</div>
+            <div class="srv-txt"><div class="st">Pesquisa de mercado NBR</div><div class="ss">Pesquiso mínimo 3 elementos comparativos verificáveis com homogeneização conforme NBR 14653-2.</div></div>
+          </div>
+          <div class="srv-item">
+            <div class="srv-ico">📄</div>
+            <div class="srv-txt"><div class="st">Laudo completo em PDF</div><div class="ss">PTAM com 15 seções, fotos, tabela de amostras, estatísticas, parecer conclusivo e assinatura com carimbo CRECI + CNAI.</div></div>
+          </div>
+          <div class="srv-item">
+            <div class="srv-ico">⚡</div>
+            <div class="srv-txt"><div class="st">Entrega em até 3 dias úteis</div><div class="ss">Após a vistoria, o laudo é entregue por e-mail em PDF e Word editável.</div></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="srv-cta-box">
+          <h3>Solicite sua avaliação agora</h3>
+          <p>Atendo região de São Paulo e Grande SP. Entre em contato pelo WhatsApp para orçamento sem compromisso.</p>
+          <div class="srv-preco">
+            <span class="de">R$ 900</span>
+            <span class="por">R$ 590</span>
+            <span class="mes">por laudo</span>
+          </div>
+          <a href="https://wa.me/5511993509109?text=Ol%C3%A1%20Sergio%2C%20quero%20solicitar%20um%20PTAM%20para%20meu%20im%C3%B3vel." class="wa-btn" target="_blank">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Solicitar via WhatsApp
+          </a>
+          <div style="margin-top:14px;font-size:.68rem;color:rgba(255,255,255,.4);text-align:center">
+            Sergio Fernandes da Costa · CRECI-SP 294791-F · CNAI 52708
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="text-center">
+      <div class="sec-label" style="color:var(--sky-l)">Para corretores</div>
+      <h2 class="sec-title" style="color:#fff">Emita PTAMs profissionais<br>em minutos</h2>
+      <p class="sec-sub" style="color:rgba(255,255,255,.55);margin:0 auto">O sistema mais completo do mercado para avaliação imobiliária. 15 seções técnicas, cálculos automáticos e conformidade total com NBR, CEF e CPC.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card fade-up">
+        <div class="feat-ico">📐</div>
+        <div class="feat-title">NBR 14653 Compliant</div>
+        <div class="feat-desc">Graus I, II e III. Homogeneização com 5 fatores. Estatística: média, mediana, DP e CV automáticos.</div>
+        <span class="feat-tag gold">CNAI</span>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:.1s">
+        <div class="feat-ico">🏦</div>
+        <div class="feat-title">Checklist CEF Completo</div>
+        <div class="feat-desc">15 critérios de conformidade SFH/SBPE/FGTS/MCMV. LTV calculado automaticamente. Barra de conformidade.</div>
+        <span class="feat-tag blue">CEF</span>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:.2s">
+        <div class="feat-ico">⚖️</div>
+        <div class="feat-title">Módulo Judicial CPC</div>
+        <div class="feat-desc">Quesitos por parte (Juízo/Autor/Réu). Linha do tempo processual. Conformidade com CPC art. 464–480.</div>
+        <span class="feat-tag" style="background:rgba(123,63,160,.2);color:#d4a4ff;border:1px solid rgba(123,63,160,.3)">CPC</span>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:.3s">
+        <div class="feat-ico">📷</div>
+        <div class="feat-title">Fotos Integradas</div>
+        <div class="feat-desc">5 categorias no imóvel + fotos por amostra comparativa. Lightbox, legendas editáveis, exportação no PDF.</div>
+        <span class="feat-tag blue">PRO</span>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:.4s">
+        <div class="feat-ico">💰</div>
+        <div class="feat-title">Valor por Extenso</div>
+        <div class="feat-desc">Cálculo automático: valor total, R$/m², intervalo ±15%, método evolutivo CUB e convergência entre métodos.</div>
+        <span class="feat-tag gold">AUTO</span>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:.5s">
+        <div class="feat-ico">📄</div>
+        <div class="feat-title">PDF Profissional</div>
+        <div class="feat-desc">Preview completo com todas as seções, fotos organizadas, tabela de amostras e assinatura. Impressão otimizada.</div>
+        <span class="feat-tag blue">PRO</span>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:.6s">
+        <div class="feat-ico">💾</div>
+        <div class="feat-title">Salvar e Continuar</div>
+        <div class="feat-desc">Rascunhos salvos no navegador. Retome qualquer laudo de onde parou. Laudos ilimitados no plano Pro.</div>
+        <span class="feat-tag gold">PRO</span>
+      </div>
+      <div class="feat-card fade-up" style="transition-delay:.7s">
+        <div class="feat-ico">✅</div>
+        <div class="feat-title">Checklist 25 Itens</div>
+        <div class="feat-desc">Verificação final com referências normativas. Barra de progresso. Garante que nenhum item obrigatório seja esquecido.</div>
+        <span class="feat-tag gold">CNAI</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLANOS -->
+<section id="planos">
+  <div class="container">
+    <div class="text-center">
+      <div class="sec-label">Planos e Preços</div>
+      <h2 class="sec-title">Escolha o plano ideal<br>para sua produção</h2>
+      <p class="sec-sub">Comece gratuitamente. Faça upgrade quando precisar de mais recursos. Cancele quando quiser.</p>
+    </div>
+    <div class="planos-grid">
+      <!-- GRÁTIS -->
+      <div class="plano fade-up">
+        <div class="plano-nome">Gratuito</div>
+        <div class="plano-preco"><span class="cur">R$</span><span class="val">0</span><span class="per">/mês</span></div>
+        <div class="plano-desc">Para conhecer o sistema e emitir laudos simples.</div>
+        <ul class="plano-feats">
+          <li><span class="ck">✓</span> 2 laudos por mês</li>
+          <li><span class="ck">✓</span> Todas as seções básicas</li>
+          <li><span class="ck">✓</span> Homogeneização automática</li>
+          <li><span class="ck">✓</span> Preview do laudo</li>
+          <li><span class="xk">✗</span> <span style="color:#ccc">PDF profissional com logo</span></li>
+          <li><span class="xk">✗</span> <span style="color:#ccc">Módulo CEF completo</span></li>
+          <li><span class="xk">✗</span> <span style="color:#ccc">Módulo judicial CPC</span></li>
+          <li><span class="xk">✗</span> <span style="color:#ccc">Suporte prioritário</span></li>
+        </ul>
+        <button class="btn-plano ghost" onclick="abrirApp()">Começar grátis</button>
+      </div>
+      <!-- PRO MENSAL -->
+      <div class="plano dest fade-up" style="transition-delay:.1s">
+        <div class="plano-badge">⭐ Mais popular</div>
+        <div class="plano-nome">Pro Mensal</div>
+        <div class="plano-preco"><span class="cur">R$</span><span class="val">79</span><span class="per">/mês</span></div>
+        <div class="plano-desc">Para o corretor que emite laudos regularmente com máxima qualidade.</div>
+        <ul class="plano-feats">
+          <li><span class="ck">✓</span> <strong>Laudos ilimitados</strong></li>
+          <li><span class="ck">✓</span> PDF profissional com logo FCosta</li>
+          <li><span class="ck">✓</span> Módulo CEF completo (15 critérios)</li>
+          <li><span class="ck">✓</span> Módulo judicial CPC</li>
+          <li><span class="ck">✓</span> Fotos no imóvel e nas amostras</li>
+          <li><span class="ck">✓</span> Método evolutivo (CUB)</li>
+          <li><span class="ck">✓</span> Checklist 25 itens NBR</li>
+          <li><span class="ck">✓</span> Suporte via WhatsApp</li>
+        </ul>
+        <button class="btn-plano pri" onclick="abrirCheckout('Pro Mensal','R$ 79,00/mês',79)">Assinar Pro →</button>
+      </div>
+      <!-- PRO ANUAL -->
+      <div class="plano fade-up" style="transition-delay:.2s">
+        <div class="plano-nome">Pro Anual</div>
+        <div class="plano-preco"><span class="cur">R$</span><span class="val">690</span><span class="per">/ano</span></div>
+        <div class="plano-desc">Tudo do Pro Mensal com 2 meses grátis e prioridade máxima.</div>
+        <ul class="plano-feats">
+          <li><span class="ck">✓</span> <strong>Tudo do Pro Mensal</strong></li>
+          <li><span class="ck">✓</span> <strong>2 meses grátis</strong> (R$ 57,50/mês)</li>
+          <li><span class="ck">✓</span> Acesso antecipado a novidades</li>
+          <li><span class="ck">✓</span> Suporte prioritário WhatsApp</li>
+          <li><span class="ck">✓</span> 1 consultoria de avaliação inclusa</li>
+          <li><span class="ck">✓</span> Templates personalizados</li>
+          <li><span class="xk">—</span> <span style="color:#ccc">Cobrado uma vez por ano</span></li>
+          <li><span class="xk">—</span> <span style="color:#ccc">Cancele a qualquer momento</span></li>
+        </ul>
+        <button class="btn-plano sec" onclick="abrirCheckout('Pro Anual','R$ 690,00/ano',690)">Assinar Anual →</button>
+        <div class="economy">💸 Economia de R$ 258,00 por ano</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section id="depoimentos">
+  <div class="container">
+    <div class="text-center">
+      <div class="sec-label" style="color:var(--sky-l)">Depoimentos</div>
+      <h2 class="sec-title" style="color:#fff">O que dizem os corretores<br>que já usam</h2>
+    </div>
+    <div class="dep-grid">
+      <div class="dep-card fade-up">
+        <div class="dep-stars">★★★★★</div>
+        <div class="dep-txt">"Usei para um financiamento CEF que havia sido recusado duas vezes por laudo incompleto. Com o PTAM Pro o laudo passou na primeira tentativa. Incrível."</div>
+        <div class="dep-author"><div class="dep-av">RC</div><div><div class="dep-name">Roberto C.</div><div class="dep-role">Corretor · CRECI-SP · São Paulo/SP</div></div></div>
+      </div>
+      <div class="dep-card fade-up" style="transition-delay:.1s">
+        <div class="dep-stars">★★★★★</div>
+        <div class="dep-txt">"Fiz um laudo para inventário judicial. O juiz aceitou sem questionar. O módulo de quesitos e respostas é perfeito para perícia — economizei horas de trabalho."</div>
+        <div class="dep-author"><div class="dep-av">AM</div><div><div class="dep-name">Ana M.</div><div class="dep-role">Corretora · CNAI · Campinas/SP</div></div></div>
+      </div>
+      <div class="dep-card fade-up" style="transition-delay:.2s">
+        <div class="dep-stars">★★★★★</div>
+        <div class="dep-txt">"Cobrei R$ 800 por um laudo que levei 40 minutos para fazer. O sistema é tão completo que o cliente nem questiona o valor — a qualidade já justifica tudo."</div>
+        <div class="dep-author"><div class="dep-av">FS</div><div><div class="dep-name">Fábio S.</div><div class="dep-role">Corretor · CRECI-SP · Santo André/SP</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div class="text-center">
+      <div class="sec-label">Dúvidas frequentes</div>
+      <h2 class="sec-title">Perguntas e respostas</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Preciso ter CNAI para usar o sistema?<span class="arr">▼</span></div><div class="faq-a"><p>Para usar a ferramenta não há restrição. Mas para que o laudo tenha validade na CEF e em laudos periciais judiciais, o profissional que assina precisa ter CNAI ativo. O CNAI é emitido pelo COFECI após curso de avaliação imobiliária.</p></div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">O laudo gerado é aceito pela Caixa Econômica Federal?<span class="arr">▼</span></div><div class="faq-a"><p>Sim, desde que você seja o profissional habilitado (CRECI + CNAI), preencha todos os campos obrigatórios e atenda ao checklist de 15 critérios CEF incluído no sistema. A ferramenta foi desenvolvida especificamente para atender as exigências da IN CEF.</p></div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Posso usar para imóveis de outros estados?<span class="arr">▼</span></div><div class="faq-a"><p>A ferramenta funciona para qualquer localidade do Brasil. Para que o laudo seja válido, o profissional precisa ter CRECI ativo na UF onde o imóvel está localizado (ou autorização de atuação no estado).</p></div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Como funciona o pagamento e posso cancelar?<span class="arr">▼</span></div><div class="faq-a"><p>O pagamento é processado pelo Mercado Pago com cartão de crédito, débito ou Pix. Você pode cancelar a assinatura a qualquer momento, sem multa. O acesso continua até o fim do período pago.</p></div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">A ferramenta gera o PDF automaticamente?<span class="arr">▼</span></div><div class="faq-a"><p>Sim. Clique em "Visualizar" para ver o laudo completo formatado, depois "Gerar PDF" e use a função de impressão do navegador para salvar como PDF. O resultado tem aparência profissional com todas as seções, fotos e tabelas.</p></div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Meus dados ficam salvos entre sessões?<span class="arr">▼</span></div><div class="faq-a"><p>Sim. O sistema salva o rascunho no seu navegador automaticamente (clique em 💾 Salvar). Você pode fechar e retomar o laudo quando quiser, no mesmo dispositivo e navegador.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section id="cta-final">
+  <div class="cta-final-inner">
+    <h2>Comece a emitir laudos profissionais hoje</h2>
+    <p>Gratuito para começar. Upgrade quando quiser. Sem burocracia, sem contrato.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <button class="btn-gold" onclick="abrirApp()">🚀 Acessar o Sistema Grátis</button>
+      <a href="https://wa.me/5511993509109?text=Quero+saber+mais+sobre+o+FCosta+PTAM+Pro" target="_blank" class="btn-ghost">💬 Falar com Sergio</a>
+    </div>
+    <p style="margin-top:20px;font-size:.7rem;color:rgba(255,255,255,.3)">Sergio Fernandes da Costa · CRECI-SP 294791-F · CNAI 52708 · fcostacorretor.com</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">FCosta <span>PTAM</span> Pro</div>
+    <div class="footer-info">
+      Sergio Fernandes da Costa · CRECI-SP 294791-F · CNAI 52708<br>
+      © 2026 FCosta Corretor · fcostacorretor.com · Todos os direitos reservados
+    </div>
+    <div class="footer-links">
+      <a href="https://fcostacorretor.com/politica-de-privacidade">Privacidade</a>
+      <a href="https://fcostacorretor.com/condicoes-de-uso">Termos</a>
+      <a href="https://wa.me/5511993509109">WhatsApp</a>
+    </div>
+  </div>
+</footer>
+
+<!-- MODAL CHECKOUT -->
+<div id="modal-checkout">
+  <div class="modal-box">
+    <div class="modal-hd">
+      <h3>Assinar FCosta PTAM Pro</h3>
+      <button class="modal-close" onclick="fecharCheckout()">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="mp-logo">
+        <div class="mp-icon">MP</div>
+        <span>Pagamento seguro via <strong>Mercado Pago</strong></span>
+      </div>
+      <div class="plano-sel-info">
+        <div><div class="psi-nome" id="modal-plan-nome">Pro Mensal</div><div style="font-size:.65rem;color:var(--muted)">Acesso imediato após confirmação</div></div>
+        <div class="psi-preco" id="modal-plan-preco">R$ 79,00/mês</div>
+      </div>
+      <div class="form-group"><label>Nome completo</label><input type="text" id="pay-nome" placeholder="Seu nome completo"></div>
+      <div class="form-group"><label>E-mail</label><input type="email" id="pay-email" placeholder="seu@email.com"></div>
+      <div class="form-group"><label>CPF</label><input type="text" id="pay-cpf" placeholder="000.000.000-00" oninput="maskCpf(this)"></div>
+      <div class="form-group"><label>CRECI</label><input type="text" id="pay-creci" placeholder="CRECI-SP 000000-F"></div>
+      <hr>
+      <div style="font-size:.72rem;font-weight:700;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">Forma de pagamento</div>
+      <div class="pay-methods">
+        <button class="pm-btn sel" onclick="selPay(this,'cartao')"><span class="pm-ico">💳</span>Cartão</button>
+        <button class="pm-btn" onclick="selPay(this,'pix')"><span class="pm-ico">⚡</span>Pix</button>
+        <button class="pm-btn" onclick="selPay(this,'boleto')"><span class="pm-ico">📄</span>Boleto</button>
+      </div>
+      <div id="pay-cartao-fields">
+        <div class="form-group"><label>Número do cartão</label><input type="text" id="pay-card" placeholder="0000 0000 0000 0000" oninput="maskCard(this)" maxlength="19"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Validade</label><input type="text" id="pay-val" placeholder="MM/AA" maxlength="5" oninput="maskVal(this)"></div>
+          <div class="form-group"><label>CVV</label><input type="text" id="pay-cvv" placeholder="000" maxlength="4"></div>
+        </div>
+        <div class="form-group"><label>Nome no cartão</label><input type="text" id="pay-card-nome" placeholder="Nome como está no cartão"></div>
+      </div>
+      <div id="pay-pix-fields" style="display:none">
+        <div style="background:var(--sky-ll);border:1px solid rgba(59,155,214,.3);border-radius:8px;padding:14px;text-align:center;font-size:.8rem;color:var(--dark)">
+          ⚡ <strong>Pix instantâneo</strong> — Após confirmar, você receberá o QR Code para pagamento. Acesso liberado em segundos após confirmação.
+        </div>
+      </div>
+      <div id="pay-boleto-fields" style="display:none">
+        <div style="background:var(--warn-l);border:1px solid rgba(230,126,34,.3);border-radius:8px;padding:14px;text-align:center;font-size:.8rem;color:#7a4500">
+          📄 <strong>Boleto bancário</strong> — Vencimento em 3 dias úteis. Acesso liberado após compensação (1–2 dias úteis).
+        </div>
+      </div>
+      <button class="btn-pagar" onclick="processarPagamento()">🔒 Confirmar Assinatura</button>
+      <div class="safe-note">🔒 Ambiente seguro · SSL · Mercado Pago · Seus dados estão protegidos</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── NAVEGAÇÃO ──
+function abrirApp(){ window.open('ptam-fcosta.html','_blank'); }
+
+// ── FAQ ──
+function toggleFaq(el){
+  const item=el.closest('.faq-item');
+  item.classList.toggle('open');
+}
+
+// ── SCROLL ANIMATIONS ──
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+},{threshold:.1});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+
+// ── CHECKOUT MODAL ──
+let planAtual={nome:'',preco:'',val:0};
+function abrirCheckout(nome,preco,val){
+  planAtual={nome,preco,val};
+  document.getElementById('modal-plan-nome').textContent=nome;
+  document.getElementById('modal-plan-preco').textContent=preco;
+  document.getElementById('modal-checkout').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function fecharCheckout(){
+  document.getElementById('modal-checkout').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.getElementById('modal-checkout').addEventListener('click',function(e){
+  if(e.target===this) fecharCheckout();
+});
+
+// ── MÉTODOS DE PAGAMENTO ──
+function selPay(el,tipo){
+  document.querySelectorAll('.pm-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('pay-cartao-fields').style.display=tipo==='cartao'?'block':'none';
+  document.getElementById('pay-pix-fields').style.display=tipo==='pix'?'block':'none';
+  document.getElementById('pay-boleto-fields').style.display=tipo==='boleto'?'block':'none';
+}
+
+// ── MÁSCARAS ──
+function maskCpf(el){
+  let v=el.value.replace(/\D/g,'').slice(0,11);
+  v=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+  el.value=v;
+}
+function maskCard(el){
+  let v=el.value.replace(/\D/g,'').slice(0,16);
+  v=v.replace(/(\d{4})/g,'$1 ').trim();
+  el.value=v;
+}
+function maskVal(el){
+  let v=el.value.replace(/\D/g,'').slice(0,4);
+  if(v.length>2) v=v.slice(0,2)+'/'+v.slice(2);
+  el.value=v;
+}
+
+// ── PROCESSAR PAGAMENTO ──
+// ── MERCADO PAGO CHECKOUT REAL ──
+const MP_PUBLIC_KEY = "TEST-18f3caec-5980-41a6-b853-69661c4a7d23";
+
+async function processarPagamento(){
+  const nome  = document.getElementById('pay-nome').value.trim();
+  const email = document.getElementById('pay-email').value.trim();
+  const cpf   = document.getElementById('pay-cpf').value.trim();
+  const creci = document.getElementById('pay-creci').value.trim();
+
+  if(!nome || !email || !cpf){
+    mostrarErro('Preencha nome, e-mail e CPF para continuar.');
+    return;
+  }
+  if(!email.includes('@')){
+    mostrarErro('Informe um e-mail válido.');
+    return;
+  }
+
+  const btn = document.querySelector('.btn-pagar');
+  btn.innerHTML = '<span class="spin">⏳</span> Processando...';
+  btn.disabled = true;
+
+  try {
+    const planoKey = planAtual.nome.includes('Anual') ? 'anual' : 'mensal';
+
+    const res = await fetch('/.netlify/functions/mp-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        plano: planoKey,
+        email: email,
+        nome: nome,
+        cpf: cpf,
+        creci: creci,
+        back_url: window.location.origin + '/ptam-fcosta.html'
+      })
+    });
+
+    const data = await res.json();
+
+    if(data.ok && data.url){
+      fecharCheckout();
+      // Salvar email localmente para reconhecer após retorno
+      localStorage.setItem('ptam_email_pendente', email);
+      localStorage.setItem('ptam_plano_pendente', planoKey);
+      // Redirecionar para checkout MP
+      window.location.href = data.url;
+    } else {
+      mostrarErro('Erro ao criar assinatura: ' + (data.error || 'Tente novamente.'));
+      btn.innerHTML = '🔒 Confirmar Assinatura';
+      btn.disabled = false;
+    }
+  } catch(e) {
+    mostrarErro('Falha de conexão. Verifique sua internet e tente novamente.');
+    btn.innerHTML = '🔒 Confirmar Assinatura';
+    btn.disabled = false;
+  }
+}
+
+function mostrarErro(msg){
+  let el = document.getElementById('pay-erro');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'pay-erro';
+    el.style.cssText = 'background:#fdeaea;border:1px solid #f5a8a8;color:#7a1a1a;border-radius:7px;padding:10px 12px;font-size:.78rem;margin-top:8px;';
+    document.querySelector('.btn-pagar').after(el);
+  }
+  el.textContent = '⚠️ ' + msg;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 5000);
+}
+
+// Verificar retorno do MP ao carregar a página
+window.addEventListener('load', () => {
+  const params = new URLSearchParams(window.location.search);
+  const status = params.get('status') || params.get('collection_status');
+  const email  = localStorage.getItem('ptam_email_pendente');
+  const plano  = localStorage.getItem('ptam_plano_pendente');
+
+  if(status === 'approved' && email){
+    localStorage.removeItem('ptam_email_pendente');
+    localStorage.removeItem('ptam_plano_pendente');
+    mostrarSucesso(email, plano);
+  } else if(status === 'pending'){
+    alert('⏳ Pagamento pendente. Assim que confirmado seu acesso será liberado automaticamente.');
+  }
+});
+
+function mostrarSucesso(email, plano){
+  document.body.innerHTML = `
+  <div style="min-height:100vh;background:linear-gradient(135deg,#1E3A5F,#0d2340);display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif">
+    <div style="background:#fff;border-radius:16px;padding:48px;max-width:480px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.4)">
+      <div style="font-size:3rem;margin-bottom:16px">🎉</div>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:#1E3A5F;margin-bottom:10px">Assinatura ativada!</h2>
+      <p style="color:#6b7e91;font-size:.9rem;line-height:1.7;margin-bottom:24px">
+        Bem-vindo ao <strong>FCosta PTAM Pro</strong>!<br>
+        Plano <strong>${plano === 'anual' ? 'Pro Anual' : 'Pro Mensal'}</strong> ativado para <strong>${email}</strong>.
+      </p>
+      <a href="ptam-fcosta.html" style="display:inline-block;background:linear-gradient(135deg,#3B9BD6,#6cb8e6);color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:.9rem">
+        🚀 Acessar o Sistema PTAM Pro
+      </a>
+      <p style="margin-top:16px;font-size:.7rem;color:#aaa">Um e-mail de confirmação será enviado para ${email}</p>
+    </div>
+  </div>`;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor PTAM Profissional — FCosta Corretor</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--sky:#3B9BD6;--sky-l:#6cb8e6;--sky-ll:#e4f2fc;--dark:#1E3A5F;--white:#fff;--off:#f4f7fb;--border:#d0dfed;--text:#1a2b3c;--muted:#5a7080;--gold:#c8a84b;--gold-l:#f5e6c0;--ok:#27ae60;--ok-l:#e8f8ef;--warn:#e67e22;--warn-l:#fff4e0;--err:#c0392b;--err-l:#fdeaea;--r:10px;--sh:0 4px 20px rgba(30,58,95,.10)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"DM Sans",sans-serif;background:var(--off);color:var(--text);min-height:100vh;font-size:14px}
+#topbar{background:var(--dark);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;height:54px;position:sticky;top:0;z-index:200;box-shadow:0 2px 14px rgba(0,0,0,.3)}
+#topbar .brand .bname{font-family:"Playfair Display",serif;font-size:1.05rem}
+#topbar .brand .bsub{font-size:.58rem;color:var(--sky-l);font-family:"DM Mono",monospace;display:block}
+#topbar .acts{display:flex;gap:6px;flex-wrap:wrap}
+.bt{background:rgba(255,255,255,.11);border:1px solid rgba(255,255,255,.18);color:#fff;padding:5px 12px;border-radius:6px;font-size:.75rem;cursor:pointer;font-family:"DM Sans",sans-serif;font-weight:500;transition:background .2s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.bt:hover{background:rgba(255,255,255,.22)}.bt.pri{background:var(--sky);border-color:var(--sky)}
+#layout{display:flex;min-height:calc(100vh - 54px)}
+#sidebar{width:228px;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;padding:12px 0;flex-shrink:0;overflow-y:auto}
+.sg{margin-bottom:2px}.slbl{font-size:.58rem;font-weight:700;letter-spacing:1.2px;color:var(--muted);text-transform:uppercase;padding:10px 14px 3px}
+.si{display:flex;align-items:center;gap:8px;padding:8px 14px;cursor:pointer;font-size:.8rem;font-weight:500;color:var(--text);border-left:3px solid transparent;transition:all .15s;user-select:none}
+.si:hover{background:var(--off);color:var(--sky)}.si.active{background:#e4f2fc;color:var(--sky);border-left-color:var(--sky);font-weight:600}
+.si .ico{font-size:.95rem;width:17px;text-align:center;flex-shrink:0}
+.sbadge{margin-left:auto;background:var(--sky);color:#fff;font-size:.56rem;padding:2px 5px;border-radius:8px;font-weight:700;min-width:18px;text-align:center}
+.sbadge.g{background:var(--gold)}.sbadge.ok{background:var(--ok)}
+#main{flex:1;padding:22px;overflow-y:auto}
+.sec{display:none}.sec.active{display:block}
+.shd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:10px}
+.stit{font-family:"Playfair Display",serif;font-size:1.35rem;color:var(--dark)}
+.ssub{font-size:.75rem;color:var(--muted);margin-top:2px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:.63rem;font-weight:700;letter-spacing:.4px;white-space:nowrap}
+.badge.cnai{background:linear-gradient(135deg,#c8a84b,#f0d080);color:#5a3d00}
+.badge.cef{background:#006699;color:#fff}.badge.cpc{background:#7b3fa0;color:#fff}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:var(--sh)}
+.card.warn{border-left:4px solid var(--warn)}.card.err{border-left:4px solid var(--err)}.card.ok{border-left:4px solid var(--ok)}
+.ctit{font-size:.82rem;font-weight:700;color:var(--dark);margin-bottom:12px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--border);padding-bottom:9px;flex-wrap:wrap}
+.ctit-sub{margin-left:auto;font-size:.63rem;font-weight:400;color:var(--muted)}
+.g{display:grid;gap:10px}.g1{grid-template-columns:1fr}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:1fr 1fr 1fr 1fr}.g5{grid-template-columns:1fr 1fr 1fr 1fr 1fr}
+.mt{margin-top:10px}
+.f{display:flex;flex-direction:column;gap:3px}
+.f label{font-size:.68rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.f label .req{color:var(--err);margin-left:2px}
+.f input,.f select,.f textarea{border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:.82rem;font-family:"DM Sans",sans-serif;color:var(--text);background:#fff;transition:border .15s;width:100%}
+.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--sky);box-shadow:0 0 0 3px rgba(59,155,214,.12)}
+.f textarea{resize:vertical;min-height:78px;line-height:1.55}
+.hint{font-size:.65rem;color:var(--muted);line-height:1.4;margin-top:2px}
+.hint.warn{color:var(--warn)}.hint.ok{color:var(--ok)}
+.grau-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.gp{padding:5px 13px;border-radius:20px;font-size:.73rem;font-weight:700;cursor:pointer;border:2px solid transparent;transition:all .15s;user-select:none}
+.gp[data-g="1"]{border-color:var(--ok);color:var(--ok)}.gp[data-g="1"].sel{background:var(--ok);color:#fff}
+.gp[data-g="2"]{border-color:var(--warn);color:var(--warn)}.gp[data-g="2"].sel{background:var(--warn);color:#fff}
+.gp[data-g="3"]{border-color:var(--sky);color:var(--sky)}.gp[data-g="3"].sel{background:var(--sky);color:#fff}
+.tbl{width:100%;border-collapse:collapse;font-size:.77rem}
+.tbl th{background:var(--dark);color:#fff;padding:7px 8px;text-align:left;font-weight:600;font-size:.68rem;white-space:nowrap}
+.tbl td{padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+.tbl tr:nth-child(even) td{background:#f7fbff}
+.tbl input,.tbl select{border:1px solid var(--border);border-radius:4px;padding:4px 6px;font-size:.75rem;width:100%;font-family:"DM Sans",sans-serif;background:#fff}
+.tbl input:focus,.tbl select:focus{outline:none;border-color:var(--sky)}
+.tbl .num{font-family:"DM Mono",monospace;font-weight:600;color:var(--dark)}
+.tbl-wrap{overflow-x:auto}
+.btn-row{display:inline-flex;align-items:center;gap:5px;background:var(--off);border:1px dashed var(--sky);color:var(--sky);padding:6px 14px;border-radius:6px;font-size:.75rem;cursor:pointer;font-family:"DM Sans",sans-serif;margin-top:10px;font-weight:600}
+.btn-row:hover{background:var(--sky-ll)}
+.btn-del{background:none;border:none;color:var(--err);cursor:pointer;font-size:.95rem;padding:2px 5px;border-radius:4px}
+.res-box{background:linear-gradient(135deg,#e4f2fc,#f4f7fb);border:2px solid var(--sky);border-radius:var(--r);padding:16px;text-align:center}
+.res-box .rl{font-size:.65rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.res-box .rv{font-family:"DM Mono",monospace;font-size:1.5rem;font-weight:700;color:var(--dark);margin:3px 0}
+.res-box .rs{font-size:.7rem;color:var(--muted)}
+.res-box.gold{border-color:var(--gold);background:linear-gradient(135deg,var(--gold-l),#fffdf5)}
+.res-box.gold .rv{color:#7a5200}
+.val-destaque{background:var(--dark);color:#fff;border-radius:var(--r);padding:20px;text-align:center;margin:14px 0}
+.val-destaque .vdl{font-size:.68rem;opacity:.75;text-transform:uppercase;letter-spacing:.5px}
+.val-destaque .vdv{font-family:"DM Mono",monospace;font-size:2.2rem;font-weight:700;margin:4px 0}
+.val-destaque .vds{font-size:.75rem;opacity:.7}
+.cklist{list-style:none;display:flex;flex-direction:column;gap:6px}
+.cklist li{display:flex;align-items:flex-start;gap:10px;font-size:.8rem;padding:9px 12px;background:#fff;border:1px solid var(--border);border-radius:7px;cursor:pointer;transition:all .15s;line-height:1.45}
+.cklist li:hover{border-color:var(--sky);background:var(--sky-ll)}
+.cklist li.done{background:var(--ok-l);border-color:#a8e6bc;color:#1e7e45}
+.cklist li .ck{width:18px;height:18px;border:2px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:.72rem;flex-shrink:0;margin-top:1px;transition:all .15s}
+.cklist li.done .ck{background:var(--ok);border-color:var(--ok);color:#fff}
+.cklist li .ck-txt{flex:1}
+.cklist li .ck-ref{font-size:.62rem;color:var(--muted);display:block;margin-top:2px;font-style:italic}
+.cklist li.done .ck-ref{color:#4aaa70}
+.prog-wrap{background:var(--border);border-radius:10px;height:8px;overflow:hidden;margin:7px 0}
+.prog-bar{height:100%;background:linear-gradient(90deg,var(--sky),var(--sky-l));border-radius:10px;transition:width .4s ease}
+.prog-bar.ok{background:linear-gradient(90deg,var(--ok),#4cd080)}
+.prog-bar.warn{background:linear-gradient(90deg,var(--warn),#f0a84c)}
+.prog-bar.err{background:linear-gradient(90deg,var(--err),#e05050)}
+.foto-grid{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;min-height:20px}
+.foto-slot{position:relative;width:140px;height:105px;border-radius:7px;overflow:hidden;border:1px solid var(--border);flex-shrink:0}
+.foto-slot img{width:100%;height:100%;object-fit:cover;cursor:pointer}
+.foto-del{position:absolute;top:3px;right:3px;background:rgba(192,57,43,.85);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:.7rem;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.foto-leg{position:absolute;bottom:0;left:0;right:0;background:rgba(30,58,95,.75);color:#fff;font-size:.58rem;text-align:center;padding:3px 4px;cursor:text}
+.foto-leg-inp{position:absolute;bottom:0;left:0;right:0;background:rgba(30,58,95,.9);color:#fff;font-size:.6rem;text-align:center;padding:2px 4px;border:none;outline:none;font-family:"DM Mono",monospace;width:100%}
+.foto-add-btn{width:140px;height:105px;border-radius:7px;border:2px dashed var(--sky);background:var(--sky-ll);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:var(--sky);font-size:.72rem;font-weight:600;gap:4px;flex-shrink:0;transition:background .2s}
+.foto-add-btn:hover{background:#d0e8f8}
+.am-thumb{width:52px;height:40px;object-fit:cover;border-radius:4px;border:1px solid var(--border);cursor:pointer;flex-shrink:0}
+.am-foto-add{width:52px;height:40px;border-radius:4px;border:2px dashed var(--sky);background:var(--sky-ll);display:inline-flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;color:var(--sky);flex-shrink:0}
+.alert{border-radius:7px;padding:10px 13px;font-size:.78rem;margin-bottom:10px;display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+.alert.info{background:#e4f2fc;border:1px solid #a8d4f0;color:#1a4a6a}
+.alert.warn{background:var(--warn-l);border:1px solid #f5c88a;color:#7a4500}
+.alert.ok{background:var(--ok-l);border:1px solid #a8e6bc;color:#1e5c35}
+.alert.err{background:var(--err-l);border:1px solid #f5a8a8;color:#7a1a1a}
+.alert .aico{font-size:1rem;flex-shrink:0;margin-top:1px}
+.jud-tl{position:relative;padding-left:26px}
+.jud-tl::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;background:var(--border)}
+.jud-ev{position:relative;margin-bottom:14px;padding:10px 12px;background:#fff;border:1px solid var(--border);border-radius:8px}
+.jud-ev::before{content:"";position:absolute;left:-21px;top:16px;width:10px;height:10px;background:var(--sky);border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 2px var(--sky)}
+.jud-ev.done::before{background:var(--ok);box-shadow:0 0 0 2px var(--ok)}
+#preview-modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.6);align-items:center;justify-content:center}
+#preview-modal.open{display:flex}
+#preview-inner{background:#fff;border-radius:12px;width:92%;max-width:820px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.pm-hd{background:var(--dark);color:#fff;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;border-radius:12px 12px 0 0;position:sticky;top:0;z-index:1}
+.pm-bd{padding:28px}
+.ptam-doc{font-family:"DM Sans",sans-serif;font-size:.82rem;line-height:1.78;color:#1a1a1a}
+.ptam-doc h1{font-family:"Playfair Display",serif;font-size:1.3rem;text-align:center;color:var(--dark);margin-bottom:4px}
+.ptam-doc .doc-sub{text-align:center;font-size:.7rem;color:var(--muted);margin-bottom:4px}
+.ptam-doc hr{border:none;border-top:2px solid var(--dark);margin:14px 0}
+.ptam-doc .dsec{margin-bottom:18px}
+.ptam-doc .dsec h3{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--dark);border-bottom:1px solid var(--border);margin-bottom:9px;padding-bottom:5px}
+.ptam-doc .dr{display:flex;gap:8px;margin-bottom:4px;font-size:.78rem}
+.ptam-doc .dk{font-weight:600;min-width:175px;color:var(--muted);font-size:.72rem;flex-shrink:0}
+.ptam-doc .dv{flex:1}
+.ptam-doc .vtbl{width:100%;border-collapse:collapse;font-size:.74rem;margin:8px 0}
+.ptam-doc .vtbl th{background:var(--dark);color:#fff;padding:5px 8px;text-align:left;font-size:.68rem}
+.ptam-doc .vtbl td{padding:5px 8px;border-bottom:1px solid var(--border)}
+.ptam-doc .vtbl tr:nth-child(even) td{background:#f7fbff}
+.ptam-doc .val-blk{background:var(--dark);color:#fff;border-radius:8px;padding:18px;text-align:center;margin:18px 0}
+.ptam-doc .val-blk .vbl{font-size:.65rem;opacity:.75;text-transform:uppercase;letter-spacing:.5px}
+.ptam-doc .val-blk .vbv{font-family:"DM Mono",monospace;font-size:2rem;font-weight:700;margin:4px 0}
+.ptam-doc .val-blk .vbs{font-size:.72rem;opacity:.7}
+.ptam-doc .vrange{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:8px 0}
+.ptam-doc .vr-box{border:1px solid var(--border);border-radius:6px;padding:8px;text-align:center}
+.ptam-doc .vr-box.c{border-color:var(--sky);background:var(--sky-ll)}
+.ptam-doc .vrl{font-size:.6rem;color:var(--muted);display:block;margin-bottom:2px}
+.ptam-doc .vrv{font-family:"DM Mono",monospace;font-weight:700;color:var(--dark)}
+.ptam-doc .foto-pg{display:flex;flex-wrap:wrap;gap:10px;margin:10px 0}
+.ptam-doc .foto-pg img{width:175px;height:130px;object-fit:cover;border-radius:6px;border:1px solid #ddd}
+.ptam-doc .assin{display:flex;justify-content:space-around;margin-top:40px;flex-wrap:wrap;gap:20px}
+.ptam-doc .assin-box{text-align:center;min-width:160px}
+.ptam-doc .assin-box .asl{border-top:1px solid #333;padding-top:6px;margin-top:50px;font-size:.73rem}
+.ptam-doc .rodape{font-size:.6rem;color:var(--muted);border-top:1px solid var(--border);margin-top:24px;padding-top:8px;text-align:center;font-style:italic}
+#lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9000;flex-direction:column;align-items:center;justify-content:center;cursor:zoom-out}
+#lightbox.open{display:flex}
+#lightbox img{max-width:90vw;max-height:82vh;border-radius:8px;object-fit:contain}
+#lightbox .lb-cap{color:#fff;font-size:.78rem;margin-top:10px;opacity:.75}
+#lightbox .lb-x{position:absolute;top:16px;right:20px;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:1.2rem;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#toast{position:fixed;bottom:22px;right:22px;z-index:9999;background:var(--dark);color:#fff;padding:11px 18px;border-radius:8px;font-size:.8rem;box-shadow:0 6px 22px rgba(0,0,0,.28);transform:translateY(70px);opacity:0;transition:all .3s ease;pointer-events:none;max-width:300px;line-height:1.4}
+#toast.show{transform:translateY(0);opacity:1}
+@media(max-width:720px){#sidebar{width:50px}.si span:not(.ico){display:none}.slbl,.sbadge{display:none}.g2,.g3,.g4,.g5{grid-template-columns:1fr}}
+@media print{#topbar,#sidebar,#preview-modal,#lightbox,#toast{display:none!important}#main{padding:0}.card{box-shadow:none;break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="brand">
+    <div><span class="bname">FCosta PTAM Pro</span><small class="bsub">NBR 14653 · CNAI 52708 · COFECI · CEF/SFH · CPC</small></div>
+  </div>
+  <div class="acts">
+    <button class="bt" onclick="salvar()">💾 Salvar</button>
+    <button class="bt" onclick="carregar()">📂 Carregar</button>
+    <button class="bt" onclick="novoLaudo()">🗑 Novo</button>
+    <button class="bt" onclick="abrirPreview()">👁 Visualizar</button>
+    <button class="bt pri" onclick="gerarPDF()">📄 Gerar PDF</button>
+  </div>
+</div>
+
+<div id="layout">
+<nav id="sidebar">
+  <div class="sg"><div class="slbl">Identificação</div>
+    <div class="si active" onclick="nav(this,'s1')"><span class="ico">📋</span><span>Laudo</span></div>
+    <div class="si" onclick="nav(this,'s2')"><span class="ico">👤</span><span>Profissional</span></div>
+    <div class="si" onclick="nav(this,'s3')"><span class="ico">🤝</span><span>Solicitante</span></div>
+  </div>
+  <div class="sg"><div class="slbl">Imóvel</div>
+    <div class="si" onclick="nav(this,'s4')"><span class="ico">📍</span><span>Localização</span></div>
+    <div class="si" onclick="nav(this,'s5')"><span class="ico">🏠</span><span>Características</span></div>
+    <div class="si" onclick="nav(this,'s6')"><span class="ico">📄</span><span>Documentação</span></div>
+    <div class="si" onclick="nav(this,'s7')"><span class="ico">📷</span><span>Fotos</span><span class="sbadge" id="bdg-fotos">0</span></div>
+  </div>
+  <div class="sg"><div class="slbl">Avaliação</div>
+    <div class="si" onclick="nav(this,'s8')"><span class="ico">⚙️</span><span>Método NBR</span><span class="sbadge g">CNAI</span></div>
+    <div class="si" onclick="nav(this,'s9')"><span class="ico">🔍</span><span>Amostras</span><span class="sbadge" id="bdg-am">0</span></div>
+    <div class="si" onclick="nav(this,'s10')"><span class="ico">📊</span><span>Mercado</span></div>
+    <div class="si" onclick="nav(this,'s11')"><span class="ico">💰</span><span>Valor Final</span></div>
+  </div>
+  <div class="sg"><div class="slbl">Especializados</div>
+    <div class="si" onclick="nav(this,'s12')"><span class="ico">🏦</span><span>COT Caixa</span><span class="sbadge" style="background:#006699">CEF</span></div>
+    <div class="si" onclick="nav(this,'s13')"><span class="ico">⚖️</span><span>Judicial</span><span class="sbadge" style="background:#7b3fa0">CPC</span></div>
+  </div>
+  <div class="sg"><div class="slbl">Conclusão</div>
+    <div class="si" onclick="nav(this,'s14')"><span class="ico">✍️</span><span>Parecer</span></div>
+    <div class="si" onclick="nav(this,'s15')"><span class="ico">✅</span><span>Checklist</span><span class="sbadge ok" id="bdg-ck">0</span></div>
+  </div>
+</nav>
+
+<main id="main">
+
+<!-- S1 LAUDO -->
+<div class="sec active" id="s1">
+  <div class="shd"><div><div class="stit">Identificação do Laudo</div><div class="ssub">Cabeçalho oficial — obrigatório para aceitação judicial e SFH/SBPE</div></div><span class="badge cnai">⭐ CNAI · COFECI</span></div>
+  <div class="alert info"><span class="aico">ℹ️</span><span>O PTAM é aceito judicialmente (CPC art.464) e no SFH/CEF quando: assinado por Corretor com CRECI ativo + CNAI, segue NBR 14653-2, contém mínimo 3 amostras homogeneizadas, grau de fundamentação declarado, registro fotográfico e parecer conclusivo completo.</span></div>
+  <div class="card">
+    <div class="ctit"><span class="ico">📋</span> Dados do Laudo</div>
+    <div class="g g3">
+      <div class="f"><label>Nº do Laudo <span class="req">*</span></label><input type="text" id="num_ptam" placeholder="PTAM-2026-001"><div class="hint">Numeração sequencial. Ex: PTAM-2026-001</div></div>
+      <div class="f"><label>Data de Emissão <span class="req">*</span></label><input type="date" id="data_laudo"><div class="hint">Data em que o laudo é assinado e entregue ao solicitante</div></div>
+      <div class="f"><label>Data da Vistoria <span class="req">*</span></label><input type="date" id="data_vistoria"><div class="hint">Data da inspeção física. Deve ser anterior à emissão.</div></div>
+    </div>
+    <div class="g g3 mt">
+      <div class="f"><label>Finalidade <span class="req">*</span></label>
+        <select id="finalidade" onchange="updFinalidade()">
+          <option value="">— selecione —</option>
+          <option value="compra_venda">Compra e Venda</option>
+          <option value="garantia_cef">Garantia — CEF / MCMV / FGTS</option>
+          <option value="garantia_sfh">Garantia — SFH / SBPE</option>
+          <option value="locacao">Locação</option>
+          <option value="judicial">Perícia Judicial (CPC)</option>
+          <option value="inventario">Inventário / Partilha</option>
+          <option value="desapropriacao">Desapropriação (DL 3.365/41)</option>
+          <option value="seguro">Seguro de Imóvel</option>
+          <option value="irpf">Declaração IRPF / Doação</option>
+          <option value="iptu">Contestação de IPTU</option>
+          <option value="revisional">Revisão de Aluguel (Judicial)</option>
+          <option value="fundo">Fundo Imobiliário / FII</option>
+        </select>
+        <div class="hint" id="hint-fin"></div>
+      </div>
+      <div class="f"><label>Uso do Imóvel <span class="req">*</span></label>
+        <select id="uso_imovel">
+          <option>Residencial</option><option>Comercial</option><option>Industrial</option>
+          <option>Rural</option><option>Misto (Residencial + Comercial)</option><option>Institucional</option>
+        </select>
+      </div>
+      <div class="f"><label>Validade do Laudo</label>
+        <select id="validade">
+          <option>30 dias — Uso judicial urgente</option>
+          <option>60 dias — Padrão CEF/SFH</option>
+          <option>90 dias — Compra e venda / locação</option>
+          <option>180 dias — Inventário / planejamento</option>
+          <option>Conforme determinação judicial</option>
+        </select>
+        <div class="hint">CEF aceita laudo com até 6 meses. Para financiamento: máx. 60 dias recomendado.</div>
+      </div>
+    </div>
+    <div class="g g2 mt">
+      <div class="f"><label>Processo / Nº de Contrato / Referência</label><input type="text" id="num_processo" placeholder="Ex: 0000000-00.2026.8.26.0000 (judicial) ou nº de contrato bancário"></div>
+      <div class="f"><label>Observações / Ressalvas Iniciais</label><input type="text" id="obs_iniciais" placeholder="Condições de acesso, documentos não apresentados, limitações técnicas..."></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit"><span class="ico">📐</span> Norma e Método</div>
+    <div class="g g3">
+      <div class="f"><label>Norma ABNT Aplicada <span class="req">*</span></label>
+        <select id="norma">
+          <option>NBR 14653-1:2019 + NBR 14653-2:2011 (Imóveis Urbanos)</option>
+          <option>NBR 14653-1:2019 (Procedimentos Gerais)</option>
+          <option>NBR 14653-3:2004 (Imóveis Rurais)</option>
+          <option>NBR 14653-4:2002 (Empreendimentos)</option>
+        </select>
+        <div class="hint">Para imóveis urbanos residenciais/comerciais e financiamento CEF: NBR 14653-2 é obrigatória.</div>
+      </div>
+      <div class="f"><label>Método Principal <span class="req">*</span></label>
+        <select id="metodo">
+          <option>Comparativo Direto de Dados de Mercado</option>
+          <option>Evolutivo (Custo de Reprodução + Comparativo)</option>
+          <option>Renda (Capitalização da Renda Bruta)</option>
+          <option>Involutivo</option>
+          <option>Comparativo + Renda (complementar)</option>
+        </select>
+        <div class="hint">Para CEF/SFH: método comparativo direto é obrigatório como principal. Evolutivo aceito como complementar.</div>
+      </div>
+      <div class="f"><label>Grau de Fundamentação NBR <span class="req">*</span></label>
+        <div class="grau-row">
+          <div class="gp" data-g="1" onclick="selGrau(this,1)">Grau I</div>
+          <div class="gp" data-g="2" onclick="selGrau(this,2)">Grau II</div>
+          <div class="gp" data-g="3" onclick="selGrau(this,3)">Grau III</div>
+        </div>
+        <input type="hidden" id="grau_fund">
+        <div class="hint" id="hint-grau">Grau I: ≥3 amostras, CV≤30% · Grau II: ≥5, CV≤20% · Grau III: ≥5 + regressão, CV≤15%</div>
+      </div>
+    </div>
+    <div class="g g3 mt">
+      <div class="f"><label>Grau de Precisão</label>
+        <select id="grau_prec">
+          <option>Grau I — CV ≤ 30% (amplitude 60%)</option>
+          <option>Grau II — CV ≤ 20% (amplitude 40%)</option>
+          <option>Grau III — CV ≤ 15% (amplitude 30%)</option>
+        </select>
+      </div>
+      <div class="f"><label>Critério de Homogeneização</label>
+        <select id="crit_hom">
+          <option>Fatores de Homogeneização (Multiplicativo)</option>
+          <option>Regressão Linear Simples</option>
+          <option>Regressão Linear Múltipla (SPSS/Excel)</option>
+          <option>Fatores + Ajuste de Oferta</option>
+        </select>
+      </div>
+      <div class="f"><label>Fator de Oferta Padrão</label>
+        <select id="fat_oferta_tipo">
+          <option value="0.90">0,90 — Desconto 10% (mercado típico)</option>
+          <option value="0.95">0,95 — Desconto 5% (mercado aquecido)</option>
+          <option value="0.85">0,85 — Desconto 15% (mercado retraído)</option>
+          <option value="1.00">1,00 — Sem ajuste (pesquisa a preço de venda)</option>
+        </select>
+        <div class="hint">CEF aceita entre 0,85 e 0,95. Justifique no parecer.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- S2 PROFISSIONAL -->
+<div class="sec" id="s2">
+  <div class="shd"><div><div class="stit">Dados do Profissional Avaliador</div><div class="ssub">Identificação completa exigida pelo COFECI e CNAI para validade do laudo</div></div><span class="badge cnai">⭐ CNAI</span></div>
+  <div class="alert warn"><span class="aico">⚠️</span><span>Para laudo ser aceito pela CEF e pelo judiciário: CRECI deve estar ativo na UF do imóvel. O CNAI (Cadastro Nacional de Avaliadores Imobiliários do COFECI) é obrigatório para laudos de garantia financeira. Sem CNAI o laudo pode ser recusado pela CEF.</span></div>
+  <div class="card">
+    <div class="ctit"><span class="ico">👤</span> Identificação Profissional</div>
+    <div class="g g3">
+      <div class="f"><label>Nome Completo <span class="req">*</span></label><input type="text" id="prof_nome" value="Sergio Fernandes da Costa"></div>
+      <div class="f"><label>CRECI <span class="req">*</span></label><input type="text" id="prof_creci" value="CRECI-SP 294791-F"><div class="hint">Deve estar ativo. Inclua a UF do imóvel avaliado.</div></div>
+      <div class="f"><label>CNAI <span class="req">*</span></label><input type="text" id="prof_cnai" value="CNAI 52708"><div class="hint">Obrigatório para CEF e laudos judiciais.</div></div>
+    </div>
+    <div class="g g4 mt">
+      <div class="f"><label>CPF</label><input type="text" id="prof_cpf" placeholder="000.000.000-00"></div>
+      <div class="f"><label>RG / Órgão Emissor</label><input type="text" id="prof_rg" placeholder="00.000.000-0 SSP/SP"></div>
+      <div class="f"><label>Telefone / WhatsApp</label><input type="text" id="prof_tel" placeholder="(11) 9 0000-0000"></div>
+      <div class="f"><label>E-mail Profissional</label><input type="email" id="prof_email" placeholder="sergio@fcostacorretor.com"></div>
+    </div>
+    <div class="g g3 mt">
+      <div class="f"><label>Formação / Titulação</label>
+        <select id="prof_form">
+          <option>Técnico em Transações Imobiliárias (TTI) — Corretor de Imóveis</option>
+          <option>Especialista em Avaliações Imobiliárias (CNAI/COFECI)</option>
+          <option>Pós-graduado em Avaliações e Perícias Imobiliárias</option>
+          <option>Engenheiro Civil — atribuição em avaliações (CREA)</option>
+          <option>Arquiteto e Urbanista — atribuição em avaliações (CAU)</option>
+        </select>
+      </div>
+      <div class="f"><label>Especialização / Cursos</label><input type="text" id="prof_espec" placeholder="Ex: Avaliações CEF, Perito Judicial, Pós-graduação..."></div>
+      <div class="f"><label>Site / Portfólio</label><input type="text" id="prof_site" value="fcostacorretor.com"></div>
+    </div>
+    <div class="g g1 mt">
+      <div class="f"><label>Endereço Profissional</label><input type="text" id="prof_end" placeholder="Rua, nº, Sala — Bairro — Cidade/UF — CEP"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit"><span class="ico">⚖️</span> Declaração de Independência e Imparcialidade <span class="ctit-sub">NBR 14653-1 · COFECI — obrigatório</span></div>
+    <div class="f">
+      <label>Texto da Declaração <span class="req">*</span></label>
+      <textarea id="decl_indep" style="min-height:110px">Declaro, para os devidos fins de direito, que não possuo qualquer vínculo de dependência, interesse financeiro direto ou indireto, nem relação de parentesco com as partes envolvidas nesta transação ou com o imóvel objeto deste laudo. O presente Parecer Técnico de Avaliação Mercadológica foi elaborado com plena independência técnica e imparcialidade, em conformidade com o Código de Ética do Corretor de Imóveis (Resolução COFECI nº 326/1992), com a NBR 14653 da ABNT e com as normas do CNAI/COFECI aplicáveis à atividade de avaliação imobiliária.</textarea>
+    </div>
+  </div>
+</div>
+
+<!-- S3 SOLICITANTE -->
+<div class="sec" id="s3">
+  <div class="shd"><div><div class="stit">Solicitante / Contratante</div><div class="ssub">Identificação de quem contratou o laudo e das partes envolvidas</div></div></div>
+  <div class="card">
+    <div class="ctit"><span class="ico">🤝</span> Dados do Contratante</div>
+    <div class="g g3">
+      <div class="f"><label>Nome / Razão Social <span class="req">*</span></label><input type="text" id="cont_nome" placeholder="Pessoa física ou jurídica"></div>
+      <div class="f"><label>CPF / CNPJ <span class="req">*</span></label><input type="text" id="cont_cpf" placeholder="000.000.000-00 ou 00.000.000/0001-00"></div>
+      <div class="f"><label>Qualificação</label>
+        <select id="cont_qual">
+          <option>Comprador</option><option>Vendedor</option><option>Banco / Instituição Financeira</option>
+          <option>Advogado / Escritório</option><option>Inventariante</option><option>Locador</option>
+          <option>Locatário</option><option>Proprietário</option><option>Juízo / Tribunal</option><option>Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="g g3 mt">
+      <div class="f"><label>Telefone</label><input type="text" id="cont_tel" placeholder="(11) 9 0000-0000"></div>
+      <div class="f"><label>E-mail</label><input type="email" id="cont_email" placeholder="contato@email.com"></div>
+      <div class="f"><label>Endereço</label><input type="text" id="cont_end" placeholder="Rua, nº — Bairro — Cidade/UF"></div>
+    </div>
+    <div class="g g2 mt">
+      <div class="f"><label>Proprietário do Imóvel (se diferente)</label><input type="text" id="prop_nome" placeholder="Nome conforme matrícula do CRI"></div>
+      <div class="f"><label>Representante Legal / Advogado</label><input type="text" id="adv_nome" placeholder="Nome — OAB nº"></div>
+    </div>
+    <div class="f mt"><label>Contexto / Motivo da Contratação</label>
+      <textarea id="cont_motivo" placeholder="Descreva o contexto: alienação voluntária, financiamento, litígio, partilha de bens, desapropriação, contrato bancário, etc..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- S4 LOCALIZAÇÃO -->
+<div class="sec" id="s4">
+  <div class="shd"><div><div class="stit">Localização do Imóvel</div><div class="ssub">Endereço completo e análise locacional — NBR 14653-2 · item 8.2</div></div></div>
+  <div class="card">
+    <div class="ctit"><span class="ico">📍</span> Endereço Completo</div>
+    <div class="g g2">
+      <div class="f"><label>Logradouro <span class="req">*</span></label><input type="text" id="loc_rua" placeholder="Rua / Av. / Alameda / Rodovia"></div>
+      <div class="f"><label>Número / Complemento <span class="req">*</span></label><input type="text" id="loc_num" placeholder="123 / Apto 45 / Bloco B / Lote 12"></div>
+    </div>
+    <div class="g g4 mt">
+      <div class="f"><label>Bairro <span class="req">*</span></label><input type="text" id="loc_bairro"></div>
+      <div class="f"><label>Município <span class="req">*</span></label><input type="text" id="loc_cidade"></div>
+      <div class="f"><label>UF <span class="req">*</span></label>
+        <select id="loc_uf"><option>SP</option><option>RJ</option><option>MG</option><option>PR</option><option>SC</option><option>RS</option><option>BA</option><option>GO</option><option>DF</option><option>PE</option><option>CE</option><option>AM</option><option>PA</option><option>MT</option><option>MS</option><option>ES</option><option>RN</option></select>
+      </div>
+      <div class="f"><label>CEP <span class="req">*</span></label><input type="text" id="loc_cep" placeholder="00000-000"></div>
+    </div>
+    <div class="g g3 mt">
+      <div class="f"><label>Coordenadas GPS — Latitude</label><input type="text" id="loc_lat" placeholder="-23.550520"></div>
+      <div class="f"><label>Coordenadas GPS — Longitude</label><input type="text" id="loc_lng" placeholder="-46.633309"></div>
+      <div class="f"><label>Ponto de Referência</label><input type="text" id="loc_ref" placeholder="Próximo a... / Em frente a... / Entre as ruas X e Y"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit"><span class="ico">🗺️</span> Análise Locacional Detalhada <span class="ctit-sub">NBR 14653-2 · item 8.2 — obrigatório</span></div>
+    <div class="g g3">
+      <div class="f"><label>Macro-zona / Setor Urbano</label>
+        <select id="loc_zona">
+          <option>Centro / Centro Expandido</option><option>Zona Norte</option><option>Zona Sul</option>
+          <option>Zona Leste</option><option>Zona Oeste</option><option>Região Metropolitana</option>
+          <option>Subúrbio / Periferia</option><option>Área Industrial</option><option>Área Rural</option>
+        </select>
+      </div>
+      <div class="f"><label>Zoneamento Municipal</label>
+        <select id="loc_zon_mun">
+          <option>ZR1 — Residencial baixa densidade</option><option>ZR2 — Residencial média densidade</option>
+          <option>ZR3 — Residencial alta densidade</option><option>ZM — Zona Mista</option>
+          <option>ZC — Zona Comercial</option><option>ZI — Zona Industrial</option>
+          <option>ZEIS — Zona de Interesse Social</option><option>Não identificado</option>
+        </select>
+      </div>
+      <div class="f"><label>Padrão do Entorno</label>
+        <select id="loc_padrao">
+          <option>Popular — edificações simples, infra básica</option>
+          <option>Médio baixo — razoável, infra parcial</option>
+          <option>Médio — infra completa, boa conservação</option>
+          <option>Médio alto — bom padrão, oferta de serviços</option>
+          <option>Alto — empreendimentos de alto padrão</option>
+        </select>
+      </div>
+    </div>
+    <div class="g g4 mt">
+      <div class="f"><label>Topografia</label>
+        <select id="loc_topo">
+          <option>Plano</option><option>Aclive suave</option><option>Declive suave</option>
+          <option>Aclive acentuado</option><option>Declive acentuado</option><option>Irregular</option>
+        </select>
+      </div>
+      <div class="f"><label>Posição no Logradouro</label>
+        <select id="loc_pos">
+          <option>Meio de quadra</option><option>Esquina</option><option>Encravado</option>
+          <option>Frente para praça/parque</option><option>Frente para avenida de grande fluxo</option>
+        </select>
+      </div>
+      <div class="f"><label>Via de Acesso</label>
+        <select id="loc_via">
+          <option>Rua local — baixo fluxo</option><option>Avenida — médio fluxo</option>
+          <option>Via expressa / Rodovia</option><option>Rua sem saída</option><option>Via particular / condomínio</option>
+        </select>
+      </div>
+      <div class="f"><label>Restrições Legais / Ambientais</label>
+        <select id="loc_rest">
+          <option>Nenhuma identificada</option><option>APP — Preservação Permanente (parcial)</option>
+          <option>Faixa de domínio rodovia/ferrovia</option><option>Área inundável / enchente</option>
+          <option>Área de deslizamento (PMRR)</option><option>Tombamento histórico</option>
+          <option>Contaminação ambiental suspeita</option>
+        </select>
+      </div>
+    </div>
+    <div class="g g1 mt"><div class="f"><label>Infraestrutura Disponível no Logradouro</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px" id="infra-wrap"></div>
+    </div></div>
+    <div class="g g3 mt">
+      <div class="f"><label>Acesso a transporte público</label>
+        <select id="loc_transp">
+          <option>Excelente — metrô/trem na porta</option><option>Ótimo — ônibus frequente próximo</option>
+          <option>Bom — ônibus a até 500m</option><option>Regular — ônibus a mais de 500m</option>
+          <option>Deficiente / sem transporte coletivo</option>
+        </select>
+      </div>
+      <div class="f"><label>Comércio e serviços no entorno</label>
+        <select id="loc_comercio">
+          <option>Até 200m — praticamente no local</option><option>200 a 500m — a pé</option>
+          <option>500m a 1km — fácil acesso</option><option>1 a 3km</option><option>Mais de 3km</option>
+        </select>
+      </div>
+      <div class="f"><label>Tendência locacional</label>
+        <select id="loc_tend">
+          <option>Valorização — área em desenvolvimento</option><option>Estável — área consolidada</option>
+          <option>Desvalorização — área em declínio</option><option>Incerta — depende de fatores externos</option>
+        </select>
+      </div>
+    </div>
+    <div class="f mt"><label>Descrição do Entorno — Narrativa para o Laudo <span class="req">*</span></label>
+      <textarea id="loc_descr" style="min-height:110px" placeholder="Descreva detalhadamente: equipamentos urbanos, estabelecimentos comerciais, qualidade ambiental, vetores de valorização/desvalorização, projetos urbanísticos em andamento, características físicas da vizinhança, índices de segurança pública, oferta de serviços de educação e saúde nas proximidades..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- S5 CARACTERÍSTICAS FÍSICAS -->
+<div class="sec" id="s5">
+  <div class="shd"><div><div class="stit">Características Físicas do Imóvel</div><div class="ssub">Descrição técnica detalhada — NBR 14653-2 · item 8.3</div></div></div>
+  <div class="card">
+    <div class="ctit"><span class="ico">🏠</span> Tipologia e Dados Básicos</div>
+    <div class="g g4">
+      <div class="f"><label>Tipo do Imóvel <span class="req">*</span></label>
+        <select id="fis_tipo">
+          <option>Apartamento</option><option>Casa — Padrão</option><option>Casa — Térrea</option>
+          <option>Casa — Sobrado</option><option>Casa em Condomínio Fechado</option>
+          <option>Terreno Urbano</option><option>Sala / Conjunto Comercial</option>
+          <option>Loja</option><option>Galpão / Barracão Industrial</option>
+          <option>Sítio / Chácara</option><option>Prédio Comercial (inteiro)</option>
+        </select>
+      </div>
+      <div class="f"><label>Padrão Construtivo <span class="req">*</span></label>
+        <select id="fis_padrao">
+          <option>R1 — Popular / Mínimo (NBR 12721)</option>
+          <option>R2 — Simples (NBR 12721)</option>
+          <option>R3 — Normal / Médio (NBR 12721)</option>
+          <option>R4 — Alto (NBR 12721)</option>
+          <option>R5 — Fino / Luxo (NBR 12721)</option>
+        </select>
+        <div class="hint">Classificação conforme NBR 12721. R3 é referência do CUB.</div>
+      </div>
+      <div class="f"><label>Estado de Conservação <span class="req">*</span></label>
+        <select id="fis_conserv">
+          <option>1 — Novo (nunca utilizado)</option>
+          <option>2 — Excelente (conservado como novo)</option>
+          <option>3 — Bom (bem conservado, pequenos reparos)</option>
+          <option>4 — Regular (desgaste aparente, reparos necessários)</option>
+          <option>5 — Ruim (deterioração acentuada)</option>
+          <option>6 — Péssimo (abandono, riscos estruturais)</option>
+        </select>
+      </div>
+      <div class="f"><label>Fase Ocupacional</label>
+        <select id="fis_fase">
+          <option>Concluído — Habitado</option><option>Concluído — Desocupado</option>
+          <option>Em construção — % indicar</option><option>Na planta / Lançamento</option>
+        </select>
+      </div>
+    </div>
+    <div class="g g5 mt">
+      <div class="f"><label>Área Total / Matriculada (m²) <span class="req">*</span></label><input type="number" id="fis_area_total" placeholder="0,00" step="0.01" oninput="calcFinal()"></div>
+      <div class="f"><label>Área Privativa / Útil (m²)</label><input type="number" id="fis_area_priv" placeholder="0,00" step="0.01" oninput="calcFinal()"><div class="hint">Área averbada no CRI</div></div>
+      <div class="f"><label>Área Construída (m²)</label><input type="number" id="fis_area_constr" placeholder="0,00" step="0.01"></div>
+      <div class="f"><label>Área de Terreno (m²)</label><input type="number" id="fis_area_terr" placeholder="0,00" step="0.01"></div>
+      <div class="f"><label>Área Comum (m²)</label><input type="number" id="fis_area_comum" placeholder="0,00" step="0.01"></div>
+    </div>
+    <div class="g g5 mt">
+      <div class="f"><label>Dormitórios</label><input type="number" id="fis_dorms" min="0" value="0"></div>
+      <div class="f"><label>Suítes</label><input type="number" id="fis_suites" min="0" value="0"></div>
+      <div class="f"><label>Banheiros (total)</label><input type="number" id="fis_banhs" min="0" value="0"></div>
+      <div class="f"><label>Vagas de Garagem</label><input type="number" id="fis_vagas" min="0" value="0"></div>
+      <div class="f"><label>Andar / Pavimento</label><input type="text" id="fis_andar" placeholder="5º / Térreo"></div>
+    </div>
+    <div class="g g4 mt">
+      <div class="f"><label>Ano de Construção</label><input type="number" id="fis_ano" placeholder="2000" min="1900" max="2030"></div>
+      <div class="f"><label>Idade Aparente (anos)</label><input type="number" id="fis_idade" placeholder="0" min="0" oninput="calcDeprec()"></div>
+      <div class="f"><label>Vida Útil Estimada (anos)</label><input type="number" id="fis_vu" value="60" oninput="calcDeprec()"><div class="hint">NBR: 60 anos para concreto armado</div></div>
+      <div class="f"><label>Depreciação Ross-Heidecke (%)</label><input type="number" id="fis_deprec" placeholder="0" min="0" max="100" readonly><div class="hint" id="hint-deprec">Calculada automaticamente pela idade/vida útil</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit"><span class="ico">🔨</span> Especificações Construtivas</div>
+    <div class="g g3">
+      <div class="f"><label>Estrutura</label>
+        <select id="fis_estrut">
+          <option>Concreto armado convencional</option><option>Concreto armado — parede estrutural</option>
+          <option>Metálica / Steel frame</option><option>Alvenaria estrutural</option>
+          <option>Madeira</option><option>Mista</option>
+        </select>
+      </div>
+      <div class="f"><label>Cobertura / Telhado</label>
+        <select id="fis_telh">
+          <option>Laje + telha cerâmica</option><option>Laje impermeabilizada (jardim)</option>
+          <option>Telha colonial cerâmica</option><option>Telha metálica / galvanizada</option>
+          <option>Telha de fibrocimento</option><option>Shingle / asfáltica</option><option>Misto</option>
+        </select>
+      </div>
+      <div class="f"><label>Alvenaria / Vedação</label>
+        <select id="fis_alv">
+          <option>Tijolo cerâmico rebocado</option><option>Bloco de concreto</option>
+          <option>Drywall / gesso acartonado</option><option>Bloco de vidro</option><option>Misto</option>
+        </select>
+      </div>
+    </div>
+    <div class="g g3 mt">
+      <div class="f"><label>Piso (áreas sociais)</label>
+        <select id="fis_piso">
+          <option>Porcelanato importado</option><option>Porcelanato nacional</option>
+          <option>Cerâmica</option><option>Piso laminado</option><option>Piso vinílico SPC/LVT</option>
+          <option>Madeira maciça / parquet</option><option>Mármore / Granito</option><option>Cimentado</option>
+        </select>
+      </div>
+      <div class="f"><label>Esquadrias</label>
+        <select id="fis_esq">
+          <option>Alumínio — padrão</option><option>Alumínio — alto padrão</option>
+          <option>PVC</option><option>Madeira maciça</option><option>Ferro / aço</option><option>Misto</option>
+        </select>
+      </div>
+      <div class="f"><label>Revestimento de Fachada</label>
+        <select id="fis_fach">
+          <option>Pintura texturizada</option><option>Pintura acrílica</option>
+          <option>Cerâmica / Porcelanato</option><option>Pedra (granito/mármore)</option>
+          <option>ACM / Alumínio composto</option><option>Pastilha cerâmica</option>
+          <option>Reboco simples</option><option>Misto</option>
+        </select>
+      </div>
+    </div>
+    <div class="g g3 mt">
+      <div class="f"><label>Instalações Elétricas</label>
+        <select id="fis_elet">
+          <option>Embutidas — padrão convencional</option><option>Embutidas — padrão alto (automação)</option>
+          <option>Aparentes — conduítes</option><option>Mistas</option>
+        </select>
+      </div>
+      <div class="f"><label>Instalações Hidrossanitárias</label>
+        <select id="fis_hidro">
+          <option>PVC convencional</option><option>PPR (polipropileno) — alto padrão</option>
+          <option>Cobre</option><option>Mista</option>
+        </select>
+      </div>
+      <div class="f"><label>Abastecimento de Água</label>
+        <select id="fis_agua">
+          <option>Rede pública — SABESP/Concessionária</option>
+          <option>Poço artesiano</option><option>Rede + poço</option><option>Carro-pipa</option>
+        </select>
+      </div>
+    </div>
+    <div class="f mt"><label>Benfeitorias / Itens de Valor Agregado</label>
+      <textarea id="fis_benf" placeholder="Piscina, churrasqueira, sauna, elevador, gerador, energia solar, automação, ar-condicionado central, closet, home theater, academia, playground, salão de festas, portaria 24h, câmeras de segurança..."></textarea>
+    </div>
+    <div class="f mt"><label>Vícios / Patologias Construtivas Observadas</label>
+      <textarea id="fis_vicios" placeholder="Registre todas as patologias: trincas, rachaduras, infiltrações, umidade, bolor, recalque, corrosão, instalações danificadas. Se não houver: 'Não foram observados vícios aparentes na data da vistoria.'"></textarea>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit"><span class="ico">🏢</span> Dados do Condomínio (se aplicável)</div>
+    <div class="g g3">
+      <div class="f"><label>Nome do Condomínio / Empreendimento</label><input type="text" id="cond_nome" placeholder="Residencial / Comercial..."></div>
+      <div class="f"><label>CNPJ do Condomínio</label><input type="text" id="cond_cnpj" placeholder="00.000.000/0001-00"></div>
+      <div class="f"><label>Administradora / Síndico</label><input type="text" id="cond_adm" placeholder="Nome ou empresa administradora"></div>
+    </div>
+    <div class="g g3 mt">
+      <div class="f"><label>Nº de Unidades</label><input type="number" id="cond_un" placeholder="0"></div>
+      <div class="f"><label>Taxa de Condomínio (R$/mês)</label><input type="number" id="cond_taxa" placeholder="0,00"></div>
+      <div class="f"><label>Situação Financeira</label>
+        <select id="cond_fin">
+          <option>Regular — adimplente</option><option>Irregular — inadimplência informada</option><option>Desconhecida</option>
+        </select>
+      </div>
+    </div>
+    <div class="f mt"><label>Infraestrutura do Condomínio</label>
+      <textarea id="cond_infra" placeholder="Portaria 24h, elevadores, câmeras, piscina, academia, salão de festas, playground, gerador, brinquedoteca..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- S6 DOCUMENTAÇÃO -->
+<div class="sec" id="s6">
+  <div class="shd"><div><div class="stit">Documentação do Imóvel</div><div class="ssub">Análise documental — imprescindível para financiamento CEF e judicial</div></div></div>
+  <div class="alert warn"><span class="aico">⚠️</span><span>Para CEF/SFH: matrícula atualizada (máx. 30 dias), Habite-se e IPTU quitado são indispensáveis. Ausência pode inviabilizar o financiamento. Para fins judiciais: certidão de ônus reais é obrigatória.</span></div>
+  <div class="card">
+    <div class="ctit"><span class="ico">📄</span> Registro de Imóveis</div>
+    <div class="g g3">
+      <div class="f"><label>Nº da Matrícula <span class="req">*</span></label><input type="text" id="doc_mat" placeholder="Nº da matrícula no CRI"></div>
+      <div class="f"><label>Cartório de Registro de Imóveis <span class="req">*</span></label><input type="text" id="doc_cri" placeholder="Nº CRI — Comarca — UF"></div>
+      <div class="f"><label>Data da Última Atualização</label><input type="date" id="doc_data_mat"></div>
+    </div>
+    <div class="g g3 mt">
+      <div class="f"><label>Proprietário(s) conforme matrícula <span class="req">*</span></label><input type="text" id="doc_prop_mat" placeholder="Nome(s) exato(s) — CPF/CNPJ"></div>
+      <div class="f"><label>Fração Ideal (condomínio)</label><input type="text" id="doc_frac" placeholder="Ex: 1/12 = 8,33%"></div>
+      <div class="f"><label>Inscrição Municipal / IPTU <span class="req">*</span></label><input type="text" id="doc_iptu_num" placeholder="0000.000.000.0000"></div>
+    </div>
+    <div class="g g4 mt">
+      <div class="f"><label>Situação da Matrícula</label>
+        <select id="doc_sit_mat">
+          <option>Regular — sem ônus ou restrições</option>
+          <option>Alienação fiduciária em vigor</option>
+          <option>Hipoteca em vigor</option>
+          <option>Penhora / Arresto judicial</option>
+          <option>Usufruto registrado</option>
+          <option>Indisponibilidade registrada</option>
+          <option>Irregularidade — área não averbada</option>
+        </select>
+      </div>
+      <div class="f"><label>Habite-se / Carta de Habitação</label>
+        <select id="doc_habite">
+          <option>Emitido — regular</option>
+          <option>Não emitido — construção sem aprovação</option>
+          <option>Em processo de regularização</option>
+          <option>Não aplicável — terreno</option>
+        </select>
+      </div>
+      <div class="f"><label>IPTU — Situação</label>
+        <select id="doc_iptu_sit">
+          <option>Quitado — sem débitos</option>
+          <option>Parcelamento ativo (REFIS)</option>
+          <option>Débito em aberto</option>
+          <option>Isento</option>
+        </select>
+      </div>
+      <div class="f"><label>Valor Venal (IPTU) R$</label><input type="number" id="doc_val_venal" placeholder="0,00" step="0.01"><div class="hint">Valor fiscal — geralmente inferior ao de mercado</div></div>
+    </div>
+    <div class="f mt"><label>Observações sobre a Documentação</label>
+      <textarea id="doc_obs" placeholder="Irregularidades, divergências de área entre matrícula e IPTU, pendências, documentos não apresentados, ressalvas que possam impactar a operação..."></textarea>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit"><span class="ico">✅</span> Documentos Verificados</div>
+    <ul class="cklist" id="docs-list">
+      <li onclick="ckToggle(this)"><div class="ck"></div><div class="ck-txt">Matrícula atualizada do CRI <span class="ck-ref">Emissão máx. 30 dias para financiamento CEF</span></div></li>
+      <li onclick="ckToggle(this)"><div class="ck"></div><div class="ck-txt">Certidão de ônus reais <span class="ck-ref">Hipotecas, penhoras, alienações fiduciárias</span></div></li>
+      <li onclick="ckToggle(this)"><div class="ck"></div><div class="ck-txt">Habite-se / Carta de Habitação <span class="ck-ref">Emitido pela Prefeitura — obrigatório CEF</span></div></li>
+      <li onclick="ckToggle(this)"><div class="ck"></div><div class="ck-txt">IPTU — comprovante de quitação <span class="ck-ref">Exercício corrente e anteriores</span></div></li>
+      <li onclick="ckToggle(this)"><div class="ck"></div><div class="ck-txt">Planta aprovada pela Prefeitura <span class="ck-ref">Conformidade legal da construção</span></div></li>
+      <li onclick="ckToggle(this)"><div class="ck"></div><div class="ck-txt">Averbação da construção na matrícula <span class="ck-ref">Área construída deve estar averbada no CRI</span></div></li>
+      <li onclick="ckToggle(this)"><div class="ck"></div><div class="ck-txt">Certidão de quitação de condomínio <span class="ck-ref">Sem débitos — obrigatório para venda</span></div></li>
+      <li onclick="ckToggle(this)"><div class="ck"></div><div class="ck-txt">Memorial descritivo da construção <span class="ck-ref">Especificações do projeto aprovado</span></div></li>
+    </ul>
+  </div>
+</div>
+
+<!-- S7 FOTOS -->
+<div class="sec" id="s7">
+  <div class="shd"><div><div class="stit">Registro Fotográfico</div><div class="ssub">Documentação visual — NBR 14653-2 · item 8.4 — obrigatório</div></div></div>
+  <div class="alert info"><span class="aico">📷</span><span>Fotografe todos os cômodos, fachada, garagem, áreas comuns e entorno. Para CEF e fins judiciais as fotos devem identificar o imóvel inequivocamente. Clique em ＋ para adicionar. Clique na foto para ampliar. Dê duplo clique na legenda para editar.</span></div>
+  <div class="card"><div class="ctit"><span class="ico">🏠</span> Fachada / Vista Geral / Entorno</div>
+    <div class="foto-grid" id="fg-1"></div>
+    <div class="foto-add-btn" onclick="abrirFotos('fg-1','Fachada')" style="margin-top:8px;width:auto;height:40px;flex-direction:row;padding:0 16px;border-radius:6px">📷 Adicionar fotos de fachada e entorno</div>
+  </div>
+  <div class="card"><div class="ctit"><span class="ico">🛋️</span> Ambientes Internos — Sala / Quartos / Cozinha</div>
+    <div class="foto-grid" id="fg-2"></div>
+    <div class="foto-add-btn" onclick="abrirFotos('fg-2','Ambiente')" style="margin-top:8px;width:auto;height:40px;flex-direction:row;padding:0 16px;border-radius:6px">📷 Adicionar ambientes internos</div>
+  </div>
+  <div class="card"><div class="ctit"><span class="ico">🚿</span> Banheiros / Área de Serviço / Cozinha</div>
+    <div class="foto-grid" id="fg-3"></div>
+    <div class="foto-add-btn" onclick="abrirFotos('fg-3','Banheiro/Cozinha')" style="margin-top:8px;width:auto;height:40px;flex-direction:row;padding:0 16px;border-radius:6px">📷 Adicionar</div>
+  </div>
+  <div class="card"><div class="ctit"><span class="ico">🏊</span> Área de Lazer / Garagem / Infraestrutura</div>
+    <div class="foto-grid" id="fg-4"></div>
+    <div class="foto-add-btn" onclick="abrirFotos('fg-4','Lazer/Garagem')" style="margin-top:8px;width:auto;height:40px;flex-direction:row;padding:0 16px;border-radius:6px">📷 Adicionar</div>
+  </div>
+  <div class="card"><div class="ctit"><span class="ico">📐</span> Plantas / Documentos / Mapas</div>
+    <div class="foto-grid" id="fg-5"></div>
+    <div class="foto-add-btn" onclick="abrirFotos('fg-5','Planta/Documento')" style="margin-top:8px;width:auto;height:40px;flex-direction:row;padding:0 16px;border-radius:6px">📷 Adicionar plantas e documentos</div>
+  </div>
+</div>
+
+<!-- S8 MÉTODO NBR -->
+<div class="sec" id="s8">
+  <div class="shd"><div><div class="stit">Método e Homogeneização NBR 14653</div><div class="ssub">Tratamento estatístico das amostras comparativas</div></div><span class="badge cnai">⭐ CNAI</span></div>
+  <div class="card">
+    <div class="ctit"><span class="ico">⚙️</span> Configuração dos Fatores</div>
+    <div class="alert info"><span class="aico">ℹ️</span><span>Valor Homogeneizado = (V.Oferta / Área) × F.Oferta × F.Área × F.Local × F.Padrão × F.Conservação. Cada fator corrige a diferença entre o comparativo e o imóvel avaliando. Fator 1,00 = sem diferença. Fator acima de 1,00 = o avaliando é melhor que o comparativo.</span></div>
+    <div class="g g3">
+      <div class="f"><label>Variável Principal</label>
+        <select id="var_princ">
+          <option>Valor unitário (R$/m² de área privativa)</option>
+          <option>Valor unitário (R$/m² de área total)</option>
+          <option>Valor total do imóvel (R$)</option>
+          <option>Valor unitário (R$/m² de terreno)</option>
+        </select>
+      </div>
+      <div class="f"><label>Campo de Arbítrio</label>
+        <select id="campo_arb">
+          <option value="15">±15% — Grau I (mínimo NBR)</option>
+          <option value="12">±12% — Grau II</option>
+          <option value="8">±8% — Grau III</option>
+        </select>
+      </div>
+      <div class="f"><label>Saneamento de Outliers</label>
+        <select id="saneam">
+          <option>Sem saneamento (todas as amostras)</option>
+          <option>Critério de Chauvenet</option>
+          <option>Amplitude interquartil (IQR)</option>
+          <option>Exclusão manual justificada</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit"><span class="ico">📊</span> Resultado Estatístico</div>
+    <div class="g g4">
+      <div class="res-box"><div class="rl">Média Homogeneizada</div><div class="rv" id="st-med">—</div><div class="rs">R$/m²</div></div>
+      <div class="res-box"><div class="rl">Mediana</div><div class="rv" id="st-mdn">—</div><div class="rs">R$/m²</div></div>
+      <div class="res-box"><div class="rl">Desvio Padrão (σ)</div><div class="rv" id="st-dp">—</div><div class="rs">dispersão</div></div>
+      <div class="res-box"><div class="rl">Coef. Variação (CV)</div><div class="rv" id="st-cv">—</div><div class="rs">precisão NBR</div></div>
+    </div>
+    <div class="g g4 mt">
+      <div class="res-box"><div class="rl">Amostras Válidas (n)</div><div class="rv" id="st-n">0</div><div class="rs">mín. 3 (Grau I)</div></div>
+      <div class="res-box"><div class="rl">Limite Inferior</div><div class="rv" id="st-inf">—</div><div class="rs">campo de arbítrio</div></div>
+      <div class="res-box"><div class="rl">Limite Superior</div><div class="rv" id="st-sup">—</div><div class="rs">campo de arbítrio</div></div>
+      <div class="res-box gold"><div class="rl">Valor Unit. Adotado</div><div class="rv" id="st-adot">—</div><div class="rs">dentro do campo</div></div>
+    </div>
+    <div class="f mt"><label>Comentário Técnico — Representatividade das Amostras</label>
+      <textarea id="coment_am" placeholder="Período de coleta, raio de pesquisa, distribuição espacial, sazonalidade, outliers excluídos e motivo, justificativa da representatividade do conjunto de amostras..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- S9 AMOSTRAS -->
+<div class="sec" id="s9">
+  <div class="shd"><div><div class="stit">Elementos Comparativos (Amostras)</div><div class="ssub">Pesquisa de mercado homogeneizada — NBR 14653-2 · item 8.1.2</div></div><span class="badge cnai">⭐ CNAI</span></div>
+  <div class="alert info"><span class="aico">ℹ️</span><span>Cada amostra precisa de: endereço verificável, fonte identificada, data, área e valor. O fator de oferta converte preço pedido em preço de venda. Os demais fatores corrigem diferenças físicas e locacionais. Adicione fotos clicando em 📷 na linha.</span></div>
+  <div class="card">
+    <div class="ctit"><span class="ico">🔍</span> Tabela de Amostras <span class="ctit-sub">Grau I: ≥3 · Grau II: ≥5 · Grau III: ≥5 + regressão</span></div>
+    <div class="tbl-wrap">
+      <table class="tbl" id="tbl-am">
+        <thead><tr>
+          <th>#</th><th>Data</th><th>Endereço / Referência</th><th>Tipo</th>
+          <th>Área m²</th><th>Dorms</th><th>Vagas</th><th>Padrão</th><th>Conserv.</th>
+          <th>V.Oferta R$</th><th>F.Oferta</th><th>F.Área</th><th>F.Local</th><th>F.Padrão</th><th>F.Conserv</th>
+          <th>V.Homog R$/m²</th><th>Fonte</th><th>📷</th><th>🗑</th>
+        </tr></thead>
+        <tbody id="tbody-am"></tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn-row" onclick="addAm()">＋ Adicionar Amostra</button>
+      <button class="btn-row" onclick="calcHomog()" style="background:var(--sky);color:#fff;border-style:solid">⚡ Recalcular Homogeneização</button>
+    </div>
+  </div>
+</div>
+
+<!-- S10 MERCADO -->
+<div class="sec" id="s10">
+  <div class="shd"><div><div class="stit">Diagnóstico de Mercado</div><div class="ssub">Análise da conjuntura imobiliária local — NBR 14653-2 · item 8.2.3</div></div></div>
+  <div class="card">
+    <div class="ctit"><span class="ico">📊</span> Indicadores Quantitativos</div>
+    <div class="g g4">
+      <div class="f"><label>Taxa de Absorção Mensal (%)</label><input type="number" id="merc_abs" placeholder="0,0" step="0.1"><div class="hint">Acima de 5%: mercado aquecido</div></div>
+      <div class="f"><label>Estoque no Raio (unidades)</label><input type="number" id="merc_est" placeholder="0"></div>
+      <div class="f"><label>Tempo Médio de Absorção (dias)</label><input type="number" id="merc_tmp" placeholder="0"><div class="hint">Até 90 dias: boa liquidez</div></div>
+      <div class="f"><label>Raio de Pesquisa Adotado (km)</label><input type="number" id="merc_raio" placeholder="1,0" step="0.1"></div>
+    </div>
+    <div class="g g4 mt">
+      <div class="f"><label>Preço Mín. Pesquisado (R$/m²)</label><input type="number" id="merc_pmin" placeholder="0,00" step="0.01"></div>
+      <div class="f"><label>Preço Máx. Pesquisado (R$/m²)</label><input type="number" id="merc_pmax" placeholder="0,00" step="0.01"></div>
+      <div class="f"><label>Preço Médio de Mercado (R$/m²)</label><input type="number" id="merc_pmed" placeholder="0,00" step="0.01"></div>
+      <div class="f"><label>Variação últimos 12m (%)</label><input type="number" id="merc_var" placeholder="0,0" step="0.1"></div>
+    </div>
+    <div class="g g4 mt">
+      <div class="f"><label>Tendência de Preços</label>
+        <select id="merc_tend">
+          <option>Estável</option><option>Valorização moderada (até 5% a.a.)</option>
+          <option>Valorização acelerada (acima de 5%)</option><option>Leve queda (até 5%)</option>
+          <option>Queda acentuada (acima de 5%)</option>
+        </select>
+      </div>
+      <div class="f"><label>Liquidez do Imóvel Avaliando</label>
+        <select id="merc_liq">
+          <option>Alta — até 90 dias</option><option>Média — 90 a 180 dias</option>
+          <option>Baixa — acima de 180 dias</option><option>Muito baixa — mercado restrito</option>
+        </select>
+      </div>
+      <div class="f"><label>Fase do Ciclo Imobiliário</label>
+        <select id="merc_ciclo">
+          <option>Expansão — demanda > oferta</option><option>Equilíbrio</option>
+          <option>Desaceleração — oferta crescendo</option><option>Recessão</option><option>Recuperação</option>
+        </select>
+      </div>
+      <div class="f"><label>Perfil do Comprador Típico</label>
+        <select id="merc_perf">
+          <option>Família de renda média — uso próprio</option>
+          <option>Investidor — renda de aluguel</option>
+          <option>Pessoa jurídica / empresa</option><option>MCMV / Programas habitacionais</option>
+        </select>
+      </div>
+    </div>
+    <div class="f mt"><label>Diagnóstico Narrativo do Mercado <span class="req">*</span></label>
+      <textarea id="merc_narr" style="min-height:140px" placeholder="Descreva com profundidade: condições do mercado imobiliário local e regional; vetores de valorização (infraestrutura, projetos, empreendimentos); fatores negativos; sazonalidade; comparação com IGMI-R FGV, FipeZap, CRECI-SP; perspectivas de curto/médio prazo; impacto da taxa SELIC na demanda por financiamento; características socioeconômicas da região..."></textarea>
+    </div>
+    <div class="f mt"><label>Fontes de Pesquisa de Mercado</label>
+      <textarea id="merc_fontes" placeholder="ZAP Imóveis, Viva Real, OLX, pesquisa direta com corretores, índice FipeZap (data), boletim CRECI-SP (mês/ano), dados IBGE..."></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- S11 VALOR FINAL -->
+<div class="sec" id="s11">
+  <div class="shd"><div><div class="stit">Valor de Avaliação Final</div><div class="ssub">Composição, arbitramento e intervalo de confiança NBR</div></div></div>
+  <div class="card">
+    <div class="ctit"><span class="ico">💰</span> Composição do Valor de Mercado</div>
+    <div class="g g4">
+      <div class="f"><label>Valor Unit. Calculado (R$/m²)</label><input type="number" id="vu_calc" placeholder="0,00" step="0.01" oninput="calcFinal()"><div class="hint">Média homogeneizada das amostras</div></div>
+      <div class="f"><label>Valor Unit. Adotado (R$/m²) <span class="req">*</span></label><input type="number" id="vu_adot" placeholder="0,00" step="0.01" oninput="calcFinal()"><div class="hint">Dentro do campo de arbítrio (±15%)</div></div>
+      <div class="f"><label>Área de Referência (m²) <span class="req">*</span></label><input type="number" id="val_area" placeholder="0,00" step="0.01" oninput="calcFinal()"><div class="hint">Área privativa ou total conforme padrão do mercado</div></div>
+      <div class="f"><label>Ajuste Final (%)</label><input type="number" id="val_ajuste" value="0" step="0.1" oninput="calcFinal()"><div class="hint">Ex: –5% para facilitar liquidez. Justifique no parecer.</div></div>
+    </div>
+    <div class="val-destaque">
+      <div class="vdl">💰 Valor de Mercado — Imóvel Avaliando</div>
+      <div class="vdv" id="val-destaque-v">R$ 0,00</div>
+      <div class="vds" id="val-extenso">—</div>
+    </div>
+    <div class="g g3 mt">
+      <div class="res-box"><div class="rl">Limite Inferior (–15%)</div><div class="rv" id="val-inf">—</div><div class="rs">mínimo NBR</div></div>
+      <div class="res-box" style="border-color:var(--dark)"><div class="rl">Valor Central Adotado</div><div class="rv" id="val-cen">—</div><div class="rs">valor de avaliação</div></div>
+      <div class="res-box"><div class="rl">Limite Superior (+15%)</div><div class="rv" id="val-sup">—</div><div class="rs">máximo NBR</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit"><span class="ico">📐</span> Método Evolutivo / Custo de Reedição (complementar)</div>
+    <div class="g g4">
+      <div class="f"><label>Valor do Terreno (R$)</label><input type="number" id="ev_terr" placeholder="0,00" step="0.01" oninput="calcEvol()"></div>
+      <div class="f"><label>CUB Referência (R$/m²)</label><input type="number" id="ev_cub" placeholder="0,00" step="0.01" oninput="calcEvol()"><div class="hint">CUB SINDUSCON do mês/UF</div></div>
+      <div class="f"><label>Área Construída (m²)</label><input type="number" id="ev_area" placeholder="0,00" step="0.01" oninput="calcEvol()"></div>
+      <div class="f"><label>Depreciação (%)</label><input type="number" id="ev_dep" value="0" step="0.1" oninput="calcEvol()"></div>
+    </div>
+    <div class="g g3 mt">
+      <div class="res-box"><div class="rl">Custo de Reedição</div><div class="rv" id="ev-custo">—</div><div class="rs">CUB × área × (1–dep)</div></div>
+      <div class="res-box"><div class="rl">Valor Evolutivo Total</div><div class="rv" id="ev-total">—</div><div class="rs">Terreno + Construção</div></div>
+      <div class="res-box gold"><div class="rl">Convergência</div><div class="rv" id="ev-conv">—</div><div class="rs">divergência entre métodos</div></div>
+    </div>
+    <div class="hint mt">Divergência superior a 20% entre comparativo e evolutivo deve ser investigada e explicada no parecer.</div>
+  </div>
+</div>
+
+<!-- S12 COT CAIXA -->
+<div class="sec" id="s12">
+  <div class="shd"><div><div class="stit">COT — Caixa Econômica Federal</div><div class="ssub">Critérios de conformidade para SFH · SBPE · FGTS · MCMV</div></div><span class="badge cef">🏦 CEF</span></div>
+  <div class="alert warn"><span class="aico">⚠️</span><span>O laudo CEF deve atender integralmente à Instrução Normativa da CEF vigente, à NBR 14653-2 e às normas do BACEN. O não cumprimento de qualquer requisito pode resultar na recusa do laudo e inviabilização do financiamento.</span></div>
+  <div class="card">
+    <div class="ctit"><span class="ico">🏦</span> Dados da Operação</div>
+    <div class="g g3">
+      <div class="f"><label>Modalidade <span class="req">*</span></label>
+        <select id="cot_mod">
+          <option>SBPE — Sistema Brasileiro de Poupança e Empréstimo</option>
+          <option>FGTS — MCMV Faixa 1</option><option>FGTS — MCMV Faixa 2</option>
+          <option>FGTS — MCMV Faixa 3</option><option>Pró-Cotista FGTS</option>
+          <option>Carta de Crédito FGTS Individual</option><option>SFI — Sistema de Financiamento Imobiliário</option>
+        </select>
+      </div>
+      <div class="f"><label>Valor de Compra e Venda (R$)</label><input type="number" id="cot_cv" placeholder="0,00" step="0.01" oninput="calcCot()"></div>
+      <div class="f"><label>Valor do Financiamento (R$)</label><input type="number" id="cot_fin" placeholder="0,00" step="0.01" oninput="calcCot()"></div>
+    </div>
+    <div class="g g3 mt">
+      <div class="res-box"><div class="rl">Valor do Laudo</div><div class="rv" id="cot-laudo">—</div><div class="rs">PTAM</div></div>
+      <div class="res-box"><div class="rl">Valor de Referência CEF</div><div class="rv" id="cot-ref">—</div><div class="rs">menor entre laudo e C&V</div></div>
+      <div class="res-box"><div class="rl">LTV Calculado</div><div class="rv" id="cot-ltv">—</div><div class="rs">máx. 80% SBPE / 90% MCMV</div></div>
+    </div>
+    <div class="g g2 mt">
+      <div class="f"><label>Nº do Processo / Proposta CEF</label><input type="text" id="cot_proc" placeholder="00000000000-00"></div>
+      <div class="f"><label>Agência CEF Responsável</label><input type="text" id="cot_ag" placeholder="Nome e código da agência"></div>
+    </div>
+    <div class="f mt"><label>Ressalvas e Condicionantes para o Financiamento</label>
+      <textarea id="cot_res" placeholder="Pendências documentais, discrepâncias de área, vícios construtivos, restrições legais, irregularidades de zoneamento, etc."></textarea>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit"><span class="ico">✅</span> Checklist de Conformidade CEF / SFH</div>
+    <ul class="cklist" id="cot-list">
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">Imóvel residencial urbano — uso habitacional confirmado <span class="ck-ref">CEF não financia imóvel comercial pelo SFH</span></div></li>
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">Matrícula CRI atualizada (máx. 30 dias) sem ônus ou com ônus declarados <span class="ck-ref">Obrigatório — emissão dentro do prazo</span></div></li>
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">Habite-se emitido pela Prefeitura <span class="ck-ref">Obrigatório. Sem habite-se: CEF exige regularização prévia</span></div></li>
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">Averbação da construção na matrícula <span class="ck-ref">Área deve coincidir com a averbada no CRI</span></div></li>
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">IPTU em dia — sem débitos em aberto <span class="ck-ref">Débitos podem ser exigidos como quitados previamente</span></div></li>
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">Imóvel sem alienação fiduciária vigente <span class="ck-ref">Ou com carta de anuência do credor original</span></div></li>
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">Imóvel não em APP, faixa de domínio ou área de risco <span class="ck-ref">CEF nega financiamento em áreas de risco geológico/hídrico</span></div></li>
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">Profissional habilitado: CRECI ativo + CNAI <span class="ck-ref">CNAI é exigência formal da CEF</span></div></li>
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">Laudo dentro do prazo de validade (máx. 6 meses) <span class="ck-ref">Recomendado máx. 60 dias para financiamento</span></div></li>
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">Mínimo 3 amostras comparativas com identificação completa <span class="ck-ref">Endereço + área + valor + fonte verificável</span></div></li>
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">LTV dentro do limite da modalidade (80% SBPE / 90% MCMV) <span class="ck-ref">Calculado sobre o menor valor: laudo ou C&V</span></div></li>
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">Registro fotográfico completo — fachada + internos identificados <span class="ck-ref">Fotos datadas ou com GPS preferível</span></div></li>
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">Declaração de independência profissional inserida <span class="ck-ref">Exigência COFECI / NBR 14653</span></div></li>
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">Laudo assinado com carimbo — CRECI e CNAI legíveis <span class="ck-ref">Assinatura com carimbo em todas as vias</span></div></li>
+      <li onclick="ckToggle(this);calcCotBar()"><div class="ck"></div><div class="ck-txt">Valor de avaliação justificado em relação ao valor de C&V <span class="ck-ref">Se laudo menor que C&V, CEF usa o laudo como base</span></div></li>
+    </ul>
+    <div style="margin-top:10px">
+      <div class="prog-wrap"><div class="prog-bar" id="cot-bar" style="width:0%"></div></div>
+      <div id="cot-status" style="font-size:.78rem;color:var(--muted);margin-top:3px">0 de 15 critérios</div>
+    </div>
+  </div>
+</div>
+
+<!-- S13 JUDICIAL -->
+<div class="sec" id="s13">
+  <div class="shd"><div><div class="stit">Perícia Judicial Imobiliária</div><div class="ssub">Laudo pericial conforme CPC art. 464–480 e Resolução CNJ nº 233/2016</div></div><span class="badge cpc">⚖️ CPC</span></div>
+  <div class="alert info"><span class="aico">⚖️</span><span>O perito é auxiliar do juízo. Responde civil e penalmente pelas conclusões. O laudo deve responder objetivamente a todos os quesitos formulados, com fundamentação técnica clara. Respostas evasivas podem ser consideradas omissão pelo juízo.</span></div>
+  <div class="card">
+    <div class="ctit"><span class="ico">⚖️</span> Identificação Processual</div>
+    <div class="g g3">
+      <div class="f"><label>Nº do Processo (CNJ) <span class="req">*</span></label><input type="text" id="jud_proc" placeholder="0000000-00.2026.8.26.0000"></div>
+      <div class="f"><label>Vara / Câmara / Tribunal <span class="req">*</span></label><input type="text" id="jud_vara" placeholder="2ª Vara Cível — Comarca de São Paulo/SP"></div>
+      <div class="f"><label>Nome do(a) Juiz(a)</label><input type="text" id="jud_juiz" placeholder="Dr(a). Nome do Magistrado(a)"></div>
+    </div>
+    <div class="g g3 mt">
+      <div class="f"><label>Tipo de Ação <span class="req">*</span></label>
+        <select id="jud_acao">
+          <option>Divisão e Demarcação de Imóvel</option><option>Usucapião</option>
+          <option>Divórcio — Partilha de Bens</option><option>Inventário / Arrolamento</option>
+          <option>Execução — Penhora de Imóvel</option><option>Desapropriação</option>
+          <option>Ação Indenizatória — Danos Materiais</option><option>Revisional de Aluguel</option>
+          <option>Ação Possessória</option><option>Arbitragem Imobiliária</option>
+        </select>
+      </div>
+      <div class="f"><label>Data da Nomeação</label><input type="date" id="jud_nom"></div>
+      <div class="f"><label>Prazo de Entrega</label><input type="date" id="jud_prazo"></div>
+    </div>
+    <div class="g g3 mt">
+      <div class="f"><label>Parte Autora / Requerente <span class="req">*</span></label><input type="text" id="jud_autor" placeholder="Nome — CPF/CNPJ"></div>
+      <div class="f"><label>Advogado do Autor (OAB)</label><input type="text" id="jud_adv_aut" placeholder="Nome — OAB/UF nº"></div>
+      <div class="f"><label>Assistente Técnico do Autor</label><input type="text" id="jud_at_aut" placeholder="Nome — CRECI/CREA"></div>
+    </div>
+    <div class="g g3 mt">
+      <div class="f"><label>Parte Ré / Requerida <span class="req">*</span></label><input type="text" id="jud_reu" placeholder="Nome — CPF/CNPJ"></div>
+      <div class="f"><label>Advogado do Réu (OAB)</label><input type="text" id="jud_adv_reu" placeholder="Nome — OAB/UF nº"></div>
+      <div class="f"><label>Assistente Técnico do Réu</label><input type="text" id="jud_at_reu" placeholder="Nome — CRECI/CREA"></div>
+    </div>
+    <div class="g g3 mt">
+      <div class="f"><label>Data da Vistoria Pericial</label><input type="date" id="jud_vist"></div>
+      <div class="f"><label>Hora início / Término</label><div style="display:flex;gap:6px"><input type="time" id="jud_hi"><input type="time" id="jud_hf"></div></div>
+      <div class="f"><label>Data-Base da Avaliação</label><input type="date" id="jud_base"><div class="hint">Em desapropriação: data da imissão na posse</div></div>
+    </div>
+    <div class="f mt"><label>Presentes na Vistoria</label>
+      <textarea id="jud_pres" placeholder="Perito: nome — CRECI/CNAI&#10;Assistente técnico do autor: nome — CRECI nº&#10;Assistente técnico do réu: nome — CRECI nº&#10;Representante legal: nome — OAB nº"></textarea>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit"><span class="ico">❓</span> Quesitos e Respostas Periciais <span class="ctit-sub">CPC art. 465</span></div>
+    <div id="quesitos-wrap"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button class="btn-row" onclick="addQ('Juízo')">＋ Quesito do Juízo</button>
+      <button class="btn-row" onclick="addQ('Autor')">＋ Quesito do Autor</button>
+      <button class="btn-row" onclick="addQ('Réu')">＋ Quesito do Réu</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit"><span class="ico">📋</span> Conclusão Pericial</div>
+    <div class="f">
+      <label>Conclusão Técnica para o Juízo <span class="req">*</span></label>
+      <textarea id="jud_conc" style="min-height:160px" placeholder="O perito, com base nas investigações realizadas, na vistoria de [data], nos documentos analisados e na pesquisa de mercado conforme NBR 14653-2, conclui que o valor de mercado do imóvel situado em [endereço] é de R$ [valor] ([extenso]), na data-base de [data].&#10;&#10;Valor obtido pelo Método Comparativo Direto de Dados de Mercado, Grau de Fundamentação [I/II/III] e Grau de Precisão [I/II/III] (NBR 14653).&#10;&#10;O perito se coloca à disposição do MM. Juízo para esclarecimentos."></textarea>
+    </div>
+    <div class="g g2 mt">
+      <div class="f"><label>Honorários Periciais (R$)</label><input type="number" id="jud_honor" placeholder="0,00" step="0.01"></div>
+      <div class="f"><label>Local e Data</label><input type="text" id="jud_local" placeholder="São Paulo, DD de mês de AAAA"></div>
+    </div>
+  </div>
+</div>
+
+<!-- S14 PARECER -->
+<div class="sec" id="s14">
+  <div class="shd"><div><div class="stit">Parecer Conclusivo</div><div class="ssub">Síntese técnica e declarações finais do laudo</div></div></div>
+  <div class="card">
+    <div class="ctit"><span class="ico">📊</span> Síntese</div>
+    <div class="g g3">
+      <div class="res-box"><div class="rl">Valor de Mercado</div><div class="rv" id="par-val">R$ 0,00</div><div class="rs">adotado</div></div>
+      <div class="res-box"><div class="rl">Método</div><div class="rv" style="font-size:.95rem" id="par-met">—</div><div class="rs">NBR 14653</div></div>
+      <div class="res-box"><div class="rl">Grau de Fundamentação</div><div class="rv" style="font-size:1.1rem" id="par-grau">—</div><div class="rs">precisão da avaliação</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit"><span class="ico">✍️</span> Texto do Parecer</div>
+    <div class="f">
+      <label>Parecer Conclusivo Completo <span class="req">*</span></label>
+      <textarea id="parecer_txt" style="min-height:200px" placeholder="Com base nas pesquisas de mercado realizadas, na vistoria efetuada em [data], nos documentos analisados e nos cálculos desenvolvidos conforme a NBR 14653-2:2011, conclui-se que o valor de mercado do imóvel avaliando, situado em [endereço completo], é de:&#10;&#10;R$ [valor] ([valor por extenso])&#10;&#10;Na data-base de [data de emissão].&#10;&#10;Valor determinado pelo Método Comparativo Direto de Dados de Mercado, com [n] elementos comparativos, Grau de Fundamentação [I/II/III] e Grau de Precisão [I/II/III] (NBR 14653). O intervalo de confiança situa-se entre R$ [inf.] e R$ [sup.] (±15%).&#10;&#10;Elaborado com independência e imparcialidade, conforme a NBR 14653, o Código de Ética do Corretor (Res. COFECI 326/1992) e as normas do CNAI/COFECI."></textarea>
+    </div>
+    <div class="g g2 mt">
+      <div class="f"><label>Validade do Laudo</label><input type="text" id="par_val" placeholder="90 dias a partir de DD/MM/AAAA"></div>
+      <div class="f"><label>Local e Data de Emissão</label><input type="text" id="par_data" placeholder="São Paulo, DD de mês de AAAA"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctit"><span class="ico">📚</span> Referências Normativas</div>
+    <div class="f">
+      <textarea id="par_refs" style="min-height:130px">• ABNT NBR 14653-1:2019 — Avaliação de Bens — Procedimentos Gerais
+• ABNT NBR 14653-2:2011 — Avaliação de Bens — Imóveis Urbanos
+• ABNT NBR 12721:2006 — CUB — Custo Unitário Básico de Construção
+• COFECI — Resolução nº 957/2006 — Regulamenta a avaliação imobiliária
+• COFECI — Resolução nº 1.066/2007 — CNAI (Cadastro Nacional de Avaliadores)
+• Código de Ética do Corretor de Imóveis — Resolução COFECI nº 326/1992
+• Lei Federal nº 6.530/1978 e Decreto nº 81.871/1978 — Profissão de Corretor
+• CPC/2015 — Lei nº 13.105/2015 — Arts. 464 a 480 (perícia judicial)
+• Lei nº 4.591/1964 — Condomínio e Incorporações Imobiliárias
+• Lei nº 8.245/1991 — Lei do Inquilinato
+• Instrução Normativa CEF vigente — Avaliação de Garantias SFH/SBPE/FGTS</textarea>
+    </div>
+  </div>
+</div>
+
+<!-- S15 CHECKLIST -->
+<div class="sec" id="s15">
+  <div class="shd"><div><div class="stit">Checklist de Conformidade Total</div><div class="ssub">Verificação final para aceitação judicial, CEF/SFH e COFECI/CNAI</div></div></div>
+  <div class="card">
+    <div class="ctit"><span class="ico">✅</span> 25 Itens Obrigatórios — PTAM Completo</div>
+    <div class="prog-wrap"><div class="prog-bar" id="ck-bar" style="width:0%"></div></div>
+    <div id="ck-status" style="font-size:.78rem;color:var(--muted);margin-bottom:14px">0% — 0 de 25 itens</div>
+    <ul class="cklist" id="main-ck">
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Nº do laudo, data de emissão e data da vistoria preenchidos <span class="ck-ref">NBR 14653-2 · item 12.1</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Finalidade da avaliação declarada <span class="ck-ref">NBR 14653 · item 12.2 — determina o método aplicável</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Dados do profissional: nome completo, CRECI ativo, CNAI <span class="ck-ref">COFECI Res. 957/2006 — obrigatório para validade</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Declaração de independência e imparcialidade <span class="ck-ref">NBR 14653-1 · item 8 — exigência ética obrigatória</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Identificação completa do solicitante (nome + CPF/CNPJ) <span class="ck-ref">NBR 14653 · item 12.3</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Endereço completo com CEP, matrícula e inscrição municipal <span class="ck-ref">Dados essenciais para identificação inequívoca</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Análise locacional detalhada (entorno, infraestrutura, zoneamento) <span class="ck-ref">NBR 14653-2 · item 8.2</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Caracterização física completa (tipo, padrão, conservação, áreas) <span class="ck-ref">NBR 14653-2 · item 8.3</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Especificações construtivas (estrutura, acabamentos, instalações) <span class="ck-ref">NBR 14653-2 · item 8.3.2</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Vícios e patologias registrados (ou ausência confirmada) <span class="ck-ref">Obrigatório declarar estado construtivo</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Documentação verificada: matrícula, IPTU, Habite-se <span class="ck-ref">CEF: matrícula máx. 30 dias + Habite-se obrigatório</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Norma aplicada e método de avaliação declarados <span class="ck-ref">NBR 14653-2 — método comparativo para CEF</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Grau de fundamentação selecionado e justificado <span class="ck-ref">Grau I mín. · Grau III para maior rigor judicial</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Mínimo 3 amostras com identificação e fonte completas <span class="ck-ref">Grau I: 3 · Grau II: 5 · Grau III: 5 + modelo estatístico</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Fatores de homogeneização aplicados e justificados <span class="ck-ref">NBR 14653-2 · item 8.1.2 — cada fator deve ser justificado</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Estatística: média, desvio padrão e CV calculados <span class="ck-ref">CV ≤ 30% (I) · ≤ 20% (II) · ≤ 15% (III)</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Campo de arbítrio definido e valor adotado dentro do intervalo <span class="ck-ref">NBR 14653 — valor final dentro de ±15%</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Diagnóstico de mercado (tendência, liquidez, absorção) <span class="ck-ref">NBR 14653-2 · item 8.2.3 — obrigatório</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Valor de mercado em R$ total + R$/m² + área de referência <span class="ck-ref">Indicar sempre a área de referência adotada</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Intervalo de confiança NBR (limite inf. e sup.) informado <span class="ck-ref">NBR 14653 — tabela de enquadramento dos graus</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Registro fotográfico completo (fachada + ambientes + entorno) <span class="ck-ref">CEF exige fotos identificando inequivocamente o imóvel</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Parecer conclusivo com método, grau, data-base e validade <span class="ck-ref">Fundamentação técnica obrigatória</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Referências normativas citadas (NBR, COFECI, CEF, CPC) <span class="ck-ref">Conforme aplicável à finalidade do laudo</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Validade do laudo declarada <span class="ck-ref">CEF: máx. 6 meses · Judicial: conforme determinação</span></div></li>
+      <li onclick="ckToggle(this);updCk()"><div class="ck"></div><div class="ck-txt">Assinatura com carimbo profissional — CRECI + CNAI legíveis <span class="ck-ref">Todas as vias e preferencialmente cada folha</span></div></li>
+    </ul>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- PREVIEW MODAL -->
+<div id="preview-modal">
+  <div id="preview-inner">
+    <div class="pm-hd">
+      <span style="font-weight:700">Pré-visualização — PTAM FCosta</span>
+      <div style="display:flex;gap:6px">
+        <button class="bt" onclick="gerarPDF()">🖨️ Imprimir / PDF</button>
+        <button class="bt" onclick="fechaPreview()">✕ Fechar</button>
+      </div>
+    </div>
+    <div class="pm-bd"><div class="ptam-doc" id="preview-body"></div></div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox" onclick="fechaLb()">
+  <button class="lb-x" onclick="fechaLb()">✕</button>
+  <img id="lb-img" src="" alt="">
+  <div class="lb-cap" id="lb-cap"></div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ── NAVEGAÇÃO ──
+function nav(el,id){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.si').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── HOJE ──
+function hoje(){return new Date().toISOString().split('T')[0]}
+function fmtBR(v){return v?new Date(v+'T00:00').toLocaleDateString('pt-BR'):'—'}
+function fmtR(v){return'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})}
+
+// ── INICIALIZAÇÃO ──
+window.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('data_laudo').value=hoje();
+  document.getElementById('data_vistoria').value=hoje();
+  selGrau(document.querySelector('.gp[data-g="2"]'),2);
+  geraInfra();
+  addAm();addAm();addAm();
+  updCk();
+});
+
+// ── INFRAESTRUTURA CHECKBOXES ──
+function geraInfra(){
+  const its=['Água encanada (rede pública)','Esgoto sanitário (rede pública)','Coleta de lixo municipal','Energia elétrica (ANEEL)','Iluminação pública','Pavimentação asfáltica','Calçadas / Passeios','Gás encanado (distribuição)','Internet / fibra óptica','Escola pública próxima','UBS / Hospital próximo','Praça / Área verde','Metrô / Trem próximo','Ciclovia / Ciclofaixa','Câmeras de segurança pública'];
+  const w=document.getElementById('infra-wrap');
+  if(!w)return;
+  its.forEach(it=>{
+    const l=document.createElement('label');
+    l.style.cssText='display:inline-flex;align-items:center;gap:5px;font-size:.75rem;background:#fff;border:1px solid var(--border);border-radius:5px;padding:5px 9px;cursor:pointer;user-select:none;';
+    l.innerHTML='<input type="checkbox" value="'+it+'" style="width:13px;height:13px"> '+it;
+    w.appendChild(l);
+  });
+}
+function getInfra(){
+  return Array.from(document.querySelectorAll('#infra-wrap input:checked')).map(e=>e.value).join(', ')||'—';
+}
+
+// ── GRAU NBR ──
+const grauTxt={1:'Grau I — mín. 3 amostras, CV ≤ 30%, campo ±15%. Aceito para fins gerais e CEF.',2:'Grau II — mín. 5 amostras, CV ≤ 20%, campo ±12%. Recomendado para laudos judiciais.',3:'Grau III — mín. 5 amostras, CV ≤ 15%, modelo regressão. Exigido em perícias de grande valor.'};
+function selGrau(el,g){
+  document.querySelectorAll('.gp').forEach(p=>p.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('grau_fund').value=['','Grau I','Grau II','Grau III'][g];
+  document.getElementById('hint-grau').textContent=grauTxt[g];
+}
+
+// ── HINT FINALIDADE ──
+const finTxt={compra_venda:'Método comparativo direto. CNAI recomendado.',garantia_cef:'CNAI obrigatório. Checklist CEF deve ser atendido integralmente. LTV máx. 90%.',garantia_sfh:'CNAI obrigatório. NBR 14653-2. Mín. 3 amostras. Validade 6 meses.',locacao:'Valor de aluguel de mercado. Método comparativo ou renda.',judicial:'CPC art.464-480. Resposta a quesitos obrigatória. Responsabilidade civil e penal do perito.',inventario:'Valor na data do óbito pode ser exigido (data-base histórica).',desapropriacao:'Seguir Decreto-Lei 3.365/41. Terra nua + benfeitorias + lucro cessante.',seguro:'Valor de reedição (custo de reconstrução), não valor de mercado.',irpf:'Data de aquisição ou doação. Laudo simples.',iptu:'Valor venal ≠ valor de mercado. Parâmetros da PGV municipal.',revisional:'Data-base da ação. Responder quesito de valor de aluguel.',fundo:'Avaliação patrimonial. Empresa credenciada CVM pode ser exigida.'};
+function updFinalidade(){
+  const v=document.getElementById('finalidade').value;
+  document.getElementById('hint-fin').textContent=finTxt[v]||'';
+}
+
+// ── DEPRECIAÇÃO ──
+function calcDeprec(){
+  const id=parseFloat(document.getElementById('fis_idade')?.value)||0;
+  const vu=parseFloat(document.getElementById('fis_vu')?.value)||60;
+  if(id>0&&vu>0){
+    const d=Math.min((id/vu)*100,100).toFixed(1);
+    document.getElementById('fis_deprec').value=d;
+    document.getElementById('hint-deprec').textContent='Ross-Heidecke simplificado: '+d+'% de depreciação física';
+  }
+}
+
+// ── AMOSTRAS ──
+let amId=0;
+const fotosAm={};
+function addAm(){
+  amId++;
+  const id=amId;
+  fotosAm[id]=[];
+  const tr=document.createElement('tr');
+  tr.id='am'+id;
+  tr.innerHTML=`<td class="num">${id}</td>
+    <td><input type="date" value="${hoje()}" style="width:108px" onchange="calcHomog()"></td>
+    <td><input type="text" placeholder="Rua/Av., nº — Bairro" style="min-width:150px" onchange="calcHomog()"></td>
+    <td><select style="width:82px" onchange="calcHomog()"><option>Apto</option><option>Casa</option><option>Terreno</option><option>Sala</option><option>Loja</option><option>Galpão</option></select></td>
+    <td><input type="number" placeholder="0" style="width:65px" class="am-area" onchange="calcHomog()"></td>
+    <td><input type="number" placeholder="0" style="width:42px" onchange="calcHomog()"></td>
+    <td><input type="number" placeholder="0" style="width:42px" onchange="calcHomog()"></td>
+    <td><select style="width:52px" onchange="calcHomog()"><option>R1</option><option>R2</option><option selected>R3</option><option>R4</option><option>R5</option></select></td>
+    <td><select style="width:58px" onchange="calcHomog()"><option>1-Novo</option><option>2-Exc</option><option selected>3-Bom</option><option>4-Reg</option><option>5-Ruim</option></select></td>
+    <td><input type="number" placeholder="0" class="am-vo" style="width:105px" onchange="calcHomog()"></td>
+    <td><input type="number" value="0.90" step="0.01" class="am-fo" style="width:55px" onchange="calcHomog()" title="Fator de oferta (0,85–1,00)"></td>
+    <td><input type="number" value="1.00" step="0.01" class="am-fa" style="width:55px" onchange="calcHomog()" title="Fator área"></td>
+    <td><input type="number" value="1.00" step="0.01" class="am-fl" style="width:55px" onchange="calcHomog()" title="Fator localização"></td>
+    <td><input type="number" value="1.00" step="0.01" class="am-fp" style="width:55px" onchange="calcHomog()" title="Fator padrão"></td>
+    <td><input type="number" value="1.00" step="0.01" class="am-fc" style="width:55px" onchange="calcHomog()" title="Fator conservação"></td>
+    <td class="num am-vh" style="min-width:80px;color:var(--ok)">—</td>
+    <td><select style="width:85px"><option>ZAP</option><option>Viva Real</option><option>OLX</option><option>Pesquisa direta</option><option>CRECI</option><option>Escritório</option></select></td>
+    <td style="min-width:65px"><div id="amft${id}" style="display:flex;flex-wrap:wrap;gap:3px;align-items:center"><div class="am-foto-add" onclick="abrirFotoAm(${id})" title="Fotos da amostra">📷</div></div></td>
+    <td><button class="btn-del" onclick="delAm(${id})">🗑</button></td>`;
+  document.getElementById('tbody-am').appendChild(tr);
+  document.getElementById('bdg-am').textContent=document.querySelectorAll('#tbody-am tr').length;
+}
+function delAm(id){
+  const el=document.getElementById('am'+id);if(el)el.remove();
+  delete fotosAm[id];calcHomog();
+  document.getElementById('bdg-am').textContent=document.querySelectorAll('#tbody-am tr').length;
+}
+function abrirFotoAm(id){
+  const i=document.createElement('input');i.type='file';i.accept='image/*';i.multiple=true;
+  i.onchange=e=>Array.from(e.target.files).forEach(f=>{
+    const r=new FileReader();r.onload=ev=>{fotosAm[id].push(ev.target.result);renderFotoAm(id);};r.readAsDataURL(f);
+  });i.click();
+}
+function renderFotoAm(id){
+  const w=document.getElementById('amft'+id);if(!w)return;
+  w.innerHTML=fotosAm[id].map((s,i)=>{const cap='Amostra '+id+' Foto '+(i+1);return '<img class="am-thumb" src="'+s+'" onclick="abrirLb(this.src,\''+cap+'\')"> ';}).join('')
+    +'<div class="am-foto-add" onclick="abrirFotoAm('+id+')" title="Mais fotos">📷</div>';
+}
+
+// ── CALCULAR HOMOGENEIZAÇÃO ──
+function calcHomog(){
+  const rows=document.querySelectorAll('#tbody-am tr');
+  const vals=[];
+  rows.forEach(tr=>{
+    const vo=parseFloat(tr.querySelector('.am-vo')?.value)||0;
+    const ar=parseFloat(tr.querySelector('.am-area')?.value)||1;
+    const fo=parseFloat(tr.querySelector('.am-fo')?.value)||1;
+    const fa=parseFloat(tr.querySelector('.am-fa')?.value)||1;
+    const fl=parseFloat(tr.querySelector('.am-fl')?.value)||1;
+    const fp=parseFloat(tr.querySelector('.am-fp')?.value)||1;
+    const fc=parseFloat(tr.querySelector('.am-fc')?.value)||1;
+    const cel=tr.querySelector('.am-vh');
+    if(vo>0&&ar>0){
+      const vh=(vo/ar)*fo*fa*fl*fp*fc;
+      cel.textContent='R$ '+vh.toFixed(2).replace('.',',');
+      cel.style.color='var(--ok)';vals.push(vh);
+    }else{cel.textContent='—';cel.style.color='var(--muted)';}
+  });
+  const n=vals.length;
+  document.getElementById('st-n').textContent=n;
+  if(n>0){
+    const med=vals.reduce((a,b)=>a+b,0)/n;
+    const sorted=[...vals].sort((a,b)=>a-b);
+    const mdn=n%2===0?(sorted[n/2-1]+sorted[n/2])/2:sorted[Math.floor(n/2)];
+    const dp=Math.sqrt(vals.map(v=>Math.pow(v-med,2)).reduce((a,b)=>a+b,0)/n);
+    const cv=dp/med*100;
+    const arb=parseFloat(document.getElementById('campo_arb')?.value)||15;
+    const inf=med*(1-arb/100),sup=med*(1+arb/100);
+    const f=v=>'R$ '+v.toFixed(2).replace('.',',');
+    document.getElementById('st-med').textContent=f(med);
+    document.getElementById('st-mdn').textContent=f(mdn);
+    document.getElementById('st-dp').textContent=f(dp);
+    const cvEl=document.getElementById('st-cv');
+    cvEl.textContent=cv.toFixed(1)+'%';
+    cvEl.style.color=cv<=15?'var(--ok)':cv<=20?'var(--warn)':cv<=30?'var(--warn)':'var(--err)';
+    document.getElementById('st-inf').textContent=f(inf);
+    document.getElementById('st-sup').textContent=f(sup);
+    document.getElementById('st-adot').textContent=f(med);
+    const vc=document.getElementById('vu_calc'),va=document.getElementById('vu_adot');
+    if(vc)vc.value=med.toFixed(2);if(va)va.value=med.toFixed(2);
+    calcFinal();
+  } else {
+    ['st-med','st-mdn','st-dp','st-cv','st-inf','st-sup','st-adot'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='—';});
+  }
+}
+
+// ── VALOR FINAL ──
+function calcFinal(){
+  const vu=parseFloat(document.getElementById('vu_adot')?.value)||0;
+  const ar=parseFloat(document.getElementById('val_area')?.value)||parseFloat(document.getElementById('fis_area_priv')?.value)||0;
+  const aj=parseFloat(document.getElementById('val_ajuste')?.value)||0;
+  const tot=vu*ar*(1+aj/100);
+  if(document.getElementById('val-destaque-v'))document.getElementById('val-destaque-v').textContent=fmtR(tot);
+  if(document.getElementById('val-extenso'))document.getElementById('val-extenso').textContent=tot>0?numExtenso(tot):'—';
+  if(document.getElementById('val-inf'))document.getElementById('val-inf').textContent=fmtR(tot*0.85);
+  if(document.getElementById('val-cen'))document.getElementById('val-cen').textContent=fmtR(tot);
+  if(document.getElementById('val-sup'))document.getElementById('val-sup').textContent=fmtR(tot*1.15);
+  if(document.getElementById('par-val'))document.getElementById('par-val').textContent=fmtR(tot);
+  const met=document.getElementById('metodo');
+  if(document.getElementById('par-met'))document.getElementById('par-met').textContent=met?(met.value||'—').split(' ')[0]:'—';
+  if(document.getElementById('par-grau'))document.getElementById('par-grau').textContent=document.getElementById('grau_fund')?.value||'—';
+  calcEvol();calcCot();
+}
+
+// ── EVOLUTIVO ──
+function calcEvol(){
+  const terr=parseFloat(document.getElementById('ev_terr')?.value)||0;
+  const cub=parseFloat(document.getElementById('ev_cub')?.value)||0;
+  const ar=parseFloat(document.getElementById('ev_area')?.value)||0;
+  const dep=parseFloat(document.getElementById('ev_dep')?.value)||0;
+  const custo=cub*ar*(1-dep/100);
+  const tot=terr+custo;
+  if(document.getElementById('ev-custo'))document.getElementById('ev-custo').textContent=custo>0?fmtR(custo):'—';
+  if(document.getElementById('ev-total'))document.getElementById('ev-total').textContent=tot>0?fmtR(tot):'—';
+  const vc=parseFloat(document.getElementById('vu_adot')?.value)||0;
+  const va=parseFloat(document.getElementById('val_area')?.value)||1;
+  const tc=vc*va;
+  if(document.getElementById('ev-conv')&&tot>0&&tc>0){
+    const div=Math.abs(tot-tc)/tc*100;
+    const e=document.getElementById('ev-conv');
+    e.textContent=div.toFixed(1)+'%';
+    e.style.color=div<=10?'var(--ok)':div<=20?'var(--warn)':'var(--err)';
+  }
+}
+
+// ── COT ──
+function calcCot(){
+  const vu=parseFloat(document.getElementById('vu_adot')?.value)||0;
+  const va=parseFloat(document.getElementById('val_area')?.value)||1;
+  const laudo=vu*va;
+  const cv=parseFloat(document.getElementById('cot_cv')?.value)||0;
+  const fin=parseFloat(document.getElementById('cot_fin')?.value)||0;
+  const ref=cv>0&&laudo>0?Math.min(laudo,cv):laudo||cv;
+  const ltv=ref>0&&fin>0?fin/ref*100:0;
+  if(document.getElementById('cot-laudo'))document.getElementById('cot-laudo').textContent=laudo>0?fmtR(laudo):'—';
+  if(document.getElementById('cot-ref'))document.getElementById('cot-ref').textContent=ref>0?fmtR(ref):'—';
+  if(document.getElementById('cot-ltv')){
+    const e=document.getElementById('cot-ltv');
+    e.textContent=ltv>0?ltv.toFixed(1)+'%':'—';
+    e.style.color=ltv<=80?'var(--ok)':ltv<=90?'var(--warn)':'var(--err)';
+  }
+}
+function calcCotBar(){
+  const all=document.querySelectorAll('#cot-list li');
+  const done=document.querySelectorAll('#cot-list li.done').length;
+  const pct=Math.round(done/all.length*100);
+  const b=document.getElementById('cot-bar');
+  b.style.width=pct+'%';b.className='prog-bar '+(pct>=90?'ok':pct>=60?'':'err');
+  document.getElementById('cot-status').textContent=done+' de '+all.length+' critérios ('+pct+'%)';
+}
+
+// ── QUESITOS ──
+let qId=0;
+function addQ(parte){
+  qId++;
+  const clr=parte==='Juízo'?'var(--dark)':parte==='Autor'?'var(--sky)':'var(--warn)';
+  const div=document.createElement('div');
+  div.className='card';div.style.borderLeft='4px solid '+clr;div.style.marginBottom='10px';
+  div.innerHTML='<div style="font-size:.7rem;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase">'+parte+' — Quesito '+qId+'</div>'
+    +'<div class="g g2"><div class="f"><label>Quesito formulado</label><textarea placeholder="Texto exato do quesito..." style="min-height:70px"></textarea></div>'
+    +'<div class="f"><label>Resposta Técnica do Perito</label><textarea placeholder="Resposta objetiva e fundamentada..." style="min-height:70px"></textarea></div></div>'
+    +'<button onclick="this.closest(\'.card\').remove()" style="margin-top:6px;background:none;border:none;color:var(--err);cursor:pointer;font-size:.72rem">🗑 Remover quesito</button>';
+  document.getElementById('quesitos-wrap').appendChild(div);
+}
+
+// ── FOTOS ──
+const fotosGrid={};let fCnt=0;
+function abrirFotos(gid,cat){
+  const i=document.createElement('input');i.type='file';i.accept='image/*';i.multiple=true;
+  i.onchange=e=>Array.from(e.target.files).forEach(f=>{
+    const r=new FileReader();r.onload=ev=>inserirFoto(gid,cat,ev.target.result);r.readAsDataURL(f);
+  });i.click();
+}
+function inserirFoto(gid,cat,src){
+  if(!fotosGrid[gid])fotosGrid[gid]=[];
+  const fid='fi'+(++fCnt);fotosGrid[gid].push({fid,src,leg:cat});
+  const g=document.getElementById(gid);
+  const s=document.createElement('div');s.className='foto-slot';s.id=fid;
+  s.innerHTML='<img src="'+src+'" onclick="abrirLb(this.src,\''+cat+'\')"><button class="foto-del" onclick="rmFoto(\''+gid+'\',\''+fid+'\')">✕</button><div class="foto-leg" ondblclick="editLeg(this)">'+cat+'</div>';
+  g.appendChild(s);updBdgFotos();
+}
+function editLeg(el){
+  const v=el.textContent;const i=document.createElement('input');
+  i.className='foto-leg-inp';i.value=v;
+  i.onblur=()=>{el.textContent=i.value||v;i.remove();el.style.display='';};
+  i.onkeydown=e=>{if(e.key==='Enter')i.blur();};
+  el.style.display='none';el.parentNode.insertBefore(i,el.nextSibling);i.focus();
+}
+function rmFoto(gid,fid){
+  const e=document.getElementById(fid);if(e)e.remove();
+  if(fotosGrid[gid])fotosGrid[gid]=fotosGrid[gid].filter(f=>f.fid!==fid);
+  updBdgFotos();
+}
+function updBdgFotos(){
+  const t=Object.values(fotosGrid).reduce((a,b)=>a+b.length,0);
+  document.getElementById('bdg-fotos').textContent=t;
+}
+
+// ── LIGHTBOX ──
+function abrirLb(src,cap){
+  document.getElementById('lb-img').src=src;
+  document.getElementById('lb-cap').textContent=cap;
+  document.getElementById('lightbox').classList.add('open');
+}
+function fechaLb(){document.getElementById('lightbox').classList.remove('open');}
+
+// ── CHECKLIST GENÉRICO ──
+function ckToggle(el){
+  el.classList.toggle('done');
+  el.querySelector('.ck').textContent=el.classList.contains('done')?'✓':'';
+}
+function updCk(){
+  const all=document.querySelectorAll('#main-ck li');
+  const done=document.querySelectorAll('#main-ck li.done').length;
+  const pct=all.length?Math.round(done/all.length*100):0;
+  const b=document.getElementById('ck-bar');
+  b.style.width=pct+'%';b.className='prog-bar '+(pct>=80?'ok':pct>=50?'':'err');
+  document.getElementById('ck-status').textContent=pct+'% — '+done+' de '+all.length+' itens concluídos';
+  document.getElementById('bdg-ck').textContent=done;
+}
+
+// ── SALVAR / CARREGAR (GitHub Pages) ──
+function salvar(){
+  const d={};
+  document.querySelectorAll('input[id],select[id],textarea[id]').forEach(e=>{if(e.id)d[e.id]=e.value;});
+  const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ptam.json';a.click();
+  toast('✅ Rascunho salvo!');
+}
+function carregar(){
+  const raw=localStorage.getItem('ptam_fcosta_v5');
+  if(!raw){toast('⚠️ Nenhum rascunho encontrado.');return;}
+  try{
+    const d=JSON.parse(raw);
+    Object.keys(d).forEach(k=>{const e=document.getElementById(k);if(e)e.value=d[k];});
+    calcHomog();calcFinal();toast('📂 Rascunho carregado!');
+  }catch(e){toast('❌ Erro ao carregar.');}
+}
+function novoLaudo(){
+  if(!confirm('Limpar todos os dados e iniciar novo PTAM?'))return;
+  location.reload();
+}
+
+// ── PREVIEW ──
+function v(id){return document.getElementById(id)?.value||'—';}
+function getFotosPg(gid,max=8){
+  return(fotosGrid[gid]||[]).slice(0,max).map(f=>'<div style="text-align:center"><img src="'+f.src+'" style="width:170px;height:128px;object-fit:cover;border-radius:6px;border:1px solid #ddd"><div style="font-size:.58rem;color:#999;margin-top:2px">'+f.leg+'</div></div>').join('');
+}
+function getAmTbl(){
+  const rows=document.querySelectorAll('#tbody-am tr');let html='';
+  rows.forEach((tr,i)=>{
+    const end=tr.querySelectorAll('td')[2].querySelector('input')?.value||'—';
+    const ar=tr.querySelector('.am-area')?.value||'—';
+    const vo=parseFloat(tr.querySelector('.am-vo')?.value)||0;
+    const vh=tr.querySelector('.am-vh')?.textContent||'—';
+    const font=tr.querySelectorAll('select')[1]?.value||'—';
+    html+='<tr><td>'+( i+1)+'</td><td>'+end+'</td><td>'+ar+' m²</td><td>'+fmtR(vo)+'</td><td><strong>'+vh+'</strong></td><td>'+font+'</td></tr>';
+  });
+  return html||'<tr><td colspan="6" style="text-align:center;color:#ccc">Nenhuma amostra</td></tr>';
+}
+function abrirPreview(){
+  const val=document.getElementById('val-destaque-v')?.textContent||'—';
+  const ext=document.getElementById('val-extenso')?.textContent||'—';
+  const vInf=document.getElementById('val-inf')?.textContent||'—';
+  const vSup=document.getElementById('val-sup')?.textContent||'—';
+  const fp1=getFotosPg('fg-1');const fp2=getFotosPg('fg-2');
+  const fp3=getFotosPg('fg-3');const fp4=getFotosPg('fg-4');
+  const html=`
+<h1>PARECER TÉCNICO DE AVALIAÇÃO MERCADOLÓGICA</h1>
+<div class="doc-sub">PTAM Nº ${v('num_ptam')} &nbsp;|&nbsp; ${fmtBR(v('data_laudo'))} &nbsp;|&nbsp; ${v('finalidade')||'—'}</div>
+<hr>
+<div class="dsec"><h3>1. Identificação do Profissional Avaliador</h3>
+  <div class="dr"><span class="dk">Nome:</span><span class="dv">${v('prof_nome')}</span></div>
+  <div class="dr"><span class="dk">CRECI:</span><span class="dv">${v('prof_creci')}</span></div>
+  <div class="dr"><span class="dk">CNAI:</span><span class="dv">${v('prof_cnai')}</span></div>
+  <div class="dr"><span class="dk">Formação:</span><span class="dv">${v('prof_form')}</span></div>
+  <div class="dr"><span class="dk">Contato:</span><span class="dv">${v('prof_tel')} | ${v('prof_email')} | ${v('prof_site')}</span></div>
+  <div class="dr"><span class="dk">Declaração:</span><span class="dv" style="font-size:.73rem">${v('decl_indep')}</span></div>
+</div>
+<div class="dsec"><h3>2. Identificação do Laudo</h3>
+  <div class="dr"><span class="dk">Nº do Laudo:</span><span class="dv">${v('num_ptam')}</span></div>
+  <div class="dr"><span class="dk">Data de Emissão:</span><span class="dv">${fmtBR(v('data_laudo'))}</span></div>
+  <div class="dr"><span class="dk">Data da Vistoria:</span><span class="dv">${fmtBR(v('data_vistoria'))}</span></div>
+  <div class="dr"><span class="dk">Finalidade:</span><span class="dv">${v('finalidade')}</span></div>
+  <div class="dr"><span class="dk">Validade:</span><span class="dv">${v('validade')}</span></div>
+  <div class="dr"><span class="dk">Norma:</span><span class="dv">${v('norma')}</span></div>
+  <div class="dr"><span class="dk">Método:</span><span class="dv">${v('metodo')}</span></div>
+  <div class="dr"><span class="dk">Grau de Fundamentação:</span><span class="dv">${v('grau_fund')}</span></div>
+  <div class="dr"><span class="dk">Grau de Precisão:</span><span class="dv">${v('grau_prec')}</span></div>
+  <div class="dr"><span class="dk">Processo / Referência:</span><span class="dv">${v('num_processo')}</span></div>
+</div>
+<div class="dsec"><h3>3. Solicitante / Contratante</h3>
+  <div class="dr"><span class="dk">Contratante:</span><span class="dv">${v('cont_nome')} — ${v('cont_cpf')}</span></div>
+  <div class="dr"><span class="dk">Qualificação:</span><span class="dv">${v('cont_qual')}</span></div>
+  <div class="dr"><span class="dk">Proprietário (matrícula):</span><span class="dv">${v('doc_prop_mat')}</span></div>
+  <div class="dr"><span class="dk">Motivo da contratação:</span><span class="dv">${v('cont_motivo')}</span></div>
+</div>
+<div class="dsec"><h3>4. Identificação e Localização do Imóvel</h3>
+  <div class="dr"><span class="dk">Endereço:</span><span class="dv">${v('loc_rua')}, ${v('loc_num')} — ${v('loc_bairro')}, ${v('loc_cidade')}/${v('loc_uf')} — CEP ${v('loc_cep')}</span></div>
+  <div class="dr"><span class="dk">Matrícula CRI:</span><span class="dv">${v('doc_mat')} — ${v('doc_cri')}</span></div>
+  <div class="dr"><span class="dk">Inscrição Municipal / IPTU:</span><span class="dv">${v('doc_iptu_num')}</span></div>
+  <div class="dr"><span class="dk">Zona / Zoneamento:</span><span class="dv">${v('loc_zona')} — ${v('loc_zon_mun')}</span></div>
+  <div class="dr"><span class="dk">Padrão do entorno:</span><span class="dv">${v('loc_padrao')}</span></div>
+  <div class="dr"><span class="dk">Topografia:</span><span class="dv">${v('loc_topo')}</span></div>
+  <div class="dr"><span class="dk">Restrições:</span><span class="dv">${v('loc_rest')}</span></div>
+  <div class="dr"><span class="dk">Infraestrutura:</span><span class="dv">${getInfra()}</span></div>
+  <div class="dr"><span class="dk">Transporte:</span><span class="dv">${v('loc_transp')}</span></div>
+  <div class="dr"><span class="dk">Descrição do entorno:</span><span class="dv">${v('loc_descr')}</span></div>
+</div>
+<div class="dsec"><h3>5. Caracterização do Imóvel</h3>
+  <div class="dr"><span class="dk">Tipo:</span><span class="dv">${v('fis_tipo')}</span></div>
+  <div class="dr"><span class="dk">Padrão Construtivo:</span><span class="dv">${v('fis_padrao')}</span></div>
+  <div class="dr"><span class="dk">Estado de Conservação:</span><span class="dv">${v('fis_conserv')}</span></div>
+  <div class="dr"><span class="dk">Área Total / Matriculada:</span><span class="dv">${v('fis_area_total')} m²</span></div>
+  <div class="dr"><span class="dk">Área Privativa / Útil:</span><span class="dv">${v('fis_area_priv')} m²</span></div>
+  <div class="dr"><span class="dk">Área Construída:</span><span class="dv">${v('fis_area_constr')} m²</span></div>
+  <div class="dr"><span class="dk">Dormitórios / Suítes / Banheiros:</span><span class="dv">${v('fis_dorms')} dorms. / ${v('fis_suites')} suítes / ${v('fis_banhs')} banh.</span></div>
+  <div class="dr"><span class="dk">Vagas / Andar:</span><span class="dv">${v('fis_vagas')} vagas / ${v('fis_andar')}</span></div>
+  <div class="dr"><span class="dk">Ano de construção / Idade:</span><span class="dv">${v('fis_ano')} / ${v('fis_idade')} anos (deprec. ${v('fis_deprec')}%)</span></div>
+  <div class="dr"><span class="dk">Estrutura:</span><span class="dv">${v('fis_estrut')}</span></div>
+  <div class="dr"><span class="dk">Telhado:</span><span class="dv">${v('fis_telh')}</span></div>
+  <div class="dr"><span class="dk">Piso social:</span><span class="dv">${v('fis_piso')}</span></div>
+  <div class="dr"><span class="dk">Esquadrias:</span><span class="dv">${v('fis_esq')}</span></div>
+  <div class="dr"><span class="dk">Fachada:</span><span class="dv">${v('fis_fach')}</span></div>
+  <div class="dr"><span class="dk">Benfeitorias:</span><span class="dv">${v('fis_benf')}</span></div>
+  <div class="dr"><span class="dk">Patologias observadas:</span><span class="dv">${v('fis_vicios')}</span></div>
+</div>
+<div class="dsec" style="page-break-before:always"><h3>6. Registro Fotográfico</h3>
+  ${fp1?'<p style="font-size:.72rem;font-weight:600;color:#555;margin-bottom:6px">Fachada / Vista Geral</p><div class="foto-pg">'+fp1+'</div>':''}
+  ${fp2?'<p style="font-size:.72rem;font-weight:600;color:#555;margin:10px 0 6px">Ambientes Internos</p><div class="foto-pg">'+fp2+'</div>':''}
+  ${fp3?'<p style="font-size:.72rem;font-weight:600;color:#555;margin:10px 0 6px">Banheiros / Cozinha</p><div class="foto-pg">'+fp3+'</div>':''}
+  ${fp4?'<p style="font-size:.72rem;font-weight:600;color:#555;margin:10px 0 6px">Área de Lazer / Garagem</p><div class="foto-pg">'+fp4+'</div>':''}
+  ${!fp1&&!fp2&&!fp3&&!fp4?'<p style="color:#bbb">Nenhuma foto inserida.</p>':''}
+</div>
+<div class="dsec"><h3>7. Pesquisa de Mercado — Elementos Comparativos</h3>
+  <p style="font-size:.78rem;margin-bottom:8px">${v('coment_am')}</p>
+  <table class="vtbl"><thead><tr><th>#</th><th>Endereço</th><th>Área</th><th>V.Oferta</th><th>V.Homogeneizado R$/m²</th><th>Fonte</th></tr></thead>
+  <tbody>${getAmTbl()}</tbody></table>
+  <div class="dr" style="margin-top:8px"><span class="dk">Fator de oferta:</span><span class="dv">${v('fat_oferta_tipo')}</span></div>
+  <div class="dr"><span class="dk">Homogeneização:</span><span class="dv">${v('crit_hom')}</span></div>
+  <div class="dr"><span class="dk">Saneamento:</span><span class="dv">${v('saneam')}</span></div>
+</div>
+<div class="dsec"><h3>8. Diagnóstico de Mercado</h3>
+  <div class="dr"><span class="dk">Tendência:</span><span class="dv">${v('merc_tend')}</span></div>
+  <div class="dr"><span class="dk">Liquidez:</span><span class="dv">${v('merc_liq')}</span></div>
+  <div class="dr"><span class="dk">Ciclo imobiliário:</span><span class="dv">${v('merc_ciclo')}</span></div>
+  <div class="dr"><span class="dk">Absorção mensal:</span><span class="dv">${v('merc_abs')}%</span></div>
+  <div class="dr"><span class="dk">Preço médio local:</span><span class="dv">R$ ${v('merc_pmed')}/m²</span></div>
+  <div class="dr"><span class="dk">Diagnóstico:</span><span class="dv">${v('merc_narr')}</span></div>
+  <div class="dr"><span class="dk">Fontes:</span><span class="dv">${v('merc_fontes')}</span></div>
+</div>
+<div class="val-blk">
+  <div class="vbl">Valor de Mercado — Imóvel Avaliando</div>
+  <div class="vbv">${val}</div>
+  <div class="vbs">${ext}</div>
+  <div class="vbs" style="margin-top:6px">Data-base: ${fmtBR(v('data_laudo'))} | Validade: ${v('validade')}</div>
+</div>
+<div class="vrange">
+  <div class="vr-box"><span class="vrl">Limite Inferior (–15%)</span><span class="vrv">${vInf}</span></div>
+  <div class="vr-box c"><span class="vrl">Valor Central Adotado</span><span class="vrv">${val}</span></div>
+  <div class="vr-box"><span class="vrl">Limite Superior (+15%)</span><span class="vrv">${vSup}</span></div>
+</div>
+<div class="dsec" style="margin-top:18px"><h3>9. Parecer Conclusivo</h3>
+  <p style="line-height:1.8">${v('parecer_txt')}</p>
+</div>
+<div class="dsec"><h3>10. Declaração de Independência</h3>
+  <p>${v('decl_indep')}</p>
+</div>
+<div class="dsec"><h3>11. Referências Normativas</h3>
+  <p style="white-space:pre-line;font-size:.75rem">${v('par_refs')}</p>
+</div>
+<div class="assin">
+  <div class="assin-box">
+    <div class="asl">${v('prof_nome')}<br>${v('prof_creci')} | ${v('prof_cnai')}<br>Avaliador Responsável</div>
+  </div>
+</div>
+<div class="rodape">
+  FCosta PTAM Pro | fcostacorretor.com | Laudo Nº ${v('num_ptam')} | ${fmtBR(v('data_laudo'))}<br>
+  Elaborado conforme ABNT NBR 14653, COFECI Res. 957/2006 e normas do CNAI.
+</div>`;
+  document.getElementById('preview-body').innerHTML=html;
+  document.getElementById('preview-modal').classList.add('open');
+}
+function fechaPreview(){document.getElementById('preview-modal').classList.remove('open');}
+function gerarPDF(){
+  abrirPreview();
+  setTimeout(()=>{
+    window.print();
+    toast('🖨️ Use "Salvar como PDF". Defina margens estreitas para melhor resultado.');
+  },500);
+}
+
+// ── TOAST ──
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ── NÚMERO POR EXTENSO ──
+function numExtenso(n){
+  if(!n||n===0)return'zero reais';
+  const int=Math.floor(n),dec=Math.round((n-int)*100);
+  const u=['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
+  const d=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
+  const c=['','cem','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
+  function p3(n){if(!n)return'';if(n===100)return'cem';let r='';const ci=Math.floor(n/100),di=Math.floor((n%100)/10),ui=n%10;if(ci)r+=c[ci];if(n%100>=20){r+=(r?' e ':'')+d[di];if(ui)r+=' e '+u[ui];}else if(n%100>0)r+=(r?' e ':'')+u[n%100];return r;}
+  let r='';
+  const bi=Math.floor(int/1000000000),mi=Math.floor((int%1000000000)/1000000),k=Math.floor((int%1000000)/1000),h=int%1000;
+  if(bi)r+=p3(bi)+(bi===1?' bilhão':' bilhões');
+  if(mi)r+=(r?' e ':'')+p3(mi)+(mi===1?' milhão':' milhões');
+  if(k)r+=(r?' e ':'')+p3(k)+(k===1?' mil':' mil');
+  if(h)r+=(r?' e ':'')+p3(h);
+  r+=(int===1?' real':' reais');
+  if(dec>0)r+=' e '+p3(dec)+(dec===1?' centavo':' centavos');
+  return r.charAt(0).toUpperCase()+r.slice(1);
+}
+
+// Fechar modal ao clicar fora
+document.getElementById('preview-modal').addEventListener('click',function(e){if(e.target===this)fechaPreview();});
+</script>
+</body>
+</html>
