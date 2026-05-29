@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Esboço de Sermão — Pastor Sérgio Costa</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Crimson+Pro:wght@400;500;600&display=swap');
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #3A3028;
+  --dark: #1A1208;
+  --gold: #C9A84C;
+  --gold2: #8B6914;
+  --border: #4A3728;
+  --paper: #FDFAF3;
+  --paper2: #FEF9EF;
+  --ink: #1A1208;
+  --muted: #555;
+  --brown: #6B3A1F;
+  --red: #8B2020;
+  --green: #1A6B2A;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Crimson Pro', Georgia, serif;
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── TOOLBAR ── */
+.toolbar {
+  width: 100%;
+  background: var(--dark);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.tlabel {
+  color: var(--gold);
+  font-family: 'EB Garamond', serif;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tb-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.tb {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--gold);
+  padding: 6px 11px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: 'Crimson Pro', serif;
+  min-height: 34px;
+  touch-action: manipulation;
+}
+.tb:hover, .tb:active { background: var(--gold2); color: var(--dark); }
+
+.sep { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+
+.pbtn {
+  margin-left: auto;
+  background: var(--gold2);
+  color: #FEF9EF;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: 'EB Garamond', serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 36px;
+  touch-action: manipulation;
+}
+.pbtn:hover { background: var(--gold); color: var(--dark); }
+
+/* Swatches */
+.swatch {
+  width: 24px; height: 24px;
+  border-radius: 4px;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  touch-action: manipulation;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.swatch:active { transform: scale(0.9); }
+
+input[type=color].tb-color {
+  width: 28px; height: 28px;
+  padding: 1px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ── WRAP ── */
+.wrap {
+  padding: 16px 12px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── PAGE ── */
+.page {
+  background: var(--paper);
+  width: 100%;
+  max-width: 760px;
+  padding: 20px 16px 24px;
+  border-radius: 6px;
+  box-shadow: 0 6px 30px rgba(0,0,0,.45);
+}
+
+/* ── HEADER ── */
+.hdr { text-align: center; margin-bottom: 14px; }
+
+.church {
+  font-size: 11pt;
+  color: var(--brown);
+  font-weight: 600;
+  letter-spacing: .3px;
+  margin-bottom: 6px;
+}
+
+.title {
+  font-family: 'EB Garamond', serif;
+  font-size: 22pt;
+  font-weight: 600;
+  color: var(--ink);
+  outline: none;
+  min-height: 30px;
+  line-height: 1.25;
+  border: 1px solid #D4B896;
+  border-radius: 4px;
+  padding: 5px 8px;
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+.title:focus { background: #FFFEF5; border-color: var(--gold2); }
+.title:empty::before { content: 'Título do Sermão'; color: #ccc; font-style: italic; }
+
+.meta {
+  font-size: 11pt;
+  color: var(--muted);
+  outline: none;
+  min-height: 20px;
+  margin-top: 6px;
+  border: 1px solid #D4B896;
+  border-radius: 4px;
+  padding: 5px 8px;
+  width: 100%;
+  display: block;
+  text-align: center;
+}
+.meta:focus { background: #FFFEF5; border-color: var(--gold2); }
+.meta:empty::before { content: 'Texto | Pregador | Data'; color: #ccc; }
+
+/* ── PAINEL INTRODUÇÃO ── */
+.intro-panel {
+  background: #FFF8E8;
+  border: 1.5px solid var(--gold);
+  border-radius: 6px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.intro-panel-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 13pt;
+  font-weight: 600;
+  color: var(--brown);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 8.5pt;
+  background: var(--gold);
+  color: var(--dark);
+  border-radius: 3px;
+  padding: 2px 7px;
+  letter-spacing: .5px;
+  font-family: 'Crimson Pro', serif;
+  font-weight: 600;
+}
+
+.intro-field {
+  margin-bottom: 10px;
+}
+
+.intro-field label {
+  display: block;
+  font-size: 10.5pt;
+  color: #4A3728;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.intro-input, .intro-select {
+  width: 100%;
+  border: 1px solid #D4B896;
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-family: 'Crimson Pro', serif;
+  font-size: 13pt;
+  background: #FFFEF5;
+  color: var(--ink);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.intro-input:focus, .intro-select:focus { border-color: var(--gold2); }
+
+.intro-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238B6914' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.gbtn {
+  width: 100%;
+  background: var(--brown);
+  color: #FEF9EF;
+  border: none;
+  padding: 13px;
+  border-radius: 4px;
+  font-family: 'EB Garamond', serif;
+  font-size: 14pt;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 4px;
+  touch-action: manipulation;
+}
+.gbtn:active { background: #4A2710; }
+.gbtn:hover { background: #8B5A2B; }
+
+.intro-feedback {
+  font-size: 10pt;
+  color: var(--gold2);
+  font-style: italic;
+  margin-top: 8px;
+  min-height: 16px;
+  text-align: center;
+}
+
+/* ── SEÇÕES ── */
+.screen-label {
+  display: block;
+  font-size: 9pt;
+  font-weight: 600;
+  color: var(--gold2);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin: 14px 0 6px;
+}
+
+/* ── CAMPOS ── */
+.field {
+  margin-bottom: 10px;
+}
+
+.field label {
+  display: block;
+  font-size: 10pt;
+  font-weight: 600;
+  color: #4A3728;
+  margin-bottom: 4px;
+}
+
+.val {
+  width: 100%;
+  font-family: 'Crimson Pro', serif;
+  font-size: 13pt;
+  color: var(--ink);
+  outline: none;
+  min-height: 52px;
+  line-height: 1.6;
+  border: 1px solid #D4B896;
+  border-radius: 4px;
+  padding: 8px 10px;
+  resize: none;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-break: break-word;
+  display: block;
+}
+.val:focus { background: #FFFEF5; border-color: var(--gold2); }
+.val:empty::before { content: '...'; color: #ccc; }
+
+/* ── PONTOS ── */
+.pt {
+  margin-top: 14px;
+  padding: 12px;
+  border-left: 3px solid #D4B896;
+  background: var(--paper2);
+  border-radius: 0 6px 6px 0;
+}
+
+.pt-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.pt-num {
+  font-size: 9pt;
+  font-weight: 600;
+  color: var(--gold2);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.btn-del {
+  background: transparent;
+  border: 1px solid #ddd;
+  color: #aaa;
+  font-size: 11pt;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 4px;
+  touch-action: manipulation;
+}
+.btn-del:active { color: var(--red); border-color: var(--red); }
+
+.pt-title {
+  font-family: 'EB Garamond', serif;
+  font-size: 14pt;
+  font-weight: 600;
+  color: var(--ink);
+  outline: none;
+  min-height: 36px;
+  border: 1px solid #D4B896;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-bottom: 10px;
+  width: 100%;
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.pt-title:focus { background: #FFFEF5; border-color: var(--gold2); }
+.pt-title:empty::before { content: 'Título do ponto...'; color: #ccc; font-style: italic; }
+
+/* ── CONCLUSÃO ── */
+.conc { margin-top: 14px; }
+
+.conc-text {
+  font-family: 'Crimson Pro', serif;
+  font-size: 13pt;
+  color: var(--ink);
+  outline: none;
+  min-height: 80px;
+  line-height: 1.6;
+  border: 1px solid #D4B896;
+  border-radius: 4px;
+  padding: 8px 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  width: 100%;
+  display: block;
+}
+.conc-text:focus { background: #FFFEF5; border-color: var(--gold2); }
+.conc-text:empty::before { content: 'Resumo, apelo final e oração...'; color: #ccc; }
+
+/* ── ADD PONTO ── */
+.btn-add {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  padding: 13px;
+  background: transparent;
+  border: 1.5px dashed #D4B896;
+  color: var(--gold2);
+  font-family: 'EB Garamond', serif;
+  font-size: 14pt;
+  cursor: pointer;
+  text-align: center;
+  border-radius: 4px;
+  touch-action: manipulation;
+}
+.btn-add:active { background: #F5EDD3; }
+
+/* ── RODAPÉ ── */
+.ftr {
+  text-align: center;
+  margin-top: 16px;
+  font-size: 9pt;
+  color: #888;
+}
+
+/* ── FLASH ── */
+@keyframes filled-flash {
+  0%   { background: #FFF8C0; }
+  50%  { background: #FFF8C0; }
+  100% { background: transparent; }
+}
+.just-filled { animation: filled-flash .9s ease; }
+
+/* ── SELECT FONT SIZE ── */
+select.tb {
+  background: #2C1F0E;
+  min-width: 70px;
+}
+
+/* ── PRINT ── */
+@media print {
+  @page { size: A4; margin: 10mm; }
+  body { background: #fff !important; }
+  .toolbar, .btn-add, .btn-del, .screen-label, .pt-num,
+  .church, .ftr, .intro-panel { display: none !important; }
+  .wrap { padding: 0; }
+  .page {
+    width: 100% !important; max-width: 100% !important;
+    border: none !important; box-shadow: none !important;
+    padding: 0 !important; background: #fff !important;
+    border-radius: 0 !important;
+  }
+  .val, .pt-title, .conc-text, .title, .meta {
+    border: none !important; background: none !important;
+    padding: 0 !important; border-radius: 0 !important;
+  }
+  .pt { border-left: none !important; padding: 2px 0 !important; background: none !important; }
+  .field label { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <span class="tlabel">✝ ESBOÇO</span>
+  <div class="sep"></div>
+  <div class="tb-group">
+    <button class="tb" onclick="applyFmt('bold')"><b>N</b></button>
+    <button class="tb" onclick="applyFmt('italic')"><i>I</i></button>
+    <button class="tb" onclick="applyFmt('underline')"><u>S</u></button>
+  </div>
+  <div class="sep"></div>
+  <select class="tb" id="fsize" title="Tamanho">
+    <option value="">Tam.</option>
+    <option value="12px">12</option>
+    <option value="14px">14</option>
+    <option value="16px">16</option>
+    <option value="18px">18</option>
+    <option value="22px">22</option>
+  </select>
+  <div class="sep"></div>
+  <div class="tb-group">
+    <span class="swatch" style="background:#000" onclick="applyColor('#000000')"></span>
+    <span class="swatch" style="background:#8B2020" onclick="applyColor('#8B2020')"></span>
+    <span class="swatch" style="background:#1A4A8B" onclick="applyColor('#1A4A8B')"></span>
+    <span class="swatch" style="background:#1A6B2A" onclick="applyColor('#1A6B2A')"></span>
+    <span class="swatch" style="background:#6B3A1F" onclick="applyColor('#6B3A1F')"></span>
+    <span class="swatch" style="background:#8B6914" onclick="applyColor('#8B6914')"></span>
+    <input type="color" class="tb-color" id="customColor" value="#000000" onchange="applyColor(this.value)">
+  </div>
+  <div class="sep"></div>
+  <div class="tb-group">
+    <span class="swatch" style="background:#FFF176" onclick="applyHighlight('#FFF176')"></span>
+    <span class="swatch" style="background:#C8F0C8" onclick="applyHighlight('#C8F0C8')"></span>
+    <span class="swatch" style="background:#FFCDD2" onclick="applyHighlight('#FFCDD2')"></span>
+    <span class="swatch" style="background:#BBDEFB" onclick="applyHighlight('#BBDEFB')"></span>
+    <span class="swatch" style="background:#fff;border:1px solid #888;font-size:12px;line-height:22px;text-align:center;" onclick="applyHighlight('transparent')">✕</span>
+  </div>
+  <button class="pbtn" onclick="window.print()">🖨 PDF</button>
+</div>
+
+<!-- CONTEÚDO -->
+<div class="wrap">
+<div class="page" id="page">
+
+  <div class="hdr">
+    <div class="church">Igreja O Brasil Para Cristo — Jardim São Fernando</div>
+    <div class="title" contenteditable="true" id="sermon-title"></div>
+    <div class="meta"  contenteditable="true" id="sermon-meta"></div>
+  </div>
+
+  <!-- PAINEL INTRODUÇÃO -->
+  <div class="intro-panel" id="intro-panel">
+    <div class="intro-panel-title">
+      ✦ Gerador de Introdução
+      <span class="badge">AUTOMÁTICO</span>
+    </div>
+
+    <div class="intro-field">
+      <label>Referência bíblica</label>
+      <input class="intro-input" id="ref-input" placeholder="Ex: João 3:16 ou Salmos 23:1-3" />
+    </div>
+
+    <div class="intro-field">
+      <label>Ênfase do sermão</label>
+      <select class="intro-select" id="enfase-select">
+        <option value="salv">Salvação / Evangelho</option>
+        <option value="fe">Fé e Confiança em Deus</option>
+        <option value="amor">Amor e Graça de Deus</option>
+        <option value="vida">Vida Cristã / Santidade</option>
+        <option value="esperanca">Esperança e Promessas</option>
+        <option value="oracao">Oração e Intimidade com Deus</option>
+        <option value="missao">Missão e Evangelismo</option>
+        <option value="familia">Família e Relacionamentos</option>
+        <option value="avivamento">Avivamento e Renovação</option>
+        <option value="profecia">Profecias e Escatologia</option>
+        <option value="sabedoria">Sabedoria e Direção Divina</option>
+        <option value="louvor">Louvor e Adoração</option>
+        <option value="cura">Cura e Restauração</option>
+        <option value="provisao">Provisão e Fidelidade</option>
+        <option value="livre">Livre escolha</option>
+      </select>
+    </div>
+
+    <div class="intro-field">
+      <label>Tom da introdução</label>
+      <select class="intro-select" id="tom-select">
+        <option value="evangelistico">Evangelístico — apelo ao incrédulo</option>
+        <option value="edificante">Edificante — fortalece o crente</option>
+        <option value="profético">Profético — chamado à transformação</option>
+        <option value="narrativo">Narrativo — começa com uma história</option>
+        <option value="questionador">Questionador — provoca reflexão</option>
+        <option value="doutrinario">Doutrinário — ensino sistemático</option>
+        <option value="pastoral">Pastoral — consolo e cuidado</option>
+      </select>
+    </div>
+
+    <button class="gbtn" onclick="gerarIntroducao()">✦ Gerar Introdução</button>
+    <div class="intro-feedback" id="intro-feedback"></div>
+  </div>
+
+  <!-- INTRODUÇÃO -->
+  <span class="screen-label">Introdução</span>
+  <div class="field">
+    <label>Contexto</label>
+    <div class="val" contenteditable="true" id="campo-contexto"></div>
+  </div>
+  <div class="field">
+    <label>Ligação ao tema</label>
+    <div class="val" contenteditable="true" id="campo-ligacao"></div>
+  </div>
+
+  <!-- PONTOS -->
+  <div id="pts"></div>
+  <button class="btn-add" onclick="add()">+ Adicionar ponto</button>
+
+  <!-- CONCLUSÃO -->
+  <div class="conc">
+    <span class="screen-label">Conclusão</span>
+    <div class="conc-text" contenteditable="true"></div>
+  </div>
+
+  <div class="ftr">Pastor Sérgio Costa · CRECI-SP 294791-F · CNAI 52708</div>
+</div>
+</div>
+
+<script>
+/* ── BANCO DE DADOS ── */
+var CONTEXTO_LIVRO = {
+  "gn":"Escrito por Moisés, o livro de Gênesis narra as origens da criação, da humanidade e do povo escolhido por Deus. É o livro dos começos, onde encontramos as bases da fé e da relação de Deus com o ser humano.",
+  "gênesis":"Escrito por Moisés, o livro de Gênesis narra as origens da criação, da humanidade e do povo escolhido por Deus. É o livro dos começos, onde encontramos as bases da fé e da relação de Deus com o ser humano.",
+  "ex":"O livro do Êxodo relata a libertação do povo de Israel da escravidão no Egito. Deus age com poder sobrenatural e estabelece Sua aliança, revelando Seu caráter de libertador e redentor.",
+  "êxodo":"O livro do Êxodo relata a libertação do povo de Israel da escravidão no Egito. Deus age com poder sobrenatural e estabelece Sua aliança, revelando Seu caráter de libertador e redentor.",
+  "sl":"O livro dos Salmos é a coletânea de hinos, lamentos e louvores do povo de Deus. Por séculos, tem sido o livro de adoração e oração da Igreja. Cada salmo revela uma faceta do coração humano diante de Deus.",
+  "salmos":"O livro dos Salmos é a coletânea de hinos, lamentos e louvores do povo de Deus. Por séculos, tem sido o livro de adoração e oração da Igreja. Cada salmo revela uma faceta do coração humano diante de Deus.",
+  "pv":"O livro de Provérbios reúne a sabedoria prática para a vida cotidiana, compilada principalmente por Salomão. Ensina que o temor ao Senhor é o começo de toda sabedoria verdadeira.",
+  "provérbios":"O livro de Provérbios reúne a sabedoria prática para a vida cotidiana. Ensina que o temor ao Senhor é o começo de toda sabedoria verdadeira.",
+  "is":"O livro de Isaías é chamado de 'o quinto evangelho' por suas profecias messiânicas detalhadas. Escrito séculos antes de Cristo, aponta com precisão para o sofrimento, morte e glória do Salvador.",
+  "isaías":"O livro de Isaías é chamado de 'o quinto evangelho' por suas profecias messiânicas detalhadas.",
+  "jr":"O profeta Jeremias ministrou em um dos períodos mais difíceis da história de Israel. Seus escritos são um chamado urgente ao arrependimento e à esperança em meio ao juízo.",
+  "jeremias":"O profeta Jeremias ministrou em um dos períodos mais difíceis da história de Israel. Seus escritos são um chamado urgente ao arrependimento e à esperança em meio ao juízo.",
+  "mt":"O Evangelho de Mateus foi escrito para a comunidade judaica, apresentando Jesus como o Messias prometido. É o evangelho do cumprimento das Escrituras e do Reino dos Céus.",
+  "mateus":"O Evangelho de Mateus foi escrito para a comunidade judaica, apresentando Jesus como o Messias prometido.",
+  "mc":"O Evangelho de Marcos é o mais breve e dinâmico dos quatro evangelhos, retratando Jesus como o Servo poderoso que age com autoridade e compaixão.",
+  "marcos":"O Evangelho de Marcos retrata Jesus como o Servo poderoso que age com autoridade e compaixão.",
+  "lc":"O Evangelho de Lucas foi escrito por um médico gentio, apresentando Jesus como o Salvador de toda a humanidade. Enfatiza a misericórdia, a inclusão dos marginalizados e o poder do Espírito Santo.",
+  "lucas":"O Evangelho de Lucas apresenta Jesus como o Salvador de toda a humanidade, enfatizando a misericórdia e o poder do Espírito Santo.",
+  "jo":"O Evangelho de João foi escrito para que o leitor creia que Jesus é o Cristo, o Filho de Deus. É o evangelho do amor, da luz e da vida eterna.",
+  "joão":"O Evangelho de João foi escrito para que o leitor creia que Jesus é o Cristo, o Filho de Deus. É o evangelho do amor, da luz e da vida eterna.",
+  "at":"O livro de Atos registra o nascimento e expansão da Igreja primitiva sob o poder do Espírito Santo. É a continuação do ministério de Jesus através de Seus discípulos.",
+  "atos":"O livro de Atos registra o nascimento e expansão da Igreja primitiva sob o poder do Espírito Santo.",
+  "rm":"A carta aos Romanos é o tratado mais completo da teologia paulina, apresentando o plano de salvação de Deus. É a Magna Carta da graça e da justificação pela fé.",
+  "romanos":"A carta aos Romanos apresenta o plano de salvação de Deus — a Magna Carta da graça e da justificação pela fé.",
+  "1co":"A Primeira Carta aos Coríntios foi escrita para uma igreja que enfrentava divisões e confusão doutrinária. Paulo a chama ao arrependimento e ao amor como fundamento de toda vida cristã.",
+  "2co":"A Segunda Carta aos Coríntios revela o coração pastoral de Paulo. Fala sobre fraqueza, sofrimento e a graça suficiente de Deus.",
+  "gl":"A carta aos Gálatas é a declaração de independência cristã — liberdade da Lei pela graça em Cristo.",
+  "gálatas":"A carta aos Gálatas defende vigorosamente o evangelho da justificação pela fé, libertos da Lei pela graça em Cristo.",
+  "ef":"A carta aos Efésios revela os mistérios do plano eterno de Deus: a Igreja como corpo de Cristo e o chamado à vida no Espírito.",
+  "efésios":"A carta aos Efésios revela os mistérios do plano eterno de Deus e o chamado à vida no Espírito.",
+  "fp":"A carta aos Filipenses foi escrita da prisão e transborda de alegria. Paulo exorta a ter a mente de Cristo e contentamento em todas as circunstâncias.",
+  "filipenses":"Escrita da prisão, a carta aos Filipenses transborda de alegria e exorta a ter a mente de Cristo.",
+  "cl":"A carta aos Colossenses exalta a supremacia absoluta de Cristo sobre toda criação e toda filosofia humana.",
+  "colossenses":"A carta aos Colossenses exalta a supremacia absoluta de Cristo — Jesus é tudo e é suficiente.",
+  "hb":"A carta aos Hebreus apresenta a superioridade de Cristo sobre tudo no Antigo Testamento. Cristo é o cumprimento e a perfeição de tudo.",
+  "hebreus":"A carta aos Hebreus apresenta Cristo como o cumprimento e a perfeição de tudo que o Antigo Testamento anunciava.",
+  "tg":"A carta de Tiago é eminentemente prática — a fé que não produz obras é fé morta.",
+  "tiago":"A carta de Tiago chama à integridade entre o crer e o viver: a fé sem obras é morta.",
+  "1pe":"A Primeira Carta de Pedro foi escrita a cristãos que sofriam perseguição, exortando-os a viver com esperança e santidade.",
+  "2pe":"A Segunda Carta de Pedro alerta contra falsos mestres e exorta ao crescimento na graça e no conhecimento de Jesus Cristo.",
+  "1jo":"A Primeira Carta de João foi escrita para que o povo de Deus saiba que tem vida eterna. Define o amor, a luz e a verdade como marcas do genuíno filho de Deus.",
+  "ap":"O Apocalipse é a revelação de Jesus Cristo dada ao apóstolo João — um livro de consolo e esperança, proclamando a vitória final de Deus.",
+  "apocalipse":"O Apocalipse proclama a vitória final de Deus e de Cristo sobre todo o mal, trazendo esperança aos perseguidos."
+};
+
+var LIGACAO_ENFASE = {
+  "salv": [
+    "Este texto nos confronta com a maior questão da existência humana: como o pecador pode ser reconciliado com um Deus santo? A resposta não está em nossos esforços — está inteiramente na graça de Deus manifestada em Cristo.",
+    "Em um mundo que busca redenção em mil lugares diferentes, a Palavra de hoje aponta para o único caminho verdadeiro: Jesus Cristo, crucificado e ressurreto.",
+    "Este texto é um convite e um desafio: você já respondeu ao chamado de Deus? A salvação não é automática — é uma decisão pessoal, urgente e necessária."
+  ],
+  "fe": [
+    "Vivemos em tempos de incerteza, onde as estruturas nas quais o ser humano confiava têm tremido. A Palavra de hoje nos chama a ancorar nossa fé não nas circunstâncias, mas no caráter imutável de Deus.",
+    "A fé não é a ausência de dúvida, mas a decisão de confiar em Deus apesar das dúvidas. Este texto nos desafia a avançar confiando no Senhor, ainda que o caminho não esteja completamente claro.",
+    "Muitos de nós oramos pedindo que Deus mude nossas circunstâncias, quando Ele quer, antes de tudo, fortalecer nossa fé dentro delas."
+  ],
+  "amor": [
+    "Antes de falarmos sobre o que devemos fazer por Deus, precisamos contemplar o que Ele fez por nós. O amor de Deus não é uma abstração — é um amor que desceu à terra e foi até a cruz.",
+    "O amor de Deus é a âncora da nossa identidade. Não somos amados porque somos bons — somos amados porque Deus é bom.",
+    "Em uma cultura marcada pela rejeição e solidão, a mensagem do amor de Deus é revolucionária: Ele nos amou primeiro, nos amou plenamente e nos ama para sempre."
+  ],
+  "vida": [
+    "Ser cristão não é apenas ter um conjunto de crenças — é ter uma vida transformada. O texto de hoje nos convoca a uma santidade prática, visível, que glorifica a Deus em cada detalhe do cotidiano.",
+    "O mundo ao nosso redor observa se nossa fé faz diferença real em quem somos e como vivemos. Este texto nos desafia a ser diferentes pela obra do Espírito que nos renova.",
+    "Deus não nos salvou apenas para o céu — Ele nos salvou para uma nova vida agora."
+  ],
+  "esperanca": [
+    "Em um tempo marcado por ansiedades e perdas, a esperança cristã não é escapismo — é uma convicção firme baseada nas promessas de Deus.",
+    "A diferença entre o crente e o descrente diante da adversidade não é a ausência de dor, mas a presença da esperança. Deus ainda está no trono e nenhuma promessa Sua jamais falhou.",
+    "Quando as circunstâncias contradizem as promessas, o crente é chamado a olhar além do que os olhos veem. O melhor ainda está por vir."
+  ],
+  "oracao": [
+    "A oração é o termômetro da nossa vida espiritual — ela revela em quem realmente confiamos. O texto de hoje nos desafia a entrar em uma intimidade real com o Pai.",
+    "Muitos cristãos têm uma teologia da oração, mas poucos têm uma vida de oração. Este texto é um convite de Deus para que nos aproximemos Dele com ousadia e confiança.",
+    "A oração não muda Deus — ela nos muda. Quando nos colocamos diante de Deus de forma consistente e sincera, somos transformados à Sua imagem."
+  ],
+  "missao": [
+    "A Igreja não existe para si mesma. Somos um povo enviado — enviado a alcançar os perdidos, restaurar os quebrantados e proclamar a esperança em Cristo.",
+    "Antes de ascender, Jesus não deu uma sugestão — deu uma ordem: ide. A Grande Comissão não é opcional para quem diz ser discípulo de Cristo.",
+    "Cada crente é um missionário em potencial. O campo está na nossa rua, no nosso trabalho, na nossa família. O texto de hoje nos desafia a começar onde estamos."
+  ],
+  "familia": [
+    "A família foi o primeiro projeto de Deus na terra. Em um tempo em que esse projeto tem sido atacado, a Palavra de Deus oferece o fundamento sólido e o modelo eterno para os nossos lares.",
+    "Não existe avivamento duradouro onde as famílias estão destruídas. O texto de hoje nos chama de volta ao plano de Deus para os relacionamentos.",
+    "O lar é o laboratório onde a fé é testada todos os dias. As virtudes cristãs precisam ser vividas dentro de casa."
+  ],
+  "avivamento": [
+    "Os grandes avivamentos na história bíblica sempre começaram com um retorno à Palavra de Deus e um choro coletivo diante do pecado. O texto de hoje é um chamado urgente para este mesmo retorno.",
+    "A Igreja precisa mais do que programas e estratégias — precisa do derramamento do Espírito Santo. O texto de hoje é um sopro de esperança.",
+    "Avivamento não é apenas culto animado — é quebrantamento profundo, conversão radical e transformação que vai das almas às famílias e das famílias às cidades."
+  ],
+  "profecia": [
+    "Vivemos em tempos em que os sinais das Escrituras nunca foram tão evidentes. O texto de hoje nos convida a estudar as profecias não por curiosidade, mas por preparação.",
+    "O estudo profético não deve gerar ansiedade, mas esperança e urgência. Somos chamados a viver com mais pureza e fervor.",
+    "A profecia bíblica é a revelação sobrenatural de Deus sobre o que está por vir. O texto de hoje nos convida a ajustar nossa vida à luz das realidades eternas."
+  ],
+  "sabedoria": [
+    "Em um mundo com cada vez mais informação mas cada vez menos sabedoria, a Palavra de Deus oferece o que nenhuma universidade pode ensinar: o discernimento que vem do alto.",
+    "A sabedoria bíblica não é um conjunto de regras — é uma relação a cultivar. Quando andamos perto de Deus, enxergamos a vida com os olhos Dele.",
+    "Você está diante de uma decisão difícil? O texto de hoje afirma que Deus promete guiar nossos passos quando confiamos Nele de todo o coração."
+  ],
+  "louvor": [
+    "O louvor não é apenas uma abertura de culto — é uma postura de vida. O texto de hoje nos chama a essa adoração integral, do coração e da vida.",
+    "Quando a vida dói, louvar pode parecer contraditório. Mas o louvor sacrificial — o que sobe dos lábios mesmo quando o coração chora — é o mais precioso aos olhos de Deus.",
+    "A Igreja que adora genuinamente é uma Igreja que avança. Fomos criados para glorificar a Deus."
+  ],
+  "cura": [
+    "Há pessoas aqui hoje que carregam feridas que os médicos não conseguem ver. Deus, que criou o ser humano, também é capaz de restaurar em toda a sua profundidade.",
+    "A cura que Deus oferece vai além do físico — ela alcança o emocional, o espiritual e o relacional.",
+    "Quantos chegaram hoje com um peso que pensavam que ninguém poderia tirar? O texto de hoje é a Palavra de Deus para esse peso."
+  ],
+  "provisao": [
+    "Nenhuma crise econômica pode superar a fidelidade de Deus. O texto de hoje é um testemunho eterno: Deus tem provido, Deus provê e Deus providerá.",
+    "O povo de Deus não vive pela lei da escassez, mas pela lei do Reino — confiança sobrenatural em um Pai que sabe do que precisamos.",
+    "Quando olhamos para nossos recursos e para nossos problemas, muitas vezes a conta não fecha. Mas Deus não opera pela nossa matemática — Ele opera pela fé."
+  ],
+  "livre": [
+    "A passagem que veremos hoje é rica em significado e cheia de aplicações práticas. Pedimos ao Espírito Santo que abra nossos olhos para o que Deus quer nos dizer neste momento.",
+    "Cada texto da Bíblia foi inspirado por Deus para um propósito eterno — e este diante de nós hoje não é diferente. Há uma palavra aqui especialmente preparada para você.",
+    "As Escrituras são a voz viva de Deus para cada geração. O texto de hoje é um presente do Céu para você, aqui e agora."
+  ]
+};
+
+var ABERTURA_TOM = {
+  "evangelistico": "Imagine alguém que passou a vida inteira buscando preencher um vazio interior — tentando nas conquistas, nos relacionamentos, nos prazeres. Talvez você mesmo se reconheça nessa busca. A boa notícia é que esse vazio tem um nome e tem uma resposta. E é exatamente isso que este texto nos revela.",
+  "edificante": "Há momentos na caminhada cristã em que nos sentimos cansados e desanimados — quando a fé parece distante e o peso da vida parece grande demais. É exatamente para esses momentos que a Palavra de hoje foi escrita. Ela não vem para nos condenar, mas para nos fortalecer.",
+  "profético": "Existe um chamado urgente de Deus para a Sua Igreja neste tempo. Não é hora de acomodação, não é hora de tibieza. O Senhor está falando — e este texto é uma das Suas vozes mais claras. Ouçamos com atenção e disposição para mudar.",
+  "narrativo": "Deixa eu te contar uma história. Não é uma história fictícia — é registrada nas Escrituras Sagradas. Uma história que vai mudar a forma como você vê a situação que está vivendo hoje.",
+  "questionador": "Deixa-me fazer uma pergunta direta: se Deus te pedisse hoje para largar algo que te prende, você estaria disposto? Se Ele te pedisse para confiar Nele completamente, sem ver o caminho, você confiaria? É com essa disposição que precisamos nos aproximar do texto de hoje.",
+  "doutrinario": "Para entender o que este texto nos ensina, precisamos compreender o contexto histórico, o autor e as questões teológicas em jogo. Um entendimento sólido transforma a aplicação prática.",
+  "pastoral": "Sei que alguns de vocês chegaram aqui hoje com o coração pesado. Talvez com uma perda recente, um relacionamento rompido, uma saúde fragilizada. Não é coincidência que este texto seja o nosso texto hoje. Deus escolheu esta Palavra para falar ao seu coração."
+};
+
+/* ── GERAR INTRODUÇÃO ── */
+function gerarIntroducao() {
+  var ref  = document.getElementById('ref-input').value.trim();
+  var enf  = document.getElementById('enfase-select').value;
+  var tom  = document.getElementById('tom-select').value;
+  var fb   = document.getElementById('intro-feedback');
+
+  if (!ref) {
+    fb.style.color = '#8B2020';
+    fb.textContent = '⚠ Informe a referência bíblica antes de gerar.';
+    return;
+  }
+
+  var parsed = parseRef(ref);
+  var ctxKey = parsed.livroKey;
+  var contextoTexto = CONTEXTO_LIVRO[ctxKey] ||
+    'Este trecho das Escrituras está inserido em um livro de profunda relevância para a fé cristã. Toda a Escritura é inspirada por Deus e útil para o ensino, para a repreensão, para a correção e para a instrução na justiça (2Tm 3:16).';
+
+  var ctxAdicional = parsed.cap ?
+    '\n\nNo capítulo ' + parsed.cap + (parsed.vers ? ', versículo' + (parsed.versEnd ? 's ' + parsed.vers + ' ao ' + parsed.versEnd : ' ' + parsed.vers) : '') + ', somos confrontados com uma verdade específica que merece nossa total atenção.' : '';
+
+  var ligsArr = LIGACAO_ENFASE[enf] || LIGACAO_ENFASE['livre'];
+  var ligTexto = ABERTURA_TOM[tom] + '\n\n' + ligsArr[Math.floor(Math.random() * ligsArr.length)];
+
+  var campoCtx = document.getElementById('campo-contexto');
+  var campoLig = document.getElementById('campo-ligacao');
+  campoCtx.textContent = contextoTexto + ctxAdicional;
+  campoLig.textContent = ligTexto;
+  flash(campoCtx); flash(campoLig);
+
+  var metaEl = document.getElementById('sermon-meta');
+  if (!metaEl.textContent.trim()) {
+    metaEl.textContent = 'Texto: ' + ref + '  |  Pregador: Pastor Sérgio Costa  |  Data: ___/___/______';
+  }
+
+  fb.style.color = '#1A6B2A';
+  fb.textContent = '✔ Introdução gerada! Edite os campos à vontade.';
+  setTimeout(function() { fb.textContent = ''; }, 4000);
+}
+
+/* ── PARSE REFERÊNCIA ── */
+function parseRef(str) {
+  var s = str.trim();
+  function norm(t) { return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+  var numLivro = '', livro = '';
+  var m = s.match(/^([123])\s*([A-Za-zÀ-ÖØ-öø-ÿ]+)/);
+  if (m) { numLivro = m[1]; livro = m[2]; }
+  else { var m2 = s.match(/^([A-Za-zÀ-ÖØ-öø-ÿ]+)/); if (m2) livro = m2[1]; }
+  var cap = '', vers = '', versEnd = '';
+  var capMatch = s.match(/:?(\d+):(\d+)-?(\d+)?/);
+  if (capMatch) { cap = capMatch[1]; vers = capMatch[2]; versEnd = capMatch[3] || ''; }
+  else { var co = s.match(/\s+(\d+)$/); if (co) cap = co[1]; }
+  return {
+    livroKey: norm(numLivro ? numLivro + livro : livro),
+    livroNome: numLivro ? numLivro + ' ' + livro : livro,
+    cap: cap, vers: vers, versEnd: versEnd
+  };
+}
+
+function flash(el) {
+  el.classList.remove('just-filled');
+  void el.offsetWidth;
+  el.classList.add('just-filled');
+}
+
+/* ── FORMATAÇÃO ── */
+var savedRange = null;
+document.addEventListener('selectionchange', function() {
+  var sel = window.getSelection();
+  if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+    var range = sel.getRangeAt(0);
+    if (document.getElementById('page').contains(range.commonAncestorContainer)) {
+      savedRange = range.cloneRange();
+    }
+  }
+});
+function restoreSelection() {
+  if (!savedRange) return false;
+  var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(savedRange); return true;
+}
+function applyFmt(cmd) { restoreSelection(); document.execCommand(cmd, false, null); }
+document.getElementById('fsize').addEventListener('change', function() {
+  var sz = this.value; if (!sz) return;
+  restoreSelection(); wrapSelection('font-size:' + sz); this.value = '';
+});
+function applyColor(hex) { restoreSelection(); if (!wrapSelection('color:' + hex)) document.execCommand('foreColor', false, hex); document.getElementById('customColor').value = hex; }
+function applyHighlight(hex) { restoreSelection(); wrapSelection('background-color:' + hex); }
+function wrapSelection(styleStr) {
+  var sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return false;
+  var range = sel.getRangeAt(0);
+  var frag = range.extractContents();
+  var span = document.createElement('span');
+  span.style.cssText = styleStr;
+  span.appendChild(frag);
+  range.insertNode(span);
+  var nr = document.createRange(); nr.selectNodeContents(span);
+  sel.removeAllRanges(); sel.addRange(nr);
+  savedRange = nr.cloneRange();
+  return true;
+}
+
+/* ── PONTOS ── */
+var n = 0;
+function add() {
+  n++;
+  var list = document.getElementById('pts');
+  var d = document.createElement('div');
+  d.className = 'pt';
+  d.innerHTML =
+    '<div class="pt-header">' +
+      '<span class="pt-num">Ponto ' + n + '</span>' +
+      '<button class="btn-del" onclick="this.closest(\'.pt\').remove();renum()">✕ remover</button>' +
+    '</div>' +
+    '<div class="pt-title" contenteditable="true"></div>' +
+    '<div class="field"><label>Versículo</label><div class="val" contenteditable="true"></div></div>' +
+    '<div class="field"><label>Contextualização</label><div class="val" contenteditable="true"></div></div>' +
+    '<div class="field"><label>Explicação</label><div class="val" contenteditable="true"></div></div>' +
+    '<div class="field"><label>Aplicação</label><div class="val" contenteditable="true"></div></div>';
+  list.appendChild(d);
+  d.querySelector('.pt-title').focus();
+}
+function renum() {
+  var pts = document.querySelectorAll('.pt');
+  pts.forEach(function(b, i) { b.querySelector('.pt-num').textContent = 'Ponto ' + (i + 1); });
+  n = pts.length;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  add(); add();
+  document.getElementById('ref-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); gerarIntroducao(); }
+  });
+});
+</script>
+</body>
+</html>
