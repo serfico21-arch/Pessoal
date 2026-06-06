@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado – Eclesiologia | IBBC</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Serif+4:wght@400;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #b8973a;
+    --gold-light: #f5e8c0;
+    --gold-dark: #7a6020;
+    --ink: #1a1610;
+    --parchment: #faf6ed;
+    --parchment-dark: #f0e8d0;
+    --border: #d4b870;
+    --correct: #2d6a3f;
+    --correct-bg: #e8f5ed;
+    --wrong: #8b2020;
+    --wrong-bg: #faeaea;
+    --muted: #7a6a4a;
+  }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--parchment);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    border: 2px solid var(--gold);
+    padding: 2rem 1.5rem 1.5rem;
+    margin-bottom: 2rem;
+    background: white;
+    position: relative;
+  }
+
+  header::before {
+    content: '✝';
+    position: absolute;
+    top: -18px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--parchment);
+    padding: 0 10px;
+    font-size: 24px;
+    color: var(--gold);
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--gold-dark);
+    letter-spacing: 0.02em;
+    margin-bottom: 0.3rem;
+  }
+
+  header p {
+    font-size: 0.95rem;
+    color: var(--muted);
+  }
+
+  .scoreboard {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .score-card {
+    flex: 1;
+    min-width: 110px;
+    background: white;
+    border: 1px solid var(--border);
+    padding: 0.8rem 1rem;
+    text-align: center;
+  }
+
+  .score-card .label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .score-card .value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--gold-dark);
+    font-weight: 700;
+  }
+
+  .progress-bar {
+    background: var(--parchment-dark);
+    height: 6px;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+  }
+
+  .progress-fill {
+    background: var(--gold);
+    height: 100%;
+    transition: width 0.4s ease;
+  }
+
+  .question-box {
+    background: white;
+    border: 1px solid var(--border);
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .q-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.8rem;
+  }
+
+  .q-text {
+    font-size: 1.1rem;
+    line-height: 1.65;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+    font-weight: 600;
+  }
+
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--parchment);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    line-height: 1.5;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    background: var(--gold-light);
+    border-color: var(--gold);
+  }
+
+  .option-btn.correct {
+    background: var(--correct-bg);
+    border-color: var(--correct);
+    color: var(--correct);
+    font-weight: 600;
+  }
+
+  .option-btn.wrong {
+    background: var(--wrong-bg);
+    border-color: var(--wrong);
+    color: var(--wrong);
+  }
+
+  .option-btn:disabled { cursor: default; }
+
+  .feedback {
+    margin-top: 1rem;
+    padding: 0.85rem 1rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    display: none;
+    border-left: 3px solid;
+  }
+
+  .feedback.show { display: block; }
+  .feedback.correct { border-color: var(--correct); background: var(--correct-bg); color: var(--correct); }
+  .feedback.wrong { border-color: var(--wrong); background: var(--wrong-bg); color: var(--wrong); }
+
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .btn-nav {
+    background: var(--gold-dark);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.6rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.15s;
+  }
+
+  .btn-nav:hover { background: var(--gold); }
+  .btn-nav:disabled { background: var(--muted); cursor: default; }
+
+  .btn-secondary {
+    background: white;
+    color: var(--gold-dark);
+    border: 1px solid var(--gold);
+    padding: 0.7rem 1.6rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-secondary:hover { background: var(--gold-light); }
+
+  .round-indicator {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .resultado-final {
+    display: none;
+    background: white;
+    border: 2px solid var(--gold);
+    padding: 2.5rem 2rem;
+    text-align: center;
+  }
+
+  .resultado-final h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--gold-dark);
+    margin-bottom: 0.5rem;
+  }
+
+  .resultado-final .nota-geral {
+    font-size: 3.5rem;
+    font-family: 'Playfair Display', serif;
+    color: var(--gold-dark);
+    margin: 1rem 0;
+    display: block;
+  }
+
+  .resultado-final p {
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  .historico {
+    margin-top: 1.5rem;
+    text-align: left;
+  }
+
+  .historico h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .hist-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    padding: 4px 0;
+    border-bottom: 0.5px solid var(--parchment-dark);
+  }
+
+  .hist-row span:first-child { color: var(--muted); }
+  .hist-row .acertos { color: var(--correct); font-weight: 600; }
+
+  .estrelas { font-size: 1.8rem; margin: 0.5rem 0; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Simulado — Eclesiologia</h1>
+    <p>Doutrina da Igreja · IBBC · 10 Rodadas · 10 Questões por Rodada</p>
+  </header>
+
+  <div class="scoreboard">
+    <div class="score-card"><div class="label">Rodada</div><div class="value" id="display-rodada">1 / 10</div></div>
+    <div class="score-card"><div class="label">Questão</div><div class="value" id="display-questao">1 / 10</div></div>
+    <div class="score-card"><div class="label">Acertos</div><div class="value" id="display-acertos">0</div></div>
+    <div class="score-card"><div class="label">Total</div><div class="value" id="display-total">0 / 0</div></div>
+  </div>
+
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+  <div id="quiz-area">
+    <div class="question-box">
+      <div class="q-meta" id="q-meta">Rodada 1 · Questão 1</div>
+      <div class="q-text" id="q-text">Carregando...</div>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+    <div class="nav-row">
+      <span class="round-indicator" id="round-indicator"></span>
+      <button class="btn-nav" id="btn-proxima" onclick="proximaQuestao()" disabled>Próxima →</button>
+    </div>
+  </div>
+
+  <div class="resultado-final" id="resultado-final">
+    <h2>Resultado Final</h2>
+    <span class="nota-geral" id="nota-geral">—</span>
+    <div class="estrelas" id="estrelas">★★★★★</div>
+    <p id="mensagem-final">—</p>
+    <div class="historico" id="historico-rodadas"></div>
+    <br>
+    <button class="btn-nav" onclick="reiniciarTudo()">Reiniciar do zero</button>
+  </div>
+
+</div>
+
+<script>
+const BANCO = [
+  // ---- 100 questões (10 por rodada) ----
+  // RODADA 1: Nomes bíblicos da Igreja
+  {r:1,q:"Qual palavra grega usada no Novo Testamento significa 'chamar para fora' e origina o nome Igreja?",op:["Kuriake","Ekklesia","Synagoge","Ekkletos"],c:1,e:"Ekklesia (ἐκκλησία) significa 'chamar para fora' ou 'convocar', sendo o principal termo grego para Igreja."},
+  {r:1,q:"O termo grego 'Kuriake' de onde deriva a palavra inglesa 'Church' significa:",op:["Assembleia dos santos","Pertence ao Senhor","Casa de oração","Congregação eleita"],c:1,e:"Kuriake significa 'pertence ao Senhor', referindo-se ao local consagrado para a glória de Deus."},
+  {r:1,q:"No Antigo Testamento, qual palavra hebraica indica a 'assembleia da congregação' de Israel?",op:["Synagoge","Kahal","Ekklesia","Kuriake"],c:1,e:"Kahal é a palavra hebraica que indica assembleia, traduzida no NT para ekklesia."},
+  {r:1,q:"Qual das seguintes indicações figuradas da Igreja encontramos em Efésios 1.23?",op:["Templo do Espírito Santo","Corpo de Cristo","Nova Jerusalém","Coluna da verdade"],c:1,e:"Ef 1.23 descreve a Igreja como o Corpo de Cristo, do qual Ele é a Cabeça."},
+  {r:1,q:"'Coluna e baluarte da verdade' é uma metáfora bíblica para a Igreja encontrada em:",op:["1Co 3.16","Ef 2.21","1Tm 3.15","Ap 21.2"],c:2,e:"1 Timóteo 3.15 chama a Igreja de 'coluna e baluarte da verdade'."},
+  {r:1,q:"Segundo o material, a principal diferença entre Israel e as outras nações era:",op:["A organização política","Os princípios religiosos que norteavam a conduta ética e moral","A língua e a cultura","O território e as fronteiras"],c:1,e:"A principal diferença era que os valores de Israel eram de origem religiosa, não apenas social."},
+  {r:1,q:"'Templo do Espírito Santo ou de Deus' como nome figurado da Igreja está em:",op:["1Co 3.16 e Ef 2.21","Gl 4.26 e Hb 12.22","Rm 16.23 e 1Co 16.19","Ef 1.23 e Cl 1.18"],c:0,e:"1 Coríntios 3.16 e Efésios 2.21-22 descrevem a Igreja como Templo do Espírito Santo."},
+  {r:1,q:"Jesus provavelmente foi o primeiro a usar a terminologia 'Igreja' em qual passagem?",op:["Jo 17.21","Mt 16.18","At 2.47","Ef 5.27"],c:1,e:"Mateus 16.18 é o texto em que Jesus usa pela primeira vez o termo 'minha Igreja'."},
+  {r:1,q:"'Nova Jerusalém Celestial' como nome figurado da Igreja está em:",op:["1Tm 3.15","Ef 1.23","Gl 4.26 e Hb 12.22","At 2.42"],c:2,e:"Gálatas 4.26 e Hebreus 12.22 utilizam a figura da Nova Jerusalém para a Igreja."},
+  {r:1,q:"Os primórdios cristãos entendiam que precisavam de organização humana para a funcionalidade de qual instituição?",op:["Do Estado Romano","Da instituição divina — a Igreja","Das sinagogas judaicas","Das escolas filosóficas"],c:1,e:"Os Apóstolos entenderam a necessidade de organizar a Igreja como instituição humana para preservar a instituição divina."},
+
+  // RODADA 2: Doutrina da Igreja na história
+  {r:2,q:"No Período Patrístico, qual figura de liderança passou a centralizar o poder na Igreja, sendo chamado de 'Papa'?",op:["O Evangelista","O Bispo de Roma","O Presbítero local","O Diácono-mor"],c:1,e:"O Bispo de Roma, com a força política que possuía, ganhou o direito de ser chamado de Papa."},
+  {r:2,q:"Na Idade Média, qual teólogo desenvolveu a ideia da Igreja Católica Romana como o Reino de Deus?",op:["Calvino","Lutero","Agostinho","Zuínglio"],c:2,e:"A tese de Agostinho sobre a identidade da Igreja com o Reino de Deus serviu de base para estabelecer o papado."},
+  {r:2,q:"A transubstanciação dos elementos da eucaristia é uma doutrina surgida em qual período?",op:["Patrístico","Reforma","Idade Média","Contemporâneo"],c:2,e:"A transubstanciação surgiu como doutrina na Idade Média, ensinando que o pão e o vinho se tornam literalmente corpo e sangue de Cristo."},
+  {r:2,q:"Qual dos seguintes princípios foi restaurado pela Reforma Protestante?",op:["A veneração dos santos","A separação do Estado e Igreja e a defesa das doutrinas bíblicas","A infalibilidade papal","A extrema-unção como sacramento"],c:1,e:"A Reforma restaurou a separação Estado-Igreja, a defesa das doutrinas bíblicas e a centralidade da Palavra."},
+  {r:2,q:"O movimento Neopentecostal é caracterizado principalmente por:",op:["Foco na teologia reformada","Fé de resultados, influenciada pelo mundo empresarial","Governo presbiteriano rigoroso","Separação total do Estado"],c:1,e:"O material descreve os neopentecostais como voltados à 'fé de resultados', influenciada pelo mundo empresarial americano."},
+  {r:2,q:"Quais heresias surgiram durante a expansão da Igreja no Período Patrístico?",op:["Anglicanismo e Metodismo","Montanismo, Novacionismo e Donatismo","Calvinismo e Arminianismo","Batismo e Congregacionalismo"],c:1,e:"A expansão da Igreja primitiva trouxe heresias como Montanismo, Novacionismo e Donatismo."},
+  {r:2,q:"A Reforma teve como base o resgate de quais verdades?",op:["Ritos sacramentais e hierarquia","A Bíblia e a exposição da Palavra","Tradição e magistério","Papado e concílios"],c:1,e:"A base da Reforma foi o resgate das verdades bíblicas, colocando a Bíblia em lugar de destaque."},
+  {r:2,q:"No Período Contemporâneo, o surgimento do movimento nos EUA no século XIX influenciou qual expansão religiosa no Brasil?",op:["O catolicismo popular","O protestantismo histórico e depois o pentecostalismo","O espiritismo","O judaísmo reformado"],c:1,e:"O movimento nos EUA influenciou o protestantismo histórico e sua principal linha de ação no mundo, chegando ao Brasil."},
+  {r:2,q:"Qual é o maior perigo identificado no texto sobre as novas denominações neopentecostais?",op:["Falta de música no culto","Líderes que transformam a Igreja em oligarquia familiar para benefício próprio","Ausência de sacramentos","Pregação excessiva da Bíblia"],c:1,e:"O texto alerta que líderes neopentecostais frequentemente nomeiam familiares para sucedê-los, tornando a Igreja uma oligarquia familiar."},
+  {r:2,q:"O Período Contemporâneo, após o século XIX, é marcado por quais dificuldades?",op:["Perseguição romana","Dificuldades em manter a unidade e o crescimento dos fiéis","Falta de lideranças","Ausência de Bíblias"],c:1,e:"O período contemporâneo é marcado por dificuldades em manter a unidade e o crescimento desordenado dos fiéis."},
+
+  // RODADA 3: Natureza da Igreja
+  {r:3,q:"Segundo a teologia reformada (Lutero e Calvino), a essência da Igreja é:",op:["A organização visível com seus bispos","A comunidade dos que creem e são santificados em Cristo","O papado e os sacramentos","O edifício e seus rituais"],c:1,e:"Lutero e Calvino defendiam que a essência da Igreja é a comunidade dos que creem e são santificados em Cristo, ligados a Ele como Salvador."},
+  {r:3,q:"A Igreja Invisível reúne:",op:["Somente os pastores ordenados","Todos os que estão crendo, inclusive os que ainda hão de crer, em todo o globo","Apenas os membros batizados na denominação","Os mortos e ressuscitados"],c:1,e:"A Igreja Invisível é universal, reunindo todos os que creem no mundo inteiro, inclusive os que ainda hão de crer."},
+  {r:3,q:"A Igreja Militante é caracterizada por:",op:["Ser uma Igreja já triunfante no céu","Lutar espiritualmente contra os poderes das trevas neste mundo (Ef 6)","Praticar apenas a oração contemplativa","Ser composta só pelos líderes"],c:1,e:"A Igreja Militante trava batalha espiritual contra os poderes das trevas — o combate ocorre no mundo espiritual e se reflete no físico (Ef 6)."},
+  {r:3,q:"A Igreja Triunfante é descrita como aquela que:",op:["Está na terra ganhando almas","Está no céu, onde a espada é trocada pelos louros da vitória","É uma instituição perfeita visível","Existe apenas no futuro escatológico"],c:1,e:"A Igreja Triunfante está no céu, onde a espada é trocada por louros de vitória e a luta é substituída pelo cântico triunfal."},
+  {r:3,q:"Segundo a doutrina arminiana, quem faz parte da Igreja?",op:["Somente os eleitos desde a eternidade","Pessoas que respondem ao chamado pelo batismo e professam a fé verdadeira","Todos os seres humanos automaticamente","Apenas os que receberam visões e revelações"],c:1,e:"A doutrina arminiana defende que a Igreja é composta por pessoas que entram na comunidade pelo batismo e professam a fé verdadeira."},
+  {r:3,q:"Segundo a doutrina calvinista, a Igreja é composta por:",op:["Pessoas eleitas por Deus desde a eternidade, cujo destino é eterno","Voluntários que escolheram a Deus livremente","Membros que pagam dízimo regularmente","Líderes ordenados por bispos apostólicos"],c:0,e:"A doutrina calvinista ensina que a Igreja é composta de pessoas eleitas por Deus antes da eternidade, cujo destino eterno é garantido."},
+  {r:3,q:"É impossível existir a Igreja sem a presença de Jesus na pessoa de quem?",op:["Dos apóstolos","Do Espírito Santo","Do pastor local","Da hierarquia eclesiástica"],c:1,e:"É impossível existir a Igreja sem a presença de Jesus na pessoa do Espírito Santo (Mt 7.22-23)."},
+  {r:3,q:"Como Corpo de Cristo, a Igreja está destinada a:",op:["Dominar politicamente as nações","Refletir a glória de Deus como está manifestada na obra de redenção","Acumular bens materiais","Substituir o Estado"],c:1,e:"Como Corpo de Cristo, a Igreja reflete a glória de Deus manifestada na obra de redenção."},
+  {r:3,q:"A Igreja Visível é notável por sua profissão de fé e conduta cristã no ministério da Palavra, nos sacramentos e em seu:",op:["Sistema de arrecadação financeira","Governo humano externo","Número de membros","Tamanho do templo"],c:1,e:"A Igreja Visível é notável pela profissão de fé, conduta cristã, ministério da Palavra, sacramentos e governo externo."},
+  {r:3,q:"Paulo pede que membros como exemplos negativos (joio) sejam excluídos da comunidade conforme:",op:["Rm 8.1","1Co 5 e 2Ts 3.6","Jo 17.21","Hb 12.22"],c:1,e:"Paulo em 1 Coríntios 5 e 2 Tessalonicenses 3.6 pede que tais membros sejam excluídos."},
+
+  // RODADA 4: Atributos e Marcas da Igreja
+  {r:4,q:"Quais são os atributos da Igreja segundo os protestantes?",op:["Infalibilidade e apostolicidade","Unidade, santidade da Igreja, fiel pregação da Palavra, correta ministração dos sacramentos e fiel exercício da disciplina","Papado e tradição","Hierarquia e ritos"],c:1,e:"Os protestantes elencam como atributos: unidade, santidade, fiel pregação da Palavra, correta ministração dos sacramentos e disciplina."},
+  {r:4,q:"A unidade da Igreja tem caráter primariamente:",op:["Externo e organizacional","Interno e espiritual","Político e cultural","Emocional e sentimental"],c:1,e:"A unidade da Igreja não é primariamente externa, mas tem caráter interno e espiritual — é a unidade do Corpo de Cristo (1Co 12)."},
+  {r:4,q:"Como podemos descrever a santidade da Igreja?",op:["Perfeição absoluta dos membros nesta vida","Separação diária do pecado; obra inacabada que somente estará pronta no céu","Ausência total de conflitos internos","Isolamento do mundo"],c:1,e:"Santidade é a separação diária do pecado. É obra inacabada; somente no céu haverá santos perfeitos."},
+  {r:4,q:"A fiel pregação da Palavra é considerada a mais relevante das marcas porque:",op:["Gera mais renda para a Igreja","É o grande meio para manutenção e habilitação da Igreja como padrão (Jo 8.31,32,47)","Atrai mais visitantes","Dispensa os sacramentos"],c:1,e:"A fiel pregação da Palavra é o grande meio para manutenção da Igreja e para habilitá-la a ser o padrão (Jo 8.31,32,47)."},
+  {r:4,q:"Os sacramentos jamais podem ser separados de:",op:["A autoridade episcopal","A Palavra","O calendário litúrgico","O dízimo"],c:1,e:"Jamais podemos separar os sacramentos da Palavra — devem ser ministrados por legítimos ministros do Evangelho."},
+  {r:4,q:"O fiel exercício da disciplina na Igreja tem como principal propósito:",op:["Punir os membros por falta de frequência","Manutenção da pureza da doutrina e correção dos transgressores","Aumentar a arrecadação","Selecionar líderes"],c:1,e:"A disciplina visa manutenção da pureza da doutrina, correção dos transgressores e evitar a corrupção dentro da comunidade."},
+  {r:4,q:"Com o surgimento das heresias, tornou-se necessário destacar as marcas da Igreja a fim de:",op:["Aumentar o número de membros","Reconhecer entre um cristão verdadeiro e a Igreja verdadeira","Justificar a cobrança de dízimo","Proibir o batismo de adultos"],c:1,e:"Com as heresias e o crescimento dos evangélicos nominais, foi preciso destacar marcas para identificar a Igreja genuína."},
+  {r:4,q:"Crentes 'sem Igreja', que participam de cultos mas não pertencem a nenhuma denominação, são chamados de:",op:["Missionários independentes","Evangélicos nominais","Profetas itinerantes","Diáconos informais"],c:1,e:"O material chama esses crentes de 'evangélicos nominais' — crentes sem identidade de Igreja."},
+  {r:4,q:"A disciplina eclesiástica encontra base bíblica em passagens como:",op:["Is 40.31 e Sl 23","Mt 18.15-18 e 1Co 5.1-5","Jo 3.16 e Rm 8.28","Hb 11.1 e Tg 2.17"],c:1,e:"A disciplina é fundamentada em Mateus 18.15-18 e 1 Coríntios 5.1-5, entre outras passagens."},
+  {r:4,q:"A Igreja que aplica mensagens apócrifas — sem base bíblica — está falhando em qual marca?",op:["Correta ministração dos sacramentos","Fiel pregação da Palavra","Exercício da disciplina","Unidade"],c:1,e:"Pregar mensagens apócrifas, sem base bíblica, é uma falha grave na marca da fiel pregação da Palavra."},
+
+  // RODADA 5: Governo da Igreja
+  {r:5,q:"Quais são os três principais sistemas de governo da Igreja?",op:["Papal, Monárquico e Republicano","Episcopal, Presbiteriano e Congregacional","Apostólico, Profético e Pastoral","Didático, Diaconal e Episcopal"],c:1,e:"Os três sistemas clássicos de governo são Episcopal, Presbiteriano e Congregacional."},
+  {r:5,q:"No sistema Episcopal, quem detém a autoridade máxima na Igreja local?",op:["O presbítero eleito pela congregação","Um único bispo","O conselho de diáconos","A assembleia dos membros"],c:1,e:"No sistema Episcopal, a autoridade máxima recai sobre um único bispo, considerado sucessor dos apóstolos."},
+  {r:5,q:"No sistema Presbiteriano, quem governa a Igreja?",op:["Um único pastor vitalício","Um presbitério — grupo de presbíteros representativos","O diácono-mor","O bispo regional"],c:1,e:"No sistema Presbiteriano, Cristo governa por meio de presbíteros eleitos pela congregação para representá-la."},
+  {r:5,q:"No sistema Congregacional, cada Igreja é:",op:["Subordinada ao bispo regional","Completamente independente, sendo governo exclusivo dos membros","Parte obrigatória de uma convenção","Gerida pelo Estado"],c:1,e:"No Congregacionalismo, cada Igreja é completa e independente — o governo é exclusivo dos membros locais."},
+  {r:5,q:"A Igreja O Brasil Para Cristo adota um modelo de governo que mistura elementos de qual sistema?",op:["Episcopal e Papal","Congregacional e Presbiteriano","Metodista e Luterano","Anglicano e Batista"],c:1,e:"A IBPC tem um modelo misto: certa independência congregacional, mas consagra presbíteros — elemento presbiteriano."},
+  {r:5,q:"A autoridade máxima na Igreja local da IBPC é:",op:["O bispo regional","O pastor, cuja substituição se dá pela Convenção Estadual","O presidente nacional","O conselho apostólico"],c:1,e:"A autoridade máxima na Igreja local é o pastor; sua substituição se dá pela Convenção Estadual por solicitação da membresia."},
+  {r:5,q:"Qual é o perigo identificado nas igrejas que desenvolveram modelos de gestão para benefício próprio do líder?",op:["Pouca ênfase na evangelização","Transformação em oligarquia familiar","Excesso de pregação bíblica","Governo demasiado democrático"],c:1,e:"O texto alerta que líderes neopentecostais frequentemente transformam a Igreja em oligarquia familiar."},
+  {r:5,q:"Os presbíteros, no sistema presbiteriano, têm a incumbência de auxiliar o pastor e também:",op:["Vender propriedades da Igreja","Destituí-lo ou empossá-lo quando necessário","Pregar todos os cultos","Batizar os novos membros"],c:1,e:"Aos presbíteros fica a incumbência de auxiliar o pastor e, quando necessário, destituí-lo ou empossá-lo."},
+  {r:5,q:"O surgimento de conferências e convenções entre igrejas congregacionais ocorreu por quê?",op:["Por exigência do governo civil","Por conveniência de manter comunhão com as demais Igrejas","Por determinação apostólica","Por falta de pastores locais"],c:1,e:"As igrejas congregacionais, achando conveniente, mantinham comunhão com as demais, originando conferências e convenções."},
+  {r:5,q:"Cristo, como Cabeça da Igreja no sistema Presbiteriano, exerce influência por meio de:",op:["Revelações diretas ao bispo","Sua Palavra, levantando pessoas como presbíteros","Tradição apostólica ininterrupta","Sinais e milagres permanentes"],c:1,e:"No Presbiterianismo, Cristo é o Chefe e exerce influência por meio de Sua Palavra, levantando pessoas como presbíteros."},
+
+  // RODADA 6: Ministros e Oficiais
+  {r:6,q:"Quais são os quatro ministérios extraordinários listados no material?",op:["Pastor, Evangelista, Mestre, Diácono","Apóstolo, Profeta, Evangelista e Pastor","Bispo, Presbítero, Evangelista, Profeta","Apóstolo, Bispo, Mestre, Diácono"],c:1,e:"Os ministérios extraordinários (com capacitação sobrenatural) são: Apóstolos, Profetas, Evangelistas e Pastores."},
+  {r:6,q:"O Apóstolo (do grego) ou Missionário (do latim) trabalhava para:",op:["Pastorear uma congregação local fixa","Lançar os alicerces da Igreja","Administrar os sacramentos","Controlar as finanças da Igreja"],c:1,e:"O Apóstolo/Missionário trabalhava para lançar os alicerces da Igreja, sendo que a Igreja Primitiva restringiu este título aos doze."},
+  {r:6,q:"Os Profetas trabalhavam na edificação da Igreja servindo de instrumento para:",op:["Adquirir propriedades para a Igreja","Advindos eclesiásticos futuros","Ordenar novos pastores","Disciplinar membros rebeldes"],c:1,e:"Os Profetas serviam de instrumento para os advindos (acontecimentos) eclesiásticos futuros."},
+  {r:6,q:"A principal função do Evangelista é:",op:["Pastorear uma congregação por anos","Iniciar novas igrejas, pregando e ganhando almas para depois seguir em frente","Administrar o patrimônio da Igreja","Ensinar teologia nos seminários"],c:1,e:"O Evangelista tem como principal função no Corpo iniciar novas igrejas, pregando e ganhando almas, mas não ficando preso pastoreando."},
+  {r:6,q:"Qual é a motivação central do Pastor no seu ministério?",op:["Ganhar financeiramente com o rebanho","Cuidar, zelar, preservar e administrar a Igreja local, zelando pelo bem-estar dos crentes","Plantar igrejas em novos lugares","Pregar apenas em grandes conferências"],c:1,e:"O Pastor, como o próprio nome diz, é vocacionado para cuidar, zelar, preservar e administrar a Igreja local (Tt 1.5; 1Tm 5.22)."},
+  {r:6,q:"Os Mestres são obreiros com vocação para o ensino, sendo que a vocação é divina, mas a preparação é:",op:["Sobrenatural e dispensada por revelação","Humana (Ef 4.11), devendo haver constante estudo","Herdada dos pais","Desnecessária para quem tem o dom"],c:1,e:"A vocação do Mestre é divina, mas a preparação é humana (Ef 4.11). Paulo pede que se selecionem homens capazes de instruir outros."},
+  {r:6,q:"Os Bispos e Presbíteros têm, entre suas atividades, Presid (Rm 12.8), Governar (1Co 12.28), Guiar (Hb 13.17,24) e:",op:["Curar os enfermos","Pastorear (Ef 4.11)","Profetizar","Administrar os bens materiais"],c:1,e:"As atividades do Bispo/Presbítero incluem Presidir, Governar, Guiar e Pastorear (Ef 4.11)."},
+  {r:6,q:"Os Diáconos, no sentido geral (Atos 6), podem ser vistos como:",op:["Supervisores doutrinários","Servidores designados para servir na festa do amor cristão, como 'garçons'","Chefes financeiros","Pregadores principais"],c:1,e:"Os Diáconos são servidores designados para servir na festa do amor cristão — como garçons da festa. Perdem a função ao deixar de servir."},
+  {r:6,q:"Os ministérios são compostos por pessoas vocacionadas e são permanentes; já os oficiais são:",op:["Também permanentes e vitalícios","Funções administrativas transitórias","Superiores hierarquicamente","Dispensados do estudo bíblico"],c:1,e:"Os ministérios são permanentes (vocacionados), enquanto os oficiais são funções administrativas transitórias."},
+  {r:6,q:"A vocação externa do crente para um ministério é notada pela instrumentalidade do crente dentro da Igreja local, e o ministro/oficial é reconhecido publicamente por meio de:",op:["Votação em assembleia geral nacional","Imposição de mãos","Revelação profética individual","Aprovação do bispo diocesano"],c:1,e:"O ministro e o oficial são ordenados, ou seja, reconhecidos publicamente com imposição de mãos."},
+
+  // RODADA 7: Poder da Igreja
+  {r:7,q:"A Igreja de Jesus Cristo foi investida de poder ou autoridade por Ele como Cabeça tanto no sentido:",op:["Econômico e político","Dogmático como administrativo","Militar e cultural","Sacramental e litúrgico"],c:1,e:"A Igreja foi investida de poder tanto no sentido dogmático (ensino) como administrativo (governo) — Ele é a Cabeça."},
+  {r:7,q:"Quais são os três poderes (poder tríplice) que a Igreja exerce, ligados aos três ofícios de Cristo?",op:["Político, Econômico e Social","Dogmático, de Governo/Ordem e de Misericórdia","Sacramental, Litúrgico e Evangelístico","Apostólico, Profético e Pastoral"],c:1,e:"A Igreja exerce poder tríplice: Dogmático, de Governo ou Ordem, e de Misericórdia — ligados aos três ofícios de Cristo."},
+  {r:7,q:"O Poder Dogmático está relacionado à tarefa da Igreja de:",op:["Distribuir recursos financeiros","Comunicar a verdade da Palavra de Deus, preservar a sã doutrina e cultivar o estudo da teologia","Eleger líderes políticos","Construir templos maiores"],c:1,e:"O Poder Dogmático relaciona-se com comunicar a verdade, preservar a sã doutrina e cultivar o estudo da teologia (1Tm 1.3; Tt 1.9)."},
+  {r:7,q:"O Poder de Governo ou Ordem visa:",op:["Enriquecer a Igreja","Disciplinar os membros e manter a ordem, preservando a unidade e o bom andamento das coisas na Igreja","Controlar as mídias","Nomear líderes governamentais"],c:1,e:"O Poder de Governo/Ordem permite que a Igreja discipline e mantenha a ordem para preservar a unidade (1Co 14.33,40)."},
+  {r:7,q:"O Poder ou Ministério da Misericórdia envolve dois elementos: o dom de cura e:",op:["A arrecadação do dízimo","A beneficência da Igreja para cuidar dos pobres e necessitados","A pregação nos meios de comunicação","A formação de seminários"],c:1,e:"O Ministério da Misericórdia envolve: o dom de cura sobrenatural e a beneficência — cuidar dos pobres e necessitados."},
+  {r:7,q:"O poder ministerial na Igreja é um indicativo de que a Igreja NÃO é um poder:",op:["Espiritual e delegado","Independente e soberano (Mt 20.25-26)","Derivado da Palavra de Deus","Exercido em harmonia com Cristo"],c:1,e:"O poder ministerial indica que a Igreja não é poder independente e soberano (Mt 20.25-26), mas um serviço/ministério (At 4.29-30)."},
+  {r:7,q:"Os ministros e oficiais precisam de poder para servir à Igreja, e isso somente é possível quando existe:",op:["Um grande orçamento financeiro","Um vínculo com Jesus Cristo","Reconhecimento do governo civil","Grande número de membros"],c:1,e:"O vínculo com Jesus Cristo é o que possibilita que ministros e oficiais tenham poder para servir à Igreja."},
+  {r:7,q:"O caráter espiritual do poder da Igreja indica que ela NÃO é totalmente interna e invisível porque:",op:["O poder não existe realmente","Pode ser visto através das palavras, sacramentos e diaconato (At 20.28)","Os milagres o tornam visível para todos","O governo civil o reconhece"],c:1,e:"O poder espiritual pode ser visto através das palavras, sacramentos e no diaconato (Atos 20.28), tornando-o visível."},
+  {r:7,q:"O Poder de Governo tem sua base em passagens como 1Co 14.33,40 e também em:",op:["Jo 3.16 e Ap 22.20","Lv 5.3; Is 44.9; At 2.7,13; 2Co 2.5-7","Sl 23 e Is 40.31","Hb 11.1 e Tg 1.2"],c:1,e:"O Poder de Governo tem base em 1Co 14.33,40 e também em Lv 5.3; Is 44.9; At 2.7,13; 2Co 2.5-7."},
+  {r:7,q:"O Poder Dogmático inclui o cuidado com atividades como:",op:["Gestão financeira e marketing","Preservação da sã doutrina, comunicação da verdade e cultivo do estudo da teologia (1Tm 1.3; Tt 1.9; Hb 5.11-6.3)","Organização de eventos culturais","Administração de hospitais"],c:1,e:"O Poder Dogmático cuida da preservação da sã doutrina, comunicação da verdade e cultivo da teologia (1Tm 1.3; Tt 1.9; Hb 5.11-6.3)."},
+
+  // RODADA 8: A Igreja e os Meios de Graça
+  {r:8,q:"Quais são os dois grandes meios de graça mencionados no material?",op:["Jejum e oração","A Palavra e os Sacramentos","O dízimo e a oferta","A música e a liturgia"],c:1,e:"Os dois grandes meios de graça são a Palavra e os Sacramentos — instrumentos, não da graça em si, mas da graça especial do Espírito Santo."},
+  {r:8,q:"Os meios de graça são instrumentos — mas não da graça em si. Qual é a fonte da graça especial?",op:["O pastor ungido","O Espírito Santo","A hierarquia eclesiástica","Os santos intercessores"],c:1,e:"A graça especial que remove o pecado e renova o pecador é obra exclusiva do Espírito Santo."},
+  {r:8,q:"A Palavra de Deus como meio de graça é também chamada de:",op:["Tradição apostólica","Escritura Sagrada","Magistério eclesiástico","Revelação progressiva"],c:1,e:"A Palavra de Deus como meio de graça é também chamada de Escritura Sagrada, reconhecida como base doutrinária de fé e prática."},
+  {r:8,q:"A Palavra sozinha NÃO é capaz de produzir fé e conversão porque ela necessita inteiramente de:",op:["Um pastor carismático","O Espírito Santo, que a usa tanto no AT como no NT para revelar a vontade de Deus","O apoio da tradição eclesiástica","Um ambiente de adoração preparado"],c:1,e:"A Palavra necessita inteiramente do Espírito Santo, que faz uso de seus ensinos (AT e NT) para revelar a vontade perfeita de Deus."},
+  {r:8,q:"A Igreja pode ser descrita como o grande meio de graça porque:",op:["Garante a salvação por mérito dos membros","Usa para redimir os perdidos, edificar os santos e formar o corpo espiritual, qualificando-a com dons espirituais","É a única mediadora entre Deus e os homens","Possui poder político sobre a sociedade"],c:1,e:"A Igreja é o grande meio de graça porque Deus a usa para redimir os perdidos, edificar os santos e formar o corpo espiritual."},
+  {r:8,q:"A Igreja tem consciência de que ela é instrumento de:",op:["Si mesma e de seus líderes","Do Espírito Santo","Do governo civil","Da tradição cultural cristã"],c:1,e:"A Igreja tem consciência de que é instrumento do Espírito Santo — não da graça por si mesma."},
+  {r:8,q:"O próprio Cristo qualifica sua Igreja com dons espirituais e institui ministros e oficiais para o bom andamento e administração de:",op:["Apenas das finanças","Da Palavra e dos sacramentos","Dos bens imóveis","Das atividades sociais e culturais"],c:1,e:"Cristo institui ministros e oficiais para o bom andamento e administração da Palavra e dos sacramentos."},
+  {r:8,q:"A Palavra é empregada pelo Espírito Santo com qual finalidade específica?",op:["Apenas para consolação emocional","Proclamação do evangelho e edificação dos santos","Justificar a autoridade do papa","Validar tradições religiosas"],c:1,e:"A Palavra é empregada pelo Espírito Santo para a proclamação do evangelho e a edificação dos santos."},
+  {r:8,q:"Qual é a base doutrinária da Palavra como meio de graça?",op:["É apenas um livro humano de sabedoria","É inspirada por Deus, base doutrinária de fé e prática, não apenas conceito teológico","É obra literária sem autoridade normativa","É válida somente para o período apostólico"],c:1,e:"A Palavra é reconhecida como inspirada por Deus, base doutrinária de fé e prática — não apenas um conceito teológico."},
+  {r:8,q:"Os meios de graça são instrumentos nada mais são do que o que a Palavra e os Sacramentos fazem: remover o pecado e renovar o pecador em conformidade com a imagem de Deus. Essa obra é exclusiva de quem?",op:["Do pastor e dos líderes","Do Espírito Santo, desde que a Igreja tenha consciência de que é instrumento Dele","Da hierarquia eclesiástica","Da tradição e dos concílios"],c:1,e:"A obra de remover o pecado e renovar o pecador é exclusiva do Espírito Santo — a Igreja deve ter consciência de ser Seu instrumento."},
+
+  // RODADA 9: Os Sacramentos
+  {r:9,q:"O termo 'sacramento' deriva do latim denotando juramento. Como o pensamento grego compreendia esse termo?",op:["Como cerimônia de iniciação militar","Como mistério","Como contrato jurídico","Como sacrifício animal"],c:1,e:"Enquanto o latim entendia como juramento, o pensamento grego compreendia o sacramento como mistério."},
+  {r:9,q:"Quantos sacramentos a Igreja do Novo Testamento possui, segundo o texto?",op:["Sete","Dois: Batismo e Santa Ceia do Senhor","Cinco","Um: somente a Ceia"],c:1,e:"A Igreja no NT possui dois sacramentos: o Batismo e a Santa Ceia do Senhor, que simbolizam as bênçãos da circuncisão e da Páscoa."},
+  {r:9,q:"Os sacramentos estão distinguidos em três partes: o sinal externo, a graça interna selada e:",op:["A oração do pastor","A união entre o sinal e o selo","O jejum preparatório","A confissão pública"],c:1,e:"Os sacramentos têm três partes: o sinal externo, a graça interna selada e a união entre o sinal e o selo."},
+  {r:9,q:"O sacramento é obra exclusiva de quem, sendo recebido com fé?",op:["Do sacerdote ordenado","Do Espírito Santo (At 22.16; 1Co 5.7)","Da vontade humana","Da hierarquia eclesiástica"],c:1,e:"O sacramento só tem utilidade pelos fiéis quando é recebido com fé — é obra exclusiva do Espírito Santo (At 22.16; 1Co 5.7)."},
+  {r:9,q:"A Igreja de Roma acrescentou mais sete ações aos dois sacramentos do NT, dentre elas a confirmação, penitência, ordenação, matrimônio e extrema-unção. O material ressalta que esses NÃO são sacramentos, mas:",op:["Heresias condenáveis","Ações que fazem parte do dia a dia do cristão, como foi nos dias dos Apóstolos","Rituais supersticiosos","Invenções medievais sem valor algum"],c:1,e:"Esses sete da Igreja Romana não são sacramentos, mas ações do cotidiano cristão — como foram nos dias dos Apóstolos."},
+  {r:9,q:"Quanto ao aspecto espiritual interno expresso pelo símbolo de selo, temos referências como a aliança da graça (Gn 9.12,13), a justiça de fé (Rm 4.11), o perdão dos pecados (Mc 1.4) e:",op:["A prosperidade material","A fé e a ressurreição (Rm 6.3)","O dom de línguas","A santidade absoluta nesta vida"],c:1,e:"O selo do sacramento inclui aliança da graça, justiça de fé, perdão dos pecados, fé e ressurreição (Rm 6.3)."},
+  {r:9,q:"O sacramento indica a presença física de Jesus Cristo?",op:["Sim, literalmente (transubstanciação)","Não — refere-se à presença espiritual quando recebido com fé","Sim, mas apenas na Ceia","Depende da denominação"],c:1,e:"O sacramento NÃO indica a presença física de Cristo, mas refere-se à Sua presença espiritual quando recebido com fé."},
+  {r:9,q:"Os sacramentos contêm elementos materiais palpáveis aos sentidos; por exemplo:",op:["Incenso e velas","O uso da água, pão e vinho","Instrumentos musicais e flores","Óleos e perfumes sagrados"],c:1,e:"Os sacramentos contêm elementos materiais como o uso da água (Batismo) e pão e vinho (Santa Ceia)."},
+  {r:9,q:"Qual semelhança existe entre a Palavra e os Sacramentos quanto à autoria?",op:["Ambos foram criados pelo concílio de Niceia","Deus instituiu ambos como meio de graça","Ambos dependem da autoridade do papa","Foram criados pelos apóstolos de forma independente"],c:1,e:"Autoria: Deus instituiu ambos (Palavra e Sacramentos) como meios de graça — ponto de semelhança."},
+  {r:9,q:"Qual é a diferença entre a Palavra e os Sacramentos quanto à extensão/alcance?",op:["A Palavra é mais sagrada","A Palavra vai pelo mundo inteiro; os sacramentos são ministrados aos que estão na Igreja local","Os sacramentos têm maior poder de conversão","Não existe diferença prática"],c:1,e:"A Palavra vai pelo mundo inteiro (missão), enquanto os sacramentos são ministrados aos que estão na Igreja local."},
+
+  // RODADA 10: Batismo, Ceia e Missão
+  {r:10,q:"O Batismo foi instituído por Cristo após consumar a obra de reconciliação e receber a aprovação do Pai na:",op:["Transfiguração","Ressurreição","Encarnação","Ascensão"],c:1,e:"O Batismo foi instituído por Cristo após a obra de reconciliação e a aprovação do Pai na Ressurreição."},
+  {r:10,q:"O Batismo é realizado em nome de quem, conforme Mt 28.19,20?",op:["Somente do Espírito Santo","Do Pai, do Filho e do Espírito Santo","Somente de Jesus Cristo","Do pastor local e da congregação"],c:1,e:"O Batismo é realizado em nome do Pai, do Filho e do Espírito Santo, conforme ordenou Jesus (Mt 28.19,20)."},
+  {r:10,q:"A Igreja O Brasil Para Cristo usa qual forma batismal, e a partir de qual idade?",op:["Aspersão, desde o nascimento","Imersão, de pessoas a partir de mais ou menos 12 anos","Fusão, de pessoas adultas apenas","Aspersão, apenas de adultos"],c:1,e:"A IBPC usa a imersão como forma batismal, a partir de mais ou menos 12 anos — como a maioria dos pentecostais brasileiros."},
+  {r:10,q:"A Santa Ceia do Senhor simboliza, entre outros aspectos, a morte sacrifical do Senhor em nosso favor conforme:",op:["Jo 3.16","1Co 11.26","Rm 5.8","Hb 9.22"],c:1,e:"A Santa Ceia simboliza a morte sacrifical do Senhor em nosso favor (1Co 11.26)."},
+  {r:10,q:"A Santa Ceia é destinada a todos quanto creem no Evangelho e estão verdadeiramente arrependidos de seus pecados. Quem NÃO pode participar?",op:["Os idosos","As crianças (por não terem condições de examinar a si mesmas — 1Co 11.28) e os que não compreendem os atos de graça","Os que chegam atrasados ao culto","Os não batizados por imersão"],c:1,e:"Não podem participar: os que não compreendem os atos de graça e as crianças, pois não têm condições de examinar a si mesmas (1Co 11.28)."},
+  {r:10,q:"A Ceia do Senhor é um sacramento que inclui sinal externo e interno. Como selo, ela sela (entre outros):",op:["A prosperidade financeira prometida","O grande amor de Deus revelado no sofrimento e morte de Jesus Cristo","A cura física garantida","A liderança do pastor"],c:1,e:"Como selo, a Santa Ceia sela o grande amor de Deus revelado no sofrimento amargo e morte de Jesus Cristo."},
+  {r:10,q:"Qual é a missão da Igreja segundo Efésios 2.20-22 e outros textos (1Tm 3.15; Ef 3.10; Ef 3.20-21; Ef 4.11-13; Mt 18.15-17; Mt 28.18-20)?",op:["Dominar politicamente as nações","Ser templo/habitação de Deus, testificar da verdade, mostrar a sabedoria divina, edificar o Corpo, disciplinar e evangelizar","Acumular riquezas para obras sociais","Substituir o governo civil na administração das cidades"],c:1,e:"A missão da Igreja envolve: ser habitação de Deus, testificar, mostrar sabedoria, dar glória, edificar o Corpo, disciplinar e evangelizar."},
+  {r:10,q:"A Grande Comissão (Mt 28.18-20) determina que a Igreja deve:",op:["Evangelizar apenas a nação de Israel","Evangelizar todos os quanto alcançarem","Aguardar o retorno de Cristo sem agir","Evangelizar somente os que já frequentam a Igreja"],c:1,e:"A Grande Comissão determina: evangelizar todos os quanto alcançarem (Mt 28.18-20)."},
+  {r:10,q:"A Páscoa no Antigo Testamento, que serviu de base para a Ceia do Senhor, era um sacrifício de expiação apontando para:",op:["Os sacrifícios dos mártires cristãos","O que Cristo faria por todos (Ex 12.27)","A fundação da Igreja em Roma","A circuncisão como sinal da aliança"],c:1,e:"A Páscoa (Ex 12.27) apontava para o que Cristo faria por todos — sacrifício de expiação que serve de base para a Santa Ceia."},
+  {r:10,q:"A estrutura denominacional da Igreja O Brasil Para Cristo (IBPC) organiza-se da seguinte forma:",op:["Igreja local → Diocese → Vaticano","Igreja local → Convenção Estadual/Regional → Conselho Nacional → Conselho Apostólico → Supremo Conselho","Igreja local → Superintendência → Conselho Mundial","Igreja local → Câmara de Pastores → Supremo Bispo"],c:1,e:"A IBPC organiza-se: Igreja local → Convenção Estadual ou Regional → Conselho Nacional → Conselho Apostólico → Supremo Conselho."},
+];
+
+let rodadaAtual = 1;
+let questaoAtual = 0;
+let acertos = 0;
+let acertosRodada = 0;
+let totalRespondidas = 0;
+let respondiuAtual = false;
+let historicoRodadas = [];
+let questoesRodada = [];
+
+function embaralhar(arr) {
+  return arr.slice().sort(() => Math.random() - 0.5);
+}
+
+function carregarRodada() {
+  questoesRodada = embaralhar(BANCO.filter(q => q.r === rodadaAtual));
+  questaoAtual = 0;
+  acertosRodada = 0;
+  mostrarQuestao();
+}
+
+function mostrarQuestao() {
+  if (questaoAtual >= questoesRodada.length) {
+    encerrarRodada();
+    return;
+  }
+  respondiuAtual = false;
+  const q = questoesRodada[questaoAtual];
+  document.getElementById('q-meta').textContent = `Rodada ${rodadaAtual} · Questão ${questaoAtual + 1} de ${questoesRodada.length}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('display-rodada').textContent = `${rodadaAtual} / 10`;
+  document.getElementById('display-questao').textContent = `${questaoAtual + 1} / 10`;
+  document.getElementById('display-acertos').textContent = acertos;
+  document.getElementById('display-total').textContent = `${totalRespondidas} / ${(rodadaAtual - 1) * 10 + questaoAtual}`;
+  document.getElementById('round-indicator').textContent = ``;
+
+  const opDiv = document.getElementById('options');
+  opDiv.innerHTML = '';
+  const letras = ['A','B','C','D'];
+  const ordensEmbaralhadas = embaralhar(q.op.map((t, i) => ({t, i})));
+  ordensEmbaralhadas.forEach((item, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = `${letras[idx]}. ${item.t}`;
+    btn.dataset.original = item.i;
+    btn.onclick = () => responder(btn, item.i === q.c, q);
+    opDiv.appendChild(btn);
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.textContent = '';
+
+  document.getElementById('btn-proxima').disabled = true;
+
+  const total = (rodadaAtual - 1) * 10 + questaoAtual + 1;
+  const pct = ((total - 1) / 100) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function responder(btn, correto, q) {
+  if (respondiuAtual) return;
+  respondiuAtual = true;
+  totalRespondidas++;
+
+  const opDiv = document.getElementById('options');
+  const allBtns = opDiv.querySelectorAll('.option-btn');
+
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if (parseInt(b.dataset.original) === q.c) b.classList.add('correct');
+  });
+
+  const fb = document.getElementById('feedback');
+  if (correto) {
+    acertos++;
+    acertosRodada++;
+    btn.classList.add('correct');
+    fb.className = 'feedback correct show';
+    fb.innerHTML = `<strong>Correto!</strong> ${q.e}`;
+  } else {
+    btn.classList.add('wrong');
+    fb.className = 'feedback wrong show';
+    fb.innerHTML = `<strong>Incorreto.</strong> ${q.e}`;
+  }
+
+  document.getElementById('display-acertos').textContent = acertos;
+  document.getElementById('display-total').textContent = `${totalRespondidas} / ${totalRespondidas}`;
+  document.getElementById('btn-proxima').disabled = false;
+}
+
+function proximaQuestao() {
+  questaoAtual++;
+  if (questaoAtual >= questoesRodada.length) {
+    encerrarRodada();
+  } else {
+    mostrarQuestao();
+  }
+}
+
+function encerrarRodada() {
+  historicoRodadas.push({ rodada: rodadaAtual, acertos: acertosRodada, total: questoesRodada.length });
+  rodadaAtual++;
+  if (rodadaAtual > 10) {
+    mostrarResultadoFinal();
+  } else {
+    carregarRodada();
+  }
+}
+
+function mostrarResultadoFinal() {
+  document.getElementById('quiz-area').style.display = 'none';
+  const rf = document.getElementById('resultado-final');
+  rf.style.display = 'block';
+
+  const pct = Math.round((acertos / 100) * 100);
+  document.getElementById('nota-geral').textContent = `${acertos} / 100 (${pct}%)`;
+
+  let estrelas = '';
+  const s = pct >= 90 ? 5 : pct >= 75 ? 4 : pct >= 60 ? 3 : pct >= 40 ? 2 : 1;
+  for (let i = 0; i < 5; i++) estrelas += i < s ? '★' : '☆';
+  document.getElementById('estrelas').textContent = estrelas;
+
+  let msg = '';
+  if (pct >= 90) msg = 'Excelente, Pastor Sérgio! O Senhor abençoe seu estudo — você dominou o conteúdo de Eclesiologia!';
+  else if (pct >= 75) msg = 'Muito bom! Você tem um sólido conhecimento da Doutrina da Igreja. Continue revisando os pontos errados.';
+  else if (pct >= 60) msg = 'Bom progresso! Revise os temas com menor aproveitamento e refaça o simulado.';
+  else msg = 'Continue estudando! Releia as seções do material e tente novamente — o Senhor honrará sua persistência.';
+  document.getElementById('mensagem-final').textContent = msg;
+
+  const hist = document.getElementById('historico-rodadas');
+  let html = '<h3>Desempenho por rodada</h3>';
+  const temas = ['Nomes bíblicos','História da Igreja','Natureza da Igreja','Atributos e Marcas','Governo da Igreja','Ministros e Oficiais','Poder da Igreja','Meios de Graça','Os Sacramentos','Batismo, Ceia e Missão'];
+  historicoRodadas.forEach((h, i) => {
+    const p = Math.round((h.acertos / h.total) * 100);
+    html += `<div class="hist-row"><span>R${h.rodada}: ${temas[i]}</span><span class="acertos">${h.acertos}/${h.total} (${p}%)</span></div>`;
+  });
+  hist.innerHTML = html;
+
+  document.getElementById('progress-fill').style.width = '100%';
+}
+
+function reiniciarTudo() {
+  rodadaAtual = 1;
+  questaoAtual = 0;
+  acertos = 0;
+  acertosRodada = 0;
+  totalRespondidas = 0;
+  historicoRodadas = [];
+  document.getElementById('resultado-final').style.display = 'none';
+  document.getElementById('quiz-area').style.display = 'block';
+  document.getElementById('progress-fill').style.width = '0%';
+  carregarRodada();
+}
+
+carregarRodada();
+</script>
+</body>
+</html>

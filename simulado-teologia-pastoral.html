@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado — Teologia Pastoral</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f4ef;
+    --card: #ffffff;
+    --primary: #2d5a3d;
+    --primary-light: #e8f2eb;
+    --accent: #c8973a;
+    --accent-light: #fdf4e3;
+    --text: #1a1a1a;
+    --muted: #6b6b6b;
+    --border: #e0dbd2;
+    --correct: #1e6b3a;
+    --correct-bg: #e8f5ee;
+    --wrong: #8b2020;
+    --wrong-bg: #fceaea;
+    --neutral-bg: #f0ede8;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+  /* HEADER */
+  .app-header {
+    background: var(--primary);
+    color: #fff;
+    padding: 18px 24px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .app-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+  .app-header p {
+    font-size: 12px;
+    opacity: 0.75;
+    margin-top: 2px;
+  }
+  .header-score {
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 8px 14px;
+    text-align: center;
+    min-width: 70px;
+  }
+  .header-score .score-num {
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .header-score .score-lbl {
+    font-size: 10px;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  /* PROGRESS */
+  .progress-wrap {
+    background: var(--primary);
+    padding: 0 24px 12px;
+  }
+  .progress-bar {
+    background: rgba(255,255,255,0.25);
+    border-radius: 99px;
+    height: 5px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 99px;
+    transition: width 0.5s ease;
+  }
+  /* ROUND NAV */
+  .round-nav {
+    background: #fff;
+    padding: 12px 20px;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    scrollbar-width: none;
+  }
+  .round-nav::-webkit-scrollbar { display: none; }
+  .rnd-btn {
+    min-width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+    flex-shrink: 0;
+    font-family: 'Source Sans 3', sans-serif;
+  }
+  .rnd-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .rnd-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .rnd-btn.done-ok { background: var(--correct-bg); border-color: var(--correct); color: var(--correct); }
+  .rnd-btn.done-fail { background: var(--wrong-bg); border-color: var(--wrong); color: var(--wrong); }
+  /* STATS ROW */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+  }
+  .stat-item {
+    padding: 10px 8px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-val {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+  }
+  .stat-lbl {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  /* MAIN */
+  .main {
+    padding: 20px 16px 100px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  /* QUESTION CARD */
+  .q-card {
+    background: var(--card);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 14px;
+    border: 1px solid var(--border);
+  }
+  .q-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 99px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .q-text {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .opt-btn {
+    background: #fafaf8;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    text-align: left;
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.18s;
+    line-height: 1.5;
+    font-family: 'Source Sans 3', sans-serif;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .opt-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    transform: translateX(3px);
+  }
+  .opt-btn .opt-letter {
+    font-weight: 700;
+    min-width: 20px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .opt-btn.correct {
+    background: var(--correct-bg);
+    border-color: var(--correct);
+    color: var(--correct);
+  }
+  .opt-btn.correct .opt-letter { color: var(--correct); }
+  .opt-btn.wrong {
+    background: var(--wrong-bg);
+    border-color: var(--wrong);
+    color: var(--wrong);
+  }
+  .opt-btn.wrong .opt-letter { color: var(--wrong); }
+  .opt-btn.reveal {
+    background: var(--neutral-bg);
+    border-color: #c5bfb5;
+    color: #888;
+    opacity: 0.75;
+  }
+  .opt-btn:disabled { cursor: default; transform: none; }
+  /* FEEDBACK */
+  .feedback {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    line-height: 1.65;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    animation: fadeIn 0.25s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .feedback.ok { background: var(--correct-bg); color: #1a4d2a; border: 1px solid #a3d4b5; }
+  .feedback.err { background: var(--wrong-bg); color: #5a1515; border: 1px solid #f0b0b0; }
+  .feedback-icon { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
+  /* NAV BOTTOM */
+  .nav-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    z-index: 100;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+    max-width: 100%;
+  }
+  .nav-btn {
+    padding: 10px 18px;
+    border-radius: 9px;
+    border: 1.5px solid var(--border);
+    background: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--text);
+    font-family: 'Source Sans 3', sans-serif;
+    transition: all 0.15s;
+    min-width: 90px;
+  }
+  .nav-btn:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); }
+  .nav-btn:disabled { opacity: 0.4; cursor: default; }
+  .nav-btn.primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+  }
+  .nav-btn.primary:hover:not(:disabled) { background: #1f3f2b; }
+  .nav-counter {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.4;
+  }
+  /* RESULT SCREEN */
+  .result-screen {
+    padding: 20px 0 80px;
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .result-hero {
+    background: var(--primary);
+    color: #fff;
+    border-radius: 16px;
+    padding: 30px 24px;
+    text-align: center;
+    margin: 20px 16px 14px;
+    box-shadow: var(--shadow);
+  }
+  .result-hero h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+  .result-big {
+    font-size: 64px;
+    font-weight: 700;
+    line-height: 1;
+    margin: 10px 0 6px;
+  }
+  .result-sub {
+    font-size: 15px;
+    opacity: 0.85;
+    margin-bottom: 14px;
+  }
+  .result-msg {
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .rounds-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    padding: 0 16px;
+    margin-bottom: 14px;
+  }
+  .r-cell {
+    background: var(--card);
+    border-radius: 10px;
+    padding: 10px 6px;
+    text-align: center;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .r-cell .r-num { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .r-cell .r-score { font-size: 20px; font-weight: 700; }
+  .r-cell.ok { border-color: #a3d4b5; }
+  .r-cell.ok .r-score { color: var(--correct); }
+  .r-cell.fail { border-color: #f0b0b0; }
+  .r-cell.fail .r-score { color: var(--wrong); }
+  .result-actions {
+    padding: 0 16px;
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+  }
+  .result-actions button {
+    padding: 14px;
+    border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Source Sans 3', sans-serif;
+    transition: all 0.15s;
+  }
+  .btn-restart { background: var(--primary); color: #fff; }
+  .btn-restart:hover { background: #1f3f2b; }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    color: var(--muted);
+    padding: 0 16px;
+    margin-bottom: 10px;
+    margin-top: 16px;
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const ALL_QUESTIONS = [
+[
+{q:"Para ser pastor, segundo a disciplina, é necessário:",opts:["Apenas ter talento natural para liderar","Passar por um processo de desenvolvimento físico, emocional, espiritual e intelectual","Ser escolhido pela maioria dos membros da Igreja","Ter diploma de curso superior em teologia"],ans:1,exp:"O texto afirma que é necessário todo um processo de desenvolvimento físico, emocional, espiritual e intelectual para que alguém esteja pronto para assumir o pastoreio."},
+{q:"Qual das afirmações abaixo é CORRETA sobre o ministério pastoral?",opts:["O pastor é funcionário da Igreja como outro funcionário qualquer","Qualquer pessoa que quiser pode ser pastor","O pastor é um ofício humano, mas de origem e capacitação divina","O pastor é escolhido somente pela liderança sênior"],ans:2,exp:"O ministério pastoral é um ofício humano, mas de origem e capacitação divina — não é apenas uma profissão como qualquer outra."},
+{q:"Quais são os três tipos de pastor encontrados no contexto evangélico?",opts:["O que prega bem, o que administra bem e o que cuida do rebanho","O que se faz pastor, o que é feito por outros homens e o que é feito por Deus","O vocacionado, o seminarista e o missionário","O bispo, o presbítero e o diácono"],ans:1,exp:"O livro classifica três tipos: aquele que se faz pastor (por esforço próprio), aquele que é feito por outros homens (apadrinhamento) e aquele que é feito por Deus (chamado divino)."},
+{q:"O 'pastor que se faz' é caracterizado por:",opts:["Depender totalmente de Deus em suas decisões","Galgar posições ministeriais por esforços pessoais e qualificações próprias","Ser constantemente ungido pelo Espírito Santo","Ter profunda humildade e desprendimento de posição"],ans:1,exp:"Esse tipo de pastor usa esforços pessoais, estudo, dons e habilidades para ascender na hierarquia da Igreja, como em uma empresa."},
+{q:"Por que o 'pastor que se faz' tende a ser inseguro?",opts:["Porque não tem formação teológica suficiente","Por causa da falta de vocação, sente-se em competição constante","Por não ter apoio da família","Porque a Igreja não reconhece seu trabalho"],ans:1,exp:"Por falta de vocação, ele sente que alguém pode 'roubar' seu rebanho, vivendo em permanente conflito e competição."},
+{q:"O 'pastor feito pelos homens' chega ao ministério por:",opts:["Chamado específico de Deus e confirmação da Igreja","Apadrinhamento, sem direção divina clara na escolha","Experiências místicas e visões sobrenaturais","Concurso ou eleição democrática da congregação"],ans:1,exp:"Essas pessoas chegam ao ministério por apadrinhamento, sem que Deus os tenha chamado para o pastoreio."},
+{q:"Pastores feitos pelos homens tendem a:",opts:["Tomar decisões firmes baseadas na Palavra","Depender dos homens e agradar à maioria em suas decisões","Priorizar o crescimento espiritual do rebanho","Ser independentes e corajosos na pregação"],ans:1,exp:"Esses pastores tornam-se dependentes dos homens, sempre procurando agradar e considerando o que 'os outros vão pensar'."},
+{q:"A concepção do 'pastor feito por Deus' ocorre em três fases:",opts:["Chamado, Consagração e Ordenação","Escolha, Chamado e Capacitação","Conversão, Batismo e Unção","Oração, Jejum e Estudo"],ans:1,exp:"O processo é efetuado em três fases: Escolha (de Deus), Chamado (comunicado ao espírito) e Capacitação (equipamento para o ministério)."},
+{q:"Qual característica principal distingue o 'pastor feito por Deus'?",opts:["Nunca comete erros doutrinários","Depende de Deus e busca sempre agradar ao Senhor, mesmo ferindo vontades pessoais","Tem sempre o maior templo e a maior congregação","É o mais estudado e intelectualmente preparado"],ans:1,exp:"Esse pastor será dependente de Deus, orará, estudará a Bíblia e buscará agradar a Deus acima de qualquer interesse pessoal ou de terceiros."},
+{q:"O que Paulo afirma em Efésios 4.11,12 sobre os pastores?",opts:["São os únicos com autoridade para batizar","São dados como presente de Deus para a edificação da Igreja","Devem ser eleitos democraticamente pela congregação","São superiores aos demais ministérios cristãos"],ans:1,exp:"Paulo diz que esses ministros são dados como presente de Deus para a edificação de Sua Igreja."}
+],
+[
+{q:"Segundo os princípios bíblicos, qual é a principal necessidade do rebanho do Senhor?",opts:["Crescer numericamente a todo custo","Ser cuidado e protegido pelo pastor como servo de Deus","Construir templos maiores e mais bonitos","Arrecadar fundos para missões internacionais"],ans:1,exp:"O Senhor Jesus veio para constituir uma grande família para Deus, e esse rebanho precisa ser cuidado — é necessidade fundamental do povo de Deus."},
+{q:"Em Jeremias 50.6,7, o que Deus diz sobre as ovelhas perdidas?",opts:["As ovelhas são responsáveis por se perderem","Os pastores as fizeram errar e se esqueceram de seu lugar de repouso","O povo pecou e por isso foi abandonado","Os adversários são os únicos culpados pela dispersão"],ans:1,exp:"Deus diz: 'as ovelhas perdidas têm sido o meu povo; os seus pastores as fizeram errar, e voltaram aos montes...'"},
+{q:"Em Ezequiel 34.6,8, qual é a acusação de Deus contra os pastores?",opts:["Que construíram igrejas sem autorização divina","Que os pastores não procuraram as ovelhas e as entregaram às feras","Que cobraram dízimos excessivos do povo","Que introduziram heresias doutrinárias"],ans:1,exp:"Deus afirma que as ovelhas foram entregues a toda fera do campo por falta de pastor, e os pastores não as procuraram."},
+{q:"O que Jesus sentiu ao ver a multidão em Marcos 6.34?",opts:["Admiração pela fé demonstrada","Compaixão, porque eram como ovelhas que não têm pastor","Tristeza por causa da incredulidade","Entusiasmo para realizar mais milagres"],ans:1,exp:"'Jesus descendo do barco, viu uma grande multidão e teve compaixão deles, porque eram como ovelhas que não têm pastor.'"},
+{q:"Qual é o papel do pastor em relação ao perigo espiritual do rebanho?",opts:["Ignorar ameaças externas e focar no crescimento","Prover proteção contra o diabo, que age como lobo devorador","Ensinar o rebanho a se defender sozinho","Denunciar publicamente os inimigos da Igreja"],ans:1,exp:"O diabo funciona como um lobo devorador à caça das ovelhas. O pastor é servo de Deus que deve prover proteção do rebanho."},
+{q:"A base bíblica da Teologia Pastoral está fundamentada principalmente em:",opts:["Tradições eclesiásticas e concílios históricos","A Palavra de Deus, que molda o comportamento do pastor","Os escritos dos Pais da Igreja","A experiência pessoal do pastor ao longo dos anos"],ans:1,exp:"A Palavra de Deus traz ensinamentos sobre o exercício do ministério pastoral — ela molda o comportamento do pastor no desempenho de sua função."},
+{q:"A 'liberdade' que o pastor deve promover se refere a:",opts:["Liberdade política e social dos membros","Liberdade espiritual — libertar as pessoas das amarras do pecado e do diabo","Liberdade financeira por meio da prosperidade","Liberdade para cada um interpretar a Bíblia como quiser"],ans:1,exp:"O sistema do mundo prende as pessoas ao pecado. O pastor deve promover a liberdade espiritual — libertar como Cristo libertou."},
+{q:"A 'espiritualidade' no ministério pastoral envolve:",opts:["Apenas a prática de jejum e oração pessoal","Promover um ambiente espiritual com banho de louvor, oração e estudo da Palavra","Realizar milagres e sinais para confirmar o ministério","Estudar exclusivamente teologia sistemática"],ans:1,exp:"O pastor deve promover na igreja um ambiente espiritual — banho de louvor, pregação, oração — para que as ovelhas cresçam espiritualmente."},
+{q:"A 'cura' no ministério pastoral envolve:",opts:["Apenas curas físicas e milagres","Cuidar de doenças físicas, emocionais e espirituais, aconselhando e orando","Encaminhar todos os problemas para médicos seculares","Realizar rituais especiais de libertação"],ans:1,exp:"Existem vários tipos de doenças — físicas, emocionais e espirituais. O conselho e a Bíblia são instrumentos fundamentais para a cura."},
+{q:"Qual é o papel do pastor em relação ao 'rebanho' segundo a base bíblica?",opts:["Ser o dono das ovelhas e decidir tudo por elas","Ser servo de Deus que provê proteção, cuidado e os meios para que cada crente viva como nova criatura","Ser apenas pregador e deixar a administração para os diáconos","Ser intermediário entre Deus e os fiéis em todos os assuntos"],ans:1,exp:"O pastor é servo de Deus que deve prover proteção e os meios necessários para que cada crente viva como uma nova criatura."}
+],
+[
+{q:"O Senhor Jesus cuida do rebanho de Deus através do ministério de quem?",opts:["Apenas dos apóstolos e profetas","Dos pastores que Ele mesmo escolhe e capacita","De todos os membros igualmente sem distinção","Exclusivamente dos bispos e superintendentes"],ans:1,exp:"O Senhor Jesus cuida de Seu rebanho através do ministério pastoral — pastores escolhidos e capacitados por Ele."},
+{q:"O que acontece com as pessoas que são escolhidas por Jesus para ser pastores?",opts:["Automaticamente deixam de ter problemas pessoais","Precisam do consentimento humano e submissão ao Espírito Santo no processo","Recebem riqueza material como confirmação do chamado","São imunes a tentações e pecados após a consagração"],ans:1,exp:"A parte humana no processo é o consentimento e a vontade — aceitação e submissão a Deus cooperando com o Espírito Santo."},
+{q:"Por que o pastor deve ser dependente de Deus para cuidar das ovelhas?",opts:["Porque os membros exigem isso como condição de obediência","Porque sem Deus não consegue entender as necessidades únicas de cada ovelha","Porque a Igreja não paga salário suficiente","Por tradição histórica do ministério eclesiástico"],ans:1,exp:"Sem Deus, o pastor não consegue entender e atender às necessidades únicas de cada ovelha. O cuidado pastoral é sobrenatural."},
+{q:"O 'discernimento' é uma capacidade pastoral importante porque:",opts:["Permite ao pastor saber quem dá mais dízimos","Ajuda a entender as coisas do Espírito que não são compreendidas naturalmente","É uma habilidade acadêmica adquirida no seminário","Permite identificar e excluir membros problemáticos"],ans:1,exp:"O discernimento permite ao pastor entender as coisas do Espírito, que as pessoas naturais não conseguem perceber — é capacidade espiritual."},
+{q:"Segundo o texto, qual é a principal diferença entre pastores e líderes seculares?",opts:["Pastores não precisam de inteligência — apenas fé","Pastores têm sentimentos comuns aos de Cristo, o Bom Pastor","Pastores recebem autoridade automática por ordenação","Pastores são superiores a todos os outros ministérios"],ans:1,exp:"Por serem chamados por Deus para o santo ofício pastoral, conseguem sentimentos comuns aos de Cristo, o Bom Pastor."},
+{q:"Quando o Senhor Jesus decide quem será pastor, Ele:",opts:["Consulta os líderes da denominação para confirmar","Escolhe a pessoa e a chama por um processo íntimo com o Espírito Santo","Usa sonhos e visões exclusivamente para comunicar o chamado","Aguarda que a pessoa se apresente voluntariamente"],ans:1,exp:"A decisão de ser pastor não é humana — é um processo íntimo do Espírito Santo com o homem, envolvendo Escolha, Chamado e Capacitação."},
+{q:"Por que ninguém pode se tornar pastor apenas pela própria decisão?",opts:["Porque a Igreja proíbe auto-candidaturas","Porque o pastorado não é uma opção humana, mas um chamado divino sobrenatural","Porque exige muitos anos de estudo formal","Porque a congregação deve votar para confirmar"],ans:1,exp:"Ser pastor não é uma opção humana — é um chamado específico de Deus, uma ação sobrenatural. Sem esse chamado, o trabalho é inútil."},
+{q:"O que significa 'pastor se tornar empregado, sócio e amigo de Deus'?",opts:["Que o pastor recebe salário de Deus diretamente","Que o pastor trabalha nos objetivos e propósitos de Deus como parceiro","Que o pastor não precisa de salário da Igreja","Que a relação com Deus é apenas profissional"],ans:1,exp:"O texto diz que 'pastor é tornar-se empregado, sócio e amigo de Deus em seus objetivos e propósitos' — é parceria total com Deus."},
+{q:"O fundamental para o bem estar do rebanho de Deus é:",opts:["Ter um templo grande e estruturado","O pastor ter caráter cristão e cuidado genuíno pelas ovelhas","Ter programação intensa de eventos e cultos","Arrecadar recursos financeiros suficientes"],ans:1,exp:"O fundamental é que o pastor tenha caráter cristão íntegro e cuidado genuíno pelo rebanho — isso é o bem-estar do povo de Deus."},
+{q:"Em João 10.16, Jesus menciona 'outras ovelhas'. Isso representa:",opts:["Membros de outras denominações que devem ser ignorados","Pessoas além do contexto inicial que também serão incluídas no rebanho de Deus","Ovelhas literais que Jesus cuidava no campo","Os pastores auxiliares que ajudam no ministério"],ans:1,exp:"As 'outras ovelhas' representam pessoas além do contexto imediato que também integrarão o único rebanho sob o único Pastor."}
+],
+[
+{q:"O 'chamado pelo Senhor Jesus' envolve capacitação porque:",opts:["Ninguém nasce com as habilidades necessárias para o ministério","O Senhor não chama sem equipar — a capacitação é parte integral do chamado","A Igreja exige certificados antes da ordenação","O seminário é o único lugar onde se recebe capacitação"],ans:1,exp:"Ninguém tem ou pode obter capacidade para o pastorado sem ser chamado pelo Senhor. A capacitação é parte do chamado — Deus chama e equipa."},
+{q:"A 'capacidade adquirida pela herança' inclui:",opts:["Apenas bens materiais herdados dos pais","Habilidades naturais transmitidas pela família, como liderança e inteligência","Títulos ministeriais passados de pai para filho automaticamente","Experiências negativas que ensinam o que não fazer"],ans:1,exp:"A pessoa traz da família capacidades como liderança, inteligência, habilidades de relacionamento — herança que o Senhor usa no ministério."},
+{q:"A 'oratória' como capacidade pastoral é importante porque:",opts:["Determina o tamanho da congregação que o pastor terá","Permite ao pastor ter boa comunicação e transmitir as ideias da Bíblia com clareza","É o critério principal para escolha de pastores nas denominações","Substitui a necessidade de estudo bíblico aprofundado"],ans:1,exp:"A oratória permite ao pastor comunicar com clareza, transmitindo inteligentemente as ideias do Espírito Santo para o rebanho."},
+{q:"A 'LIDERANÇA' como capacidade pastoral baseia-se principalmente em:",opts:["Posição hierárquica e autoridade eclesiástica","Exemplo — o bom líder é seguido pelo exemplo que dá, com integridade e visão","Carisma pessoal e personalidade forte","Quantidade de anos no ministério"],ans:1,exp:"A liderança bíblica imposta pelo líder — sua integridade, visão e exemplo — é a base. A liderança se desenvolve pelo exemplo."},
+{q:"Sobre a INTELIGÊNCIA no ministério pastoral, o texto afirma que:",opts:["Apenas pastores com alto QI são eficazes","Todo ser humano possui inteligência e o Espírito Santo a potencializa","Inteligência acadêmica é mais importante que espiritual","Pastores inteligentes devem liderar e os menos dotados devem servir"],ans:1,exp:"Toda pessoa possui um determinado coeficiente de inteligência (QI), e o Espírito Santo a desenvolve para servir melhor ao Senhor."},
+{q:"A 'capacidade adquirida pela experiência' significa:",opts:["Que apenas pastores idosos são capazes","Que ao longo do tempo, o pastor acumula experiências que se tornam instrumentos para aperfeiçoar seu ministério","Que experiências ruins invalidam o ministério pastoral","Que a experiência substitui o estudo bíblico formal"],ans:1,exp:"A vida do pastor, com todas as situações, boas ou ruins, torna-se instrumento divino para aperfeiçoar a fim de servir melhor."},
+{q:"A 'PROVA' no processo de capacitação pastoral serve para:",opts:["Eliminar os candidatos mais fracos","Verificar a autenticidade do chamado e fortalecer o ministério","Humilhar o pastor diante da congregação","Mostrar à denominação quem merece ser promovido"],ans:1,exp:"A prova serve para verificar a autenticidade do chamado — pastores chamados por Deus superam as provas com Seu auxílio."},
+{q:"A 'TRIBULAÇÃO' no ministério pastoral:",opts:["Indica que o pastor está fora da vontade de Deus","Faz parte do processo de capacitação e amadurecimento espiritual","É castigo por algum pecado cometido","Deve ser evitada com uma vida de fé positiva"],ans:1,exp:"A tribulação faz parte do processo — o pastor chamado por Deus foi chamado para este ofício mesmo diante das dificuldades."},
+{q:"O Senhor escolhe algumas 'ovelhas' do rebanho para desenvolver certas capacidades. Por quê?",opts:["Para criar uma elite espiritual dentro da Igreja","Para que possam crescer e depois ajudar a apascentar o rebanho como pastores","Para mostrarem aos demais como servir corretamente","Para receberem bênçãos especiais em primeiro lugar"],ans:1,exp:"O Senhor escolhe algumas ovelhas e lhes dá capacidades específicas para que sejam pastores e apascentem o rebanho."},
+{q:"Por que nenhuma escola teológica pode 'produzir' pastores de verdade?",opts:["Porque as escolas teológicas não têm qualidade suficiente","Porque a capacidade para produzir pastor é exclusiva do Senhor Jesus","Porque o estudo formal atrapalha a unção divina","Porque pastores verdadeiros não precisam de formação"],ans:1,exp:"Nenhuma escola teológica pode produzir um pastor — essa capacidade é exclusiva do Senhor Jesus. As escolas só desenvolvem o que Ele já chamou."}
+],
+[
+{q:"O pastor chamado por Deus deve ter como postura fundamental ser:",opts:["Dono da Igreja e das ovelhas","Ministro de Deus a serviço do Seu Reino","Gerente da organização religiosa","Representante da denominação perante os membros"],ans:1,exp:"A postura do pastor deve ser de Ministro de Deus a serviço do Seu Reino — não é dono, mas servo do Senhor."},
+{q:"A 'prudência' no caráter do pastor é exigida porque:",opts:["Deus é prudente e exige a mesma característica de Seu servo","Membros da Igreja cobram prudência como requisito","Prudência é exigida pela lei civil para líderes religiosos","A denominação premia pastores prudentes com promoções"],ans:0,exp:"Deus é fiel, e para um bom relacionamento com Deus, é exigência que o pastor também seja fiel, prudente e íntegro."},
+{q:"O relacionamento do pastor com Deus nasce de:",opts:["Uma compatibilidade de propósito e adequação da vontade do pastor à vontade de Deus","Uma experiência mística única e irrepetível","A aprovação do conselho da Igreja","A conclusão do curso de teologia"],ans:0,exp:"Nasce de uma compatibilidade de propósito — adequação da vontade do homem à vontade de Deus — daí nasce o bom relacionamento."},
+{q:"Deus quer um rebanho que:",opts:["Cresça a qualquer custo, mesmo sem qualidade","Cresça com qualidade — não basta ser grande se não for sadio nem forte","Produza riqueza material para o reino","Seja o maior em número na cidade"],ans:1,exp:"Deus quer um rebanho que cresça com qualidade. Não basta ser grande se não for sadio, nem bonito se não for forte."},
+{q:"Em 1 Coríntios 1.1,2, Paulo descreve os pastores como:",opts:["Chefes e supervisores da obra","Ministros de Cristo e despenseiros dos mistérios de Deus","Donos das igrejas locais","Representantes do Sumo Pastor nos territórios"],ans:1,exp:"'Assim, pois, que os homens nos considerem como ministros de Cristo, e despenseiros dos mistérios de Deus.'"},
+{q:"A 'fidelidade' no caráter do pastor exige que ele lance fora:",opts:["Membros que causam problemas","A traição, o engano, a mentira e toda espécie de farsa","A busca por crescimento numérico","Relacionamentos com pessoas de fora da Igreja"],ans:1,exp:"O Senhor testificou a fidelidade — ela lança fora a traição, o engano, a mentira e toda espécie de farsa."},
+{q:"A postura de Ministro de Deus implica que o pastor:",opts:["É funcionário da Igreja e responde ao conselho","Coopera com Deus administrando a liderança em Sua Igreja como servo e por amor","É autônomo em suas decisões ministeriais","É subordinado apenas à liderança denominacional"],ans:1,exp:"O pastor coopera com Deus administrando a liderança em Sua Igreja — tomando decisões no tratamento das ovelhas sempre como servo e por amor."},
+{q:"O equilíbrio no relacionamento pastor-Deus é necessário porque:",opts:["Excesso de espiritualidade afasta os membros","Sem equilíbrio, o pastor não consegue exercer suas funções e provar sustento no tempo certo","A Igreja cobra resultados práticos e não apenas espiritualidade","A denominação avalia o equilíbrio para promover pastores"],ans:1,exp:"O pastor deve manter equilíbrio para que possa exercer suas funções e provar sustento no tempo certo — alma, corpo e espírito equilibrados."},
+{q:"Qual deve ser a principal motivação do pastor?",opts:["O crescimento numérico da Igreja","Amor ao Senhor Jesus e ao Seu rebanho","O reconhecimento e prestígio ministerial","A remuneração e os benefícios do ministério"],ans:1,exp:"A principal motivação do pastor deve ser o amor ao Senhor Jesus Cristo e ao Seu rebanho — amor que impulsiona o serviço genuíno."},
+{q:"A 'nobre condição' para o progresso ministerial inclui:",opts:["Ter muitas posses e templo próprio","Manter perseverança, não desistir e ter boa atitude — como indicado em 2Tm 3.12","Ser o pastor mais jovem da denominação","Realizar o maior número de batismos por ano"],ans:1,exp:"A nobre condição inclui perseverança, não desistir, manter boa atitude — fundamentais para o progresso ministerial ao ritmo de Deus."}
+],
+[
+{q:"O relacionamento do pastor com sua família é fundamental porque:",opts:["A família supervisiona o trabalho pastoral","Se ele não governa bem sua própria casa, como cuidará da Igreja de Deus? (1Tm 3.4,5)","A família representa a Igreja perante a sociedade","O desempenho familiar determina o salário do pastor"],ans:1,exp:"Paulo pergunta: 'se alguém não sabe governar a própria casa, como cuidará da Igreja de Deus?' — a família é prova da capacidade pastoral."},
+{q:"O relacionamento familiar mais importante para o pastor é com:",opts:["Sua denominação e superiores eclesiásticos","Esposa e filhos — o resultado mais importante do pastor é o bem estar da família","Seus pais e avós espirituais","Os membros mais antigos e fiéis da Igreja"],ans:1,exp:"O resultado mais importante do pastor é o bem estar da família — ganhar o mundo e perder a família representa fracasso total."},
+{q:"Em relação à liderança em casa, o pastor deve:",opts:["Deixar a esposa liderar para praticar a humildade","Exercer uma liderança amorosa e respeitosa, sendo o exemplo e cabeça da família","Ser autoritário para mostrar à Igreja como deve ser a ordem","Tratar a família como um departamento da Igreja"],ans:1,exp:"O pastor deve liderar sua família com amor, respeito e exemplo — dentro de sua casa, o pastor deve ter autoridade exercida com graça e firmeza."},
+{q:"O relacionamento do pastor com a Igreja NÃO deve ser motivado por:",opts:["Amor genuíno ao rebanho","Força ou ganância — 'NÃO POR FORÇA, NÃO POR GANÂNCIA'","Serviço voluntário","Desejo de edificar os membros"],ans:1,exp:"A autoridade e liderança do pastor com a Igreja NÃO deve ser por força (imposição) nem por ganância (interesse financeiro) — mas por amor."},
+{q:"O relacionamento do pastor com a sociedade é importante porque:",opts:["Permite ao pastor fazer negócios e parceiros comerciais","O pastor representa o Senhor Jesus em todo o ambiente onde vive","Aumenta o número de membros da Igreja","Garante benefícios fiscais para a Igreja"],ans:1,exp:"O pastor representa o Senhor Jesus — é Seu embaixador na sociedade, em todo tempo e em todo lugar onde ele circula."},
+{q:"O problema de muitos pastores na sociedade é:",opts:["Excesso de envolvimento com questões políticas","Viver em sua própria 'bolha' sem amizades reais fora da Igreja","Falar demais sobre temas religiosos no trabalho","Não ter formação acadêmica suficiente para o diálogo"],ans:1,exp:"O problema é que muitos pastores vivem em suas próprias mentes, sem nenhuma amizade com a vida real — são teóricos que não conseguem se expressar."},
+{q:"O 'ZELO' pastoral, do ponto de vista bíblico, significa:",opts:["Rigor punitivo com membros que erram","Cuidado e diligência no exercício do ministério — atitude e comprometimento","Controle da vida pessoal de cada ovelha","Fiscalização constante das finanças da Igreja"],ans:1,exp:"Zelo é cuidado, diligência, atitude de não apenas orientar pelo que 'deve' ser feito — é o comprometimento genuíno do pastor."},
+{q:"A 'VOLUNTARIEDADE' no ministério pastoral significa:",opts:["Trabalhar sem remuneração nenhuma","Servir de boa vontade, não por obrigação ou pressão — entregar 'tudo' ao chamado","Aceitar qualquer tarefa sem questionar a liderança","Voluntariar-se para todos os projetos da denominação"],ans:1,exp:"Paulo diz que tudo o que fazer, faça de coração como ao Senhor — a voluntariedade é servir 'TUDO' de coração ao Senhor."},
+{q:"A 'BOA VONTADE' como atitude pastoral implica:",opts:["Sempre concordar com o que a maioria decide","Servir com entusiasmo, continuidade e motivação genuína ao bem do rebanho","Nunca criticar ou corrigir membros para evitar conflitos","Ser simpático e bem-humorado em todas as situações"],ans:1,exp:"A boa vontade representa o esforço do pastor para ser o melhor que pode em cada circunstância, com entusiasmo e motivação genuína."},
+{q:"A 'CONDUTA EXEMPLAR' do pastor é baseada em:",opts:["Regras da denominação e tradição eclesiástica","O exemplo de Jesus Cristo como o maior modelo de conduta pastoral","Normas sociais e expectativas culturais locais","As orientações dos pastores mais experientes da região"],ans:1,exp:"A conduta exemplar do pastor é baseada no exemplo de Jesus — Ele viu o pai e fez o mesmo; o pastor deve ver a Jesus e fazer o mesmo."}
+],
+[
+{q:"O papel do pastor na sociedade hodierna é fundamentalmente:",opts:["Ser líder político da comunidade","Ser um representante do Senhor Jesus em todos os ambientes da vida","Ser o maior empresário da região","Controlar a vida cultural e intelectual da sociedade"],ans:1,exp:"O pastor é, fundamentalmente, representante do Senhor Jesus — chamado a viver uma relação íntima com Deus e próxima com as pessoas."},
+{q:"Por que o pastor é uma 'pessoa pública'?",opts:["Porque aparece na mídia com frequência","Porque lidera um grupo de pessoas e é reconhecido por sua função e presença na comunidade","Porque tem obrigação legal de se registrar como líder público","Porque a denominação o promove publicamente"],ans:1,exp:"O pastor sempre foi reconhecido entre as pessoas como alguém que tem um papel — é uma figura de liderança reconhecida na comunidade."},
+{q:"O 'papel do pastor dentro de uma relação com Deus' exige:",opts:["Que ele viva em reclusão e isolamento para manter a santidade","Uma relação íntima com Deus que se reflete em vocação, ação e vida de acordo com Deus","Que realize jejuns prolongados de forma pública","Que tenha experiências sobrenaturais visíveis para confirmar seu chamado"],ans:1,exp:"O pastor vive dentro de uma relação com Deus — em virtude de seu chamado, encontra nela a força necessária para o cumprimento de seu papel."},
+{q:"O relacionamento pastoral com a família (4.2.0) é central porque:",opts:["A família serve como equipe de trabalho ministerial","A família é a primeira Igreja do pastor — se não cuida bem dela, compromete tudo o mais","A denominação avalia o pastor pela aparência da família","A família do pastor deve ser modelo de perfeição para todos"],ans:1,exp:"Em virtude dos muitos desafios, o pastor e a família precisam de uma relação íntima como casal — a vida pastoral exige parceria total do casal."},
+{q:"'Governar bem a própria casa' (1Tm 3.4,5) significa:",opts:["Manter ordem financeira e disciplina rígida","Ter filhos obedientes e ser referência de autoridade amorosa no lar","Ser o líder mais temido da família","Ter filhos pastores ou missionários"],ans:1,exp:"Governar bem a própria casa inclui ter filhos em submissão com toda a honestidade — é pré-requisito bíblico para o ministério pastoral."},
+{q:"O problema do pastor que não cuida da família é que:",opts:["Perde credibilidade apenas com a família imediata","Compromete o ministério inteiro, pois quem não pode cuidar do menor não pode cuidar do maior","Pode ser removido do ministério pela denominação","Fica sem apoio financeiro da família"],ans:1,exp:"Se não consegue cuidar da família, não conseguirá cuidar da Igreja — a família é laboratório e prova do ministério pastoral."},
+{q:"A relação do pastor com a Igreja (3.3) deve ser fundamentada em:",opts:["Autoridade absoluta e inquestionável","Amor genuíno ao rebanho, serviço voluntário e boa vontade — NÃO POR FORÇA","Contratos formais e acordos denominacionais","Resultados numéricos e financeiros mensuráveis"],ans:1,exp:"A relação com a Igreja deve ser de amor genuíno, voluntariedade e boa vontade — nunca por força, ganância ou obrigação mercenária."},
+{q:"'DILIGÊNCIA' como característica pastoral significa:",opts:["Trabalhar muitas horas por dia sem descanso","Ser cuidadoso, ativo e perseverante no exercício do ministério","Fazer tudo rapidamente para atender mais pessoas","Ser o primeiro a chegar e o último a sair de todos os eventos"],ans:1,exp:"Diligência é ser cuidadoso, ativo e perseverante — o valor e a importância do trabalho, preparado para promover um encontro agradável com Deus."},
+{q:"Por que é impossível o pastorado ser desempenhado na ociosidade?",opts:["Porque a denominação fiscaliza a produtividade","Porque o pastorado exige presença constante, cuidado e dedicação que não permitem ociosidade","Porque membros reclamariam da falta de atividade","Porque a Bíblia proíbe explicitamente a ociosidade para pastores"],ans:1,exp:"O pastorado exige uma dedicação que torna impossível a ociosidade — é um chamado de tempo integral na essência."},
+{q:"A principal diferença espiritual entre o pastor e um líder comum é:",opts:["O pastor tem mais autoridade oficial","O pastor tem uma experiência pessoal com Deus que forma a base de todo seu ministério","O pastor frequentou mais anos de seminário","O pastor foi votado pela maioria da congregação"],ans:1,exp:"O pastor tem uma relação íntima com Deus — essa experiência pessoal é a base e fonte de toda sua capacidade ministerial."}
+],
+[
+{q:"A 'Igreja' (Ekklesia), segundo Millard J. Erickson, originalmente referia-se a:",opts:["Um prédio religioso dedicado ao culto","Aqueles que foram tirados de dentre os cidadãos — uma assembleia convocada","O conjunto de todas as denominações cristãs","Apenas os líderes e sacerdotes consagrados"],ans:1,exp:"No grego clássico, Ekklesia referia-se àqueles que foram tirados de dentre os cidadãos de uma cidade para uma assembleia."},
+{q:"No Novo Testamento, 'Igreja' tem dois sentidos principais:",opts:["Denominação e congregação local","Universal (todos os crentes em Cristo) e local (grupo de crentes numa localidade)","Templo físico e comunidade espiritual","Clero e laicato"],ans:1,exp:"A palavra Igreja denota todos os crentes em todas as épocas (universal) e, com maior frequência, um grupo de crentes em dada localidade geográfica."},
+{q:"A Igreja — onde o pastor atua — é definida como:",opts:["Um sistema hierárquico de autoridade eclesiástica","O conjunto dos crentes que se reúnem e, ao mesmo tempo, a própria reunião deles","Uma organização sem fins lucrativos registrada pelo Estado","Um clube social de pessoas com crenças semelhantes"],ans:1,exp:"A Igreja é o conjunto dos crentes que se reúnem e, ao mesmo tempo, a própria reunião deles — convocados para fora do mundo."},
+{q:"Por que se estudar Teologia Pastoral é importante para os membros?",opts:["Para que possam avaliar e criticar o trabalho do pastor","Porque todos nós somos pastores em potencial ou temos pastores, e é bom conhecer a obra e a pessoa","Para se prepararem para eventualmente substituir o pastor","Para cumprir requisito curricular do seminário"],ans:1,exp:"Todos estamos envolvidos com nossos pastores — somos pastores ou temos potencial para tanto. Conhecer a obra é fundamental."},
+{q:"A Teologia Pastoral estuda:",opts:["Apenas a história das denominações cristãs","O que a Bíblia diz sobre o pastor — sua obra, modo de vida e relacionamentos","Técnicas de gestão eclesiástica e crescimento de Igreja","A comparação entre diferentes sistemas teológicos"],ans:1,exp:"Ao estudarmos Teologia Pastoral, estamos na descoberta bíblica sobre o pastor: o que a Bíblia diz, sua obra e modo de vida."},
+{q:"A formação de um pastor deve contemplar:",opts:["Apenas conhecimento doutrinário e bíblico","Desenvolvimento físico, emocional, espiritual e intelectual","Habilidades de oratória e comunicação pública","Gestão financeira e administrativa"],ans:1,exp:"Todo um processo de desenvolvimento físico, emocional, espiritual e intelectual é necessário para assumir o pastoreio de uma Igreja."},
+{q:"Encarar o ministério como profissão é problemático porque:",opts:["Pastores profissionais ganham salários altos e isso gera inveja","O trabalho pastoral requer amor e cuidado recíproco, não relação trabalhista","A legislação trabalhista não reconhece o pastorado","Profissionalismo diminui a espiritualidade do pastor"],ans:1,exp:"Não existe relação trabalhista no pastoreio — é relação de amor e cuidado recíproco entre pastor, Igreja e Deus."},
+{q:"O chamado pastoral pode se revelar:",opts:["Apenas de forma dramática e instantânea","Gradualmente, com o passar do tempo, tornando-se cada vez mais evidente","Somente através de sonhos e visões","Por meio de eleição denominacional"],ans:1,exp:"Com o passar do tempo, o chamado começou a ser evidente — isso ilustra que o chamado pode se revelar gradualmente."},
+{q:"A Igreja 'espiritualmente é um corpo invisível'. Na prática local, ela é:",opts:["Apenas uma abstração teológica sem forma concreta","Um grupo específico e identificável da assembleia dos Santos numa localidade","Uma organização hierárquica com sede central","Uma fusão de todas as denominações num território"],ans:1,exp:"Espiritualmente é um corpo invisível, mas em âmbito local é um grupo específico, da assembleia dos Santos em determinado lugar."},
+{q:"Qual é o propósito central da disciplina de Teologia Pastoral?",opts:["Avaliar diferentes denominações e seus sistemas doutrinários","Conhecer quem é o pastor e como devem ser seus relacionamentos com Deus, família, rebanho e mundo","Treinar administradores para igrejas em crescimento","Estudar a história do protestantismo no Brasil"],ans:1,exp:"A disciplina trata da formação do pastor segundo o coração de Deus — quem é pastor e como devem ser seus relacionamentos."}
+],
+[
+{q:"O relacionamento do pastor com a sociedade exige que ele seja reconhecido como:",opts:["Um líder político influente na cidade","Um homem íntegro que representa o Senhor Jesus em todos os ambientes","Um especialista em assuntos religiosos apenas","Um empresário de sucesso que também prega"],ans:1,exp:"O pastor é o representante do Senhor Jesus — não apenas com os da Igreja, mas com todos os que ele encontra na sociedade."},
+{q:"Por que o pastor deve conhecer a lei civil?",opts:["Para ter vantagens legais sobre outros líderes","Para orientar e proteger os membros em situações legais","Para ter formação universitária em direito","Para representar juridicamente os membros em processos"],ans:1,exp:"O pastor aprova e conhece a lei para ajudar as pessoas que estão sob sua supervisão — é difícil desconhecê-la na função pastoral."},
+{q:"Por que o pastor deve ser o mesmo em casa e fora de casa?",opts:["Para evitar conflitos com a família","Porque a autenticidade e integridade não mudam conforme o ambiente — ele representa a Cristo em todos os lugares","Para satisfazer a expectativa dos membros","Porque a denominação fiscaliza sua conduta em todos os ambientes"],ans:1,exp:"O pastor deve ser o mesmo em todos os ambientes — sua integridade e autenticidade não podem variar conforme a audiência."},
+{q:"O 'relacionamento com a comunidade' exige que o pastor:",opts:["Mantenha distância para preservar a santidade","Esteja presente e participe de sua comunidade, sendo referência de amor e serviço","Limite seus contatos apenas a crentes","Evite envolvimento em questões sociais por serem 'mundanas'"],ans:1,exp:"O pastor deve estar inserido em sua comunidade — presente e participativo, sendo referência de amor e serviço ao próximo."},
+{q:"O pastor é referência social quando:",opts:["Tem o maior número de seguidores nas redes sociais","Age com integridade, amor e serve como exemplo de vida cristã autentica no dia a dia","Tem o maior templo e a maior congregação da cidade","Aparece frequentemente na mídia local"],ans:1,exp:"O pastor é referência social quando age com integridade, amor e serve como exemplo de vida cristã autentica — sem theatralidade."},
+{q:"'Governar bem a própria casa' é aplicado ao pastor como:",opts:["Requisito opcional dependendo da denominação","Pré-requisito bíblico fundamental — quem não governa a casa não pode governar a Igreja","Ideal a ser buscado mas não exigido","Responsabilidade da esposa e não do pastor"],ans:1,exp:"Governar bem a casa é pré-requisito bíblico fundamental — está diretamente ligado à capacidade de governar e cuidar da Igreja."},
+{q:"'Reconhecer os caminhos do Senhor' significa:",opts:["Conhecer todos os atalhos geográficos da cidade","Entender a direção e vontade de Deus para o ministério e para as ovelhas","Seguir todas as tradições denominacionais sem questionar","Memorizar todos os textos bíblicos sobre orientação divina"],ans:1,exp:"Reconhecer os caminhos do Senhor significa entender a direção e vontade de Deus para o ministério — caminhar segundo Sua orientação."},
+{q:"O 'Conhecimento dos processos do mundo' é importante para o pastor porque:",opts:["Permite ao pastor fazer negócios com pessoas do mundo","O pastor precisa entender o contexto social para ministrar com relevância","É exigência das autoridades civis para o registro da Igreja","Permite ao pastor discutir política com autoridade"],ans:1,exp:"Entender os processos do mundo permite ao pastor ministrar com relevância — conhecer o contexto é fundamental para alcançar as pessoas."},
+{q:"Por que o pastor não pode ser desconhecido na sua própria comunidade?",opts:["Porque precisa de divulgação para crescer numericamente","Porque sua presença e influência são instrumentos de Deus para alcançar a comunidade","Porque a lei exige registro dos líderes religiosos","Porque membros se envergonham de um pastor desconhecido"],ans:1,exp:"O pastor deve ser conhecido em sua comunidade — é instrumento de Deus para alcançar pessoas que precisam do Evangelho ao redor."},
+{q:"A 'Demonstração do amor ao próximo' é característica pastoral essencial porque:",opts:["Aumenta o número de membros e o dízimo","O amor ao próximo é o segundo maior mandamento — fundamento do ministério e testemunho de Cristo","É exigido pelo estatuto da Igreja","Membros permanecerão apenas se sentirem amados"],ans:1,exp:"Amor ao próximo é o segundo maior mandamento — é fundamento de todo o ministério pastoral e testemunho vivo de Cristo no mundo."}
+],
+[
+{q:"Fazendo uma síntese geral, quantos tipos de pastor são descritos no material?",opts:["Dois: o chamado e o não chamado","Três: o que se faz, o feito por homens e o feito por Deus","Quatro: missionário, evangelista, presbítero e bispo","Cinco: de acordo com os dons espirituais"],ans:1,exp:"O livro classifica três tipos: aquele que se faz pastor (por esforço próprio), aquele feito por outros homens (apadrinhamento) e aquele feito por Deus."},
+{q:"Qual é a única fonte legítima de 'pastores verdadeiros' segundo o material?",opts:["Os seminários e faculdades de teologia","O chamado divino — a escolha, chamado e capacitação pelo Senhor Jesus","A tradição e sucessão apostólica","O voto da congregação local"],ans:1,exp:"A única fonte legítima de pastores verdadeiros é o chamado divino — Escolha, Chamado e Capacitação pelo próprio Senhor Jesus Cristo."},
+{q:"Qual dos relacionamentos pastorais é o mais fundamental de todos?",opts:["Com a denominação e seus líderes","Com Deus — pois de lá nasce a capacidade para todos os demais relacionamentos","Com a família imediata","Com a Igreja e o rebanho local"],ans:1,exp:"O relacionamento com Deus é o fundamento — dele nasce o amor, a capacidade e a motivação para todos os demais relacionamentos."},
+{q:"As três fases da formação do 'pastor feito por Deus' são (em ordem):",opts:["Oração, Jejum e Revelação","Escolha, Chamado e Capacitação","Conversão, Batismo e Consagração","Chamado, Estudo e Ordenação"],ans:1,exp:"As três fases são: Escolha (Deus escolhe), Chamado (comunica ao espírito) e Capacitação (equipa para o ministério)."},
+{q:"Os dois primeiros tipos de pastor (que se faz e feito por homens) são descritos como:",opts:["Modelos legítimos em contextos diferentes","Verdadeiras caricaturas de pastor que acarretam prejuízos ao Reino de Deus","Alternativas válidas quando não há pastor chamado disponível","Etapas de transição antes do verdadeiro chamado"],ans:1,exp:"Os dois primeiros são verdadeiras caricaturas de pastor — acarretam prejuízos enormes ao Reino de Deus e geram ovelhas doentes."},
+{q:"A LIDERANÇA do pastor, segundo o capítulo 2.5, deve ser baseada primariamente em:",opts:["Autoridade hierárquica e posição eclesiástica","Exemplo — 'Alguém que faz do Senhor voluntariamente' (Jz 18.10)","Poder de persuasão e comunicação","Recursos financeiros e estrutura institucional"],ans:1,exp:"A liderança baseia-se no exemplo — 'Alguém que faz do Senhor voluntariamente' — a liderança genuína é seguida pelo exemplo dado."},
+{q:"Os princípios bíblicos (capítulo 2) fundamentam que o pastor deve prover ao rebanho:",opts:["Somente pregação e ensino doutrinário","Liberdade espiritual, espiritualidade, cura e proteção contra o inimigo","Prosperidade material e bênçãos financeiras","Entretenimento e programação diversificada"],ans:1,exp:"O pastor deve prover ao rebanho: liberdade espiritual, ambiente de espiritualidade, cura (física, emocional e espiritual) e proteção."},
+{q:"A 'conduta exemplar' do pastor é baseada principalmente em:",opts:["Normas sociais e expectativas da comunidade","O exemplo de Jesus Cristo — ver o Pai e fazer o mesmo; o pastor vê a Jesus e imita","Regulamentos da denominação e tradição histórica","Aconselhamento dos pastores mais experientes"],ans:1,exp:"A conduta exemplar é baseada em Jesus — Ele via o Pai e fazia o mesmo. O pastor deve ver a Jesus e imitar Sua conduta."},
+{q:"A formação integral do pastor abrange:",opts:["Doutrinária, homilética e litúrgica","Física, emocional, espiritual e intelectual","Social, política, econômica e religiosa","Vocacional, acadêmica, ministerial e social"],ans:1,exp:"A formação integral do pastor envolve desenvolvimento físico, emocional, espiritual e intelectual — todas as dimensões do ser humano."},
+{q:"Qual é o grande perigo da frase 'Eu quero ser pastor'?",opts:["Demonstra falta de humildade e soberba espiritual","É muito perigoso pois ser pastor não é opção humana — é chamado divino sobrenatural","Pode ofender pastores já ordenados na denominação","Indica imaturidade espiritual que precisa ser trabalhada"],ans:1,exp:"É muito perigosa porque ser pastor não é uma opção humana, mas um chamado divino. Fazer do ministério um projeto pessoal é erro grave."}
+]
+];
+
+let state = {
+  round: 0,
+  qIdx: 0,
+  answers: ALL_QUESTIONS.map(r => new Array(r.length).fill(null)),
+  roundScores: new Array(10).fill(null),
+  screen: 'quiz'
+};
+
+function getStats() {
+  let c = 0, a = 0;
+  state.answers.forEach((r, ri) => r.forEach((v, qi) => {
+    if (v !== null) { a++; if (v === ALL_QUESTIONS[ri][qi].ans) c++; }
+  }));
+  return { c, a, total: 100 };
+}
+
+function getRoundScore(ri) {
+  const r = state.answers[ri];
+  if (r.every(v => v !== null)) {
+    return r.filter((v, qi) => v === ALL_QUESTIONS[ri][qi].ans).length;
+  }
+  return null;
+}
+
+function render() {
+  const root = document.getElementById('root');
+  if (state.screen === 'result') { root.innerHTML = buildResult(); return; }
+  root.innerHTML = buildQuiz();
+}
+
+function buildQuiz() {
+  const { c, a, total } = getStats();
+  const pct = Math.round(a / total * 100);
+  const q = ALL_QUESTIONS[state.round][state.qIdx];
+  const userAns = state.answers[state.round][state.qIdx];
+  const answered = userAns !== null;
+  const roundDone = state.answers[state.round].every(v => v !== null);
+  const isLast = state.qIdx === 9;
+  const isFirst = state.qIdx === 0 && state.round === 0;
+
+  let rndBtns = '';
+  for (let i = 0; i < 10; i++) {
+    const sc = getRoundScore(i);
+    let cls = 'rnd-btn';
+    if (i === state.round) cls += ' active';
+    else if (sc !== null) cls += sc >= 7 ? ' done-ok' : ' done-fail';
+    rndBtns += `<button class="${cls}" onclick="goRound(${i})">${i + 1}</button>`;
+  }
+
+  let opts = '';
+  q.opts.forEach((o, i) => {
+    let cls = 'opt-btn';
+    if (answered) {
+      if (i === q.ans) cls += ' correct';
+      else if (i === userAns) cls += ' wrong';
+      else cls += ' reveal';
+    }
+    opts += `<button class="${cls}" onclick="answer(${i})" ${answered ? 'disabled' : ''}>
+      <span class="opt-letter">${String.fromCharCode(65 + i)}</span>
+      <span>${o}</span>
+    </button>`;
+  });
+
+  let feedback = '';
+  if (answered) {
+    const ok = userAns === q.ans;
+    feedback = `<div class="feedback ${ok ? 'ok' : 'err'}">
+      <span class="feedback-icon">${ok ? '✓' : '✗'}</span>
+      <span><strong>${ok ? 'Correto!' : 'Incorreto.'}</strong> ${q.exp}</span>
+    </div>`;
+  }
+
+  const showNext = isLast && roundDone;
+  const nextAction = state.round < 9 ? `goRound(${state.round + 1})` : `showResult()`;
+  const nextLabel = state.round < 9 ? 'Próxima Rodada →' : 'Ver Resultado →';
+
+  return `
+    <div class="app-header">
+      <div>
+        <h1>Teologia Pastoral</h1>
+        <p>Simulado completo · 10 rodadas</p>
+      </div>
+      <div class="header-score">
+        <div class="score-num">${c}</div>
+        <div class="score-lbl">Acertos</div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+    <div class="round-nav">${rndBtns}</div>
+    <div class="stats-row">
+      <div class="stat-item"><div class="stat-val">${c}</div><div class="stat-lbl">Acertos</div></div>
+      <div class="stat-item"><div class="stat-val">${a}</div><div class="stat-lbl">Respondidas</div></div>
+      <div class="stat-item"><div class="stat-val">${total - a}</div><div class="stat-lbl">Restantes</div></div>
+      <div class="stat-item"><div class="stat-val">${a > 0 ? Math.round(c / a * 100) : 0}%</div><div class="stat-lbl">Aproveitamento</div></div>
+    </div>
+    <div class="main">
+      <div class="q-card">
+        <div class="q-badge">Rodada ${state.round + 1} &nbsp;·&nbsp; Questão ${state.qIdx + 1}/10</div>
+        <div class="q-text">${q.q}</div>
+        <div class="options">${opts}</div>
+        ${feedback}
+      </div>
+    </div>
+    <div class="nav-bottom">
+      <button class="nav-btn" onclick="prevQ()" ${isFirst ? 'disabled' : ''}>← Anterior</button>
+      <div class="nav-counter">
+        Rodada ${state.round + 1}/10<br>
+        <strong>${state.qIdx + 1} de 10</strong>
+      </div>
+      ${showNext
+        ? `<button class="nav-btn primary" onclick="${nextAction}">${nextLabel}</button>`
+        : `<button class="nav-btn" onclick="nextQ()" ${!answered || isLast ? 'disabled' : ''}>Próxima →</button>`
+      }
+    </div>`;
+}
+
+function buildResult() {
+  const { c, a } = getStats();
+  const pct = Math.round(c / 100 * 100);
+  const msg = pct >= 90 ? '🎉 Excelente domínio da matéria!' :
+    pct >= 70 ? '👍 Muito bom! Revise os pontos errados.' :
+    pct >= 50 ? '📖 Regular. Estude mais os tópicos fracos.' :
+    '🔄 Precisa revisar todo o conteúdo.';
+
+  let cells = '';
+  for (let i = 0; i < 10; i++) {
+    const sc = getRoundScore(i) || 0;
+    const ok = sc >= 7;
+    cells += `<div class="r-cell ${ok ? 'ok' : 'fail'}">
+      <div class="r-num">Rod. ${i + 1}</div>
+      <div class="r-score">${sc}/10</div>
+    </div>`;
+  }
+
+  return `
+    <div class="result-screen">
+      <div class="result-hero">
+        <h2>Resultado Final</h2>
+        <div class="result-big">${c}/100</div>
+        <div class="result-sub">${pct}% de aproveitamento</div>
+        <div class="result-msg">${msg}</div>
+      </div>
+      <p class="section-title">Desempenho por rodada</p>
+      <div class="rounds-grid">${cells}</div>
+      <div class="result-actions">
+        <button class="btn-restart" onclick="restart()">🔄 Refazer Simulado</button>
+      </div>
+    </div>`;
+}
+
+function answer(i) {
+  if (state.answers[state.round][state.qIdx] !== null) return;
+  state.answers[state.round][state.qIdx] = i;
+  render();
+}
+function nextQ() {
+  if (state.qIdx < 9) { state.qIdx++; render(); }
+}
+function prevQ() {
+  if (state.qIdx > 0) { state.qIdx--; render(); }
+  else if (state.round > 0) { state.round--; state.qIdx = 9; render(); }
+}
+function goRound(i) { state.round = i; state.qIdx = 0; render(); }
+function showResult() { state.screen = 'result'; render(); }
+function restart() {
+  state = {
+    round: 0, qIdx: 0,
+    answers: ALL_QUESTIONS.map(r => new Array(r.length).fill(null)),
+    roundScores: new Array(10).fill(null),
+    screen: 'quiz'
+  };
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

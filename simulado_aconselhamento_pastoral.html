@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado – Aconselhamento Pastoral</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --bg: #1a1208;
+    --surface: #231a0d;
+    --gold: #c9a227;
+    --gold-light: #e8c76a;
+    --cream: #f5ead6;
+    --cream-dim: #c8b99a;
+    --green: #2e6b4f;
+    --green-light: #4caf7a;
+    --red: #8b2020;
+    --red-light: #e05050;
+    --border: #3d2e12;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'Lora', Georgia, serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 60px;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(201,162,39,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 90%, rgba(46,107,79,0.07) 0%, transparent 50%);
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 36px;
+    max-width: 700px;
+  }
+
+  header .badge {
+    display: inline-block;
+    font-family: 'Lora', serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    padding: 4px 16px;
+    margin-bottom: 16px;
+    border-radius: 2px;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(26px, 5vw, 42px);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--cream);
+    margin-bottom: 8px;
+  }
+
+  header h1 span { color: var(--gold); }
+
+  header p {
+    font-size: 14px;
+    color: var(--cream-dim);
+    font-style: italic;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 24px;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--cream-dim);
+    margin-bottom: 8px;
+  }
+
+  .progress-bar-bg {
+    background: var(--border);
+    height: 6px;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 99px;
+    transition: width 0.5s ease;
+  }
+
+  /* Round indicator */
+  .round-dots {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+
+  .round-dot {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    border: 2px solid var(--border);
+    color: var(--cream-dim);
+    transition: all 0.3s;
+  }
+
+  .round-dot.done { background: var(--green); border-color: var(--green-light); color: #fff; }
+  .round-dot.active { background: var(--gold); border-color: var(--gold-light); color: var(--bg); }
+
+  /* Card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    max-width: 700px;
+    width: 100%;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+
+  .question-number {
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .question-text {
+    font-size: clamp(16px, 2.5vw, 19px);
+    line-height: 1.6;
+    color: var(--cream);
+    margin-bottom: 28px;
+    font-weight: 600;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+
+  .option-btn {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    color: var(--cream);
+    transition: all 0.2s;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    line-height: 1.5;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--gold);
+    background: rgba(201,162,39,0.08);
+  }
+
+  .option-btn .letter {
+    min-width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.2s;
+  }
+
+  .option-btn.correct {
+    border-color: var(--green-light);
+    background: rgba(46,107,79,0.2);
+    color: #fff;
+  }
+  .option-btn.correct .letter { background: var(--green-light); color: var(--bg); }
+
+  .option-btn.wrong {
+    border-color: var(--red-light);
+    background: rgba(139,32,32,0.2);
+    color: #ccc;
+  }
+  .option-btn.wrong .letter { background: var(--red-light); color: #fff; }
+
+  .option-btn:disabled { cursor: default; }
+
+  /* Feedback */
+  .feedback {
+    margin-top: 18px;
+    padding: 14px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct-fb { background: rgba(46,107,79,0.25); border-left: 3px solid var(--green-light); color: #a8e6c0; }
+  .feedback.wrong-fb { background: rgba(139,32,32,0.25); border-left: 3px solid var(--red-light); color: #f0a0a0; }
+
+  /* Buttons */
+  .btn {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    padding: 13px 32px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-gold {
+    background: var(--gold);
+    color: var(--bg);
+  }
+  .btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+  .btn-outline {
+    background: transparent;
+    border: 2px solid var(--gold);
+    color: var(--gold);
+  }
+  .btn-outline:hover { background: rgba(201,162,39,0.1); }
+
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 700px;
+    width: 100%;
+  }
+
+  /* Score card */
+  .score-card {
+    text-align: center;
+    padding: 40px 28px;
+  }
+
+  .score-big {
+    font-family: 'Playfair Display', serif;
+    font-size: 72px;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .score-label {
+    font-size: 14px;
+    color: var(--cream-dim);
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+
+  .score-verdict {
+    font-size: 20px;
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 20px;
+    color: var(--cream);
+  }
+
+  .score-bar-wrap {
+    background: var(--border);
+    height: 10px;
+    border-radius: 99px;
+    overflow: hidden;
+    margin: 0 auto 28px;
+    max-width: 300px;
+  }
+  .score-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 99px;
+    transition: width 1s ease 0.3s;
+  }
+
+  .round-history {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  .round-pill {
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .round-pill.high { background: rgba(46,107,79,0.3); color: var(--green-light); border: 1px solid var(--green-light); }
+  .round-pill.mid { background: rgba(201,162,39,0.2); color: var(--gold-light); border: 1px solid var(--gold); }
+  .round-pill.low { background: rgba(139,32,32,0.25); color: var(--red-light); border: 1px solid var(--red-light); }
+
+  /* Start screen */
+  .start-card {
+    text-align: center;
+    padding: 40px 28px;
+  }
+  .start-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    margin-bottom: 16px;
+    color: var(--gold);
+  }
+  .start-card p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--cream-dim);
+    margin-bottom: 28px;
+  }
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .info-box {
+    background: var(--border);
+    border-radius: 8px;
+    padding: 14px 8px;
+    font-size: 13px;
+  }
+  .info-box .num { font-family: 'Playfair Display', serif; font-size: 28px; color: var(--gold); display: block; }
+  .info-box .lbl { color: var(--cream-dim); font-size: 12px; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Teologia</div>
+  <h1>Simulado de<br><span>Aconselhamento Pastoral</span></h1>
+  <p>10 rodadas · 10 perguntas por rodada · 4 alternativas</p>
+</header>
+
+<!-- Start Screen -->
+<div class="card start-card" id="startScreen">
+  <h2>Bem-vindo ao Simulado!</h2>
+  <p>Este simulado cobre os principais temas do Aconselhamento Pastoral: ambiente e frequência, características do conselheiro, erros comuns, ética, procedimentos, personalidades, neuroses, ansiedade, depressão, culpa e muito mais.</p>
+  <div class="info-grid">
+    <div class="info-box"><span class="num">10</span><span class="lbl">Rodadas</span></div>
+    <div class="info-box"><span class="num">10</span><span class="lbl">Perguntas/Rodada</span></div>
+    <div class="info-box"><span class="num">100</span><span class="lbl">Total de Questões</span></div>
+  </div>
+  <button class="btn btn-gold" onclick="startQuiz()">Começar Simulado</button>
+</div>
+
+<!-- Quiz Screen -->
+<div id="quizScreen" class="hidden" style="width:100%;max-width:700px;display:flex;flex-direction:column;align-items:center;">
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span id="progressLabel">Rodada 1 / 10</span>
+      <span id="scoreLabel">Acertos: 0</span>
+    </div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+  </div>
+
+  <div class="round-dots" id="roundDots"></div>
+
+  <div class="card">
+    <div class="question-number" id="questionNumber">Questão 1 de 10</div>
+    <div class="question-text" id="questionText"></div>
+    <div class="options" id="optionsContainer"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-outline hidden" id="nextBtn" onclick="nextQuestion()">Próxima →</button>
+  </div>
+</div>
+
+<!-- Round End Screen -->
+<div class="card score-card hidden" id="roundEndScreen">
+  <div class="question-number" id="roundEndLabel">FIM DA RODADA 1</div>
+  <div class="score-big" id="roundScore">0/10</div>
+  <div class="score-label">acertos nesta rodada</div>
+  <div class="score-verdict" id="roundVerdict"></div>
+  <div class="score-bar-wrap"><div class="score-bar-fill" id="roundScoreBar" style="width:0%"></div></div>
+  <button class="btn btn-gold" id="nextRoundBtn" onclick="nextRound()">Próxima Rodada →</button>
+</div>
+
+<!-- Final Screen -->
+<div class="card score-card hidden" id="finalScreen">
+  <div class="question-number">SIMULADO CONCLUÍDO</div>
+  <div class="score-big" id="finalScore">0/100</div>
+  <div class="score-label">pontuação final</div>
+  <div class="score-verdict" id="finalVerdict"></div>
+  <div class="score-bar-wrap"><div class="score-bar-fill" id="finalScoreBar" style="width:0%"></div></div>
+  <p style="font-size:14px;color:var(--cream-dim);margin-bottom:16px;">Resultado por rodada:</p>
+  <div class="round-history" id="roundHistory"></div>
+  <button class="btn btn-gold" onclick="restartQuiz()">Refazer Simulado</button>
+</div>
+
+<script>
+const ALL_QUESTIONS = [
+  // RODADA 1 – O Aconselhamento Pastoral / Ouvir
+  [
+    {q:"O que é o Aconselhamento Pastoral, segundo o texto?", opts:["A capacidade de ouvir e orientar eficaz e eficientemente com o auxílio do Espírito Santo, através da Palavra de Deus","Um método exclusivamente psicológico de tratamento de transtornos mentais","Uma prática reservada apenas a psicólogos credenciados pela igreja","Um serviço prestado apenas em situações de crise aguda"], ans:0, fb:"O Aconselhamento Pastoral é definido como a capacidade de ouvir e orientar com o auxílio do Espírito Santo e da Palavra de Deus."},
+    {q:"Segundo Albert Friesen (2004), o aconselhamento é:", opts:["Uma técnica terapêutica cognitiva aplicada em grupo","Um relacionamento interpessoal no qual o conselheiro ajuda o indivíduo a ajustar-se consigo e com o meio em que vive","Um conjunto de regras morais impostas pela liderança pastoral","Um processo exclusivamente espiritual sem envolvimento emocional"], ans:1, fb:"Para Friesen, o aconselhamento é um relacionamento interpessoal que auxilia o indivíduo a ajustar-se consigo mesmo e com o ambiente."},
+    {q:"O aconselhamento preventivo tem como objetivo:", opts:["Tratar traumas já instalados após longos anos de vida","Antecipar-se à crise, fornecendo conhecimento para superá-la com menos dor","Substituir o tratamento psiquiátrico em todos os casos","Identificar membros problemáticos da congregação"], ans:1, fb:"O aconselhamento preventivo busca preparar as pessoas antes que a crise chegue, tornando a experiência menos dolorosa e traumática."},
+    {q:"Qual habilidade fundamental o conselheiro pastoral deve desenvolver?", opts:["Dar conselhos diretos e rápidos","A capacidade de ouvir e compreender a fala do outro","Memorizar versículos bíblicos para toda situação","Diagnosticar transtornos psiquiátricos"], ans:1, fb:"Ouvir é a habilidade central do aconselhamento pastoral – é a necessidade básica de saber escutar o outro."},
+    {q:"O que significa 'ouvir com neutralidade'?", opts:["Não demonstrar nenhum sentimento durante a sessão","Equilibrar o uso de sentimentos e razão ao ouvir, controlando as emoções liberadas","Permanecer completamente indiferente à situação do aconselhado","Evitar qualquer forma de empatia com o aconselhado"], ans:1, fb:"Ouvir com neutralidade envolve equilíbrio entre sentimento e razão, mantendo o controle emocional durante o processo."},
+    {q:"O que é 'ouvir com empatia'?", opts:["Concordar com tudo que o aconselhado diz","Sentir junto com o aconselhado, partilhando seus sentimentos de forma controlada","Criticar suavemente as atitudes do aconselhado","Apenas ouvir sem nenhuma resposta emocional"], ans:1, fb:"Empatia é a capacidade de se colocar no lugar do outro, sentindo o que ele sente de forma controlada e profissional."},
+    {q:"Qual é o papel do conselheiro ao 'fornecer realimentação'?", opts:["Repetir exatamente o que o aconselhado disse","Resumir e refletir o que ouviu para confirmar compreensão e mostrar atenção","Corrigir os erros do aconselhado imediatamente","Dar sua opinião pessoal sobre a situação"], ans:1, fb:"A realimentação consiste em resumir e refletir as informações recebidas, demonstrando compreensão ativa."},
+    {q:"O que é 'atenção flutuante' no aconselhamento?", opts:["Distração involuntária do conselheiro durante a sessão","A capacidade de escutar em diferentes níveis, captando o que está sendo dito e o que não está","Fazer anotações enquanto ouve o aconselhado","Focar apenas nas palavras ditas, ignorando emoções"], ans:1, fb:"A atenção flutuante é uma escuta em diferentes planos, captando tanto o que é dito quanto o subtexto emocional."},
+    {q:"Por que o conselheiro pastoral deve conhecer psicologia?", opts:["Para substituir o trabalho de psicólogos","Para entender melhor o comportamento humano e direcionar o aconselhamento","Para diagnosticar doenças mentais","Para aplicar terapias cognitivo-comportamentais"], ans:1, fb:"O conhecimento psicológico ajuda o conselheiro a compreender o comportamento humano e orientar melhor o aconselhamento."},
+    {q:"O aconselhamento espiritual pode ser feito com pessoas não convertidas?", opts:["Não, apenas com membros batizados","Sim, aproveitando a oportunidade de apresentar o Evangelho","Apenas se autorizado pelo pastor titular","Não, pois requer compromisso prévio com a fé"], ans:1, fb:"O aconselhamento pode ser feito com não convertidos, aproveitando a oportunidade de compartilhar o Evangelho."},
+  ],
+  // RODADA 2 – Conhecimento teórico / Técnicas
+  [
+    {q:"Qual é a necessidade do conhecimento teórico bíblico e psicológico no aconselhamento?", opts:["Permite que o conselheiro demonstre erudição","Habilita o conselheiro a entender e responder adequadamente às situações humanas complexas","É obrigatório apenas para pastores com pós-graduação","Substitui a necessidade de ouvir o aconselhado"], ans:1, fb:"O conhecimento bíblico e psicológico é fundamental para que o conselheiro compreenda e responda bem às situações complexas."},
+    {q:"Por que o conselheiro deve perguntar 'só o necessário'?", opts:["Para economizar tempo durante a sessão","Para não parecer intrometido e evitar constrangimento","Para não interromper o fluxo de fala do aconselhado com perguntas desnecessárias","Para cumprir protocolos formais de atendimento"], ans:2, fb:"Perguntar apenas o necessário evita interrupções desnecessárias e mantém o foco no que o aconselhado precisa expor."},
+    {q:"O que é 'espelhar a fala' no aconselhamento?", opts:["Repetir mecanicamente o que o aconselhado disse","Usar palavras e expressões semelhantes às do aconselhado para mostrar compreensão e proximidade","Fazer gestos que imitem a postura do aconselhado","Concordar verbalmente com tudo que é dito"], ans:1, fb:"Espelhar a fala é usar linguagem próxima à do aconselhado para criar conexão e demonstrar compreensão."},
+    {q:"Qual é a função dos questionamentos reflexivos no aconselhamento?", opts:["Confundir o aconselhado para que ele pense mais profundamente","Estimular a auto-reflexão e a busca por soluções pelo próprio aconselhado","Testar o nível de inteligência do aconselhado","Servir como formulário de diagnóstico clínico"], ans:1, fb:"Os questionamentos reflexivos estimulam o aconselhado a refletir sobre sua situação e encontrar suas próprias respostas."},
+    {q:"Quando deve ser usada a oração no aconselhamento?", opts:["Apenas no início de cada sessão como ritual de abertura","Em momentos estratégicos, conforme o Espírito Santo dirigir","Em toda oração, a cada 10 minutos de sessão","Apenas ao final, após todas as questões serem resolvidas"], ans:1, fb:"A oração deve ser utilizada em momentos estratégicos, guiada pela sensibilidade espiritual do conselheiro."},
+    {q:"Qual é a técnica de 'atenção' na lista de técnicas de aconselhamento?", opts:["Ficar em silêncio absoluto durante toda a sessão","Demonstrar ao aconselhado, por meio de comportamento verbal e não verbal, que está sendo ouvido","Tomar notas detalhadas de tudo que é dito","Gravar a sessão para análise posterior"], ans:1, fb:"Atenção é demonstrar ao aconselhado, verbal e não verbalmente, que ele está sendo completamente ouvido."},
+    {q:"O que significa 'confrontar' no contexto do aconselhamento pastoral?", opts:["Repreender publicamente o comportamento do aconselhado","Apresentar ao aconselhado informações úteis sobre si mesmo que ele ainda não percebeu","Desafiar o aconselhado a mudar de comportamento imediatamente","Argumentar contra as crenças do aconselhado"], ans:1, fb:"Confrontar é apresentar informações úteis que o aconselhado ainda não percebeu sobre si mesmo, de forma construtiva."},
+    {q:"A técnica de 'refletir' no aconselhamento consiste em:", opts:["Pensar antes de responder ao aconselhado","Permitir que o aconselhado ouça suas próprias palavras e sentimentos devolvidos pelo conselheiro","Analisar o problema em silêncio","Recomendar livros e recursos ao aconselhado"], ans:1, fb:"Refletir é devolver ao aconselhado suas próprias palavras e sentimentos, para que ele possa ouvi-los de fora."},
+    {q:"Qual é o uso de textos bíblicos no aconselhamento?", opts:["Substituir totalmente a conversa psicológica","Servir como recurso adicional de orientação e conforto quando apropriado","Ser repetido em voz alta no início e fim de cada sessão","Ser imposto ao aconselhado como solução definitiva"], ans:1, fb:"Os textos bíblicos são recursos complementares de orientação e conforto, usados no momento adequado."},
+    {q:"Qual é a missão da igreja no desenvolvimento de um ministério de aconselhamento?", opts:["Substituir os serviços de saúde mental do governo","Criar grupos terapêuticos com fins de renda para a igreja","Ajudar as pessoas a crescerem em direção à maturidade, com os membros cuidando uns dos outros","Selecionar apenas casos leves para atendimento pastoral"], ans:2, fb:"A missão é criar um ambiente de cuidado mútuo onde os membros crescem em maturidade e se apoiam uns aos outros."},
+  ],
+  // RODADA 3 – O Ambiente / Características do Conselheiro
+  [
+    {q:"Como deve ser o ambiente de aconselhamento?", opts:["Amplo e com muitas pessoas presentes para apoio","Reservado e vinculado ao objetivo desejado, permitindo diálogo livre e confidencial","Um espaço público para evitar acusações","Sempre o consultório do pastor principal"], ans:1, fb:"O ambiente deve ser reservado, vinculado ao objetivo, e propício ao diálogo livre e confidencial."},
+    {q:"Por que a frequência dos encontros de aconselhamento é importante?", opts:["Porque define o valor cobrado pelo serviço","Porque a regularidade ajuda a construir confiança e permite acompanhamento do progresso","Porque determina quantos membros podem ser atendidos simultaneamente","Porque é exigida pelas normas eclesiásticas"], ans:1, fb:"A frequência regular é fundamental para construir confiança e acompanhar o desenvolvimento do processo."},
+    {q:"Qual característica é essencial no conselheiro pastoral segundo o texto?", opts:["Alta escolaridade acadêmica e títulos formais","Empatia – a capacidade de sentir junto com o outro","Posição de liderança na hierarquia eclesiástica","Experiência prévia em consultório de psicologia"], ans:1, fb:"A empatia – sentir junto com o aconselhado – é apontada como característica essencial do bom conselheiro."},
+    {q:"Os conselheiros eficazes são descritos como pessoas que:", opts:["Mantêm distância emocional do aconselhado","Têm facilidade de encontrar outras pessoas e demonstram curiosidade genuína por elas","Falam mais do que ouvem durante as sessões","Preferem trabalhar com casos simples e de fácil solução"], ans:1, fb:"Conselheiros eficazes têm facilidade de encontro com pessoas e curiosidade genuína por suas histórias e sentimentos."},
+    {q:"O que significa 'autenticidade' como característica do conselheiro?", opts:["Ter personalidade extrovertida e comunicativa","Ser genuíno, consistente entre o que sente, pensa e expressa","Possuir formação teológica completa","Nunca expressar sentimentos durante as sessões"], ans:1, fb:"Autenticidade significa ser genuíno – há consistência entre o que o conselheiro sente internamente e o que expressa."},
+    {q:"Qual das seguintes NÃO é uma característica listada do conselheiro?", opts:["Empatia","Autenticidade","Autoritarismo","Compaixão"], ans:2, fb:"Autoritarismo não é característica do bom conselheiro – pelo contrário, contradiz os princípios do aconselhamento pastoral."},
+    {q:"O que se requer do conselheiro quanto à sua própria vida?", opts:["Ter uma vida perfeita sem problemas pessoais","Ser maduro, estável emocionalmente e capaz de lidar com suas próprias questões","Não ter nenhum contato com pessoas fora do trabalho de aconselhamento","Viver isolado para manter a objetividade"], ans:1, fb:"O conselheiro precisa de maturidade e estabilidade emocional para lidar adequadamente com as situações dos aconselhados."},
+    {q:"O conselheiro deve buscar ajuda profissional quando:", opts:["O aconselhado apresentar problemas muito complexos além de sua competência","A sessão durar mais de uma hora","O aconselhado chorar durante a sessão","O tema envolver questões financeiras"], ans:0, fb:"O conselheiro deve reconhecer seus limites e encaminhar o aconselhado a profissionais especializados quando necessário."},
+    {q:"Por que o conselheiro precisa ter conhecimento de si mesmo?", opts:["Para impressionar o aconselhado com autoconhecimento","Para não projetar seus próprios conflitos e reações no processo de aconselhamento","Para justificar suas decisões durante a sessão","Para convencer o aconselhado a seguir seu exemplo"], ans:1, fb:"O autoconhecimento evita que o conselheiro projete seus próprios conflitos e reações no processo do aconselhado."},
+    {q:"A compaixão do conselheiro significa:", opts:["Resolver os problemas do aconselhado em seu lugar","Sofrer junto com o aconselhado de forma que prejudique o processo","Ter genuíno interesse pelo bem-estar do aconselhado, mantendo o equilíbrio profissional","Concordar com todas as decisões do aconselhado"], ans:2, fb:"Compaixão é ter genuíno interesse pelo bem-estar do outro, sem perder o equilíbrio necessário ao processo."},
+  ],
+  // RODADA 4 – Erros Comuns
+  [
+    {q:"Qual é o erro de 'ser incapaz de controlar suas reações'?", opts:["O conselheiro demonstrar emoções positivas durante a sessão","O conselheiro reagir negativamente a colocações do aconselhado, criando desestímulo","O conselheiro encerrar a sessão antes do tempo previsto","O conselheiro não tomar notas durante a conversa"], ans:1, fb:"Reações negativas do conselheiro desestimulam o aconselhado e comprometem a qualidade do processo."},
+    {q:"O que significa 'fazer julgamento de valor sobre o que ouve'?", opts:["Avaliar objetivamente os fatos apresentados","Impor a opinião do conselheiro de forma autoritária ao aconselhado","Tomar partido pelo cônjuge do aconselhado","Recusar-se a ouvir determinados assuntos"], ans:1, fb:"Fazer julgamento de valor é impor opinião pessoal de forma autoritária, o que o conselheiro deve evitar."},
+    {q:"O erro de 'catalogar o aconselhado' consiste em:", opts:["Manter arquivo organizado das sessões","Rotular o aconselhado com base em experiências anteriores, perdendo sua singularidade","Fazer um relatório detalhado ao pastor","Comparar o aconselhado com membros conhecidos da igreja"], ans:1, fb:"Catalogar é rotular o aconselhado baseando-se em tipos já conhecidos, o que faz perder a singularidade de cada pessoa."},
+    {q:"Por que 'fechar-se em diagnósticos obtidos' é um erro?", opts:["Porque diagnósticos são sempre incorretos","Porque impede o conselheiro de atualizar sua compreensão à medida que novas informações surgem","Porque o diagnóstico deve ser feito apenas por médicos","Porque consome muito tempo da sessão"], ans:1, fb:"Fechar-se em diagnósticos impede a abertura para novas percepções e a melhora da própria compreensão dos fatos."},
+    {q:"Por que 'dar conselhos' é considerado um erro no aconselhamento?", opts:["Porque conselhos são ilegais sem formação clínica","Porque o objetivo é ajudar o aconselhado a encontrar suas próprias soluções, não impor as do conselheiro","Porque conselhos sempre geram dependência física","Porque a Bíblia proíbe dar conselhos"], ans:1, fb:"Dar conselhos vai contra o princípio de ajudar o aconselhado a descobrir suas próprias soluções e tomar suas próprias decisões."},
+    {q:"Segundo Patterson/Eisenberg (1998), os erros no aconselhamento são:", opts:["Ocasionais e sem impacto no resultado","Reiteradamente cometidos e precisam de atenção constante para serem evitados","Exclusivos de conselheiros iniciantes","Impossíveis de evitar na prática"], ans:1, fb:"Os autores apontam que esses erros são cometidos repetidamente, exigindo atenção constante do conselheiro."},
+    {q:"O que o conselheiro eficiente deve fazer ao sentir que uma conversa toca em sua própria ética?", opts:["Concordar com o aconselhado para evitar conflito","Controlar suas reações ou fechar a conversa adequadamente","Usar a sessão para ensinar sua ética ao aconselhado","Encerrar o aconselhamento definitivamente"], ans:1, fb:"O conselheiro eficiente controla suas reações internas ou encerra a conversa de forma adequada quando se sente afetado pessoalmente."},
+    {q:"Qual é o risco de 'deixar de ajudar a pessoa a tomar suas próprias decisões'?", opts:["Criar sessões mais curtas e eficientes","Gerar dependência e tirar a autonomia do aconselhado","Fazer o aconselhamento durar menos tempo","Facilitar a resolução rápida dos problemas"], ans:1, fb:"Não promover a autonomia do aconselhado cria dependência e impede seu crescimento pessoal."},
+    {q:"O erro de 'não ser imparcial' implica:", opts:["O conselheiro favorecer uma das partes em situações de conflito","O conselheiro ser muito neutro durante as sessões","O conselheiro demorar para dar sua opinião","O conselheiro cobrar pela prestação do serviço"], ans:0, fb:"A parcialidade leva o conselheiro a favorecer injustamente uma das partes, comprometendo a credibilidade do processo."},
+    {q:"O que pode acontecer se o conselheiro compartilha informações confidenciais?", opts:["O aconselhado se sentirá mais à vontade","A confiança no processo é destruída e o aconselhado se fecha","O processo se torna mais eficiente","A igreja terá mais informações para ajudar"], ans:1, fb:"A quebra de confidencialidade destrói a confiança e faz o aconselhado se fechar, inviabilizando o processo."},
+  ],
+  // RODADA 5 – Ética / Procedimentos de Jesus
+  [
+    {q:"Qual é a obrigação ética fundamental do conselheiro quanto à confidencialidade?", opts:["Compartilhar informações com líderes da igreja quando necessário","Manter em segredo as informações confidenciais, nunca compartilhando sem permissão","Informar a família do aconselhado sobre os problemas discutidos","Registrar tudo em atas da congregação"], ans:1, fb:"A confidencialidade é obrigação ética central: as informações da sessão jamais devem ser compartilhadas sem autorização."},
+    {q:"O que significa 'deixar de ajudar a pessoa a tomar suas próprias decisões'?", opts:["Dar todas as respostas prontamente","Decidir pelo aconselhado quando este está muito angustiado","Uma postura inadequada que tira a autonomia do aconselhado","Uma técnica válida em casos de emergência"], ans:2, fb:"Decidir pelo aconselhado é uma postura inadequada que retira sua autonomia e impede seu crescimento."},
+    {q:"Jesus como conselheiro usava qual abordagem principal?", opts:["Dava respostas diretas e definitivas a cada pergunta","Fazia uso de uma técnica de aconselhamento compassiva, usando perguntas, histórias e atenção individual","Aplicava regras rígidas iguais para todos","Evitava situações emocionais durante os encontros"], ans:1, fb:"Jesus atendia individualmente, com compaixão, usando perguntas e histórias – um modelo de aconselhamento personalizado."},
+    {q:"O procedimento de Jesus incluía 'auto-realização'. Isso significa:", opts:["Incentivá-los a alcançar o sucesso profissional","Ajudar as pessoas a descobrirem seu potencial máximo e enfrentarem seus problemas com recursos internos","Ensinar técnicas de meditação","Promover autoestima por meio de elogios frequentes"], ans:1, fb:"A auto-realização no método de Jesus envolvia ajudar as pessoas a descobrirem seu potencial e recursos internos."},
+    {q:"A 'aprendizagem e modificação de comportamento' como procedimento de Jesus refere-se a:", opts:["Punir comportamentos errados publicamente","Ensinar pelo exemplo e história, levando à mudança interna e comportamental","Aplicar disciplina eclesiástica formal","Prescrever regras de conduta escritas"], ans:1, fb:"Jesus ensinava por meio de histórias e exemplo, levando as pessoas a uma transformação interna genuína."},
+    {q:"O que caracteriza o aconselhamento de Jesus quanto à individualidade?", opts:["Atendia a todos da mesma forma, sem distinção","Reconhecia a singularidade de cada pessoa, adaptando sua abordagem conforme a necessidade","Preferia atender grupos a indivíduos","Seguia sempre o mesmo roteiro de aconselhamento"], ans:1, fb:"Jesus reconhecia a singularidade de cada pessoa e adaptava sua abordagem a cada situação específica."},
+    {q:"Qual é o fator espiritual essencial no aconselhamento pastoral segundo o capítulo 8?", opts:["A memorização de versículos bíblicos","A dependência do Espírito Santo para guiar o processo","A autoridade hierárquica do pastor sobre o aconselhado","A aplicação de denominação específica de doutrina"], ans:1, fb:"A dependência do Espírito Santo é o fator espiritual central que distingue o aconselhamento pastoral de outros modelos."},
+    {q:"O conselheiro pastoral deve encaminhar o aconselhado a um especialista quando:", opts:["O problema parecer muito simples para o conselheiro","As necessidades estiverem além de sua competência ou recursos","O aconselhado pedir um diagnóstico médico","A sessão durar mais de duas horas"], ans:1, fb:"Quando o problema ultrapassa a competência do conselheiro, o encaminhamento a especialistas é a atitude ética correta."},
+    {q:"A 'comunicação' como alvo do aconselhamento pastoral significa:", opts:["Desenvolver habilidades retóricas no aconselhado","Ajudar o aconselhado a aprender a se comunicar, a se abrir e expressar sentimentos adequadamente","Ensinar técnicas de oratória e apresentação pública","Melhorar a comunicação do aconselhado nas redes sociais"], ans:1, fb:"A comunicação como alvo envolve ajudar o aconselhado a se abrir, expressar sentimentos e se relacionar melhor."},
+    {q:"Qual é o objetivo central do aconselhamento pastoral descrito no capítulo 8?", opts:["Substituir o tratamento psicológico convencional","Ajudar o indivíduo a crescer em direção à maturidade e tornar-se um agente de cuidado aos outros","Aumentar o número de membros ativos na congregação","Identificar e excluir membros problemáticos da comunidade"], ans:1, fb:"O objetivo central é ajudar o indivíduo a crescer em maturidade para que ele mesmo possa ajudar outros ao seu redor."},
+  ],
+  // RODADA 6 – Fatores / Personalidades
+  [
+    {q:"Qual fator torna a pessoa do aconselhado vulnerável?", opts:["Excesso de confiança no conselheiro","Envolvimento emocional no lugar de permanecer objetivo durante a sessão","Falta de vocabulário para expressar sentimentos","Resistência a aceitar a Bíblia como referência"], ans:1, fb:"O envolvimento emocional excessivo, em vez de manter objetividade, é um dos fatores que tornam o aconselhado vulnerável."},
+    {q:"O que é a 'personalidade desajustada'?", opts:["Uma pessoa que recusa tratamento psicológico","Uma personalidade desenvolvida por condicionamentos e uso da própria mente que gera comportamentos disfuncionais","Uma característica exclusiva de pessoas com diagnóstico psiquiátrico formal","Uma personalidade introvertida e pouco comunicativa"], ans:1, fb:"A personalidade desajustada é desenvolvida por condicionamentos e padrões de pensamento que geram comportamentos problemáticos."},
+    {q:"A personalidade paranoide é caracterizada por:", opts:["Excesso de generosidade e confiança nos outros","Desconfiança excessiva, sentindo-se permanentemente perseguida e criticada pelos outros","Grande facilidade de relacionamentos interpessoais","Humor instável com fases de euforia e depressão"], ans:1, fb:"A personalidade paranoide é marcada por desconfiança excessiva e pela sensação permanente de perseguição e crítica."},
+    {q:"O que caracteriza a personalidade ciclotímica (bipolar)?", opts:["Isolamento social completo e recusa de contato","Alternância entre estados de euforia e depressão, com humor extremamente instável","Agressividade constante e intencional contra outros","Incapacidade total de expressar sentimentos"], ans:1, fb:"A personalidade ciclotímica alterna entre estados de euforia e depressão, com humor muito instável e imprevisível."},
+    {q:"O que define a personalidade esquizoide?", opts:["Grande extroversão e necessidade de atenção social","Comportamento que se manifesta numa imagem hipersensível, com afastamento das relações interpessoais","Agressividade explosiva e descontrolada","Ansiedade crônica com ataques de pânico frequentes"], ans:1, fb:"A personalidade esquizoide é hipersensível e se caracteriza pelo afastamento das relações interpessoais e isolamento."},
+    {q:"Como o conselheiro deve abordar uma personalidade paranoide?", opts:["Confrontar diretamente suas suspeitas como irracionais","Buscar paciência, construir confiança gradualmente e nunca confirmar nem negar diretamente as suspeitas","Ignorar as queixas de perseguição por serem fantasias","Encaminhar imediatamente para internação psiquiátrica"], ans:1, fb:"Com a personalidade paranoide, o conselheiro deve ter paciência e construir confiança gradualmente, evitando confrontos diretos."},
+    {q:"O 'passivo-agressivo' no aconselhamento é caracterizado por:", opts:["Agressividade direta e explícita","Hostilidade expressa de forma indireta, por meio de postergação, ironia e resistência passiva","Submissão total e concordância com tudo","Explosões emocionais frequentes seguidas de arrependimento"], ans:1, fb:"O passivo-agressivo expressa hostilidade de forma indireta – procrastinação, ironia, resistência velada, sem conflito aberto."},
+    {q:"O que é a personalidade histérica?", opts:["Uma personalidade extremamente introvertida","Personalidade marcada por dramatismo, emotividade intensa e busca constante de atenção","Pessoa com histórico de trauma de guerra","Característica de pessoas com transtorno obsessivo"], ans:1, fb:"A personalidade histérica é marcada por dramatismo, emotividade exagerada e constante busca de atenção dos outros."},
+    {q:"O que significa 'maturidade humana' no contexto do Anexo do material?", opts:["Atingir a maioridade legal de 18 anos","O desenvolvimento pleno da pessoa em todas as dimensões: social, psicológica, espiritual, física e emocional","Alcançar estabilidade financeira e profissional","Completar formação teológica reconhecida"], ans:1, fb:"Maturidade humana é o desenvolvimento integral da pessoa em todas as dimensões – social, psicológica, espiritual e física."},
+    {q:"Qual dos seguintes é um fator que ATRAPALHA a motivação para aconselhar?", opts:["Compaixão genuína pelo aconselhado","Manipulação – usar o aconselhamento para exercer poder ou influência sobre o aconselhado","Desejo de ajudar o próximo","Fé na possibilidade de mudança"], ans:1, fb:"A manipulação é um fator que perverte o aconselhamento, transformando-o em instrumento de poder e controle."},
+  ],
+  // RODADA 7 – Neuroses / Ansiedade
+  [
+    {q:"O que são neuroses no contexto do aconselhamento pastoral?", opts:["Doenças físicas com origem desconhecida","Padrões de resposta disfuncionais da mente que levam a sofrimento e dificuldades de adaptação","Comportamentos normais em situações de estresse extremo","Transtornos exclusivos de pessoas sem fé religiosa"], ans:1, fb:"Neuroses são padrões mentais disfuncionais que causam sofrimento e dificultam a adaptação da pessoa à realidade."},
+    {q:"Como o conselheiro deve abordar uma pessoa com neurose de ansiedade?", opts:["Minimizar os sintomas para tranquilizar o aconselhado","Validar os sentimentos, identificar as causas e trabalhar estratégias junto com especialistas quando necessário","Prescrever medicamentos ansiolíticos","Proibir o aconselhado de falar sobre seus medos"], ans:1, fb:"O conselheiro deve validar os sentimentos, identificar causas e, quando necessário, trabalhar junto com especialistas."},
+    {q:"Qual é a diferença entre ansiedade normal e patológica?", opts:["A ansiedade normal é agradável; a patológica é sempre angustiante","A ansiedade normal é uma reação proporcional a situações reais; a patológica é desproporcional e persistente","A ansiedade patológica só ocorre à noite","Não há diferença clinicamente significativa entre elas"], ans:1, fb:"A ansiedade normal é proporcional à situação real; a patológica é desproporcional, persistente e interfere na vida."},
+    {q:"O que é a etiologia da ansiedade do ponto de vista psicológico?", opts:["É sempre resultado de trauma físico","É uma reação de ansiedade aprendida ou associada a estímulos específicos que se generalizou","É exclusivamente hereditária e sem influência do ambiente","É causada apenas por fatores espirituais"], ans:1, fb:"A etiologia da ansiedade envolve reações aprendidas e associações com estímulos que se generalizam para outras situações."},
+    {q:"Como o aconselhamento cristão aborda a solidão?", opts:["Incentivando o isolamento para evitar influências negativas","Reconhecendo que o ser humano precisa de comunidade e promovendo conexões saudáveis à luz do Evangelho","Proibindo a expressão de sentimentos de solidão como falta de fé","Afirmando que solidão é sempre culpa da própria pessoa"], ans:1, fb:"O aconselhamento cristão reconhece a necessidade humana de comunidade e promove conexões saudáveis fundamentadas no Evangelho."},
+    {q:"Qual é o papel da comunidade religiosa no enfrentamento da ansiedade?", opts:["Nenhum, pois ansiedade é questão médica exclusiva","Pode ser um ambiente de suporte emocional e espiritual significativo no processo de recuperação","Deve substituir completamente o tratamento psicológico","Serve apenas para diagnosticar casos graves"], ans:1, fb:"A comunidade religiosa oferece suporte emocional e espiritual relevante, complementando outros recursos de cuidado."},
+    {q:"O que o aconselhador deve observar em alguém com neurose de ansiedade?", opts:["Apenas os sintomas físicos relatados","Sintomas físicos, padrões de pensamento, comportamentos evitantes e o contexto relacional da pessoa","Somente a frequência às reuniões da igreja","Apenas a história familiar de transtornos mentais"], ans:1, fb:"O aconselhador deve observar sintomas físicos, padrões de pensamento, comportamentos evitantes e o contexto relacional."},
+    {q:"Como a fé pode contribuir no tratamento de neuroses?", opts:["Substitui completamente qualquer intervenção profissional","Pode oferecer esperança, ressignificação e suporte espiritual que complementam o processo terapêutico","Garante cura imediata e definitiva de todos os sintomas","Não tem nenhuma relação com o processo de cura"], ans:1, fb:"A fé oferece esperança, ressignificação e suporte espiritual que complementam – mas não substituem – o processo terapêutico."},
+    {q:"Qual característica principal distingue a neurose da psicose?", opts:["A neurose é sempre mais grave","Na neurose o contato com a realidade é preservado; na psicose há ruptura com a realidade","A psicose responde melhor ao aconselhamento","Não há distinção clinicamente relevante entre ambas"], ans:1, fb:"A distinção fundamental é que na neurose o contato com a realidade é mantido; na psicose há ruptura com essa realidade."},
+    {q:"Qual das estratégias abaixo NÃO é recomendada para lidar com ansiedade no aconselhamento?", opts:["Ajudar o aconselhado a identificar e questionar pensamentos irracionais","Oferecer apoio espiritual e encorajamento","Garantir ao aconselhado que seus medos nunca irão se concretizar","Encaminhar para especialista quando necessário"], ans:2, fb:"Garantir que medos nunca se concretizarão é inadequado – o conselheiro deve trabalhar pensamentos irracionais, não fazer promessas absolutas."},
+  ],
+  // RODADA 8 – Depressão / Culpa
+  [
+    {q:"Quais são as duas principais categorias de depressão mencionadas no texto?", opts:["Depressão leve e depressão grave","Depressão endógena (biológica) e depressão exógena (situacional/ambiental)","Depressão espiritual e depressão emocional","Depressão adulta e depressão infantil"], ans:1, fb:"O texto distingue entre depressão endógena, de origem biológica, e exógena, causada por fatores ambientais e situacionais."},
+    {q:"O que o conselheiro deve fazer diante de um caso de depressão severa?", opts:["Tratar sozinho usando apenas recursos espirituais","Acompanhar de perto enquanto incentiva fortemente a busca por tratamento profissional especializado","Ignorar os sintomas físicos e focar apenas no espiritual","Recomendar que o aconselhado ore mais e leia a Bíblia com mais frequência"], ans:1, fb:"Em casos severos, o conselheiro acompanha enquanto encaminha e incentiva a busca por tratamento profissional."},
+    {q:"Como o conselheiro pastoral pode funcionar na depressão de alguém?", opts:["Como juiz moral da situação do aconselhado","Como alguém que aponta caminhos e incentiva o ministério, envolvendo o aconselhado gradualmente","Como terapeuta primário responsável pelo tratamento clínico","Como porta-voz da congregação para comunicar a situação ao pastor"], ans:1, fb:"O conselheiro aponta caminhos, incentiva e envolve gradualmente o aconselhado em atividades, funcionando como guia no processo."},
+    {q:"Quais sentimentos costumam acompanhar a depressão segundo o material?", opts:["Euforia e hiperatividade","Inutilidade, desesperança, tristeza profunda e perda de prazer nas atividades","Apenas cansaço físico sem componente emocional","Raiva intensa e comportamento agressivo"], ans:1, fb:"A depressão é acompanhada por sentimentos de inutilidade, desesperança, tristeza profunda e perda de prazer (anedonia)."},
+    {q:"Qual é a diferença entre culpa saudável e culpa patológica?", opts:["Não há diferença; toda culpa é prejudicial","A culpa saudável leva ao arrependimento e mudança; a patológica é excessiva, paralisante e autodestruidora","A culpa saudável é sentida apenas por pessoas religiosas","A culpa patológica é sempre relacionada a traumas de infância"], ans:1, fb:"A culpa saudável leva ao arrependimento e transformação; a patológica é desproporcional, paralisante e prejudica a vida."},
+    {q:"Como o conselheiro deve lidar com sentimentos de culpa no aconselhado?", opts:["Ignorar a culpa pois é sempre infundada","Distinguir entre culpa real (por faltas concretas) e culpa neurótica, trabalhando cada uma de forma adequada","Usar a culpa como ferramenta para motivar a mudança de comportamento","Absolver o aconselhado de toda culpa para restaurar sua autoestima"], ans:1, fb:"O conselheiro deve distinguir culpa real de culpa neurótica e trabalhar cada tipo de forma específica e adequada."},
+    {q:"O que o conselheiro deve evitar ao tratar alguém com depressão?", opts:["Ouvir com atenção e empatia","Recomendar atividades gradativas","Minimizar os sentimentos com frases como 'isso vai passar' sem abordar a dor real","Encaminhar para especialista quando necessário"], ans:2, fb:"Minimizar a dor com frases superficiais invalida o sofrimento do aconselhado e prejudica o processo de recuperação."},
+    {q:"Quais são os 'pensamentos disfuncionais' listados para trabalhar com culpa?", opts:["Apenas o pensamento mágico e a superstição","Pensamento do tipo tudo-ou-nada, catastrofização, personalização, e outros distorções cognitivas","Somente pensamentos de natureza religiosa","Apenas fantasias sobre o futuro"], ans:1, fb:"Os pensamentos disfuncionais incluem distorções como o pensamento tudo-ou-nada, catastrofização, personalização, entre outros."},
+    {q:"O que significa 'reconstrução cognitiva' no contexto da culpa?", opts:["Substituir todas as memórias negativas por positivas","Identificar e reestruturar padrões de pensamento distorcidos que sustentam a culpa patológica","Apagar o passado e começar uma vida completamente nova","Convencer o aconselhado de que nunca errou"], ans:1, fb:"A reconstrução cognitiva identifica e reestrutura padrões de pensamento distorcidos que alimentam a culpa patológica."},
+    {q:"Qual recurso espiritual é especialmente relevante para trabalhar a culpa no aconselhamento pastoral?", opts:["A disciplina eclesiástica formal","O perdão – tanto o recebimento do perdão divino quanto o perdão a si mesmo","A confissão pública diante de toda a congregação","A exclusão temporária das atividades da igreja"], ans:1, fb:"O perdão – receber o perdão de Deus e aprender a perdoar a si mesmo – é o recurso espiritual central para tratar a culpa."},
+  ],
+  // RODADA 9 – Revisão Geral I
+  [
+    {q:"Qual é a definição mais completa de aconselhamento pastoral apresentada no material?", opts:["Uma técnica de persuasão para mudar comportamentos religiosos","Um relacionamento de ajuda que envolve ouvir, orientar e cuidar da pessoa integralmente com base bíblica e psicológica","Um serviço de emergência para crises espirituais graves","Uma forma de disciplina eclesiástica para membros com problemas"], ans:1, fb:"O aconselhamento pastoral é um relacionamento de ajuda integral, combinando ouvir, orientar e cuidar com base bíblica e psicológica."},
+    {q:"Por que a ética da confidencialidade é fundamental no aconselhamento?", opts:["Para proteger juridicamente o conselheiro de processos legais","Para garantir que o aconselhado possa se expressar livremente sem medo de julgamento ou exposição","Para cumprir normas burocráticas da denominação religiosa","Para evitar que outros membros procurem aconselhamento"], ans:1, fb:"A confidencialidade garante a liberdade de expressão do aconselhado sem temor de julgamento ou exposição pública."},
+    {q:"Qual é a função da oração no processo de aconselhamento pastoral?", opts:["Substituir todas as técnicas psicológicas de escuta","Conectar o processo ao âmbito espiritual, buscando sabedoria e cuidado divinos","Encerrar formalmente cada sessão de aconselhamento","Convencer o aconselhado a se arrepender imediatamente"], ans:1, fb:"A oração conecta o processo ao campo espiritual, buscando sabedoria divina e cuidado integral para o aconselhado."},
+    {q:"O que distingue o aconselhamento pastoral do simples 'dar conselhos'?", opts:["O aconselhamento pastoral usa somente textos bíblicos","O aconselhamento pastoral é um processo estruturado de escuta, compreensão e ajuda ao crescimento, não apenas dar respostas","O aconselhamento pastoral é mais rápido e objetivo","O aconselhamento pastoral não envolve emoções"], ans:1, fb:"Ao contrário de simplesmente dar conselhos, o aconselhamento é um processo de escuta estruturado que promove o crescimento."},
+    {q:"Qual é o erro mais comum que transforma o conselheiro em um 'consertador de problemas'?", opts:["Ouvir demais sem dar respostas","Assumir responsabilidade pelas decisões do aconselhado, retirando sua autonomia","Fazer questionamentos reflexivos com frequência","Usar textos bíblicos durante a sessão"], ans:1, fb:"Assumir a responsabilidade pelas decisões do aconselhado é o erro que transforma o conselheiro num 'consertador', retirando a autonomia do outro."},
+    {q:"Como o material descreve a relação entre psicologia e aconselhamento pastoral?", opts:["São áreas opostas e incompatíveis entre si","São complementares – a psicologia ajuda a entender o comportamento humano, enriquecendo o aconselhamento pastoral","A psicologia deve substituir o aconselhamento pastoral","O aconselhamento pastoral é superior e dispensa a psicologia"], ans:1, fb:"O material afirma que psicologia e aconselhamento pastoral são complementares, enriquecendo mutuamente a compreensão humana."},
+    {q:"Por que o conselheiro deve ter maturidade emocional?", opts:["Para impressionar o aconselhado com estabilidade","Para não ser afetado pelos problemas do aconselhado a ponto de perder o equilíbrio e a objetividade","Para evitar questões jurídicas relacionadas ao atendimento","Para poder diagnosticar transtornos com mais precisão"], ans:1, fb:"A maturidade emocional permite ao conselheiro manter equilíbrio e objetividade mesmo diante de situações difíceis."},
+    {q:"Qual atitude o conselheiro deve ter frente à sua própria limitação?", opts:["Fingir competência para não perder a confiança do aconselhado","Reconhecer honestamente seus limites e encaminhar quando necessário, sem sentir vergonha","Tentar resolver tudo sozinho para não fracassar","Afastar-se do aconselhamento enquanto busca mais formação"], ans:1, fb:"Reconhecer limitações e encaminhar quando necessário é sinal de maturidade e ética, não de fraqueza ou fracasso."},
+    {q:"Como deve ser o ambiente físico do aconselhamento?", opts:["Qualquer lugar público desde que discreto","Um espaço acolhedor, reservado, com privacidade e sem interrupções","Sempre o templo ou santuário da igreja","Um ambiente formal com mesa e cadeiras frente a frente"], ans:1, fb:"O ambiente deve ser acolhedor, reservado, com privacidade e sem interrupções para garantir a qualidade do processo."},
+    {q:"O que o material destaca como base do crescimento do aconselhado?", opts:["A obediência irrestrita às orientações do conselheiro","O desenvolvimento da autonomia, autoconhecimento e capacidade de tomar decisões responsáveis","A frequência semanal obrigatória às sessões de aconselhamento","A memorização de princípios bíblicos específicos"], ans:1, fb:"O crescimento real do aconselhado envolve autonomia, autoconhecimento e capacidade de tomar decisões responsáveis."},
+  ],
+  // RODADA 10 – Revisão Geral II
+  [
+    {q:"O que o texto afirma sobre o conselheiro que 'se envolve emocionalmente' em excesso?", opts:["Isso demonstra grande empatia e é sempre positivo","Perde a objetividade e pode se tornar parte do problema em vez de solução","Motiva o aconselhado a se abrir com mais facilidade","É um sinal de maturidade emocional avançada"], ans:1, fb:"Envolvimento emocional excessivo prejudica a objetividade e pode tornar o conselheiro parte do problema."},
+    {q:"Qual é o alvo do aconselhamento em relação ao 'comportamento'?", opts:["Fazer o aconselhado se comportar conforme as normas da igreja","Ajudar o aconselhado a aprender e modificar comportamentos disfuncionais através de novas perspectivas","Registrar e reportar comportamentos problemáticos à liderança","Punir comportamentos contrários aos valores cristãos"], ans:1, fb:"O objetivo é ajudar o aconselhado a aprender e modificar comportamentos disfuncionais por meio de novas perspectivas."},
+    {q:"Qual é a característica principal do 'explosivo' como tipo de personalidade?", opts:["Reações sempre proporcionais ao estímulo recebido","Explosões de raiva inesperadas e intensas, seguidas muitas vezes de aparente calma e arrependimento","Agressividade constante e previsível em todas as situações","Passividade extrema com raros momentos de irritação"], ans:1, fb:"A personalidade explosiva apresenta crises de raiva intensas e inesperadas, alternadas com períodos de calma e arrependimento."},
+    {q:"O que é a 'Terapia Redentiva' mencionada no material?", opts:["Uma técnica de terapia comportamental desenvolvida por cristãos","Uma abordagem que integra a perspectiva da redenção e transformação em Cristo ao processo de cura e crescimento","Um método de cura exclusivamente espiritual","Uma forma de terapia de grupo em igrejas evangélicas"], ans:1, fb:"A Terapia Redentiva integra a perspectiva da redenção em Cristo ao processo de cura e crescimento do indivíduo."},
+    {q:"O que o material afirma sobre os 'padrões de desajustamento' no Anexo?", opts:["São exclusivos de pessoas sem educação formal","São padrões de comportamento desenvolvidos ao longo da vida que refletem formas inadequadas de lidar com a realidade","São causados exclusivamente por fatores genéticos","Aparecem apenas na fase adulta da vida"], ans:1, fb:"Os padrões de desajustamento são formas desenvolvidas ao longo da vida para lidar inadequadamente com a realidade."},
+    {q:"Como o conselheiro pastoral deve encerrar um ciclo de aconselhamento?", opts:["Abruptamente, quando o aconselhado parecer bem","Com avaliação dos progressos, consolidação dos aprendizados e preparação para a autonomia futura","Apenas quando o pastor autorizar o encerramento formal","Transferindo automaticamente para outro conselheiro"], ans:1, fb:"O encerramento saudável inclui avaliação dos progressos, consolidação dos ganhos e preparação para a autonomia do aconselhado."},
+    {q:"Qual é o papel dos textos bíblicos no aconselhamento pastoral?", opts:["Substituir completamente qualquer técnica psicológica","Servir como fonte de sabedoria, consolo e orientação, complementando o processo","Ser imposto obrigatoriamente em todas as sessões","Servir apenas como abertura e encerramento formal da sessão"], ans:1, fb:"Os textos bíblicos são fonte de sabedoria e orientação, complementando – mas não substituindo – o processo de aconselhamento."},
+    {q:"Qual é a postura do conselheiro diante de um aconselhado resistente?", opts:["Pressionar o aconselhado a aceitar a ajuda imediatamente","Respeitar o ritmo do aconselhado, construindo confiança gradualmente sem forçar o processo","Encerrar o aconselhamento por falta de comprometimento","Compartilhar a situação com outros líderes para que pressionem o aconselhado"], ans:1, fb:"Com aconselhados resistentes, a postura adequada é respeitar o ritmo, construir confiança gradualmente e não forçar o processo."},
+    {q:"Por que o material afirma que o aconselhador deve ser 'imparcial'?", opts:["Para não ser responsabilizado por decisões do aconselhado","Para que o aconselhado se sinta plenamente acolhido e não julgado, podendo se expressar com liberdade","Para cumprir normas formais do código de ética profissional","Para manter a neutralidade emocional absoluta durante toda a sessão"], ans:1, fb:"A imparcialidade garante que o aconselhado se sinta acolhido e não julgado, podendo se expressar com total liberdade."},
+    {q:"Qual é a grande conclusão do material sobre o Aconselhamento Pastoral?", opts:["É uma atividade exclusiva de pastores ordenados com formação teológica avançada","É um ministério que exige preparo, mas que pode ser exercido por pessoas comprometidas com o cuidado do próximo","É uma área em que a intuição substitui qualquer formação técnica","É adequado apenas para casos leves; casos graves devem ir direto à psiquiatria"], ans:1, fb:"O aconselhamento pastoral é um ministério que exige preparo, mas pode ser exercido por pessoas comprometidas com o cuidado genuíno do próximo."},
+  ],
+];
+
+let currentRound = 0;
+let currentQuestion = 0;
+let roundScore = 0;
+let totalScore = 0;
+let roundScores = [];
+let answered = false;
+
+function startQuiz() {
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  buildRoundDots();
+  loadQuestion();
+}
+
+function buildRoundDots() {
+  const wrap = document.getElementById('roundDots');
+  wrap.innerHTML = '';
+  for(let i=0;i<10;i++){
+    const d = document.createElement('div');
+    d.className = 'round-dot' + (i === currentRound ? ' active' : (i < currentRound ? ' done' : ''));
+    d.textContent = i+1;
+    wrap.appendChild(d);
+  }
+}
+
+function loadQuestion() {
+  answered = false;
+  const q = ALL_QUESTIONS[currentRound][currentQuestion];
+  document.getElementById('questionNumber').textContent = `Questão ${currentQuestion+1} de 10`;
+  document.getElementById('questionText').textContent = q.q;
+
+  const opts = document.getElementById('optionsContainer');
+  opts.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.innerHTML = `<span class="letter">${letters[i]}</span><span>${opt}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    opts.appendChild(btn);
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.textContent = '';
+  document.getElementById('nextBtn').classList.add('hidden');
+
+  // Progress
+  const total = (currentRound * 10) + currentQuestion + 1;
+  document.getElementById('progressLabel').textContent = `Rodada ${currentRound+1} / 10`;
+  document.getElementById('scoreLabel').textContent = `Acertos: ${totalScore + roundScore}`;
+  document.getElementById('progressBar').style.width = ((total-1)/100*100) + '%';
+}
+
+function selectAnswer(idx) {
+  if(answered) return;
+  answered = true;
+  const q = ALL_QUESTIONS[currentRound][currentQuestion];
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((b,i) => {
+    b.disabled = true;
+    if(i === q.ans) b.classList.add('correct');
+    else if(i === idx && idx !== q.ans) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('feedback');
+  if(idx === q.ans) {
+    roundScore++;
+    fb.className = 'feedback correct-fb show';
+    fb.textContent = '✓ Correto! ' + q.fb;
+  } else {
+    fb.className = 'feedback wrong-fb show';
+    fb.textContent = '✗ Incorreto. ' + q.fb;
+  }
+  document.getElementById('scoreLabel').textContent = `Acertos: ${totalScore + roundScore}`;
+  document.getElementById('nextBtn').classList.remove('hidden');
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if(currentQuestion >= 10) {
+    showRoundEnd();
+  } else {
+    loadQuestion();
+  }
+}
+
+function showRoundEnd() {
+  document.getElementById('quizScreen').style.display = 'none';
+  const re = document.getElementById('roundEndScreen');
+  re.classList.remove('hidden');
+  document.getElementById('roundEndLabel').textContent = `FIM DA RODADA ${currentRound+1}`;
+  document.getElementById('roundScore').textContent = `${roundScore}/10`;
+  const pct = roundScore * 10;
+  setTimeout(() => { document.getElementById('roundScoreBar').style.width = pct + '%'; }, 100);
+  let verdict = '';
+  if(roundScore >= 9) verdict = '🏆 Excelente! Domínio pleno do conteúdo.';
+  else if(roundScore >= 7) verdict = '✅ Muito bom! Continue assim.';
+  else if(roundScore >= 5) verdict = '📖 Razoável. Revise os pontos errados.';
+  else verdict = '⚠️ Precisa estudar mais este tema.';
+  document.getElementById('roundVerdict').textContent = verdict;
+  roundScores.push(roundScore);
+  totalScore += roundScore;
+
+  const nextBtn = document.getElementById('nextRoundBtn');
+  if(currentRound >= 9) {
+    nextBtn.textContent = 'Ver Resultado Final →';
+  } else {
+    nextBtn.textContent = 'Próxima Rodada →';
+  }
+}
+
+function nextRound() {
+  document.getElementById('roundEndScreen').classList.add('hidden');
+  currentRound++;
+  currentQuestion = 0;
+  roundScore = 0;
+
+  if(currentRound >= 10) {
+    showFinal();
+  } else {
+    document.getElementById('quizScreen').style.display = 'flex';
+    buildRoundDots();
+    loadQuestion();
+  }
+}
+
+function showFinal() {
+  document.getElementById('finalScreen').classList.remove('hidden');
+  document.getElementById('finalScore').textContent = `${totalScore}/100`;
+  const pct = totalScore;
+  setTimeout(() => { document.getElementById('finalScoreBar').style.width = pct + '%'; }, 100);
+  let verdict = '';
+  if(totalScore >= 90) verdict = '🏆 Aprovado com distinção! Pronto para a prova.';
+  else if(totalScore >= 70) verdict = '✅ Aprovado! Bom desempenho geral.';
+  else if(totalScore >= 50) verdict = '📖 Regular. Revise os capítulos com mais erros.';
+  else verdict = '⚠️ Precisa estudar mais. Revise todo o material.';
+  document.getElementById('finalVerdict').textContent = verdict;
+
+  const hist = document.getElementById('roundHistory');
+  hist.innerHTML = '';
+  roundScores.forEach((s,i) => {
+    const pill = document.createElement('div');
+    const cls = s >= 8 ? 'high' : s >= 6 ? 'mid' : 'low';
+    pill.className = `round-pill ${cls}`;
+    pill.textContent = `R${i+1}: ${s}/10`;
+    hist.appendChild(pill);
+  });
+}
+
+function restartQuiz() {
+  currentRound = 0; currentQuestion = 0; roundScore = 0; totalScore = 0; roundScores = [];
+  document.getElementById('finalScreen').classList.add('hidden');
+  document.getElementById('quizScreen').style.display = 'flex';
+  buildRoundDots();
+  loadQuestion();
+}
+</script>
+</body>
+</html>
