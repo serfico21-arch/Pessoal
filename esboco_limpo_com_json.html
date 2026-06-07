@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Esboço de Sermão — Pastor Sérgio Costa</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Crimson+Pro:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Crimson Pro',Georgia,serif;background:#3A3028;display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+
+/* ═══ TOOLBAR ═══ */
+.toolbar{width:100%;background:#1A1208;display:flex;flex-direction:column;position:sticky;top:0;z-index:100;border-bottom:2px solid #5A3E1A;}
+.tb-row{display:flex;align-items:center;gap:5px;padding:6px 14px;flex-wrap:wrap;}
+.tb-row+.tb-row{border-top:1px solid #2C1F0E;}
+.tlabel{color:#C9A84C;font-family:'EB Garamond',serif;font-size:14px;font-weight:600;white-space:nowrap;margin-right:4px;}
+.tb-group-label{color:#7A5A2A;font-size:10px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;}
+.sep{width:1px;height:24px;background:#3A2C1A;flex-shrink:0;margin:0 2px;}
+
+/* botões gerais */
+.tb{background:#2C1F0E;border:1px solid #5A3E1A;color:#C9A84C;padding:5px 13px;border-radius:4px;cursor:pointer;font-size:13px;font-family:'Crimson Pro',serif;line-height:1;transition:background .12s,color .12s;white-space:nowrap;}
+.tb:hover{background:#8B6914;color:#1A1208;border-color:#8B6914;}
+.tb:active{background:#C9A84C;color:#1A1208;}
+
+/* botões de TAMANHO — grid 2×4 compacto */
+.sz-grid{display:flex;gap:3px;flex-wrap:wrap;max-width:220px;}
+.tb-sz{background:#2C1F0E;border:1px solid #5A3E1A;color:#C9A84C;padding:4px 0;border-radius:4px;cursor:pointer;font-family:'Crimson Pro',serif;width:42px;text-align:center;font-size:12px;transition:background .12s;}
+.tb-sz:hover{background:#8B6914;color:#1A1208;border-color:#8B6914;}
+
+/* bolinhas de COR — grandes e com título */
+.sw-grid{display:flex;gap:4px;align-items:center;flex-wrap:wrap;}
+.swatch{width:28px;height:28px;border-radius:5px;border:2px solid #3A2C1A;cursor:pointer;flex-shrink:0;transition:transform .1s,border-color .1s;position:relative;}
+.swatch:hover{transform:scale(1.18);border-color:#C9A84C;}
+.swatch[title]:hover::after{content:attr(title);position:absolute;bottom:32px;left:50%;transform:translateX(-50%);background:#1A1208;color:#C9A84C;font-size:10px;padding:2px 6px;border-radius:3px;white-space:nowrap;pointer-events:none;z-index:10;}
+.swatch.remover{background:#2C1F0E !important;color:#888;font-size:14px;display:flex;align-items:center;justify-content:center;font-weight:bold;}
+input[type=color].tb-color{width:28px;height:28px;padding:1px;background:#2C1F0E;border:2px solid #5A3E1A;border-radius:5px;cursor:pointer;}
+input[type=color].tb-color:hover{border-color:#C9A84C;}
+
+/* botão imprimir */
+.pbtn{background:#8B6914;color:#FEF9EF;border:none;padding:6px 16px;border-radius:4px;font-family:'EB Garamond',serif;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;}
+.pbtn:hover{background:#C9A84C;color:#1A1208;}
+
+/* ═══ PÁGINA ═══ */
+.wrap{padding:20px;display:flex;flex-direction:column;align-items:center;}
+.page{background:#FDFAF3;width:794px;min-height:1000px;padding:15mm 18mm 14mm;border:1px solid #ccc;box-shadow:0 6px 30px rgba(0,0,0,.5);}
+
+.hdr{text-align:center;margin-bottom:10px;}
+.church{font-size:9pt;color:#6B3A1F;font-weight:600;letter-spacing:.3px;margin-bottom:4px;}
+.title{font-family:'EB Garamond',serif;font-size:20pt;font-weight:600;color:#1A1208;outline:none;min-height:24px;line-height:1.2;}
+.meta{font-size:9.5pt;color:#555;outline:none;min-height:14px;margin-top:4px;}
+.screen-label{display:block;font-size:8pt;font-weight:600;color:#8B6914;letter-spacing:1.5px;text-transform:uppercase;margin:10px 0 4px;}
+
+.row{display:grid;grid-template-columns:125px 1fr;gap:2px 8px;align-items:start;margin-bottom:5px;}
+.lbl{font-size:9pt;font-weight:600;color:#4A3728;text-align:right;padding-top:2px;}
+.val{font-size:10.5pt;color:#1A1208;outline:none;min-height:22px;line-height:1.6;border:1px solid #D4B896;border-radius:3px;padding:3px 6px;resize:none;overflow:hidden;white-space:pre-wrap;word-break:break-word;}
+.val:focus{background:#FFFEF5;border-color:#8B6914;}
+
+.title:empty::before{content:'Título do Sermão';color:#ccc;font-style:italic;}
+.meta:empty::before{content:'Texto: Livro 0:0  |  Pregador: Nome  |  Data: __/__/__';color:#ccc;}
+.val:empty::before{content:'...';color:#ccc;}
+
+.pt{margin-top:10px;padding:8px 10px;border-left:3px solid #D4B896;background:#FEF9EF;}
+.pt-num{font-size:8pt;font-weight:600;color:#8B6914;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.pt-title{font-family:'EB Garamond',serif;font-size:13pt;font-weight:600;color:#1A1208;outline:none;min-height:22px;border:1px solid #D4B896;border-radius:3px;padding:3px 6px;margin-bottom:7px;width:100%;display:block;white-space:pre-wrap;word-break:break-word;}
+.pt-title:focus{background:#FFFEF5;border-color:#8B6914;}
+.pt-title:empty::before{content:'Título do ponto...';color:#ccc;font-style:italic;}
+
+.conc{margin-top:12px;}
+.conc-text{font-size:10.5pt;color:#1A1208;outline:none;min-height:50px;line-height:1.6;border:1px solid #D4B896;border-radius:3px;padding:4px 6px;white-space:pre-wrap;word-break:break-word;width:100%;display:block;}
+.conc-text:focus{background:#FFFEF5;border-color:#8B6914;}
+.conc-text:empty::before{content:'Resumo, apelo final e oração...';color:#ccc;}
+
+.ftr{text-align:center;margin-top:14px;font-size:8pt;color:#888;}
+.btn-add{display:block;width:100%;margin-top:8px;padding:7px;background:transparent;border:1px dashed #D4B896;color:#8B6914;font-family:'EB Garamond',serif;font-size:13px;cursor:pointer;text-align:center;}
+.btn-add:hover{background:#F5EDD3;}
+.btn-del{float:right;background:transparent;border:none;color:#bbb;font-size:10px;cursor:pointer;padding:1px 5px;}
+.btn-del:hover{color:#8B2020;}
+
+/* ═══ IMPRESSÃO ═══ */
+@media print {
+  @page{size:A4;margin:8mm 6mm 8mm 6mm;}
+  body{background:#fff !important;}
+  .toolbar,.btn-add,.btn-del,.screen-label,.pt-num,.church,.ftr{display:none !important;}
+  .title:empty,.meta:empty,.val:empty,.pt-title:empty,.conc-text:empty{display:none !important;}
+  .lbl{display:none !important;}
+  .row{grid-template-columns:1fr !important;}
+  .wrap{padding:0;}
+  .page{width:100% !important;min-height:auto !important;border:none !important;box-shadow:none !important;padding:0 !important;background:#fff !important;}
+  .val,.pt-title,.conc-text{border:none !important;background:none !important;padding:0 !important;border-radius:0 !important;}
+  .pt{border-left:none !important;padding:2px 0 !important;margin-top:5px !important;background:none !important;}
+  .hdr{margin-bottom:5px !important;}
+  .conc{margin-top:7px !important;}
+  .row{margin-bottom:1px !important;}
+  .title:empty::before,.meta:empty::before,.val:empty::before,.pt-title:empty::before,.conc-text:empty::before{content:none !important;}
+  [contenteditable]:hover,[contenteditable]:focus{background:none !important;border:none !important;}
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+
+  <!-- LINHA 1: formatação básica + tamanhos -->
+  <div class="tb-row">
+    <span class="tlabel">✝ ESBOÇO</span>
+    <div class="sep"></div>
+
+    <button class="tb" onmousedown="ev(event,'bold')" title="Negrito (selecione o texto primeiro)"><b>N</b></button>
+    <button class="tb" onmousedown="ev(event,'italic')" title="Itálico"><i>I</i></button>
+    <button class="tb" onmousedown="ev(event,'underline')" title="Sublinhado"><u>S</u></button>
+    <div class="sep"></div>
+
+    <span class="tb-group-label">Tamanho:</span>
+    <div class="sz-grid">
+      <button class="tb-sz" onmousedown="evSz(event,'9px')"  title="9pt">9</button>
+      <button class="tb-sz" onmousedown="evSz(event,'10px')" title="10pt">10</button>
+      <button class="tb-sz" onmousedown="evSz(event,'11px')" title="11pt">11</button>
+      <button class="tb-sz" onmousedown="evSz(event,'12px')" title="12pt">12</button>
+      <button class="tb-sz" onmousedown="evSz(event,'14px')" title="14pt">14</button>
+      <button class="tb-sz" onmousedown="evSz(event,'16px')" title="16pt">16</button>
+      <button class="tb-sz" onmousedown="evSz(event,'18px')" title="18pt">18</button>
+      <button class="tb-sz" onmousedown="evSz(event,'22px')" title="22pt">22</button>
+    </div>
+    <div class="sep"></div>
+
+    <button class="tb" onmousedown="evClear(event)" title="Remover toda formatação do trecho selecionado">✕ Limpar</button>
+    <div class="sep"></div>
+
+    <button class="tb" onclick="exportJSON()">⬇ JSON</button>
+    <button class="tb" onclick="document.getElementById('importFile').click()">⬆ JSON</button>
+    <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
+    <div class="sep"></div>
+    <button class="pbtn" onclick="window.print()">🖨 Imprimir / PDF</button>
+  </div>
+
+  <!-- LINHA 2: cores do texto -->
+  <div class="tb-row">
+    <span class="tb-group-label">Cor do texto:</span>
+    <div class="sw-grid">
+      <span class="swatch" style="background:#000000" title="Preto"    onmousedown="evColor(event,'#000000')"></span>
+      <span class="swatch" style="background:#1A1208" title="Sépia"    onmousedown="evColor(event,'#1A1208')"></span>
+      <span class="swatch" style="background:#8B2020" title="Vermelho" onmousedown="evColor(event,'#8B2020')"></span>
+      <span class="swatch" style="background:#C0392B" title="Escarlate"onmousedown="evColor(event,'#C0392B')"></span>
+      <span class="swatch" style="background:#1A4A8B" title="Azul"     onmousedown="evColor(event,'#1A4A8B')"></span>
+      <span class="swatch" style="background:#2980B9" title="Azul claro"onmousedown="evColor(event,'#2980B9')"></span>
+      <span class="swatch" style="background:#1A6B2A" title="Verde"    onmousedown="evColor(event,'#1A6B2A')"></span>
+      <span class="swatch" style="background:#27AE60" title="Verde claro"onmousedown="evColor(event,'#27AE60')"></span>
+      <span class="swatch" style="background:#6B3A1F" title="Marrom"   onmousedown="evColor(event,'#6B3A1F')"></span>
+      <span class="swatch" style="background:#8B6914" title="Dourado"  onmousedown="evColor(event,'#8B6914')"></span>
+      <span class="swatch" style="background:#5A1A6B" title="Roxo"     onmousedown="evColor(event,'#5A1A6B')"></span>
+      <span class="swatch" style="background:#555555" title="Cinza"    onmousedown="evColor(event,'#555555')"></span>
+      <input type="color" class="tb-color" id="customColor" value="#000000" title="Cor livre" onmousedown="event.stopPropagation()" onchange="applyColor(this.value)">
+    </div>
+    <div class="sep"></div>
+    <span class="tb-group-label">Destaque:</span>
+    <div class="sw-grid">
+      <span class="swatch" style="background:#FFF176" title="Amarelo"  onmousedown="evHL(event,'#FFF176')"></span>
+      <span class="swatch" style="background:#C8F0C8" title="Verde"    onmousedown="evHL(event,'#C8F0C8')"></span>
+      <span class="swatch" style="background:#FFCDD2" title="Rosa"     onmousedown="evHL(event,'#FFCDD2')"></span>
+      <span class="swatch" style="background:#BBDEFB" title="Azul"     onmousedown="evHL(event,'#BBDEFB')"></span>
+      <span class="swatch" style="background:#FFD9A0" title="Laranja"  onmousedown="evHL(event,'#FFD9A0')"></span>
+      <span class="swatch remover" title="Remover destaque" onmousedown="evHL(event,'')">✕</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="wrap">
+<div class="page" id="page">
+
+  <div class="hdr">
+    <div class="church">Igreja O Brasil Para Cristo — Jardim São Fernando</div>
+    <div class="title" contenteditable="true" id="sermon-title"></div>
+    <div class="meta"  contenteditable="true"></div>
+  </div>
+
+  <span class="screen-label">Introdução</span>
+  <div class="row">
+    <span class="lbl">Contexto:</span>
+    <div class="val" contenteditable="true"></div>
+  </div>
+  <div class="row">
+    <span class="lbl">Ligação ao tema:</span>
+    <div class="val" contenteditable="true"></div>
+  </div>
+
+  <div id="pts"></div>
+  <button class="btn-add" onclick="add()">+ Adicionar ponto</button>
+
+  <div class="conc">
+    <span class="screen-label">Conclusão</span>
+    <div class="conc-text" contenteditable="true"></div>
+  </div>
+
+  <div class="ftr">Pastor Sérgio Costa · OBPC Jardim São Fernando</div>
+
+</div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────────
+   SELEÇÃO SALVA
+   Usamos mouseup no documento para capturar a seleção
+   ANTES que o clique na toolbar a destrua.
+───────────────────────────────────────────────── */
+var savedRange = null;
+
+document.addEventListener('mouseup', function(e){
+  if(e.target.closest('.toolbar')) return;
+  var sel = window.getSelection();
+  if(sel && sel.rangeCount > 0 && !sel.isCollapsed){
+    var r = sel.getRangeAt(0);
+    if(document.getElementById('page').contains(r.commonAncestorContainer)){
+      savedRange = r.cloneRange();
+    }
+  } else {
+    savedRange = null;
+  }
+});
+
+function restoreSel(){
+  if(!savedRange) return false;
+  var sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(savedRange);
+  return true;
+}
+
+/* ─────────────────────────────────────────────────
+   HANDLERS — todos usam onmousedown + preventDefault
+   para evitar perda de seleção antes do clique.
+───────────────────────────────────────────────── */
+function ev(e, cmd){
+  e.preventDefault();
+  restoreSel();
+  document.execCommand(cmd, false, null);
+}
+
+function evSz(e, sz){
+  e.preventDefault();
+  restoreSel();
+  wrapSel('font-size:'+sz);
+}
+
+function evColor(e, hex){
+  e.preventDefault();
+  applyColor(hex);
+}
+
+function applyColor(hex){
+  restoreSel();
+  wrapSel('color:'+hex);
+  document.getElementById('customColor').value = hex;
+}
+
+function evHL(e, hex){
+  e.preventDefault();
+  restoreSel();
+  if(!hex){ removeHighlight(); return; }
+  wrapSel('background-color:'+hex);
+}
+
+function removeHighlight(){
+  var sel = window.getSelection();
+  if(!sel || sel.rangeCount===0 || sel.isCollapsed) return;
+  document.execCommand('removeFormat', false, null);
+}
+
+function evClear(e){
+  e.preventDefault();
+  restoreSel();
+  document.execCommand('removeFormat', false, null);
+}
+
+/* ─────────────────────────────────────────────────
+   WRAP EM SPAN
+───────────────────────────────────────────────── */
+function wrapSel(styleStr){
+  var sel = window.getSelection();
+  if(!sel || sel.rangeCount===0 || sel.isCollapsed){
+    alert('Selecione o texto primeiro, depois clique no botão.');
+    return false;
+  }
+  var range = sel.getRangeAt(0);
+  var frag  = range.extractContents();
+  var span  = document.createElement('span');
+  span.style.cssText = styleStr;
+  span.appendChild(frag);
+  range.insertNode(span);
+  var nr = document.createRange();
+  nr.selectNodeContents(span);
+  sel.removeAllRanges();
+  sel.addRange(nr);
+  savedRange = nr.cloneRange();
+  return true;
+}
+
+/* ─────────────────────────────────────────────────
+   PONTOS
+───────────────────────────────────────────────── */
+var n=0;
+function add(){
+  n++;
+  var list=document.getElementById('pts');
+  var d=document.createElement('div');
+  d.className='pt';
+  d.innerHTML=
+    '<div class="pt-num">Ponto '+n+
+    ' <button class="btn-del" onclick="this.closest(\'.pt\').remove();renum()">&#x2715; remover</button></div>'+
+    '<div class="pt-title" contenteditable="true"></div>'+
+    '<div class="row"><span class="lbl">Vers&#237;culo:</span><div class="val" contenteditable="true"></div></div>'+
+    '<div class="row"><span class="lbl">Contextualiza&#231;&#227;o:</span><div class="val" contenteditable="true"></div></div>'+
+    '<div class="row"><span class="lbl">Explica&#231;&#227;o:</span><div class="val" contenteditable="true"></div></div>'+
+    '<div class="row"><span class="lbl">Aplica&#231;&#227;o:</span><div class="val" contenteditable="true"></div></div>';
+  list.appendChild(d);
+  d.querySelector('.pt-title').focus();
+}
+function renum(){
+  document.querySelectorAll('.pt').forEach(function(b,i){
+    b.querySelector('.pt-num').firstChild.textContent='Ponto '+(i+1)+' ';
+  });
+  n=document.querySelectorAll('.pt').length;
+}
+add();add();
+
+/* ─────────────────────────────────────────────────
+   EXPORTAR JSON
+───────────────────────────────────────────────── */
+function exportJSON(){
+  var titleEl  = document.getElementById('sermon-title');
+  var metaEl   = document.querySelector('.meta');
+  var introEls = document.querySelectorAll('.hdr ~ .row .val');
+  var concEl   = document.querySelector('.conc-text');
+  var pontos   = [];
+  document.querySelectorAll('#pts .pt').forEach(function(pt){
+    var vals=pt.querySelectorAll('.val');
+    pontos.push({
+      titulo:           pt.querySelector('.pt-title').innerHTML,
+      versiculo:        vals[0]?vals[0].innerHTML:'',
+      contextualizacao: vals[1]?vals[1].innerHTML:'',
+      explicacao:       vals[2]?vals[2].innerHTML:'',
+      aplicacao:        vals[3]?vals[3].innerHTML:''
+    });
+  });
+  var data={
+    _formato:'esboco-sermao-v1',
+    titulo:  titleEl.innerHTML,
+    meta:    metaEl.innerHTML,
+    intro:{
+      contexto: introEls[0]?introEls[0].innerHTML:'',
+      ligacao:  introEls[1]?introEls[1].innerHTML:''
+    },
+    pontos:   pontos,
+    conclusao:concEl.innerHTML
+  };
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  var slug=(titleEl.innerText||'').trim().replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_\u00C0-\u00FF]/g,'').substring(0,40)||'esboco';
+  a.download='esboco_'+slug+'.json';
+  a.href=URL.createObjectURL(blob);
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ─────────────────────────────────────────────────
+   IMPORTAR JSON
+───────────────────────────────────────────────── */
+function importJSON(input){
+  var file=input.files[0];
+  if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var data;
+    try{data=JSON.parse(e.target.result);}
+    catch(err){alert('Arquivo JSON inválido.');return;}
+    if(data._formato!=='esboco-sermao-v1'){
+      if(!confirm('Arquivo não reconhecido como esboço.\nImportar mesmo assim?')) return;
+    }
+    document.getElementById('sermon-title').innerHTML=data.titulo||'';
+    document.querySelector('.meta').innerHTML=data.meta||'';
+    var introEls=document.querySelectorAll('.hdr ~ .row .val');
+    if(introEls[0]) introEls[0].innerHTML=(data.intro&&data.intro.contexto)||'';
+    if(introEls[1]) introEls[1].innerHTML=(data.intro&&data.intro.ligacao)||'';
+    var list=document.getElementById('pts');
+    list.innerHTML='';n=0;
+    (data.pontos||[]).forEach(function(p){
+      n++;
+      var d=document.createElement('div');
+      d.className='pt';
+      d.innerHTML=
+        '<div class="pt-num">Ponto '+n+
+        ' <button class="btn-del" onclick="this.closest(\'.pt\').remove();renum()">&#x2715; remover</button></div>'+
+        '<div class="pt-title" contenteditable="true">'+(p.titulo||'')+'</div>'+
+        '<div class="row"><span class="lbl">Vers&#237;culo:</span><div class="val" contenteditable="true">'+(p.versiculo||'')+'</div></div>'+
+        '<div class="row"><span class="lbl">Contextualiza&#231;&#227;o:</span><div class="val" contenteditable="true">'+(p.contextualizacao||'')+'</div></div>'+
+        '<div class="row"><span class="lbl">Explica&#231;&#227;o:</span><div class="val" contenteditable="true">'+(p.explicacao||'')+'</div></div>'+
+        '<div class="row"><span class="lbl">Aplica&#231;&#227;o:</span><div class="val" contenteditable="true">'+(p.aplicacao||'')+'</div></div>';
+      list.appendChild(d);
+    });
+    document.querySelector('.conc-text').innerHTML=data.conclusao||'';
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+</script>
+</body>
+</html>
