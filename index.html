@@ -12,17 +12,20 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --azul: #3B9BD6;
-      --azul-claro: #5DB0E0;
-      --escuro: #1E3A5F;
-      --escuro2: #162d4a;
+      --verde: #10b981;
+      --verde-claro: #34d399;
+      --verde-escuro: #047857;
+      --escuro: #0f2922;
+      --escuro2: #0a1f1a;
       --branco: #ffffff;
-      --card-bg: rgba(59,155,214,0.07);
-      --card-border: rgba(59,155,214,0.22);
-      --card-hover-bg: rgba(59,155,214,0.16);
-      --card-hover-border: rgba(59,155,214,0.5);
+      --card-bg: rgba(16,185,129,0.07);
+      --card-border: rgba(16,185,129,0.22);
+      --card-hover-bg: rgba(16,185,129,0.16);
+      --card-hover-border: rgba(16,185,129,0.5);
       --text-muted: rgba(255,255,255,0.45);
-      --divider: rgba(59,155,214,0.13);
+      --divider: rgba(16,185,129,0.14);
+      --group-bg: rgba(16,185,129,0.04);
+      --group-border: rgba(16,185,129,0.16);
     }
 
     html { scroll-behavior: smooth; }
@@ -37,7 +40,7 @@
     /* ── HEADER ─────────────────────────────────── */
     header {
       background: var(--escuro);
-      border-bottom: 2px solid var(--azul);
+      border-bottom: 2px solid var(--verde);
       padding: 1.4rem 2rem;
       display: flex;
       align-items: center;
@@ -50,7 +53,7 @@
     .logo {
       width: 50px; height: 50px;
       border-radius: 50%;
-      background: var(--azul);
+      background: var(--verde);
       display: flex; align-items: center; justify-content: center;
       font-family: 'Sora', sans-serif;
       font-size: 19px; font-weight: 700; color: #fff;
@@ -69,12 +72,12 @@
 
     .header-badge {
       margin-left: auto;
-      background: rgba(59,155,214,0.15);
-      border: 0.5px solid rgba(59,155,214,0.4);
+      background: rgba(16,185,129,0.15);
+      border: 0.5px solid rgba(16,185,129,0.4);
       border-radius: 20px;
       padding: 5px 14px;
       font-size: 12px;
-      color: var(--azul-claro);
+      color: var(--verde-claro);
       font-weight: 500;
       white-space: nowrap;
     }
@@ -141,7 +144,7 @@
 
     .card-icon {
       font-size: 22px;
-      color: var(--azul);
+      color: var(--verde);
       margin-bottom: 2px;
       display: block;
     }
@@ -163,8 +166,54 @@
 
     /* destaque */
     .card.destaque {
-      background: rgba(59,155,214,0.13);
-      border-color: rgba(59,155,214,0.42);
+      background: rgba(16,185,129,0.13);
+      border-color: rgba(16,185,129,0.42);
+    }
+
+    /* ── GRUPOS (matéria + simulado + guia juntos) ──── */
+    .subject-group {
+      background: var(--group-bg);
+      border: 1px solid var(--group-border);
+      border-radius: 14px;
+      padding: 14px 14px 12px;
+      margin-bottom: 10px;
+    }
+
+    .subject-name {
+      font-family: 'Sora', sans-serif;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--verde-claro);
+      margin-bottom: 10px;
+      padding-left: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .subject-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .subject-row .card {
+      animation: none;
+      padding: 12px 12px 11px;
+    }
+
+    .subject-row .card-title { font-size: 12.5px; }
+    .subject-row .card-sub { font-size: 10.5px; }
+    .subject-row .card-icon { font-size: 18px; }
+
+    .theo-groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+    }
+
+    @media (max-width: 480px) {
+      .theo-groups { grid-template-columns: 1fr; }
     }
 
     /* ── ANIMAÇÃO ────────────────────────────────── */
@@ -188,7 +237,7 @@
       border-top: 0.5px solid var(--divider);
     }
 
-    footer span { color: var(--azul); }
+    footer span { color: var(--verde); }
 
     /* ── RESPONSIVO ──────────────────────────────── */
     @media (max-width: 480px) {
@@ -303,55 +352,104 @@
     <!-- SIMULADOS TEOLÓGICOS -->
     <section>
       <div class="section-label">Simulados Teológicos</div>
-      <div class="grid">
 
-        <a class="card" href="simulado_aconselhamento_pastoral.html">
-          <i class="ti ti-heart-handshake card-icon"></i>
-          <span class="card-title">Aconselhamento Pastoral</span>
-          <span class="card-sub">Simulado teológico</span>
-        </a>
+      <div class="theo-groups">
 
-        <a class="card" href="avaliacao_aconselhamento_pastoral.html">
-          <i class="ti ti-book-2 card-icon"></i>
-          <span class="card-title">Guia de Memorização</span>
-          <span class="card-sub">Aconselhamento Pastoral</span>
-        </a>
+        <div class="subject-group">
+          <div class="subject-name"><i class="ti ti-heart-handshake"></i> Aconselhamento Pastoral</div>
+          <div class="subject-row">
+            <a class="card" href="simulado_aconselhamento_pastoral.html">
+              <i class="ti ti-clipboard-list card-icon"></i>
+              <span class="card-title">Simulado</span>
+              <span class="card-sub">Fazer a prova</span>
+            </a>
+            <a class="card" href="avaliacao_aconselhamento_pastoral.html">
+              <i class="ti ti-book-2 card-icon"></i>
+              <span class="card-title">Guia</span>
+              <span class="card-sub">Memorização</span>
+            </a>
+          </div>
+        </div>
 
-        <a class="card" href="simulado_adm_eclesiastica.html">
-          <i class="ti ti-building-church card-icon"></i>
-          <span class="card-title">Adm. Eclesiástica</span>
-          <span class="card-sub">Simulado teológico</span>
-        </a>
+        <div class="subject-group">
+          <div class="subject-name"><i class="ti ti-building-church"></i> Administração Eclesiástica</div>
+          <div class="subject-row">
+            <a class="card" href="simulado_adm_eclesiastica.html">
+              <i class="ti ti-clipboard-list card-icon"></i>
+              <span class="card-title">Simulado</span>
+              <span class="card-sub">Fazer a prova</span>
+            </a>
+            <a class="card" href="#" style="opacity:0.4; cursor:default; pointer-events:none;">
+              <i class="ti ti-book-2 card-icon"></i>
+              <span class="card-title">Guia</span>
+              <span class="card-sub">Em breve</span>
+            </a>
+          </div>
+        </div>
 
-        <a class="card" href="simulado_eclesiologia.html">
-          <i class="ti ti-users card-icon"></i>
-          <span class="card-title">Eclesiologia</span>
-          <span class="card-sub">Simulado teológico</span>
-        </a>
+        <div class="subject-group">
+          <div class="subject-name"><i class="ti ti-users"></i> Eclesiologia</div>
+          <div class="subject-row">
+            <a class="card" href="simulado_eclesiologia.html">
+              <i class="ti ti-clipboard-list card-icon"></i>
+              <span class="card-title">Simulado</span>
+              <span class="card-sub">Fazer a prova</span>
+            </a>
+            <a class="card" href="avaliacao_eclesiologia.html">
+              <i class="ti ti-book-2 card-icon"></i>
+              <span class="card-title">Guia</span>
+              <span class="card-sub">Memorização</span>
+            </a>
+          </div>
+        </div>
 
-        <a class="card" href="simulado_historia_igreja3.html">
-          <i class="ti ti-timeline card-icon"></i>
-          <span class="card-title">História da Igreja</span>
-          <span class="card-sub">Simulado teológico</span>
-        </a>
+        <div class="subject-group">
+          <div class="subject-name"><i class="ti ti-timeline"></i> História da Igreja</div>
+          <div class="subject-row">
+            <a class="card" href="simulado_historia_igreja3.html">
+              <i class="ti ti-clipboard-list card-icon"></i>
+              <span class="card-title">Simulado</span>
+              <span class="card-sub">Fazer a prova</span>
+            </a>
+            <a class="card" href="avaliacao_historia_igreja3.html">
+              <i class="ti ti-book-2 card-icon"></i>
+              <span class="card-title">Guia</span>
+              <span class="card-sub">Memorização</span>
+            </a>
+          </div>
+        </div>
 
-        <a class="card" href="simulado-escatologia.html">
-          <i class="ti ti-stars card-icon"></i>
-          <span class="card-title">Escatologia</span>
-          <span class="card-sub">Simulado teológico</span>
-        </a>
+        <div class="subject-group">
+          <div class="subject-name"><i class="ti ti-stars"></i> Escatologia</div>
+          <div class="subject-row">
+            <a class="card" href="simulado-escatologia.html">
+              <i class="ti ti-clipboard-list card-icon"></i>
+              <span class="card-title">Simulado</span>
+              <span class="card-sub">Fazer a prova</span>
+            </a>
+            <a class="card" href="avaliacao_escatologia.html">
+              <i class="ti ti-book-2 card-icon"></i>
+              <span class="card-title">Guia</span>
+              <span class="card-sub">Memorização</span>
+            </a>
+          </div>
+        </div>
 
-        <a class="card" href="simulado-teologia-pastoral.html">
-          <i class="ti ti-bible card-icon"></i>
-          <span class="card-title">Teologia Pastoral</span>
-          <span class="card-sub">Simulado teológico</span>
-        </a>
-
-        <a class="card" href="avaliacao_teologia_pastoral.html">
-          <i class="ti ti-book-2 card-icon"></i>
-          <span class="card-title">Guia de Memorização</span>
-          <span class="card-sub">Teologia Pastoral</span>
-        </a>
+        <div class="subject-group">
+          <div class="subject-name"><i class="ti ti-bible"></i> Teologia Pastoral</div>
+          <div class="subject-row">
+            <a class="card" href="simulado-teologia-pastoral.html">
+              <i class="ti ti-clipboard-list card-icon"></i>
+              <span class="card-title">Simulado</span>
+              <span class="card-sub">Fazer a prova</span>
+            </a>
+            <a class="card" href="avaliacao_teologia_pastoral.html">
+              <i class="ti ti-book-2 card-icon"></i>
+              <span class="card-title">Guia</span>
+              <span class="card-sub">Memorização</span>
+            </a>
+          </div>
+        </div>
 
       </div>
     </section>
