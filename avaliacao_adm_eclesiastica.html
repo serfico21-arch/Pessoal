@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia de Memorização – Administração Eclesiástica</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #f7f4ef;
+    --surface: #ffffff;
+    --primary: #2d5a3d;
+    --primary-light: #e8f2eb;
+    --accent: #c8973a;
+    --accent-light: #fdf4e3;
+    --text: #2b2b28;
+    --text-dim: #6b6a63;
+    --border: #e3ddd0;
+    --radius: 12px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  .app-header {
+    background: var(--primary);
+    color: #fff;
+    padding: 18px 24px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .app-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .app-header p {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-top: 2px;
+  }
+  .back-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px;
+    background: rgba(255,255,255,0.15);
+    padding: 8px 14px;
+    border-radius: 99px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .back-link:hover { background: rgba(255,255,255,0.28); }
+
+  .wrap {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 24px 18px 0;
+  }
+
+  .howto {
+    background: var(--accent-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    margin-bottom: 26px;
+  }
+  .howto h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--accent);
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  .howto ol { padding-left: 20px; }
+  .howto li { font-size: 13.5px; line-height: 1.7; color: var(--text-dim); margin-bottom: 5px; }
+  .howto li strong { color: var(--text); }
+
+  .day-nav {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 26px;
+  }
+  .day-pill {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .day-pill:hover { border-color: var(--primary); color: var(--primary); }
+  .day-pill.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+  .day-block { display: none; }
+  .day-block.active { display: block; }
+
+  .day-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 21px;
+    color: var(--primary);
+    margin-bottom: 6px;
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 12px;
+  }
+  .day-intro {
+    font-size: 13.5px;
+    color: var(--text-dim);
+    font-style: italic;
+    margin: 14px 0 22px;
+    line-height: 1.6;
+  }
+
+  .qa-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  }
+  .qa-question {
+    padding: 16px 18px;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    line-height: 1.5;
+  }
+  .qa-question .num { color: var(--primary); margin-right: 6px; }
+  .qa-question .chevron {
+    flex-shrink: 0;
+    color: var(--primary);
+    transition: transform 0.25s;
+    font-size: 13px;
+    margin-top: 2px;
+  }
+  .qa-card.open .chevron { transform: rotate(180deg); }
+
+  .qa-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  .qa-card.open .qa-body { max-height: 600px; }
+
+  .qa-answer {
+    background: var(--primary-light);
+    border-top: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    padding: 12px 18px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1.6;
+  }
+  .qa-explain {
+    padding: 14px 18px 18px;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  .reveal-hint {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-dim);
+    opacity: 0.8;
+    margin: -4px 0 18px;
+    font-style: italic;
+  }
+
+  .pers-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 22px;
+    font-size: 13.5px;
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  }
+  .pers-table th {
+    background: var(--primary);
+    color: #fff;
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 700;
+  }
+  .pers-table td {
+    background: var(--surface);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .pers-table td.key { color: var(--primary); font-weight: 700; white-space: nowrap; }
+
+  .dica {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-light);
+    padding: 14px 18px;
+    margin: 16px 0 28px;
+    font-size: 13.5px;
+    font-style: italic;
+    line-height: 1.6;
+    border-radius: 0 8px 8px 0;
+    color: var(--text);
+  }
+  .dica strong { color: var(--accent); font-style: normal; }
+
+  .check-list { list-style: none; margin-bottom: 22px; }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .check-item:hover { border-color: var(--primary); }
+  .check-item .box {
+    width: 18px; height: 18px;
+    flex-shrink: 0;
+    border: 1.5px solid var(--primary);
+    border-radius: 4px;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #fff;
+    transition: all 0.2s;
+  }
+  .check-item.checked .box { background: var(--primary); border-color: var(--primary); }
+  .check-item.checked .box::after { content: "✓"; }
+  .check-item.checked span.txt { color: var(--text-dim); text-decoration: line-through; opacity: 0.6; }
+
+  .final-box {
+    background: var(--primary-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    margin-top: 8px;
+  }
+  .final-box h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--primary);
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  .final-box p { font-size: 13.5px; color: var(--text-dim); line-height: 1.7; margin-bottom: 8px; }
+
+  .day-footer-nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 24px;
+    margin-bottom: 30px;
+  }
+  .nav-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    padding: 11px 22px;
+    border-radius: 8px;
+    border: 2px solid var(--primary);
+    background: transparent;
+    color: var(--primary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { background: var(--primary-light); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .nav-btn.primary { background: var(--primary); color: #fff; }
+  .nav-btn.primary:hover { background: #234a32; }
+
+  @media (max-width: 480px) {
+    .pers-table { font-size: 12px; }
+    .pers-table th, .pers-table td { padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div>
+    <h1>Guia de Memorização</h1>
+    <p>Administração Eclesiástica · 5 dias</p>
+  </div>
+  <a class="back-link" href="simulado_adm_eclesiastica.html">← Voltar para o Simulado</a>
+</div>
+
+<div class="wrap">
+
+  <div class="howto">
+    <h3>Como usar este guia</h3>
+    <ol>
+      <li><strong>Estude só o dia de hoje.</strong> Não pule dias nem tente fazer tudo de uma vez — isso é o que mais cansa e gera ansiedade.</li>
+      <li><strong>Toque na pergunta</strong> para abrir a resposta curta e a explicação simples.</li>
+      <li>No fim de cada dia, tente <strong>recitar de cabeça</strong> antes de abrir o card. Repita amanhã antes de avançar.</li>
+      <li>Se sentir ansiedade, pare, respire fundo umas 5 vezes e continue depois. Não existe pressa.</li>
+      <li>No <strong>Dia 5</strong> tem um checklist com todas as perguntas — use para se testar antes da prova.</li>
+    </ol>
+  </div>
+
+  <div class="day-nav" id="dayNav"></div>
+
+  <!-- DIA 1 -->
+  <div class="day-block" data-day="1">
+    <div class="day-title">Dia 1 — A Bíblia e os princípios de administração</div>
+    <p class="day-intro">Hoje você vai aprender os exemplos bíblicos de administração e o que é Administração Eclesiástica. São 3 perguntas. Vá com calma.</p>
+    <p class="reveal-hint">toque na pergunta para revelar a resposta</p>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">1.</span>Cite pelo menos 3 exemplos bíblicos de princípios de Administração.</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">Resposta para decorar: Êxodo 18 (Jetro e Moisés), Gênesis 6-9 (Noé e a Arca), 1 Crônicas 24 (Davi e os sacerdotes).</div>
+        <div class="qa-explain">
+          Decore assim:<br>
+          • <strong>JETRO</strong> (Êx 18) → aconselhou Moisés a <em>delegar</em>: dividiu o trabalho e criou hierarquia.<br>
+          • <strong>NOÉ</strong> (Gn 6-9) → Deus deu instruções <em>detalhadas</em> para construir a Arca — planejamento total.<br>
+          • <strong>DAVI</strong> (1 Cr 24) → dividiu os sacerdotes em 24 turnos — <em>especialização e supervisão</em>.
+        </div>
+      </div>
+    </div>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">2.</span>O que é Administração Eclesiástica?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">Resposta para decorar: É o estudo dos aspectos que influenciam a organização do povo de Deus, para que seus administradores conduzam a igreja a cumprir sua missão — no aspecto espiritual, social e econômico.</div>
+        <div class="qa-explain">Guarde três palavras: <strong>ESPIRITUAL, SOCIAL, ECONÔMICO</strong>. A administração eclesiástica cuida dessas três dimensões da igreja ao mesmo tempo.</div>
+      </div>
+    </div>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">3.</span>Quais são os 5 principais objetivos da Administração?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">Resposta para decorar: Prever, Organizar, Comandar, Coordenar e Avaliar.</div>
+        <div class="qa-explain">Decore pela sigla <strong>POCCA</strong>: <strong>P</strong>rever → <strong>O</strong>rganizar → <strong>C</strong>omandar → <strong>C</strong>oordenar → <strong>A</strong>valiar. Repita em voz alta três vezes.</div>
+      </div>
+    </div>
+
+    <div class="dica"><strong>Dica para lembrar:</strong> JETRO delega, NOÉ planeja, DAVI organiza turnos. POCCA: Prever, Organizar, Comandar, Coordenar, Avaliar.</div>
+
+    <div class="day-footer-nav">
+      <button class="nav-btn" disabled>← Anterior</button>
+      <button class="nav-btn primary" onclick="goDay(2)">Próximo dia →</button>
+    </div>
+  </div>
+
+  <!-- DIA 2 -->
+  <div class="day-block" data-day="2">
+    <div class="day-title">Dia 2 — Deus, a Igreja e as formas de governo</div>
+    <p class="day-intro">Hoje você aprende a diferença entre Igreja Organismo e Igreja Organização, e as formas de governo eclesiástico.</p>
+    <p class="reveal-hint">toque na pergunta para revelar a resposta</p>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">4.</span>Do seu ponto de vista, Deus é um ser organizado? Por quê?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">Resposta para decorar: Sim. Em Sua soberania, Deus planeja todas as Suas ações e nada pode surpreendê-Lo. A organização é bíblica e universal, sendo tão antiga quanto a própria humanidade.</div>
+        <div class="qa-explain">Lembre que a apostila destaca: Deus não improvisa. Tudo o que Ele faz é planejado com antecedência. Isso demonstra Seu caráter ordenado e soberano.</div>
+      </div>
+    </div>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">5.</span>O que é Igreja Organismo e o que é Igreja Organização?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">Resposta para decorar: Organismo = corpo espiritual de Cristo, sujeito às leis de Deus. Organização = estrutura humana e jurídica de apoio, sujeita às leis dos homens.</div>
+        <div class="qa-explain">Pense assim: o <strong>ORGANISMO</strong> é o coração (espiritual, divino). A <strong>ORGANIZAÇÃO</strong> é o esqueleto (estrutura humana, administrativa). O coração existe por si; o esqueleto sustenta o coração. E a organização deve sempre trabalhar <em>para</em> o organismo, nunca o contrário.</div>
+      </div>
+    </div>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">6.</span>Cite 3 das 5 formas mais conhecidas de governo eclesiástico.</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">Resposta para decorar: Episcopal, Presbiteriano e Congregacional.</div>
+        <div class="qa-explain">
+          Decore por quem manda em cada um:<br>
+          • <strong>EPISCOPAL</strong> → o bispo manda (epíscopos = bispos).<br>
+          • <strong>PRESBITERIANO</strong> → um conselho de presbíteros (anciãos) governa.<br>
+          • <strong>CONGREGACIONAL</strong> → a congregação (membros) decide.
+        </div>
+      </div>
+    </div>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">7.</span>Assinale a alternativa correta: a Igreja como organização deve trabalhar para…</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">Resposta para decorar: A Igreja como organização deve sempre trabalhar para a Igreja organismo.</div>
+        <div class="qa-explain">Pegadinha clássica da prova: a estrutura (organização) existe para servir ao corpo espiritual (organismo), nunca o contrário. Se a organização vira o fim em si mesma, a igreja deixou de ser a Igreja de Cristo.</div>
+      </div>
+    </div>
+
+    <div class="dica"><strong>Dica para lembrar:</strong> ORGANISMO = espiritual (Deus). ORGANIZAÇÃO = estrutura (homens). A estrutura serve ao espiritual, nunca ao contrário.</div>
+
+    <div class="day-footer-nav">
+      <button class="nav-btn" onclick="goDay(1)">← Anterior</button>
+      <button class="nav-btn primary" onclick="goDay(3)">Próximo dia →</button>
+    </div>
+  </div>
+
+  <!-- DIA 3 -->
+  <div class="day-block" data-day="3">
+    <div class="day-title">Dia 3 — Autoridade: de Deus e dos homens</div>
+    <p class="day-intro">Hoje você aprende quais autoridades pertencem só a Deus e quais foram delegadas aos homens. São conceitos distintos e importantes para a prova.</p>
+    <p class="reveal-hint">toque na pergunta para revelar a resposta</p>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">8.</span>Quais são os 3 níveis de autoridade reservados somente a Deus?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">Resposta para decorar: 1) Autoridade Soberana ou Imperial. 2) Autoridade da Verdade. 3) Autoridade da Consciência.</div>
+        <div class="qa-explain">
+          Decore a sigla <strong>SVC</strong>:<br>
+          • <strong>S</strong>oberana/Imperial → só Deus reina supremo.<br>
+          • <strong>V</strong>erdade → a verdade absoluta pertence só a Deus.<br>
+          • <strong>C</strong>onsciência → Deus fala à consciência de cada pessoa — nenhum homem pode ocupar esse lugar.
+        </div>
+      </div>
+    </div>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">9.</span>Cite 3 dos níveis de autoridade concedidos aos homens.</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">Resposta para decorar: 1) Autoridade delegada. 2) Autoridade estipulada (contratos/acordos). 3) Autoridade dos costumes/tradição. 4) Autoridade funcional (competência).</div>
+        <div class="qa-explain">
+          A mais fácil de lembrar é a <strong>DELEGADA</strong> (veio de cima, de Deus ou de quem tem poder). A <strong>FUNCIONAL</strong> é a do especialista — você obedece porque a pessoa entende do assunto. A <strong>DOS COSTUMES</strong> é a tradição que todo mundo respeita sem questionar.
+        </div>
+      </div>
+    </div>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">10.</span>Qual o instrumento mais importante da legislação brasileira?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">Resposta para decorar: A Constituição Federal.</div>
+        <div class="qa-explain">Simples e direto: a Constituição é a lei máxima do país — nenhuma outra lei pode contrariá-la. A igreja, como organização, também está sujeita a ela.</div>
+      </div>
+    </div>
+
+    <div class="dica"><strong>Dica para lembrar:</strong> Deus tem SVC (Soberana, Verdade, Consciência). Homens têm autoridade delegada, estipulada, dos costumes e funcional.</div>
+
+    <div class="day-footer-nav">
+      <button class="nav-btn" onclick="goDay(2)">← Anterior</button>
+      <button class="nav-btn primary" onclick="goDay(4)">Próximo dia →</button>
+    </div>
+  </div>
+
+  <!-- DIA 4 -->
+  <div class="day-block" data-day="4">
+    <div class="day-title">Dia 4 — Revisão: Verdadeiro ou Falso e tabela-resumo</div>
+    <p class="day-intro">Hoje é revisão do conteúdo dos três dias anteriores em outro formato. Você já sabe — é treinar reconhecer na hora da prova.</p>
+    <p class="reveal-hint">toque na pergunta para revelar a resposta</p>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">V/F 1.</span>A organização é bíblica e tão antiga quanto a humanidade.</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">VERDADEIRO.</div>
+        <div class="qa-explain">Desde a criação do mundo Deus organiza — os exemplos de Noé, Moisés e Davi mostram isso.</div>
+      </div>
+    </div>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">V/F 2.</span>A Igreja Organismo está sujeita às leis dos homens.</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">FALSO.</div>
+        <div class="qa-explain">O Organismo (corpo espiritual) está sujeito às leis de Deus. Quem se sujeita às leis dos homens é a Organização (estrutura jurídica).</div>
+      </div>
+    </div>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">V/F 3.</span>A administração é um processo contínuo — se não for contínuo, não alcança seus objetivos.</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">VERDADEIRO.</div>
+        <div class="qa-explain">Administração não é evento pontual: é processo — acontece todo dia, sem parar.</div>
+      </div>
+    </div>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">V/F 4.</span>A autoridade da consciência pode ser exercida por qualquer líder eclesiástico.</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">FALSO.</div>
+        <div class="qa-explain">A autoridade da consciência é reservada exclusivamente a Deus. Nenhum homem — nem pastor, nem bispo — pode se colocar no lugar de Deus na consciência de alguém.</div>
+      </div>
+    </div>
+
+    <div class="qa-card" onclick="toggleCard(this)">
+      <div class="qa-question"><span><span class="num">V/F 5.</span>No governo Congregacional, quem decide é a própria congregação de membros.</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <div class="qa-answer">VERDADEIRO.</div>
+        <div class="qa-explain">Congre-GACIONAL = a CONGREGAÇÃO governa. É a forma mais democrática de governo eclesiástico.</div>
+      </div>
+    </div>
+
+    <p style="font-family:'Playfair Display',serif;color:var(--primary);font-size:16px;margin:24px 0 6px;">Tabela-resumo para ligar as colunas</p>
+    <p class="day-intro" style="margin-top:6px;">Decore por palavra-chave. Cada conceito tem UMA palavra que resume tudo:</p>
+
+    <table class="pers-table">
+      <tr><th>Conceito</th><th>Palavra-chave / o que cai na prova</th></tr>
+      <tr><td class="key">Jetro (Êx 18)</td><td>DELEGAÇÃO. Aconselhou Moisés a dividir o trabalho e criar hierarquia.</td></tr>
+      <tr><td class="key">Noé (Gn 6-9)</td><td>PLANEJAMENTO DETALHADO. Deus deu instruções completas para a Arca.</td></tr>
+      <tr><td class="key">Davi (1 Cr 24)</td><td>ESPECIALIZAÇÃO. Dividiu os sacerdotes em 24 turnos.</td></tr>
+      <tr><td class="key">POCCA</td><td>Prever, Organizar, Comandar, Coordenar, Avaliar — os 5 objetivos.</td></tr>
+      <tr><td class="key">Organismo</td><td>ESPIRITUAL. Corpo de Cristo, sujeito às leis de Deus.</td></tr>
+      <tr><td class="key">Organização</td><td>ESTRUTURA. Aspecto humano/jurídico, sujeito às leis dos homens.</td></tr>
+      <tr><td class="key">Episcopal</td><td>BISPO governa.</td></tr>
+      <tr><td class="key">Presbiteriano</td><td>CONSELHO DE ANCIÃOS governa.</td></tr>
+      <tr><td class="key">Congregacional</td><td>MEMBROS decidem.</td></tr>
+      <tr><td class="key">Autoridade de Deus</td><td>SVC: Soberana, Verdade, Consciência.</td></tr>
+    </table>
+
+    <div class="dica"><strong>Dica para lembrar:</strong> POCCA (5 objetivos). SVC (só de Deus). Organismo = espiritual. Organização = estrutura. Episcopal = bispo, Presbiteriano = anciãos, Congregacional = membros.</div>
+
+    <div class="day-footer-nav">
+      <button class="nav-btn" onclick="goDay(3)">← Anterior</button>
+      <button class="nav-btn primary" onclick="goDay(5)">Próximo dia →</button>
+    </div>
+  </div>
+
+  <!-- DIA 5 -->
+  <div class="day-block" data-day="5">
+    <div class="day-title">Dia 5 — Revisão geral: teste você mesmo</div>
+    <p class="day-intro">Toque para marcar o que você já consegue responder de memória. Só volte aos dias anteriores se travar em alguma pergunta — sem culpa, é normal precisar revisar.</p>
+
+    <ul class="check-list" id="checkList">
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">1. Cite 3 exemplos bíblicos de princípios de Administração.</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">2. O que é Administração Eclesiástica?</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">3. Quais são os 5 objetivos da Administração? (POCCA)</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">4. Deus é organizado? Por quê?</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">5. Defina Igreja Organismo e Igreja Organização.</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">6. Cite 3 formas de governo eclesiástico.</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">7. A organização deve trabalhar para o organismo ou o contrário?</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">8. Quais os 3 níveis de autoridade reservados só a Deus?</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">9. Cite 3 níveis de autoridade concedidos aos homens.</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">10. Qual o instrumento mais importante da legislação brasileira?</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">V/F: A organização é bíblica e tão antiga quanto a humanidade.</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">V/F: O Organismo está sujeito às leis dos homens.</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">V/F: A administração é um processo contínuo.</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">V/F: A autoridade da consciência pode ser exercida por líderes eclesiásticos.</span></li>
+      <li class="check-item" onclick="toggleCheck(this)"><span class="box"></span><span class="txt">V/F: No governo Congregacional, a congregação decide.</span></li>
+    </ul>
+
+    <div class="final-box">
+      <h3>Antes da prova</h3>
+      <p>Você não precisa lembrar tudo igual ao texto. Lembrar a IDEIA já é suficiente para responder bem.</p>
+      <p>Durma bem na noite anterior — o sono ajuda mais a memória do que revisar até tarde.</p>
+      <p>Se a ansiedade vier durante a prova, pare, respire devagar três vezes e volte: você já estudou, o conteúdo está na sua cabeça.</p>
+    </div>
+
+    <div class="day-footer-nav">
+      <button class="nav-btn" onclick="goDay(4)">← Anterior</button>
+      <a class="nav-btn primary" style="text-decoration:none;display:inline-flex;align-items:center;" href="simulado_adm_eclesiastica.html">Ir para o Simulado →</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const totalDays = 5;
+
+  function buildNav() {
+    const nav = document.getElementById('dayNav');
+    nav.innerHTML = '';
+    for (let i = 1; i <= totalDays; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'day-pill';
+      btn.textContent = 'Dia ' + i;
+      btn.onclick = () => goDay(i);
+      btn.dataset.day = i;
+      nav.appendChild(btn);
+    }
+  }
+
+  function goDay(n) {
+    document.querySelectorAll('.day-block').forEach(d => {
+      d.classList.toggle('active', Number(d.dataset.day) === n);
+    });
+    document.querySelectorAll('.day-pill').forEach(p => {
+      p.classList.toggle('active', Number(p.dataset.day) === n);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    localStorage.setItem('adm_guide_day', n);
+  }
+
+  function toggleCard(el) {
+    el.classList.toggle('open');
+  }
+
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+  }
+
+  buildNav();
+  goDay(1);
+</script>
+</body>
+</html>
