@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Simulado — A Instituição Divina da Família</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=EB+Garamond:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--vd:#1B7A3F;--vd-claro:#27ae60;--vd-suave:#e8f6ec;--esc:#0d2818;--card:#ffffff;--borda:#cfe8d8;--erro:#c0392b;--erro-bg:#fdecea;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'EB Garamond',Georgia,serif;background:linear-gradient(160deg,#0d2818 0%,#1B7A3F 55%,#27ae60 100%);min-height:100vh;color:#fff;-webkit-tap-highlight-color:transparent;}
+.wrap{max-width:680px;margin:0 auto;padding:18px 14px 60px;}
+header.topo{text-align:center;margin-bottom:18px;}
+header.topo .badge{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);padding:4px 14px;border-radius:20px;font-family:'Oswald',sans-serif;font-size:.62rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+header.topo h1{font-family:'Oswald',sans-serif;font-size:1.3rem;font-weight:700;letter-spacing:.3px;line-height:1.3;}
+header.topo p{font-size:.82rem;color:rgba(255,255,255,.75);margin-top:4px;font-style:italic;}
+
+/* ── TELA DE SELEÇÃO DE RODADAS ── */
+#tela-rodadas .grid-rodadas{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px;}
+.card-rodada{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.25);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.card-rodada:hover,.card-rodada:active{background:rgba(255,255,255,.2);transform:translateY(-2px);}
+.card-rodada .num{font-family:'Oswald',sans-serif;font-size:1.7rem;font-weight:700;color:#fff;}
+.card-rodada .lbl{font-family:'Oswald',sans-serif;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.7);margin-top:2px;}
+.card-rodada .score-pill{display:inline-block;margin-top:8px;font-size:.62rem;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(0,0,0,.2);color:#a8e6c1;}
+.card-rodada .score-pill.vazio{color:rgba(255,255,255,.4);}
+.info-geral{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:12px 14px;margin-top:18px;font-size:.78rem;line-height:1.6;color:rgba(255,255,255,.85);}
+.info-geral strong{color:#fff;}
+.btn-reset{display:block;width:100%;margin-top:14px;background:rgba(192,57,43,.25);border:1.5px solid rgba(192,57,43,.5);color:#ffd5d2;padding:10px;border-radius:10px;font-family:'Oswald',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.5px;cursor:pointer;text-transform:uppercase;}
+
+/* ── TELA DE QUIZ ── */
+#tela-quiz{display:none;}
+.quiz-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;}
+.btn-voltar{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:7px 14px;border-radius:8px;font-family:'Oswald',sans-serif;font-size:.68rem;font-weight:700;cursor:pointer;flex-shrink:0;}
+.progresso-info{font-family:'Oswald',sans-serif;font-size:.7rem;color:rgba(255,255,255,.85);text-align:right;}
+.barra-progresso{height:6px;background:rgba(255,255,255,.2);border-radius:4px;overflow:hidden;margin-bottom:18px;}
+.barra-progresso .fill{height:100%;background:linear-gradient(90deg,#a8e6c1,#27ae60);border-radius:4px;transition:width .3s;}
+.card-pergunta{background:var(--card);color:var(--esc);border-radius:16px;padding:22px 18px;box-shadow:0 12px 40px rgba(0,0,0,.35);}
+.card-pergunta .num-q{font-family:'Oswald',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--vd-claro);margin-bottom:8px;}
+.card-pergunta .texto-q{font-size:1.08rem;line-height:1.55;font-weight:600;margin-bottom:18px;}
+.opcoes{display:flex;flex-direction:column;gap:10px;}
+.opcao{display:flex;align-items:flex-start;gap:10px;background:#f6faf7;border:1.5px solid var(--borda);border-radius:11px;padding:12px 14px;cursor:pointer;transition:all .15s;font-size:.92rem;line-height:1.45;}
+.opcao:active{transform:scale(.985);}
+.opcao .letra{font-family:'Oswald',sans-serif;font-weight:700;font-size:.8rem;color:var(--vd-claro);background:#fff;border:1.5px solid var(--borda);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.opcoes.respondido .opcao{cursor:default;}
+.opcao.correta{background:var(--vd-suave);border-color:var(--vd-claro);}
+.opcao.correta .letra{background:var(--vd-claro);color:#fff;border-color:var(--vd-claro);}
+.opcao.errada{background:var(--erro-bg);border-color:var(--erro);}
+.opcao.errada .letra{background:var(--erro);color:#fff;border-color:var(--erro);}
+.feedback{margin-top:16px;padding:11px 14px;border-radius:10px;font-size:.85rem;font-weight:600;display:none;}
+.feedback.show{display:block;animation:fadeIn .2s ease;}
+.feedback.ok{background:var(--vd-suave);color:var(--vd);border:1.5px solid var(--vd-claro);}
+.feedback.no{background:var(--erro-bg);color:var(--erro);border:1.5px solid var(--erro);}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.btn-prox{display:none;width:100%;margin-top:16px;background:var(--vd);color:#fff;border:none;padding:14px;border-radius:11px;font-family:'Oswald',sans-serif;font-size:.85rem;font-weight:700;letter-spacing:.5px;cursor:pointer;text-transform:uppercase;}
+.btn-prox.show{display:block;}
+.btn-prox:active{filter:brightness(.92);}
+
+/* ── TELA DE RESULTADO ── */
+#tela-resultado{display:none;text-align:center;}
+.resultado-card{background:var(--card);color:var(--esc);border-radius:18px;padding:32px 22px;box-shadow:0 12px 40px rgba(0,0,0,.35);}
+.resultado-card .emoji{font-size:3rem;margin-bottom:10px;}
+.resultado-card h2{font-family:'Oswald',sans-serif;font-size:1.2rem;margin-bottom:6px;}
+.resultado-card .pontuacao{font-family:'Oswald',sans-serif;font-size:2.6rem;font-weight:700;color:var(--vd);margin:10px 0;}
+.resultado-card .legenda{font-size:.85rem;color:#555;margin-bottom:20px;}
+.resultado-btns{display:flex;gap:10px;margin-top:10px;}
+.resultado-btns button{flex:1;padding:13px;border-radius:10px;font-family:'Oswald',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.4px;cursor:pointer;border:none;text-transform:uppercase;}
+.btn-refazer{background:var(--vd);color:#fff;}
+.btn-rodadas{background:#eee;color:#333;}
+.rev-erros{margin-top:18px;text-align:left;}
+.rev-erros h4{font-family:'Oswald',sans-serif;font-size:.75rem;letter-spacing:1px;text-transform:uppercase;color:#888;margin-bottom:10px;border-bottom:1px solid #eee;padding-bottom:6px;}
+.rev-item{background:#fdf6ec;border:1.5px solid #f0d9a8;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:.78rem;line-height:1.5;}
+.rev-item .rq{font-weight:700;margin-bottom:3px;}
+.rev-item .rc{color:var(--vd);font-weight:700;}
+@media(max-width:380px){.grid-rodadas{grid-template-columns:repeat(2,1fr);}.card-pergunta{padding:18px 14px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="topo">
+  <span class="badge">Aconselhamento / Teologia Pastoral</span>
+  <h1>A Instituição Divina da Família</h1>
+  <p>Palestra 1 — Prof.ª Ana Pimentel · 10 rodadas de 10 questões</p>
+</header>
+
+<div id="tela-rodadas">
+  <div class="grid-rodadas" id="gridRodadas"></div>
+  <div class="info-geral">
+    <strong>Como funciona:</strong> escolha uma rodada, responda as 10 questões de múltipla escolha. A posição da resposta certa (A, B, C ou D) varia em cada questão — sem padrão fixo — para você realmente decorar o conteúdo, e não a posição. Suas melhores pontuações ficam salvas neste aparelho.
+  </div>
+  <button class="btn-reset" onclick="zerarProgresso()">🗑 Zerar pontuações salvas</button>
+</div>
+
+<div id="tela-quiz">
+  <div class="quiz-hdr">
+    <button class="btn-voltar" onclick="voltarRodadas()">‹ Rodadas</button>
+    <div class="progresso-info" id="progressoInfo">Rodada 1 · 1/10</div>
+  </div>
+  <div class="barra-progresso"><div class="fill" id="barraFill" style="width:10%;"></div></div>
+  <div class="card-pergunta">
+    <div class="num-q" id="numQ">QUESTÃO 1 DE 10</div>
+    <div class="texto-q" id="textoQ">...</div>
+    <div class="opcoes" id="opcoesQ"></div>
+    <div class="feedback" id="feedbackQ"></div>
+  </div>
+  <button class="btn-prox" id="btnProx" onclick="proximaPergunta()">Próxima →</button>
+</div>
+
+<div id="tela-resultado">
+  <div class="resultado-card">
+    <div class="emoji" id="emojiResultado">🎉</div>
+    <h2 id="tituloResultado">Rodada concluída!</h2>
+    <div class="pontuacao" id="pontuacaoResultado">0/10</div>
+    <div class="legenda" id="legendaResultado">Continue praticando!</div>
+    <div class="resultado-btns">
+      <button class="btn-refazer" onclick="refazerRodada()">Refazer</button>
+      <button class="btn-rodadas" onclick="voltarRodadas()">Rodadas</button>
+    </div>
+    <div class="rev-erros" id="revErros"></div>
+  </div>
+</div>
+
+</div>
+<script>
+/* ══ BANCO DE QUESTÕES — 10 RODADAS x 10 QUESTÕES ══
+   Cada questão: { q: "...", op: ["A","B","C","D"], c: índice da correta (0-3) }
+   A posição da resposta certa foi distribuída deliberadamente entre A/B/C/D (25 de cada). */
+const RODADAS = [
+
+// RODADA 1 — Introdução: A Instituição Divina da Família
+[
+{q:'Quem ministrou a Palestra 1, "A Instituição Divina da Família"?',op:['Ana Pimentel','Sara Hayashi','Hernandes Dias Lopes','Charles Spurgeon'],c:0},
+{q:'Segundo a citação usada na palestra, a família é o hospital de recuperação para os doentes e o quê para os grandes embates da vida?',op:['Um tribunal','O campo de treinamento','Um depósito','Uma escola apenas'],c:1},
+{q:'Toda educação cristã da criança e do adolescente se dá dentro de:',op:['Um vácuo emocional','Uma instituição apenas','Um contexto','Um plano aleatório'],c:2},
+{q:'Quem são os primeiros e mais importantes modelos que influenciam a criança, segundo o texto?',op:['Os professores','Os amigos','A mídia','Os pais'],c:3},
+{q:'"Instrui o menino no caminho em que deve andar, e até quando envelhecer não se desviará dele" é a referência de:',op:['Provérbios 22:6','Efésios 6:4','Salmo 127:1','Deuteronômio 6:7'],c:0},
+{q:'No mundo hebreu, a ação de "ensinar" é descrita como a de uma parteira que:',op:['Lê em voz alta as Escrituras','Molha o dedo no azeite e friciona o céu da boca do neném','Unge a criança com óleo sagrado','Recita salmos ao recém-nascido'],c:1},
+{q:'O gesto da parteira busca provocar no recém-nascido:',op:['O choro de alívio','O sono profundo','O desejo de sugar o seio da mãe','A tosse purificadora'],c:2},
+{q:'Provérbios 22:6 quer dizer exatamente que se deve:',op:['Castigar a criança com rigor','Ignorar os desejos da criança','Ensinar apenas na escola','Provocar no coração da criança o gosto pelas coisas de Deus'],c:3},
+{q:'"Educar" significa igualmente:',op:['Dirigir alguém por um caminho específico e disciplinar','Apenas alimentar o corpo','Deixar a criança livre, sem regras','Repetir frases de memória'],c:0},
+{q:'Segundo o texto, há três verbos repetidos pelos quais "Deus opera por nosso intermédio". Quais são?',op:['Orar, jejuar, crer','Aprender, aprender, aprender','Ensinar, corrigir, perdoar','Amar, servir, obedecer'],c:1}
+],
+
+// RODADA 2 — Fundamentos: educar, família, casamento, domínio
+[
+{q:'Efésios 5:15-17 nos adverte a andar:',op:['Como néscios, aproveitando o tempo','Sem rumo, pois os dias são bons','Como sábios, remindo o tempo, pois os dias são maus','Apenas conforme a vontade própria'],c:2},
+{q:'O estudo da Palestra 1 foi baseado no livro:',op:['O Lar Cristão, de John MacArthur','Família à Prova de Bala','Pais Exemplares','Construindo uma Família Feliz, de Sara Hayashi'],c:3},
+{q:'Em hebraico, a palavra "mish-paw-kwau" (família) significa:',op:['Círculo de parentes, classe, espécie de animais e plantas, tribo e povo','Apenas pai, mãe e filhos','Lugar de moradia fixa','Aliança comercial entre tribos'],c:0},
+{q:'Segundo o texto, qual deve ser sempre a maior razão do casamento entre um homem e uma mulher?',op:['A conveniência financeira','O amor entre eles, que desejam formar família','A pressão social','A tradição familiar apenas'],c:1},
+{q:'A palavra "família" refere-se a um círculo social formado por humanos que:',op:['Apenas convivem sem vínculo','Disputam recursos entre si','Se unem, frutificam e se multiplicam','Se isolam do convívio social'],c:2},
+{q:'Segundo o texto, todo ser humano é um ser:',op:['Solitário por natureza','Independente de vínculos','Apenas racional','Social'],c:3},
+{q:'"Dominar", como planejado por Deus, traria ao homem o lugar de:',op:['Glória e honra','Sofrimento e prova','Riqueza material apenas','Poder político'],c:0},
+{q:'A referência bíblica usada para o domínio e a honra dados ao homem é:',op:['Gênesis 3','Salmo 8:3-8','Efésios 5:23','Provérbios 22:6'],c:1},
+{q:'A honra e a glória do domínio do homem foram roubadas por:',op:['Uma guerra entre nações','Um erro humano isolado','Satanás, que enganou o casal no jardim do Éden','Uma decisão divina arbitrária'],c:2},
+{q:'Após a queda no Éden, formou-se uma família imperfeita marcada por:',op:['Apenas tristeza passageira','Separação geográfica','Pobreza extrema','O primeiro homicídio da história'],c:3}
+],
+
+// RODADA 3 — Primeira família e a formação do caráter
+[
+{q:'A primeira família de seres humanos era composta por quantos membros?',op:['Quatro','Cinco','Três','Seis'],c:0},
+{q:'Apesar dos poucos membros, a primeira família não conseguiu:',op:['Sobreviver financeiramente','Conviver em paz','Ter filhos','Cultivar a terra'],c:1},
+{q:'Quanto mais os cônjuges estiverem embasados em quais princípios, mais chances há de formar uma família equilibrada?',op:['Princípios financeiros','Princípios sociais','Princípios bíblicos','Princípios culturais'],c:2},
+{q:'O caráter se forma:',op:['Somente na escola','Apenas com os amigos','De forma espontânea, sem influência externa','No lar, na criação com os pais'],c:3},
+{q:'Segundo a psicologia (mesmo não sendo da linha cristã), caráter é:',op:['A parte da alma caracterizada por valores morais','Um traço genético imutável','Um conjunto de habilidades técnicas','Uma classificação social'],c:0},
+{q:'O texto afirma que a modernidade do século XXI está desvalorizando certos valores que os filhos deveriam adquirir no lar entre que faixa de idade?',op:['Entre 5 e 10 anos','Entre 1 e 5 anos','Entre 10 e 15 anos','Entre 0 e 1 ano'],c:1},
+{q:'O texto sugere que, mais do que a quantidade de tempo, o que importa na criação dos filhos é:',op:['O valor gasto com eles','A quantidade de brinquedos','A consistência e a qualidade do tempo','A quantidade de escolas frequentadas'],c:2},
+{q:'Com a facilidade de creches, berçários e escolinhas, o texto alerta que ficou fácil para a mãe:',op:['Cuidar melhor dos filhos','Aumentar o tempo de qualidade','Reduzir o estresse familiar','Terceirizar a educação dos filhos'],c:3},
+{q:'O texto cita Dt 4:9,10; 11:19; Sl 78:3-8 ao alertar que algumas mães necessitam de recursos modernos, mas devem cuidar para não:',op:['Terceirizar a criação dos filhos por qualquer motivo','Trabalhar fora de casa','Estudar a Bíblia','Orar pelos filhos'],c:0},
+{q:'Segundo o texto, o problema acontece quando a criança, para os pais, se torna um:',op:['Motivo de alegria constante','"Trambolho" que veio roubar tempo e liberdade','Investimento financeiro','Símbolo de status social'],c:1}
+],
+
+// RODADA 4 — Hierarquia familiar e o papel do pai (geral)
+[
+{q:'A hierarquia humana inicia com a formação de qual instituição?',op:['Da igreja','Do Estado','Da família (Efésios 5:23)','Da escola'],c:2},
+{q:'Segundo o texto, muitas famílias seriam bem mais felizes se cada um exercesse bem:',op:['Sua profissão','Sua liberdade individual','Sua vontade própria','O seu papel'],c:3},
+{q:'Quando o plano de Deus para a família é interrompido, segundo o texto, isso ocorre por causa de:',op:['Desobediência','Pobreza','Doença','Distância geográfica'],c:0},
+{q:'A pergunta-chave sugerida pelo texto para cada membro da família é:',op:['"Quanto eu ganho com isso?"','"Que papel exerce cada um deles?"','"Quem manda mais na casa?"','"Quem trabalha mais?"'],c:1},
+{q:'Os conselhos da Palavra para relacionamentos em família e em qualquer círculo social estão, por exemplo, em:',op:['Apenas em Gênesis','Apenas nos Salmos','Efésios 5:22-33 e 6:1-9','Apenas no livro de Provérbios'],c:2},
+{q:'No plano de Deus, o pai é a:',op:['Sombra da família','Base financeira apenas','Memória da família','Cabeça da família'],c:3},
+{q:'O pai deve incorporar o exemplo de qual dupla função, segundo o texto?',op:['"Sacerdote" e "rei"','"Juiz" e "guerreiro"','"Professor" e "médico"','"Conselheiro" e "advogado"'],c:0},
+{q:'Cabe ao pai zelar pela ordem, organização e planejamento, além de imprimir a visão para onde caminha:',op:['Apenas o seu trabalho','A família','A igreja local','A sociedade em geral'],c:1},
+{q:'Segundo Josué 24:15, o pai é a:',op:['Sombra da mãe','Voz da tradição','Personificação de Deus','Autoridade civil máxima'],c:2},
+{q:'Um filho que tem bom relacionamento com seu pai terreno, segundo o texto, terá menos dificuldade em:',op:['Estudar a Bíblia','Obedecer às leis civis','Fazer amizades','Chamar Deus de "Pai"'],c:3}
+],
+
+// RODADA 5 — O pai: corpo
+[
+{q:'Segundo 1 Tessalonicenses 5:23-24, Deus deseja conservar plenamente quais três áreas do ser humano?',op:['Espírito, alma e corpo','Mente, coração e vontade','Trabalho, lar e igreja','Saúde, riqueza e fama'],c:0},
+{q:'No corpo, os instintos citados pelo texto incluem sono, fome, sede, sobrevivência e:',op:['Curiosidade','Sexualidade','Memória','Criatividade'],c:1},
+{q:'Segundo Mateus 6:25-34, citado no texto, o que devemos buscar primeiro?',op:['O conforto material','A segurança financeira','O Reino de Deus e a sua justiça','O reconhecimento social'],c:2},
+{q:'"Alimentando o corpo", o texto afirma que o pai é, no lar:',op:['Apenas o disciplinador','O exemplo intelectual','O guardião da tradição','O provedor'],c:3},
+{q:'Segundo o exemplo do texto, um bom pai educa e cuida dos filhos, dando:',op:['Proteção e segurança','Apenas recursos financeiros','Liberdade irrestrita','Apenas disciplina rígida'],c:0},
+{q:'Na área da alma, o texto afirma que ela representa a nossa:',op:['Capacidade física','Pessoa, ou personalidade','Aparência externa','Posição social'],c:1},
+{q:'A área da alma é chamada também de EGO ou:',op:['Caráter fixo','Temperamento único','"Eu"','Espírito Santo'],c:2},
+{q:'Segundo o texto, por causa do livre-arbítrio, Deus deseja interagir, mas:',op:['Sempre força a nossa vontade','Ignora nossas decisões','Decide tudo por nós','Às vezes não toma decisões por nós'],c:3},
+{q:'A referência bíblica usada para a alimentação da alma é:',op:['Filipenses 4:6-8','Salmo 23','Romanos 12:1-2','Gálatas 5:22-23'],c:0},
+{q:'No exemplo do texto, a netinha de 1 ano e 10 meses, ao ouvir "papai chegou", deve responder se quer morrer de beijo ou de:',op:['Cócegas','Mordida','Abraço','Sorriso'],c:1}
+],
+
+// RODADA 6 — O pai: alma, espírito · O papel da mãe
+[
+{q:'O texto recomenda que o pai marque seus filhos com:',op:['Regras rígidas','Bens materiais','Lembranças maravilhosas','Cobranças constantes'],c:2},
+{q:'Segundo o texto, quando se tratar de filhos, deve-se substituir imediatamente presentes por:',op:['Dinheiro','Elogios públicos','Brinquedos caros','Presença'],c:3},
+{q:'A alimentação espiritual é importante para se ter:',op:['Saúde','Fama','Riqueza','Popularidade'],c:0},
+{q:'Os momentos diários de oração e leitura bíblica, e a comunhão com o corpo de Cristo, são essenciais para o crescimento sadio do:',op:['Corpo','Espírito','Intelecto','Patrimônio'],c:1},
+{q:'A referência usada para a comunhão com o corpo de Cristo é:',op:['Romanos 8','Salmo 1','Efésios 4:13','Mateus 5'],c:2},
+{q:'Segundo Charles Spurgeon, citado no texto: "Devo ser hoje o cristão que quero que meus filhos sejam":',op:['Na próxima semana','Quando crescerem','Depois de orar','Amanhã'],c:3},
+{q:'O pai humano deve ser a imagem de quem, segundo o texto?',op:['Do Pai Celestial','De um líder político','De um herói popular','De um professor renomado'],c:0},
+{q:'O papel da mãe é promover o clima saudável e cuidar dos detalhes da casa, como alimentação, limpeza e:',op:['Finanças da empresa familiar','Ordem','Decoração apenas','Eventos sociais'],c:1},
+{q:'A referência usada para o papel da mãe inclui Provérbios 31:10-31, Êxodo 2:7-9 e:',op:['Gênesis 2','Salmo 127','Rute 4:16','Mateus 19'],c:2},
+{q:'A mãe tem o papel mais forte para a formação da saúde:',op:['Financeira','Física','Intelectual','Emocional'],c:3}
+],
+
+// RODADA 7 — Mãe, filhos e irmãos
+[
+{q:'Enquanto a mãe forma a saúde emocional, o pai determina:',op:['A identidade e o destino dos filhos','Apenas o sustento financeiro','Apenas as regras da casa','A escolha da escola'],c:0},
+{q:'Segundo o texto, pai e mãe são, em relação aos filhos:',op:['Substituíveis facilmente','Insubstituíveis (Efésios 6:4; Colossenses 3:21)','Concorrentes na criação','Figuras decorativas'],c:1},
+{q:'Em caso de divórcio, segundo o texto, é mais difícil para o filho:',op:['Aceitar um padrasto ou madrasta, em comparação ao caso de luto','Conviver com os avós','Se adequar à substituição do pai ou da mãe ausente','Frequentar a escola normalmente'],c:2},
+{q:'O papel dos filhos inclui sujeitar-se à autoridade dos pais, saber que autoridades protegem nas tempestades da vida, e:',op:['Questionar tudo','Competir com os irmãos','Buscar independência total','Obedecer'],c:3},
+{q:'A referência usada para a obediência dos filhos aos pais é:',op:['Deuteronômio 27:16','Levítico 19','Números 6','Josué 1'],c:0},
+{q:'Enquanto os filhos devem obedecer, os pais devem ser assertivos com amor e sem:',op:['Cobrar resultados','Desanimá-los','Estabelecer regras','Demonstrar afeto'],c:1},
+{q:'Segundo Efésios 6:1-3, honrar pai e mãe é o primeiro mandamento que vem acompanhado de:',op:['Uma punição','Uma condição','Uma promessa','Um sacrifício'],c:2},
+{q:'Deus promete bênçãos quando os irmãos, naturais ou espirituais, são:',op:['Independentes entre si','Competitivos','Distantes uns dos outros','Unidos e se amam'],c:3},
+{q:'A referência usada para a união entre irmãos é:',op:['Salmo 133:1','Salmo 23:1','Provérbios 3:5','Isaías 40:31'],c:0},
+{q:'Segundo o texto, as comparações entre irmãos, ou com qualquer outra pessoa, são consideradas:',op:['Estimulantes','Muito prejudiciais','Necessárias','Inofensivas'],c:1}
+],
+
+// RODADA 8 — Ameaças de destruição da família
+[
+{q:'Entre as ameaças de destruição da família citadas no texto está o Movimento Político, que busca:',op:['Fortalecer o lar','Apoiar a igreja local','Impor discursos extremistas contra as famílias','Incentivar o diálogo familiar'],c:2},
+{q:'A Ideologia de gêneros é descrita no texto como algo:',op:['Cientificamente comprovado e benéfico','Neutro, sem impacto nas famílias','Apoiado pela maioria dos pais','Absurdo, divulgado inclusive em materiais escolares'],c:3},
+{q:'Segundo o texto, cristãos (crianças e adolescentes) têm sofrido, no ambiente escolar:',op:['Bullying','Apenas elogios','Indiferença total','Apoio incondicional'],c:0},
+{q:'O texto afirma que o maior patrimônio do homem é:',op:['O dinheiro acumulado','A família','A carreira profissional','Os bens materiais'],c:1},
+{q:'A "troca de papéis do pai e da mãe" citada no texto refere-se a mulheres que se preocupam excessivamente com:',op:['A educação dos filhos','A vida espiritual','As finanças, ao ponto de resolverem trabalhar para aquietar a ansiedade','A aparência física'],c:2},
+{q:'Segundo o texto, a mulher pode cooperar com a ansiedade financeira do lar, orando e:',op:['Assumindo o papel do marido por completo','Ignorando o problema','Buscando outro emprego imediatamente','Intercedendo diante de Deus para que o marido seja bem-sucedido na profissão'],c:3},
+{q:'Entre as ameaças listadas, o texto cita "contrato de babás mais do que":',op:['Necessidades reais','Recursos disponíveis','Tempo livre dos pais','Orçamento familiar'],c:0},
+{q:'As creches, segundo o texto, estão se tornando cada vez mais comuns, oferecendo facilidades em vez de:',op:['Diversão','Auxílio','Educação formal','Custos'],c:1},
+{q:'O texto afirma que criar filhos é realmente trabalhoso, mas também é muito:',op:['Caro','Estressante','Gratificante','Solitário'],c:2},
+{q:'Segundo o texto, as comodidades modernas, como comida delivery, não são pecaminosas, porém deve haver:',op:['Rejeição total a elas','Dependência delas','Justificativa bíblica específica','Bom senso e equilíbrio'],c:3}
+],
+
+// RODADA 9 — Educando filhos à luz da Palavra
+[
+{q:'A referência usada na seção "Educando filhos à luz da Palavra" é:',op:['Deuteronômio 6:5-9','Mateus 28:19-20','João 3:16','Romanos 10:9-10'],c:0},
+{q:'Segundo a tabela "Mundo x Bíblia" do texto, em vez da "Ausência de autoridade" do mundo, a Bíblia ensina:',op:['Autoridade compartilhada por todos','Autoridade constituída','Ausência total de regras','Autoridade apenas dos filhos'],c:1},
+{q:'Em vez da "Educação terceirizada", a Bíblia ensina a:',op:['Educação pela mídia','Educação pelos avós apenas','Educação que vem do lar','Educação apenas escolar'],c:2},
+{q:'Em vez da "Libertinagem", a tabela do texto apresenta:',op:['Repressão total','Regras rígidas sem amor','Isolamento social','Liberdade em Cristo'],c:3},
+{q:'Em vez da "Sexualidade precoce", a Bíblia ensina a:',op:['Sexualidade no padrão bíblico','Abstinência forçada','Educação sexual apenas escolar','Ausência total do tema'],c:0},
+{q:'Em vez da "Exposição precoce da mídia (apelo consumista)", a Bíblia propõe a exposição precoce à:',op:['Tecnologia','Mensagem da cruz','Cultura popular','Política'],c:1},
+{q:'Segundo a tabela, enquanto o mundo conduz à "Educação para perdição eterna", a Bíblia conduz à:',op:['Educação para o sucesso financeiro','Educação para a fama','Educação para a vida eterna','Educação apenas moral'],c:2},
+{q:'O texto afirma que crianças sem infância são privadas do direito de:',op:['Estudar','Trabalhar','Orar','Brincar'],c:3},
+{q:'Segundo o item sobre "crianças sem infância", elas devem ter atividades físicas e interação com outras crianças e com:',op:['Adultos, como pais, tios e avós','Apenas a televisão','Apenas jogos eletrônicos','Apenas a escola'],c:0},
+{q:'Se privadas do direito de brincar, segundo o texto, as crianças correm o risco de, quando adultas:',op:['Tornarem-se mais responsáveis','Se arrependerem de não ter usufruído da infância','Terem mais sucesso profissional','Não sentirem nenhuma diferença'],c:1}
+],
+
+// RODADA 10 — Lista de checagem para os pais e conclusão
+[
+{q:'Na lista de checagem para os pais, o primeiro conselho é:',op:['Toquem mais nos filhos','Ouçam mais os filhos','Amem mais seu cônjuge','Deem mais risadas'],c:2},
+{q:'O texto recomenda tocar mais nos filhos, demonstrando afeto incondicional, independentemente:',op:['Do comportamento deles','Das notas escolares','Da idade dos pais','Da idade dos filhos'],c:3},
+{q:'Segundo o texto, crianças não crescem simplesmente; elas são:',op:['Formadas','Compradas','Programadas','Treinadas'],c:0},
+{q:'O texto afirma que os filhos aprendem muito mais observando o comportamento dos pais do que:',op:['Lendo livros','Nos ouvindo','Frequentando a igreja','Estudando na escola'],c:1},
+{q:'Os elogios recomendados pelo texto devem ser mais pessoais e sinceros, e não apenas pelo:',op:['Comportamento diário','Esforço visível','Sucesso','Tamanho da família'],c:2},
+{q:'A falta de monitoramento dos filhos aumenta os riscos de envolvimento com drogas, álcool e:',op:['Esportes','Estudos','Atividades religiosas','Delinquência'],c:3},
+{q:'Segundo o texto, uma técnica que funciona em uma idade pode ser um desastre em:',op:['Outra idade','Outra família','Outra cultura','Outra religião'],c:0},
+{q:'O texto recomenda evitar mudar as regras todos os dias, ou apenas para atender a uma situação específica, pois elas serão:',op:['Reforçadas','Esquecidas ou negligenciadas','Documentadas','Discutidas em família'],c:1},
+{q:'Segundo o texto, a culpa pelo mau comportamento dos filhos, nesse caso, é:',op:['Exclusiva da escola','Exclusiva da criança','Toda dos pais','Da sociedade em geral'],c:2},
+{q:'Na conclusão do estudo, o texto afirma que fomos feitos à imagem e semelhança de Deus, e que Deus:',op:['Desistiu do projeto da família após a queda','Espera que a família seja perfeita','Pune as famílias imperfeitas','Não desistiu de seu sonho para a família'],c:3}
+]
+
+];
+
+const TITULOS_RODADAS=['Introdução','Fundamentos','Caráter','Hierarquia & Pai','Pai — Corpo','Pai/Mãe — Alma','Mãe/Filhos/Irmãos','Ameaças à Família','Educando à Luz da Palavra','Checagem & Conclusão'];
+
+let _rodadaAtual=0,_perguntaAtual=0,_acertos=0,_respondida=false,_erros=[];
+
+function getMelhores(){try{const r=localStorage.getItem('simulado_familia_v1');if(r)return JSON.parse(r);}catch(e){}return{};}
+function setMelhores(obj){try{localStorage.setItem('simulado_familia_v1',JSON.stringify(obj));}catch(e){}}
+function zerarProgresso(){if(!confirm('Zerar todas as pontuações salvas?'))return;setMelhores({});renderRodadas();}
+
+function renderRodadas(){
+  const melhores=getMelhores();
+  const grid=document.getElementById('gridRodadas');
+  grid.innerHTML=RODADAS.map((r,i)=>{
+    const melhor=melhores[i];
+    const pill=melhor!==undefined?`<div class="score-pill">Melhor: ${melhor}/10</div>`:'<div class="score-pill vazio">Ainda não feita</div>';
+    return `<div class="card-rodada" onclick="iniciarRodada(${i})">
+      <div class="num">${i+1}</div>
+      <div class="lbl">${TITULOS_RODADAS[i]}</div>
+      ${pill}
+    </div>`;
+  }).join('');
+}
+
+function iniciarRodada(idx){
+  _rodadaAtual=idx;_perguntaAtual=0;_acertos=0;_erros=[];
+  document.getElementById('tela-rodadas').style.display='none';
+  document.getElementById('tela-resultado').style.display='none';
+  document.getElementById('tela-quiz').style.display='block';
+  mostrarPergunta();
+}
+
+function voltarRodadas(){
+  document.getElementById('tela-quiz').style.display='none';
+  document.getElementById('tela-resultado').style.display='none';
+  document.getElementById('tela-rodadas').style.display='block';
+  renderRodadas();
+}
+
+function refazerRodada(){iniciarRodada(_rodadaAtual);}
+
+function mostrarPergunta(){
+  _respondida=false;
+  const lista=RODADAS[_rodadaAtual];
+  const p=lista[_perguntaAtual];
+  document.getElementById('progressoInfo').textContent=`Rodada ${_rodadaAtual+1} · ${_perguntaAtual+1}/10`;
+  document.getElementById('barraFill').style.width=((_perguntaAtual)/10*100)+'%';
+  document.getElementById('numQ').textContent='QUESTÃO '+(_perguntaAtual+1)+' DE 10';
+  document.getElementById('textoQ').textContent=p.q;
+  const letras=['A','B','C','D'];
+  const opEl=document.getElementById('opcoesQ');
+  opEl.className='opcoes';
+  opEl.innerHTML=p.op.map((texto,i)=>`<div class="opcao" data-i="${i}" onclick="responder(${i})"><span class="letra">${letras[i]}</span><span>${texto}</span></div>`).join('');
+  document.getElementById('feedbackQ').className='feedback';
+  document.getElementById('feedbackQ').textContent='';
+  document.getElementById('btnProx').className='btn-prox';
+}
+
+function responder(escolhaIdx){
+  if(_respondida)return;
+  _respondida=true;
+  const lista=RODADAS[_rodadaAtual];
+  const p=lista[_perguntaAtual];
+  const opEl=document.getElementById('opcoesQ');
+  opEl.classList.add('respondido');
+  const cards=opEl.querySelectorAll('.opcao');
+  const fb=document.getElementById('feedbackQ');
+  if(escolhaIdx===p.c){
+    cards[escolhaIdx].classList.add('correta');
+    _acertos++;
+    fb.className='feedback show ok';
+    fb.textContent='✅ Correto!';
+  }else{
+    cards[escolhaIdx].classList.add('errada');
+    cards[p.c].classList.add('correta');
+    fb.className='feedback show no';
+    fb.textContent='❌ Errado. A resposta certa é: '+['A','B','C','D'][p.c]+') '+p.op[p.c];
+    _erros.push({q:p.q,certa:['A','B','C','D'][p.c]+') '+p.op[p.c]});
+  }
+  document.getElementById('btnProx').classList.add('show');
+  document.getElementById('btnProx').textContent=(_perguntaAtual<9)?'Próxima →':'Ver resultado →';
+}
+
+function proximaPergunta(){
+  if(_perguntaAtual<9){
+    _perguntaAtual++;
+    mostrarPergunta();
+  }else{
+    mostrarResultado();
+  }
+}
+
+function mostrarResultado(){
+  document.getElementById('tela-quiz').style.display='none';
+  document.getElementById('tela-resultado').style.display='block';
+  document.getElementById('pontuacaoResultado').textContent=_acertos+'/10';
+  let emoji='🎉',titulo='Muito bem!',legenda='Você domina este conteúdo.';
+  if(_acertos<=4){emoji='📖';titulo='Vamos revisar?';legenda='Releia o material e tente novamente.';}
+  else if(_acertos<=7){emoji='💪';titulo='Bom progresso!';legenda='Você está quase lá. Revise os erros abaixo.';}
+  document.getElementById('emojiResultado').textContent=emoji;
+  document.getElementById('tituloResultado').textContent=titulo;
+  document.getElementById('legendaResultado').textContent=legenda;
+
+  const melhores=getMelhores();
+  if(melhores[_rodadaAtual]===undefined||_acertos>melhores[_rodadaAtual]){
+    melhores[_rodadaAtual]=_acertos;
+    setMelhores(melhores);
+  }
+
+  const revEl=document.getElementById('revErros');
+  if(_erros.length){
+    revEl.innerHTML='<h4>Questões para revisar</h4>'+_erros.map(e=>`<div class="rev-item"><div class="rq">${e.q}</div><div class="rc">${e.certa}</div></div>`).join('');
+  }else{
+    revEl.innerHTML='<h4 style="color:#1B7A3F;">🏆 Gabarito 10/10 — nenhum erro!</h4>';
+  }
+}
+
+renderRodadas();
+</script>
+</body>
+</html>
