@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado – História da Igreja 3</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --card: #1e2333;
+    --border: #2a2f45;
+    --gold: #c9a84c;
+    --gold-dim: #8a6e2f;
+    --text: #e8e4da;
+    --muted: #8b8fa8;
+    --correct-bg: #1a3d2e;
+    --wrong-bg: #3d1a1a;
+    --selected: #1e3a5f;
+    --selected-border: #4a90d9;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.6; min-height: 100vh; }
+
+  header {
+    background: linear-gradient(135deg, #0a0d14 0%, #141827 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 70%); }
+  .header-eyebrow { font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:var(--gold); margin-bottom:10px; }
+  header h1 { font-family:'EB Garamond',serif; font-size:clamp(24px,5vw,38px); font-weight:600; color:var(--text); line-height:1.2; }
+  header p { color:var(--muted); font-size:13px; margin-top:8px; }
+
+  .progress-bar-wrap { background:var(--border); height:3px; }
+  .progress-bar-fill { height:3px; background:linear-gradient(90deg,var(--gold-dim),var(--gold)); transition:width .4s; width:0%; }
+
+  .stats-row { display:flex; justify-content:center; gap:24px; padding:14px 20px; background:var(--surface); border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  .stat { text-align:center; }
+  .stat-val { font-size:20px; font-weight:600; color:var(--gold); font-family:'EB Garamond',serif; }
+  .stat-label { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+
+  /* TAB NAV */
+  .tab-nav { display:flex; background:var(--surface); border-bottom:1px solid var(--border); overflow-x:auto; }
+  .tab-btn { flex:1; min-width:90px; padding:12px 8px; font-size:12px; font-weight:600; text-align:center; color:var(--muted); cursor:pointer; border:none; background:none; border-bottom:2px solid transparent; transition:all .2s; white-space:nowrap; }
+  .tab-btn.active { color:var(--gold); border-bottom-color:var(--gold); }
+  .tab-btn:hover:not(.active) { color:var(--text); }
+
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  main { max-width:740px; margin:0 auto; padding:28px 16px 60px; }
+
+  /* CARDS */
+  .question-card { background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:24px; margin-bottom:20px; transition:border-color .2s; }
+  .question-card.answered { border-color:var(--gold-dim); }
+  .q-header { display:flex; align-items:flex-start; gap:14px; margin-bottom:16px; }
+  .q-num { font-family:'EB Garamond',serif; font-size:22px; font-weight:600; color:var(--gold); min-width:32px; line-height:1; padding-top:2px; }
+  .q-text { font-size:15px; font-weight:500; color:var(--text); line-height:1.55; }
+
+  /* OPTIONS */
+  .options { display:flex; flex-direction:column; gap:8px; }
+  .option { display:flex; align-items:center; gap:12px; padding:11px 14px; border:1px solid var(--border); border-radius:7px; cursor:pointer; transition:all .15s; background:var(--surface); user-select:none; }
+  .option:hover:not(.locked) { border-color:var(--selected-border); background:var(--selected); }
+  .option.selected { border-color:var(--selected-border); background:var(--selected); }
+  .option.correct { border-color:#40c07a; background:var(--correct-bg); }
+  .option.wrong { border-color:#e05555; background:var(--wrong-bg); }
+  .option.locked { cursor:default; }
+  .opt-letter { width:26px; height:26px; border-radius:50%; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; color:var(--muted); flex-shrink:0; transition:all .15s; }
+  .option.selected .opt-letter { border-color:var(--selected-border); color:var(--text); background:rgba(74,144,217,0.2); }
+  .option.correct .opt-letter { border-color:#40c07a; color:#40c07a; background:rgba(64,192,122,0.15); }
+  .option.wrong .opt-letter { border-color:#e05555; color:#e05555; background:rgba(224,85,85,0.15); }
+  .opt-text { font-size:14px; color:var(--text); line-height:1.4; }
+
+  /* MATCHING */
+  .match-table { width:100%; border-collapse:collapse; margin-top:4px; }
+  .match-table td { padding:8px 10px; font-size:13px; vertical-align:middle; }
+  .match-table tr:nth-child(odd) td { background:rgba(255,255,255,0.03); }
+  .match-col-a { color:var(--gold); font-weight:600; width:44%; border-radius:5px 0 0 5px; }
+  .match-col-sel { width:12%; text-align:center; }
+  .match-select { background:var(--surface); border:1px solid var(--border); color:var(--text); border-radius:5px; padding:4px 6px; font-size:12px; width:100%; cursor:pointer; }
+  .match-select:focus { outline:none; border-color:var(--selected-border); }
+  .match-col-b { color:var(--muted); width:44%; }
+
+  /* TRUE/FALSE */
+  .tf-row { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border); border-radius:7px; margin-bottom:8px; background:var(--surface); }
+  .tf-text { flex:1; font-size:14px; line-height:1.4; }
+  .tf-btn-group { display:flex; gap:6px; flex-shrink:0; }
+  .tf-btn { padding:5px 14px; border-radius:5px; border:1px solid var(--border); background:none; color:var(--muted); font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; }
+  .tf-btn:hover { border-color:var(--selected-border); color:var(--text); }
+  .tf-btn.selected-v { border-color:#40c07a; background:rgba(64,192,122,0.15); color:#40c07a; }
+  .tf-btn.selected-f { border-color:#e05555; background:rgba(224,85,85,0.15); color:#e05555; }
+  .tf-btn.correct-v { border-color:#40c07a; background:rgba(64,192,122,0.2); color:#40c07a; }
+  .tf-btn.correct-f { border-color:#40c07a; background:rgba(64,192,122,0.2); color:#40c07a; }
+  .tf-btn.wrong-v { border-color:#e05555; background:rgba(224,85,85,0.2); color:#e05555; }
+  .tf-btn.wrong-f { border-color:#e05555; background:rgba(224,85,85,0.2); color:#e05555; }
+  .tf-btn.locked { cursor:default; }
+
+  /* COMPLETE */
+  .fill-wrap { margin-top:8px; }
+  .fill-input { background:var(--surface); border:1px solid var(--border); border-radius:6px; color:var(--text); font-size:14px; padding:8px 12px; width:100%; margin-bottom:6px; }
+  .fill-input:focus { outline:none; border-color:var(--selected-border); }
+  .fill-input.correct-input { border-color:#40c07a; }
+  .fill-input.wrong-input { border-color:#e05555; }
+
+  /* DISCURSIVE */
+  .discursive-area { background:var(--surface); border:1px solid var(--border); border-radius:6px; color:var(--text); font-size:14px; padding:10px 12px; width:100%; min-height:90px; resize:vertical; font-family:'Inter',sans-serif; line-height:1.5; }
+  .discursive-area:focus { outline:none; border-color:var(--selected-border); }
+
+  /* FEEDBACK */
+  .feedback { margin-top:14px; padding:12px 14px; border-radius:7px; font-size:13px; line-height:1.55; display:none; }
+  .feedback.show { display:block; }
+  .feedback.ok { background:rgba(45,106,79,0.3); border:1px solid #2d6a4f; color:#7fd1a8; }
+  .feedback.err { background:rgba(123,45,45,0.3); border:1px solid #7b2d2d; color:#f09090; }
+  .feedback.info { background:rgba(30,58,95,0.4); border:1px solid #2a4f7a; color:#90c4f0; }
+  .feedback strong { display:block; margin-bottom:3px; }
+
+  .btn-check { display:none; margin-top:14px; padding:10px 22px; background:var(--gold); color:#0f1117; border:none; border-radius:7px; font-size:13px; font-weight:600; cursor:pointer; }
+  .btn-check:hover { opacity:.88; }
+  .btn-check.visible { display:inline-block; }
+
+  /* RESULT */
+  .result-box { display:none; background:var(--card); border:1px solid var(--gold-dim); border-radius:var(--radius); padding:32px 24px; text-align:center; margin-top:10px; }
+  .result-box.show { display:block; }
+  .result-title { font-family:'EB Garamond',serif; font-size:32px; color:var(--gold); margin-bottom:8px; }
+  .result-sub { color:var(--muted); font-size:14px; margin-bottom:20px; }
+  .result-score { font-family:'EB Garamond',serif; font-size:64px; font-weight:600; color:var(--text); line-height:1; }
+  .result-label { color:var(--muted); font-size:13px; margin-top:6px; }
+  .btn-reset { margin-top:22px; padding:11px 28px; background:var(--gold); color:#0f1117; border:none; border-radius:7px; font-size:14px; font-weight:600; cursor:pointer; }
+
+  @media(max-width:480px){ .question-card{padding:18px 14px;} .stats-row{gap:16px;} .tab-btn{font-size:11px;padding:10px 6px;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">IBBC Ferraz – Centro</div>
+  <h1>História da Igreja 3</h1>
+  <p>Simulado de avaliação · 4 seções · gabarito comentado</p>
+</header>
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="pgBar"></div></div>
+
+<div class="stats-row">
+  <div class="stat"><div class="stat-val" id="stDone">0</div><div class="stat-label">Respondidas</div></div>
+  <div class="stat"><div class="stat-val" id="stOk">0</div><div class="stat-label">Pontos</div></div>
+  <div class="stat"><div class="stat-val" id="stTotal">20</div><div class="stat-label">Total pts</div></div>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('tab1',this)">Relacione (5pts)</button>
+  <button class="tab-btn" onclick="showTab('tab2',this)">Complete (0,5pt)</button>
+  <button class="tab-btn" onclick="showTab('tab3',this)">V ou F (2,5pts)</button>
+  <button class="tab-btn" onclick="showTab('tab4',this)">Discursiva (2pts)</button>
+</div>
+
+<main>
+
+<!-- ===== TAB 1: RELACIONE ===== -->
+<div class="tab-panel active" id="tab1">
+  <div class="question-card" id="cardMatch">
+    <div class="q-header">
+      <span class="q-num">1.</span>
+      <span class="q-text">Relacione a primeira coluna com a segunda coluna. <em>(0,5 ponto para cada par correto)</em></span>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Escolha na lista à direita o nome correspondente a cada personagem/evento da coluna A.</p>
+    <table class="match-table" id="matchTable">
+      <tbody id="matchBody"></tbody>
+    </table>
+    <button class="btn-check visible" id="btnMatch" onclick="checkMatch()">Verificar relacionamento</button>
+    <div class="feedback" id="fbMatch"></div>
+  </div>
+</div>
+
+<!-- ===== TAB 2: COMPLETE ===== -->
+<div class="tab-panel" id="tab2">
+  <div class="question-card" id="cardFill">
+    <div class="q-header">
+      <span class="q-num">2.</span>
+      <span class="q-text">Complete a frase: <em>(0,5 ponto)</em></span>
+    </div>
+    <p style="font-size:14px;color:var(--text);line-height:1.6;margin-bottom:14px;">
+      "Apesar de seu <strong style="color:var(--gold)">___________</strong>, os menonitas foram considerados 
+      <strong style="color:var(--gold)">___________</strong> pelas autoridades porque se negavam a participar 
+      da vida comum da sociedade."
+    </p>
+    <div class="fill-wrap">
+      <input class="fill-input" id="fill1" placeholder="Primeira lacuna..." />
+      <input class="fill-input" id="fill2" placeholder="Segunda lacuna..." />
+    </div>
+    <button class="btn-check visible" id="btnFill" onclick="checkFill()">Verificar resposta</button>
+    <div class="feedback" id="fbFill"></div>
+  </div>
+</div>
+
+<!-- ===== TAB 3: V ou F ===== -->
+<div class="tab-panel" id="tab3">
+  <div class="question-card" id="cardTF">
+    <div class="q-header">
+      <span class="q-num">3.</span>
+      <span class="q-text">Complete com (V) para Verdadeiro e (F) para Falso. <em>(0,5 ponto para cada acerto)</em></span>
+    </div>
+    <div id="tfList"></div>
+    <button class="btn-check visible" id="btnTF" onclick="checkTF()">Verificar V/F</button>
+    <div class="feedback" id="fbTF"></div>
+  </div>
+</div>
+
+<!-- ===== TAB 4: DISCURSIVA ===== -->
+<div class="tab-panel" id="tab4">
+  <div class="question-card">
+    <div class="q-header">
+      <span class="q-num">4.</span>
+      <span class="q-text">Quais foram os principais filósofos do Racionalismo e do Empirismo? <em>(2,0 pontos)</em></span>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Escreva sua resposta e compare com o gabarito abaixo.</p>
+    <textarea class="discursive-area" id="discArea" placeholder="Escreva sua resposta aqui..."></textarea>
+    <button class="btn-check visible" onclick="showGabarito()">Ver gabarito</button>
+    <div class="feedback info" id="fbDisc" style="display:none;">
+      <strong>Gabarito — Filósofos do Racionalismo e do Empirismo</strong>
+      <p style="margin-top:6px;"><strong style="color:#c9a84c;">Racionalismo</strong> — corrente que colocava a razão como fonte do conhecimento:</p>
+      <ul style="margin:6px 0 10px 18px;font-size:13px;">
+        <li><strong>René Descartes</strong> (1596–1650) — francês, considerado o pai do Racionalismo moderno; "Penso, logo existo".</li>
+        <li><strong>Baruch Spinoza</strong> (1632–1677) — holandês, desenvolveu o método geométrico na filosofia.</li>
+        <li><strong>Gottfried Wilhelm Leibniz</strong> (1646–1716) — alemão, co-inventor do cálculo e criador da monadologia.</li>
+      </ul>
+      <p><strong style="color:#c9a84c;">Empirismo</strong> — corrente que colocava a experiência sensorial como fonte do conhecimento:</p>
+      <ul style="margin:6px 0 0 18px;font-size:13px;">
+        <li><strong>Francis Bacon</strong> (1561–1626) — inglês, precursor do método indutivo científico.</li>
+        <li><strong>John Locke</strong> (1632–1704) — inglês, defendia que a mente é uma "tábula rasa" preenchida pela experiência.</li>
+        <li><strong>David Hume</strong> (1711–1776) — escocês, aprofundou o ceticismo empirista.</li>
+        <li><strong>George Berkeley</strong> (1685–1753) — irlandês, associado ao imaterialismo empirista.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="result-box" id="resultBox">
+    <div class="result-title">Simulado concluído</div>
+    <div class="result-sub">Pontuação estimada (seções objetivas)</div>
+    <div class="result-score" id="resPts">—</div>
+    <div class="result-label" id="resLabel"></div>
+    <button class="btn-reset" onclick="resetAll()">Refazer simulado</button>
+  </div>
+</div>
+
+</main>
+
+<script>
+// ========== MATCH DATA ==========
+const matchLeft = [
+  "David Miranda",
+  "John Wesley",
+  "Doriel de Oliveira e Ruth Brunelli de Oliveira",
+  "João Calvino",
+  "Manoel de Mello",
+  "Louis Francescon",
+  "Venda de Indulgências",
+  "Daniel Berg e Gunnar Vingren",
+  "Racionalismo",
+  "As Institutas de Religião Cristã"
+];
+const matchRight = [
+  "João Calvino",
+  "René Descartes",
+  "Congregação Cristã do Brasil",
+  "Casa da Benção",
+  "Igreja Presbiteriana",
+  "Deus é Amor",
+  "O Brasil Para Cristo",
+  "Metodista",
+  "Igreja Católica Romana",
+  "Assembleia de Deus"
+];
+// correct answers: for each left item, which right item matches
+const matchAnswers = [
+  "Deus é Amor",           // David Miranda
+  "Metodista",              // John Wesley
+  "Casa da Benção",         // Doriel e Ruth
+  "As Institutas de Religião Cristã" , // João Calvino — wait, left has Calvino, right col has "Igreja Presbiteriana"
+  "O Brasil Para Cristo",  // Manoel de Mello
+  "Congregação Cristã do Brasil", // Louis Francescon
+  "Igreja Católica Romana",// Venda de Indulgências
+  "Assembleia de Deus",    // Daniel Berg e Gunnar Vingren
+  "René Descartes",        // Racionalismo
+  "João Calvino"           // As Institutas de Religião Cristã
+];
+// NOTE: The prova coluna B lists items to match; correct pairs per apostila:
+// David Miranda → Deus é Amor
+// John Wesley → Metodista
+// Doriel/Ruth → Casa da Benção
+// João Calvino → As Institutas / Igreja Presbiteriana (prova col B has "Igreja Presbiteriana" separate — Calvino is listed in col B as answer for Institutas)
+// Manoel de Mello → O Brasil Para Cristo
+// Louis Francescon → Congregação Cristã do Brasil
+// Venda de Indulgências → Igreja Católica Romana
+// Daniel Berg/Vingren → Assembleia de Deus
+// Racionalismo → René Descartes
+// As Institutas → João Calvino
+
+const MATCH_KEY = {
+  "David Miranda": "Deus é Amor",
+  "John Wesley": "Metodista",
+  "Doriel de Oliveira e Ruth Brunelli de Oliveira": "Casa da Benção",
+  "João Calvino": "Igreja Presbiteriana",
+  "Manoel de Mello": "O Brasil Para Cristo",
+  "Louis Francescon": "Congregação Cristã do Brasil",
+  "Venda de Indulgências": "Igreja Católica Romana",
+  "Daniel Berg e Gunnar Vingren": "Assembleia de Deus",
+  "Racionalismo": "René Descartes",
+  "As Institutas de Religião Cristã": "João Calvino"
+};
+
+const MATCH_EXP = {
+  "David Miranda": "David Miranda fundou a Igreja <strong>Deus é Amor</strong> em São Paulo em 1962.",
+  "John Wesley": "John Wesley é o fundador do <strong>Metodismo</strong> (séc. XVIII, Inglaterra).",
+  "Doriel de Oliveira e Ruth Brunelli de Oliveira": "Doriel e Ruth Brunelli fundaram a <strong>Casa da Benção</strong>.",
+  "João Calvino": "Calvino organizou a Reforma em Genebra e sua influência está na origem da <strong>Igreja Presbiteriana</strong>.",
+  "Manoel de Mello": "Manoel de Mello fundou a Igreja <strong>O Brasil Para Cristo</strong> em 1955.",
+  "Louis Francescon": "Louis Francescon fundou a <strong>Congregação Cristã do Brasil</strong> em 1910.",
+  "Venda de Indulgências": "A venda de indulgências era uma prática da <strong>Igreja Católica Romana</strong> que motivou a Reforma Luterana.",
+  "Daniel Berg e Gunnar Vingren": "Daniel Berg e Gunnar Vingren fundaram a <strong>Assembleia de Deus</strong> no Brasil em 1911 (Belém-PA).",
+  "Racionalismo": "O Racionalismo tem como figura central <strong>René Descartes</strong> (séc. XVII), que colocava a razão como fonte do conhecimento.",
+  "As Institutas de Religião Cristã": "As Institutas de Religião Cristã é a grande obra de <strong>João Calvino</strong>, publicada em 1536."
+};
+
+// ========== TF DATA ==========
+const TF = [
+  { txt: "A Reforma na Suíça foi liderada por Zuínglio.", ans: "V", exp: "Correto. Ulrich Zuínglio liderou a Reforma na Suíça, especialmente em Zurique a partir de 1519. Ele foi contemporâneo de Lutero mas atuou de forma independente." },
+  { txt: "Os Batistas (Anabatistas) batizavam crianças.", ans: "F", exp: "Falso. Os Anabatistas rejeitavam o batismo infantil. Defendiam que o batismo deveria ser aplicado somente a adultos que professassem a fé ('rebatizadores')." },
+  { txt: "Os Menonitas nunca vieram ao Brasil.", ans: "F", exp: "Falso. Os menonitas vieram ao Brasil. A apostila informa que 'os menonitas se fixaram na Alemanha, México e outras nações, emigrando inclusive para a América do Sul'." },
+  { txt: "O movimento Iluminista não afetou em absolutamente nada o Cristianismo.", ans: "F", exp: "Falso. O Iluminismo (séc. XVII–XVIII) afetou profundamente o Cristianismo: fortaleceu o deísmo, o ceticismo bíblico, e gerou grande oposição à autoridade da Igreja e à revelação sobrenatural." },
+  { txt: "Os Puritanos tinham como ênfase 'o estudo da Bíblia e a pregação da Palavra'.", ans: "V", exp: "Correto. Os Puritanos eram conhecidos pelo rigor bíblico e pela ênfase no estudo das Escrituras e na pregação fiel da Palavra de Deus." }
+];
+
+// ========== STATE ==========
+let matchDone = false, fillDone = false, tfDone = false;
+let matchPts = 0, fillPts = 0, tfPts = 0;
+
+// ========== TABS ==========
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ========== BUILD MATCH ==========
+function buildMatch() {
+  const tbody = document.getElementById('matchBody');
+  const opts = [...matchRight].sort(() => Math.random() - 0.5);
+  matchLeft.forEach((item, i) => {
+    const tr = document.createElement('tr');
+    let selHtml = `<select class="match-select" id="ms${i}"><option value="">—</option>`;
+    opts.forEach(o => { selHtml += `<option value="${o}">${o}</option>`; });
+    selHtml += '</select>';
+    tr.innerHTML = `<td class="match-col-a">${item}</td><td class="match-col-sel">${selHtml}</td><td class="match-col-b" id="mb${i}"></td>`;
+    tbody.appendChild(tr);
+    // show right-col items as hints grayed
+    document.getElementById(`mb${i}`).textContent = '';
+  });
+}
+
+function checkMatch() {
+  if (matchDone) return;
+  matchDone = true;
+  let pts = 0;
+  let html = '<strong>Resultado do relacionamento:</strong><ul style="margin-top:8px;padding-left:16px;font-size:13px;">';
+  matchLeft.forEach((item, i) => {
+    const sel = document.getElementById(`ms${i}`);
+    const chosen = sel.value;
+    const correct = MATCH_KEY[item];
+    const ok = chosen === correct;
+    if (ok) pts += 0.5;
+    sel.disabled = true;
+    const icon = ok ? '✓' : '✗';
+    const color = ok ? '#7fd1a8' : '#f09090';
+    html += `<li style="color:${color};margin-bottom:6px;">${icon} <strong>${item}</strong> → ${correct}<br><span style="color:var(--muted);font-size:12px;">${MATCH_EXP[item]}</span></li>`;
+  });
+  html += '</ul>';
+  matchPts = pts;
+  const fb = document.getElementById('fbMatch');
+  fb.className = 'feedback show ' + (pts >= 4 ? 'ok' : pts >= 2 ? 'info' : 'err');
+  fb.innerHTML = `<strong>Você acertou ${pts.toFixed(1)} de 5,0 pontos</strong>${html}`;
+  document.getElementById('btnMatch').style.display = 'none';
+  document.getElementById('cardMatch').classList.add('answered');
+  updateStats();
+}
+
+// ========== FILL ==========
+function checkFill() {
+  if (fillDone) return;
+  fillDone = true;
+  const v1 = document.getElementById('fill1').value.trim().toLowerCase();
+  const v2 = document.getElementById('fill2').value.trim().toLowerCase();
+  const ok1 = v1.includes('pacifism') || v1.includes('pacifis') || v1.includes('pacifismo');
+  const ok2 = v2.includes('perigoso') || v2.includes('perig') || v2.includes('subversivo') || v2.includes('subvers') || v2.includes('rebelde') || v2.includes('rebel');
+  const pts = (ok1 ? 0.25 : 0) + (ok2 ? 0.25 : 0);
+  fillPts = pts > 0 ? 0.5 : 0; // 0.5 se acertou o sentido geral
+  if (ok1 || ok2) fillPts = 0.5;
+  document.getElementById('fill1').className = 'fill-input ' + (ok1 ? 'correct-input' : 'wrong-input');
+  document.getElementById('fill2').className = 'fill-input ' + (ok2 ? 'correct-input' : 'wrong-input');
+  document.getElementById('fill1').disabled = true;
+  document.getElementById('fill2').disabled = true;
+  const fb = document.getElementById('fbFill');
+  fb.className = 'feedback show ' + (fillPts > 0 ? 'ok' : 'err');
+  fb.innerHTML = `<strong>${fillPts > 0 ? '✓ Correto!' : '✗ Revise'}</strong>
+    Gabarito: "Apesar de seu <em>pacifismo</em>, os menonitas foram considerados <em>perigosos / subversivos</em> pelas autoridades porque se negavam a participar da vida comum da sociedade."<br>
+    <span style="font-size:12px;color:var(--muted);">Os menonitas eram pacifistas e recusavam o serviço militar e participação em guerras, o que os tornava suspeitos politicamente.</span>`;
+  document.getElementById('btnFill').style.display = 'none';
+  document.getElementById('cardFill').classList.add('answered');
+  updateStats();
+}
+
+// ========== TF ==========
+function buildTF() {
+  const list = document.getElementById('tfList');
+  TF.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'tf-row';
+    div.id = `tfrow${i}`;
+    div.innerHTML = `<span class="tf-text">${item.txt}</span>
+      <div class="tf-btn-group">
+        <button class="tf-btn" id="tfv${i}" onclick="selectTF(${i},'V')">V</button>
+        <button class="tf-btn" id="tff${i}" onclick="selectTF(${i},'F')">F</button>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+const tfSelected = {};
+function selectTF(i, val) {
+  if (document.getElementById(`tfv${i}`).classList.contains('locked')) return;
+  tfSelected[i] = val;
+  document.getElementById(`tfv${i}`).className = 'tf-btn' + (val === 'V' ? ' selected-v' : '');
+  document.getElementById(`tff${i}`).className = 'tf-btn' + (val === 'F' ? ' selected-f' : '');
+}
+
+function checkTF() {
+  if (tfDone) return;
+  tfDone = true;
+  let pts = 0;
+  let html = '<ul style="margin-top:8px;padding-left:16px;font-size:13px;">';
+  TF.forEach((item, i) => {
+    const chosen = tfSelected[i];
+    const ok = chosen === item.ans;
+    if (ok) pts += 0.5;
+    ['tfv' + i, 'tff' + i].forEach(id => {
+      document.getElementById(id).classList.add('locked');
+    });
+    const bv = document.getElementById('tfv' + i);
+    const bf = document.getElementById('tff' + i);
+    if (item.ans === 'V') bv.classList.add('correct-v'); else bf.classList.add('correct-f');
+    if (chosen && chosen !== item.ans) {
+      if (chosen === 'V') bv.classList.add('wrong-v'); else bf.classList.add('wrong-f');
+    }
+    const icon = ok ? '✓' : '✗';
+    const color = ok ? '#7fd1a8' : '#f09090';
+    html += `<li style="color:${color};margin-bottom:6px;">${icon} <strong>(${item.ans})</strong> ${item.txt}<br><span style="color:var(--muted);font-size:12px;">${item.exp}</span></li>`;
+  });
+  html += '</ul>';
+  tfPts = pts;
+  const fb = document.getElementById('fbTF');
+  fb.className = 'feedback show ' + (pts >= 2 ? 'ok' : pts >= 1 ? 'info' : 'err');
+  fb.innerHTML = `<strong>Você acertou ${pts.toFixed(1)} de 2,5 pontos</strong>${html}`;
+  document.getElementById('btnTF').style.display = 'none';
+  document.getElementById('cardTF').classList.add('answered');
+  updateStats();
+  checkShowResult();
+}
+
+function showGabarito() {
+  const fb = document.getElementById('fbDisc');
+  fb.style.display = 'block';
+  checkShowResult();
+}
+
+function checkShowResult() {
+  if (matchDone && fillDone && tfDone) {
+    const total = matchPts + fillPts + tfPts;
+    document.getElementById('resPts').textContent = total.toFixed(1) + ' / 10';
+    document.getElementById('resLabel').textContent = 'Pontos das seções objetivas (+ 2pts discursiva corrigida pelo professor)';
+    document.getElementById('resultBox').classList.add('show');
+  }
+}
+
+function updateStats() {
+  const done = (matchDone ? 1 : 0) + (fillDone ? 1 : 0) + (tfDone ? 1 : 0);
+  document.getElementById('stDone').textContent = done;
+  document.getElementById('stOk').textContent = (matchPts + fillPts + tfPts).toFixed(1);
+  document.getElementById('pgBar').style.width = (done / 4 * 100) + '%';
+}
+
+function resetAll() {
+  location.reload();
+}
+
+// ========== INIT ==========
+buildMatch();
+buildTF();
+</script>
+</body>
+</html>

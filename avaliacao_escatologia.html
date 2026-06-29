@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado – Escatologia</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --card: #1e2333;
+    --border: #2a2f45;
+    --gold: #c9a84c;
+    --gold-dim: #8a6e2f;
+    --text: #e8e4da;
+    --muted: #8b8fa8;
+    --correct: #2d6a4f;
+    --correct-bg: #1a3d2e;
+    --wrong: #7b2d2d;
+    --wrong-bg: #3d1a1a;
+    --selected: #1e3a5f;
+    --selected-border: #4a90d9;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, #0a0d14 0%, #141827 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 70%);
+  }
+  .header-eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+  header h1 {
+    font-family: 'EB Garamond', serif;
+    font-size: clamp(26px, 5vw, 40px);
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+  }
+  header p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 8px;
+  }
+
+  .progress-bar-wrap {
+    background: var(--border);
+    height: 3px;
+    width: 100%;
+  }
+  .progress-bar-fill {
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding: 14px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-val {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--gold);
+    font-family: 'EB Garamond', serif;
+  }
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  main {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 28px 16px 60px;
+  }
+
+  .question-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    transition: border-color 0.2s;
+  }
+  .question-card.answered { border-color: var(--gold-dim); }
+
+  .q-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .q-num {
+    font-family: 'EB Garamond', serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--gold);
+    min-width: 32px;
+    line-height: 1;
+    padding-top: 2px;
+  }
+  .q-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.55;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 8px; }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--surface);
+    user-select: none;
+  }
+  .option:hover:not(.locked) {
+    border-color: var(--selected-border);
+    background: var(--selected);
+  }
+  .option.selected {
+    border-color: var(--selected-border);
+    background: var(--selected);
+  }
+  .option.correct {
+    border-color: #40c07a;
+    background: var(--correct-bg);
+  }
+  .option.wrong {
+    border-color: #e05555;
+    background: var(--wrong-bg);
+  }
+  .option.locked { cursor: default; }
+
+  .opt-letter {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .option.selected .opt-letter { border-color: var(--selected-border); color: var(--text); background: rgba(74,144,217,0.2); }
+  .option.correct .opt-letter { border-color: #40c07a; color: #40c07a; background: rgba(64,192,122,0.15); }
+  .option.wrong .opt-letter { border-color: #e05555; color: #e05555; background: rgba(224,85,85,0.15); }
+
+  .opt-text { font-size: 14px; color: var(--text); line-height: 1.4; }
+
+  .feedback {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 7px;
+    font-size: 13px;
+    line-height: 1.55;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.ok { background: rgba(45,106,79,0.3); border: 1px solid #2d6a4f; color: #7fd1a8; }
+  .feedback.err { background: rgba(123,45,45,0.3); border: 1px solid #7b2d2d; color: #f09090; }
+  .feedback strong { display: block; margin-bottom: 3px; font-size: 13px; }
+
+  .btn-check {
+    display: none;
+    margin-top: 14px;
+    padding: 10px 22px;
+    background: var(--gold);
+    color: #0f1117;
+    border: none;
+    border-radius: 7px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-check:hover { opacity: 0.88; }
+  .btn-check.visible { display: inline-block; }
+
+  .result-box {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--gold-dim);
+    border-radius: var(--radius);
+    padding: 32px 24px;
+    text-align: center;
+    margin-top: 10px;
+  }
+  .result-box.show { display: block; }
+  .result-title {
+    font-family: 'EB Garamond', serif;
+    font-size: 32px;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .result-sub { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+  .result-score {
+    font-family: 'EB Garamond', serif;
+    font-size: 64px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1;
+  }
+  .result-label { color: var(--muted); font-size: 13px; margin-top: 6px; }
+  .btn-reset {
+    margin-top: 22px;
+    padding: 11px 28px;
+    background: var(--gold);
+    color: #0f1117;
+    border: none;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-reset:hover { opacity: 0.88; }
+
+  @media (max-width: 480px) {
+    .question-card { padding: 18px 14px; }
+    .stats-row { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-eyebrow">IBBC Ferraz – Centro</div>
+  <h1>Escatologia</h1>
+  <p>Simulado de avaliação · 10 questões · 2 pontos cada</p>
+</header>
+<div class="progress-bar-wrap"><div class="progress-bar-fill" id="pgBar"></div></div>
+
+<div class="stats-row">
+  <div class="stat"><div class="stat-val" id="stTotal">10</div><div class="stat-label">Questões</div></div>
+  <div class="stat"><div class="stat-val" id="stDone">0</div><div class="stat-label">Respondidas</div></div>
+  <div class="stat"><div class="stat-val" id="stOk">0</div><div class="stat-label">Corretas</div></div>
+  <div class="stat"><div class="stat-val" id="stPts">0</div><div class="stat-label">Pontos</div></div>
+</div>
+
+<main id="quizArea"></main>
+
+<script>
+const Q = [
+  {
+    q: "O que é Escatologia?",
+    opts: [
+      "Estudo dos anjos",
+      "Estudo das últimas coisas e dos acontecimentos finais",
+      "Estudo da criação",
+      "Estudo dos dons espirituais"
+    ],
+    ans: 1,
+    exp: "Escatologia vem do grego <em>eschatos</em> (último) + <em>logos</em> (estudo). A apostila define: 'escatologia é o estudo das últimas coisas, tendo que a ressurreição com a volta de Cristo, o Reinado de Deus e o estado final de todas as coisas como principais temas.'"
+  },
+  {
+    q: "Qual livro da Bíblia é considerado o principal livro profético sobre os acontecimentos finais?",
+    opts: [
+      "Gênesis",
+      "Salmos",
+      "Apocalipse",
+      "Atos"
+    ],
+    ans: 2,
+    exp: "O Apocalipse (do grego <em>apokalypsis</em> = revelação) é o livro profético por excelência dos acontecimentos finais no NT, contendo as visões de João sobre o fim dos tempos, o milênio e o estado final."
+  },
+  {
+    q: "O que significa a palavra 'Arrebatamento'?",
+    opts: [
+      "O juízo final sobre os ímpios",
+      "A retirada da Igreja para encontrar-se com Cristo",
+      "A destruição da Terra",
+      "A ressurreição dos anjos"
+    ],
+    ans: 1,
+    exp: "A apostila ensina que o arrebatamento é o ato pelo qual Deus retira a Igreja do mundo antes (pré-trib) ou durante a Grande Tribulação, para encontrar-se com Cristo. Texto principal: Mt 24.40-42; 1Co 15.51-52; 1Ts 4.13-18."
+  },
+  {
+    q: "Segundo a Bíblia, quem julgará vivos e mortos?",
+    opts: [
+      "Moisés",
+      "Pedro",
+      "Jesus Cristo",
+      "Paulo"
+    ],
+    ans: 2,
+    exp: "A apostila confirma (cap. 7 – O Julgamento Final) que Jesus Cristo é o juiz de todos. Paulo afirma: 'Ele é o que Deus designou para ser juiz dos vivos e dos mortos' (At 10.42). Também 2Co 5.10 e Ap 20.11-15."
+  },
+  {
+    q: "O que é a Grande Tribulação?",
+    opts: [
+      "Um período de grande sofrimento e juízo sobre a Terra",
+      "A perseguição dos cristãos no primeiro século",
+      "A destruição de Jerusalém",
+      "O dilúvio"
+    ],
+    ans: 0,
+    exp: "A apostila descreve a Grande Tribulação como um período de sofrimento e juízo divino sobre a Terra (Mt 24.21; Ap 7.14). Para os pré-tribulacionistas (posição da OBPC), a Igreja será arrebatada antes desse período."
+  },
+  {
+    q: "Quem é identificado nas Escrituras como o Anticristo?",
+    opts: [
+      "Um profeta de Israel",
+      "Um líder religioso fiel",
+      "Um opositor de Cristo e do Evangelho",
+      "Um dos apóstolos"
+    ],
+    ans: 2,
+    exp: "O Anticristo é o grande opositor de Cristo que se manifestará no fim dos tempos. A apostila menciona 1Jo 2.18 e 2Ts 2.3-4 (o 'homem da iniquidade'). Ele se opõe a tudo que é de Deus e apresenta a si mesmo como deus."
+  },
+  {
+    q: "O que acontecerá na Segunda Vinda de Cristo?",
+    opts: [
+      "Cristo voltará em glória e poder",
+      "Cristo enviará apenas anjos",
+      "Cristo voltará secretamente para julgar",
+      "Nada acontecerá"
+    ],
+    ans: 0,
+    exp: "A apostila (cap. 3) ensina que a segunda vinda será pessoal, visível, gloriosa e triunfante. 'Varias descrições do retorno de Cristo nos indicam seu caráter glorioso' (Mt 24.30; Mc 13.26; Lc 21.27). Ap 19.16: Rei dos reis e Senhor dos senhores."
+  },
+  {
+    q: "O que é o Milênio?",
+    opts: [
+      "Um período de mil anos mencionado em Apocalipse 20",
+      "O tempo da Igreja Primitiva",
+      "O período entre o Antigo e o Novo Testamento",
+      "O tempo dos patriarcas"
+    ],
+    ans: 0,
+    exp: "Milênio (do latim <em>mille anni</em> = mil anos) é o reino de Cristo por mil anos descrito em Ap 20.1-6. A OBPC é pré-milenista: crê que Cristo voltará bodilmente antes de estabelecer esse reino literal na terra."
+  },
+  {
+    q: "O que é o Juízo Final?",
+    opts: [
+      "A última ceia de Cristo",
+      "O julgamento definitivo de toda a humanidade",
+      "A queda de Jerusalém",
+      "A conversão das nações"
+    ],
+    ans: 1,
+    exp: "A apostila (cap. 7) descreve o Juízo Final como o julgamento definitivo de todos os seres humanos por Cristo. Inclui o Tribunal de Cristo (para os salvos – 2Co 5.10) e o Grande Trono Branco (para os ímpios – Ap 20.11-15)."
+  },
+  {
+    q: "Qual será o destino final dos salvos segundo Apocalipse?",
+    opts: [
+      "Retornar ao Éden",
+      "Habitar nos Novos Céus e Nova Terra com Deus",
+      "Viver em Jerusalém terrena para sempre",
+      "Tornar-se anjos"
+    ],
+    ans: 1,
+    exp: "A apostila (cap. 8 – O Estado Final) afirma que os justos habitarão nos Novos Céus e Nova Terra, em perfeita comunhão com Deus. Ap 21.1-4: 'Vi um novo céu e uma nova terra... e a morada de Deus é com os homens.'"
+  }
+];
+
+let done = 0, correct = 0;
+const area = document.getElementById('quizArea');
+
+function render() {
+  area.innerHTML = '';
+  Q.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = 'card' + i;
+
+    const letters = ['A','B','C','D'];
+    const optsHtml = item.opts.map((o, j) => `
+      <div class="option" id="opt${i}_${j}" onclick="pick(${i},${j})">
+        <span class="opt-letter">${letters[j]}</span>
+        <span class="opt-text">${o}</span>
+      </div>`).join('');
+
+    card.innerHTML = `
+      <div class="q-header">
+        <span class="q-num">${i+1}.</span>
+        <span class="q-text">${item.q}</span>
+      </div>
+      <div class="options" id="opts${i}">${optsHtml}</div>
+      <button class="btn-check" id="btn${i}" onclick="check(${i})">Confirmar resposta</button>
+      <div class="feedback" id="fb${i}"></div>`;
+    area.appendChild(card);
+  });
+
+  const res = document.createElement('div');
+  res.className = 'result-box';
+  res.id = 'resultBox';
+  res.innerHTML = `
+    <div class="result-title">Avaliação concluída</div>
+    <div class="result-sub">Confira seu desempenho abaixo</div>
+    <div class="result-score" id="resPct">—</div>
+    <div class="result-label" id="resLabel"></div>
+    <button class="btn-reset" onclick="reset()">Refazer simulado</button>`;
+  area.appendChild(res);
+}
+
+let selected = {};
+let answered = {};
+
+function pick(qi, oi) {
+  if (answered[qi]) return;
+  selected[qi] = oi;
+  const letters = ['A','B','C','D'];
+  Q[qi].opts.forEach((_, j) => {
+    const el = document.getElementById(`opt${qi}_${j}`);
+    el.className = 'option' + (j === oi ? ' selected' : '');
+  });
+  document.getElementById('btn' + qi).classList.add('visible');
+}
+
+function check(qi) {
+  if (answered[qi] || selected[qi] === undefined) return;
+  answered[qi] = true;
+  const sel = selected[qi];
+  const ans = Q[qi].ans;
+  const isOk = sel === ans;
+  if (isOk) correct++;
+  done++;
+
+  Q[qi].opts.forEach((_, j) => {
+    const el = document.getElementById(`opt${qi}_${j}`);
+    el.classList.remove('selected');
+    el.classList.add('locked');
+    if (j === ans) el.classList.add('correct');
+    else if (j === sel && !isOk) el.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('fb' + qi);
+  fb.className = 'feedback show ' + (isOk ? 'ok' : 'err');
+  fb.innerHTML = `<strong>${isOk ? '✓ Correto!' : '✗ Incorreto'}</strong>${Q[qi].exp}`;
+
+  document.getElementById('btn' + qi).style.display = 'none';
+  document.getElementById('card' + qi).classList.add('answered');
+
+  updateStats();
+
+  if (done === Q.length) {
+    setTimeout(showResult, 600);
+  }
+}
+
+function updateStats() {
+  document.getElementById('stDone').textContent = done;
+  document.getElementById('stOk').textContent = correct;
+  document.getElementById('stPts').textContent = correct * 2;
+  document.getElementById('pgBar').style.width = (done / Q.length * 100) + '%';
+}
+
+function showResult() {
+  const pct = Math.round(correct / Q.length * 100);
+  document.getElementById('resPct').textContent = correct + ' / ' + Q.length;
+  document.getElementById('resLabel').textContent = pct + '% de aproveitamento · ' + (correct * 2) + ' pontos de 20';
+  document.getElementById('resultBox').classList.add('show');
+  document.getElementById('resultBox').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function reset() {
+  done = 0; correct = 0; selected = {}; answered = {};
+  updateStats();
+  document.getElementById('pgBar').style.width = '0%';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+render();
+</script>
+</body>
+</html>
