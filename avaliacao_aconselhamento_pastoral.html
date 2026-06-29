@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aconselhamento Pastoral</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #1a1208;
+    --surface: #231a0d;
+    --primary: #c9a227;
+    --primary-light: rgba(201,162,39,0.16);
+    --accent: #2e6b4f;
+    --accent-light: rgba(46,107,79,0.16);
+    --text: #f5ead6;
+    --text-dim: #c8b99a;
+    --border: rgba(255,255,255,0.10);
+    --on-primary: #231a0d;
+    --ok: #2a9d57;
+    --ok-light: rgba(42,157,87,0.13);
+    --warn: #e08a2e;
+    --warn-light: rgba(224,138,46,0.14);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); }
+
+  body {
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 30px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .app-header {
+    background: var(--primary);
+    color: var(--on-primary);
+    padding: 18px 20px 16px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+  }
+  .app-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    font-weight: 700;
+  }
+  .app-header p {
+    font-size: 12px;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+
+  .wrap {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 18px 16px 0;
+  }
+
+  /* progress */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    font-weight: 600;
+  }
+  .progress-bar {
+    flex: 1;
+    height: 8px;
+    border-radius: 99px;
+    background: var(--primary-light);
+    overflow: hidden;
+    display: flex;
+  }
+  .progress-bar .seg-ok { background: var(--ok); height: 100%; }
+  .progress-bar .seg-warn { background: var(--warn); height: 100%; }
+
+  .stats-row {
+    display: flex;
+    gap: 14px;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .stats-row span b { color: var(--text); }
+  .dot-ok { color: var(--ok); }
+  .dot-warn { color: var(--warn); }
+
+  /* dot nav */
+  .dots {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .dotnav {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .dotnav.current { width: 12px; height: 12px; box-shadow: 0 0 0 2px var(--primary-light); }
+  .dotnav.ok { background: var(--ok); }
+  .dotnav.warn { background: var(--warn); }
+
+  /* card */
+  .card-zone {
+    perspective: 1400px;
+    margin-bottom: 18px;
+  }
+  .card {
+    position: relative;
+    min-height: 280px;
+    border-radius: var(--radius);
+    cursor: pointer;
+  }
+  .face {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+    padding: 30px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 280px;
+  }
+  .face.back { display: none; }
+  .card.flipped .face.front { display: none; }
+  .card.flipped .face.back { display: flex; }
+
+  .q-label {
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 14px;
+  }
+  .q-text {
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--text);
+  }
+  .tap-hint {
+    margin-top: 22px;
+    text-align: center;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  .a-label {
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--ok);
+    margin-bottom: 10px;
+  }
+  .a-text {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.55;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+  .a-text .line { display: block; margin-bottom: 4px; }
+  .dica-box {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-light);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+  .dica-box b { color: var(--accent); }
+
+  /* mark buttons */
+  .mark-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .mark-btn {
+    flex: 1;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 10px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+  }
+  .mark-btn:active { transform: scale(0.97); }
+  .mark-btn[disabled] { opacity: 0.35; cursor: default; }
+  .mark-btn.warn { background: var(--warn-light); color: var(--warn); }
+  .mark-btn.ok { background: var(--ok-light); color: var(--ok); }
+
+  .nav-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 26px;
+  }
+  .nav-btn {
+    flex: 1;
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    border-radius: 10px;
+    padding: 11px;
+    cursor: pointer;
+  }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+  .toolbar-btn {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+
+  /* end screen */
+  .end-screen { display: none; text-align: center; padding: 10px 4px 30px; }
+  .end-screen.show { display: block; }
+  .end-screen .big-emoji { font-size: 44px; margin-bottom: 8px; }
+  .end-screen h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 21px;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .end-screen p { font-size: 14px; color: var(--text-dim); margin-bottom: 22px; line-height: 1.6; }
+  .end-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 22px;
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+  }
+  .end-stat { text-align: center; }
+  .end-stat .num { font-size: 26px; font-weight: 800; }
+  .end-stat.ok .num { color: var(--ok); }
+  .end-stat.warn .num { color: var(--warn); }
+  .end-stat .lbl { font-size: 11.5px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  .end-actions { display: flex; flex-direction: column; gap: 10px; }
+  .end-actions button {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-ghost { background: transparent; border: 2px solid var(--border); color: var(--text); }
+
+  .main-area.hidden { display: none; }
+
+  @media (max-width: 380px) {
+    .q-text { font-size: 17px; }
+    .face { padding: 24px 18px; min-height: 240px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>Aconselhamento Pastoral</h1>
+  <p>Revisão rápida para a prova</p>
+</div>
+
+<div class="wrap">
+
+  <div class="main-area" id="mainArea">
+    <div class="toolbar">
+      <button class="toolbar-btn" onclick="restartAll(false)">↺ Reiniciar tudo</button>
+      <button class="toolbar-btn" onclick="shuffleDeck()">🔀 Embaralhar</button>
+    </div>
+
+    <div class="progress-row">
+      <span id="progressLabel">1 / 28</span>
+      <div class="progress-bar">
+        <div class="seg-ok" id="segOk" style="width:0%"></div>
+        <div class="seg-warn" id="segWarn" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <span>✅ Sei: <b id="cntOk">0</b></span>
+      <span>🔁 Revisar: <b id="cntWarn">0</b></span>
+      <span>⬜ Restam: <b id="cntLeft">28</b></span>
+    </div>
+
+    <div class="dots" id="dotsRow"></div>
+
+    <div class="card-zone">
+      <div class="card" id="card" onclick="flipCard()">
+        <div class="face front">
+          <div class="q-label" id="qLabel">Pergunta</div>
+          <div class="q-text" id="qText"></div>
+          <div class="tap-hint">👆 Pense na resposta, depois toque para confirmar</div>
+        </div>
+        <div class="face back">
+          <div class="a-label">✅ Resposta</div>
+          <div class="a-text" id="aText"></div>
+          <div class="dica-box" id="dicaBox" style="display:none;">
+            <b>💡 Dica para lembrar:</b> <span id="dicaText"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mark-row">
+      <button class="mark-btn warn" id="btnWarn" onclick="mark('warn')" disabled>🔁 Preciso revisar</button>
+      <button class="mark-btn ok" id="btnOk" onclick="mark('ok')" disabled>✅ Já sei essa</button>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="btnPrev" onclick="goPrev()">‹ Anterior</button>
+      <button class="nav-btn" id="btnNext" onclick="goNext()">Próxima ›</button>
+    </div>
+  </div>
+
+  <div class="end-screen" id="endScreen">
+    <div class="big-emoji">🎉</div>
+    <h2>Revisão concluída!</h2>
+    <p id="endMsg">Você passou por todas as perguntas.</p>
+    <div class="end-card">
+      <div class="end-stat ok"><div class="num" id="endOk">0</div><div class="lbl">Sei bem</div></div>
+      <div class="end-stat warn"><div class="num" id="endWarn">0</div><div class="lbl">Revisar</div></div>
+    </div>
+    <div class="end-actions">
+      <button class="btn-primary" id="btnReviewPending" onclick="restartAll(true)">📌 Revisar só as pendentes</button>
+      <button class="btn-ghost" onclick="restartAll(false)">↺ Começar tudo de novo</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ORIGINAL_DATA = [{"pergunta": "Que característica o conselheiro DEVE EVITAR?", "resposta": "Ser intrometido.", "dica": "Pense assim: o bom conselheiro tem coragem e é imparcial (justo, sem tomar partido). O que ele NÃO pode ser é intrometido — ou seja, ficar se metendo onde não foi chamado."}, {"pergunta": "Qual a alternativa correta sobre a postura do conselheiro?", "resposta": "O conselheiro deve ter atenção.", "dica": "Ouvir com atenção é a base do aconselhamento. As erradas são o contrário do que se espera: ele PRECISA confrontar quando necessário, e deve OUVIR mais do que falar."}, {"pergunta": "Qual o principal papel do aconselhamento pastoral?", "resposta": "Cuidar do rebanho, pois esta é a tarefa confiada ao obreiro.", "dica": "O pastor é como um pastor de ovelhas: sua função central é cuidar, não fiscalizar a vida das pessoas nem se sentir superior a elas."}, {"pergunta": "Defina Aconselhamento Preventivo e Aconselhamento Reativo.", "resposta": "Preventivo = antes do problema. Reativo = depois que o problema já aconteceu.", "dica": "Pense em duas palavras-chave: PREVENIR é agir ANTES (orientar o casal antes do casamento, por exemplo). REAGIR é agir DEPOIS que a crise já chegou (uma separação, uma crise de fé). É a mesma lógica de remédio preventivo x remédio para quando já se está doente."}, {"pergunta": "Por que existem aconselhamentos pastorais ineficazes?", "resposta": "Porque faltam preparo, técnica adequada, escuta verdadeira ou o conselheiro impõe sua opinião em vez de ajudar a pessoa a entender o próprio problema.", "dica": "Resuma assim na sua cabeça: aconselhamento falha quando o conselheiro fala demais, ouve pouco, não tem técnica, ou tenta resolver o problema pelo aconselhado em vez de ajudá-lo a enxergar e decidir por si mesmo."}, {"pergunta": "Mencione três técnicas usadas no Aconselhamento. (pergunta repetida na prova)", "resposta": "Esclarecimento, reflexão e escuta ativa.", "dica": "Decore essas três palavras: ESCLARECER (ajudar a pessoa a entender melhor o que sente), REFLETIR (devolver para a pessoa o que ela disse, com outras palavras, para ela se ouvir) e ESCUTAR ATIVAMENTE (prestar atenção total, sem julgar). Essas três aparecem como técnica em quase toda prova de aconselhamento."}, {"pergunta": "Personalidade é caráter? Explique.", "resposta": "Não exatamente. Personalidade é mais ampla; caráter é a parte moral dentro dela.", "dica": "Pense assim: personalidade é a \"máscara\" (do grego \"persona\", que os gregos usavam para o papel do ator). Caráter é o que está embaixo da máscara: o valor moral. Por isso personalidade é mais que só caráter."}, {"pergunta": "Como se manifesta a personalidade esquizoide?", "resposta": "Isolamento, frieza emocional, distanciamento social e dificuldade de afeto.", "dica": "Associe \"esquizoide\" a \"sozinho\": é a pessoa fria, fechada, que evita contato e parece não se importar com os outros — não confundir com esquizofrenia, que é outra coisa."}, {"pergunta": "Qual é a principal causa da culpa?", "resposta": "A relação à experiência passada e não confessada.", "dica": "Guarde a palavra-chave: NÃO CONFESSADO. A culpa nasce de algo do passado que a pessoa não resolveu nem confessou — fica guardado e pesa."}, {"pergunta": "Quais os dois campos da Ansiedade?", "resposta": "Ansiedade normal (real) e ansiedade neurótica (irreal, exagerada).", "dica": "Pense em dois tipos: uma ansiedade que faz sentido (perigo de verdade) e uma ansiedade que é desproporcional, que aparece mesmo sem um motivo real à altura do medo sentido."}, {"pergunta": "1 Esclarecimento e reflexão estão entre as técnicas de aconselhamento.", "resposta": "VERDADEIRO.", "dica": "Já vimos isso no Dia 2 — são duas das três técnicas principais."}, {"pergunta": "2 O conselheiro deve resolver o problema do aconselhado, buscando soluções para ele.", "resposta": "FALSO.", "dica": "O papel do conselheiro é ajudar a PESSOA a encontrar a própria solução, não resolver por ela. Resolver pelo outro tira a responsabilidade dele."}, {"pergunta": "3 O conselheiro tem obrigação de manter em segredo as informações confidenciais.", "resposta": "VERDADEIRO.", "dica": "Sigilo é parte essencial da ética no aconselhamento."}, {"pergunta": "4 Jesus não usou nenhuma técnica de aconselhamento, pois Ele era Deus.", "resposta": "FALSO.", "dica": "Jesus usava técnicas como perguntas, parábolas e escuta — Ele é, inclusive, o modelo de conselheiro."}, {"pergunta": "5 O Aconselhamento não visa comunicação nem apoio, pois as pessoas conseguem se virar sozinhas.", "resposta": "FALSO.", "dica": "É exatamente o oposto: aconselhamento existe porque comunicação e apoio fazem diferença na vida das pessoas."}, {"pergunta": "6 O conselheiro é um educador, ensinando as pessoas a lidar com os problemas da vida.", "resposta": "VERDADEIRO.", "dica": "Uma das funções do conselheiro é, sim, ensinar e orientar."}, {"pergunta": "7 A personalidade é um caráter.", "resposta": "FALSO.", "dica": "Como vimos no Dia 2: personalidade é mais ampla que caráter, que é só a parte moral dela."}, {"pergunta": "8 Os sintomas do paranoico são desconfiança, ser extremamente defensivo e agressivo, formado em lares de dúvida, medo e incerteza.", "resposta": "VERDADEIRO.", "dica": "Frase-chave para decorar o paranoico: DESCONFIADO, DEFENSIVO, AGRESSIVO."}, {"pergunta": "Marque as alternativas CORRETAS sobre o pastor (questão com várias certas).", "resposta": "Certas: a, b, c, e, g, i, j. Erradas: d, f, h.", "dica": "As ERRADAS são sempre as que exageram contra a vida pessoal do pastor: dizer que ele NÃO precisa se preocupar com a família, que a igreja é MAIS importante que a família, ou que ele NÃO precisa ter vida privada. Essas três são armadilhas clássicas — o pastor TEM família e TEM vida privada, sim. As certas falam de chamado, caráter e testemunho."}, {"pergunta": "Por que é importante que os crentes conheçam os detalhes da obra e da pessoa do pastor?", "resposta": "Gera respeito mútuo, evita cobranças injustas e fortalece a comunhão entre rebanho e pastor.", "dica": "Pense desse jeito simples: quando a pessoa entende o que o pastor faz e o que ele vive, ela cobra menos e ajuda mais."}, {"pergunta": "Complete: \"No meio da sua ___ o Senhor escolhe algumas ___ e lhes dá capacidade, por meio de ___ específicos, para servirem no ___ de apascentamento.\"", "resposta": "Igreja / pessoas / dons / ministério.", "dica": "Leia a frase em voz alta substituindo pelas palavras: \"No meio da sua IGREJA o Senhor escolhe algumas PESSOAS e lhes dá capacidade, por meio de DONS específicos, para servirem no MINISTÉRIO de apascentamento.\" Repetir em voz alta ajuda a fixar a ordem das palavras."}, {"pergunta": "Como o Pastor adquire experiência?", "resposta": "Vivendo o dia a dia com o rebanho, orando, estudando e aprendendo com o tempo e com os erros.", "dica": "Não existe atalho: experiência vem de viver, servir e aprender na prática, com oração e estudo constante — não é algo que se ganha de um dia para o outro."}, {"pergunta": "Qual característica NÃO é pastoral? (assinale a errada)", "resposta": "Ser dominador do rebanho, afinal Deus lhe confiou este cargo.", "dica": "\"Dominador\" é a palavra-armadilha. O pastor deve ser EXEMPLO e VERDADEIRO, nunca dominador — liderar servindo, não controlando."}, {"pergunta": "Que tipo de liderança familiar o texto de 1 Timóteo 3.4 mostra?", "resposta": "Liderança verdadeira.", "dica": "1 Timóteo 3.4 fala que o líder deve governar bem a própria casa — isso é sinal de uma liderança genuína (verdadeira), não fingida nem por interesse."}, {"pergunta": "Ligue a coluna: tipos de pastor e o que cada um representa.", "resposta": "1-Faz-se pastor → luta com \"unhas e dentes\" para manter o pastorado. 2-Feito pelos homens → não precisa de vocação, basta ser filho de pastor. 3-Feito por Deus → precisa orar e depende de Deus. 4-As pessoas precisam receber → liberdade, espiritualidade, cura e socorro. 5-1Timóteo 3.4 → os liderados devem ser respeitados pelo líder.", "dica": "Truque para decorar: o pastor \"que SE FAZ\" briga para manter o cargo (orgulho). O \"FEITO PELOS HOMENS\" é só de nome (filho de pastor, sem vocação). O \"FEITO POR DEUS\" ora e depende Dele — é o verdadeiro."}, {"pergunta": "Por que é importante para a igreja o exemplo de vida do pastor?", "resposta": "Porque o pastor representa Jesus, e sua vida prática ensina mais que suas palavras.", "dica": "Frase para guardar: \"o pastor é o sermão que as pessoas veem, não só o que ouvem.\""}, {"pergunta": "Quais os três conselhos que o apóstolo Pedro deu em 1 Pedro 5.2-3?", "resposta": "1) Apascentar de boa vontade. 2) Não servir por ganância. 3) Não dominar, mas ser exemplo.", "dica": "Decore as três palavras-chave na ordem: VONTADE (não obrigação) → DEDICAÇÃO (não dinheiro) → EXEMPLO (não dominação)."}, {"pergunta": "Qual a importância da Teologia Pastoral para a igreja?", "resposta": "Para que a igreja saiba que deve somar forças com o pastor na expansão do reino.", "dica": "A ideia central da Teologia Pastoral não é fiscalizar nem engessar o pastor com regras rígidas — é fazer a igreja entender que o trabalho é de TIME, pastor e igreja juntos."}];
+
+let deck = ORIGINAL_DATA.map((q, i) => ({...q, id: i, status: null}));
+let order = deck.map((_, i) => i);
+let pos = 0;
+let reviewMode = false;
+
+function currentItem() { return deck[order[pos]]; }
+
+function render() {
+  const item = currentItem();
+  document.getElementById('card').classList.remove('flipped');
+  document.getElementById('qText').textContent = item.pergunta;
+  document.getElementById('aText').innerHTML = item.resposta.split('\\n').map(l => '<span class="line">' + l + '</span>').join('');
+  if (item.dica) {
+    document.getElementById('dicaBox').style.display = 'block';
+    document.getElementById('dicaText').textContent = item.dica;
+  } else {
+    document.getElementById('dicaBox').style.display = 'none';
+  }
+  document.getElementById('progressLabel').textContent = (pos + 1) + ' / ' + order.length;
+  document.getElementById('btnPrev').disabled = (pos === 0);
+  document.getElementById('btnOk').disabled = false;
+  document.getElementById('btnWarn').disabled = false;
+  updateNextLabel();
+  updateStats();
+  renderDots();
+}
+
+function updateNextLabel() {
+  document.getElementById('btnNext').textContent = (pos === order.length - 1) ? 'Concluir ✓' : 'Próxima ›';
+}
+
+function flipCard() {
+  document.getElementById('card').classList.toggle('flipped');
+}
+
+function updateStats() {
+  const okCount = deck.filter(d => d.status === 'ok').length;
+  const warnCount = deck.filter(d => d.status === 'warn').length;
+  const total = deck.length;
+  document.getElementById('cntOk').textContent = okCount;
+  document.getElementById('cntWarn').textContent = warnCount;
+  document.getElementById('cntLeft').textContent = total - okCount - warnCount;
+  document.getElementById('segOk').style.width = (okCount / total * 100) + '%';
+  document.getElementById('segWarn').style.width = (warnCount / total * 100) + '%';
+}
+
+function renderDots() {
+  const row = document.getElementById('dotsRow');
+  row.innerHTML = '';
+  order.forEach((idx, i) => {
+    const d = deck[idx];
+    const el = document.createElement('div');
+    el.className = 'dotnav' + (i === pos ? ' current' : '') + (d.status === 'ok' ? ' ok' : '') + (d.status === 'warn' ? ' warn' : '');
+    el.onclick = () => { pos = i; render(); };
+    row.appendChild(el);
+  });
+}
+
+function mark(status) {
+  currentItem().status = status;
+  updateStats();
+  renderDots();
+  goNext();
+}
+
+function goNext() {
+  if (pos < order.length - 1) {
+    pos++;
+    render();
+  } else {
+    showEnd();
+  }
+}
+
+function goPrev() {
+  if (pos > 0) {
+    pos--;
+    render();
+  }
+}
+
+function showEnd() {
+  document.getElementById('mainArea').classList.add('hidden');
+  const endScreen = document.getElementById('endScreen');
+  endScreen.classList.add('show');
+  const okCount = deck.filter(d => d.status === 'ok').length;
+  const warnCount = deck.filter(d => d.status === 'warn').length;
+  document.getElementById('endOk').textContent = okCount;
+  document.getElementById('endWarn').textContent = warnCount;
+  document.getElementById('btnReviewPending').style.display = warnCount > 0 ? 'block' : 'none';
+  document.getElementById('endMsg').textContent = warnCount > 0
+    ? 'Ainda restam ' + warnCount + ' pergunta(s) para revisar com calma.'
+    : 'Você marcou que já sabe todas! Excelente preparo para a prova.';
+}
+
+function restartAll(onlyPending) {
+  document.getElementById('endScreen').classList.remove('show');
+  document.getElementById('mainArea').classList.remove('hidden');
+  if (onlyPending) {
+    order = deck.map((d, i) => i).filter(i => deck[i].status !== 'ok');
+  } else {
+    deck.forEach(d => d.status = null);
+    order = deck.map((_, i) => i);
+  }
+  pos = 0;
+  render();
+}
+
+function shuffleDeck() {
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  pos = 0;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
