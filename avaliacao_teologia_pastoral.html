@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teologia Pastoral</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg: #f7f4ef;
+    --surface: #ffffff;
+    --primary: #2d5a3d;
+    --primary-light: #e8f2eb;
+    --accent: #c8973a;
+    --accent-light: #fdf4e3;
+    --text: #2b2b28;
+    --text-dim: #6b6a63;
+    --border: #e3ddd0;
+    --on-primary: #ffffff;
+    --ok: #2a9d57;
+    --ok-light: rgba(42,157,87,0.13);
+    --warn: #e08a2e;
+    --warn-light: rgba(224,138,46,0.14);
+    --bad: #d65454;
+    --bad-light: rgba(214,84,84,0.14);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--bg); }
+
+  body {
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 30px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .app-header {
+    background: var(--primary);
+    color: var(--on-primary);
+    padding: 18px 20px 16px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+  }
+  .app-header h1 { font-family: 'Playfair Display', serif; font-size: 19px; font-weight: 700; }
+  .app-header p { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+
+  .wrap { max-width: 560px; margin: 0 auto; padding: 18px 16px 0; }
+
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .toolbar-btn { background: none; border: none; color: var(--text-dim); font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: underline; }
+
+  .progress-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 12.5px; color: var(--text-dim); font-weight: 600; }
+  .progress-bar { flex: 1; height: 8px; border-radius: 99px; background: var(--primary-light); overflow: hidden; display: flex; }
+  .progress-bar .seg-ok { background: var(--ok); height: 100%; }
+  .progress-bar .seg-warn { background: var(--warn); height: 100%; }
+
+  .stats-row { display: flex; gap: 14px; font-size: 12px; color: var(--text-dim); margin-bottom: 14px; flex-wrap: wrap; }
+  .stats-row b { color: var(--text); }
+
+  .dots { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 18px; }
+  .dotnav { width: 9px; height: 9px; border-radius: 50%; background: var(--border); cursor: pointer; flex-shrink: 0; }
+  .dotnav.current { width: 12px; height: 12px; box-shadow: 0 0 0 2px var(--primary-light); }
+  .dotnav.ok { background: var(--ok); }
+  .dotnav.warn { background: var(--warn); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.10); padding: 26px 22px; margin-bottom: 16px; min-height: 220px; }
+
+  .type-pill { display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--primary); background: var(--primary-light); padding: 4px 10px; border-radius: 99px; margin-bottom: 12px; }
+
+  .q-text { font-size: 18px; font-weight: 700; line-height: 1.5; color: var(--text); margin-bottom: 16px; }
+  .instr { font-size: 13px; color: var(--text-dim); font-style: italic; margin-bottom: 16px; }
+
+  /* dissertativa */
+  textarea.resp-box {
+    width: 100%; min-height: 90px; border: 1.5px solid var(--border); border-radius: 10px;
+    background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 14.5px;
+    padding: 12px; resize: vertical; margin-bottom: 14px;
+  }
+  textarea.resp-box:focus { outline: none; border-color: var(--primary); }
+
+  /* vf buttons */
+  .vf-row { display: flex; gap: 12px; margin-bottom: 8px; }
+  .vf-btn {
+    flex: 1; padding: 16px; border-radius: 12px; border: 2px solid var(--border);
+    background: var(--bg); font-family: 'Inter', sans-serif; font-weight: 800; font-size: 17px;
+    color: var(--text); cursor: pointer;
+  }
+  .vf-btn:disabled { cursor: default; }
+  .vf-btn.correct { background: var(--ok-light); border-color: var(--ok); color: var(--ok); }
+  .vf-btn.wrong { background: var(--bad-light); border-color: var(--bad); color: var(--bad); }
+
+  /* ordem */
+  .ordem-row, .pares-row {
+    display: flex; align-items: center; gap: 10px; padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .ordem-row:last-child, .pares-row:last-child { border-bottom: none; }
+  .slot {
+    width: 40px; height: 40px; flex-shrink: 0; border-radius: 8px; border: 1.5px solid var(--border);
+    background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-weight: 800;
+    font-size: 15px; text-align: center;
+  }
+  .slot.correct { border-color: var(--ok); background: var(--ok-light); color: var(--ok); }
+  .slot.wrong { border-color: var(--bad); background: var(--bad-light); color: var(--bad); }
+  .row-label { font-size: 14px; line-height: 1.4; color: var(--text); flex: 1; }
+
+  .esquerda-list { margin-bottom: 10px; }
+  .esquerda-item { font-size: 13.5px; padding: 6px 0; color: var(--text-dim); }
+  .esquerda-item b { color: var(--primary); margin-right: 6px; }
+
+  .check-btn {
+    width: 100%; background: var(--primary); color: var(--on-primary); border: none; border-radius: 10px;
+    padding: 13px; font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer;
+    margin: 14px 0 4px;
+  }
+  .check-btn:disabled { opacity: 0.4; }
+
+  /* answer reveal */
+  .answer-box { margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--border); }
+  .a-label { font-size: 11.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: var(--ok); margin-bottom: 8px; }
+  .a-text { font-size: 16px; font-weight: 700; line-height: 1.55; color: var(--text); margin-bottom: 14px; white-space: pre-line; }
+  .dica-box { border-left: 3px solid var(--accent); background: var(--accent-light); border-radius: 0 10px 10px 0;
+    padding: 12px 14px; font-size: 13.5px; line-height: 1.6; color: var(--text-dim); }
+  .dica-box b { color: var(--accent); }
+
+  /* mark buttons */
+  .mark-row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .mark-btn { flex: 1; border: none; border-radius: 12px; padding: 14px 10px; font-family: 'Inter', sans-serif;
+    font-weight: 700; font-size: 13.5px; cursor: pointer; }
+  .mark-btn:active { transform: scale(0.97); }
+  .mark-btn[disabled] { opacity: 0.35; cursor: default; }
+  .mark-btn.warn { background: var(--warn-light); color: var(--warn); }
+  .mark-btn.ok { background: var(--ok-light); color: var(--ok); }
+
+  .nav-row { display: flex; gap: 10px; margin-bottom: 26px; }
+  .nav-btn { flex: 1; background: transparent; border: 2px solid var(--primary); color: var(--primary);
+    font-family: 'Inter', sans-serif; font-weight: 700; font-size: 13.5px; border-radius: 10px; padding: 11px; cursor: pointer; }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+  .end-screen { display: none; text-align: center; padding: 10px 4px 30px; }
+  .end-screen.show { display: block; }
+  .end-screen .big-emoji { font-size: 44px; margin-bottom: 8px; }
+  .end-screen h2 { font-family: 'Playfair Display', serif; font-size: 21px; color: var(--primary); margin-bottom: 8px; }
+  .end-screen p { font-size: 14px; color: var(--text-dim); margin-bottom: 22px; line-height: 1.6; }
+  .end-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 22px; display: flex; justify-content: center; gap: 28px; }
+  .end-stat { text-align: center; }
+  .end-stat .num { font-size: 26px; font-weight: 800; }
+  .end-stat.ok .num { color: var(--ok); }
+  .end-stat.warn .num { color: var(--warn); }
+  .end-stat .lbl { font-size: 11.5px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  .end-actions { display: flex; flex-direction: column; gap: 10px; }
+  .end-actions button { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 14px; border-radius: 12px; padding: 14px; cursor: pointer; border: none; }
+  .btn-primary { background: var(--primary); color: var(--on-primary); }
+  .btn-ghost { background: transparent; border: 2px solid var(--border); color: var(--text); }
+
+  .main-area.hidden { display: none; }
+
+  @media (max-width: 380px) {
+    .q-text { font-size: 16.5px; }
+    .card { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>Teologia Pastoral</h1>
+  <p>Revisão rápida para a prova</p>
+</div>
+
+<div class="wrap">
+
+  <div class="main-area" id="mainArea">
+    <div class="toolbar">
+      <button class="toolbar-btn" onclick="restartAll(false)">↺ Reiniciar tudo</button>
+      <button class="toolbar-btn" onclick="shuffleDeck()">🔀 Embaralhar</button>
+    </div>
+
+    <div class="progress-row">
+      <span id="progressLabel">1 / 28</span>
+      <div class="progress-bar">
+        <div class="seg-ok" id="segOk" style="width:0%"></div>
+        <div class="seg-warn" id="segWarn" style="width:0%"></div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <span>✅ Sei: <b id="cntOk">0</b></span>
+      <span>🔁 Revisar: <b id="cntWarn">0</b></span>
+      <span>⬜ Restam: <b id="cntLeft">28</b></span>
+    </div>
+
+    <div class="dots" id="dotsRow"></div>
+
+    <div class="card" id="card"></div>
+
+    <div class="mark-row">
+      <button class="mark-btn warn" id="btnWarn" onclick="mark('warn')" disabled>🔁 Preciso revisar</button>
+      <button class="mark-btn ok" id="btnOk" onclick="mark('ok')" disabled>✅ Já sei essa</button>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" id="btnPrev" onclick="goPrev()">‹ Anterior</button>
+      <button class="nav-btn" id="btnNext" onclick="goNext()">Próxima ›</button>
+    </div>
+  </div>
+
+  <div class="end-screen" id="endScreen">
+    <div class="big-emoji">🎉</div>
+    <h2>Revisão concluída!</h2>
+    <p id="endMsg">Você passou por todas as perguntas.</p>
+    <div class="end-card">
+      <div class="end-stat ok"><div class="num" id="endOk">0</div><div class="lbl">Sei bem</div></div>
+      <div class="end-stat warn"><div class="num" id="endWarn">0</div><div class="lbl">Revisar</div></div>
+    </div>
+    <div class="end-actions">
+      <button class="btn-primary" id="btnReviewPending" onclick="restartAll(true)">📌 Revisar só as pendentes</button>
+      <button class="btn-ghost" onclick="restartAll(false)">↺ Começar tudo de novo</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ORIGINAL_DATA = [{"tipo": "dissertativa", "pergunta": "Que característica o conselheiro DEVE EVITAR?", "resposta": "Ser intrometido.", "dica": "Pense assim: o bom conselheiro tem coragem e é imparcial (justo, sem tomar partido). O que ele NÃO pode ser é intrometido — ou seja, ficar se metendo onde não foi chamado."}, {"tipo": "dissertativa", "pergunta": "Qual a alternativa correta sobre a postura do conselheiro?", "resposta": "O conselheiro deve ter atenção.", "dica": "Ouvir com atenção é a base do aconselhamento. As erradas são o contrário do que se espera: ele PRECISA confrontar quando necessário, e deve OUVIR mais do que falar."}, {"tipo": "dissertativa", "pergunta": "Qual o principal papel do aconselhamento pastoral?", "resposta": "Cuidar do rebanho, pois esta é a tarefa confiada ao obreiro.", "dica": "O pastor é como um pastor de ovelhas: sua função central é cuidar, não fiscalizar a vida das pessoas nem se sentir superior a elas."}, {"tipo": "dissertativa", "pergunta": "Defina Aconselhamento Preventivo e Aconselhamento Reativo.", "resposta": "Preventivo = antes do problema. Reativo = depois que o problema já aconteceu.", "dica": "Pense em duas palavras-chave: PREVENIR é agir ANTES (orientar o casal antes do casamento, por exemplo). REAGIR é agir DEPOIS que a crise já chegou (uma separação, uma crise de fé). É a mesma lógica de remédio preventivo x remédio para quando já se está doente."}, {"tipo": "dissertativa", "pergunta": "Por que existem aconselhamentos pastorais ineficazes?", "resposta": "Porque faltam preparo, técnica adequada, escuta verdadeira ou o conselheiro impõe sua opinião em vez de ajudar a pessoa a entender o próprio problema.", "dica": "Resuma assim na sua cabeça: aconselhamento falha quando o conselheiro fala demais, ouve pouco, não tem técnica, ou tenta resolver o problema pelo aconselhado em vez de ajudá-lo a enxergar e decidir por si mesmo."}, {"tipo": "dissertativa", "pergunta": "Mencione três técnicas usadas no Aconselhamento. (pergunta repetida na prova)", "resposta": "Esclarecimento, reflexão e escuta ativa.", "dica": "Decore essas três palavras: ESCLARECER (ajudar a pessoa a entender melhor o que sente), REFLETIR (devolver para a pessoa o que ela disse, com outras palavras, para ela se ouvir) e ESCUTAR ATIVAMENTE (prestar atenção total, sem julgar). Essas três aparecem como técnica em quase toda prova de aconselhamento."}, {"tipo": "dissertativa", "pergunta": "Personalidade é caráter? Explique.", "resposta": "Não exatamente. Personalidade é mais ampla; caráter é a parte moral dentro dela.", "dica": "Pense assim: personalidade é a \"máscara\" (do grego \"persona\", que os gregos usavam para o papel do ator). Caráter é o que está embaixo da máscara: o valor moral. Por isso personalidade é mais que só caráter."}, {"tipo": "dissertativa", "pergunta": "Como se manifesta a personalidade esquizoide?", "resposta": "Isolamento, frieza emocional, distanciamento social e dificuldade de afeto.", "dica": "Associe \"esquizoide\" a \"sozinho\": é a pessoa fria, fechada, que evita contato e parece não se importar com os outros — não confundir com esquizofrenia, que é outra coisa."}, {"tipo": "dissertativa", "pergunta": "Qual é a principal causa da culpa?", "resposta": "A relação à experiência passada e não confessada.", "dica": "Guarde a palavra-chave: NÃO CONFESSADO. A culpa nasce de algo do passado que a pessoa não resolveu nem confessou — fica guardado e pesa."}, {"tipo": "dissertativa", "pergunta": "Quais os dois campos da Ansiedade?", "resposta": "Ansiedade normal (real) e ansiedade neurótica (irreal, exagerada).", "dica": "Pense em dois tipos: uma ansiedade que faz sentido (perigo de verdade) e uma ansiedade que é desproporcional, que aparece mesmo sem um motivo real à altura do medo sentido."}, {"tipo": "vf", "pergunta": "Esclarecimento e reflexão estão entre as técnicas de aconselhamento.", "valor": true, "resposta": "VERDADEIRO.", "dica": "Já vimos isso no Dia 2 — são duas das três técnicas principais."}, {"tipo": "vf", "pergunta": "O conselheiro deve resolver o problema do aconselhado, buscando soluções para ele.", "valor": false, "resposta": "FALSO.", "dica": "O papel do conselheiro é ajudar a PESSOA a encontrar a própria solução, não resolver por ela. Resolver pelo outro tira a responsabilidade dele."}, {"tipo": "vf", "pergunta": "O conselheiro tem obrigação de manter em segredo as informações confidenciais.", "valor": true, "resposta": "VERDADEIRO.", "dica": "Sigilo é parte essencial da ética no aconselhamento."}, {"tipo": "vf", "pergunta": "Jesus não usou nenhuma técnica de aconselhamento, pois Ele era Deus.", "valor": false, "resposta": "FALSO.", "dica": "Jesus usava técnicas como perguntas, parábolas e escuta — Ele é, inclusive, o modelo de conselheiro."}, {"tipo": "vf", "pergunta": "O Aconselhamento não visa comunicação nem apoio, pois as pessoas conseguem se virar sozinhas.", "valor": false, "resposta": "FALSO.", "dica": "É exatamente o oposto: aconselhamento existe porque comunicação e apoio fazem diferença na vida das pessoas."}, {"tipo": "vf", "pergunta": "O conselheiro é um educador, ensinando as pessoas a lidar com os problemas da vida.", "valor": true, "resposta": "VERDADEIRO.", "dica": "Uma das funções do conselheiro é, sim, ensinar e orientar."}, {"tipo": "vf", "pergunta": "A personalidade é um caráter.", "valor": false, "resposta": "FALSO.", "dica": "Como vimos no Dia 2: personalidade é mais ampla que caráter, que é só a parte moral dela."}, {"tipo": "vf", "pergunta": "Os sintomas do paranoico são desconfiança, ser extremamente defensivo e agressivo, formado em lares de dúvida, medo e incerteza.", "valor": true, "resposta": "VERDADEIRO.", "dica": "Frase-chave para decorar o paranoico: DESCONFIADO, DEFENSIVO, AGRESSIVO."}, {"tipo": "dissertativa", "pergunta": "Marque as alternativas CORRETAS sobre o pastor (questão com várias certas).", "resposta": "Certas: a, b, c, e, g, i, j. Erradas: d, f, h.", "dica": "As ERRADAS são sempre as que exageram contra a vida pessoal do pastor: dizer que ele NÃO precisa se preocupar com a família, que a igreja é MAIS importante que a família, ou que ele NÃO precisa ter vida privada. Essas três são armadilhas clássicas — o pastor TEM família e TEM vida privada, sim. As certas falam de chamado, caráter e testemunho."}, {"tipo": "dissertativa", "pergunta": "Por que é importante que os crentes conheçam os detalhes da obra e da pessoa do pastor?", "resposta": "Gera respeito mútuo, evita cobranças injustas e fortalece a comunhão entre rebanho e pastor.", "dica": "Pense desse jeito simples: quando a pessoa entende o que o pastor faz e o que ele vive, ela cobra menos e ajuda mais."}, {"tipo": "dissertativa", "pergunta": "Complete: \"No meio da sua ___ o Senhor escolhe algumas ___ e lhes dá capacidade, por meio de ___ específicos, para servirem no ___ de apascentamento.\"", "resposta": "Igreja / pessoas / dons / ministério.", "dica": "Leia a frase em voz alta substituindo pelas palavras: \"No meio da sua IGREJA o Senhor escolhe algumas PESSOAS e lhes dá capacidade, por meio de DONS específicos, para servirem no MINISTÉRIO de apascentamento.\" Repetir em voz alta ajuda a fixar a ordem das palavras."}, {"tipo": "dissertativa", "pergunta": "Como o Pastor adquire experiência?", "resposta": "Vivendo o dia a dia com o rebanho, orando, estudando e aprendendo com o tempo e com os erros.", "dica": "Não existe atalho: experiência vem de viver, servir e aprender na prática, com oração e estudo constante — não é algo que se ganha de um dia para o outro."}, {"tipo": "dissertativa", "pergunta": "Qual característica NÃO é pastoral? (assinale a errada)", "resposta": "Ser dominador do rebanho, afinal Deus lhe confiou este cargo.", "dica": "\"Dominador\" é a palavra-armadilha. O pastor deve ser EXEMPLO e VERDADEIRO, nunca dominador — liderar servindo, não controlando."}, {"tipo": "dissertativa", "pergunta": "Que tipo de liderança familiar o texto de 1 Timóteo 3.4 mostra?", "resposta": "Liderança verdadeira.", "dica": "1 Timóteo 3.4 fala que o líder deve governar bem a própria casa — isso é sinal de uma liderança genuína (verdadeira), não fingida nem por interesse."}, {"tipo": "pares", "pergunta": "Ligue a coluna: tipos de pastor e o que cada um representa.", "esquerda": ["Faz-se pastor", "Feito pelos homens", "Feito por Deus", "As pessoas precisam receber", "1Timóteo 3.4"], "direita": ["luta com \"unhas e dentes\" para manter o pastorado", "não precisa de vocação, basta ser filho de pastor", "precisa orar e depende de Deus", "liberdade, espiritualidade, cura e socorro", "os liderados devem ser respeitados pelo líder"], "resposta": "1-Faz-se pastor → luta com \"unhas e dentes\" para manter o pastorado. 2-Feito pelos homens → não precisa de vocação, basta ser filho de pastor. 3-Feito por Deus → precisa orar e depende de Deus. 4-As pessoas precisam receber → liberdade, espiritualidade, cura e socorro. 5-1Timóteo 3.4 → os liderados devem ser respeitados pelo líder.", "dica": "Truque para decorar: o pastor \"que SE FAZ\" briga para manter o cargo (orgulho). O \"FEITO PELOS HOMENS\" é só de nome (filho de pastor, sem vocação). O \"FEITO POR DEUS\" ora e depende Dele — é o verdadeiro."}, {"tipo": "dissertativa", "pergunta": "Por que é importante para a igreja o exemplo de vida do pastor?", "resposta": "Porque o pastor representa Jesus, e sua vida prática ensina mais que suas palavras.", "dica": "Frase para guardar: \"o pastor é o sermão que as pessoas veem, não só o que ouvem.\""}, {"tipo": "dissertativa", "pergunta": "Quais os três conselhos que o apóstolo Pedro deu em 1 Pedro 5.2-3?", "resposta": "1) Apascentar de boa vontade. 2) Não servir por ganância. 3) Não dominar, mas ser exemplo.", "dica": "Decore as três palavras-chave na ordem: VONTADE (não obrigação) → DEDICAÇÃO (não dinheiro) → EXEMPLO (não dominação)."}, {"tipo": "dissertativa", "pergunta": "Qual a importância da Teologia Pastoral para a igreja?", "resposta": "Para que a igreja saiba que deve somar forças com o pastor na expansão do reino.", "dica": "A ideia central da Teologia Pastoral não é fiscalizar nem engessar o pastor com regras rígidas — é fazer a igreja entender que o trabalho é de TIME, pastor e igreja juntos."}];
+
+let deck = ORIGINAL_DATA.map((q, i) => ({...q, id: i, status: null}));
+let order = deck.map((_, i) => i);
+let pos = 0;
+let revealed = false;
+let rowState = []; // for ordem/pares: shuffled rows with correct positions
+
+function currentItem() { return deck[order[pos]]; }
+
+function shuffleArr(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function esc(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function render() {
+  const item = currentItem();
+  revealed = false;
+  document.getElementById('btnOk').disabled = true;
+  document.getElementById('btnWarn').disabled = true;
+  document.getElementById('progressLabel').textContent = (pos + 1) + ' / ' + order.length;
+  document.getElementById('btnPrev').disabled = (pos === 0);
+  document.getElementById('btnNext').textContent = (pos === order.length - 1) ? 'Concluir ✓' : 'Próxima ›';
+
+  const card = document.getElementById('card');
+
+  if (item.tipo === 'vf') {
+    card.innerHTML = `
+      <div class="type-pill">Verdadeiro ou Falso</div>
+      <div class="q-text">${esc(item.pergunta)}</div>
+      <div class="instr">👉 Toque em ( V ) ou ( F )</div>
+      <div class="vf-row">
+        <button class="vf-btn" id="vfV" onclick="chooseVF(true)">( V )</button>
+        <button class="vf-btn" id="vfF" onclick="chooseVF(false)">( F )</button>
+      </div>
+      <div class="answer-box" id="answerBox" style="display:none;"></div>
+    `;
+  } else if (item.tipo === 'ordem') {
+    const shuffled = shuffleArr(item.itens.map((t, i) => ({ texto: t, correta: i + 1 })));
+    rowState = shuffled;
+    let rows = shuffled.map((r, i) => `
+      <div class="ordem-row">
+        <select class="slot" id="slot${i}">
+          <option value="">?</option>
+          ${item.itens.map((_, n) => `<option value="${n+1}">${n+1}</option>`).join('')}
+        </select>
+        <div class="row-label">${esc(r.texto)}</div>
+      </div>`).join('');
+    card.innerHTML = `
+      <div class="type-pill">Ordene de 1 a ${item.itens.length}</div>
+      <div class="q-text">Numere a ordem correta:</div>
+      <div class="instr">🔢 Escolha o número de cada item, de cima para baixo</div>
+      ${rows}
+      <button class="check-btn" onclick="checkOrdem()">Conferir ordem</button>
+      <div class="answer-box" id="answerBox" style="display:none;"></div>
+    `;
+  } else if (item.tipo === 'pares') {
+    const shuffled = shuffleArr(item.direita.map((d, i) => ({ texto: d, correta: i + 1 })));
+    rowState = shuffled;
+    let esquerdaHtml = item.esquerda.map((e, i) => `<div class="esquerda-item"><b>${i+1}.</b>${esc(e)}</div>`).join('');
+    let rows = shuffled.map((r, i) => `
+      <div class="pares-row">
+        <select class="slot" id="slot${i}">
+          <option value="">( )</option>
+          ${item.esquerda.map((_, n) => `<option value="${n+1}">(${n+1})</option>`).join('')}
+        </select>
+        <div class="row-label">${esc(r.texto)}</div>
+      </div>`).join('');
+    card.innerHTML = `
+      <div class="type-pill">Ligar colunas</div>
+      <div class="q-text">${esc(item.pergunta)}</div>
+      <div class="instr">🔗 Escreva, em cada parêntese, o número do termo correspondente</div>
+      <div class="esquerda-list">${esquerdaHtml}</div>
+      ${rows}
+      <button class="check-btn" onclick="checkPares()">Conferir</button>
+      <div class="answer-box" id="answerBox" style="display:none;"></div>
+    `;
+  } else {
+    card.innerHTML = `
+      <div class="type-pill">Responda com suas palavras</div>
+      <div class="q-text">${esc(item.pergunta)}</div>
+      <div class="instr">✍️ Escreva sua resposta abaixo e depois compare com a resposta correta</div>
+      <textarea class="resp-box" id="respBox" placeholder="Digite sua resposta aqui..."></textarea>
+      <button class="check-btn" onclick="revealAnswer()">Ver resposta correta</button>
+      <div class="answer-box" id="answerBox" style="display:none;"></div>
+    `;
+  }
+
+  updateStats();
+  renderDots();
+}
+
+function buildAnswerHtml(item) {
+  let html = '<div class="a-label">✅ Resposta correta</div><div class="a-text">' + esc(item.resposta) + '</div>';
+  if (item.dica) {
+    html += '<div class="dica-box"><b>💡 Dica:</b> ' + esc(item.dica) + '</div>';
+  }
+  return html;
+}
+
+function unlockMark() {
+  document.getElementById('btnOk').disabled = false;
+  document.getElementById('btnWarn').disabled = false;
+}
+
+function chooseVF(escolha) {
+  if (revealed) return;
+  revealed = true;
+  const item = currentItem();
+  const correta = item.valor;
+  document.getElementById('vfV').disabled = true;
+  document.getElementById('vfF').disabled = true;
+  document.getElementById(correta ? 'vfV' : 'vfF').classList.add('correct');
+  if (escolha !== correta) {
+    document.getElementById(escolha ? 'vfV' : 'vfF').classList.add('wrong');
+  }
+  const box = document.getElementById('answerBox');
+  box.style.display = 'block';
+  box.innerHTML = buildAnswerHtml(item);
+  unlockMark();
+}
+
+function checkOrdem() {
+  if (revealed) return;
+  revealed = true;
+  const item = currentItem();
+  let allFilled = true;
+  rowState.forEach((r, i) => {
+    const sel = document.getElementById('slot' + i);
+    const val = parseInt(sel.value, 10);
+    if (!val) { allFilled = false; return; }
+    sel.classList.add(val === r.correta ? 'correct' : 'wrong');
+    sel.disabled = true;
+  });
+  document.querySelector('.check-btn').disabled = true;
+  const box = document.getElementById('answerBox');
+  box.style.display = 'block';
+  box.innerHTML = buildAnswerHtml(item);
+  unlockMark();
+}
+
+function checkPares() {
+  if (revealed) return;
+  revealed = true;
+  const item = currentItem();
+  rowState.forEach((r, i) => {
+    const sel = document.getElementById('slot' + i);
+    const val = parseInt(sel.value, 10);
+    sel.classList.add(val === r.correta ? 'correct' : 'wrong');
+    sel.disabled = true;
+  });
+  document.querySelector('.check-btn').disabled = true;
+  const box = document.getElementById('answerBox');
+  box.style.display = 'block';
+  box.innerHTML = buildAnswerHtml(item);
+  unlockMark();
+}
+
+function revealAnswer() {
+  if (revealed) return;
+  revealed = true;
+  const item = currentItem();
+  const box = document.getElementById('answerBox');
+  box.style.display = 'block';
+  box.innerHTML = buildAnswerHtml(item);
+  unlockMark();
+}
+
+function updateStats() {
+  const okCount = deck.filter(d => d.status === 'ok').length;
+  const warnCount = deck.filter(d => d.status === 'warn').length;
+  const total = deck.length;
+  document.getElementById('cntOk').textContent = okCount;
+  document.getElementById('cntWarn').textContent = warnCount;
+  document.getElementById('cntLeft').textContent = total - okCount - warnCount;
+  document.getElementById('segOk').style.width = (okCount / total * 100) + '%';
+  document.getElementById('segWarn').style.width = (warnCount / total * 100) + '%';
+}
+
+function renderDots() {
+  const row = document.getElementById('dotsRow');
+  row.innerHTML = '';
+  order.forEach((idx, i) => {
+    const d = deck[idx];
+    const el = document.createElement('div');
+    el.className = 'dotnav' + (i === pos ? ' current' : '') + (d.status === 'ok' ? ' ok' : '') + (d.status === 'warn' ? ' warn' : '');
+    el.onclick = () => { pos = i; render(); };
+    row.appendChild(el);
+  });
+}
+
+function mark(status) {
+  currentItem().status = status;
+  updateStats();
+  renderDots();
+  goNext();
+}
+
+function goNext() {
+  if (pos < order.length - 1) {
+    pos++;
+    render();
+  } else {
+    showEnd();
+  }
+}
+
+function goPrev() {
+  if (pos > 0) {
+    pos--;
+    render();
+  }
+}
+
+function showEnd() {
+  document.getElementById('mainArea').classList.add('hidden');
+  const endScreen = document.getElementById('endScreen');
+  endScreen.classList.add('show');
+  const okCount = deck.filter(d => d.status === 'ok').length;
+  const warnCount = deck.filter(d => d.status === 'warn').length;
+  document.getElementById('endOk').textContent = okCount;
+  document.getElementById('endWarn').textContent = warnCount;
+  document.getElementById('btnReviewPending').style.display = warnCount > 0 ? 'block' : 'none';
+  document.getElementById('endMsg').textContent = warnCount > 0
+    ? 'Ainda restam ' + warnCount + ' pergunta(s) para revisar com calma.'
+    : 'Você marcou que já sabe todas! Excelente preparo para a prova.';
+}
+
+function restartAll(onlyPending) {
+  document.getElementById('endScreen').classList.remove('show');
+  document.getElementById('mainArea').classList.remove('hidden');
+  if (onlyPending) {
+    order = deck.map((d, i) => i).filter(i => deck[i].status !== 'ok');
+  } else {
+    deck.forEach(d => d.status = null);
+    order = deck.map((_, i) => i);
+  }
+  pos = 0;
+  render();
+}
+
+function shuffleDeck() {
+  order = shuffleArr(order);
+  pos = 0;
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
