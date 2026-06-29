@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Administração Eclesiástica</title>
+<style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700;800&display=swap');
+:root{--bg:#15102a;--surface:#201a3d;--primary:#8b7bd8;--primary-light:rgba(139,123,216,0.16);--accent:#f0c75e;--accent-light:rgba(240,199,94,0.10);--text:#ece8fb;--text-dim:#a89cd0;--border:rgba(255,255,255,0.10);--ok:#2a9d57;--ok-light:rgba(42,157,87,0.15);--bad:#d65454;--bad-light:rgba(214,84,84,0.15);--radius:16px;}
+*{box-sizing:border-box;margin:0;padding:0;}html,body{background:var(--bg);}
+body{color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;padding-bottom:40px;-webkit-tap-highlight-color:transparent;}
+.app-header{background:var(--primary);color:#fff;padding:18px 20px 16px;text-align:center;position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(0,0,0,0.25);}
+.app-header h1{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;}
+.app-header p{font-size:12px;opacity:.85;margin-top:3px;}
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 0;}
+.progress-wrap{margin-bottom:18px;}
+.progress-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--text-dim);font-weight:600;margin-bottom:6px;}
+.progress-track{height:8px;border-radius:99px;background:var(--primary-light);overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:99px;transition:width .4s ease;}
+.dots{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:20px;}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);cursor:pointer;flex-shrink:0;transition:all .2s;}
+.dot.active{width:14px;height:14px;background:var(--primary);box-shadow:0 0 0 3px var(--primary-light);}
+.dot.correct{background:var(--ok);}.dot.wrong{background:var(--bad);}.dot.answered{background:var(--accent);}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px;margin-bottom:16px;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.q-num{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--primary);background:var(--primary-light);padding:4px 10px;border-radius:99px;margin-bottom:14px;}
+.q-text{font-size:17px;font-weight:700;line-height:1.55;color:var(--text);margin-bottom:18px;}
+.q-instr{font-size:13px;color:var(--text-dim);font-style:italic;margin-bottom:14px;}
+.options{display:flex;flex-direction:column;gap:10px;margin-bottom:4px;}
+.opt-btn{display:flex;align-items:flex-start;gap:12px;background:rgba(255,255,255,0.04);border:1.5px solid var(--border);border-radius:12px;padding:13px 15px;color:var(--text);font-family:'Inter',sans-serif;font-size:14.5px;line-height:1.45;cursor:pointer;text-align:left;transition:background .18s,border-color .18s,transform .12s;}
+.opt-btn:active{transform:scale(.98);}.opt-btn:hover:not(:disabled){background:var(--primary-light);border-color:var(--primary);}.opt-btn:disabled{cursor:default;}
+.opt-letter{min-width:26px;height:26px;border-radius:8px;background:rgba(139,123,216,0.12);border:1.5px solid rgba(139,123,216,0.3);color:var(--primary);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:all .18s;}
+.opt-btn.correct{background:var(--ok-light);border-color:var(--ok);color:#a3ddc0;}.opt-btn.correct .opt-letter{background:rgba(42,157,87,0.25);border-color:var(--ok);color:var(--ok);}
+.opt-btn.wrong{background:var(--bad-light);border-color:var(--bad);color:#f0a0a0;}.opt-btn.wrong .opt-letter{background:rgba(214,84,84,0.25);border-color:var(--bad);color:var(--bad);}
+.opt-btn.reveal-correct{background:rgba(42,157,87,0.06);border-color:rgba(42,157,87,0.35);color:#a3ddc0;}.opt-btn.reveal-correct .opt-letter{background:rgba(42,157,87,0.15);border-color:rgba(42,157,87,0.5);color:var(--ok);}
+.vf-row{display:flex;gap:12px;margin-bottom:8px;}
+.vf-btn{flex:1;padding:16px;border-radius:12px;border:2px solid var(--border);background:rgba(255,255,255,0.04);font-family:'Inter',sans-serif;font-weight:800;font-size:18px;color:var(--text);cursor:pointer;transition:all .18s;}
+.vf-btn:hover:not(:disabled){background:var(--primary-light);border-color:var(--primary);}.vf-btn:disabled{cursor:default;}
+.vf-btn.correct{background:var(--ok-light);border-color:var(--ok);color:var(--ok);}.vf-btn.wrong{background:var(--bad-light);border-color:var(--bad);color:var(--bad);}
+.esquerda-list{background:rgba(139,123,216,0.06);border:1px solid var(--primary-light);border-radius:10px;padding:12px 14px;margin-bottom:14px;}
+.esquerda-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);}.esquerda-item:last-child{border-bottom:none;}
+.esq-num{min-width:24px;height:24px;border-radius:6px;background:var(--primary-light);color:var(--primary);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.esq-txt{font-size:13px;color:var(--text-dim);line-height:1.4;}
+.par-item{border-bottom:1px solid var(--border);}.par-item:last-child{border-bottom:none;}
+.par-row{display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer;}
+.par-display{min-width:44px;height:36px;flex-shrink:0;border-radius:8px;border:1.5px dashed var(--border);background:rgba(255,255,255,0.03);color:var(--text);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;}
+.par-display.correct{border-style:solid;border-color:var(--ok);background:var(--ok-light);color:var(--ok);}.par-display.wrong{border-style:solid;border-color:var(--bad);background:var(--bad-light);color:var(--bad);}
+.par-txt{font-size:14px;line-height:1.4;color:var(--text);}
+.num-picker{display:none;flex-wrap:wrap;gap:6px;padding:0 0 10px 54px;}.num-picker.show{display:flex;}
+.num-btn{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text);font-weight:800;font-size:13px;cursor:pointer;}.num-btn:hover{background:var(--primary-light);border-color:var(--primary);}
+.resp-area{width:100%;min-height:80px;border:1.5px solid var(--border);border-radius:10px;background:rgba(255,255,255,0.03);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;padding:12px;resize:vertical;margin-bottom:14px;}.resp-area:focus{outline:none;border-color:var(--primary);}
+.feedback{margin-top:14px;padding:13px 15px;border-radius:10px;font-size:13px;line-height:1.6;animation:fadeUp .25s ease;}
+.feedback.ok{background:var(--ok-light);border:1px solid rgba(42,157,87,0.3);color:#a3ddc0;}.feedback.err{background:var(--bad-light);border:1px solid rgba(214,84,84,0.3);color:#f0a0a0;}.feedback.neu{background:var(--accent-light);border:1px solid rgba(240,199,94,0.2);color:#f0c75e;}
+.feedback strong{display:block;font-size:14px;margin-bottom:4px;}
+.check-btn,.next-btn{width:100%;margin-top:14px;padding:14px;border:none;border-radius:10px;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:15px;cursor:pointer;transition:opacity .2s,transform .12s;animation:fadeUp .25s ease;}
+.check-btn{background:rgba(139,123,216,0.5);border:1.5px solid var(--primary);color:#fff;}.next-btn{background:var(--primary);}
+.check-btn:hover,.next-btn:hover{opacity:.88;transform:translateY(-1px);}.check-btn:disabled{opacity:.35;cursor:default;transform:none;}
+.nav-row{display:flex;gap:10px;margin-bottom:24px;}
+.nav-btn{flex:1;background:transparent;border:1.5px solid var(--border);color:var(--text-dim);font-family:'Inter',sans-serif;font-weight:600;font-size:13px;border-radius:10px;padding:11px;cursor:pointer;transition:border-color .18s,color .18s;}
+.nav-btn:hover:not(:disabled){border-color:var(--primary);color:var(--primary);}.nav-btn:disabled{opacity:.3;cursor:default;}
+.result{display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:30px 22px;text-align:center;animation:fadeUp .4s ease;}.result.show{display:block;}
+.result .medal{font-size:54px;margin-bottom:12px;}.result h2{font-family:'Playfair Display',serif;font-size:24px;margin-bottom:8px;}
+.result .nota{font-size:52px;font-weight:800;color:var(--accent);margin:14px 0 6px;line-height:1;}.result .nota span{font-size:20px;color:var(--text-dim);}
+.result .msg{font-size:14px;color:var(--text-dim);line-height:1.7;margin-bottom:22px;}
+.result-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px;}
+.result-stat{background:rgba(255,255,255,0.04);border-radius:10px;padding:14px;}.result-stat .n{font-size:26px;font-weight:800;}
+.result-stat.g .n{color:var(--ok);}.result-stat.r .n{color:var(--bad);}.result-stat .l{font-size:11.5px;color:var(--text-dim);margin-top:3px;}
+.restart-btn{width:100%;padding:15px;background:var(--primary);border:none;border-radius:12px;color:#fff;font-family:'Inter',sans-serif;font-weight:700;font-size:15px;cursor:pointer;}.restart-btn:hover{opacity:.88;}
+@media(max-width:380px){.q-text{font-size:15.5px;}.card{padding:18px 14px;}.opt-btn{font-size:13.5px;}}</style>
+</head>
+<body>
+<div class="app-header">
+  <h1>Administração Eclesiástica</h1>
+  <p>IBBC Ferraz-Centro · Questões mistas</p>
+</div>
+<div class="wrap">
+  <div id="mainArea">
+    <div class="progress-wrap">
+      <div class="progress-labels"><span id="progLabel">Questão 1</span><span id="progPct">0%</span></div>
+      <div class="progress-track"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+    </div>
+    <div class="dots" id="dots"></div>
+    <div class="card" id="card"></div>
+    <div class="nav-row">
+      <button class="nav-btn" id="btnPrev" onclick="go(-1)" disabled>‹ Anterior</button>
+      <button class="nav-btn" id="btnNext" onclick="go(1)" disabled>Próxima ›</button>
+    </div>
+  </div>
+  <div class="result" id="result">
+    <div class="medal" id="resMedal">🎉</div>
+    <h2 id="resTitle">Avaliação concluída!</h2>
+    <div class="nota" id="resNota">0<span>/10</span></div>
+    <p class="msg" id="resMsg"></p>
+    <div class="result-stats">
+      <div class="result-stat g"><div class="n" id="resOk">0</div><div class="l">Acertos</div></div>
+      <div class="result-stat r"><div class="n" id="resErr">0</div><div class="l">Erros</div></div>
+    </div>
+    <button class="restart-btn" onclick="restart()">↺ Refazer a avaliação</button>
+  </div>
+</div>
+<script>
+const QUESTIONS=[
+{tipo:'diss',q:'Cite pelo menos 3 exemplos de princípios de Administração na Bíblia.',exp:'1) Moisés e Jetro (Êx 18) — delegação de autoridade e divisão de trabalho. 2) Neemias (Ne 2-4) — planejamento, organização e liderança na reconstrução do muro. 3) Igreja Primitiva (At 6) — criação dos diáconos para administrar a distribuição de alimentos. 4) Paulo (1Co 12-14) — organização dos dons e ministérios.'},
+{tipo:'diss',q:'O que é Administração Eclesiástica?',exp:'É o conjunto de princípios e práticas que orientam a gestão da Igreja, aplicando princípios bíblicos de organização para que ela cumpra sua missão de forma ordenada e eficaz — como mordomia fiel dos recursos que Deus confiou.'},
+{tipo:'diss',q:'Quais são os 5 principais objetivos da Administração?',exp:'1) Planejar — definir metas e estratégias. 2) Organizar — estruturar recursos e responsabilidades. 3) Dirigir — liderar e motivar as pessoas. 4) Coordenar — integrar as ações. 5) Controlar — avaliar e corrigir o rumo.'},
+{tipo:'diss',q:'Do seu ponto de vista, Deus é um ser organizado? Por quê?',exp:'SIM. Deus é sumamente organizado: criou o universo com ordem e propósito (Gn 1); estabeleceu leis naturais e morais; organizou Israel com leis, sacerdotes e juízes; e a Igreja com ministérios e dons (1Co 12-14). "Deus não é Deus de confusão, mas de paz" (1Co 14.33).'},
+{tipo:'diss',q:'Em poucas palavras, descreva o que é Igreja Organização e o que é Igreja Organismo.',exp:'ORGANIZAÇÃO: aspecto estrutural e administrativo da Igreja — estatutos, cargos, finanças, regras. É o "esqueleto". ORGANISMO: aspecto vivo e espiritual da Igreja — o Corpo de Cristo animado pelo Espírito Santo, com relacionamentos, crescimento e vida. É o "coração". A organização deve servir ao organismo.'},
+{tipo:'diss',q:'Existem 3 níveis de autoridade reservados somente para Deus. Quais são?',exp:'1) Autoridade de CRIAÇÃO — só Deus cria do nada (ex nihilo). 2) Autoridade de SALVAÇÃO — só Deus salva; nenhum homem pode salvar outro. 3) Autoridade de JUÍZO FINAL — só Deus julga os corações e determina o destino eterno.'},
+{tipo:'diss',q:'Dos níveis de autoridade reservados aos homens, cite no mínimo 3.',exp:'1) Autoridade civil/governamental (Rm 13). 2) Autoridade familiar (Ef 5-6). 3) Autoridade eclesiástica (pastores, presbíteros, diáconos). 4) Autoridade patronal/trabalhista. 5) Autoridade de pais sobre filhos.'},
+{tipo:'diss',q:'Cite 3 dos 5 mais conhecidos formas de governo eclesiástico.',exp:'1) EPISCOPAL — governo por bispos (Católica, Anglicana, Metodista). 2) PRESBITERIANO — governo por conselhos de presbíteros eleitos. 3) CONGREGACIONAL — cada congregação é autônoma, governada pelos membros (Batistas). Outros: Apostólico e Sinodal.'},
+{tipo:'diss',q:'Qual o instrumento mais importante da legislação brasileira?',exp:'A CONSTITUIÇÃO FEDERAL DE 1988 — "Constituição Cidadã". É a lei máxima do Brasil, à qual todas as demais leis devem estar subordinadas.'},
+{tipo:'mc',q:'Assinale a alternativa correta:',
+ opts:['A Igreja como organização deve sempre trabalhar para a Igreja organismo','A Igreja como organismo deve sempre trabalhar para a Igreja organização','Não há diferença, pois organismo e organização são a mesma coisa'],
+ c:0,exp:'A Igreja como ORGANIZAÇÃO deve sempre trabalhar PARA a Igreja ORGANISMO. A estrutura (organização) existe para servir a vida espiritual (organismo) — nunca ao contrário.'},
+];
+
+const LETTERS=['a','b','c','d'];
+let cur=0,answers=[];
+function init(){answers=QUESTIONS.map(()=>({status:null,chosen:null,rowState:null}));cur=0;render();}
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function getStatusClass(i){const a=answers[i];if(!a||a.status===null)return'';return a.status==='correct'?'correct':a.status==='wrong'?'wrong':'answered';}
+function renderDots(){const el=document.getElementById('dots');el.innerHTML='';QUESTIONS.forEach((_,i)=>{const d=document.createElement('div');d.className='dot '+getStatusClass(i)+(i===cur?' active':'');d.onclick=()=>{cur=i;render();};el.appendChild(d);});}
+function renderProgress(){const done=answers.filter(a=>a.status!==null).length;const pct=Math.round(done/QUESTIONS.length*100);document.getElementById('progLabel').textContent='Questão '+(cur+1)+' de '+QUESTIONS.length;document.getElementById('progPct').textContent=pct+'%';document.getElementById('progFill').style.width=pct+'%';}
+function render(){renderDots();renderProgress();document.getElementById('btnPrev').disabled=(cur===0);const ans=answers[cur];document.getElementById('btnNext').disabled=(ans.status===null);const q=QUESTIONS[cur];const revealed=ans.status!==null;let html='<div class="q-num">Questão '+(cur+1)+' de '+QUESTIONS.length+'</div>';if(q.tipo==='mc'){html+=renderMC(q,ans,revealed);}else if(q.tipo==='vf'){html+=renderVF(q,ans,revealed);}else if(q.tipo==='pares'){html+=renderPares(q,ans,revealed);}else{html+=renderDiss(q,ans,revealed);}document.getElementById('card').innerHTML=html;}
+function feedbackHtml(ok,exp){return'<div class="feedback '+(ok?'ok':'err')+'"><strong>'+(ok?'✅ Correto!':'❌ Incorreto')+'</strong>'+esc(exp)+'</div>';}
+function nextBtnHtml(){const last=cur===QUESTIONS.length-1;return'<button class="next-btn" onclick="'+(last?'showResult()':'goNext()')+'">'+( last?'Ver resultado final →':'Próxima questão →')+'</button>';}
+function renderMC(q,ans,revealed){let html='<div class="q-text">'+esc(q.q)+'</div><div class="options">';q.opts.forEach((opt,i)=>{let cls='opt-btn';if(revealed){if(i===q.c)cls+=' reveal-correct';if(i===ans.chosen&&ans.chosen!==q.c)cls+=' wrong';if(i===ans.chosen&&ans.chosen===q.c)cls='opt-btn correct';}html+='<button class="'+cls+'" '+(revealed?'disabled':'')+' onclick="chooseMC('+i+')"><span class="opt-letter">'+LETTERS[i]+'</span><span>'+esc(opt)+'</span></button>';});html+='</div>';if(revealed){html+=feedbackHtml(ans.chosen===q.c,q.exp)+nextBtnHtml();}return html;}
+function chooseMC(i){if(answers[cur].status!==null)return;const q=QUESTIONS[cur];answers[cur].chosen=i;answers[cur].status=(i===q.c)?'correct':'wrong';render();}
+function renderVF(q,ans,revealed){let html='<div class="q-text">'+esc(q.q)+'</div><div class="q-instr">👉 Toque em V (Verdadeiro) ou F (Falso)</div><div class="vf-row">';const clsV='vf-btn'+(revealed?(q.v?' correct':(ans.chosen===true?' wrong':'')):'');const clsF='vf-btn'+(revealed?(!q.v?' correct':(ans.chosen===false?' wrong':'')):'');html+='<button class="'+clsV+'" '+(revealed?'disabled':'')+' onclick="chooseVF(true)">( V ) Verdadeiro</button>';html+='<button class="'+clsF+'" '+(revealed?'disabled':'')+' onclick="chooseVF(false)">( F ) Falso</button>';html+='</div>';if(revealed){html+=feedbackHtml(ans.status==='correct',q.exp)+nextBtnHtml();}return html;}
+function chooseVF(v){if(answers[cur].status!==null)return;const q=QUESTIONS[cur];answers[cur].chosen=v;answers[cur].status=(v===q.v)?'correct':'wrong';render();}
+function renderPares(q,ans,revealed){let html='<div class="q-text">'+esc(q.q)+'</div><div class="q-instr">🔗 A coluna ESQUERDA tem os números. Toque no parêntese de cada item da direita e escolha o número correto.</div><div class="esquerda-list">';q.esq.forEach((e,i)=>{html+='<div class="esquerda-item"><div class="esq-num">'+(i+1)+'</div><div class="esq-txt">'+esc(e)+'</div></div>';});html+='</div>';const rowState=ans.rowState||(()=>{const arr=q.dir.map((d,i)=>({txt:d,corr:i+1}));for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}answers[cur].rowState=arr;return arr;})();rowState.forEach((r,i)=>{const chosen=ans.chosen?ans.chosen[i]:null;let dispCls='par-display';if(revealed&&chosen!==null){dispCls+=(chosen===r.corr)?' correct':' wrong';}const btns=q.esq.map((_,n)=>'<button class="num-btn" onclick="choosePar('+i+','+(n+1)+')">'+(n+1)+'</button>').join('');html+='<div class="par-item"><div class="par-row" onclick="togglePicker('+i+')"><div class="'+dispCls+'" id="pd'+i+'">('+(chosen?chosen:'&nbsp;')+')</div><div class="par-txt">'+esc(r.txt)+'</div></div><div class="num-picker" id="pk'+i+'">'+btns+'</div></div>';});if(!revealed){html+='<button class="check-btn" id="checkBtn" onclick="checkPares()">Conferir respostas</button>';}else{const allOk=rowState.every((r,i)=>ans.chosen&&ans.chosen[i]===r.corr);html+=feedbackHtml(allOk,q.exp)+nextBtnHtml();}return html;}
+function togglePicker(i){if(answers[cur].status!==null)return;document.querySelectorAll('.num-picker').forEach((p,j)=>{if(j!==i)p.classList.remove('show');});const p=document.getElementById('pk'+i);if(p)p.classList.toggle('show');}
+function choosePar(i,n){if(answers[cur].status!==null)return;if(!answers[cur].chosen)answers[cur].chosen={};answers[cur].chosen[i]=n;const pd=document.getElementById('pd'+i);if(pd)pd.textContent='('+n+')';const p=document.getElementById('pk'+i);if(p)p.classList.remove('show');const total=QUESTIONS[cur].dir.length;const filled=Object.keys(answers[cur].chosen).length;const btn=document.getElementById('checkBtn');if(btn)btn.disabled=(filled<total);}
+function checkPares(){const ans=answers[cur];const q=QUESTIONS[cur];const allOk=ans.rowState.every((r,i)=>ans.chosen&&ans.chosen[i]===r.corr);ans.status=allOk?'correct':'wrong';render();}
+function renderDiss(q,ans,revealed){let html='<div class="q-text">'+esc(q.q)+'</div>';if(!revealed){html+='<div class="q-instr">✍️ Escreva sua resposta e compare com o gabarito</div><textarea class="resp-area" id="dissResp" placeholder="Sua resposta..."></textarea><button class="check-btn" onclick="revealDiss()">Ver gabarito</button>';}else{html+='<div class="feedback neu"><strong>📋 Gabarito</strong>'+esc(q.exp)+'</div>'+nextBtnHtml();}return html;}
+function revealDiss(){answers[cur].status='answered';render();}
+function goNext(){if(cur<QUESTIONS.length-1){cur++;render();}}
+function go(dir){cur=Math.max(0,Math.min(QUESTIONS.length-1,cur+dir));render();}
+function showResult(){document.getElementById('mainArea').style.display='none';const corr=answers.filter((a,i)=>QUESTIONS[i].tipo!=='diss'&&a.status==='correct').length;const wrong=answers.filter((a,i)=>QUESTIONS[i].tipo!=='diss'&&a.status==='wrong').length;const total=QUESTIONS.filter(q=>q.tipo!=='diss').length;let medal='😔',title='Continue estudando!';if(corr>=total*0.9)medal='🏆',title='Excelente! Parabéns!';else if(corr>=total*0.7)medal='🎉',title='Muito bem!';else if(corr>=total*0.5)medal='👍',title='Bom resultado!';document.getElementById('resMedal').textContent=medal;document.getElementById('resTitle').textContent=title;document.getElementById('resNota').innerHTML=corr+'<span>/'+total+'</span>';document.getElementById('resOk').textContent=corr;document.getElementById('resErr').textContent=wrong;document.getElementById('resMsg').textContent='Você acertou '+corr+' de '+total+' questões objetivas.';document.getElementById('result').classList.add('show');}
+function restart(){document.getElementById('mainArea').style.display='block';document.getElementById('result').classList.remove('show');init();}
+init();
+
+</script>
+</body>
+</html>
