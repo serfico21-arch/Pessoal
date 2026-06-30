@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado de Teologia Pastoral</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap');
+
+  :root {
+    --bg: #0f0e17;
+    --surface: #1a1929;
+    --surface2: #221f35;
+    --accent: #e8c96d;
+    --accent2: #7c6cfc;
+    --green: #4caf82;
+    --red: #e05f5f;
+    --text: #ede8f5;
+    --muted: #9087b0;
+    --border: rgba(232,201,109,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lato', Georgia, serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.25) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.18) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 10%, rgba(255,255,255,0.22) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 75%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 90%, rgba(255,255,255,0.15) 0%, transparent 100%),
+      radial-gradient(1px 1px at 5% 50%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 92% 30%, rgba(255,255,255,0.18) 0%, transparent 100%),
+      radial-gradient(2px 2px at 45% 45%, rgba(232,201,109,0.12) 0%, transparent 100%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 720px;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .top-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    animation: fadeDown 0.6s ease;
+  }
+  .top-header .eyebrow {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .top-header h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 32px;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .top-header p { font-size: 13px; color: var(--muted); font-weight: 300; }
+
+  #stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+  .stat-box {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+  .stat-box .num { font-size: 22px; font-weight: 700; }
+  .stat-box .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  .stat-box.acerto .num { color: var(--green); }
+  .stat-box.erro .num { color: var(--red); }
+
+  #progress-wrap {
+    margin-bottom: 1.8rem;
+  }
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .progress-track {
+    background: var(--surface2);
+    border-radius: 99px;
+    height: 6px;
+    overflow: hidden;
+  }
+  #prog {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .q-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 1.8rem;
+    animation: fadeUp 0.4s ease;
+  }
+  .round-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(124,108,252,0.15);
+    border: 0.5px solid rgba(124,108,252,0.35);
+    color: #a99dff;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 99px;
+    margin-bottom: 1.2rem;
+  }
+  .q-num { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .q-text {
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt-btn {
+    background: var(--surface2);
+    border: 0.5px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 13px 16px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Lato', Georgia, serif;
+    cursor: pointer;
+    text-align: left;
+    line-height: 1.5;
+    transition: all 0.18s;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .opt-btn .letter {
+    min-width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 0.5px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 1px;
+    flex-shrink: 0;
+    transition: all 0.18s;
+  }
+  .opt-btn:hover:not(:disabled) {
+    background: rgba(124,108,252,0.12);
+    border-color: rgba(124,108,252,0.4);
+    transform: translateX(3px);
+  }
+  .opt-btn:hover:not(:disabled) .letter {
+    background: rgba(124,108,252,0.25);
+    border-color: rgba(124,108,252,0.6);
+    color: #c4baff;
+  }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct {
+    background: rgba(76,175,130,0.15);
+    border-color: rgba(76,175,130,0.5);
+    color: #a3ddc0;
+  }
+  .opt-btn.correct .letter { background: rgba(76,175,130,0.3); border-color: var(--green); color: #a3ddc0; }
+  .opt-btn.wrong {
+    background: rgba(224,95,95,0.12);
+    border-color: rgba(224,95,95,0.4);
+    color: #f0a0a0;
+  }
+  .opt-btn.wrong .letter { background: rgba(224,95,95,0.25); border-color: var(--red); color: #f0a0a0; }
+  .opt-btn.reveal-correct {
+    background: rgba(76,175,130,0.08);
+    border-color: rgba(76,175,130,0.3);
+    color: #a3ddc0;
+  }
+
+  .feedback-box {
+    margin-top: 1.2rem;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+    animation: fadeUp 0.3s ease;
+  }
+  .feedback-box.ok { background: rgba(76,175,130,0.12); border: 0.5px solid rgba(76,175,130,0.35); color: #a3ddc0; }
+  .feedback-box.err { background: rgba(224,95,95,0.1); border: 0.5px solid rgba(224,95,95,0.3); color: #f0a0a0; }
+  .feedback-box strong { display: block; margin-bottom: 4px; font-size: 14px; }
+
+  .next-btn {
+    width: 100%;
+    margin-top: 1.2rem;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent2), #9b8ffc);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-family: 'Lato', Georgia, serif;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s, transform 0.15s;
+    animation: fadeUp 0.3s ease;
+  }
+  .next-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .result-screen {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    animation: fadeUp 0.5s ease;
+  }
+  .result-screen .medal { font-size: 56px; margin-bottom: 1rem; }
+  .result-screen h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 26px;
+    margin-bottom: 8px;
+  }
+  .result-screen .score {
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 1rem 0;
+    line-height: 1;
+  }
+  .result-screen .score span { font-size: 20px; color: var(--muted); }
+  .result-screen .result-msg { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem; }
+  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+  .result-stat { background: var(--surface2); border-radius: 10px; padding: 14px; }
+  .result-stat .n { font-size: 24px; font-weight: 700; }
+  .result-stat .l { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .result-stat.g .n { color: var(--green); }
+  .result-stat.r .n { color: var(--red); }
+
+  .round-result {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    animation: fadeUp 0.4s ease;
+  }
+  .round-result h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; margin-bottom: 8px; }
+  .round-result .rs { font-size: 44px; font-weight: 700; color: var(--accent); margin: 12px 0; }
+  .round-result p { font-size: 14px; color: var(--muted); margin-bottom: 1.5rem; }
+
+  .start-screen {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    animation: fadeUp 0.5s ease;
+  }
+  .start-screen .icon { font-size: 52px; margin-bottom: 1rem; }
+  .start-screen h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 24px; margin-bottom: 10px; }
+  .start-screen p { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem; }
+  .info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1.5rem; }
+  .info-box { background: var(--surface2); border-radius: 10px; padding: 14px 8px; }
+  .info-box .n { font-size: 22px; font-weight: 700; color: var(--accent); }
+  .info-box .l { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .big-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent2), #9b8ffc);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 16px;
+    font-family: 'Lato', Georgia, serif;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .big-btn:hover { opacity: 0.88; transform: translateY(-2px); }
+  .big-btn.gold { background: linear-gradient(135deg, #b8922a, var(--accent)); }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:none; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="top-header">
+    <div class="eyebrow">IBBC Ferraz – Centro</div>
+    <h1>Simulado de Teologia Pastoral</h1>
+    <p>O perfil, a vocação, a liderança e o exemplo de vida do pastor</p>
+  </div>
+
+  <div id="stats-bar" style="display:none">
+    <div class="stat-box">
+      <div class="num" id="s-rodada">1/4</div>
+      <div class="lbl">Rodada</div>
+    </div>
+    <div class="stat-box">
+      <div class="num" id="s-q">1/10</div>
+      <div class="lbl">Questão</div>
+    </div>
+    <div class="stat-box acerto">
+      <div class="num" id="s-acertos">0</div>
+      <div class="lbl">Acertos</div>
+    </div>
+    <div class="stat-box erro">
+      <div class="num" id="s-erros">0</div>
+      <div class="lbl">Erros</div>
+    </div>
+  </div>
+
+  <div id="progress-wrap" style="display:none">
+    <div class="progress-labels">
+      <span>Progresso</span>
+      <span id="prog-label">0 / 26</span>
+    </div>
+    <div class="progress-track">
+      <div id="prog"></div>
+    </div>
+  </div>
+
+  <div id="main"></div>
+</div>
+
+<script>
+const ROUND_NAMES = ["O Perfil do Pastor","Vocação, Formação e Apascentamento","Liderança e Caráter Pastoral","Exemplo, Conselhos de Pedro e Importância da Teologia Pastoral"];
+
+const QUESTIONS = [
+[
+{q:"O que é a Teologia Pastoral, segundo a apostila?",
+ opts:["A disciplina que trata da formação e perfil do pastor","Apenas o estudo da liturgia","Um ramo da Eclesiologia sem relação com o pastor","Um curso de oratória para pregadores"],
+ c:0, exp:"Correto. A apostila define Teologia Pastoral como a disciplina que trata da formação e perfil do pastor."},
+
+{q:"Por que é importante que cada crente conheça os detalhes que envolvem a obra e a pessoa do pastor?",
+ opts:["Porque todos somos potenciais pastores, e isso ajuda a entendê-lo e manter um bom relacionamento","Porque assim a igreja pode controlar o salário do pastor","Isso não é importante, cada um cuida apenas da sua vida espiritual","Apenas os diáconos precisam saber disso"],
+ c:0, exp:"Correto. A apostila afirma que é importante que cada crente conheça a obra e a pessoa do pastor, pois todos somos pastores ou temos potencial para tanto."},
+
+{q:"Quem decide se uma pessoa será pastor, segundo a apostila?",
+ opts:["A igreja, por votação","Deus, por meio do chamado — 'a decisão de ser pastor não é um bem humano'","O próprio candidato, por vocação pessoal sem confirmação","O presbitério regional"],
+ c:1, exp:"Incorreto dizer que é a igreja quem decide. Quem decide é Deus (por meio do chamado), não a Igreja. A apostila afirma que 'a decisão de ser pastor não é um bem humano' (seção 2.4)."},
+
+{q:"O pastor bem-sucedido não precisa se preocupar com sua família?",
+ opts:["Correto, a família é secundária ao ministério","Incorreto — o pastor deve cuidar bem de sua família, conforme 1Tm 3.4","Depende apenas do tamanho da igreja","Só se preocupa com a família quando é solteiro"],
+ c:1, exp:"Incorreto. O pastor deve cuidar de sua família; a apostila dedica a seção 3.2 ao relacionamento familiar do pastor."},
+
+{q:"O que realmente capacita alguém para o pastoreio, segundo a apostila?",
+ opts:["Ser bom orador, corajoso e inteligente, por si só","O chamado e a capacitação divina — 'ninguém tem capacidade para o pastoreio' por si só","Ter diploma de teologia","Ter aprovação unânime da igreja"],
+ c:1, exp:"Incorreto achar que basta ser bom orador, corajoso e inteligente. A apostila ensina que 'ninguém tem capacidade para o pastoreio' por si só; o que importa é o chamado e a capacitação divina."},
+
+{q:"A igreja é mais importante que a família do pastor, segundo a apostila?",
+ opts:["Sim, a igreja sempre vem primeiro","Não — o texto não ensina hierarquia entre família e Igreja; o pastor deve cuidar bem de sua família como condição pastoral (1Tm 3.4)","Sim, mas apenas durante crises","A apostila não comenta esse assunto"],
+ c:1, exp:"Incorreto. O texto não ensina hierarquia entre família e Igreja; o pastor deve cuidar bem de sua família como condição pastoral (1Tm 3.4)."},
+
+{q:"Qual deve ser a maior motivação do pastor, segundo a apostila?",
+ opts:["Seu amor por Jesus","O reconhecimento da congregação","A estabilidade financeira do cargo","O respeito da comunidade"],
+ c:0, exp:"Correto. A apostila destaca o amor por Jesus como motivação central do ministério pastoral."},
+
+{q:"O pastor não precisa ter vida privada, pois é um homem público?",
+ opts:["Correto, sua vida é só pública","Incorreto — o pastor precisa ter vida privada íntegra, coerente com sua vida pública","Depende da denominação","Só os pastores titulares têm vida privada"],
+ c:1, exp:"Incorreto. O pastor precisa ter vida privada íntegra; a apostila fala da importância da vida privada e pública coerentes."},
+
+{q:"Por que o testemunho do pastor é importante, segundo a apostila?",
+ opts:["Porque ele representa Deus e a Igreja diante da sociedade","Porque ele precisa agradar a todos","Porque assim ele ganha mais ofertas","Isso não tem relevância teológica"],
+ c:0, exp:"Correto. O pastor representa Deus e a Igreja diante da sociedade."},
+
+{q:"O pastor é um empregado da Igreja?",
+ opts:["Sim, contratado e demissível como qualquer funcionário","Não — ele é um ungido separado por Deus, não um simples empregado da Igreja","Sim, mas com direitos trabalhistas especiais","Depende do contrato firmado"],
+ c:1, exp:"Incorreto chamá-lo de empregado. A apostila afirma que o pastor não é empregado da Igreja, mas ungido por Deus."}
+],
+
+[
+{q:"Quais as duas razões para os crentes conhecerem a obra e a pessoa do pastor, segundo a apostila?",
+ opts:["Porque todos somos potenciais pastores, e para que a ovelha entenda melhor o pastor e mantenha bom relacionamento com ele","Apenas para fiscalizar o trabalho pastoral","Porque a Bíblia exige isso como lei cerimonial","Não há razão teológica, é apenas tradição"],
+ c:0, exp:"A apostila ensina que conhecer o pastor é importante porque todos nós somos potenciais pastores, e porque a ovelha deve conhecê-lo para entendê-lo melhor e manter um bom relacionamento com ele. Deus quer que o rebanho cresça com qualidade."},
+
+{q:"Complete: 'No meio da sua ___, o Senhor escolhe algumas pessoas e lhes dá capacidade...'",
+ opts:["Congregação","Cidade","Família","Denominação"],
+ c:0, exp:"Gabarito: 'No meio da sua congregação, o Senhor escolhe algumas pessoas e lhes dá capacidade, por meio de dons específicos, para servirem no ministério de apascentamento.'"},
+
+{q:"Complete: '...o Senhor escolhe algumas ___ e lhes dá capacidade, por meio de dons específicos...'",
+ opts:["Pessoas","Igrejas","Cidades","Famílias"],
+ c:0, exp:"Gabarito: '...o Senhor escolhe algumas pessoas e lhes dá capacidade, por meio de dons específicos, para servirem no ministério de apascentamento.'"},
+
+{q:"Complete: '...e lhes dá capacidade, por meio de ___ específicos, para servirem no ministério de apascentamento.'",
+ opts:["Dons","Diplomas","Cargos","Recursos"],
+ c:0, exp:"Gabarito: '...lhes dá capacidade, por meio de dons específicos, para servirem no ministério de apascentamento.'"},
+
+{q:"Complete: '...por meio de dons específicos, para servirem no ___ de apascentamento.'",
+ opts:["Ministério","Departamento","Conselho","Comitê"],
+ c:0, exp:"Gabarito: '...para servirem no ministério de apascentamento.'"},
+
+{q:"Segundo a apostila, quais são as três fontes pelas quais o pastor adquire experiência?",
+ opts:["Herança, chamado e experiência prática","Estudo acadêmico, diploma e ordenação formal","Apenas o tempo de ministério","Apenas a aprovação do presbitério"],
+ c:0, exp:"A apostila (seção 2.5) ensina que o pastor adquire experiência por meio de três fontes: (a) capacidade adquirida pela herança — dons, caráter e habilidades transmitidos pela família e contexto de vida; (b) pelo chamado — a experiência espiritual do encontro pessoal com Deus; (c) pela experiência prática — o exercício contínuo do ministério, o cuidado das ovelhas e a vivência das situações pastorais ao longo do tempo (cf. 1Tm 4.15)."}
+],
+
+[
+{q:"Qual destas características NÃO é pastoral? Assinale a errada.",
+ opts:["Ser verdadeiro em sua vida privada e pública","Ser dominador do rebanho, afinal Deus lhe confiou este cargo","Ser exemplo do rebanho, afinal ele é o representante de Jesus","Servir com humildade e amor ao rebanho"],
+ c:1, exp:"A apostila (seção 3.3) ensina que o pastor deve ser servidor, não dominador. 1Pe 5.3 instrui: 'Não como dominadores daqueles que vos foram confiados, mas sendo exemplos do rebanho.' O domínio sobre as ovelhas é uma atitude contrária à teologia pastoral bíblica."},
+
+{q:"Que tipo de liderança familiar o texto de 1Timóteo 3.4 mostra que o pastor deve exercer?",
+ opts:["Liderança displicente","Liderança verdadeira","Liderança interesseira","Liderança autoritária"],
+ c:1, exp:"A apostila cita 1Timóteo 3.4 para mostrar que o pastor deve governar bem a sua própria casa, tendo os filhos em sujeição com toda a honestidade — isto demonstra uma liderança verdadeira: aquela exercida em amor, com autoridade genuína e respeito conquistado."},
+
+{q:"O que caracteriza 'Aquele que se faz pastor', segundo a apostila?",
+ opts:["Luta com 'unhas e dentes' para manter o pastorado a qualquer custo","Precisa orar e depende de Deus em tudo","Não precisa de vocação, basta ser filho de pastor","Recebe liberdade, espiritualidade, cura e socorro"],
+ c:0, exp:"'Aquele que se faz pastor' luta para manter a posição a qualquer custo — luta com 'unhas e dentes' para manter o pastorado (seção 1.1)."},
+
+{q:"O que caracteriza 'Aquele que é feito pelos homens', segundo a apostila?",
+ opts:["Não precisa de vocação, basta ser filho de pastor","Precisa orar e depende de Deus em tudo","Luta com 'unhas e dentes' para manter o pastorado","Os liderados devem ser respeitados pelo líder"],
+ c:0, exp:"'Aquele que é feito pelos homens' não tem vocação; chega ao ministério por apadrinhamento. Muitas vezes é filho de pastor e não precisa de vocação (seção 1.2)."},
+
+{q:"O que caracteriza 'Aquele que é feito por Deus' — o verdadeiro pastor?",
+ opts:["Precisa orar e depende de Deus em tudo","Não precisa de vocação","Luta com 'unhas e dentes' para manter o cargo","Recebe liberdade, espiritualidade, cura e socorro"],
+ c:0, exp:"'Aquele que é feito por Deus' — o verdadeiro pastor — precisa orar e depende de Deus em tudo (seção 1.3)."},
+
+{q:"O que as pessoas (ovelhas) precisam receber do cuidado pastoral, segundo a apostila?",
+ opts:["Liberdade, espiritualidade, cura e socorro","Apenas repreensão e correção","Apenas ensino doutrinário","Apenas aconselhamento financeiro"],
+ c:0, exp:"As pessoas precisam receber liberdade, espiritualidade, cura e socorro — as três bases do cuidado pastoral (seção 2.1)."},
+
+{q:"O que 1Timóteo 3.4 ensina sobre a liderança familiar do pastor?",
+ opts:["Os liderados (filhos) devem ser respeitados pelo líder (pastor/pai)","Os filhos do pastor não precisam de disciplina","A família deve ser secundária ao ministério","O pastor deve liderar a casa com rigor militar"],
+ c:0, exp:"1Timóteo 3.4 fala que o pastor deve governar bem sua casa e os liderados (filhos) devem ser respeitados pelo líder (pastor/pai)."}
+],
+
+[
+{q:"Por que é importante para a igreja o exemplo de vida do pastor?",
+ opts:["Porque, como representante de Jesus e da Igreja, sua conduta exemplar transmite credibilidade e encoraja os membros a seguir o mesmo caminho","Porque assim ele recebe mais elogios da congregação","Não é importante, o que importa é apenas a doutrina pregada","Apenas para fins de imagem pública e marketing"],
+ c:0, exp:"A apostila enfatiza que o pastor é representante de Jesus e da Igreja diante da sociedade. Seu exemplo de vida influencia diretamente o rebanho — a conduta exemplar do pastor demonstra a veracidade do evangelho e transmite credibilidade, encorajando os membros a seguir o mesmo caminho. A conduta de Davi (1Sm 2.35) é modelo de fidelidade esperada do líder espiritual."},
+
+{q:"Quais são os três conselhos do apóstolo Pedro aos pastores, em 1 Pedro 5.2-3?",
+ opts:["Apascentar de boa vontade, não por ganância, e não como dominadores mas como exemplos do rebanho","Pregar, batizar e administrar a Ceia","Orar, jejuar e evangelizar","Estudar, ensinar e disciplinar"],
+ c:0, exp:"1 Pedro 5.2-3: (1) Apascentem o rebanho de Deus que está entre vós — não por obrigação, mas de boa vontade. (2) Não por ganância (amor ao dinheiro), mas com ânimo pronto. (3) Não como dominadores daqueles que vos foram confiados, mas sendo exemplos do rebanho."},
+
+{q:"Qual a importância da Teologia Pastoral para a igreja, segundo a apostila?",
+ opts:["Para que a igreja saiba quando precisa cobrar seus pastores e mostrar o que é certo para eles","Para que os obreiros jamais errem, pois é uma regra que deve ser seguida à risca","Para que a igreja saiba que o pastor jamais terá condição de trabalhar sozinho, devendo somar forças com ele na expansão do reino","Para que a igreja escolha pastores apenas por critérios acadêmicos"],
+ c:2, exp:"A apostila deixa claro que o ministério pastoral não é uma tarefa solitária. O pastor e o rebanho precisam trabalhar juntos na expansão do Reino de Deus. A Teologia Pastoral ensina à Igreja que ela deve somar forças com seu pastor, compreendendo e apoiando o ministério (cf. Ef 4.11-12)."}
+]
+];
+
+const TOTAL_Q = 26;
+const N_ROUNDS = 4;
+
+let round = 0, qIdx = 0, answered = false;
+let totalAcertos = 0, totalErros = 0;
+let roundAcertos = 0;
+let qDoneBefore = 0; // questions completed in previous rounds
+const LETTERS = ['A','B','C','D'];
+
+function getEl(id){ return document.getElementById(id); }
+
+function roundSize(r){ return QUESTIONS[r].length; }
+
+function updateStats(){
+  const totalQ = qDoneBefore + qIdx;
+  const pct = totalQ / TOTAL_Q * 100;
+  getEl('prog').style.width = pct + '%';
+  getEl('prog-label').textContent = totalQ + ' / ' + TOTAL_Q;
+  getEl('s-rodada').textContent = (round+1)+'/'+N_ROUNDS;
+  getEl('s-q').textContent = (qIdx+1)+'/'+roundSize(round);
+  getEl('s-acertos').textContent = totalAcertos;
+  getEl('s-erros').textContent = totalErros;
+}
+
+function showHUD(visible){
+  getEl('stats-bar').style.display = visible ? 'grid' : 'none';
+  getEl('progress-wrap').style.display = visible ? 'block' : 'none';
+}
+
+function showStart(){
+  showHUD(false);
+  getEl('main').innerHTML = `
+    <div class="start-screen">
+      <div class="icon">🕊️</div>
+      <h2>Simulado de Teologia Pastoral</h2>
+      <p>O perfil, a vocação, a liderança e o exemplo de vida do pastor</p>
+      <div class="info-grid">
+        <div class="info-box"><div class="n">${N_ROUNDS}</div><div class="l">Rodadas</div></div>
+        <div class="info-box"><div class="n">${TOTAL_Q}</div><div class="l">Questões</div></div>
+        <div class="info-box"><div class="n">~14</div><div class="l">Minutos</div></div>
+      </div>
+      <button class="big-btn" onclick="startQuiz()">Começar o Simulado →</button>
+    </div>`;
+}
+
+function startQuiz(){
+  round = 0; qIdx = 0; totalAcertos = 0; totalErros = 0; roundAcertos = 0; qDoneBefore = 0;
+  showHUD(true);
+  showQuestion();
+}
+
+function showQuestion(){
+  answered = false;
+  updateStats();
+  const q = QUESTIONS[round][qIdx];
+  const rSize = roundSize(round);
+
+  const optsHTML = q.opts.map((o,i) => `
+    <button class="opt-btn" id="opt${i}" onclick="answer(${i})">
+      <span class="letter">${LETTERS[i]}</span>
+      <span>${o}</span>
+    </button>`).join('');
+
+  getEl('main').innerHTML = `
+    <div class="q-card">
+      <div class="round-badge">Rodada ${round+1} — ${ROUND_NAMES[round]}</div>
+      <div class="q-num">Questão ${qIdx+1} de ${rSize}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">${optsHTML}</div>
+      <div id="feedback"></div>
+    </div>`;
+}
+
+function answer(idx){
+  if(answered) return;
+  answered = true;
+  const q = QUESTIONS[round][qIdx];
+  const correct = idx === q.c;
+  if(correct){ totalAcertos++; roundAcertos++; }
+  else { totalErros++; }
+  updateStats();
+
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach(b => b.disabled = true);
+  btns[idx].classList.add(correct ? 'correct' : 'wrong');
+  if(!correct) btns[q.c].classList.add('reveal-correct');
+
+  const icon = correct ? '✓ Correto!' : '✗ Incorreto';
+  const cls = correct ? 'ok' : 'err';
+  const rSize = roundSize(round);
+  getEl('feedback').innerHTML = `
+    <div class="feedback-box ${cls}">
+      <strong>${icon}</strong>
+      ${q.exp}
+    </div>
+    <button class="next-btn" onclick="nextQuestion()">
+      ${qIdx < rSize-1 ? 'Próxima questão →' : 'Ver resultado da rodada →'}
+    </button>`;
+}
+
+function nextQuestion(){
+  const rSize = roundSize(round);
+  if(qIdx < rSize-1){
+    qIdx++;
+    showQuestion();
+  } else {
+    showRoundResult();
+  }
+}
+
+function showRoundResult(){
+  const rSize = roundSize(round);
+  const pct = Math.round(roundAcertos / rSize * 100);
+  let emoji = pct >= 80 ? '🏆' : pct >= 60 ? '👍' : '📚';
+  let msg = pct >= 80 ? 'Excelente! Você domina este tema.' : pct >= 60 ? 'Bom resultado! Continue estudando.' : 'Estude mais este conteúdo antes de prosseguir.';
+
+  getEl('main').innerHTML = `
+    <div class="round-result">
+      <div style="font-size:48px;margin-bottom:12px">${emoji}</div>
+      <h2>Resultado da Rodada ${round+1}</h2>
+      <div class="rs">${roundAcertos}/${rSize}</div>
+      <p>${pct}% de acertos — ${msg}</p>
+      ${round < N_ROUNDS-1 ? `<button class="big-btn" onclick="nextRound()">Próxima Rodada →</button>` : `<button class="big-btn gold" onclick="showFinalResult()">Ver Resultado Final 🏁</button>`}
+    </div>`;
+}
+
+function nextRound(){
+  qDoneBefore += roundSize(round);
+  round++;
+  qIdx = 0;
+  roundAcertos = 0;
+  showQuestion();
+}
+
+function showFinalResult(){
+  const pct = Math.round(totalAcertos / TOTAL_Q * 100);
+  let medal = pct >= 90 ? '🥇' : pct >= 75 ? '🥈' : pct >= 60 ? '🥉' : '📚';
+  let msg = pct >= 90 ? 'Parabéns! Você tem um domínio excelente do conteúdo. Está pronto para a prova!'
+    : pct >= 75 ? 'Muito bom! Revise os tópicos em que errou e você estará pronto.'
+    : pct >= 60 ? 'Bom esforço! Recomendamos reler os capítulos com mais erros.'
+    : 'Continue estudando! Releia o material com calma e refaça o simulado.';
+
+  getEl('prog').style.width = '100%';
+  getEl('prog-label').textContent = TOTAL_Q + ' / ' + TOTAL_Q;
+  getEl('s-rodada').textContent = N_ROUNDS+'/'+N_ROUNDS;
+  getEl('s-acertos').textContent = totalAcertos;
+  getEl('s-erros').textContent = totalErros;
+
+  getEl('main').innerHTML = `
+    <div class="result-screen">
+      <div class="medal">${medal}</div>
+      <h2>Simulado Concluído!</h2>
+      <div class="score">${totalAcertos}<span>/${TOTAL_Q}</span></div>
+      <div class="result-grid">
+        <div class="result-stat g"><div class="n">${totalAcertos}</div><div class="l">Acertos</div></div>
+        <div class="result-stat r"><div class="n">${totalErros}</div><div class="l">Erros</div></div>
+        <div class="result-stat"><div class="n">${pct}%</div><div class="l">Aproveitamento</div></div>
+        <div class="result-stat"><div class="n">${N_ROUNDS}</div><div class="l">Rodadas</div></div>
+      </div>
+      <div class="result-msg">${msg}</div>
+      <button class="big-btn" onclick="location.reload()" style="margin-bottom:12px">Refazer o Simulado 🔄</button>
+    </div>`;
+}
+
+showStart();
+</script>
+</body>
+</html>
