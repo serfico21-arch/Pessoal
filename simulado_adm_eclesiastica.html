@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado — Administração Eclesiástica</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0e0b;
+  --card: #1a1814;
+  --gold: #c9a84c;
+  --gold2: #e8c96a;
+  --cream: #f5f0e8;
+  --text: #e8e0d0;
+  --muted: #8a8070;
+  --green: #4a9e6b;
+  --red: #c0392b;
+  --border: #2e2a22;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Crimson Pro',Georgia,serif;font-size:17px;line-height:1.6;min-height:100vh;}
+
+/* TELA INICIAL */
+#tela-inicio{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:30px;text-align:center;}
+.logo-sim{font-family:'Playfair Display',serif;font-size:clamp(26px,6vw,48px);color:var(--gold);letter-spacing:2px;line-height:1.1;margin-bottom:8px;}
+.sub-sim{font-size:clamp(13px,2.5vw,16px);color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:32px;}
+.divider{width:80px;height:2px;background:var(--gold);margin:0 auto 28px;}
+.desc-sim{max-width:500px;color:var(--text);font-size:16px;margin-bottom:32px;opacity:.85;}
+.btn-iniciar{background:var(--gold);color:#0f0e0b;font-family:'Playfair Display',serif;font-size:15px;font-weight:700;padding:14px 40px;border:none;border-radius:2px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:background .2s,transform .1s;}
+.btn-iniciar:hover{background:var(--gold2);transform:translateY(-1px);}
+.badge-rodadas{display:inline-flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:24px;}
+.badge{background:var(--border);border:1px solid var(--gold);color:var(--gold);padding:3px 10px;font-size:11px;font-family:'Playfair Display',serif;letter-spacing:1px;}
+
+/* SIMULADO */
+#tela-simulado{display:none;padding:20px;max-width:780px;margin:0 auto;padding-bottom:80px;}
+.sim-header{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--border);padding:12px 0;margin-bottom:24px;z-index:100;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.sim-rodada{font-family:'Playfair Display',serif;color:var(--gold);font-size:15px;letter-spacing:1px;}
+.sim-prog{font-size:13px;color:var(--muted);}
+.barra-prog{height:3px;background:var(--border);border-radius:2px;margin-top:6px;width:100%;}
+.barra-prog-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s;}
+
+.questao-bloco{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:22px 20px;margin-bottom:20px;transition:border-color .2s;}
+.questao-bloco.correta{border-color:var(--green);}
+.questao-bloco.errada{border-color:var(--red);}
+.q-num{font-size:11px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;font-family:'Playfair Display',serif;margin-bottom:8px;}
+.q-texto{font-size:16px;color:var(--cream);margin-bottom:16px;font-style:italic;}
+.opcoes{display:flex;flex-direction:column;gap:8px;}
+.opcao{background:transparent;border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:3px;cursor:pointer;text-align:left;font-family:'Crimson Pro',serif;font-size:15px;transition:all .15s;display:flex;align-items:flex-start;gap:10px;}
+.opcao:hover:not(:disabled){border-color:var(--gold);color:var(--gold);}
+.opcao:disabled{cursor:default;}
+.opcao.correta{background:#1a3a28;border-color:var(--green);color:#7de0a0;}
+.opcao.errada{background:#3a1a1a;border-color:var(--red);color:#e07070;}
+.opcao.mostrar-correta{background:#1a3a28;border-color:var(--green);color:#7de0a0;}
+.letra{font-family:'Playfair Display',serif;font-weight:700;color:var(--gold);min-width:18px;}
+.feedback{margin-top:10px;font-size:13px;font-style:italic;}
+.feedback.ok{color:var(--green);}
+.feedback.nao{color:#e07070;}
+
+.btn-proximo{background:var(--gold);color:#0f0e0b;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;padding:10px 28px;border:none;border-radius:2px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;margin-top:12px;transition:background .2s;}
+.btn-proximo:hover{background:var(--gold2);}
+
+/* RESULTADO RODADA */
+#tela-resultado-rodada{display:none;padding:30px 20px;max-width:600px;margin:0 auto;text-align:center;padding-bottom:60px;}
+.res-titulo{font-family:'Playfair Display',serif;font-size:28px;color:var(--gold);margin-bottom:8px;}
+.res-nota{font-size:60px;font-family:'Playfair Display',serif;color:var(--gold2);margin:16px 0;}
+.res-desc{color:var(--muted);font-size:15px;margin-bottom:24px;}
+.res-erros{background:var(--card);border:1px solid var(--border);border-radius:4px;padding:16px;margin-bottom:24px;text-align:left;}
+.res-erros h4{font-family:'Playfair Display',serif;color:var(--gold);margin-bottom:10px;font-size:14px;letter-spacing:1px;}
+.erro-item{font-size:13px;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--border);}
+.erro-item:last-child{border:none;}
+.erro-item strong{color:var(--cream);display:block;margin-bottom:2px;}
+.erro-item .certa{color:var(--green);}
+
+/* RESULTADO FINAL */
+#tela-final{display:none;padding:40px 20px;max-width:600px;margin:0 auto;text-align:center;}
+.final-titulo{font-family:'Playfair Display',serif;font-size:clamp(24px,5vw,40px);color:var(--gold);margin-bottom:8px;}
+.final-sub{color:var(--muted);font-size:14px;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;}
+.final-nota-geral{font-size:72px;font-family:'Playfair Display',serif;color:var(--gold2);margin:16px 0;}
+.final-msg{font-size:16px;color:var(--cream);margin-bottom:28px;font-style:italic;}
+.hist-rodadas{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:28px;}
+.hist-r{background:var(--card);border:1px solid var(--border);padding:8px 12px;border-radius:3px;font-size:13px;font-family:'Playfair Display',serif;}
+.hist-r span{color:var(--gold);}
+
+@media(max-width:600px){
+  .questao-bloco{padding:16px 12px;}
+  .q-texto{font-size:15px;}
+}
+</style>
+</head>
+<body>
+<style>
+  .prova-real-section{max-width:760px;margin:0 auto;padding:18px 16px 8px;font-family:Georgia,serif;}
+  .prova-real-banner{background:linear-gradient(135deg,#7a1f1f,#a82c2c);color:#fff8e8;border-radius:14px;padding:18px 20px;margin-bottom:16px;text-align:center;box-shadow:0 4px 18px rgba(168,44,44,.35);}
+  .prova-real-banner h2{font-size:1.25rem;margin:0 0 4px;letter-spacing:.03em;}
+  .prova-real-banner p{font-size:.82rem;opacity:.9;margin:0;}
+  .prova-real-list{display:flex;flex-direction:column;gap:10px;margin-bottom:22px;}
+  .prova-real-q{background:#fff8e8;border:2px solid #c9a84c;border-radius:10px;padding:14px 16px;}
+  .prova-real-q summary{cursor:pointer;font-weight:700;color:#3a2a10;list-style:none;display:flex;gap:8px;align-items:flex-start;}
+  .prova-real-q summary::before{content:"▸";color:#a82c2c;flex-shrink:0;transition:transform .2s;}
+  .prova-real-q[open] summary::before{transform:rotate(90deg);}
+  .prova-real-q summary::-webkit-details-marker{display:none;}
+  .prova-real-tag{display:inline-block;font-size:.65rem;background:#a82c2c;color:#fff;padding:2px 8px;border-radius:99px;margin-bottom:6px;letter-spacing:.05em;}
+  .prova-real-answer{margin-top:10px;padding-top:10px;border-top:1px dashed #c9a84c;color:#2a2a28;font-size:.92rem;line-height:1.5;}
+  .prova-real-answer b{color:#1e6b3a;}
+  .prova-real-answer .err{color:#a82c2c;text-decoration:line-through;opacity:.7;}
+  .prova-real-answer .ok{color:#1e6b3a;font-weight:700;}
+  .prova-real-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.88rem;}
+  .prova-real-table td{padding:5px 8px;border-bottom:1px solid #e8dcc0;}
+  .prova-real-divider{text-align:center;margin:30px 0 18px;position:relative;}
+  .prova-real-divider span{background:rgba(20,15,5,.85);color:#f5d77a;padding:6px 18px;font-size:.85rem;letter-spacing:.08em;border:1px solid #c9a84c;border-radius:99px;}
+  .tabs-nav{display:flex;gap:8px;max-width:760px;margin:16px auto 0;padding:0 16px;}
+  .tab-btn{flex:1;padding:13px 8px;border-radius:10px;border:1.5px solid #c9a84c;background:#1a1814;color:#e8c96a;font-weight:700;font-size:13.5px;cursor:pointer;font-family:'Crimson Pro',Georgia,serif;transition:all .15s;letter-spacing:.2px;}
+  .tab-btn:hover{background:#2e2a22;}
+  .tab-btn.active{background:#c9a84c;color:#1a1410;box-shadow:0 2px 8px rgba(201,168,76,.35);}
+  .tab-content{display:none;}
+  .tab-content.active{display:block;}
+  .recap-chapter-tag{display:inline-block;font-size:.7rem;background:#1e3a5f;color:#dce8f5;padding:3px 10px;border-radius:99px;margin-bottom:8px;letter-spacing:.04em;font-weight:600;}
+</style>
+
+<div class="tabs-nav">
+  <button class="tab-btn" id="tabbtn-simulado" onclick="showTab('simulado')">📝 Simulado</button>
+  <button class="tab-btn" id="tabbtn-recap" onclick="showTab('recap')">📖 Recapitulação</button>
+  <button class="tab-btn" id="tabbtn-prova" onclick="showTab('prova')">🎯 Prova</button>
+</div>
+
+<div class="tab-content" id="view-prova">
+<div class="prova-real-section">
+  <div class="prova-real-banner">
+    <h2>🎯 O QUE CAI NA PROVA</h2>
+    <p>Questionário oficial de revisão — Administração Eclesiástica (Prof. Rodrigo Andrade de Santana — IBBC Ferraz-Centro)</p>
+  </div>
+  <div class="prova-real-list">
+
+    <details class="prova-real-q">
+      <summary>1. Em muitos casos, a Bíblia tem sido citada por sua demonstração de princípios de Administração. Cite pelo menos 3 exemplos.</summary>
+      <div class="prova-real-answer">
+        <b>1)</b> A linha de autoridade estabelecida por Moisés, em atenção ao conselho de seu sogro Jetro (Êx 18.13-27).<br>
+        <b>2)</b> O sacerdócio araônico, instituído como um sumo sacerdote com ordens de sacerdotes sob sua direção — Davi dividiu os sacerdotes em 24 turnos (1Cr 24).<br>
+        <b>3)</b> Deus orientou Noé a construir a Arca, e instruiu detalhadamente Moisés a organizar o povo através do deserto, dando dados completos para a construção do tabernáculo.
+      </div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>2. O que é administração Eclesiástica?</summary>
+      <div class="prova-real-answer">É o estudo dos diversos aspectos que influenciam a organização do povo de Deus — a igreja de Cristo — a cumprir a missão que Deus como administrador supremo deu à sua igreja, considerando-se o aspecto espiritual, social e econômico.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>3. A administração é um processo contínuo, se não for contínuo não alcançará seus objetivos. Quais são os 5 principais objetivos da Administração?</summary>
+      <div class="prova-real-answer"><b>Prever, Organizar, Comandar, Coordenar e Avaliar</b> (o acróstico PROCAA).</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>4. Do seu ponto de vista, Deus é um ser organizado? Por quê?</summary>
+      <div class="prova-real-answer">Sim. A organização é bíblica e universal, tão antiga quanto a própria humanidade. A Arqueologia o tem comprovado: desde o princípio os homens sentiram necessidade de se organizar em sociedades ou grupos. Deus orientou Noé a construir a Arca e instruiu detalhadamente Moisés sobre a organização do povo, do tabernáculo, da Arca e dos altares.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>5. Em poucas palavras descreva o que é igreja organização e o que é igreja organismo.</summary>
+      <div class="prova-real-answer"><b>Igreja organismo:</b> é o corpo de Cristo, sujeita à autoridade divina e a Cristo como cabeça, sobretudo guiada pelo modelo bíblico enraizado na identificação com a pessoa do Senhor Jesus Cristo. <b>Igreja organização:</b> é a estrutura administrativa, sujeita também às leis humanas e à legislação civil, que precisa buscar a eficiência administrativa.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>6. Existem 3 níveis de autoridades reservadas somente para Deus. Quais são?</summary>
+      <div class="prova-real-answer"><b>I.</b> A autoridade Soberana ou Imperial (absoluta, infalível, só pertence a Deus). <b>II.</b> A autoridade da verdade (Deus Pai, Deus Filho e Deus Espírito Santo falam a verdade). <b>III.</b> A autoridade da consciência (a conduta divina de acordo com os mandamentos, descrita na Bíblia como consciência).</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>7. Dos níveis de autoridade reservados aos homens, cite no mínimo 3.</summary>
+      <div class="prova-real-answer"><b>1)</b> Autoridade delegada (instruções aos cinco dons ministeriais — apóstolos, profetas, evangelistas, pastores e mestres). <b>2)</b> Autoridade estipulada (devida por contratos/acordos legais, ex.: autoridades civis e estatutos da igreja). <b>3)</b> Autoridade dos costumes ou da tradição (autoridade externa, aceita por todos). <b>4)</b> Autoridade funcional (provém da nossa competência, capacidade, treinamento).</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>8. Cite 3 dos 5 mais conhecidas formas de governo eclesiástico.</summary>
+      <div class="prova-real-answer"><b>1)</b> Sistema Monárquico. <b>2)</b> Sistema Episcopal ou Prelática. <b>3)</b> Sistema Pentecostal ou Neopentecostal. <b>4)</b> Sistema Presbiterial ou Oligárquica. <b>5)</b> Sistema Congregacional.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>9. Qual o instrumento mais importante da legislação brasileira?</summary>
+      <div class="prova-real-answer">A <b>Constituição Federal</b> — é a lei mais importante do país, de que de maneira nenhuma pode ser contrariada.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>10. Assinale a alternativa correta.</summary>
+      <div class="prova-real-answer">
+        <table class="prova-real-table">
+          <tr><td class="err">( )</td><td>A Igreja como organização deve sempre trabalhar para igreja organismo.</td></tr>
+          <tr><td class="ok">(X)</td><td><b>A igreja como organismo deve sempre trabalhar para igreja organização.</b></td></tr>
+          <tr><td class="err">( )</td><td>Não há diferença pois organismo e organização são a mesma coisa.</td></tr>
+        </table>
+      </div>
+    </details>
+
+  </div>
+</div>
+</div>
+
+<div class="tab-content" id="view-recap">
+<div class="prova-real-section">
+  <div class="prova-real-banner" style="background:linear-gradient(135deg,#1e3a5f,#2d5a8f);">
+    <h2>📖 RECAPITULAÇÕES DA APOSTILA</h2>
+    <p>Questões de fixação ao final de cada capítulo — Recapitulações 1 a 8</p>
+  </div>
+  <div class="prova-real-list">
+
+    <span class="recap-chapter-tag">RECAPITULAÇÃO 1 — Cap. 1: Conceitos Gerais</span>
+
+    <details class="prova-real-q">
+      <summary>1R1. Administrar é a ciência de mercado e a força administrativa nas igrejas. Quais as práticas administrativas mais usadas?</summary>
+      <div class="prova-real-answer">Comodismo improdutivo (levando-o à acomodação) e a busca pela melhor funcionalização dos recursos, sem comprometer o futuro da organização.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>2R1. Qual o percentual de aproveitamento dos recursos indica que somos bons administradores?</summary>
+      <div class="prova-real-answer"><b>100%</b> — em todos os recursos: Humanos, Materiais, Financeiro e Informação.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>3R1. Para ser um bom administrador precisamos distribuir bem todas as tarefas. Qual o cuidado que temos que ter quanto à distribuição das tarefas?</summary>
+      <div class="prova-real-answer">Fazer com que todos os membros do grupo participem do trabalho, assumindo a gerência e a responsabilidade pelos serviços prestados.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>4R1. Tendo Jesus como nosso administrador modelo, o que devemos perceber em seu ministério que devemos imitar?</summary>
+      <div class="prova-real-answer">A capacidade de organizar pessoas e recursos, delegar (escolheu os 12, depois os 70), planejar e cumprir sua missão com excelência e propósito definido.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>5R1. O que é administração eclesiástica?</summary>
+      <div class="prova-real-answer">É o estudo dos diversos aspectos que influenciam a organização do povo de Deus — a igreja de Cristo — a cumprir a missão de Deus.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>6R1. O dom de administração, conforme descrito em Atos do capítulo 1 ao 6, temos 6 estágios pelo qual passa o crescimento da igreja. Quais são esses estágios?</summary>
+      <div class="prova-real-answer">Movidos por Deus foram dados um... / do qual veio... / de onde surgiu um... / de onde veio a... / de onde teve que sair... (estágios descritos na narrativa de Atos 1-6, culminando na escolha dos sete homens cheios do Espírito Santo e de sabedoria).</div>
+    </details>
+
+    <span class="recap-chapter-tag">RECAPITULAÇÃO 2 — Cap. 1 (continuação) e Cap. 2: Objetivos da Administração</span>
+
+    <details class="prova-real-q">
+      <summary>11R1. Em muitos casos, a Bíblia tem sido citada por sua demonstração de princípios Administrativos. Cite pelo menos 3 exemplos.</summary>
+      <div class="prova-real-answer">A linha de autoridade de Moisés por conselho de Jetro (Êx 18.13-27); o sacerdócio araônico organizado por Davi em 24 turnos (1Cr 24); as instruções detalhadas de Deus a Noé e a Moisés.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>12R1. Segundo o plano de Deus, a autoridade vem dos níveis mais elevados para os inferiores...</summary>
+      <div class="prova-real-answer">Ela traz consigo grande responsabilidade, e as pessoas investidas de autoridade são divinamente ordenadas a usá-la responsavelmente, para os propósitos celestiais.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>13R1. Marque a alternativa correta.</summary>
+      <div class="prova-real-answer"><b>a) A organização é bíblica e universal. Tão antiga como a própria humanidade.</b> (correta)</div>
+    </details>
+
+    <span class="recap-chapter-tag">RECAPITULAÇÃO 3 — Cap. 2: Os Objetivos da Administração (PROCAA)</span>
+
+    <details class="prova-real-q">
+      <summary>1R2. A administração é um processo contínuo, se não for contínuo não alcançará seus objetivos. Quais são os 5 principais objetivos da administração?</summary>
+      <div class="prova-real-answer"><b>Prever, Organizar, Comandar, Coordenar e Avaliar.</b></div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>2R2. Prever é um dos principais do planejamento. Prever é... para o futuro com antecedência, preparando programas de ação.</summary>
+      <div class="prova-real-answer"><b>Preparar-se</b> para o futuro com antecedência, preparando programas de ação.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>3R2. No planejamento além de fazer previsões o administrador deve estabelecer seus objetivos, denomina-se de...</summary>
+      <div class="prova-real-answer"><b>Estabelecimento dos objetivos</b> — determinar os resultados a serem alcançados.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>4R2. O estabelecimento de vários objetivos denomina-se de... A esses prazos chamamos de...</summary>
+      <div class="prova-real-answer"><b>Programação</b> — o estabelecimento em sequência das prioridades a seguir para atingir os objetivos; aos prazos chamamos de <b>cronograma</b>.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>5R2. Dentro do planejamento temos prazos a cumprir. A esses prazos chamamos de... sem que haja a definição das receitas e como elas serão distribuídas (custos e investimentos), a isso damos o nome de...</summary>
+      <div class="prova-real-answer">Cronograma; e <b>orçamento</b> (não pode existir um bom orçamento sem definição das receitas e despesas).</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>7R2. Organizar é reunir meios e recursos materiais e humanos, distribuídos racionalmente e de tal forma harmonizados que possam funcionar como um todo. Portanto o administrador deve:</summary>
+      <div class="prova-real-answer">Identificar e agrupar o trabalho a ser executado; atribuir responsabilidades e autoridade a outros e exigir prestação de contas pelos resultados; criar condições necessárias para os esforços mutuamente cooperativos do povo.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>8R2. Comandar é... as providências a fim de que toda a organização funcione de acordo com a norma vigente.</summary>
+      <div class="prova-real-answer"><b>Determinar</b> as providências.</div>
+    </details>
+
+    <span class="recap-chapter-tag">RECAPITULAÇÃO 4 — Cap. 3: A Administração na Igreja (Organismo e Autoridade)</span>
+
+    <details class="prova-real-q">
+      <summary>1R3. Na carta de Paulo aos Romanos, 13.1, temos uma ordem: "Toda alma esteja sujeita às autoridades superiores". Esse texto quer dizer que devemos fazer tudo o que as "autoridades superiores" nos mandarem, em qualquer situação? Por quê?</summary>
+      <div class="prova-real-answer">Não. A obediência tem limites: quando há verdadeiro conflito entre as autoridades humanas (inferior) e a autoridade divina (superior), prevalece sempre a obediência a Deus.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>2R3. Quando há verdadeiro conflito entre as autoridades humanas (inferior) e a autoridade divina (superior), temos certas ordens de prioridade. Quais são elas?</summary>
+      <div class="prova-real-answer">A obediência a Deus, a obediência aos nossos líderes religiosos, e a obediência às autoridades superiores — sempre na ordem em que a autoridade divina prevalece sobre a humana.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>3R3. A igreja é ao mesmo tempo uma organização e um organismo. A organização está sujeita às leis do... O organismo está sujeito às leis do...</summary>
+      <div class="prova-real-answer">A organização está sujeita às leis dos <b>homens</b>; o organismo está sujeito às leis de <b>Deus</b>.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>4R3. Assinale a alternativa correta.</summary>
+      <div class="prova-real-answer"><b>A igreja como organismo deve sempre trabalhar para a igreja organização.</b> (alternativa correta)</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>5R3. Podemos em algum momento ou circunstância desobedecer às leis humanas ou nossos líderes, sem cometermos pecado?</summary>
+      <div class="prova-real-answer"><b>Sim</b> — quando a autoridade humana exige algo que fere diretamente a autoridade e a Palavra de Deus.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>5R3 (bis). Existem 3 níveis de autoridades reservadas somente para Deus. Quais são elas?</summary>
+      <div class="prova-real-answer">A autoridade Soberana ou Imperial; a autoridade da verdade; e a autoridade da consciência.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>6R3. Existem 4 níveis de autoridades reservadas ao homem. Quais são elas?</summary>
+      <div class="prova-real-answer">Autoridade delegada, autoridade estipulada, autoridade dos costumes ou da tradição, e autoridade funcional.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>7R3. Os homens podem cometer erros em relação ao exercício de sua autoridade à frente da igreja, surgindo assim muitos problemas. Cite uma situação que pode originar problemas com a autoridade humana do administrador eclesiástico.</summary>
+      <div class="prova-real-answer">Quando o homem quer exercer uma autoridade que pertence somente a Deus; quando a autoridade religiosa entra em conflito com a autoridade da Palavra de Deus; ou quando se eleva a autoridade dos costumes e da tradição acima da autoridade da Bíblia.</div>
+    </details>
+
+    <span class="recap-chapter-tag">RECAPITULAÇÃO 5 — Cap. 4: Como Planejar (Visão, Missão e Alvos)</span>
+
+    <details class="prova-real-q">
+      <summary>1R4. Com base na leitura das informações acima, argumente qual a importância de o administrador possuir uma "visão" para o seu projeto.</summary>
+      <div class="prova-real-answer">A visão é a fotografia positiva do futuro preferível, uma estaca plantada no futuro que orienta todas as decisões, mobiliza pessoas e dá sentido à missão.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>2R4. Faça a relação correta: Visionar / Missão / Metas / Visão.</summary>
+      <div class="prova-real-answer"><b>Visionar:</b> origina-se no uso da imaginação. <b>Missão:</b> é o que fazemos / são pequenos objetivos que temos que alcançar no dia a dia em busca da visão. <b>Metas:</b> é o que você espera conseguir em longo prazo. <b>Visão:</b> é uma fotografia positiva do futuro preferível.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>3R4. Cite 2 dos 4 princípios úteis para se estabelecer alvos.</summary>
+      <div class="prova-real-answer">Escreva seus alvos por escrito; estabeleça metas reais e desafiadoras seguindo o critério S.M.A.R.T. (Específico, Mensurável, Atingível, Relevante e Temporal).</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>4R4. Cite 3 dos 6 benefícios em se estabelecer alvos.</summary>
+      <div class="prova-real-answer">Simplificam o processo de decisões; melhoram a saúde mental e física por diminuírem o stress e a confusão; alinham a equipe em uma só direção.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>5R4. Cite 2 dos 4 principais medos dos administradores em estabelecer alvos.</summary>
+      <div class="prova-real-answer">Medo de avos imperfeitos (a condição atual da realidade nunca é 100%); medo da derrota (achar que não vai alcançar).</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>6R4. O que o administrador precisa fazer para atingir seus objetivos?</summary>
+      <div class="prova-real-answer">Integrar e mobilizar outras pessoas, comunicar bem a visão, planejar com antecedência, definir alvos S.M.A.R.T. e avaliar constantemente o progresso.</div>
+    </details>
+
+    <span class="recap-chapter-tag">RECAPITULAÇÃO 6 — Cap. 5: Gestão de Projetos baseada em Neemias</span>
+
+    <details class="prova-real-q">
+      <summary>1R5. Cite 3 dos 6 benefícios em se ter um projeto bem definido.</summary>
+      <div class="prova-real-answer">Ajudará a organizar os pensamentos; ajudará a colocar limites e potencializar os sonhos; ajudará a comunicar-se melhor com os liderados, "vendendo" melhor a visão.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>2R5. Cite 2 das 5 necessidades que Neemias listou em seu projeto.</summary>
+      <div class="prova-real-answer">Necessidades emocionais (desprezo) e necessidades materiais para a construção (madeiras).</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>3R5. Cite 2 dos 4 benefícios de se ter objetivos bem definidos.</summary>
+      <div class="prova-real-answer">Medem diariamente o sucesso e o fracasso das ações; ajudam na motivação, pois trazem o desafio e a prestação de contas.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>4R5. Os princípios operacionais diminuem a incidência de discussões e... o processo decisório, além de ajudarem a dizer "não" às coisas boas que não pertencem ao projeto, bem como... as expectativas de todos os envolvidos.</summary>
+      <div class="prova-real-answer">Diminuem a incidência de <b>discussões e códigos de honra</b>; <b>aceleram</b> o processo decisório; <b>alinham</b> as expectativas de todos os envolvidos.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>5R5. O programa é o... de atividades relacionadas em todo o projeto. É a... de atividades que serão desenvolvidas para atingir a visão previamente estabelecida.</summary>
+      <div class="prova-real-answer"><b>Conjunto</b> de atividades relacionadas em todo o projeto. É a <b>lista</b> de atividades que serão desenvolvidas para atingir a visão.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>6R5. O programa é o que vamos... hoje e nasce da imaginação controlada sobre o que vamos fazer no futuro também.</summary>
+      <div class="prova-real-answer"><b>Fazer</b> hoje.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>7R5. O programa inclui... (dia, mês, ano) e horário (horas, minutos) e precisa ser... pelos objetivos e princípios operacionais.</summary>
+      <div class="prova-real-answer">Inclui <b>calendário</b> (dia, mês, ano) e horário; precisa ser <b>controlado</b> pelos objetivos e princípios operacionais.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>8R5. Um programa deve ser... para ser fácil de ser seguido. Neemias não... como muitos cristãos fazem (2.5-9).</summary>
+      <div class="prova-real-answer">Deve ser <b>claro</b> para ser fácil de ser seguido. Neemias não <b>improvisou</b>.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>9R5. A primeira característica de um líder é a... Indique a ação ou comportamento que você espera do liderado, pois isto, no final, será a única medida de sucesso. As... internas e motivações são coisas difíceis de medir, mas as... dos liderados sempre... as atitudes do líder.</summary>
+      <div class="prova-real-answer">A primeira característica é a <b>iniciativa</b>. As <b>atitudes</b> internas e motivações são difíceis de medir, mas as <b>atitudes</b> dos liderados sempre <b>refletem</b> as atitudes do líder.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>10R5. Delegar inclui... discutir objetivos, princípios operacionais,... expectativas,... as tarefas, etc.</summary>
+      <div class="prova-real-answer">Inclui <b>orientar</b> (discutir objetivos e princípios operacionais), <b>alinhar</b> expectativas, <b>descrever</b> as tarefas.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>11R5. Delegar é... — dar autoridade — e pedir... de contas — marcar "check points" ou "momentos da verdade" para verificação do andamento do projeto.</summary>
+      <div class="prova-real-answer">Delegar é <b>confiar</b> — dar autoridade — e pedir <b>prestação</b> de contas.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>12R5. Cite 2 dos 4 argumentos utilizados pelos inimigos de Neemias para parar a sua obra.</summary>
+      <div class="prova-real-answer">Argumento legal de rebeldia contra o rei (2.19; 6.6); escarnecendo (4.1); gerando confusão (4.8); promovendo conversa inútil e traição (6.2).</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>13R5. Quando damos as tarefas, precisamos também providenciar os...</summary>
+      <div class="prova-real-answer">Os <b>recursos</b> (orçamento, local físico para trabalhar, instrumentos ou ferramentas adequadas e acesso à informação).</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>14R5. Com suas palavras descreva a importância da avaliação.</summary>
+      <div class="prova-real-answer">A avaliação permite regular o trabalho em andamento e o acabado, registrar e relatar resultados, e aperfeiçoar métodos — ajudando a melhorar continuamente e a manter a prestação de contas diante de Deus e da equipe.</div>
+    </details>
+
+    <span class="recap-chapter-tag">RECAPITULAÇÃO 7 — Cap. 6: A Igreja como Empresa e a Legislação Brasileira</span>
+
+    <details class="prova-real-q">
+      <summary>1R6. Qual o instrumento mais importante da legislação brasileira?</summary>
+      <div class="prova-real-answer">A <b>Constituição Federal de 1988</b>.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>2R6. Defina corretamente a ordem hierárquica da legislação brasileira que influi direta ou indiretamente na vida da igreja, numerando-os de 1 a 5.</summary>
+      <div class="prova-real-answer">1. Constituição Federal 1988. 2. Código Civil – Lei n. 10.406 de 10/01/2002. 3. Estatuto Social da Igreja. 4. Regimento Interno. 5. Usos e Costumes/Tradição.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>3R6. Para se constituir uma igreja, como organização, seus membros precisam cumprir as seguintes exigências: Aprovarem o seu... , obter junto à Receita Federal o seu... e obter junto à Prefeitura Municipal de sua cidade o...</summary>
+      <div class="prova-real-answer">Aprovarem o seu <b>estatuto social</b>; obter junto à Receita Federal o seu <b>CNPJ</b>; e obter junto à Prefeitura Municipal o <b>Alvará de Licença, Localização e Funcionamento</b>.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>4R6. Quais as obrigações da igreja (organização), junto à Prefeitura Municipal?</summary>
+      <div class="prova-real-answer">Obter a Inscrição Municipal/CCM, o Alvará de Funcionamento, regularizar a documentação do imóvel (planta aprovada, habite-se, IPTU em dia) e cumprir as exigências de segurança (ex.: laudo do Corpo de Bombeiros).</div>
+    </details>
+
+    <span class="recap-chapter-tag">RECAPITULAÇÃO 8 — Cap. 7: Organogramas e Sistemas de Governo</span>
+
+    <details class="prova-real-q">
+      <summary>1R7. O organograma é uma importante ferramenta para...</summary>
+      <div class="prova-real-answer">Organizar e visualizar a hierarquia da igreja, definindo cargos, responsabilidades e a comunicação entre os níveis.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>2R7. No organograma definimos com precisão quais são as..., os..., e como deve ser a... entre os vários níveis existentes no organograma.</summary>
+      <div class="prova-real-answer"><b>Responsabilidades</b>, os <b>cargos</b>, e como deve ser a <b>comunicação</b> entre os vários níveis.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>3R7. Também através do organograma podemos saber quem é que... dentro daquela organização, sendo um importante componente do planejamento estratégico.</summary>
+      <div class="prova-real-answer">Quem <b>faz parte</b> daquela organização.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>4R7. O organograma de uma igreja deve... sempre o tipo de... que é exercido nessa igreja.</summary>
+      <div class="prova-real-answer">Deve <b>refletir</b> sempre o tipo de <b>governo</b> exercido na igreja.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>5R7. Embora os defensores dessas várias formas concordem que DEUS é a autoridade final, eles diferem no... ou... ele (DEUS) expressa ou exerce essa autoridade.</summary>
+      <div class="prova-real-answer">Diferem no <b>COMO</b> ou <b>POR MEIO DE QUEM</b> Ele expressa ou exerce essa autoridade.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>6R7. Uma igreja cristã é uma sociedade com vida coletiva, organizada de conformidade com algum plano definido, adaptado a algum... que ela se propõe realizar. Por conseguinte, conta com seus..., sua..., apropriados para a administração de seu... e para o cumprimento de seus...</summary>
+      <div class="prova-real-answer">Adaptado a algum <b>propósito</b> que se propõe realizar. Conta com seus <b>oficiais</b> e <b>ordenanças</b>, suas <b>leis e regulamentos</b>, apropriados para a administração de seu <b>governo</b> e para o cumprimento de seus <b>propósitos</b>.</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>7R7. Cite 3 das 5 mais conhecidas formas de governo eclesiástico.</summary>
+      <div class="prova-real-answer">Sistema Monárquico, Sistema Episcopal ou Prelática, Sistema Congregacional (também: Pentecostal/Neopentecostal e Presbiterial/Oligárquica).</div>
+    </details>
+
+    <details class="prova-real-q">
+      <summary>8R7. Defina os 5 sistemas de governo eclesiástico fazendo a ligação correta.</summary>
+      <div class="prova-real-answer">
+        <b>Sistema Episcopal ou Prelática:</b> diferente do Episcopal, só há um nível de clero. O oficial principal é o presbítero.<br>
+        <b>Sistema Monárquico:</b> o fundador da igreja ou o presidente exerce a função de Bispo ou até de Arcebispo.<br>
+        <b>Sistema Pentecostal ou Neopentecostal:</b> esse sistema prega a autonomia da igreja local.<br>
+        <b>Sistema Presbiterial ou Oligárquica:</b> é aquele que crê no governo dos presbíteros ou bispos.<br>
+        <b>Sistema Congregacional:</b> o governo está nas mãos de uma só pessoa, é aquele que crê no governo dos pastores ou bispos.
+      </div>
+    </details>
+
+  </div>
+</div>
+</div>
+
+<div class="tab-content" id="view-simulado">
+<div id="tela-inicio">
+  <div class="logo-sim">ADMINISTRAÇÃO ECLESIÁSTICA</div>
+  <div class="sub-sim">Simulado de Revisão</div>
+  <div class="divider"></div>
+  <p class="desc-sim">10 rodadas com 10 questões cada — cobrindo Conceitos Gerais, Objetivos da Administração, Organismo e Autoridade, Planejamento (Visão/Missão/Alvos), Gestão de Projetos baseada em Neemias, a Igreja como Empresa, Organogramas e Sistemas de Governo, Secretaria e Estatuto.</p>
+  <div class="badge-rodadas">
+    <span class="badge">100 Questões</span>
+    <span class="badge">10 Rodadas</span>
+    <span class="badge">4 Alternativas</span>
+  </div>
+  <button class="btn-iniciar" onclick="iniciarSimulado()">▶ INICIAR SIMULADO</button>
+</div>
+
+<div id="tela-simulado">
+  <div class="sim-header">
+    <div>
+      <div class="sim-rodada" id="label-rodada">RODADA 1 de 10</div>
+      <div class="sim-prog" id="label-prog">Questão 1 de 10</div>
+    </div>
+    <div style="font-family:'Playfair Display',serif;color:var(--gold);font-size:14px;" id="label-placar">✓ 0 &nbsp; ✗ 0</div>
+    <div class="barra-prog" style="flex-basis:100%;"><div class="barra-prog-fill" id="barra-fill" style="width:0%"></div></div>
+  </div>
+  <div id="questoes-container"></div>
+</div>
+
+<div id="tela-resultado-rodada">
+  <div class="res-titulo" id="rr-titulo">Rodada 1 Concluída</div>
+  <div class="res-nota" id="rr-nota">0/10</div>
+  <div class="res-desc" id="rr-desc"></div>
+  <div class="res-erros" id="rr-erros"></div>
+  <button class="btn-iniciar" id="btn-prox-rodada" onclick="proximaRodada()">PRÓXIMA RODADA →</button>
+</div>
+
+<div id="tela-final">
+  <div class="final-titulo">Simulado Concluído!</div>
+  <div class="final-sub">Administração Eclesiástica</div>
+  <div class="final-nota-geral" id="fn-nota">0/100</div>
+  <div class="final-msg" id="fn-msg"></div>
+  <div class="hist-rodadas" id="fn-hist"></div>
+  <button class="btn-iniciar" onclick="reiniciar()">↺ REFAZER SIMULADO</button>
+</div>
+
+<script>
+const TODAS = [
+// RODADA 1 — Conceitos Gerais e Habilidade de Administração
+[
+{q:"O que indica que somos bons administradores, segundo o texto sobre os recursos da igreja?",ops:["O percentual de aproveitamento dos recursos","O tamanho do orçamento da igreja","O número de membros da igreja","A frequência das reuniões"],c:0},
+{q:"Segundo o texto, quais são os recursos que o administrador deve aproveitar a 100%?",ops:["Apenas humanos e financeiros","Humanos, Materiais, Financeiro e Informação","Apenas materiais e informação","Espirituais e materiais"],c:1},
+{q:"O dom de administração, conforme Atos 1-6, passa por quantos estágios no crescimento da igreja?",ops:["4","5","6","7"],c:2},
+{q:"Qual foi o problema em Atos 6 que exigiu administração da igreja primitiva?",ops:["Disputa teológica entre apóstolos","Murmuração dos gregos porque suas viúvas eram negligenciadas na distribuição diária","Falta de recursos financeiros","Perseguição do Sinédrio"],c:1},
+{q:"Que tipo de homens os apóstolos pediram que fossem escolhidos para resolver o problema administrativo em Atos 6?",ops:["Os mais ricos da congregação","Homens de bom testemunho, cheios do Espírito Santo e de sabedoria","Os mais velhos em idade","Apenas os apóstolos originais"],c:1},
+{q:"O que se espera de um administrador prudente, segundo o texto?",ops:["Que ele nunca delegue tarefas","Que saiba conhecer e aplicar procedimentos básicos, contratar serviços e até construir um templo, entre outros","Que tome todas as decisões sozinho","Que evite qualquer investimento"],c:1},
+{q:"Qual exemplo bíblico de princípio administrativo envolve Moisés e seu sogro Jetro?",ops:["A divisão dos sacerdotes em turnos","A linha de autoridade estabelecida por conselho de Jetro (Êx 18.13-27)","A construção do tabernáculo","A travessia do Mar Vermelho"],c:1},
+{q:"No sacerdócio araônico, Davi dividiu os sacerdotes em quantos turnos?",ops:["Doze","Dezesseis","Vinte e quatro","Trinta"],c:2},
+{q:"Segundo o texto, desde o princípio, os homens sentiram necessidade de:",ops:["Viver isolados uns dos outros","Se organizar em sociedades ou grupos para prover meios de subsistência","Negar qualquer forma de liderança","Depender exclusivamente do Estado"],c:1},
+{q:"A boa administração, segundo o texto, impede a operação do Espírito Santo?",ops:["Sim, sempre","Não, pelo contrário, o Executivo divino deve ser consultado em primeiro lugar","Apenas em igrejas pequenas","Apenas quando há recursos financeiros"],c:1},
+],
+// RODADA 2 — Os Objetivos da Administração (PROCAA)
+[
+{q:"Quais são os 5 verbos que resumem o processo contínuo da administração (PROCAA)?",ops:["Prever, organizar, comandar, coordenar e avaliar","Pregar, ensinar, batizar, orar e jejuar","Planejar, executar, controlar, delegar e revisar","Visitar, aconselhar, batizar, casar e sepultar"],c:0},
+{q:"Prever, segundo o texto (Lc 14.28-32), significa:",ops:["Agir sem planejamento","Preparar-se para o futuro com antecedência, preparando programas de ação","Esperar a providência divina sem ação humana","Apenas orar pelo futuro"],c:1},
+{q:"Organizar (Pv 18.9) é:",ops:["Reunir meios e recursos materiais e humanos, distribuídos racionalmente para funcionar como um todo","Apenas comprar equipamentos novos","Demitir colaboradores ineficientes","Aguardar a vontade da assembleia"],c:0},
+{q:"Comandar (Pv 11.14) é determinar as providências para que a organização funcione de acordo com:",ops:["A vontade do líder apenas","A norma vigente","Os costumes da igreja vizinha","O calendário litúrgico"],c:1},
+{q:"Coordenar (Ef 4.11-16) tem como objetivo:",ops:["Eliminar departamentos da igreja","Manter o organismo em funcionamento homogêneo e integrado, evitando atritos e perdas de tempo","Aumentar o número de reuniões","Centralizar todo o poder no pastor"],c:1},
+{q:"Avaliar (Lc 19.11-27) tem o sentido de:",ops:["Punir os que erram","Regular o trabalho em andamento e o acabado, registrando e relatando os resultados","Demitir membros da diretoria","Aumentar a arrecadação de dízimos"],c:1},
+{q:"Entre as atividades de \"Prever\" está o estabelecimento de uma sequência de prazos para os passos do programa. Como se chama essa sequência?",ops:["Orçamento","Cronograma","Organograma","Estatuto"],c:1},
+{q:"Dentro de \"Organizar\", o que significa \"identificar e agrupar o trabalho a ser executado nos diversos cargos\"?",ops:["Comandar","Coordenar","Organizar","Avaliar"],c:2},
+{q:"O administrador deve ser especialista na arte de trabalhar com pessoas, pois seu sucesso será agradável a Deus quando:",ops:["Ajudar outros a fazerem bem o trabalho que lhes foi atribuído","Concentrar todas as tarefas em si mesmo","Evitar delegar responsabilidades","Priorizar apenas resultados financeiros"],c:0},
+{q:"A administração é um processo contínuo porque:",ops:["Se não for contínuo, não alcançará seus objetivos","É exigida apenas uma vez ao ano","Depende somente da vontade do tesoureiro","Só precisa ser feita em momentos de crise"],c:0},
+],
+// RODADA 3 — Organismo, Organização e Autoridade
+[
+{q:"A igreja é, ao mesmo tempo:",ops:["Apenas um organismo espiritual","Organismo e organização","Apenas uma organização civil","Nem organismo nem organização"],c:1},
+{q:"Segundo Rm 13.1, toda alma deve estar sujeita às autoridades superiores. Isso significa obedecer em qualquer situação?",ops:["Sim, sem nenhuma exceção","Não, a obediência tem limites quando a autoridade humana contradiz a autoridade de Deus","Apenas aos pastores","Apenas às autoridades religiosas"],c:1},
+{q:"Quantos níveis de autoridade são reservados somente para Deus?",ops:["Dois","Três","Quatro","Cinco"],c:1},
+{q:"A autoridade soberana ou imperial é caracterizada por:",ops:["Ser questionável e desafiável","Ser absoluta, infalível e pertencer só a Deus","Pertencer aos presbíteros","Pertencer ao Estado"],c:1},
+{q:"A autoridade da verdade é exercida, segundo o texto, por:",ops:["Apenas Deus Pai","Deus Pai, Deus Filho e Deus Espírito Santo","Somente os profetas do Antigo Testamento","Os concílios eclesiásticos"],c:1},
+{q:"Quantos níveis de autoridade são reservados ao homem, segundo o texto?",ops:["Dois","Três","Quatro","Cinco"],c:2},
+{q:"A autoridade delegada nunca pode ir além de:",ops:["Sua própria responsabilidade","Da vontade da maioria","Do orçamento disponível","Do tempo de mandato do líder"],c:0},
+{q:"A autoridade que é devida por contratos ou acordos legais, onde duas pessoas ou grupos concordam em executar ações específicas, é chamada de:",ops:["Autoridade delegada","Autoridade estipulada","Autoridade funcional","Autoridade da consciência"],c:1},
+{q:"A autoridade que provém da nossa competência, capacidade ou treinamento é chamada de:",ops:["Autoridade dos costumes","Autoridade funcional","Autoridade soberana","Autoridade estipulada"],c:1},
+{q:"Existem problemas com a autoridade humana quando:",ops:["O homem exerce uma autoridade que pertence somente a Deus, ou eleva os costumes acima da Bíblia","A igreja cresce rapidamente","O pastor é jovem","Há muitos departamentos na igreja"],c:0},
+],
+// RODADA 4 — Planejamento: Visão, Missão e Alvos
+[
+{q:"Visão é definida no texto como:",ops:["Uma fotografia positiva do seu futuro preferível","Um relatório financeiro anual","A lista de membros da igreja","O histórico da fundação da igreja"],c:0},
+{q:"\"Quando não há visão, o povo fica sem freio\" é uma citação de:",ops:["Davi","Salomão","Paulo","Neemias"],c:1},
+{q:"Alvos/metas são definidos como:",ops:["Os nós da corda que você amarrou na estaca — pequenos objetivos do dia a dia em busca da visão","Sonhos distantes e inalcançáveis","Documentos legais da igreja","Apenas números financeiros"],c:0},
+{q:"No critério S.M.A.R.T. para alvos, o que significa o \"M\"?",ops:["Missionário","Mensurável (Measurable)","Motivacional","Ministerial"],c:1},
+{q:"O \"T\" de S.M.A.R.T. (Temporal) indica que o alvo deve:",ops:["Ser eterno e sem prazo","Ter um prazo definido","Depender do tempo de outras igrejas","Ser revisado a cada século"],c:1},
+{q:"Um dos principais medos dos administradores em estabelecer alvos é:",ops:["O medo da derrota — achar que não vai alcançar","O medo de ter excesso de recursos","O medo de crescer rápido demais","O medo de ser elogiado"],c:0},
+{q:"Entre os benefícios de se estabelecer alvos está:",ops:["Simplificar o processo de decisões","Aumentar a burocracia da igreja","Tornar o planejamento mais confuso","Eliminar a necessidade de avaliação"],c:0},
+{q:"Por que é necessário integrar outras pessoas no projeto, segundo o texto?",ops:["Porque o líder sozinho nunca erra","Porque para mobilizar pessoas talentosas é preciso integrá-las e motivá-las a se comprometerem com a missão","Porque assim a responsabilidade desaparece","Porque reduz o número de reuniões"],c:1},
+{q:"Como se deve começar um plano ou projeto, segundo as dicas do texto?",ops:["Pensando primeiro nos detalhes pequenos","Escrevendo a visão a longo prazo e depois organizando a lista de passos em ordem lógica","Sem escrever nada, apenas confiando na memória","Delegando tudo antes de pensar na visão"],c:1},
+{q:"Segundo o texto, alvos bem estabelecidos ajudam a diminuir:",ops:["O número de membros","O stress e a confusão","O tempo de pregação","A frequência dos cultos"],c:1},
+],
+// RODADA 5 — Gestão de Projetos baseada em Neemias (parte 1)
+[
+{q:"Qual era a função de Neemias na corte do rei antes de ir a Jerusalém?",ops:["Sacerdote","Copeiro do rei","General do exército","Escriba real"],c:1},
+{q:"Como Neemias, o administrador cristão precisa, antes de tudo:",ops:["Agir sozinho, sem depender de ninguém","Depender de Deus e buscá-lo por meio da oração","Esperar que o problema se resolva sozinho","Delegar tudo imediatamente sem planejar"],c:1},
+{q:"Entre as vantagens de se ter um projeto bem definido está:",ops:["Ajudar a organizar os pensamentos e colocar limites/potencializar os sonhos","Eliminar a necessidade de oração","Tornar a igreja mais burocrática","Reduzir o número de voluntários"],c:0},
+{q:"Durante quantos dias Neemias orou e listou as necessidades de seu projeto?",ops:["40 dias","90 dias","120 dias","365 dias"],c:2},
+{q:"As necessidades que Neemias listou incluíam materiais, emocionais, legais, de segurança e:",ops:["De viagem e trabalho","De entretenimento","De propaganda","De aposentadoria"],c:0},
+{q:"Um objetivo claro, segundo o texto sobre Neemias, deve conter um prazo estipulado e:",ops:["Uma lista de coisas que ele precisava","Apenas boas intenções","Um orçamento ilimitado","Aprovação de todos os membros antes de orar"],c:0},
+{q:"Os princípios operacionais são definidos no texto como:",ops:["As regras do jogo — máximas universais, códigos de honra e princípios morais inegociáveis","Apenas as leis civis","Sugestões opcionais que podem ser ignoradas","Regras criadas apenas pelo tesoureiro"],c:0},
+{q:"O que é o \"programa\", segundo o texto baseado em Neemias?",ops:["O conjunto de eventos relacionados em todo o projeto, a lista de atividades para atingir a visão","Apenas a lista de presença dos membros","O nome do projeto","O calendário de feriados"],c:0},
+{q:"A primeira característica de um líder, segundo o texto, é:",ops:["A riqueza","A iniciativa","A eloquência","A idade avançada"],c:1},
+{q:"Segundo o texto, \"Toda criança precisa de um pai. Sem pai, sobra na mão do avô\" ilustra a importância de:",ops:["Delegar responsabilidades claramente","Centralizar todo o poder","Evitar ter sucessores","Ignorar a estrutura familiar da igreja"],c:0},
+],
+// RODADA 6 — Gestão de Projetos baseada em Neemias (parte 2) e Delegação
+[
+{q:"Delegar, segundo o texto, inclui orientar, alinhar expectativas, descrever as tarefas e:",ops:["Confiar — dar autoridade e pedir prestação de contas","Assumir toda a responsabilidade sozinho","Eliminar qualquer supervisão","Ignorar o andamento do projeto"],c:0},
+{q:"Para que servem os \"check points\" ou \"momentos da verdade\" num projeto?",ops:["Para reuniões aleatórias sem propósito","Para marcar o progresso e a prestação de contas do andamento do projeto","Apenas para a reunião final do projeto","Para avaliações anuais únicas"],c:1},
+{q:"Que tipo de proximidade Neemias buscou entre os trabalhadores, diante do perigo de serem atacados?",ops:["Trabalharam perto de suas próprias casas (Ne 3.23)","Trabalharam isolados uns dos outros","Trabalharam apenas à noite","Trabalharam em silêncio absoluto"],c:0},
+{q:"A frase \"junta a ele\" ou \"ao lado deste\" aparece repetidamente em Neemias 3 para destacar o princípio de:",ops:["Competição entre trabalhadores","Cooperação e trabalho em equipe","Hierarquia rígida","Centralização do poder"],c:1},
+{q:"Os inimigos de Neemias tentaram parar a obra usando, entre outros, qual argumento?",ops:["Argumento legal de rebeldia contra o rei","Elogios excessivos","Doação de recursos","Apoio militar"],c:0},
+{q:"Avaliação, segundo o texto, deve focar:",ops:["Nas intenções dos envolvidos","Nas ações realizadas, não nas intenções","Apenas nos erros cometidos","Apenas no orçamento gasto"],c:1},
+{q:"Quando Neemias enfrentou problemas com finanças, ele confrontou:",ops:["Os mesquinhos (Ne 5.7)","Os sacerdotes","O rei da Babilônia","Os profetas"],c:0},
+{q:"Recursos humanos, segundo o texto, incluem autoridade para convocar outros e:",ops:["O apoio do líder para o sucesso da equipe","Apenas dinheiro","Apenas equipamentos","Apenas tempo livre"],c:0},
+{q:"Diante dos problemas e inimigos, todo o capítulo 3 de Neemias destacou o princípio de:",ops:["Reconhecimento — colocando o nome de quem fez cada parte do trabalho","Anonimato total dos trabalhadores","Punição aos que erravam","Centralização das tarefas em uma só pessoa"],c:0},
+{q:"Segundo o texto, \"quando der as tarefas, dê também os recursos\" resume o princípio de:",ops:["Finanças e materiais necessários","Avaliação","Motivação","Comunicação"],c:0},
+],
+// RODADA 7 — A Igreja como Empresa e Legislação Brasileira
+[
+{q:"A legislação brasileira considera a igreja como uma entidade com deveres e responsabilidades semelhantes a uma:",ops:["Empresa, embora sem fins lucrativos","Autarquia estatal","ONG internacional","Cooperativa de crédito"],c:0},
+{q:"Qual é o instrumento jurídico mais importante da legislação brasileira que interfere na vida da igreja?",ops:["O Código Civil","A Constituição Federal","O Estatuto Social","O Regimento Interno"],c:1},
+{q:"Depois da Constituição Federal, qual código mais interfere no dia a dia da igreja, segundo o texto?",ops:["Código Penal","Código Civil Brasileiro","Código de Trânsito","Código Tributário Municipal"],c:1},
+{q:"Para se constituir uma igreja como organização, seus membros precisam cumprir, entre outras exigências:",ops:["Aprovar o estatuto social, obter o CNPJ junto à Receita Federal e o Alvará junto à Prefeitura","Registrar a igreja apenas em cartório de imóveis","Filiar-se obrigatoriamente a uma convenção nacional","Pagar uma taxa única ao Ministério Público"],c:0},
+{q:"O que é o Estatuto Social de uma igreja, segundo o texto?",ops:["Um documento opcional","O conjunto de normas que estabelece a estrutura e organização da sociedade ou grupo","Apenas um cartão de identificação","Um livro de hinos oficiais"],c:1},
+{q:"Entre os documentos exigidos pela Prefeitura para o Cadastro de Contribuintes Mobiliários (CCM) está:",ops:["Cartão do CNPJ e Estatuto Social","Apenas o RG do pastor","Lista de hinos cantados no último ano","Comprovante de matrícula escolar dos membros"],c:0},
+{q:"Qual o valor da multa pela não entrega da declaração jurídica de renda da igreja, citado no texto?",ops:["R$ 50,00","R$ 165,74","R$ 500,00","R$ 1.000,00"],c:2},
+{q:"Entre os artigos do Código Civil destacados pelo texto está o que trata de questões patrimoniais e da dissolução de entidades. Esses artigos estão entre:",ops:["1277 a 1281, 1299 e 1312 (da construção e da vizinhança)","Apenas no artigo 5º","Apenas no artigo 150","Apenas no artigo 1.513"],c:0},
+{q:"Segundo o texto, ninguém pode interferir na vida privada das pessoas — princípio relacionado a qual artigo do Código Civil mencionado?",ops:["Artigo 1.513","Artigo 19","Artigo 5º","Artigo 58"],c:0},
+{q:"Para reformar o estatuto de uma igreja, a primeira medida é:",ops:["Demitir a diretoria atual","Convocar uma assembleia geral da igreja nos termos dos estatutos vigentes","Consultar apenas o pastor presidente","Notificar a Receita Federal sem reunião"],c:1},
+],
+// RODADA 8 — Organogramas e Sistemas de Governo Eclesiástico
+[
+{q:"O organograma é uma importante ferramenta para:",ops:["Organizar a hierarquia da legislação brasileira","Organizar e mostrar de forma visual a estrutura hierárquica da igreja","Substituir o estatuto social","Eliminar a necessidade de diretoria"],c:1},
+{q:"No modelo de organograma apresentado, quem está no topo, acima da Assembleia Geral dos Membros?",ops:["O Pastor da Igreja","Jesus Cristo, como cabeça da igreja","A Diretoria","O Tesoureiro"],c:1},
+{q:"Quantas formas especiais de governo eclesiástico são citadas no texto?",ops:["Três","Quatro","Cinco","Seis"],c:2},
+{q:"No sistema monárquico de governo eclesiástico, quem detém grande parte do poder de decisão?",ops:["A assembleia de todos os membros","O pastor presidente ou fundador da igreja","Um conselho de bispos eleito","O Estado"],c:1},
+{q:"No sistema episcopal ou prelática, a autoridade máxima é exercida por:",ops:["O Bispo, que ocupa o lugar mais alto na hierarquia dos Apóstolos","Diáconos eleitos anualmente","A assembleia congregacional","O tesoureiro geral"],c:0},
+{q:"O sistema pentecostal ou neopentecostal geralmente concentra a função de Bispo (ou similar):",ops:["No presidente ou no fundador do grupo de pessoas","Em um sínodo internacional","Apenas em concílios regionais sem líder único","No Estado"],c:0},
+{q:"O sistema presbiterial ou oligárquica é caracterizado pelo governo de:",ops:["Um único bispo vitalício","Um nível de clero composto por presbíteros, exercido em Assembleias, sínodos e presbitérios","Apenas o pastor fundador","Uma junta estatal"],c:1},
+{q:"No sistema congregacional, a congregação local:",ops:["É subordinada totalmente a uma convenção nacional","É independente e governa a si mesma, com cada membro tendo direito a voz e voto","Não tem nenhuma autonomia administrativa","Depende exclusivamente do bispo regional"],c:1},
+{q:"O sistema congregacional é geralmente associado a quais grupos evangélicos, segundo o texto?",ops:["Episcopais e anglicanos","Batistas, congregacionais e independentes","Apenas católicos","Apenas luteranos"],c:1},
+{q:"Embora os defensores dos vários sistemas de governo concordem que Deus é a autoridade final, eles diferem:",ops:["No fato de Deus existir ou não","No COMO ou POR MEIO DE QUEM Ele expressa essa autoridade","No número de membros da igreja","No valor do dízimo"],c:1},
+],
+// RODADA 9 — Secretaria, Livros e Estatuto
+[
+{q:"A secretaria de uma igreja é responsável, entre outras tarefas, por:",ops:["Lavrar atas, manter o fichário de membros e a correspondência da igreja","Apenas arrecadar o dízimo","Pregar nos cultos dominicais","Decidir sozinha sobre o orçamento da igreja"],c:0},
+{q:"O Livro de Atas é importante porque:",ops:["Registra apenas os hinos cantados","Registra as ocorrências verificadas durante as reuniões, com valor legal e jurisprudência da organização","É opcional e raramente usado","Substitui o Estatuto Social"],c:1},
+{q:"O Rol Ativo de membros é de uso exclusivo de quem, segundo o texto?",ops:["De qualquer visitante","Da secretaria e diretoria","Apenas do tesoureiro","De qualquer membro que solicitar"],c:1},
+{q:"O Rol Inativo ou Passivo registra os nomes dos membros que:",ops:["São os mais antigos da igreja","Por qualquer razão, se afastaram da igreja (excluídos, transferidos ou falecidos)","Pagam o dízimo em dia","Participam do coral"],c:1},
+{q:"No Livro de Registro de Matrimônio, qual documento pode ser usado como modelo para representar a cerimônia com efeito civil?",ops:["Um livro especial impresso conforme a especificação eclesiástica","Um simples bilhete sem valor legal","Apenas a Bíblia do casal","A carteira de identidade dos noivos"],c:0},
+{q:"O cartão de membro serve, entre outras coisas, como:",ops:["Documento que pode substituir a carteira do convênio em caso de necessidade","Um cartão de crédito da igreja","Um passaporte internacional","Um certificado de batismo apenas"],c:0},
+{q:"Por que toda igreja deve ter um Estatuto Social, segundo o texto?",ops:["Porque a lei brasileira exige o registro de qualquer entidade jurídica, sem o qual ela não pode existir e agir legalmente","Não há nenhuma exigência legal envolvida","O estatuto é apenas decorativo","A igreja vira automaticamente uma ONG"],c:0},
+{q:"Entre os itens que devem constar no estatuto está:",ops:["Nome, sede, foro, finalidades, duração, quórum, diretoria e patrimônio","Apenas o nome do pastor fundador","A lista de hinos preferidos","O histórico de feriados religiosos"],c:0},
+{q:"A mudança de nome da igreja deve, de preferência:",ops:["Manter alguma conformidade com a própria convivência ou tradição, evitando confusão","Ser feita anualmente sem critério","Nunca ser comunicada aos membros","Depender exclusivamente da prefeitura"],c:0},
+{q:"Para registrar o estatuto em cartório, a ata deve ser transcrita em quantas vias, segundo o texto?",ops:["Uma via","Duas vias","Três vias","Cinco vias"],c:2},
+],
+// RODADA 10 — Revisão Geral (mix de todos os capítulos)
+[
+{q:"Qual o cuidado que se deve ter na distribuição de tarefas para que todos os membros do grupo participem do trabalho?",ops:["Assumir a gerência e a responsabilidade pelos serviços prestados, distribuindo bem as tarefas","Concentrar tudo em uma só pessoa","Evitar qualquer distribuição","Delegar apenas para os mais antigos"],c:0},
+{q:"Na definição de administração, quais são as duas palavrinhas-chave citadas no texto?",ops:["Fé e obras","Recursos e objetivos","Oração e jejum","Membros e dízimo"],c:1},
+{q:"Segundo o plano de Deus, a autoridade vem dos níveis mais elevados para os:",ops:["Mais antigos","Inferiores","Mais ricos","Mais jovens"],c:1},
+{q:"Do ponto de vista do texto, por que Deus é um ser organizado?",ops:["A Arqueologia comprova que desde o princípio os homens sentiram necessidade de se organizar, refletindo a ordem divina, e Deus deu instruções detalhadas (ex.: tabernáculo)","Não há nenhuma evidência disso","A Bíblia não trata desse assunto","Apenas os anjos são organizados"],c:0},
+{q:"Quais são os 5 principais objetivos da administração (PROCAA)?",ops:["Pregar, orar, congregar, alimentar e abençoar","Prever, organizar, comandar, coordenar e avaliar","Pagar, organizar, controlar, agendar e arquivar","Planejar, recrutar, operar, coordenar e auditar"],c:1},
+{q:"Não pode existir um bom planejamento sem que haja a definição das receitas e como elas serão distribuídas (custos e investimentos). A isso damos o nome de:",ops:["Estatuto","Orçamento","Organograma","Regimento"],c:1},
+{q:"Se for feito um bom planejamento, há necessidade de se fazer uma avaliação. Por quê, segundo o texto?",ops:["Não há necessidade, planejamento já é suficiente","Porque a avaliação regula o trabalho em andamento, relata resultados e aperfeiçoa os métodos","Apenas para satisfazer a diretoria","Porque é uma exigência apenas estética"],c:1},
+{q:"Quais as obrigações da igreja (organização) junto à Prefeitura Municipal, segundo o texto?",ops:["Obter o Alvará de Licença, Localização e Funcionamento","Nenhuma obrigação é necessária","Apenas pagar uma taxa anual simbólica","Registrar apenas o nome do pastor"],c:0},
+{q:"No organograma, definimos com precisão as responsabilidades, os cargos e a comunicação entre os vários níveis existentes. Isso ajuda a saber quem:",ops:["Faz parte daquela organização, sendo um componente do planejamento estratégico","Paga mais dízimo","Vai pregar no próximo domingo","Vai limpar o templo"],c:0},
+{q:"Em muitos casos, a Bíblia tem sido citada por sua demonstração de princípios de administração. Qual exemplo é citado no texto?",ops:["A linha de autoridade estabelecida por Moisés por conselho de Jetro, e o sacerdócio araônico organizado por Davi em turnos","A parábola do filho pródigo","O sermão do monte","O livro de Apocalipse"],c:0},
+],
+];
+
+let rodadaAtual = 0;
+let questaoAtual = 0;
+let acertos = 0;
+let erros = 0;
+let errosRodada = [];
+let acertosRodada = 0;
+let historicoRodadas = [];
+let respondidas = 0;
+let totalRespondidas = 0;
+
+function iniciarSimulado(){
+  document.getElementById('tela-inicio').style.display='none';
+  document.getElementById('tela-simulado').style.display='block';
+  carregarRodada();
+}
+
+function carregarRodada(){
+  errosRodada = [];
+  acertosRodada = 0;
+  questaoAtual = 0;
+  respondidas = 0;
+  document.getElementById('label-rodada').textContent = `RODADA ${rodadaAtual+1} DE 10`;
+  renderQuestoes();
+}
+
+function renderQuestoes(){
+  const container = document.getElementById('questoes-container');
+  container.innerHTML = '';
+  const qs = TODAS[rodadaAtual];
+  qs.forEach((q,i) => {
+    const div = document.createElement('div');
+    div.className = 'questao-bloco';
+    div.id = `q${i}`;
+    div.innerHTML = `
+      <div class="q-num">QUESTÃO ${i+1}</div>
+      <div class="q-texto">${q.q}</div>
+      <div class="opcoes" id="ops${i}">
+        ${q.ops.map((op,j)=>`
+          <button class="opcao" id="op${i}_${j}" onclick="responder(${i},${j})">
+            <span class="letra">${['A','B','C','D'][j]}</span>
+            <span>${op}</span>
+          </button>`).join('')}
+      </div>
+      <div class="feedback" id="fb${i}"></div>
+    `;
+    container.appendChild(div);
+  });
+  atualizarHeader();
+}
+
+function responder(qi, oi){
+  const q = TODAS[rodadaAtual][qi];
+  const bloco = document.getElementById(`q${qi}`);
+  const fb = document.getElementById(`fb${qi}`);
+  const ops = document.querySelectorAll(`#ops${qi} .opcao`);
+  ops.forEach(b => b.disabled = true);
+  if(oi === q.c){
+    ops[oi].classList.add('correta');
+    bloco.classList.add('correta');
+    fb.textContent = '✓ Correto!';
+    fb.className = 'feedback ok';
+    acertosRodada++;
+    acertos++;
+  } else {
+    ops[oi].classList.add('errada');
+    ops[q.c].classList.add('mostrar-correta');
+    bloco.classList.add('errada');
+    fb.textContent = `✗ Incorreto. Correta: ${['A','B','C','D'][q.c]}) ${q.ops[q.c]}`;
+    fb.className = 'feedback nao';
+    erros++;
+    errosRodada.push({q:q.q, correta: q.ops[q.c]});
+  }
+  respondidas++;
+  totalRespondidas++;
+  atualizarHeader();
+  if(respondidas === TODAS[rodadaAtual].length){
+    setTimeout(()=>mostrarResultadoRodada(), 800);
+  }
+}
+
+function atualizarHeader(){
+  document.getElementById('label-prog').textContent = `${respondidas} de 10 respondidas`;
+  document.getElementById('label-placar').textContent = `✓ ${acertos}  ✗ ${erros}`;
+  const pct = (totalRespondidas / 100) * 100;
+  document.getElementById('barra-fill').style.width = pct + '%';
+}
+
+function mostrarResultadoRodada(){
+  document.getElementById('tela-simulado').style.display='none';
+  document.getElementById('tela-resultado-rodada').style.display='block';
+  window.scrollTo(0,0);
+  document.getElementById('rr-titulo').textContent = `Rodada ${rodadaAtual+1} Concluída`;
+  document.getElementById('rr-nota').textContent = `${acertosRodada}/10`;
+  const pct = acertosRodada * 10;
+  let msg = pct >= 80 ? '🏆 Excelente desempenho!' : pct >= 60 ? '👍 Bom resultado, continue estudando!' : '📖 Revise o conteúdo desta seção.';
+  document.getElementById('rr-desc').textContent = msg;
+  historicoRodadas.push(acertosRodada);
+  const errosDiv = document.getElementById('rr-erros');
+  if(errosRodada.length === 0){
+    errosDiv.innerHTML = '<h4>ERROS</h4><div class="erro-item" style="color:#4a9e6b;">Parabéns! Você acertou todas as questões desta rodada! 🎉</div>';
+  } else {
+    errosDiv.innerHTML = `<h4>ERROS DESTA RODADA (${errosRodada.length})</h4>` +
+      errosRodada.map(e=>`<div class="erro-item"><strong>${e.q}</strong><span class="certa">✓ ${e.correta}</span></div>`).join('');
+  }
+  const btnProx = document.getElementById('btn-prox-rodada');
+  if(rodadaAtual === 9){
+    btnProx.textContent = 'VER RESULTADO FINAL →';
+  } else {
+    btnProx.textContent = `RODADA ${rodadaAtual+2} →`;
+  }
+}
+
+function proximaRodada(){
+  rodadaAtual++;
+  if(rodadaAtual >= 10){
+    mostrarFinal();
+  } else {
+    document.getElementById('tela-resultado-rodada').style.display='none';
+    document.getElementById('tela-simulado').style.display='block';
+    window.scrollTo(0,0);
+    carregarRodada();
+  }
+}
+
+function mostrarFinal(){
+  document.getElementById('tela-resultado-rodada').style.display='none';
+  document.getElementById('tela-final').style.display='block';
+  window.scrollTo(0,0);
+  document.getElementById('fn-nota').textContent = `${acertos}/100`;
+  const pct = acertos;
+  let msg = '';
+  if(pct >= 90) msg = 'Desempenho extraordinário! Você domina a Administração Eclesiástica. 🏆';
+  else if(pct >= 80) msg = 'Excelente! Você tem sólido domínio do conteúdo. 🎯';
+  else if(pct >= 70) msg = 'Bom resultado. Vale revisar alguns tópicos específicos. 📚';
+  else if(pct >= 60) msg = 'Desempenho razoável. Recomenda-se revisar com mais atenção. 📖';
+  else msg = 'Continue estudando! Leia novamente o material e refaça o simulado. ✏️';
+  document.getElementById('fn-msg').textContent = msg;
+  const hist = document.getElementById('fn-hist');
+  hist.innerHTML = historicoRodadas.map((n,i)=>`
+    <div class="hist-r">R${i+1}: <span>${n}/10</span></div>
+  `).join('');
+}
+
+function reiniciar(){
+  rodadaAtual=0; questaoAtual=0; acertos=0; erros=0;
+  errosRodada=[]; acertosRodada=0; historicoRodadas=[];
+  respondidas=0; totalRespondidas=0;
+  document.getElementById('tela-final').style.display='none';
+  document.getElementById('tela-inicio').style.display='flex';
+  window.scrollTo(0,0);
+}
+</script>
+</div>
+
+<script>
+function showTab(name) {
+  ['simulado','recap','prova'].forEach(t => {
+    document.getElementById('view-' + t).classList.toggle('active', t === name);
+    document.getElementById('tabbtn-' + t).classList.toggle('active', t === name);
+  });
+}
+showTab('simulado');
+</script>
+</body>
+</html>
