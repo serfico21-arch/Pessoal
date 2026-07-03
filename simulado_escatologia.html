@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado de Escatologia</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@300;400;700&display=swap');
+
+  :root {
+    --bg: #0f0e17;
+    --surface: #1a1929;
+    --surface2: #221f35;
+    --accent: #e8c96d;
+    --accent2: #7c6cfc;
+    --green: #4caf82;
+    --red: #e05f5f;
+    --text: #ede8f5;
+    --muted: #9087b0;
+    --border: rgba(232,201,109,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lato', Georgia, serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.25) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.18) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 10%, rgba(255,255,255,0.22) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 75%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 90%, rgba(255,255,255,0.15) 0%, transparent 100%),
+      radial-gradient(1px 1px at 5% 50%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 92% 30%, rgba(255,255,255,0.18) 0%, transparent 100%),
+      radial-gradient(2px 2px at 45% 45%, rgba(232,201,109,0.12) 0%, transparent 100%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 720px;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .top-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    animation: fadeDown 0.6s ease;
+  }
+  .top-header .eyebrow {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .top-header h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 32px;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .top-header p { font-size: 13px; color: var(--muted); font-weight: 300; }
+
+  /* STATS BAR — IDs fixos fora do #main */
+  #stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+  .stat-box {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+  .stat-box .num { font-size: 22px; font-weight: 700; }
+  .stat-box .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  .stat-box.acerto .num { color: var(--green); }
+  .stat-box.erro .num { color: var(--red); }
+
+  /* PROGRESS — ID fixo fora do #main */
+  #progress-wrap {
+    margin-bottom: 1.8rem;
+  }
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .progress-track {
+    background: var(--surface2);
+    border-radius: 99px;
+    height: 6px;
+    overflow: hidden;
+  }
+  #prog {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* QUESTION CARD */
+  .q-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 1.8rem;
+    animation: fadeUp 0.4s ease;
+  }
+  .round-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(124,108,252,0.15);
+    border: 0.5px solid rgba(124,108,252,0.35);
+    color: #a99dff;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 99px;
+    margin-bottom: 1.2rem;
+  }
+  .q-num { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .q-text {
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt-btn {
+    background: var(--surface2);
+    border: 0.5px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 13px 16px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Lato', Georgia, serif;
+    cursor: pointer;
+    text-align: left;
+    line-height: 1.5;
+    transition: all 0.18s;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .opt-btn .letter {
+    min-width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 0.5px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 1px;
+    flex-shrink: 0;
+    transition: all 0.18s;
+  }
+  .opt-btn:hover:not(:disabled) {
+    background: rgba(124,108,252,0.12);
+    border-color: rgba(124,108,252,0.4);
+    transform: translateX(3px);
+  }
+  .opt-btn:hover:not(:disabled) .letter {
+    background: rgba(124,108,252,0.25);
+    border-color: rgba(124,108,252,0.6);
+    color: #c4baff;
+  }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct {
+    background: rgba(76,175,130,0.15);
+    border-color: rgba(76,175,130,0.5);
+    color: #a3ddc0;
+  }
+  .opt-btn.correct .letter { background: rgba(76,175,130,0.3); border-color: var(--green); color: #a3ddc0; }
+  .opt-btn.wrong {
+    background: rgba(224,95,95,0.12);
+    border-color: rgba(224,95,95,0.4);
+    color: #f0a0a0;
+  }
+  .opt-btn.wrong .letter { background: rgba(224,95,95,0.25); border-color: var(--red); color: #f0a0a0; }
+  .opt-btn.reveal-correct {
+    background: rgba(76,175,130,0.08);
+    border-color: rgba(76,175,130,0.3);
+    color: #a3ddc0;
+  }
+
+  .feedback-box {
+    margin-top: 1.2rem;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+    animation: fadeUp 0.3s ease;
+  }
+  .feedback-box.ok { background: rgba(76,175,130,0.12); border: 0.5px solid rgba(76,175,130,0.35); color: #a3ddc0; }
+  .feedback-box.err { background: rgba(224,95,95,0.1); border: 0.5px solid rgba(224,95,95,0.3); color: #f0a0a0; }
+  .feedback-box strong { display: block; margin-bottom: 4px; font-size: 14px; }
+
+  .next-btn {
+    width: 100%;
+    margin-top: 1.2rem;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent2), #9b8ffc);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-family: 'Lato', Georgia, serif;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s, transform 0.15s;
+    animation: fadeUp 0.3s ease;
+  }
+  .next-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .result-screen {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    animation: fadeUp 0.5s ease;
+  }
+  .result-screen .medal { font-size: 56px; margin-bottom: 1rem; }
+  .result-screen h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 26px;
+    margin-bottom: 8px;
+  }
+  .result-screen .score {
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 1rem 0;
+    line-height: 1;
+  }
+  .result-screen .score span { font-size: 20px; color: var(--muted); }
+  .result-screen .result-msg { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem; }
+  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+  .result-stat { background: var(--surface2); border-radius: 10px; padding: 14px; }
+  .result-stat .n { font-size: 24px; font-weight: 700; }
+  .result-stat .l { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .result-stat.g .n { color: var(--green); }
+  .result-stat.r .n { color: var(--red); }
+
+  .round-result {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    animation: fadeUp 0.4s ease;
+  }
+  .round-result h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; margin-bottom: 8px; }
+  .round-result .rs { font-size: 44px; font-weight: 700; color: var(--accent); margin: 12px 0; }
+  .round-result p { font-size: 14px; color: var(--muted); margin-bottom: 1.5rem; }
+
+  .start-screen {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    animation: fadeUp 0.5s ease;
+  }
+  .start-screen .icon { font-size: 52px; margin-bottom: 1rem; }
+  .start-screen h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 24px; margin-bottom: 10px; }
+  .start-screen p { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem; }
+  .info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1.5rem; }
+  .info-box { background: var(--surface2); border-radius: 10px; padding: 14px 8px; }
+  .info-box .n { font-size: 22px; font-weight: 700; color: var(--accent); }
+  .info-box .l { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .big-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent2), #9b8ffc);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 16px;
+    font-family: 'Lato', Georgia, serif;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .big-btn:hover { opacity: 0.88; transform: translateY(-2px); }
+  .big-btn.gold { background: linear-gradient(135deg, #b8922a, var(--accent)); }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:none; } }
+</style>
+</head>
+<body>
+<style>
+  .prova-real-section{max-width:760px;margin:0 auto;padding:18px 16px 8px;font-family:Georgia,serif;}
+  .prova-real-banner{background:linear-gradient(135deg,#7a1f1f,#a82c2c);color:#fff8e8;border-radius:14px;padding:18px 20px;margin-bottom:16px;text-align:center;box-shadow:0 4px 18px rgba(168,44,44,.35);}
+  .prova-real-banner h2{font-size:1.25rem;margin:0 0 4px;letter-spacing:.03em;}
+  .prova-real-banner p{font-size:.82rem;opacity:.9;margin:0;}
+  .prova-real-list{display:flex;flex-direction:column;gap:10px;margin-bottom:22px;}
+  .prova-real-q{background:#fff8e8;border:2px solid #c9a84c;border-radius:10px;padding:14px 16px;}
+  .prova-real-q summary{cursor:pointer;font-weight:700;color:#3a2a10;list-style:none;display:flex;gap:8px;align-items:flex-start;}
+  .prova-real-q summary::before{content:"▸";color:#a82c2c;flex-shrink:0;transition:transform .2s;}
+  .prova-real-q[open] summary::before{transform:rotate(90deg);}
+  .prova-real-q summary::-webkit-details-marker{display:none;}
+  .prova-real-tag{display:inline-block;font-size:.65rem;background:#a82c2c;color:#fff;padding:2px 8px;border-radius:99px;margin-bottom:6px;letter-spacing:.05em;}
+  .prova-real-answer{margin-top:10px;padding-top:10px;border-top:1px dashed #c9a84c;color:#2a2a28;font-size:.92rem;line-height:1.5;}
+  .prova-real-answer b{color:#1e6b3a;}
+  .prova-real-answer .err{color:#a82c2c;text-decoration:line-through;opacity:.7;}
+  .prova-real-answer .ok{color:#1e6b3a;font-weight:700;}
+  .prova-real-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.88rem;}
+  .prova-real-table td{padding:5px 8px;border-bottom:1px solid #e8dcc0;}
+  .prova-real-divider{text-align:center;margin:30px 0 18px;position:relative;}
+  .prova-real-divider span{background:rgba(20,15,5,.85);color:#f5d77a;padding:6px 18px;font-size:.85rem;letter-spacing:.08em;border:1px solid #c9a84c;border-radius:99px;}
+  .recap-chapter-tag{display:inline-block;font-size:.7rem;background:#1e3a5f;color:#dce8f5;padding:3px 10px;border-radius:99px;margin:14px 0 8px;letter-spacing:.04em;font-weight:600;}
+  .recap-chapter-tag:first-child{margin-top:0;}
+  .prova-real-banner.recap-banner{background:linear-gradient(135deg,#1e3a5f,#2d5a8f);box-shadow:0 4px 18px rgba(30,58,95,.35);}
+
+  .tabs-nav{display:flex;gap:8px;max-width:760px;width:100%;margin:16px auto 0;padding:0 16px;position:relative;z-index:1;}
+  .tab-btn{flex:1;padding:13px 8px;border-radius:10px;border:1.5px solid #c9a84c;background:#1a1814;color:#e8c96a;font-weight:700;font-size:13.5px;cursor:pointer;font-family:'Lato',Georgia,serif;transition:all .15s;letter-spacing:.2px;}
+  .tab-btn:hover{background:#2e2a22;}
+  .tab-btn.active{background:#c9a84c;color:#1a1410;box-shadow:0 2px 8px rgba(201,168,76,.35);}
+  .tab-content{display:none;width:100%;}
+  .tab-content.active{display:flex;flex-direction:column;align-items:center;}
+</style>
+
+<div class="tabs-nav">
+  <button class="tab-btn" id="tabbtn-simulado" onclick="showTab('simulado')">📝 Simulado</button>
+  <button class="tab-btn" id="tabbtn-recap" onclick="showTab('recap')">📖 Recapitulação</button>
+  <button class="tab-btn" id="tabbtn-prova" onclick="showTab('prova')">🎯 Prova</button>
+</div>
+
+<div class="tab-content" id="view-prova">
+<div class="prova-real-section">
+  <div class="prova-real-banner">
+    <h2>🎯 O QUE CAI NA PROVA</h2>
+    <p>Estas são as questões EXATAS do gabarito oficial — Escatologia (IBBC Ferraz-Centro)</p>
+  </div>
+  <div class="prova-real-list">
+
+    <details class="prova-real-q"><summary>1. O que é Escatologia?</summary>
+      <div class="prova-real-answer"><span class="ok">Resposta:</span> Estudo das últimas coisas e dos acontecimentos finais.</div></details>
+
+    <details class="prova-real-q"><summary>2. Qual livro da Bíblia é o principal livro profético sobre os acontecimentos finais?</summary>
+      <div class="prova-real-answer"><span class="ok">Resposta:</span> Apocalipse.</div></details>
+
+    <details class="prova-real-q"><summary>3. O que significa "Arrebatamento"?</summary>
+      <div class="prova-real-answer"><span class="ok">Resposta:</span> A retirada da Igreja para encontrar-se com Cristo.</div></details>
+
+    <details class="prova-real-q"><summary>4. Segundo a Bíblia, quem julgará vivos e mortos?</summary>
+      <div class="prova-real-answer"><span class="ok">Resposta:</span> Jesus Cristo.</div></details>
+
+    <details class="prova-real-q"><summary>5. O que é a Grande Tribulação?</summary>
+      <div class="prova-real-answer"><span class="ok">Resposta:</span> Um período de grande sofrimento e juízo sobre a Terra.</div></details>
+
+    <details class="prova-real-q"><summary>6. Quem é identificado nas Escrituras como o Anticristo?</summary>
+      <div class="prova-real-answer"><span class="ok">Resposta:</span> Um opositor de Cristo e do Evangelho.</div></details>
+
+    <details class="prova-real-q"><summary>7. O que acontecerá na Segunda Vinda de Cristo?</summary>
+      <div class="prova-real-answer"><span class="ok">Resposta:</span> Cristo voltará em glória e poder.</div></details>
+
+    <details class="prova-real-q"><summary>8. O que é o Milênio?</summary>
+      <div class="prova-real-answer"><span class="ok">Resposta:</span> Um período de mil anos mencionado em Apocalipse 20.</div></details>
+
+    <details class="prova-real-q"><summary>9. O que é o Juízo Final?</summary>
+      <div class="prova-real-answer"><span class="ok">Resposta:</span> O julgamento definitivo de toda a humanidade.</div></details>
+
+    <details class="prova-real-q"><summary>10. Qual será o destino final dos salvos segundo Apocalipse?</summary>
+      <div class="prova-real-answer"><span class="ok">Resposta:</span> Habitar nos Novos Céus e Nova Terra com Deus.</div></details>
+
+  </div>
+</div>
+</div>
+
+<div class="tab-content" id="view-recap">
+<div class="prova-real-section">
+  <div class="prova-real-banner recap-banner">
+    <h2>📖 RECAPITULAÇÕES DA APOSTILA</h2>
+    <p>Questões de fixação ao final de cada capítulo — Recapitulações 1 a 13 + Considerações Finais</p>
+  </div>
+  <div class="prova-real-list">
+
+    <span class="recap-chapter-tag">CAP. 1 — Definição e Relevância da Escatologia (RECAPITULAÇÃO 1, 2 e 3)</span>
+
+    <details class="prova-real-q"><summary>1RI. Leia a frase e faça um comentário, expressando seu ponto de vista: "Os acontecimentos têm levado o povo de Deus a dar importância a determinada doutrina ou ignorá-la. Tudo vai depender do que aquela sociedade estiver vivendo no âmbito social."</summary>
+      <div class="prova-real-answer">A frase é verdadeira — fatores sociais, políticos e religiosos historicamente influenciam o quanto a Igreja valoriza a escatologia. Ex.: no Brasil, até meados do séc. XX, havia forte expectativa messiânica pentecostal sobre a volta de Jesus; depois de 50 anos, esse conteúdo praticamente foi abandonado nas igrejas dos grandes centros, à medida que a busca por satisfação pessoal ("Crente Shopping Center") tomou o lugar do interesse pelas últimas coisas.</div></details>
+
+    <details class="prova-real-q"><summary>2RI. O nome "escatologia" baseia-se nas ___ da Escritura que falam sobre 'os últimos dias' (eschatai hemerai), Is 2.2; Mq 4.1, os 'últimos ___' (eschatos ton chronon), 1Pe 1.20, e a 'última hora' (eschate ___), 1Jo 2.18</summary>
+      <div class="prova-real-answer">Baseia-se nas <b>passagens</b> da Escritura que falam sobre 'os últimos dias', os 'últimos <b>tempos</b>' e a 'última <b>hora</b>'. O termo vem do grego "eschatos" (último/final) + "logos" (estudo/palavra).</div></details>
+
+    <details class="prova-real-q"><summary>3R1. Mencione três textos bíblicos onde apareça a presença do pensamento escatológico dos hebreus no VT</summary>
+      <div class="prova-real-answer">Exemplos: Isaías 9.6-7 (o "Emanuel" prometido); Isaías 11.1-5 (o rebento de Jessé, redentor de Israel); Salmo 2; Gênesis 49.10 ("o cetro não se arredará de Judá... até que venha aquele a quem pertence"). A esperança messiânica era construída na perspectiva do cumprimento da "promessa-mãe" feita ao homem caído no Éden, e do redentor humano por meio de um filho da mulher.</div></details>
+
+    <details class="prova-real-q"><summary>4R1 / 2R1. A experiência ___ e social foi elementos essenciais para ___ da escatologia do povo do VT, ou seja, os ___ faziam uma interpretação do advento ___ a partir das experiências diárias</summary>
+      <div class="prova-real-answer">A experiência <b>religiosa</b> e social foi elementos essenciais para a <b>construção</b> da escatologia do povo do VT — os <b>hebreus</b> faziam uma interpretação do advento <b>escatológico</b> a partir das experiências diárias (ex.: quando estavam em guerra, esperavam um restaurador espiritual com derramar do Espírito; quando a nação estava no exílio, esperavam um redentor guerreiro).</div></details>
+
+    <details class="prova-real-q"><summary>3R1 (cap. 1.3). Quais são as duas perguntas que os discípulos de Jesus fizeram que mostra a expectativa escatológica?</summary>
+      <div class="prova-real-answer">"Quando serão essas coisas?" e "Que sinal haverá da tua vinda e do fim do mundo/era?" — perguntas feitas a Jesus no discurso do Monte das Oliveiras (Mt 24.3).</div></details>
+
+    <details class="prova-real-q"><summary>4R1. Quais são os principais ensinos de Jesus encontrados nos evangelhos sinópticos acerca dos adventos escatológicos?</summary>
+      <div class="prova-real-answer">Os principais ensinos estão no discurso do Monte das Oliveiras (Mt 24-25; Mc 13; Lc 21): sinais antes do fim, a Grande Tribulação, a vinda do Filho do Homem com poder e glória, as parábolas do Reino (talentos, virgens, ovelhas e cabritos) e a exortação à vigilância.</div></details>
+
+    <span class="recap-chapter-tag">CAP. 2 — A Morte (RECAPITULAÇÃO 4 e 5)</span>
+
+    <details class="prova-real-q"><summary>1R2. Quando falamos em ___ estamos nos referido ao fim da ___ terrena do homem, ocorre que não é apenas o ___ que morre, mas também outros seres viventes ___ por Deus</summary>
+      <div class="prova-real-answer">Quando falamos em <b>morte</b> estamos nos referindo ao fim da <b>vida</b> terrena do homem — não é apenas o <b>homem</b> que morre, mas também outros seres viventes <b>criados</b> por Deus.</div></details>
+
+    <details class="prova-real-q"><summary>2R2. A morte física aniquila o homem? Justifique sua resposta</summary>
+      <div class="prova-real-answer">Não. A morte física é a separação entre o corpo e a alma — a transição do homem do mundo físico para o espiritual. Não é a aniquilação do homem, mas a continuação da vida espiritual e eterna (Mt 10.28; Lc 12.4; Ec 12.7).</div></details>
+
+    <details class="prova-real-q"><summary>3R2. A que tipo de morte Gn 2.17 está se referindo?</summary>
+      <div class="prova-real-answer">À morte espiritual — a separação eterna entre o homem e Deus, que ocorreu quando Adão desobedeceu (Gn 2.17), e não apenas à morte física (que veio como consequência posterior).</div></details>
+
+    <details class="prova-real-q"><summary>1R2 (cap. 2.2). Quando falamos em [morte espiritual] estamos nos referindo ao fim da [comunhão] que morre, mas também...</summary>
+      <div class="prova-real-answer">A morte espiritual é a separação eterna entre o homem e Deus. Encontramos na queda de Adão que desobedeceu a Deus e, segundo o próprio Deus havia advertido, morreu espiritualmente (Gn 2.17) e não em sua morte física, porque ele continuou vivendo fora do Paraíso, distante de Deus.</div></details>
+
+    <details class="prova-real-q"><summary>4R2. Por que surgiu a teoria de que os crentes que morrem estão dormindo?</summary>
+      <div class="prova-real-answer">Surgiu de uma interpretação literal de textos que descrevem a morte como "sono" (ex.: 1Ts 4.13-18; Jo 11.11), sendo usada por alguns grupos religiosos (como as Testemunhas de Jeová) para defender o "sono da alma" — a ideia de que a alma fica inconsciente entre a morte e a ressurreição, o que contraria a maioria dos teólogos evangélicos, que defendem que os salvos vão para o Paraíso e ficam conscientes com Cristo até o arrebatamento.</div></details>
+
+    <details class="prova-real-q"><summary>2.3 O conceito católico romano e o conceito protestante sobre o pós-morte</summary>
+      <div class="prova-real-answer"><b>Protestante/evangélico:</b> não há estado intermediário de purificação — o crente, ao morrer, vai imediatamente para a presença de Cristo (2Co 5.8; Fp 1.23), e o ímpio para um lugar de tormento consciente (Lc 16.19-31). <b>Católico romano:</b> ensina a existência do purgatório, lugar onde as almas ficam temporariamente para purificar seus pecados e imperfeições antes de entrar na presença de Deus, podendo a duração do sofrimento ser abreviada por orações e boas obras dos vivos.</div></details>
+
+    <details class="prova-real-q"><summary>2.3.3 No conceito de diversas religiões sobre o pós-morte</summary>
+      <div class="prova-real-answer">Para os muçulmanos, os heróis de Alá vão para o paraíso e os infiéis são aniquilados com tormento. Para os hindus e budistas, as almas voltam a este mundo através da transmigração/reencarnação até alcançarem a bem-aventurança eterna ("Nirvana" para os budistas, união com Brama para os bramanes).</div></details>
+
+    <span class="recap-chapter-tag">CAP. 3 — A Segunda Vinda de Jesus Cristo (RECAPITULAÇÃO 6 e 7)</span>
+
+    <details class="prova-real-q"><summary>1R3 — Qual será o caráter da vinda de Cristo?</summary>
+      <div class="prova-real-answer">Será uma vinda pessoal, visível e gloriosa — Cristo voltará como glorioso conquistador, supremo juiz e redentor de toda a criação, o Rei dos reis e Senhor dos senhores (Ap 19.16), acompanhado de seus santos e anjos, visível a todas as nações (Mt 24.30; Ap 1.7).</div></details>
+
+    <details class="prova-real-q"><summary>2R3 — Quais os termos usados para a Vinda de Cristo?</summary>
+      <div class="prova-real-answer">Os seis principais termos gregos: <b>Parousia</b> (vinda/presença), <b>Phanerosis</b> (manifestação), <b>Epiphaneia</b> (aparecimento/resplendor), <b>Apokalypsis</b> (revelação), <b>Hêmera</b> (dia) e <b>Erchomai</b> (vir). O uso de uma variedade de termos não é indicação de que haverá dois estágios na segunda vinda — antes os termos são intercambiáveis e apontam para um único evento.</div></details>
+
+    <details class="prova-real-q"><summary>3.4 Os sinais da segunda vinda de Cristo — Primários e Secundários</summary>
+      <div class="prova-real-answer"><b>Primários:</b> são os sinais declarados explicitamente nas Escrituras como evidência de proximidade do dia do Senhor (ex.: grande apostasia, falsos pastores e evangelistas que pregam um pseudo-evangelho — 2Ts 2.3; 1Tm 4.1; 2Tm 3.1-5). <b>Secundários:</b> são dedutivos, não explícitos, mas evidências que antecedem os primários (ex.: avanço tecnológico que possibilitaria o controle populacional descrito em Apocalipse sobre a besta).</div></details>
+
+    <details class="prova-real-q"><summary>RECAPITULAÇÃO 07: Quais são os termos usados para a Vinda de Cristo? (repetição)</summary>
+      <div class="prova-real-answer">Parousia, Phanerosis, Epiphaneia, Apokalypsis, Hêmera e Erchomai — todos esses termos gregos do NT, usados de cada vez, percebemos progressivamente a glória desse acontecimento apoteótico na história. O uso de uma variedade de termos não é indicação de que haverá dois estágios na vinda; antes, os termos são intercambiáveis e apontam para um único evento.</div></details>
+
+    <span class="recap-chapter-tag">CAP. 4 — Concepções Tribulacionistas (RECAPITULAÇÃO 8 e 9)</span>
+
+    <details class="prova-real-q"><summary>4.1 Pré-Tribulacionismo — 1R4. No que crê o pré-tribulacionismo?</summary>
+      <div class="prova-real-answer">Crê que a Igreja será arrebatada antes do início da Grande Tribulação (período de 7 anos, a 70ª semana de Daniel), não passando por nenhuma parte da ira de Deus derramada sobre a Terra. O arrebatamento é visto como um evento iminente, sem sinais que precisem ocorrer antes.</div></details>
+
+    <details class="prova-real-q"><summary>2R4. Cite dois aspectos positivos e dois negativos do pré-tribulacionismo</summary>
+      <div class="prova-real-answer"><b>Positivos:</b> mantém viva a expectativa da iminência da volta de Cristo; livra a Igreja da ira de Deus, em coerência com a promessa de 1Ts 5.9. <b>Negativos:</b> o termo "arrebatamento" usado para os fiéis decorrentes não tem base bíblica explícita unindo Israel e Igreja em uma distinção radical; o termo "parousia" é usado tanto para o arrebatamento quanto para a vinda em glória, o que gera dificuldade de sustentar dois eventos separados.</div></details>
+
+    <details class="prova-real-q"><summary>3R4. O que afirma o pré-tribulacionismo sobre a relação Israel x igreja?</summary>
+      <div class="prova-real-answer">Afirma uma distinção radical entre Israel e a Igreja — Israel teria um propósito separado no plano de Deus, e a Igreja seria um "parêntese" nesse plano, sendo removida (arrebatada) antes que Deus retome seu trato profético com a nação de Israel durante a Tribulação.</div></details>
+
+    <details class="prova-real-q"><summary>4.2 Pós-Tribulacionismo — 1R4 (cap. seguinte). No que crê o pós-tribulacionismo?</summary>
+      <div class="prova-real-answer">A premissa básica é que a Igreja não será removida do mundo antes da tribulação — pelo contrário, passará por ela. A Segunda Vinda será um evento único, em duas fases simultâneas: o arrebatamento ocorrerá após a Grande Tribulação, quando a igreja sairá ao encontro de Cristo nos ares e retornará imediatamente à terra com Ele para reinar.</div></details>
+
+    <details class="prova-real-q"><summary>2R4 (pós-trib). Cite dois aspectos positivos e dois negativos do pós-tribulacionismo</summary>
+      <div class="prova-real-answer"><b>Positivos:</b> interpretação mais simples e menos literal dos eventos escatológicos; harmoniza melhor a descrição de Mateus 24.29-31 com 1Ts 4.16-17 (mesma descida do Senhor, trombeta e reunião do povo de Deus). <b>Negativos:</b> tem dificuldade em explicar a ausência da palavra "igreja" em todas as passagens bíblicas relacionadas à tribulação (nem mesmo em Apocalipse 4-21); deixa a Igreja passar pela ira de Deus.</div></details>
+
+    <details class="prova-real-q"><summary>6R4. O que afirma o pós-tribulacionismo sobre a relação Israel x igreja?</summary>
+      <div class="prova-real-answer">Não há base bíblica para uma distinção radical entre Israel e a Igreja. O Novo Testamento não retrata o futuro de Israel como um reino político milenial separado na Palestina, mas como um reino de bênçãos compartilhado com todos os remidos de todas as eras, numa nova Terra restaurada.</div></details>
+
+    <details class="prova-real-q"><summary>7R4. Mencione outras concepções tribulacionistas</summary>
+      <div class="prova-real-answer">Meso-Tribulacionismo (Mid), Arrebatamento Parcial, Pré-Ira e Pós-tribulacionismo iminente — posições intermediárias surgidas da tensão entre pré e pós-tribulacionistas, sem grande número de proponentes.</div></details>
+
+    <details class="prova-real-q"><summary>4.3 Posições intermediárias — 1) Meso Tribulacionismo (Mid)</summary>
+      <div class="prova-real-answer">Sustenta que a igreja enfrentará a primeira metade da Grande Tribulação e depois será removida — é uma combinação do pré e do pós-tribulacionismo, vendo a igreja na terra durante pelo menos parte da tribulação.</div></details>
+
+    <details class="prova-real-q"><summary>2) Arrebatamento Parcial / 3) Arrebatamento Pré-Ira</summary>
+      <div class="prova-real-answer"><b>Arrebatamento Parcial:</b> só os crentes fiéis e vigilantes serão arrebatados antes do milênio; os demais passarão pela tribulação. <b>Arrebatamento Pré-Ira:</b> o arrebatamento ocorrerá entre o sexto e o sétimo selo (Ap 6.12-8.1) — será próximo do fim da Grande Tribulação, mas antes do derramamento final da ira de Deus.</div></details>
+
+    <details class="prova-real-q"><summary>4) Pós-tribulacionismo iminente</summary>
+      <div class="prova-real-answer">Os sinais apocalípticos de Mt 24.4-29 e Mc 13.24-25, segundo o defensor Sphen S. Short, poderiam ser uma descrição apocalíptica da queda de Jerusalém e suas consequências, e não da Grande Tribulação futura — assim, o arrebatamento ainda poderia acontecer a qualquer momento, sem sinais pendentes.</div></details>
+
+    <span class="recap-chapter-tag">CAP. 5 — Concepções Milenistas</span>
+
+    <details class="prova-real-q"><summary>5.1 Pré-Milenismo</summary>
+      <div class="prova-real-answer">Os pré-milenistas creem que Cristo voltará antes do início dos mil anos mencionados em Apocalipse 20. Nesse período, Satanás ficará preso, Cristo reinará pessoalmente sobre a terra com seus santos a partir de Jerusalém, e haverá paz e justiça universais antes do juízo final.</div></details>
+
+    <details class="prova-real-q"><summary>5.2 Amilenismo</summary>
+      <div class="prova-real-answer">Os amilenistas acreditam que não haverá um reinado literal de mil anos na terra. O "milênio" de Apocalipse 20 é simbólico e representa o reinado espiritual de Cristo na igreja e nos corações dos crentes entre a primeira e a segunda vinda — Satanás já está, em certo sentido, atado desde a cruz.</div></details>
+
+    <details class="prova-real-q"><summary>5.3 Pós-Milenismo</summary>
+      <div class="prova-real-answer">Os pós-milenistas não entendem o milênio como um período literal de mil anos, mas como um tempo de duração indeterminada em que o evangelho e a influência transformadora do cristianismo se espalharão e prevalecerão progressivamente sobre o mundo, antes do retorno de Cristo, promovendo justiça social, a partir da pregação do Evangelho e da obra salvadora do Espírito Santo no coração dos indivíduos.</div></details>
+
+    <span class="recap-chapter-tag">A 70ª Semana de Daniel e o Milênio</span>
+
+    <details class="prova-real-q"><summary>O que é a 70ª Semana de Daniel?</summary>
+      <div class="prova-real-answer">É o período profético de sete anos descrito em Daniel 9.24-27, que muitos pré-tribulacionistas identificam como a Grande Tribulação — período de aliança entre o Anticristo e Israel, dividido em duas metades de 3,5 anos, culminando no Tribunal de Cristo e nas Bodas do Cordeiro antes da segunda vinda visível.</div></details>
+
+    <span class="recap-chapter-tag">CAP. 6 — A Ressurreição dos Mortos (RECAPITULAÇÃO 11 e 12)</span>
+
+    <details class="prova-real-q"><summary>RECAPITULAÇÃO 11. Numere a primeira coluna com os acontecimentos correspondentes da segunda</summary>
+      <div class="prova-real-answer">
+        <table class="prova-real-table">
+          <tr><td>( 3 ) Pré-milenistas</td><td>→ 1. Jesus volta depois da grande tribulação.</td></tr>
+          <tr><td>( 4 ) Amilenistas</td><td>→ 2. Jesus virá depois do milênio.</td></tr>
+          <tr><td>( 2 ) Pós-milenistas</td><td>→ 3. Jesus volta antes da grande tribulação.</td></tr>
+          <tr><td>( 1 ) Pré-tribulacionistas</td><td>→ 4. O milênio já começou no coração dos crentes.</td></tr>
+          <tr><td>( 5 ) Pós-tribulacionistas</td><td>→ 5. O milênio começa com o arrebatamento da igreja.</td></tr>
+        </table>
+        <i>(associação conforme a doutrina de cada grupo descrita na apostila)</i>
+      </div></details>
+
+    <details class="prova-real-q"><summary>RECAPITULAÇÃO 12 — 1R6. Onde estão as evidências bíblicas de que no VT ensinava sobre a ressurreição dos mortos?</summary>
+      <div class="prova-real-answer">Em textos como Jó 19.25-27; Isaías 26.19; Daniel 12.2; Salmo 16.10-11 — que já indicavam a esperança da ressurreição corporal antes mesmo da revelação plena no Novo Testamento.</div></details>
+
+    <details class="prova-real-q"><summary>2R6. O corpo de todos quanto ___ será levantado dentre os mortos e ___ unido ao seu respectivo espírito, para o ___ do grande dia</summary>
+      <div class="prova-real-answer">O corpo de todos quanto <b>morreram</b> será levantado dentre os mortos e <b>novamente</b> unido ao seu respectivo espírito, para o <b>julgamento</b> do grande dia.</div></details>
+
+    <details class="prova-real-q"><summary>6.1 A Natureza da ressurreição</summary>
+      <div class="prova-real-answer">A ressurreição será para todos — tanto justos quanto ímpios (Dn 12.2; Jo 5.28-29; At 24.15) — mas com destinos diferentes. O corpo de todos quantos morreram será levantado dentre os mortos e novamente unido a seu respectivo espírito, no contexto do que ensinam algumas seitas que afirmam o contrário.</div></details>
+
+    <details class="prova-real-q"><summary>6.2 Os dois tipos de ressurreição</summary>
+      <div class="prova-real-answer"><b>Ressurreição para vida eterna:</b> dos justos, que receberão corpos dados por Deus (1Co 15.35,38), imortais e incorruptíveis (1Co 15.42), poderosos (1Co 15.43) e gloriosos (1Co 15.42; Mt 13.43), por ocasião da volta de Cristo, quando soará uma trombeta que anunciará o momento (1Ts 4.14-17). <b>Ressurreição para morte eterna:</b> dos ímpios, existindo divergência entre os teólogos quanto ao momento — pré-milenistas defendem que ela ocorrerá no fim do milênio, separada da dos justos; pós-milenistas defendem uma única ressurreição simultânea de justos e ímpios, seguida do juízo final.</div></details>
+
+    <span class="recap-chapter-tag">CAP. 7 — O Julgamento Final (RECAPITULAÇÃO 12)</span>
+
+    <details class="prova-real-q"><summary>1R7. O apóstolo Paulo ___ esse dia como o do "Tribunal de Cristo" onde cada um ___ de Israel, os justos, os ___ pelo que fez em vida (2Co 5.10). Serão julgados por Deus, em Jesus, a ___, Satanás e os ___ decaídos</summary>
+      <div class="prova-real-answer">O apóstolo Paulo <b>denomina</b> esse dia como o do "Tribunal de Cristo" onde cada um <b>receberá</b>, de Israel, os justos, os <b>ímpios</b> pelo que fez em vida (2Co 5.10). Serão julgados por Deus, em Jesus, a <b>humanidade</b>, Satanás e os <b>anjos</b> decaídos.</div></details>
+
+    <details class="prova-real-q"><summary>7.1 O Julgamento de Israel</summary>
+      <div class="prova-real-answer">Apesar de não ser um tema de unanimidade entre os cristãos, especialmente entre pré-milenistas, afirma-se um julgamento específico sobre a nação de Israel quando ocorrerá a provação e o juízo para a restauração, conforme Ez 20.33-38; Dn 12.1-2; Mt 24.31, ao tempo da tribulação, à porta do milênio, com base em uma aliança final do Messias sobre o trono de Davi.</div></details>
+
+    <details class="prova-real-q"><summary>7.2 O Julgamento dos justos</summary>
+      <div class="prova-real-answer">Existem conclusões diferentes entre os teólogos cristãos sobre quando ocorrerá o julgamento e o que se esperam os justos e injustos. Os pré-milenistas afirmam que será uma ocasião pública de avaliação dos santos, para dar a recompensa (galardão) de acordo com a obra de cada um, no retorno do Senhor à terra para reinar (Ap 20.10).</div></details>
+
+    <details class="prova-real-q"><summary>7.3 O Julgamento dos injustos</summary>
+      <div class="prova-real-answer">Ocorre diante do "Grande Trono Branco" (Ap 20.11-15), no fim do milênio (perspectiva pré-milenista) — todos os ímpios de todas as eras serão ressuscitados e julgados de acordo com suas obras, sendo lançados no lago de fogo, a segunda morte.</div></details>
+
+    <details class="prova-real-q"><summary>7.4 O Julgamento de Satanás e dos Anjos decaídos</summary>
+      <div class="prova-real-answer">Satanás, que já recebeu a sentença na cruz (Cl 2.15), terá sua condenação final consumada — será lançado no lago de fogo (Ap 20.10) juntamente com os anjos que se rebelaram, para sofrer tormento eterno, dia e noite, para todo o sempre.</div></details>
+
+    <span class="recap-chapter-tag">CAP. 8 — O Estado Final (RECAPITULAÇÃO 13)</span>
+
+    <details class="prova-real-q"><summary>8.1 Dos justos</summary>
+      <div class="prova-real-answer">O estado final dos crentes será precedido pelo surgimento da nova criação (Mt 19.28; At 3.21). Os salvos estarão em estado acabado e definido, sem mais nenhuma mudança — os justos serão perfeitos e habitarão em lugar perfeito, vendo a Deus face a face. A maior recompensa dos justos será a morada celeste por toda a eternidade, não apenas uma vida sem fim, mas uma vida em toda plenitude, sem nenhuma das imperfeições e distúrbios da vida presente (Mt 25.46; Rm 2.7).</div></details>
+
+    <details class="prova-real-q"><summary>2R8. A maior recompensa dos ___, não apenas uma vida sem fim, mas uma ___, sem dúvida, será a morada celeste por toda ___ e distúrbios da vida presente (Mt 25.46; Rm 2.7), em toda plenitude, sem nenhuma das ___</summary>
+      <div class="prova-real-answer">A maior recompensa dos <b>justos</b>, não apenas uma vida sem fim, mas uma <b>vida</b>, sem dúvida, será a morada celeste por toda <b>eternidade</b> e distúrbios da vida presente (Mt 25.46; Rm 2.7), em toda plenitude, sem nenhuma das <b>imperfeições</b>.</div></details>
+
+    <details class="prova-real-q"><summary>8.2 Dos injustos</summary>
+      <div class="prova-real-answer">Apesar de haver uma corrente moderna que defende a ideia de que não existe punição eterna, dizem que a palavra inferno é figurada, ou ainda os extincionistas/universalistas creem que o inferno e a punição eterna seriam incoerentes com o conceito de um Deus amoroso. Porém a Bíblia afirma que a punição eterna é uma expressão de justiça divina. Existem várias referências razoáveis que ensinam a existência permanente dos ímpios: separação de Deus, trevas exteriores, fogo eterno ou inextinguível, tormento eterno, castigo eterno, destruição/perdição (ruína) eterna, onde não morre o verme, ira de Deus, retribuição e segunda morte.</div></details>
+
+    <details class="prova-real-q"><summary>3R8. Numere com 1 para céu e 2 para inferno</summary>
+      <div class="prova-real-answer">
+        <table class="prova-real-table">
+          <tr><td>( 2 ) Ap 14.10,11</td><td>tormento eterno</td></tr>
+          <tr><td>( 2 ) 2Ts 1.8,9</td><td>destruição eterna</td></tr>
+          <tr><td>( 1 ) Jo 14.2,3</td><td>onde Jesus está</td></tr>
+          <tr><td>( 2 ) 2Tm 4.8</td><td>(referência ao justo juiz — atenção ao contexto)</td></tr>
+          <tr><td>( 2 ) Mt 23.13</td><td>trevas exteriores</td></tr>
+          <tr><td>( 1 ) Hb 12.2</td><td>autor e consumador da fé, à direita do trono</td></tr>
+        </table>
+      </div></details>
+
+    <details class="prova-real-q"><summary>CONSIDERAÇÕES FINAIS — o que conclui a apostila?</summary>
+      <div class="prova-real-answer">Diante de tantos assuntos polêmicos que envolvem a escatologia, a disciplina deixa muitas margens para dúvidas ou interpretações ambíguas, principalmente quanto ao arrebatamento, à tribulação e ao milênio. A Igreja "O Brasil Para Cristo" assume posição pré-tribulacionista, arminiana e pré-milenista — mas respeita os que têm uma compreensão bíblica diferente, sem se considerar superior ou inferior aos demais grupos evangélicos. O que une todas as posições: Jesus voltará, haverá ressurreição dos mortos, juízo final, condenação dos ímpios ao inferno, e a Igreja amada do Senhor terá Jesus Cristo como único Senhor e Salvador.</div></details>
+
+  </div>
+</div>
+</div>
+
+<div class="tab-content" id="view-simulado">
+<div id="app">
+  <div class="top-header">
+    <div class="eyebrow">Teologia Sistemática</div>
+    <h1>Simulado de Escatologia</h1>
+    <p>Estudo das últimas coisas — morte, ressurreição, juízo final e estado eterno</p>
+  </div>
+
+  <!-- STATS BAR — estrutura fixa com IDs que o JS precisa -->
+  <div id="stats-bar" style="display:none">
+    <div class="stat-box">
+      <div class="num" id="s-rodada">1/10</div>
+      <div class="lbl">Rodada</div>
+    </div>
+    <div class="stat-box">
+      <div class="num" id="s-q">1/10</div>
+      <div class="lbl">Questão</div>
+    </div>
+    <div class="stat-box acerto">
+      <div class="num" id="s-acertos">0</div>
+      <div class="lbl">Acertos</div>
+    </div>
+    <div class="stat-box erro">
+      <div class="num" id="s-erros">0</div>
+      <div class="lbl">Erros</div>
+    </div>
+  </div>
+
+  <!-- PROGRESS BAR — estrutura fixa com ID que o JS precisa -->
+  <div id="progress-wrap" style="display:none">
+    <div class="progress-labels">
+      <span>Progresso</span>
+      <span id="prog-label">0 / 100</span>
+    </div>
+    <div class="progress-track">
+      <div id="prog"></div>
+    </div>
+  </div>
+
+  <div id="main"></div>
+</div>
+</div>
+
+<script>
+const QUESTIONS = [
+// ── RODADA 1 ── Introdução & Definição
+[
+{q:"O que significa etimologicamente a palavra 'Escatologia'?",
+ opts:["Estudo dos profetas","Estudo das últimas coisas","Estudo do fim do mundo","Estudo dos anjos"],
+ c:1, exp:"Escatologia vem do grego 'eschatos' (último/final) + 'logos' (estudo). É o estudo das últimas coisas: morte, ressurreição, juízo final e estado eterno."},
+
+{q:"Qual crítica o material faz à geração do 'Crente Shopping Center'?",
+ opts:["Excesso de oração e jejum","Pessoas satisfeitas com a vida presente, onde o TER é mais importante que o SER","Falta de evangelismo","Excesso de teologia sistemática"],
+ c:1, exp:"O material critica a geração que busca satisfação pessoal imediata, onde doutrinas como Escatologia são vistas como sem importância prática. O 'TER' supera o 'SER'."},
+
+{q:"Quais são os três motivos pelos quais o material diz NÃO ser possível esgotar o assunto da escatologia?",
+ opts:["É assunto novo, pouco estudado e sem base bíblica","É um dos assuntos mais complexos da Bíblia, é muito profundo e é necessário retomá-lo","Os professores não dominam o tema, falta bibliografia e o tempo é curto","O assunto muda com o tempo, é irrelevante e controverso"],
+ c:1, exp:"Os três motivos são: 1) É um dos assuntos mais complexos da Bíblia, com pouco consenso. 2) É muito profundo e temos limitações intelectuais. 3) É necessário retomá-lo para dar valor aos adventos escatológicos que envolvem a Igreja."},
+
+{q:"Onde a escatologia tem sua presença e origem segundo o material?",
+ opts:["Apenas no Novo Testamento","No livro do Apocalipse exclusivamente","No Velho Testamento (VT), adentrando ao NT","Somente nas cartas de Paulo"],
+ c:2, exp:"O material aborda as características da escatologia partindo de sua presença e origem no VT (Velho Testamento), adentrando ao NT (Novo Testamento), com 'pinceladas' na história até nossos dias."},
+
+{q:"Qual era o problema dos crentes pentecostais no Brasil até meados do século XX segundo a introdução?",
+ opts:["Excesso de teologia sem prática","Uma expectativa messiânica que pregava com ênfase a volta de Jesus e depois os abandonaram","Falta de igrejas nos grandes centros","Divisões denominacionais constantes"],
+ c:1, exp:"Os crentes pentecostais assembleanos tinham uma expectativa messiânica com ênfase na volta de Jesus e no batismo com Espírito Santo. Após 50 anos, praticamente abandonaram esse conteúdo nas igrejas dos grandes centros."},
+
+{q:"O que são os termos 'Parousia', 'Phanerosis', 'Epiphaneia', 'Apokalypsis', 'Hemera' e 'Erchomai'?",
+ opts:["Nomes dos sete anjos do Apocalipse","Termos gregos usados para o retorno de Jesus Cristo","Livros apócrifos do Antigo Testamento","Títulos dado a Jesus por diferentes apóstolos"],
+ c:1, exp:"Esses são os principais termos gregos do NT usados para descrever o retorno de Cristo: vinda/presença, manifestação, aparecimento/esplendor, revelação, dia e vir."},
+
+{q:"O que significa especificamente o termo grego 'Parousia'?",
+ opts:["Revelação ou descobrimento","Aparecimento resplandecente","Vinda e presença — tanto a chegada quanto o estar presente","Julgamento final"],
+ c:2, exp:"Parousia significa tanto a chegada de uma vinda quanto o 'estar presente'. É uma vinda que se 'torna presente' e 'um estar presente' durante um período curto ou longo. Em relação a Cristo, refere-se sempre à sua vinda e presença futuras."},
+
+{q:"O que significa 'Epiphaneia' no contexto da Segunda Vinda?",
+ opts:["Revelação de segredos escondidos","Aparecimento resplandecente — o esplendor radiante de Cristo que aniquila o mal","Vinda secreta e silenciosa","O dia do Senhor sem sinais"],
+ c:1, exp:"Epiphaneia literalmente significa 'resplandece'. A epifania de Cristo é tão radiante que aniquilará o mal até seu último reduto. Paulo escreve que os crentes devem viver aguardando 'a manifestação da glória do nosso grande Deus e Salvador Cristo Jesus' (Tt 2.13)."},
+
+{q:"Qual é a diferença entre 'Parousia' e 'Apokalypsis'?",
+ opts:["Não há diferença, são sinônimos perfeitos","Parousia é vinda/presença; Apokalypsis é revelação — trazer à luz o que estava escondido","Parousia é para Israel; Apokalypsis é para a Igreja","Parousia refere-se ao Pai; Apokalypsis ao Filho"],
+ c:1, exp:"Parousia foca na chegada e presença. Apokalypsis significa 'revelação' ou 'descobrimento' — trazer à luz o que era antes desconhecido. Ex: o Apocalipse de João é uma obra sobre os sofrimentos dos crentes e a glória futura de Cristo."},
+
+{q:"O que o termo 'Hemera' (Dia) representa na escatologia?",
+ opts:["O dia natural de 24 horas","O período do retorno de Cristo — 'o último dia' ou 'o dia de nosso Senhor Jesus Cristo'","O dia da criação do mundo","O dia do arrependimento"],
+ c:1, exp:"Hemera não se refere ao dia natural, mas ao período do retorno de Cristo. 'O último dia' representa a inauguração da era por vir. Ocorre nas cartas de Paulo: 'no dia de nosso Senhor Jesus Cristo' (1Co 1.8), 'o dia de Cristo' (Fp 1.6; 2.16)."}
+],
+
+// ── RODADA 2 ── Escatologia no VT e nos primeiros séculos
+[
+{q:"Como os hebreus no Antigo Testamento viam a escatologia segundo o material?",
+ opts:["Não tinham nenhuma expectativa futura","Viam a escatologia através de promessas relacionadas ao povo de Israel como Daniel, que aguardava a intervenção de Deus","Acreditavam apenas no presente sem perspectiva futura","Rejeitavam qualquer ideia de ressurreição"],
+ c:1, exp:"Como Daniel, o povo hebraico aguardava a intervenção de Deus na história. A escatologia está associada a um ambiente religioso onde alguém determina a iminência do fim, colocando a escatologia no centro como ponto fundamental."},
+
+{q:"Qual texto bíblico veterotestamentário é especialmente importante para os hebreus quanto à ressurreição?",
+ opts:["Gênesis 1.1","Daniel 12.2","Salmos 23","Provérbios 8"],
+ c:1, exp:"Daniel 12.2 é fundamental: 'E muitos dos que dormem no pó da terra ressuscitarão, uns para a vida eterna, e outros para vergonha e horror eterno.' Este é um dos textos mais claros sobre ressurreição no VT."},
+
+{q:"O que os cristãos dos primeiros séculos esperavam ansiosamente?",
+ opts:["A construção do templo de Jerusalém","A volta do Senhor Jesus — chamavam: 'Vem, Senhor Jesus!' (Maranatha) e 'Ven, Kyrie!' (Abba-Pai)","O fim do Império Romano","A conversão de todos os judeus"],
+ c:1, exp:"Os primeiros cristãos viviam na expectativa da volta de Cristo, usando as expressões 'Maranatha' (aramaico: 'Vem, Senhor Jesus!') e 'Ven, Kyrie' (grego). Chamavam Jesus de 'Abba-Pai' (Dn 9.27) e o 'VINDANOU' (Vem, Senhor!)."},
+
+{q:"Como os romanos imaginavam a eternidade segundo o material?",
+ opts:["Como um estado de sono eterno","Como espelho desta vida — reprodução das funções e valores terrenos","Como lugar de punição para todos","Como o paraíso dos heróis apenas"],
+ c:1, exp:"Os romanos imaginavam a eternidade como espelho desta vida. Já os muçulmanos creem que os heróis de Alá vão ao paraíso e os infiéis são aniquilados. Cada cultura tem sua visão do pós-morte."},
+
+{q:"O que hindus e budistas ensinam sobre a vida após a morte?",
+ opts:["Extinção total da consciência","As almas voltam ao mundo várias vezes pela transmigração (reencarnação) até alcançar a bem-aventurança eterna","Ressurreição corporal no último dia","Purgatório temporário para todos"],
+ c:1, exp:"Hindus e budistas ensinam a transmigração das almas — a alma volta a este mundo várias vezes até alcançar a bem-aventurança. Os budistas chamam esse estado de 'Nirvana'; os brâmanes dizem que a alma se une a Brama, o poder universal."},
+
+{q:"O que a Igreja Católica Apostólica Romana ensina sobre o Purgatório?",
+ opts:["É o inferno definitivo para pecadores","É um lugar temporário onde as almas ficam para purificar seus pecados e imperfeições antes de contemplar a Deus","É o mesmo que o paraíso dos justos","É uma invenção medieval sem base em texto algum"],
+ c:1, exp:"A Igreja Católica ensina que após a morte, almas que não tiveram vida reta ficam no purgatório por algum tempo. A duração é abreviada por orações e boas obras dos fiéis. O papa tem prerrogativa de conceder indulgências. A principal base é 2 Macabeus 12.42-45."},
+
+{q:"Por que o texto de 2 Macabeus não tem autoridade para protestantes sobre o purgatório?",
+ opts:["Porque é muito antigo","Por se tratar de um livro apócrifo, não tem autoridade para os demais cristãos","Porque foi escrito em latim","Porque contradiz Gênesis"],
+ c:1, exp:"O material explica que a principal base doutrinária para o purgatório é 2 Macabeus 12.42-45, mas por se tratar de um livro apócrifo, não tem autoridade para protestantes e demais cristãos não-católicos."},
+
+{q:"O que é o 'estado intermediário' na escatologia?",
+ opts:["O estado antes do nascimento","O estado em que a alma se encontra entre a morte e a ressurreição final","O milênio de 1000 anos","O purgatório católico exclusivamente"],
+ c:1, exp:"O estado intermediário é o período entre a morte individual e a ressurreição final dos mortos. Há grande divergência entre protestantes, católicos e evangélicos sobre esse estado — alguns defendem o 'sono da alma', outros a consciência plena."},
+
+{q:"Qual é o conceito protestante do estado pós-morte segundo o material?",
+ opts:["O crente vai imediatamente para o inferno temporal","A alma entra em sono inconsciente até a ressurreição","O crente que morre vai imediatamente à presença de Jesus (2Co 5.10) enquanto aguarda a ressurreição final","Os crentes esperam no purgatório"],
+ c:2, exp:"No conceito protestante, o crente que morre vai imediatamente à presença de Jesus. Paulo fala em 2Co 5.10 e Fp 1.21-23. O incrédulo vai ao inferno (Lc 16.22-23) aguardando o juízo final. A alma está consciente, não em sono."},
+
+{q:"Qual é a posição no conceito de 'sono da alma' e por que surgiu segundo o material?",
+ opts:["Surgiu com o Papa Gregório I no século VI","Surgiu porque algumas passagens bíblicas usam a palavra 'dormir' para descrever crentes que morreram, e alguns grupos interpretam literalmente como inconsciência","Surgiu com a Reforma Protestante de Lutero","Surgiu no Concílio de Niceia"],
+ c:1, exp:"A teoria do sono da alma surgiu porque o NT usa 'dormir' para descrever a morte de crentes (Mt 27.52; 1Co 15.51; 1Ts 4.14). Alguns grupos (como Adventistas e SDAs) interpretam literalmente como inconsciência total até a ressurreição."}
+],
+
+// ── RODADA 3 ── A Morte
+[
+{q:"Qual é a definição de morte física segundo o material?",
+ opts:["A aniquilação total da pessoa","A separação entre o corpo e a alma — transição do mundo físico para o espiritual","O fim de toda consciência e existência","O estado de sono até a ressurreição"],
+ c:1, exp:"A morte física é a separação entre o corpo e a alma; a transição do homem do mundo físico para o espiritual. Mt 10.28, Lc 12.4 e Ec 12.7 falam da morte do corpo para diferenciar da morte da alma."},
+
+{q:"O que é a morte espiritual?",
+ opts:["A mesma coisa que a morte física","A separação do homem de Deus — a exclusão do 'Paraíso de Deus' (Gn 2.17) por causa do pecado","O estado no inferno após o juízo final","A morte de Adão aos 930 anos"],
+ c:1, exp:"A morte espiritual é a separação do homem de Deus e sua exclusão do Paraíso (Gn 2.17). O pecado é a causa. A condição de vida eterna está vinculada à fé salvadora em Jesus Cristo (Rm 5.21; 6.23)."},
+
+{q:"O que acontece com outras espécies vivas em consequência da queda segundo o material?",
+ opts:["Nada muda para as outras espécies","Está comprovado que as plantas morriam antes da queda humana, mas os animais não","As outras espécies também passaram a morrer por causa do pecado de Adão — antes do Éden eram imortais","As plantas e animais são imortais por natureza"],
+ c:2, exp:"O material afirma que está comprovado que as outras espécies passaram a morrer antes da entrada do pecado, por causa da queda do homem através do Jardim do Éden."},
+
+{q:"Qual a posição das Testemunhas de Jeová sobre a morte segundo o material?",
+ opts:["A alma vai imediatamente ao céu","Todos que não fizerem parte de sua seita serão aniquilados sem a possibilidade de ressurreição","A morte é apenas sono temporário para todos","O purgatório purifica todas as almas"],
+ c:1, exp:"As Testemunhas de Jeová afirmam que todos que não fizerem parte de sua seita serão aniquilados sem direito ao 'Reino de Jeová'. O material classifica isso como heresia pois nega a imortalidade da alma."},
+
+{q:"Segundo o material, qual é a causa da morte física?",
+ opts:["A evolução natural dos seres vivos","O pecado — caracterizado na Bíblia como a causa da morte e queda do homem com exclusão do Paraíso (Gn 2.17)","A vontade soberana de Deus desde a criação","A existência do diabo"],
+ c:1, exp:"O pecado se caracteriza na Bíblia como a causa da morte (Gn 2.17; Rm 6.23). A morte física não é o caminho de ascensão do homem caído, mas o desligamento da vida terrena para o mundo espiritual."},
+
+{q:"O que o material diz sobre a morte ser a 'cessação de todas as coisas'?",
+ opts:["Concorda completamente com essa visão materialista","Discorda — a morte não é a cessação de todas as coisas, mas a continuação da vida espiritual e eterna","Depende da fé da pessoa","Apenas os crentes continuam após a morte"],
+ c:1, exp:"O material afirma categoricamente que 'a morte não é a cessação de todas as coisas, mas a continuação da vida espiritual e eterna'. Essa é a visão bíblica contra o materialismo agnóstico."},
+
+{q:"O que Mateus 10.28 ensina sobre a morte?",
+ opts:["Que não devemos temer nem a morte física nem a espiritual","Que devemos temer a Deus, que pode destruir tanto o corpo quanto a alma no inferno — diferenciando morte do corpo de morte da alma","Que o corpo ressuscitará mas a alma não","Que a morte é o sono eterno"],
+ c:1, exp:"Mt 10.28 fala da morte do corpo para diferenciar da morte da alma (morte espiritual). Jesus diz para temer a Quem pode destruir tanto o corpo quanto a alma — evidenciando que são realidades distintas."},
+
+{q:"Como a Bíblia relaciona a fé em Jesus Cristo à morte e à vida eterna?",
+ opts:["A fé não tem relação com a vida eterna — é apenas questão de boas obras","A condição de vida eterna está vinculada à fé salvadora em Jesus Cristo (Rm 5.21; Rm 6.23)","Qualquer religião garante vida eterna","Apenas os batizados têm vida eterna"],
+ c:1, exp:"Rm 5.21 e 6.23 ensinam que a vida eterna é dom de Deus em Cristo Jesus. A fé salvadora é a condição. A morte física é o desligamento da vida terrena, mas o crente possui vida eterna garantida pela fé."},
+
+{q:"Qual é a posição do Espiritismo sobre o pós-morte?",
+ opts:["Acredita no inferno eterno","Ensina a reencarnação — a alma passa de um corpo para outro até ser purificada","Defende o sono da alma até o juízo final","Crê na aniquilação dos ímpios"],
+ c:1, exp:"Há grande semelhança entre o espiritismo e a teoria da transmigração (budismo/hinduísmo). No espiritismo, a alma passa de corpo em corpo até ser purificada — reencarnação."},
+
+{q:"O que acontece com o corpo humano após a morte segundo a perspectiva escatológica cristã?",
+ opts:["É destruído para sempre sem possibilidade de ressurreição","O corpo se decompõe na terra, mas aguarda a ressurreição — o mesmo corpo será transformado e glorificado","A alma reencarna em outro corpo","O corpo vai para o purgatório junto com a alma"],
+ c:1, exp:"O corpo se decompõe, mas o cristão aguarda a ressurreição corporal. O mesmo corpo será transformado e glorificado (1Co 15; Fp 3.21). A ressurreição de Cristo é a garantia e modelo da ressurreição dos crentes."}
+],
+
+// ── RODADA 4 ── Segunda Vinda de Jesus Cristo
+[
+{q:"Qual é a relevância da Segunda Vinda de Jesus Cristo segundo o material?",
+ opts:["É um evento secundário na teologia cristã","É um dos temas mais mencionados no NT — há 1 versículo sobre a Segunda Vinda para cada 13 versículos do NT","É mencionada apenas no Apocalipse","É um evento que já ocorreu espiritualmente na Pentecostes"],
+ c:1, exp:"A Segunda Vinda de Cristo é extremamente relevante — aproximadamente 1 em cada 13 versículos do NT fazem referência a ela. É um dos temas centrais da escatologia cristã."},
+
+{q:"O que os discípulos de Jesus sustentavam que Ele começou a ensinar a partir de Atos 1.11?",
+ opts:["Que Jesus não voltaria corporalmente","Que Jesus voltaria da mesma forma que foi — corporalmente, visivelmente","Que a Segunda Vinda seria apenas espiritual","Que nenhum ser humano sabe sobre a Segunda Vinda"],
+ c:1, exp:"Em At 1.11, os anjos dizem: 'Este mesmo Jesus... virá assim como o vistes ir para o céu.' Os discípulos sustentavam que Cristo voltaria da mesma forma — corporal e visivelmente."},
+
+{q:"Qual é o caráter PESSOAL da Segunda Vinda conforme Mt 4.11?",
+ opts:["Cristo enviará um anjo em seu lugar","A Segunda Vinda será pessoal — o próprio Jesus voltará, não um representante","O Espírito Santo virá em lugar de Cristo","Uma visão coletiva da Igreja substituirá a presença física"],
+ c:1, exp:"A Segunda Vinda será pessoal — o mesmo Jesus que ascendeu voltará pessoalmente. Paulo diz: 'minha [de Paulo] presença outra vez' (Fp 1.26). Assim como a primeira vinda foi pessoal, a segunda também será."},
+
+{q:"O que significa o caráter VISÍVEL da Segunda Vinda (Mt 24.30)?",
+ opts:["Apenas os cristãos verão a vinda","Toda a terra verá a vinda de Cristo — será universalmente visível, como o relâmpago que ilumina do oriente ao ocidente","Será visível apenas em Israel","Será visível somente para os mortos ressuscitados"],
+ c:1, exp:"Mt 24.27 compara a vinda ao relâmpago que ilumina do oriente ao ocidente. Mt 24.30 diz que 'todas as tribos da terra' verão o Filho do Homem vindo sobre as nuvens. A Segunda Vinda será universalmente visível."},
+
+{q:"O que significa o caráter INESPERADO da Segunda Vinda (Mt 25.13; Lc 12.39-40; 1Ts 5.2)?",
+ opts:["Cristo virá em data certa, conhecida por alguns profetas","A Segunda Vinda será inesperada — como ladrão na noite — ninguém sabe o dia ou hora, nem mesmo os anjos","Podemos calcular a data pela profecia de Daniel","O Papa tem a prerrogativa de anunciar a data"],
+ c:1, exp:"A Segunda Vinda será inesperada — 'como ladrão na noite' (1Ts 5.2). Jesus mesmo disse que nenhum sabe o dia ou hora, nem os anjos, nem o Filho, mas só o Pai (Mt 24.36). Alertou para vigilância constante (Mt 25.13)."},
+
+{q:"O que o material ensina sobre o caráter GLORIOSO e TRIUNFAL da Segunda Vinda?",
+ opts:["Cristo voltará de forma humilhada como na primeira vinda","Cristo voltará em corpo de humilhação como na encarnação","Cristo voltará num corpo glorificado, com todos os santos, como o glorioso Conquistador, o Rei dos reis e Senhor dos senhores (Ap 19.16)","Cristo voltará invisível, apenas sentido espiritualmente"],
+ c:2, exp:"Em contraste com a primeira vinda em humilhação, a Segunda Vinda será em plena glória — com os exércitos do céu (Mt 24.30; Ap 19.14-16). Ele virá como o Rei dos reis e Senhor dos senhores, o Redentor de toda a criação."},
+
+{q:"Quais são os SINAIS da Segunda Vinda de Cristo segundo o material (cap. 3.4)?",
+ opts:["Apenas guerras e terremotos","Primeiros sinais (que Ele descreve acontecendo antes) e secundários — os que indicam que a vinda está próxima, como o evangelho sendo pregado em todo o mundo","Somente a pregação do evangelho","Apenas os sinais do livro de Apocalipse"],
+ c:1, exp:"O material distingue primeiros sinais (guerras, fomes, terremotos — eventos históricos) e secundários (que indicam a vinda iminente, como o evangelho pregado em todo o mundo — Mt 24.14, e a conversão de Israel)."},
+
+{q:"O que 2Ts 2.3-4 descreve como condição para a Segunda Vinda?",
+ opts:["A construção do terceiro templo em Jerusalém","A apostasia e a revelação do 'homem da iniquidade' — o Anticristo — que se exaltará acima de Deus","A conversão de toda a humanidade","O fim de todos os governos mundiais"],
+ c:1, exp:"2Ts 2.3-4 fala que virá primeiro a apostasia e será revelado o 'homem da iniquidade', o filho da perdição, que se opõe e se exalta acima de tudo que se chama Deus ou se adora. Essa é uma condição pré-vinda segundo Paulo."},
+
+{q:"Como o material descreve a relação entre os sinais e a intenção de Cristo ao descrevê-los?",
+ opts:["Os sinais foram dados para que calculemos a data exata","Os sinais foram dados para que os crentes se mantenham vigilantes — não para que desanimemos ou abandonemos a fé","Os sinais provam que a vinda já aconteceu","Os sinais são apenas figurativos, sem significado literal"],
+ c:1, exp:"O material ensina que os sinais foram dados por Jesus para que fiquemos atentos e vigilantes, não para desânimo ou abandono da fé. A escatologia tem função prática: manter a Igreja desperta e esperançosa."},
+
+{q:"Qual é a posição do material sobre 'calcular datas' para a Segunda Vinda?",
+ opts:["É possível e recomendado calcular com base em Daniel","Alguns grupos fizeram isso e falharam — a Bíblia não permite calcular o dia ou hora, pois só o Pai sabe","O Papa pode anunciar datas","Os profetas modernos podem revelar a data"],
+ c:1, exp:"O material cita grupos como os Adventistas e outros que tentaram calcular datas (1844, etc.) e falharam. Jesus foi claro: ninguém sabe o dia ou a hora (Mt 24.36). Calcular datas está contra o ensinamento bíblico."}
+],
+
+// ── RODADA 5 ── Concepções Tribulacionistas
+[
+{q:"O que é a 'Grande Tribulação' segundo a escatologia?",
+ opts:["O período de 70 anos do cativeiro babilônico","Um período futuro de grande sofrimento descrito em Daniel 9, Ap 7.14 e Mt 24, relacionado aos últimos tempos antes da Segunda Vinda","As perseguições romanas no século I","A Primeira Guerra Mundial"],
+ c:1, exp:"A Grande Tribulação é um período futuro de sofrimento sem precedentes, mencionado em Daniel 9 (as 70 semanas), Mt 24.21, e Ap 7.14. É o foco principal das posições tribulacionistas."},
+
+{q:"O que defende o PRÉ-TRIBULACIONISMO?",
+ opts:["A Igreja passará por toda a tribulação antes do arrebatamento","A Igreja será arrebatada ANTES da Grande Tribulação — Cristo vem em dois momentos distintos: primeiro para arrebatar a Igreja, depois na Segunda Vinda visível","A Igreja enfrentará a metade da tribulação","O arrebatamento e a Segunda Vinda são o mesmo evento"],
+ c:1, exp:"O pré-tribulacionismo defende que a Igreja será arrebatada ANTES da Grande Tribulação. Cristo vem em duas fases: arrebata a Igreja secretamente e depois volta com ela na Segunda Vinda visível. É a posição da Igreja O Brasil Para Cristo."},
+
+{q:"O que defende o PÓS-TRIBULACIONISMO?",
+ opts:["A Igreja será arrebatada antes da tribulação","A Igreja passará por toda a Grande Tribulação e será arrebatada no final — o arrebatamento e a Segunda Vinda são o mesmo evento","A Igreja vai para o céu antes de qualquer sofrimento","A tribulação já ocorreu no século I"],
+ c:1, exp:"O pós-tribulacionismo defende que a Igreja passará por toda a Grande Tribulação e será arrebatada no final. O arrebatamento e a Segunda Vinda são o mesmo evento. A Igreja enfrentará a tribulação antes de ir ao encontro do Senhor."},
+
+{q:"Qual é a principal referência bíblica usada pelo pré-tribulacionismo para o arrebatamento?",
+ opts:["João 14.1-3","Mateus 24.40-42 (1Co 15.51-52; 1Ts 4.13-18; Mt 24.40-42; 1Co 15.51-52; Rm 14.10; 2Tm 4.1)","Apocalipse 20.1-6","Salmos 90.10"],
+ c:1, exp:"Os textos principais são Mt 24.40-42; 1Co 15.51-52; 1Ts 4.13-18; Rm 14.10; 2Tm 4.1. A Vinda se dá em duas fases distintas. O texto de 1Ts 4 é o mais central para o arrebatamento pré-tribulacional."},
+
+{q:"O que é o 'MID-TRIBULACIONISMO' (Meso Tribulacionismo)?",
+ opts:["A Igreja será arrebatada antes da tribulação","A Igreja será arrebatada na metade da Grande Tribulação (após 3,5 anos) — posição intermediária entre o pré e o pós-tribulacionismo","A Igreja passará por toda a tribulação","O arrebatamento é parcial"],
+ c:1, exp:"O Mid-Tribulacionismo é posição intermediária: a Igreja passará pela primeira metade da tribulação (3,5 anos) e será arrebatada no meio. Combina elementos do pré e do pós, defendendo que a Igreja não passará pela ira de Deus."},
+
+{q:"Quando surgiu historicamente a doutrina do pré-tribulacionismo?",
+ opts:["Com os apóstolos no século I","Com Agostinho no século IV","No século XIX com John Nelson Darby (1800-1882), popularizado por Cyrus Scofield através de suas notas bíblicas","Com Calvino na Reforma do século XVI"],
+ c:2, exp:"O pré-tribulacionismo moderno surge no séc. XIX com John Nelson Darby (1800-1882), pregador anglicano irlandês. Darby foi o fundador do Movimento das Igrejas Irmãos (Plymouth Brethren). Scofield (1843-1921) popularizou com sua Bíblia anotada."},
+
+{q:"Quais são aspectos POSITIVOS do pré-tribulacionismo segundo o material?",
+ opts:["Não há aspectos positivos","Interpreta o milênio literalmente; ressurreição e segunda vinda têm múltiplos aspectos; incentiva expectativa da volta de Cristo; referência ao aprimoramento do NT são boas metodologias","Unifica todas as igrejas","Elimina qualquer controvérsia escatológica"],
+ c:1, exp:"O material lista como aspectos positivos: interpretação literal do milênio, múltiplos aspectos da segunda vinda e ressurreição, incentiva expectativa da volta de Cristo, e o aprimoramento histórico-gramatical para interpretar o NT são boas metodologias."},
+
+{q:"Quais são aspectos NEGATIVOS do pré-tribulacionismo segundo o material?",
+ opts:["Não há aspectos negativos","Não tem um sólido fundamento histórico-gramatical; a hermenêutica dupla cria problemas; não há base bíblica clara para um arrebatamento separado da Segunda Vinda; o termo 'apostasia' pode ser interpretado como arrebatamento sem base textual","É muito antigo e ultrapassado","É muito simples e superficial"],
+ c:1, exp:"Os negativos incluem: fundamento histórico-gramatical fraco, hermenêutica dupla problemática, o 'apostasia' (2Ts 2.3) ser reinterpretado como arrebatamento sem base textual, e não haver base bíblica clara para separar o arrebatamento da Segunda Vinda."},
+
+{q:"Qual é a posição oficial da Igreja O Brasil Para Cristo sobre a tribulação?",
+ opts:["Pós-tribulacionista e amilenarista","Pré-tribulacionista, arminiana e pré-milenista","Mid-tribulacionista e calvinista","Panmilenarista — tudo vai dar certo no fim"],
+ c:1, exp:"O material afirma explicitamente: 'A Igreja O Brasil Para Cristo é pré-tribulacionistas, arminiana e pré-milenista'. Porém ressalta que não se considera superior ou inferior aos demais grupos evangélicos."},
+
+{q:"Qual é a posição do pós-tribulacionismo sobre a 'ecclesia' (Igreja) durante a tribulação?",
+ opts:["A Igreja vai para o céu antes da tribulação começar","A Igreja estará presente na tribulação — será guardada, não removida, da ira de Deus durante o período","A Igreja será destruída durante a tribulação","A Igreja se dissolve e os crentes atuam individualmente"],
+ c:1, exp:"O pós-tribulacionismo ensina que a Igreja estará na tribulação, mas será guardada da ira de Deus (Jo 17.15; Ap 3.10). Distingue entre a tribulação do Anticristo (que a Igreja enfrenta) e a ira de Deus (da qual é protegida)."}
+],
+
+// ── RODADA 6 ── A 70ª Semana de Daniel e o Milênio
+[
+{q:"O que é a '70ª Semana de Daniel' (Daniel 9.24-27)?",
+ opts:["70 semanas literais de 7 dias — 490 dias totais","Um período profético de 70 'semanas de anos' (490 anos) — a última semana (7 anos) é interpretada como a Grande Tribulação","70 anos do cativeiro babilônico","70 semanas de oração de Daniel"],
+ c:1, exp:"Daniel 9.24-27 apresenta 70 'semanas de anos' (490 anos). A maioria dos estudiosos interpreta a 70ª semana (os últimos 7 anos) como o período da Grande Tribulação, dividido em duas metades de 3,5 anos."},
+
+{q:"O que significa 'Pré-Milenismo'?",
+ opts:["Cristo voltará depois do milênio","Cristo voltará ANTES do milênio para estabelecê-lo e reinar por 1000 anos literais","O milênio já está acontecendo agora","O milênio é apenas simbólico e já passou"],
+ c:1, exp:"O Pré-Milenismo defende que Cristo voltará ANTES do milênio para estabelecê-lo pessoalmente. Haverá então um reino literal de 1000 anos na terra, com Cristo reinando em Jerusalém. É a visão literal de Apocalipse 20."},
+
+{q:"O que defende o A-MILENISMO?",
+ opts:["Cristo voltará antes de um milênio literal","O milênio é um símbolo do reinado espiritual de Cristo agora — não haverá milênio literal de 1000 anos; o reino de Cristo é exercido espiritualmente no presente","O milênio já terminou no século IV","O milênio é o período da Reforma Protestante"],
+ c:1, exp:"O Amilenismo entende que o milênio não é um período literal de 1000 anos, mas símbolo do reinado espiritual de Cristo na atual era da Igreja. O 'reino' é exercido espiritualmente. Cristo voltará diretamente ao juízo final."},
+
+{q:"O que defende o PÓS-MILENISMO?",
+ opts:["Cristo voltará antes do milênio","O mundo melhorará progressivamente pelo evangelismo até que a Igreja estabeleça o reino, e então Cristo voltará ao fim de um período de ouro","O milênio é puramente simbólico","O milênio já ocorreu no período apostólico"],
+ c:1, exp:"O Pós-Milenismo crê que o mundo melhorará gradualmente pela pregação do evangelho, a Igreja estabelecerá um período de ouro de justiça social e espiritual, e então Cristo voltará. O otimismo missionário é sua característica."},
+
+{q:"Qual texto bíblico é o PRINCIPAL para a doutrina do milênio?",
+ opts:["Mateus 5.3-12 (as bem-aventuranças)","Apocalipse 20.1-6 (onde Satanás é preso por 1000 anos e os mártires reinam com Cristo)","Gênesis 1.1-3","João 3.16"],
+ c:1, exp:"Ap 20.1-6 é o texto central do milênio. Descreve Satanás sendo preso por 1000 anos, a primeira ressurreição dos mártires, e eles reinando com Cristo por esse período. A interpretação desse texto é o cerne do debate milenista."},
+
+{q:"Quais são os textos que falam sobre a ressurreição dos mártires durante o milênio?",
+ opts:["João 3.16; Rm 5.8; 1Co 13.13","Ap 20.4-6; 1Ts 4.13-18; 1Co 15.51-52","Gn 1.1; Ex 20.1-17; Dt 6.4","Mt 5.1-12; Lc 6.20-26; Jo 13.34"],
+ c:1, exp:"Ap 20.4-6 fala da primeira ressurreição dos mártires que reinam com Cristo 1000 anos. 1Ts 4.13-18 e 1Co 15.51-52 descrevem a ressurreição/transformação dos crentes no arrebatamento. Esses são os textos centrais."},
+
+{q:"O que acontece com Satanás ao final do milênio segundo Apocalipse 20?",
+ opts:["É destruído permanentemente ao início do milênio","É solto por pouco tempo após o milênio, engana as nações, tenta destruir o povo de Deus mas é derrotado e lançado no lago de fogo para sempre","Torna-se servo de Deus no milênio","Fica preso no abismo para sempre"],
+ c:1, exp:"Ap 20.7-10: após o milênio, Satanás é solto, engana as nações (Gogue e Magogue), cerca o campo dos santos, mas fogo desce do céu e os devora. Satanás é lançado no lago de fogo e enxofre, onde ficará para sempre."},
+
+{q:"Quais são as principais objeções ao pré-milenismo literal?",
+ opts:["Não há objeções sólidas","O Apocalipse usa linguagem simbólica e a maioria dos estudiosos reconhece que o número 1000 pode ser simbólico; a ideia de dois julgamentos separados tem pouco suporte fora de Ap 20; a Nova Jerusalém sugere estado eterno, não milênio transitório","É uma doutrina muito recente","Contradiz o livro de Daniel completamente"],
+ c:1, exp:"As objeções incluem: a natureza simbólica do Apocalipse; o número 1000 pode não ser literal; a ausência de dois julgamentos separados em outros textos; e que a Nova Jerusalém (Ap 21-22) aponta diretamente ao estado eterno."},
+
+{q:"Que figura profética é central no debate da 70ª Semana de Daniel — e o que ela representa?",
+ opts:["O rei Ciro — representa a libertação dos judeus","O 'príncipe que há de vir' (Dn 9.26) — interpretado por muitos como o Anticristo que fará aliança com Israel por 7 anos e a quebrará na metade","O apóstolo Paulo — representa a missão gentílica","João Batista — representa o precursor do Messias"],
+ c:1, exp:"Dn 9.26 fala do 'príncipe que há de vir' que destruirá a cidade. Dn 9.27 descreve quem faz aliança por 7 anos e a quebra na metade, cessando sacrifícios. A maioria dos pré-tribulacionistas identifica este como o Anticristo."},
+
+{q:"Qual foi a posição de Justino Mártir (100-165) sobre o milênio?",
+ opts:["Era amilenista — não cria em milênio literal","Era pós-milenista — acreditava que a Igreja estabeleceria o reino","Era pré-milenista — afirmava que a ressurreição aconteceria antes do milênio e que Jerusalém seria reconstruída","Era agnóstico sobre o tema"],
+ c:2, exp:"Justino Mártir (100-165 d.C.) era pré-milenista. Ele afirmava que a ressurreição acontece antes do milênio e que haverá uma nova Jerusalém. Irineu de Lião (130-202) também mantinha posição similar."}
+],
+
+// ── RODADA 7 ── Arrebatamento
+[
+{q:"O que é o ARREBATAMENTO segundo a escatologia?",
+ opts:["A morte dos mártires","O evento em que Cristo virá buscar a Igreja — os crentes mortos ressuscitarão e os vivos serão transformados e levados ao encontro do Senhor nos ares (1Ts 4.13-18)","A Segunda Vinda visível a toda a terra","O julgamento do trono branco"],
+ c:1, exp:"O arrebatamento é o evento em que Cristo virá buscar a Igreja. Os mortos em Cristo ressuscitarão primeiro; os vivos serão transformados e arrebatados nos ares. 1Ts 4.13-18 e 1Co 15.51-52 são os textos centrais."},
+
+{q:"Quem propôs pela primeira vez a ideia do arrebatamento pré-ira como posição formal?",
+ opts:["John Nelson Darby em 1830","Robert Gowett (1815-1901) em 1852, sendo a ideia popularizada por Robert Van Kampen (1940-2000)","Charles Spurgeon em 1880","Billy Graham nos anos 1950"],
+ c:1, exp:"O arrebatamento pré-ira foi proposto por Robert Gowett (1815-1901) em 1852 e popularizado por Robert Van Kampen (1940-2000). Sua posição é que o arrebatamento ocorrerá antes da ira de Deus mas após a tribulação do Anticristo."},
+
+{q:"O que é o arrebatamento PARCIAL?",
+ opts:["Apenas metade dos crentes será arrebatada por sorteio","Os crentes serão arrebatados em grupos, conforme seu estado espiritual — só os mais fiéis vão primeiro; os outros serão aperfeiçoados durante a tribulação","Apenas as crianças serão arrebatadas","Apenas os mártires do milênio são arrebatados"],
+ c:1, exp:"O arrebatamento parcial defende que os crentes são arrebatados em grupos conforme seu estado espiritual. Os mais fiéis vão primeiro; outros passam pela tribulação como aperfeiçoamento. É uma posição minoritária e muito criticada."},
+
+{q:"Quais são as referências tipológicas usadas para defender o arrebatamento (figuras do VT)?",
+ opts:["Moisés no Sinai; Josué em Canaã; Davi em Belém","Enoque (Gn 5.24) — arrebatado sem ver a morte; Noé — salvo do juízo; Elias (2Rs 2) — arrebatado por redemoinho; Lot — salvo antes do juízo de Sodoma","Abraão; Isaque; Jacó; José","Sansão; Gedeão; Débora; Baraque"],
+ c:1, exp:"As figuras tipológicas do arrebatamento incluem: Enoque (arrebatado sem morrer — Gn 5.24), Noé (salvo antes do dilúvio — julgamento), Elias (arrebatado por redemoinho — 2Rs 2.11), e Lot (salvo antes do juízo de Sodoma)."},
+
+{q:"O que é o PÓS-TRIBULACIONISMO e qual é sua posição sobre o arrebatamento?",
+ opts:["A Igreja será removida antes de qualquer sofrimento","A Igreja passará por toda a tribulação e o arrebatamento acontecerá no final — é o mesmo evento da Segunda Vinda visível","A Igreja vive no milênio antes da tribulação","O arrebatamento é mito sem base bíblica"],
+ c:1, exp:"No pós-tribulacionismo, a Igreja passa por toda a Grande Tribulação. O arrebatamento é o encontro da Igreja com Cristo quando Ele retorna — mesmo evento da Segunda Vinda. Os crentes sobem ao encontro de Cristo e retornam com Ele à terra."},
+
+{q:"Qual é a diferença central entre o pré e o pós-tribulacionismo no conceito de arrebatamento?",
+ opts:["Não há diferença significativa","No pré-tribulacionismo, o arrebatamento precede a tribulação e é distinto da Segunda Vinda; no pós, é simultâneo à Segunda Vinda e ocorre após a tribulação","No pré, todos ressuscitam; no pós, apenas os mártires","No pré, o arrebatamento é para Israel; no pós, para a Igreja"],
+ c:1, exp:"A diferença central: pré-tribulacionismo = arrebatamento antes da tribulação, dois eventos distintos separados por 7 anos. Pós-tribulacionismo = arrebatamento e Segunda Vinda são o mesmo evento, após a tribulação."},
+
+{q:"Qual texto bíblico os pré-tribulacionistas usam para afirmar que a Igreja foi prometida livramento da 'hora da tribulação'?",
+ opts:["João 3.16","Apocalipse 3.10 ('guardar-te-ei da hora da provação')","Romanos 8.28","Hebreus 11.1"],
+ c:1, exp:"Ap 3.10 é central: 'Também eu te guardarei da hora da provação que há de sobrevir a todo o mundo'. Pré-tribulacionistas interpretam 'guardar da hora' como remoção da Igreja antes da tribulação, não apenas proteção dentro dela."},
+
+{q:"Qual é a posição 'PRÉ-IRA' sobre o arrebatamento?",
+ opts:["Igual ao pré-tribulacionismo","A Igreja passará pela grande tribulação do Anticristo (primeiros 3/4 da semana) mas será arrebatada antes da ira de Deus ser derramada (último quarto)","A Igreja não passará por nenhuma tribulação","Arrebatamento ocorre após o milênio"],
+ c:1, exp:"A posição pré-ira distingue entre a grande tribulação (sofrimento causado pelo Anticristo, que a Igreja pode passar) e a ira de Deus (da qual a Igreja é guardada). O arrebatamento ocorre antes da ira de Deus ser derramada — posição intermediária."},
+
+{q:"Qual é a crítica principal dos pós-tribulacionistas ao pré-tribulacionismo?",
+ opts:["O pré-tribulacionismo é muito antigo","Não há versículo claro que ensine um arrebatamento secreto separado da Segunda Vinda; o NT apresenta apenas uma vinda futura de Cristo, não duas fases distintas","O pré-tribulacionismo nega a ressurreição","O pré-tribulacionismo é heresia declarada"],
+ c:1, exp:"A principal crítica é que o NT não apresenta claramente duas fases distintas da vinda de Cristo. 1Ts 4 é descrito no mesmo contexto de Mt 24, sugerindo o mesmo evento. A ideia de um arrebatamento secreto separado seria uma inferência do pré-tribulacionismo."},
+
+{q:"Qual é o papel do Espírito Santo no debate sobre o arrebatamento segundo 2Ts 2.6-7?",
+ opts:["O Espírito Santo não está relacionado ao arrebatamento","2Ts 2.6-7 menciona 'o que retém' — muitos pré-tribulacionistas interpretam isso como o Espírito Santo, cuja remoção (com a Igreja) permitirá a revelação do Anticristo","O Espírito Santo será substituído por anjos após o arrebatamento","O Espírito Santo desce somente após o arrebatamento"],
+ c:1, exp:"2Ts 2.6-7 fala de 'o que retém' o Anticristo. Muitos pré-tribulacionistas identificam isso com o Espírito Santo presente na Igreja. Quando a Igreja é arrebatada, o 'retentor' é removido e o Anticristo é revelado."}
+],
+
+// ── RODADA 8 ── Ressurreição dos Mortos
+[
+{q:"O que é a ressurreição dos mortos segundo a escatologia bíblica?",
+ opts:["A transmigração da alma para outro corpo","O evento em que os mortos em Cristo ressuscitarão com corpos transformados e glorificados — a alma reunida ao corpo para a eternidade","A reencarnação em um novo ser humano","O regresso ao pó sem possibilidade de vida futura"],
+ c:1, exp:"A ressurreição é o evento em que os mortos receberão seus corpos transformados e glorificados. Não é reencarnação (novo corpo diferente) nem transmigração, mas reunião da alma com o mesmo corpo transformado (1Co 15; Fp 3.21)."},
+
+{q:"Qual é a NATUREZA da ressurreição segundo 1Co 15.42-44?",
+ opts:["O corpo ressuscitado será idêntico ao atual, sem qualquer mudança","O corpo ressuscitado será diferente: semeado em corrupção, ressuscitado em incorrupção; semeado em desonra, em glória; semeado em fraqueza, em poder; semeado corpo natural, ressuscitado corpo espiritual","O corpo ressuscitado será puramente espiritual, sem materialidade alguma","A ressurreição não envolve o corpo físico"],
+ c:1, exp:"1Co 15.42-44 descreve a transformação: corrupção → incorrupção; desonra → glória; fraqueza → poder; corpo natural → corpo espiritual. O mesmo corpo é transformado, não substituído. O corpo de Cristo ressuscitado é o modelo."},
+
+{q:"Quais são os DOIS TIPOS de ressurreição segundo Apocalipse 20.4-6 e João 5.28-29?",
+ opts:["Ressurreição do corpo e da alma separadamente","Ressurreição para vida (dos justos) e ressurreição para morte eterna/condenação (dos ímpios)","Ressurreição parcial e ressurreição total","Ressurreição no arrebatamento e ressurreição no milênio apenas"],
+ c:1, exp:"Jo 5.28-29: 'todos os que estão nos túmulos ouvirão a sua voz e sairão: os que fizeram o bem, para a ressurreição da vida; os que praticaram o mal, para a ressurreição da condenação.' Ap 20.4-6 chama a primeira ressurreição (dos justos) de 'bem-aventurada'."},
+
+{q:"Qual é a posição do material sobre a ressurreição para MORTE ETERNA?",
+ opts:["A morte eterna significa aniquilação total","A morte eterna é separação eterna de Deus — os ímpios existirão eternamente em condenação, não serão aniquilados","Todos serão salvos no final (universalismo)","A morte eterna dura 1000 anos e então todos são salvos"],
+ c:1, exp:"O material rejeita o aniquilacionismo. A morte eterna é separação eterna de Deus em condenação consciente. Ap 20.10-15 descreve o diabo, a besta e o falso profeta no lago de fogo 'para todo o sempre' — e os ímpios sofrem o mesmo destino."},
+
+{q:"O que a ressurreição de Cristo significa para a ressurreição dos crentes?",
+ opts:["A ressurreição de Cristo foi única e não tem relação com a ressurreição dos crentes","A ressurreição de Cristo é a garantia e primícias da ressurreição dos crentes — o modelo do que acontecerá com todos em Cristo (1Co 15.20-23)","A ressurreição de Cristo foi espiritual apenas, sem corpo físico","Cristo ressuscitou, mas isso não garante a ressurreição dos crentes"],
+ c:1, exp:"1Co 15.20-23: Cristo é as primícias dos que dormiram. Sua ressurreição é garantia e modelo da ressurreição dos crentes. Como Ele ressuscitou corporalmente, assim também os que estão em Cristo ressuscitarão."},
+
+{q:"Quando ocorre a ressurreição dos JUSTOS segundo o pré-tribulacionismo?",
+ opts:["No final do milênio junto com os ímpios","No arrebatamento — antes da Grande Tribulação — quando os mortos em Cristo ressuscitarão primeiro (1Ts 4.16)","Na Segunda Vinda visível apenas","No dia do juízo final junto com todos os mortos"],
+ c:1, exp:"Para o pré-tribulacionismo, a ressurreição dos justos (mortos em Cristo) ocorre no arrebatamento, antes da Grande Tribulação (1Ts 4.16-17). Haverá também ressurreição de mártires tribulacionais no início do milênio (Ap 20.4)."},
+
+{q:"Quando ocorre a ressurreição dos ÍMPIOS segundo o material?",
+ opts:["Junto com a ressurreição dos justos no arrebatamento","Ao final do milênio — para comparecer diante do Grande Trono Branco (Ap 20.11-15)","Durante a Grande Tribulação","Os ímpios não ressuscitarão — serão aniquilados"],
+ c:1, exp:"A ressurreição dos ímpios ocorre ao final do milênio, quando comparecem diante do Grande Trono Branco (Ap 20.11-15). É a 'segunda ressurreição' — para o julgamento final e condenação eterna. O livro da vida é aberto."},
+
+{q:"O que ensinam os que NEGAM a ressurreição corporal (materialistas e agnósticos)?",
+ opts:["Acreditam em ressurreição espiritual apenas","Após a morte, tudo acaba — não há ressurreição, não há vida após a morte, a existência encerra com a morte biológica","Creem em reencarnação","Creem no purgatório para todos"],
+ c:1, exp:"Materialistas e agnósticos ensinam que após a morte não há nada — tudo acaba. Isso contradiz frontalmente o ensinamento bíblico. O material destaca isso como uma das posições a serem refutadas teologicamente."},
+
+{q:"O que Paulo ensina sobre o corpo ressuscitado em Filipenses 3.21?",
+ opts:["O corpo ressuscitado será diferente do atual em essência — um corpo completamente diferente","Cristo transformará o nosso corpo humilde, conformando-o ao seu corpo glorioso — o mesmo corpo transformado","Apenas a alma será glorificada, não o corpo","O corpo ressuscitado não terá forma física"],
+ c:1, exp:"Fp 3.21: Cristo 'transformará o nosso corpo de humilhação, para ser igual ao corpo da sua glória, segundo o eficaz poder que tem de sujeitar a si mesmo todas as coisas.' O corpo atual é transformado conforme o modelo do corpo glorificado de Cristo."},
+
+{q:"Qual é a posição das Testemunhas de Jeová sobre a ressurreição segundo o material?",
+ opts:["Acreditam na ressurreição corporal de todos","Apenas 144 mil serão ressuscitados para o 'Reino de Jeová' — os demais são aniquilados sem ressurreição","Todos serão ressuscitados mas apenas para serem julgados","A ressurreição ocorrerá somente na terra durante o milênio"],
+ c:1, exp:"As TJ afirmam que apenas 144 mil 'ungidos' irão ao céu com Jeová. Os demais fiéis viverão no paraíso terrestre. Os ímpios são simplesmente aniquilados sem possibilidade de ressurreição. O material classifica isso como heresia."}
+],
+
+// ── RODADA 9 ── O Julgamento Final
+[
+{q:"Quais são os diferentes julgamentos descritos na escatologia segundo o material?",
+ opts:["Há apenas um julgamento universal para todos","O julgamento de Israel; o julgamento dos justos (Tribunal de Cristo); o julgamento dos injustos (Trono Branco); e o julgamento de Satanás e anjos caídos","O julgamento do purgatório para todos os crentes","Apenas o Grande Trono Branco para todos"],
+ c:1, exp:"O material descreve múltiplos julgamentos: julgamento de Israel (na tribulação/milênio), o Tribunal de Cristo/Bema Seat (para os crentes — obras), o Trono Branco (para os ímpios — condenação), e o julgamento de Satanás e anjos caídos."},
+
+{q:"O que é o 'TRIBUNAL DE CRISTO' (Bema Seat — 2Co 5.10; Rm 14.10)?",
+ opts:["O julgamento dos incrédulos no Grande Trono Branco","O julgamento das obras dos crentes — não para salvação ou condenação, mas para recompensas ou perda de recompensas","O tribunal onde Pilatos julgou Jesus","O julgamento de Israel na tribulação"],
+ c:1, exp:"O Tribunal de Cristo (Bema — 2Co 5.10; Rm 14.10) é o julgamento das obras dos crentes. A salvação não está em jogo — é certa. O que é julgado são as obras: como o crente viveu, serviu e amou. Haverá recompensas ou perdas de recompensas."},
+
+{q:"O que Paulo descreve em 1Co 3.11-15 sobre o julgamento das obras?",
+ opts:["Os crentes serão julgados pela salvação no Tribunal de Cristo","As obras serão testadas como por fogo — obras duráveis (ouro, prata, pedras preciosas) serão recompensadas; obras vazias (madeira, feno, palha) serão queimadas — mas o crente será salvo","Os crentes serão julgados pelos pecados","O julgamento das obras é apenas para os líderes da Igreja"],
+ c:1, exp:"1Co 3.11-15: cada obra será testada como por fogo. Ouro, prata, pedras preciosas = obras duráveis, recompensadas. Madeira, feno, palha = obras vazias, queimadas. O crente cuja obra é queimada 'sofrerá perda, mas ele mesmo será salvo, todavia como pelo fogo.'"},
+
+{q:"O que é o 'GRANDE TRONO BRANCO' (Apocalipse 20.11-15)?",
+ opts:["O trono de Davi onde Cristo reinará no milênio","O julgamento final dos ímpios — todos os mortos ímpios comparecem diante de Deus, os livros são abertos, e são julgados por suas obras; os não inscritos no Livro da Vida são lançados no lago de fogo","O trono de julgamento do Tribunal de Cristo","O julgamento de Israel na tribulação"],
+ c:1, exp:"Ap 20.11-15: o Grande Trono Branco é o julgamento final dos ímpios. Os mortos ressuscitam, comparecem diante de Deus, os livros (de obras) e o Livro da Vida são abertos. Quem não está no Livro da Vida vai para o lago de fogo — a segunda morte."},
+
+{q:"O que significa 'segunda morte' em Apocalipse 20.14?",
+ opts:["A morte física pela segunda vez","O lago de fogo — a separação eterna e definitiva de Deus; a condenação eterna dos ímpios após o julgamento","O sono da alma por 1000 anos","O purgatório temporário"],
+ c:1, exp:"A 'segunda morte' em Ap 20.14 é o lago de fogo. É a separação eterna e definitiva de Deus. A morte e o hades também são lançados no lago de fogo. É o estado final e eterno dos que rejeitaram a Cristo."},
+
+{q:"O que o julgamento de ISRAEL envolve segundo o material?",
+ opts:["Israel não passa por nenhum julgamento específico","Israel passa por um julgamento específico na tribulação — é o período de 'angústia de Jacó' — purificação da nação antes do milênio, com a conversão do remanescente","Israel é julgado junto com todas as nações no Trono Branco","Israel foi julgado definitivamente em 70 d.C."],
+ c:1, exp:"O julgamento de Israel ocorre durante a tribulação — 'o tempo de angústia de Jacó' (Jr 30.7). É um período de purificação da nação, levando ao reconhecimento de Jesus como Messias pelo remanescente (Zc 12.10; Rm 11.25-26)."},
+
+{q:"Qual é o julgamento de SATANÁS e dos ANJOS CAÍDOS?",
+ opts:["Satanás e os anjos caídos não serão julgados formalmente","Satanás é preso no abismo durante o milênio e ao final é lançado no lago de fogo; os anjos caídos também comparecerão ao julgamento (1Co 6.3; Jd 6; Ap 20.10)","Satanás se arrepende e é restaurado ao final","Os anjos caídos já foram julgados definitivamente na queda"],
+ c:1, exp:"Satanás é preso mil anos (Ap 20.1-3), solto brevemente, derrota tentada e lançado no lago de fogo (Ap 20.10). Os anjos caídos também serão julgados — 1Co 6.3 indica que os crentes participarão desse julgamento; Jd 6 descreve os anjos presos para o julgamento."},
+
+{q:"Qual é a base para afirmar que haverá julgamentos DIFERENTES em momentos diferentes?",
+ opts:["Não há base bíblica — é apenas tradição","Ap 20.4-6 descreve a 'primeira ressurreição' (justos) separada temporalmente da segunda (ímpios); diferentes textos descrevem diferentes julgamentos em diferentes momentos da escatologia","Todos os julgamentos são simultâneos no mesmo momento","Apenas o pré-tribulacionismo ensina múltiplos julgamentos"],
+ c:1, exp:"Ap 20.4-6 diferencia a ressurreição dos justos (primeira — antes do milênio) da dos ímpios (segunda — após o milênio). 2Co 5.10 descreve o Tribunal de Cristo para os crentes; Ap 20.11-15 o Trono Branco para os ímpios. São eventos distintos."},
+
+{q:"O que Paulo diz sobre a participação dos crentes nos julgamentos em 1Co 6.2-3?",
+ opts:["Os crentes não participam de nenhum julgamento","Os santos julgarão o mundo e até os anjos — portanto os crentes têm papel ativo nos julgamentos futuros","Apenas os apóstolos julgarão","Os crentes serão julgados, mas não julgarão outros"],
+ c:1, exp:"1Co 6.2-3: 'Não sabeis que os santos hão de julgar o mundo? [...] Não sabeis que havemos de julgar os anjos?' Os crentes participarão dos julgamentos futuros, incluindo o julgamento dos anjos caídos. Isso ressalta a dignidade e responsabilidade dos santos."},
+
+{q:"Qual é a relação entre o 'Livro da Vida' e o julgamento no Grande Trono Branco?",
+ opts:["O Livro da Vida lista as obras boas de cada pessoa","O Livro da Vida contém os nomes dos redimidos — quem não está inscrito nele é lançado no lago de fogo (Ap 20.15); é a diferença entre salvação e condenação eterna","O Livro da Vida é apenas uma metáfora sem conteúdo real","O Livro da Vida lista os que cumpriram a Lei de Moisés"],
+ c:1, exp:"Ap 20.15: 'E, se alguém não foi achado inscrito no livro da vida, foi lançado no lago de fogo.' O Livro da Vida contém os nomes dos que receberam a salvação pela fé em Cristo. É o critério definitivo no Trono Branco."}
+],
+
+// ── RODADA 10 ── O Estado Final
+[
+{q:"O que o material descreve como o ESTADO FINAL DOS JUSTOS?",
+ opts:["Uma existência espiritual sem corpo e sem localização física","Um estado acabado e definido, em um lugar perfeito — habitarão com Deus face a face, glorificados, em nova criação (Mt 19.28; At 3.21)","O milênio de 1000 anos como destino final","Retorno à terra atual após sua renovação parcial"],
+ c:1, exp:"O estado final dos crentes será precedido pelo surgimento de nova criação (Mt 19.28; At 3.21). Os salvos estarão em estado acabado e definido. Os justos serão perfeitos e habitarão em lugar perfeito — face a face com Deus."},
+
+{q:"Quais características do CÉU são descritas no material?",
+ opts:["É apenas um estado de espírito, não um lugar real","O céu é: onde Jesus está (Jo 14.2-3); lugar melhor (Hb 10.34); herança do crente (1Pe 1.4); lugar de recompensa; lugar de louvor; de beleza e glória (Ap 21-22); lugar alegre; de perfeita comunhão entre crentes e Jesus (Ap 3.21)","É idêntico à terra atual, apenas sem pecado","É um lugar apenas para os israelitas fiéis"],
+ c:1, exp:"O material lista: Jo 14.2-3 (onde Jesus está), Hb 10.34 (lugar melhor), 1Pe 1.4 (herança), Mt 5.12 (recompensa), Ap 19.1 (louvor), Ap 21-22 (beleza e glória), Ap 21.4 (alegria), Ap 3.21 (comunhão com Jesus)."},
+
+{q:"O que é a 'NOVA CRIAÇÃO' mencionada no estado final?",
+ opts:["Uma melhoria gradual da terra atual pelo evangelismo","O surgimento de novos céus e nova terra (Ap 21.1; 2Pe 3.13; Is 65.17) — a criação atual será renovada/transformada como base para o estado eterno dos redimidos","A criação de novos anjos para servir os redimidos","A fundação de Jerusalém como nova capital mundial"],
+ c:1, exp:"Ap 21.1; 2Pe 3.13 e Is 65.17 descrevem novos céus e nova terra — a criação atual será renovada e transformada. O estado eterno dos redimidos será nessa nova criação. A Nova Jerusalém descerá do céu para a nova terra (Ap 21.2)."},
+
+{q:"O que é o INFERNO segundo o material bíblico?",
+ opts:["Um lugar temporário de purificação","O estado final dos ímpios — separação eterna e consciente de Deus, descrito como lago de fogo, trevas exteriores, lugar de tormento eterno (Mt 25.41; Ap 20.10-15)","Uma metáfora para a morte física","O estado de sono do qual os ímpios não acordarão"],
+ c:1, exp:"O material descreve o inferno como estado final dos ímpios: separação eterna de Deus, lago de fogo (Ap 20.10), trevas exteriores (Mt 22.13), tormento eterno (Ap 14.11). É uma questão de justiça — tanto para os bons quanto para os maus."},
+
+{q:"Quais termos bíblicos são usados para o inferno segundo o material?",
+ opts:["Apenas 'hades' e 'geena'","Separação eterna; fogo eterno (Mt 25.41); trevas exteriores (Mt 22.13); castigo eterno (Mt 25.46); lugar de tormento (Lc 16.28); lago de fogo (Ap 20.14-15); segunda morte (Ap 20.14)","Apenas 'sheol' no Antigo Testamento","Apenas 'gehenna' no NT"],
+ c:1, exp:"O material lista vários termos: fogo eterno (Mt 25.41), trevas exteriores (Mt 22.13), lugar de tormento (Lc 16.28), castigo eterno (Mt 25.46), lago de fogo (Ap 20.14-15), segunda morte (Ap 20.14), destruição ou perdição (Mt 7.13), ira eterna (Rm 9.22)."},
+
+{q:"O que o material responde à objeção 'a bondade de Deus não permitiria o inferno eterno'?",
+ opts:["Concorda que o inferno não pode ser eterno por causa do amor de Deus","O inferno é uma questão de JUSTIÇA — tanto para os bons como para os maus. A bondade de Deus não elimina sua justiça; a eternidade da punição reflete a seriedade do pecado e a santidade de Deus","Deus eliminará o inferno no fim dos tempos","O inferno existirá mas terá fim"],
+ c:1, exp:"O material responde que o inferno é questão de justiça para os bons e os maus. A bondade de Deus não cancela sua justiça. A punição eterna reflete a infinita seriedade de rejeitar a Deus. O mesmo Deus que é amor é também justo."},
+
+{q:"O que é a 'NOVA JERUSALÉM' descrita em Apocalipse 21-22?",
+ opts:["Jerusalém reconstruída durante o milênio na terra atual","A cidade celestial que descerá do céu à nova terra — o lugar da habitação eterna dos redimidos, com a presença plena de Deus, sem templo (pois Deus é o templo), sem sol (pois Deus é a luz)","A capital de Israel durante o milênio apenas","Uma visão simbólica sem realidade futura"],
+ c:1, exp:"Ap 21-22 descreve a Nova Jerusalém descendo do céu à nova terra. Não terá templo (Deus é o templo), nem sol (Deus e o Cordeiro são a luz). É o lar eterno dos redimidos — estado de perfeita comunhão com Deus para sempre."},
+
+{q:"O que significa 'ver a Deus face a face' no estado eterno?",
+ opts:["Uma metáfora sem significado real","Os redimidos terão comunhão direta e plena com Deus — a maior recompensa dos justos é a morada celeste e o encontro face a face com o Criador (Mt 25.46; Rm 2.7)","Apenas os apóstolos verão a Deus","Apenas os que alcançaram a santidade perfeita na terra"],
+ c:1, exp:"O material afirma que 'a maior recompensa dos justos, sem dúvida, será a morada celeste' — e isso inclui ver a Deus face a face. Os redimidos glorificados verão e glorificarão a Deus diretamente. 'Alegar-se-ão nele e o glorificarão.'"},
+
+{q:"O que o material conclui nas 'CONSIDERAÇÕES FINAIS' sobre a escatologia?",
+ opts:["A escatologia é assunto resolvido, sem controvérsias","Diante de tantos assuntos polêmicos, a disciplina se restringiu aos aspectos menos controversos; percebemos que quando olhamos para a escatologia futura — arrebatamento, tribulação e principalmente o milênio — há muitas margens para interpretações ambíguas","A escatologia não tem relevância prática para a vida cristã","Apenas o pré-tribulacionismo é correto"],
+ c:1, exp:"O material conclui que a escatologia envolve muitas questões polêmicas com interpretações ambíguas. Percebemos isso especialmente no arrebatamento, tribulação e milênio. Não seremos nós que resolveremos questões debatidas por séculos."},
+
+{q:"Qual é a afirmação central e incontestável da escatologia segundo as Considerações Finais?",
+ opts:["Que o pré-tribulacionismo é a única posição correta","Independentemente das posições sobre milênio e tribulação, Jesus voltará, haverá grande tribulação, ressurreição dos mortos, juízo final, condenação dos ímpios ao inferno e exaltação dos crentes com Deus","Que o amilenismo é a posição mais sólida","Que a escatologia é secundária e não deve dividir a Igreja"],
+ c:1, exp:"As Considerações Finais afirmam que o mais importante é: Jesus voltará, existirá um período de tribulação, haverá ressurreição dos mortos, juízo final, condenação dos ímpios ao inferno, e os crentes serão exaltados. Isso une todas as posições cristãs ortodoxas."}
+]
+];
+
+let round = 0, qIdx = 0, answered = false;
+let totalAcertos = 0, totalErros = 0;
+let roundAcertos = 0;
+const LETTERS = ['A','B','C','D'];
+
+function getEl(id){ return document.getElementById(id); }
+
+function updateStats(){
+  const totalQ = round * 10 + qIdx;
+  const pct = totalQ / 100 * 100;
+  getEl('prog').style.width = pct + '%';
+  getEl('prog-label').textContent = totalQ + ' / 100';
+  getEl('s-rodada').textContent = (round+1)+'/10';
+  getEl('s-q').textContent = (qIdx+1)+'/10';
+  getEl('s-acertos').textContent = totalAcertos;
+  getEl('s-erros').textContent = totalErros;
+}
+
+function showHUD(visible){
+  getEl('stats-bar').style.display = visible ? 'grid' : 'none';
+  getEl('progress-wrap').style.display = visible ? 'block' : 'none';
+}
+
+function showStart(){
+  showHUD(false);
+  getEl('main').innerHTML = `
+    <div class="start-screen">
+      <div class="icon">📖</div>
+      <h2>Simulado de Escatologia</h2>
+      <p>Este simulado cobre todo o conteúdo do material: definição de escatologia, morte, segunda vinda, tribulação, milênio, arrebatamento, ressurreição, julgamento final e estado eterno.</p>
+      <div class="info-grid">
+        <div class="info-box"><div class="n">10</div><div class="l">Rodadas</div></div>
+        <div class="info-box"><div class="n">100</div><div class="l">Questões</div></div>
+        <div class="info-box"><div class="n">~45</div><div class="l">Minutos</div></div>
+      </div>
+      <button class="big-btn" onclick="startQuiz()">Começar o Simulado →</button>
+    </div>`;
+}
+
+function startQuiz(){
+  round = 0; qIdx = 0; totalAcertos = 0; totalErros = 0; roundAcertos = 0;
+  showHUD(true);
+  showQuestion();
+}
+
+function showQuestion(){
+  answered = false;
+  updateStats();
+  const q = QUESTIONS[round][qIdx];
+  const roundNames = ['Introdução & Definição','Escatologia no VT e Primeiros Séculos','A Morte','Segunda Vinda de Jesus Cristo','Concepções Tribulacionistas','A 70ª Semana & o Milênio','O Arrebatamento','Ressurreição dos Mortos','O Julgamento Final','O Estado Final'];
+
+  const optsHTML = q.opts.map((o,i) => `
+    <button class="opt-btn" id="opt${i}" onclick="answer(${i})">
+      <span class="letter">${LETTERS[i]}</span>
+      <span>${o}</span>
+    </button>`).join('');
+
+  getEl('main').innerHTML = `
+    <div class="q-card">
+      <div class="round-badge">Rodada ${round+1} — ${roundNames[round]}</div>
+      <div class="q-num">Questão ${qIdx+1} de 10</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">${optsHTML}</div>
+      <div id="feedback"></div>
+    </div>`;
+}
+
+function answer(idx){
+  if(answered) return;
+  answered = true;
+  const q = QUESTIONS[round][qIdx];
+  const correct = idx === q.c;
+  if(correct){ totalAcertos++; roundAcertos++; }
+  else { totalErros++; }
+  updateStats();
+
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach(b => b.disabled = true);
+  btns[idx].classList.add(correct ? 'correct' : 'wrong');
+  if(!correct) btns[q.c].classList.add('reveal-correct');
+
+  const icon = correct ? '✓ Correto!' : '✗ Incorreto';
+  const cls = correct ? 'ok' : 'err';
+  getEl('feedback').innerHTML = `
+    <div class="feedback-box ${cls}">
+      <strong>${icon}</strong>
+      ${q.exp}
+    </div>
+    <button class="next-btn" onclick="nextQuestion()">
+      ${qIdx < 9 ? 'Próxima questão →' : 'Ver resultado da rodada →'}
+    </button>`;
+}
+
+function nextQuestion(){
+  if(qIdx < 9){
+    qIdx++;
+    showQuestion();
+  } else {
+    showRoundResult();
+  }
+}
+
+function showRoundResult(){
+  const pct = Math.round(roundAcertos / 10 * 100);
+  let emoji = pct >= 80 ? '🏆' : pct >= 60 ? '👍' : '📚';
+  let msg = pct >= 80 ? 'Excelente! Você domina este tema.' : pct >= 60 ? 'Bom resultado! Continue estudando.' : 'Estude mais este conteúdo antes de prosseguir.';
+
+  getEl('main').innerHTML = `
+    <div class="round-result">
+      <div style="font-size:48px;margin-bottom:12px">${emoji}</div>
+      <h2>Resultado da Rodada ${round+1}</h2>
+      <div class="rs">${roundAcertos}/10</div>
+      <p>${pct}% de acertos — ${msg}</p>
+      ${round < 9 ? `<button class="big-btn" onclick="nextRound()">Próxima Rodada →</button>` : `<button class="big-btn gold" onclick="showFinalResult()">Ver Resultado Final 🏁</button>`}
+    </div>`;
+}
+
+function nextRound(){
+  round++;
+  qIdx = 0;
+  roundAcertos = 0;
+  showQuestion();
+}
+
+function showFinalResult(){
+  const pct = Math.round(totalAcertos / 100 * 100);
+  let medal = pct >= 90 ? '🥇' : pct >= 75 ? '🥈' : pct >= 60 ? '🥉' : '📚';
+  let msg = pct >= 90 ? 'Parabéns! Você tem um domínio excelente de Escatologia. Está pronto para a prova!'
+    : pct >= 75 ? 'Muito bom! Revise os tópicos em que errou e você estará pronto.'
+    : pct >= 60 ? 'Bom esforço! Recomendamos reler os capítulos com mais erros.'
+    : 'Continue estudando! Releia o material com calma e refaça o simulado.';
+
+  getEl('prog').style.width = '100%';
+  getEl('prog-label').textContent = '100 / 100';
+  getEl('s-rodada').textContent = '10/10';
+  getEl('s-q').textContent = '10/10';
+  getEl('s-acertos').textContent = totalAcertos;
+  getEl('s-erros').textContent = totalErros;
+
+  getEl('main').innerHTML = `
+    <div class="result-screen">
+      <div class="medal">${medal}</div>
+      <h2>Simulado Concluído!</h2>
+      <div class="score">${totalAcertos}<span>/100</span></div>
+      <div class="result-grid">
+        <div class="result-stat g"><div class="n">${totalAcertos}</div><div class="l">Acertos</div></div>
+        <div class="result-stat r"><div class="n">${totalErros}</div><div class="l">Erros</div></div>
+        <div class="result-stat"><div class="n">${pct}%</div><div class="l">Aproveitamento</div></div>
+        <div class="result-stat"><div class="n">10</div><div class="l">Rodadas</div></div>
+      </div>
+      <div class="result-msg">${msg}</div>
+      <button class="big-btn" onclick="location.reload()" style="margin-bottom:12px">Refazer o Simulado 🔄</button>
+    </div>`;
+}
+
+showStart();
+</script>
+
+<script>
+function showTab(name) {
+  ['simulado','recap','prova'].forEach(t => {
+    document.getElementById('view-' + t).classList.toggle('active', t === name);
+    document.getElementById('tabbtn-' + t).classList.toggle('active', t === name);
+  });
+  window.scrollTo(0,0);
+}
+showTab('simulado');
+</script>
+</body>
+</html>
