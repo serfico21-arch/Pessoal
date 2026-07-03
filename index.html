@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sérgio Costa — Painel Pessoal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --verde: #10b981;
+      --verde-claro: #34d399;
+      --verde-escuro: #047857;
+      --escuro: #0f2922;
+      --escuro2: #0a1f1a;
+      --branco: #ffffff;
+      --card-bg: rgba(16,185,129,0.07);
+      --card-border: rgba(16,185,129,0.22);
+      --card-hover-bg: rgba(16,185,129,0.16);
+      --card-hover-border: rgba(16,185,129,0.5);
+      --text-muted: rgba(255,255,255,0.45);
+      --divider: rgba(16,185,129,0.14);
+      --group-bg: rgba(16,185,129,0.04);
+      --group-border: rgba(16,185,129,0.16);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--escuro2);
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    /* ── HEADER ─────────────────────────────────── */
+    header {
+      background: var(--escuro);
+      border-bottom: 2px solid var(--verde);
+      padding: 1.4rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      background: var(--verde);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Sora', sans-serif;
+      font-size: 19px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+      letter-spacing: -0.5px;
+    }
+
+    .header-info h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: 17px; font-weight: 600; color: #fff; line-height: 1.2;
+    }
+
+    .header-info p {
+      font-size: 12.5px; color: var(--text-muted); margin-top: 2px;
+    }
+
+    .header-badge {
+      margin-left: auto;
+      background: rgba(16,185,129,0.15);
+      border: 0.5px solid rgba(16,185,129,0.4);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 12px;
+      color: var(--verde-claro);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    /* ── MAIN ────────────────────────────────────── */
+    main {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 3rem;
+    }
+
+    /* ── SECTION ─────────────────────────────────── */
+    section { margin-bottom: 1.75rem; }
+
+    .section-label {
+      font-size: 10.5px;
+      font-weight: 500;
+      letter-spacing: 0.11em;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      padding-left: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 0.5px;
+      background: var(--divider);
+    }
+
+    /* ── GRID ────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 10px;
+    }
+
+    /* ── CARD BUTTON ─────────────────────────────── */
+    .card {
+      background: var(--card-bg);
+      border: 0.5px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px 14px 14px;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s, transform 0.12s;
+      animation: fadeUp 0.35s ease both;
+    }
+
+    .card:hover {
+      background: var(--card-hover-bg);
+      border-color: var(--card-hover-border);
+      transform: translateY(-2px);
+    }
+
+    .card:active { transform: scale(0.97); }
+
+    .card-icon {
+      font-size: 22px;
+      color: var(--verde);
+      margin-bottom: 2px;
+      display: block;
+    }
+
+    .card-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    .card-sub {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 400;
+      line-height: 1.4;
+    }
+
+    /* destaque */
+    .card.destaque {
+      background: rgba(16,185,129,0.13);
+      border-color: rgba(16,185,129,0.42);
+    }
+
+    /* ── GRUPOS (matéria + simulado + guia juntos) ──── */
+    .subject-group {
+      background: var(--group-bg);
+      border: 1px solid var(--group-border);
+      border-radius: 14px;
+      padding: 14px 14px 12px;
+      margin-bottom: 10px;
+    }
+
+    .subject-name {
+      font-family: 'Sora', sans-serif;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--verde-claro);
+      margin-bottom: 10px;
+      padding-left: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .subject-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .subject-row .card {
+      animation: none;
+      padding: 12px 12px 11px;
+    }
+
+    .subject-row .card-title { font-size: 12.5px; }
+    .subject-row .card-sub { font-size: 10.5px; }
+    .subject-row .card-icon { font-size: 18px; }
+
+    .theo-groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+    }
+
+    @media (max-width: 480px) {
+      .theo-groups { grid-template-columns: 1fr; }
+    }
+
+    /* ── ANIMAÇÃO ────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .card:nth-child(1) { animation-delay: 0.04s; }
+    .card:nth-child(2) { animation-delay: 0.09s; }
+    .card:nth-child(3) { animation-delay: 0.14s; }
+    .card:nth-child(4) { animation-delay: 0.19s; }
+    .card:nth-child(5) { animation-delay: 0.24s; }
+
+    /* ── RODAPÉ ──────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 11.5px;
+      color: var(--text-muted);
+      border-top: 0.5px solid var(--divider);
+    }
+
+    footer span { color: var(--verde); }
+
+    /* ── RESPONSIVO ──────────────────────────────── */
+    @media (max-width: 480px) {
+      header { padding: 1rem 1.25rem; }
+      .header-badge { display: none; }
+      main { padding: 1.5rem 1rem 2.5rem; }
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">SC</div>
+    <div class="header-info">
+      <h1>Sérgio Costa — Painel Pessoal</h1>
+      <p>Acesso rápido a todas as páginas do sistema</p>
+    </div>
+    <div class="header-badge">
+      <i class="ti ti-lock" style="font-size:12px; vertical-align:-1px; margin-right:4px;"></i>Pessoal
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- AGENDA & CONTRATOS -->
+    <section>
+      <div class="section-label">Agenda &amp; Contratos</div>
+      <div class="grid">
+
+        <a class="card destaque" href="agenda_p.html">
+          <i class="ti ti-calendar card-icon"></i>
+          <span class="card-title">Agenda Pessoal</span>
+          <span class="card-sub">Compromissos e eventos</span>
+        </a>
+
+        <a class="card" href="contrato_princ.html">
+          <i class="ti ti-file-description card-icon"></i>
+          <span class="card-title">Contrato Principal</span>
+          <span class="card-sub">Modelo de contrato</span>
+        </a>
+
+        <a class="card" href="contrato_sec.html">
+          <i class="ti ti-files card-icon"></i>
+          <span class="card-title">Contrato Sec.</span>
+          <span class="card-sub">Contrato secundário</span>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- FINANCEIRO & AVALIAÇÕES -->
+    <section>
+      <div class="section-label">Financeiro &amp; Avaliações</div>
+      <div class="grid">
+
+        <a class="card destaque" href="controle_fin.html">
+          <i class="ti ti-chart-bar card-icon"></i>
+          <span class="card-title">Controle Financeiro</span>
+          <span class="card-sub">Receitas e despesas</span>
+        </a>
+
+        <a class="card" href="ptam.html">
+          <i class="ti ti-building card-icon"></i>
+          <span class="card-title">PTAM</span>
+          <span class="card-sub">Parecer técnico v1</span>
+        </a>
+
+        <a class="card" href="ptam2.html">
+          <i class="ti ti-building-skyscraper card-icon"></i>
+          <span class="card-title">PTAM 2</span>
+          <span class="card-sub">Parecer técnico v2</span>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- MINISTÉRIO -->
+    <section>
+      <div class="section-label">Ministério</div>
+      <div class="grid">
+
+        <a class="card" href="esboco_sermao.html">
+          <i class="ti ti-book card-icon"></i>
+          <span class="card-title">Esboço de Sermão</span>
+          <span class="card-sub">Pregação e estudos</span>
+        </a>
+
+        <a class="card" href="esboco_limpo.html">
+          <i class="ti ti-notebook card-icon"></i>
+          <span class="card-title">Esboço Limpo</span>
+          <span class="card-sub">Versão simplificada</span>
+        </a>
+
+        <a class="card" href="esboco_limpo_intro_auto.html">
+          <i class="ti ti-sparkles card-icon"></i>
+          <span class="card-title">Esboço c/ Introdução</span>
+          <span class="card-sub">Gerador de introdução</span>
+        </a>
+
+        <a class="card" href="igreja.html">
+          <i class="ti ti-heart card-icon"></i>
+          <span class="card-title">Igreja</span>
+          <span class="card-sub">Página da comunidade</span>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- SIMULADOS TEOLÓGICOS -->
+    <section>
+      <div class="section-label">Simulados Teológicos</div>
+
+      <div class="theo-groups">
+
+        <div class="subject-group">
+          <div class="subject-name"><i class="ti ti-heart-handshake"></i> Aconselhamento Pastoral</div>
+          <div class="subject-row" style="grid-template-columns: 1fr;">
+            <a class="card" href="simulado_aconselhamento_pastoral.html">
+              <i class="ti ti-clipboard-list card-icon"></i>
+              <span class="card-title">Simulado Completo</span>
+              <span class="card-sub">O que cai na prova + apostila</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="subject-group">
+          <div class="subject-name"><i class="ti ti-building-church"></i> Administração Eclesiástica</div>
+          <div class="subject-row" style="grid-template-columns: 1fr;">
+            <a class="card" href="simulado_adm_eclesiastica.html">
+              <i class="ti ti-clipboard-list card-icon"></i>
+              <span class="card-title">Simulado Completo</span>
+              <span class="card-sub">O que cai na prova + apostila</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="subject-group">
+          <div class="subject-name"><i class="ti ti-users"></i> Eclesiologia</div>
+          <div class="subject-row" style="grid-template-columns: 1fr;">
+            <a class="card" href="simulado_eclesiologia.html">
+              <i class="ti ti-clipboard-list card-icon"></i>
+              <span class="card-title">Simulado Completo</span>
+              <span class="card-sub">O que cai na prova + apostila</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="subject-group">
+          <div class="subject-name"><i class="ti ti-timeline"></i> História da Igreja</div>
+          <div class="subject-row" style="grid-template-columns: 1fr;">
+            <a class="card" href="simulado_historia_igreja3.html">
+              <i class="ti ti-clipboard-list card-icon"></i>
+              <span class="card-title">Simulado Completo</span>
+              <span class="card-sub">O que cai na prova + apostila</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="subject-group">
+          <div class="subject-name"><i class="ti ti-stars"></i> Escatologia</div>
+          <div class="subject-row" style="grid-template-columns: 1fr;">
+            <a class="card" href="simulado_escatologia.html">
+              <i class="ti ti-clipboard-list card-icon"></i>
+              <span class="card-title">Simulado Completo</span>
+              <span class="card-sub">O que cai na prova + apostila</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="subject-group">
+          <div class="subject-name"><i class="ti ti-bible"></i> Teologia Pastoral</div>
+          <div class="subject-row" style="grid-template-columns: 1fr;">
+            <a class="card" href="simulado_teologia_pastoral.html">
+              <i class="ti ti-clipboard-list card-icon"></i>
+              <span class="card-title">Simulado Completo</span>
+              <span class="card-sub">O que cai na prova + apostila</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="subject-group">
+          <div class="subject-name"><i class="ti ti-home"></i> Instituição Divina da Família</div>
+          <div class="subject-row" style="grid-template-columns: 1fr;">
+            <a class="card" href="simulado_instituicao_familia.html">
+              <i class="ti ti-clipboard-list card-icon"></i>
+              <span class="card-title">Simulado</span>
+              <span class="card-sub">10 rodadas · 100 questões</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ACESSO RÁPIDO FCOSTA -->
+    <section>
+      <div class="section-label">Acesso Rápido — FCosta</div>
+      <div class="grid">
+
+        <a class="card" href="https://fcostacorretor.com" target="_blank" rel="noopener">
+          <i class="ti ti-world card-icon"></i>
+          <span class="card-title">Site FCosta</span>
+          <span class="card-sub">fcostacorretor.com</span>
+        </a>
+
+        <a class="card" href="https://zippy-kitsune-93a055.netlify.app" target="_blank" rel="noopener">
+          <i class="ti ti-cloud card-icon"></i>
+          <span class="card-title">Netlify</span>
+          <span class="card-sub">Deploy em produção</span>
+        </a>
+
+        <a class="card" href="https://github.com/sergiofcostacorretor-jpg/fcosta" target="_blank" rel="noopener">
+          <i class="ti ti-brand-github card-icon"></i>
+          <span class="card-title">GitHub FCosta</span>
+          <span class="card-sub">Repositório principal</span>
+        </a>
+
+        <a class="card" href="https://play.google.com/store/apps/details?id=meu.fcosta.app2026" target="_blank" rel="noopener">
+          <i class="ti ti-brand-google-play card-icon"></i>
+          <span class="card-title">App FCosta</span>
+          <span class="card-sub">Android 2026</span>
+        </a>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- RODAPÉ -->
+  <footer>
+    <span>FCosta</span> · Sérgio Fernandes da Costa · CRECI-SP 294791-F · CNAI 52708
+  </footer>
+
+</body>
+</html>
