@@ -1,0 +1,1786 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ferramentas — Sérgio Costa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --verde: #10b981;
+  --verde-claro: #34d399;
+  --verde-escuro: #047857;
+  --escuro: #0f2922;
+  --escuro2: #0a1f1a;
+  --branco: #ffffff;
+  --card-bg: rgba(16,185,129,0.07);
+  --card-border: rgba(16,185,129,0.22);
+  --card-hover-bg: rgba(16,185,129,0.16);
+  --card-hover-border: rgba(16,185,129,0.5);
+  --text-muted: rgba(255,255,255,0.45);
+  --divider: rgba(16,185,129,0.14);
+  --group-bg: rgba(16,185,129,0.04);
+  --group-border: rgba(16,185,129,0.16);
+  --danger: #f87171;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--escuro2); min-height: 100vh; color: #fff; }
+header {
+  background: var(--escuro); border-bottom: 2px solid var(--verde);
+  padding: 1.4rem 2rem; display: flex; align-items: center; gap: 16px;
+  position: sticky; top: 0; z-index: 100;
+}
+.logo {
+  width: 50px; height: 50px; border-radius: 50%; background: var(--verde);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; color: #fff;
+  flex-shrink: 0; letter-spacing: -0.5px;
+}
+.header-info h1 { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600; color: #fff; line-height: 1.2; }
+.header-info p { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+.header-badge {
+  margin-left: auto; background: rgba(16,185,129,0.15); border: 0.5px solid rgba(16,185,129,0.4);
+  border-radius: 20px; padding: 5px 14px; font-size: 12px; color: var(--verde-claro); font-weight: 500; white-space: nowrap;
+}
+.voltar {
+  margin-left: auto; display: flex; align-items: center; gap: 6px; color: var(--verde-claro);
+  text-decoration: none; font-size: 12.5px; font-weight: 500;
+}
+main { max-width: 820px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+section { margin-bottom: 1.75rem; }
+.section-label {
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.11em; color: var(--text-muted);
+  text-transform: uppercase; margin-bottom: 12px; padding-left: 2px; display: flex; align-items: center; gap: 8px;
+}
+.section-label::after { content: ''; flex: 1; height: 0.5px; background: var(--divider); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.card {
+  background: var(--card-bg); border: 0.5px solid var(--card-border); border-radius: 12px;
+  padding: 16px 14px 14px; display: flex; flex-direction: column; gap: 7px;
+  cursor: pointer; transition: background 0.18s, border-color 0.18s, transform 0.12s;
+}
+.card:hover { background: var(--card-hover-bg); border-color: var(--card-hover-border); transform: translateY(-2px); }
+.card.destaque { background: rgba(16,185,129,0.13); border-color: rgba(16,185,129,0.42); }
+.card:active { transform: scale(0.97); }
+.card.aberto { background: var(--card-hover-bg); border-color: var(--card-hover-border); }
+.card-icon { font-size: 22px; color: var(--verde); margin-bottom: 2px; display: block; }
+.card-title { font-family: 'Sora', sans-serif; font-size: 13.5px; font-weight: 500; color: #fff; line-height: 1.3; }
+.card-sub { font-size: 11.5px; color: var(--text-muted); font-weight: 400; line-height: 1.4; }
+
+.painel {
+  display: none; background: var(--group-bg); border: 1px solid var(--group-border);
+  border-radius: 14px; padding: 18px; margin-top: 10px;
+}
+.painel.aberto { display: block; }
+.campo { margin-bottom: 14px; }
+.campo label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+.campo input[type="text"], .campo input[type="number"], .campo textarea {
+  width: 100%; background: rgba(255,255,255,0.05); border: 0.5px solid var(--card-border);
+  border-radius: 8px; padding: 10px 12px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 13.5px;
+}
+.campo textarea { resize: vertical; min-height: 80px; }
+.campo input[type="range"] { width: 100%; accent-color: var(--verde); }
+.linha { display: flex; gap: 10px; flex-wrap: wrap; }
+.linha .campo { flex: 1; min-width: 130px; }
+.checks { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+.checks label { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #fff; cursor: pointer; }
+.checks input { accent-color: var(--verde); }
+.btn {
+  background: var(--verde); color: #fff; border: none; border-radius: 8px; padding: 10px 16px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s;
+}
+.btn:hover { background: var(--verde-escuro); }
+.btn.secundario { background: rgba(255,255,255,0.08); }
+.btn.secundario:hover { background: rgba(255,255,255,0.15); }
+.btn.perigo { background: rgba(248,113,113,0.15); color: var(--danger); }
+.btn.perigo:hover { background: rgba(248,113,113,0.28); }
+.resultado {
+  margin-top: 12px; background: rgba(16,185,129,0.1); border: 1px solid var(--card-border);
+  border-radius: 8px; padding: 12px 14px; font-size: 13.5px; word-break: break-word;
+}
+.resultado.destaque { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600; color: var(--verde-claro); }
+.acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.lista-cofre { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.item-cofre {
+  background: rgba(255,255,255,0.04); border: 0.5px solid var(--card-border); border-radius: 8px;
+  padding: 10px 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.item-cofre .info { flex: 1; min-width: 140px; }
+.item-cofre .site { font-family: 'Sora', sans-serif; font-size: 12.5px; font-weight: 600; }
+.item-cofre .user { font-size: 11px; color: var(--text-muted); }
+.item-cofre .senha { font-size: 12.5px; font-family: monospace; color: var(--verde-claro); }
+.vazio { font-size: 12px; color: var(--text-muted); text-align: center; padding: 10px; }
+canvas#qrcanvas { display: block; margin: 12px auto 0; border-radius: 8px; background: #fff; padding: 10px; }
+.upload-area {
+  border: 1.5px dashed var(--card-border); border-radius: 10px; padding: 20px; text-align: center;
+  cursor: pointer; transition: border-color 0.15s, background 0.15s; margin-bottom: 12px;
+}
+.upload-area:hover { border-color: var(--verde); background: rgba(16,185,129,0.05); }
+.upload-area i { font-size: 26px; color: var(--verde); display: block; margin-bottom: 6px; }
+.upload-area span { font-size: 12.5px; color: var(--text-muted); }
+.thumbs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.thumb {
+  width: 70px; height: 70px; border-radius: 8px; overflow: hidden; cursor: pointer;
+  border: 2px solid transparent; position: relative; flex-shrink: 0;
+}
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb.selecionada { border-color: var(--verde); }
+.thumb .marca {
+  position: absolute; top: 3px; right: 3px; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--verde); color: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center;
+}
+canvas#bannercanvas { display: block; margin: 12px auto 0; border-radius: 10px; max-width: 100%; height: auto; border: 0.5px solid var(--card-border); }
+select#banner-formato, select#voz-select {
+  width: 100%; background: rgba(255,255,255,0.05); border: 0.5px solid var(--card-border);
+  border-radius: 8px; padding: 10px 12px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 13.5px;
+}
+.badge-mini {
+  display: inline-block; align-self: flex-start; background: rgba(16,185,129,0.15);
+  border: 0.5px solid rgba(16,185,129,0.4); border-radius: 20px; padding: 2px 9px;
+  font-size: 9.5px; color: var(--verde-claro); font-weight: 600; letter-spacing: 0.04em;
+}
+.badge-mini.alerta { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.4); color: var(--danger); }
+.guia-voz {
+  margin-top: 14px; padding-top: 14px; border-top: 0.5px solid var(--divider);
+}
+.guia-voz summary {
+  cursor: pointer; font-size: 12.5px; font-weight: 500; color: var(--verde-claro);
+  display: flex; align-items: center; gap: 6px; list-style: none;
+}
+.guia-voz summary::-webkit-details-marker { display: none; }
+.guia-voz-conteudo { margin-top: 10px; }
+.guia-voz-conteudo p {
+  font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 10px;
+}
+.guia-voz-conteudo strong { color: #fff; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-btn {
+  background: rgba(255,255,255,0.05); border: 0.5px solid var(--card-border); border-radius: 20px;
+  padding: 7px 14px; font-family: 'DM Sans', sans-serif; font-size: 12.5px; color: rgba(255,255,255,0.75);
+  cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.tag-btn:hover { border-color: var(--card-hover-border); }
+.tag-btn.selecionada { background: var(--verde); border-color: var(--verde); color: #fff; font-weight: 500; }
+.btn-mic {
+  position: absolute; right: 8px; top: 8px; width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(16,185,129,0.15); border: 0.5px solid rgba(16,185,129,0.4); color: var(--verde-claro);
+  cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;
+  transition: background 0.15s;
+}
+.btn-mic:hover { background: rgba(16,185,129,0.3); }
+.btn-mic.gravando { background: var(--danger); border-color: var(--danger); color: #fff; animation: pulsar 1s infinite; }
+@keyframes pulsar { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+.kanban { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
+.kanban-coluna {
+  flex: 0 0 200px; background: var(--group-bg); border: 1px solid var(--group-border);
+  border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px;
+}
+.kanban-coluna-titulo {
+  font-family: 'Sora', sans-serif; font-size: 11.5px; font-weight: 600; color: #fff;
+  display: flex; justify-content: space-between; align-items: center; padding: 2px 4px 6px;
+  border-bottom: 0.5px solid var(--divider);
+}
+.kanban-coluna-titulo .contagem {
+  background: rgba(16,185,129,0.18); color: var(--verde-claro); border-radius: 20px;
+  font-size: 10px; padding: 1px 7px; font-weight: 600;
+}
+.kanban-card {
+  background: rgba(255,255,255,0.05); border: 0.5px solid var(--card-border); border-radius: 8px;
+  padding: 9px 10px; font-size: 12px;
+}
+.kanban-card .nome { font-family: 'Sora', sans-serif; font-weight: 600; font-size: 12.5px; color: #fff; margin-bottom: 2px; }
+.kanban-card .info { color: var(--text-muted); font-size: 11px; margin-bottom: 6px; line-height: 1.4; }
+.kanban-card .acoes-card { display: flex; gap: 5px; flex-wrap: wrap; }
+.kanban-card .acoes-card button, .kanban-card .acoes-card a {
+  flex: none; background: rgba(255,255,255,0.08); border: none; border-radius: 6px; color: #fff;
+  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; cursor: pointer; text-decoration: none;
+}
+.kanban-card .acoes-card .perigo-mini { background: rgba(248,113,113,0.2); color: var(--danger); }
+.kanban-vazio { font-size: 11px; color: var(--text-muted); text-align: center; padding: 10px 0; }
+.cor-btn {
+  width: 34px; height: 34px; border-radius: 50%; border: 2px solid transparent; cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.cor-btn:hover { transform: scale(1.1); }
+.cor-btn.selecionada { border-color: #fff; }
+.aviso { font-size: 11.5px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
+.aviso i { color: var(--verde); margin-right: 4px; }
+footer { text-align: center; padding: 1.5rem; font-size: 11.5px; color: var(--text-muted); border-top: 0.5px solid var(--divider); }
+footer span { color: var(--verde); }
+@media (max-width: 480px) {
+  header { padding: 1rem 1.25rem; }
+  .header-badge { display: none; }
+  main { padding: 1.5rem 1rem 2.5rem; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SC</div>
+  <div class="header-info">
+    <h1>Ferramentas</h1>
+    <p>Canivete suíço — utilitários do dia a dia</p>
+  </div>
+  <a class="voltar" href="index.html"><i class="ti ti-arrow-left"></i>Painel</a>
+</header>
+
+<main>
+
+  <!-- CORRETOR.IA -->
+  <section id="corretoria-ia">
+    <div class="section-label">CORRETOR.IA</div>
+    <div class="grid">
+      <a class="card destaque" href="https://corretoriaferramentas.lovable.app/dashboard" target="_blank" rel="noopener">
+        <span class="badge-mini">PLANO PREMIUM</span>
+        <i class="ti ti-robot card-icon"></i>
+        <span class="card-title">Abrir CORRETOR.IA</span>
+        <span class="card-sub">Painel completo (site externo)</span>
+      </a>
+    </div>
+
+    <div class="section-label" style="margin-top:22px;">CORRETOR.IA — versão local (sem login)</div>
+    <div class="grid">
+      <div class="card" onclick="alternar('leads', this)">
+        <span class="badge-mini">SEM LOGIN</span>
+        <i class="ti ti-users card-icon"></i>
+        <span class="card-title">Gestor de Leads</span>
+        <span class="card-sub">Organização de contatos</span>
+      </div>
+      <div class="card" onclick="alternar('precificacao', this)">
+        <span class="badge-mini">SEM LOGIN</span>
+        <i class="ti ti-tag card-icon"></i>
+        <span class="card-title">Precificação</span>
+        <span class="card-sub">Estimativa por comparáveis</span>
+      </div>
+      <div class="card" onclick="alternar('financiamento', this)">
+        <span class="badge-mini">SEM LOGIN</span>
+        <i class="ti ti-building-bank card-icon"></i>
+        <span class="card-title">Financiamento</span>
+        <span class="card-sub">Simulação SAC</span>
+      </div>
+      <div class="card" onclick="alternar('descricao', this)">
+        <span class="badge-mini">SEM LOGIN</span>
+        <i class="ti ti-align-left card-icon"></i>
+        <span class="card-title">Descrições</span>
+        <span class="card-sub">Gerar texto de anúncio</span>
+      </div>
+      <div class="card" onclick="alternar('voz', this)">
+        <span class="badge-mini">SEM LOGIN</span>
+        <i class="ti ti-microphone-2 card-icon"></i>
+        <span class="card-title">Narração</span>
+        <span class="card-sub">Texto em voz, com download</span>
+      </div>
+      <div class="card" onclick="alternar('academy', this)">
+        <span class="badge-mini">SEM LOGIN</span>
+        <i class="ti ti-school card-icon"></i>
+        <span class="card-title">Academy</span>
+        <span class="card-sub">Dicas para corretores</span>
+      </div>
+    </div>
+    <p class="aviso"><i class="ti ti-info-circle"></i>Essas 6 ferramentas rodam direto aqui no seu site, sem precisar logar em nada. Os dados ficam salvos só neste navegador/aparelho.</p>
+
+    <div class="section-label" style="margin-top:22px;">CORRETOR.IA — só no site externo (IA pesada)</div>
+    <div class="grid">
+      <a class="card" href="https://corretoriaferramentas.lovable.app/dashboard" target="_blank" rel="noopener">
+        <span class="badge-mini alerta">INSTÁVEL</span>
+        <i class="ti ti-video card-icon"></i>
+        <span class="card-title">Vídeos Automáticos</span>
+        <span class="card-sub">Geração de vídeos com IA</span>
+      </a>
+      <a class="card" href="https://corretoriaferramentas.lovable.app/dashboard" target="_blank" rel="noopener">
+        <span class="badge-mini">LIBERADO</span>
+        <i class="ti ti-message-chatbot card-icon"></i>
+        <span class="card-title">Assistente</span>
+        <span class="card-sub">Assistente virtual de atendimento</span>
+      </a>
+      <a class="card" href="https://corretoriaferramentas.lovable.app/dashboard" target="_blank" rel="noopener">
+        <span class="badge-mini alerta">INSTÁVEL</span>
+        <i class="ti ti-photo-ai card-icon"></i>
+        <span class="card-title">Imagens 2.0</span>
+        <span class="card-sub">Geração de imagens com IA</span>
+      </a>
+      <a class="card" href="https://corretoriaferramentas.lovable.app/dashboard" target="_blank" rel="noopener">
+        <span class="badge-mini alerta">INSTÁVEL</span>
+        <i class="ti ti-photo card-icon"></i>
+        <span class="card-title">Imagens 1.0</span>
+        <span class="card-sub">Versão antiga do gerador</span>
+      </a>
+    </div>
+    <p class="aviso"><i class="ti ti-info-circle"></i>Essas 4 precisam mesmo de IA pesada rodando em servidor — não dá pra recriar sem contratar um serviço assim. Continuam abrindo no painel externo (corretoriaferramentas.lovable.app), com login.</p>
+  </section>
+
+  <!-- SEGURANÇA -->
+  <section>
+    <div class="section-label">Segurança</div>
+    <div class="grid">
+      <div class="card" id="senha" onclick="alternar('senha', this)">
+        <i class="ti ti-key card-icon"></i>
+        <span class="card-title">Gerador de Senhas</span>
+        <span class="card-sub">Criar e guardar senhas</span>
+      </div>
+    </div>
+    <div class="painel" id="painel-senha">
+      <div class="campo">
+        <label>Comprimento: <span id="tamanho-valor">16</span> caracteres</label>
+        <input type="range" id="tamanho" min="6" max="32" value="16" oninput="document.getElementById('tamanho-valor').textContent=this.value" />
+      </div>
+      <div class="checks">
+        <label><input type="checkbox" id="op-maiusculas" checked /> Maiúsculas (A-Z)</label>
+        <label><input type="checkbox" id="op-minusculas" checked /> Minúsculas (a-z)</label>
+        <label><input type="checkbox" id="op-numeros" checked /> Números (0-9)</label>
+        <label><input type="checkbox" id="op-simbolos" checked /> Símbolos (!@#$)</label>
+      </div>
+      <button class="btn" onclick="gerarSenha()"><i class="ti ti-refresh"></i>Gerar senha</button>
+      <div class="resultado destaque" id="resultado-senha" style="display:none;"></div>
+      <div class="acoes" id="acoes-senha" style="display:none;">
+        <button class="btn secundario" onclick="copiar(document.getElementById('resultado-senha').textContent, this)"><i class="ti ti-copy"></i>Copiar</button>
+      </div>
+
+      <div style="margin-top:20px; padding-top:16px; border-top:0.5px solid var(--divider);">
+        <div class="linha">
+          <div class="campo"><label>Site / Serviço</label><input type="text" id="cofre-site" placeholder="ex: fcostacorretor.com" /></div>
+          <div class="campo"><label>Usuário (opcional)</label><input type="text" id="cofre-user" placeholder="ex: sergio@email.com" /></div>
+        </div>
+        <button class="btn secundario" onclick="salvarNoCofre()"><i class="ti ti-device-floppy"></i>Salvar no cofre</button>
+        <p class="aviso"><i class="ti ti-info-circle"></i>O cofre fica salvo só neste navegador/aparelho (armazenamento local), não é enviado para nenhum servidor.</p>
+        <div class="lista-cofre" id="lista-cofre"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IMÓVEIS -->
+  <section>
+    <div class="section-label">Imóveis</div>
+    <div class="grid">
+      <div class="card" id="qrcode" onclick="alternar('qrcode', this)">
+        <i class="ti ti-qrcode card-icon"></i>
+        <span class="card-title">Gerador de QR Code</span>
+        <span class="card-sub">Para anúncios de imóveis</span>
+      </div>
+      <div class="card" id="whatsapp" onclick="alternar('whatsapp', this)">
+        <i class="ti ti-brand-whatsapp card-icon"></i>
+        <span class="card-title">Link WhatsApp</span>
+        <span class="card-sub">Mensagem pronta pro cliente</span>
+      </div>
+      <div class="card" id="comissao" onclick="alternar('comissao', this)">
+        <i class="ti ti-percentage card-icon"></i>
+        <span class="card-title">Comissão</span>
+        <span class="card-sub">Calcular corretagem</span>
+      </div>
+      <div class="card" id="financiamento" onclick="alternar('financiamento', this)">
+        <i class="ti ti-home-dollar card-icon"></i>
+        <span class="card-title">Financiamento</span>
+        <span class="card-sub">Simulador SAC</span>
+      </div>
+      <div class="card" id="descricao" onclick="alternar('descricao', this)">
+        <i class="ti ti-file-text card-icon"></i>
+        <span class="card-title">Descrição de Imóvel</span>
+        <span class="card-sub">Gerar texto de anúncio</span>
+      </div>
+      <div class="card" id="itbi" onclick="alternar('itbi', this)">
+        <i class="ti ti-receipt card-icon"></i>
+        <span class="card-title">ITBI</span>
+        <span class="card-sub">Imposto de transmissão</span>
+      </div>
+      <div class="card" id="banner" onclick="alternar('banner', this)">
+        <i class="ti ti-photo card-icon"></i>
+        <span class="card-title">Banner de Imóvel</span>
+        <span class="card-sub">Anúncio com foto e preço</span>
+      </div>
+      <div class="card" id="leads" onclick="alternar('leads', this)">
+        <i class="ti ti-users card-icon"></i>
+        <span class="card-title">Gestor de Leads</span>
+        <span class="card-sub">Organizar contatos</span>
+      </div>
+      <div class="card" id="precificacao" onclick="alternar('precificacao', this)">
+        <i class="ti ti-tag card-icon"></i>
+        <span class="card-title">Precificação</span>
+        <span class="card-sub">Estimativa por comparáveis</span>
+      </div>
+      <div class="card" id="academy" onclick="alternar('academy', this)">
+        <i class="ti ti-school card-icon"></i>
+        <span class="card-title">Academy</span>
+        <span class="card-sub">Dicas para corretores</span>
+      </div>
+    </div>
+
+    <div class="painel" id="painel-qrcode">
+      <div class="campo">
+        <label>Link do anúncio ou texto</label>
+        <input type="text" id="qr-texto" placeholder="ex: https://fcostacorretor.com/imovel/123" />
+      </div>
+      <button class="btn" onclick="gerarQR()"><i class="ti ti-qrcode"></i>Gerar QR Code</button>
+      <canvas id="qrcanvas" style="display:none;"></canvas>
+      <div class="acoes" id="acoes-qr" style="display:none;">
+        <button class="btn secundario" onclick="baixarQR()"><i class="ti ti-download"></i>Baixar imagem</button>
+      </div>
+    </div>
+
+    <div class="painel" id="painel-whatsapp">
+      <div class="linha">
+        <div class="campo"><label>Número (com DDD)</label><input type="text" id="zap-numero" placeholder="ex: 11987654321" /></div>
+      </div>
+      <div class="campo">
+        <label>Mensagem</label>
+        <textarea id="zap-msg" placeholder="ex: Olá! Tenho interesse no imóvel que você anunciou.">Olá! Vi o anúncio do imóvel e gostaria de mais informações.</textarea>
+      </div>
+      <button class="btn" onclick="gerarWhatsapp()"><i class="ti ti-link"></i>Gerar link</button>
+      <div class="resultado" id="resultado-zap" style="display:none;"></div>
+      <div class="acoes" id="acoes-zap" style="display:none;">
+        <button class="btn secundario" onclick="copiar(document.getElementById('resultado-zap').textContent, this)"><i class="ti ti-copy"></i>Copiar link</button>
+        <a class="btn" id="abrir-zap" target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp"></i>Abrir no WhatsApp</a>
+      </div>
+    </div>
+
+    <div class="painel" id="painel-comissao">
+      <div class="linha">
+        <div class="campo"><label>Valor do imóvel (R$)</label><input type="number" id="com-valor" placeholder="ex: 350000" /></div>
+        <div class="campo"><label>Percentual (%)</label><input type="number" id="com-percentual" value="6" step="0.5" /></div>
+        <div class="campo"><label>Dividir entre quantos corretores</label><input type="number" id="com-partes" value="1" min="1" /></div>
+      </div>
+      <button class="btn" onclick="calcularComissao()"><i class="ti ti-calculator"></i>Calcular</button>
+      <div class="resultado destaque" id="resultado-comissao" style="display:none;"></div>
+    </div>
+
+    <div class="painel" id="painel-financiamento">
+      <div class="linha">
+        <div class="campo"><label>Valor do imóvel (R$)</label><input type="number" id="fin-valor" placeholder="ex: 350000" /></div>
+        <div class="campo"><label>Entrada (R$)</label><input type="number" id="fin-entrada" placeholder="ex: 70000" /></div>
+      </div>
+      <div class="linha">
+        <div class="campo"><label>Prazo (meses)</label><input type="number" id="fin-prazo" value="360" /></div>
+        <div class="campo"><label>Taxa de juros (% ao mês)</label><input type="number" id="fin-taxa" value="0.9" step="0.01" /></div>
+      </div>
+      <button class="btn" onclick="calcularFinanciamento()"><i class="ti ti-calculator"></i>Simular (tabela SAC)</button>
+      <div class="resultado" id="resultado-financiamento" style="display:none;"></div>
+      <p class="aviso"><i class="ti ti-info-circle"></i>Simulação aproximada pelo sistema SAC (amortização constante). Valores reais dependem do banco e das condições do financiamento.</p>
+    </div>
+
+    <div class="painel" id="painel-descricao">
+      <div class="campo">
+        <label>Tipo do imóvel</label>
+        <div class="tags" id="desc-tipo-tags">
+          <button type="button" class="tag-btn selecionada" data-valor="Apartamento" onclick="selecionarTag(this, 'desc-tipo-tags')">Apartamento</button>
+          <button type="button" class="tag-btn" data-valor="Casa" onclick="selecionarTag(this, 'desc-tipo-tags')">Casa</button>
+          <button type="button" class="tag-btn" data-valor="Cobertura" onclick="selecionarTag(this, 'desc-tipo-tags')">Cobertura</button>
+          <button type="button" class="tag-btn" data-valor="Sobrado" onclick="selecionarTag(this, 'desc-tipo-tags')">Sobrado</button>
+          <button type="button" class="tag-btn" data-valor="Terreno" onclick="selecionarTag(this, 'desc-tipo-tags')">Terreno</button>
+          <button type="button" class="tag-btn" data-valor="Comercial" onclick="selecionarTag(this, 'desc-tipo-tags')">Comercial</button>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Tipo de transação</label>
+        <div class="tags" id="desc-transacao-tags">
+          <button type="button" class="tag-btn selecionada" data-valor="Venda" onclick="selecionarTag(this, 'desc-transacao-tags')">Venda</button>
+          <button type="button" class="tag-btn" data-valor="Aluguel" onclick="selecionarTag(this, 'desc-transacao-tags')">Aluguel</button>
+          <button type="button" class="tag-btn" data-valor="Venda e Aluguel" onclick="selecionarTag(this, 'desc-transacao-tags')">Venda e Aluguel</button>
+        </div>
+      </div>
+      <div class="linha">
+        <div class="campo"><label>Título do imóvel</label><input type="text" id="desc-titulo" placeholder="ex: Residencial Jardins" /></div>
+        <div class="campo"><label>Bairro / Cidade</label><input type="text" id="desc-bairro" placeholder="ex: Jardim São Fernando" /></div>
+      </div>
+      <div class="linha">
+        <div class="campo"><label>Quartos</label><input type="number" id="desc-quartos" placeholder="ex: 3" /></div>
+        <div class="campo"><label>Suítes</label><input type="number" id="desc-suites" placeholder="ex: 1" /></div>
+        <div class="campo"><label>Banheiros</label><input type="number" id="desc-banheiros" placeholder="ex: 2" /></div>
+        <div class="campo"><label>Vagas</label><input type="number" id="desc-vagas" placeholder="ex: 1" /></div>
+      </div>
+      <div class="linha">
+        <div class="campo"><label>Área (m²)</label><input type="number" id="desc-area" placeholder="ex: 75" /></div>
+        <div class="campo"><label>Preço (R$)</label><input type="number" id="desc-valor" placeholder="ex: 350000" /></div>
+        <div class="campo"><label>Condomínio (R$/mês)</label><input type="number" id="desc-condominio" placeholder="ex: 500" /></div>
+      </div>
+      <div class="campo">
+        <label>Diferenciais</label>
+        <div class="tags" id="desc-diferenciais-tags">
+          <button type="button" class="tag-btn" data-valor="Piscina" onclick="alternarTagMulti(this)">Piscina</button>
+          <button type="button" class="tag-btn" data-valor="Churrasqueira" onclick="alternarTagMulti(this)">Churrasqueira</button>
+          <button type="button" class="tag-btn" data-valor="Academia" onclick="alternarTagMulti(this)">Academia</button>
+          <button type="button" class="tag-btn" data-valor="Portaria 24h" onclick="alternarTagMulti(this)">Portaria 24h</button>
+          <button type="button" class="tag-btn" data-valor="Pet Friendly" onclick="alternarTagMulti(this)">Pet Friendly</button>
+          <button type="button" class="tag-btn" data-valor="Varanda Gourmet" onclick="alternarTagMulti(this)">Varanda Gourmet</button>
+          <button type="button" class="tag-btn" data-valor="Ar Condicionado" onclick="alternarTagMulti(this)">Ar Condicionado</button>
+          <button type="button" class="tag-btn" data-valor="Mobiliado" onclick="alternarTagMulti(this)">Mobiliado</button>
+          <button type="button" class="tag-btn" data-valor="Quintal" onclick="alternarTagMulti(this)">Quintal</button>
+          <button type="button" class="tag-btn" data-valor="Área Verde" onclick="alternarTagMulti(this)">Área Verde</button>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Observações extras</label>
+        <div style="position:relative;">
+          <textarea id="desc-observacoes" placeholder="ex: fica próximo ao metrô, tem vista para o parque, recém reformado..." style="padding-right:44px;"></textarea>
+          <button type="button" class="btn-mic" id="desc-mic-btn" onclick="ditarNoCampo('desc-observacoes', this)" title="Falar em vez de digitar">
+            <i class="ti ti-microphone"></i>
+          </button>
+        </div>
+      </div>
+      <div class="acoes">
+        <button class="btn" onclick="gerarDescricao('curta')"><i class="ti ti-sparkles"></i>Gerar Curta</button>
+        <button class="btn secundario" onclick="gerarDescricao('elaborada')"><i class="ti ti-sparkles"></i>Gerar Elaborada</button>
+      </div>
+      <div class="resultado" id="resultado-descricao" style="display:none; white-space:pre-line;"></div>
+      <div class="acoes" id="acoes-descricao" style="display:none;">
+        <button class="btn secundario" onclick="copiar(document.getElementById('resultado-descricao').textContent, this)"><i class="ti ti-copy"></i>Copiar</button>
+      </div>
+    </div>
+
+    <div class="painel" id="painel-itbi">
+      <div class="linha">
+        <div class="campo"><label>Valor do imóvel ou venal (R$)</label><input type="number" id="itbi-valor" placeholder="ex: 350000" /></div>
+        <div class="campo"><label>Alíquota do município (%)</label><input type="number" id="itbi-aliquota" value="3" step="0.1" /></div>
+      </div>
+      <button class="btn" onclick="calcularItbi()"><i class="ti ti-calculator"></i>Calcular</button>
+      <div class="resultado destaque" id="resultado-itbi" style="display:none;"></div>
+      <p class="aviso"><i class="ti ti-info-circle"></i>A alíquota do ITBI varia por município (em SP costuma ficar entre 2% e 3%). Confirme o valor exato na prefeitura antes de repassar ao cliente.</p>
+    </div>
+
+    <div class="painel" id="painel-banner">
+      <div class="upload-area" onclick="document.getElementById('banner-input-foto').click()">
+        <i class="ti ti-cloud-upload"></i>
+        <span>Toque para enviar fotos do imóvel</span>
+      </div>
+      <input type="file" id="banner-input-foto" accept="image/*" multiple style="display:none;" onchange="carregarFotosBanner(event)" />
+      <div class="thumbs" id="banner-thumbs"></div>
+
+      <div class="linha">
+        <div class="campo">
+          <label>Formato do banner</label>
+          <select id="banner-formato">
+            <option value="quadrado">Quadrado (Instagram/WhatsApp — 1080×1080)</option>
+            <option value="paisagem">Paisagem (Anúncio/Facebook — 1200×628)</option>
+          </select>
+        </div>
+        <div class="campo">
+          <label>Estilo do layout</label>
+          <select id="banner-estilo">
+            <option value="faixa">Faixa Inferior</option>
+            <option value="topo">Topo Banner</option>
+            <option value="lateral">Lateral Esquerda</option>
+          </select>
+        </div>
+      </div>
+      <div class="campo">
+        <label>Cor de destaque</label>
+        <div class="tags" id="banner-cor-tags">
+          <button type="button" class="tag-btn cor-btn selecionada" data-valor="#10b981" data-cor="#10b981" style="background:#10b981;" onclick="selecionarTag(this, 'banner-cor-tags')"></button>
+          <button type="button" class="tag-btn cor-btn" data-valor="#3b82f6" data-cor="#3b82f6" style="background:#3b82f6;" onclick="selecionarTag(this, 'banner-cor-tags')"></button>
+          <button type="button" class="tag-btn cor-btn" data-valor="#f97316" data-cor="#f97316" style="background:#f97316;" onclick="selecionarTag(this, 'banner-cor-tags')"></button>
+          <button type="button" class="tag-btn cor-btn" data-valor="#ef4444" data-cor="#ef4444" style="background:#ef4444;" onclick="selecionarTag(this, 'banner-cor-tags')"></button>
+          <button type="button" class="tag-btn cor-btn" data-valor="#a855f7" data-cor="#a855f7" style="background:#a855f7;" onclick="selecionarTag(this, 'banner-cor-tags')"></button>
+        </div>
+      </div>
+      <div class="linha">
+        <div class="campo"><label>Preço</label><input type="text" id="banner-preco" placeholder="ex: R$ 350.000" /></div>
+        <div class="campo"><label>Título</label><input type="text" id="banner-titulo" placeholder="ex: Apto 3 quartos no centro" /></div>
+      </div>
+      <div class="linha">
+        <div class="campo"><label>Quartos</label><input type="number" id="banner-quartos" placeholder="ex: 3" /></div>
+        <div class="campo"><label>Área (m²)</label><input type="number" id="banner-area" placeholder="ex: 75" /></div>
+      </div>
+      <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; margin-bottom:14px; cursor:pointer;">
+        <input type="checkbox" id="banner-mostrar-valor" checked style="accent-color: var(--verde);" /> Mostrar o preço no banner
+      </label>
+
+      <div style="padding-top:12px; border-top:0.5px solid var(--divider); margin-bottom:14px;">
+        <p class="aviso" style="margin-bottom:10px;"><i class="ti ti-id"></i>Seus dados (opcional) — aparecem como assinatura no rodapé do banner.</p>
+        <div class="linha">
+          <div class="campo"><label>Seu nome</label><input type="text" id="banner-corretor-nome" placeholder="ex: Sergio Costa" /></div>
+          <div class="campo"><label>CRECI</label><input type="text" id="banner-corretor-creci" placeholder="ex: 294791-F" /></div>
+          <div class="campo"><label>WhatsApp</label><input type="text" id="banner-contato" placeholder="ex: (11) 98765-4321" /></div>
+        </div>
+      </div>
+
+      <button class="btn" onclick="gerarBanner()"><i class="ti ti-photo"></i>Gerar banner</button>
+      <canvas id="bannercanvas" style="display:none;"></canvas>
+      <div class="acoes" id="acoes-banner" style="display:none;">
+        <button class="btn secundario" onclick="baixarBanner()"><i class="ti ti-download"></i>Baixar imagem</button>
+      </div>
+      <p class="aviso"><i class="ti ti-info-circle"></i>As fotos são usadas só no seu navegador para montar a imagem — nada é enviado para nenhum servidor.</p>
+    </div>
+
+    <div class="painel" id="painel-leads">
+      <div class="linha">
+        <div class="campo"><label>Nome</label><input type="text" id="lead-nome" placeholder="ex: João Silva" /></div>
+        <div class="campo"><label>Telefone</label><input type="text" id="lead-telefone" placeholder="ex: 11987654321" /></div>
+      </div>
+      <div class="linha">
+        <div class="campo"><label>Imóvel de interesse</label><input type="text" id="lead-imovel" placeholder="ex: Apto Jardim São Fernando" /></div>
+        <div class="campo">
+          <label>Status</label>
+          <select id="lead-status">
+            <option>Novo</option>
+            <option>Em contato</option>
+            <option>Visita agendada</option>
+            <option>Proposta</option>
+            <option>Fechado</option>
+            <option>Perdido</option>
+          </select>
+        </div>
+      </div>
+      <div class="campo"><label>Observações</label><input type="text" id="lead-obs" placeholder="ex: prefere ligar à noite" /></div>
+      <button class="btn" onclick="salvarLead()"><i class="ti ti-user-plus"></i>Adicionar lead</button>
+      <div class="kanban" id="kanban-leads" style="margin-top:18px;"></div>
+      <p class="aviso"><i class="ti ti-info-circle"></i>Os leads ficam salvos só neste navegador/aparelho, sem login e sem servidor externo.</p>
+    </div>
+
+    <div class="painel" id="painel-precificacao">
+      <p class="aviso" style="margin-bottom:14px;"><i class="ti ti-info-circle"></i>Informe imóveis parecidos que você já conhece (comparáveis) — o sistema calcula a média de R$/m² deles e estima o valor do imóvel avaliado. Não é uma IA de mercado, é um cálculo direto a partir do que você informar.</p>
+      <div class="linha">
+        <div class="campo"><label>Comparável 1 — valor (R$)</label><input type="number" id="prec-valor1" placeholder="ex: 340000" /></div>
+        <div class="campo"><label>Comparável 1 — área (m²)</label><input type="number" id="prec-area1" placeholder="ex: 70" /></div>
+      </div>
+      <div class="linha">
+        <div class="campo"><label>Comparável 2 — valor (R$)</label><input type="number" id="prec-valor2" placeholder="opcional" /></div>
+        <div class="campo"><label>Comparável 2 — área (m²)</label><input type="number" id="prec-area2" placeholder="opcional" /></div>
+      </div>
+      <div class="linha">
+        <div class="campo"><label>Comparável 3 — valor (R$)</label><input type="number" id="prec-valor3" placeholder="opcional" /></div>
+        <div class="campo"><label>Comparável 3 — área (m²)</label><input type="number" id="prec-area3" placeholder="opcional" /></div>
+      </div>
+      <div class="linha">
+        <div class="campo"><label>Área do imóvel avaliado (m²)</label><input type="number" id="prec-area-alvo" placeholder="ex: 75" /></div>
+        <div class="campo"><label>Ajuste (%) — condição/localização</label><input type="number" id="prec-ajuste" value="0" step="1" /></div>
+      </div>
+      <button class="btn" onclick="calcularPrecificacao()"><i class="ti ti-calculator"></i>Estimar valor</button>
+      <div class="resultado destaque" id="resultado-precificacao" style="display:none;"></div>
+    </div>
+
+    <div class="painel" id="painel-academy">
+      <details class="guia-voz">
+        <summary><i class="ti ti-file-certificate"></i> Documentação necessária</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Confira a matrícula atualizada:</strong> sempre peça a matrícula do imóvel com no máximo 30 dias antes de fechar negócio.</p>
+          <p><strong>ITBI e escritura:</strong> use a calculadora de ITBI aqui na ferramenta pra já adiantar essa conta pro cliente na negociação.</p>
+          <p><strong>Documentos básicos do vendedor:</strong> RG/CPF, certidão de casamento (se houver), comprovante de residência e certidão de ônus reais do imóvel.</p>
+          <p><strong>Documentos básicos do comprador:</strong> RG/CPF, comprovante de renda e comprovante de residência — peça antes de agendar a visita à financeira.</p>
+        </div>
+      </details>
+      <details class="guia-voz">
+        <summary><i class="ti ti-handshake"></i> Técnicas de negociação</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Ancore com o valor de mercado:</strong> mostre 2 ou 3 comparáveis (use a ferramenta de Precificação) antes de falar em desconto.</p>
+          <p><strong>Nunca ofereça desconto primeiro:</strong> pergunte "qual valor você tinha em mente?" — deixa a outra parte se posicionar antes.</p>
+          <p><strong>Separe preço de condição:</strong> às vezes o cliente quer prazo maior ou incluir móveis — nem sempre é sobre baixar o preço.</p>
+          <p><strong>Feche com prazo:</strong> "essa condição vale até sexta" cria decisão sem parecer pressão, quando é verdade.</p>
+        </div>
+      </details>
+      <details class="guia-voz">
+        <summary><i class="ti ti-chart-line"></i> Análise de mercado</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Compare por R$/m², não só pelo valor total:</strong> dois imóveis de tamanhos diferentes só são comparáveis de verdade por metro quadrado — use a ferramenta de Precificação aqui.</p>
+          <p><strong>Observe o tempo de anúncio:</strong> imóveis parados há meses no mercado geralmente indicam preço acima do valor real da região.</p>
+          <p><strong>Acompanhe a região, não só o imóvel:</strong> obras, novo comércio ou linha de transporte perto mudam o valor futuro do bairro.</p>
+        </div>
+      </details>
+      <details class="guia-voz">
+        <summary><i class="ti ti-message-2 card-icon-inline"></i> Script de abordagem</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Primeiro contato (lead novo):</strong> "Oi [nome]! Vi seu interesse no imóvel de [bairro]. Posso te mandar mais fotos e já ver um horário pra visita?"</p>
+          <p><strong>Reativar lead frio:</strong> "Oi [nome], tudo bem? Surgiu uma condição nova nesse imóvel que você viu — ainda tem interesse ou já resolveu de outro jeito?"</p>
+          <p><strong>Depois da visita:</strong> "E aí, o que achou do imóvel? Ficou alguma dúvida que eu possa esclarecer agora?"</p>
+        </div>
+      </details>
+      <details class="guia-voz">
+        <summary><i class="ti ti-target-arrow"></i> Vendas</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Responda rápido:</strong> leads que recebem resposta em até 5 minutos têm muito mais chance de virar visita. Configure o link do WhatsApp pronto pra não perder tempo digitando.</p>
+          <p><strong>Sempre agende a visita na hora:</strong> não deixe "depois eu ligo" — feche um horário ainda na primeira conversa.</p>
+          <p><strong>Use a escassez com verdade:</strong> "tenho outra visita marcada essa semana" funciona quando é real — evite forçar urgência falsa.</p>
+        </div>
+      </details>
+      <details class="guia-voz">
+        <summary><i class="ti ti-speakerphone"></i> Marketing e anúncios</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Foto de capa é o que decide o clique:</strong> escolha a foto mais clara e bem iluminada como primeira imagem do anúncio.</p>
+          <p><strong>Preço no título ajuda a filtrar curioso:</strong> anúncios com valor visível tendem a gerar contatos mais qualificados.</p>
+          <p><strong>Poste no mesmo horário sempre:</strong> criar rotina de postagem ajuda o algoritmo das redes sociais a entregar mais gente.</p>
+        </div>
+      </details>
+      <details class="guia-voz">
+        <summary><i class="ti ti-headset"></i> Atendimento</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Escute antes de oferecer:</strong> pergunte o que o cliente realmente precisa (quantos quartos, motivo da mudança) antes de indicar imóveis.</p>
+          <p><strong>Anote tudo no Gestor de Leads:</strong> um cliente que sente que você lembra dos detalhes dele confia muito mais rápido.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- UTILITÁRIOS -->
+  <section>
+    <div class="section-label">Utilitários</div>
+    <div class="grid">
+      <div class="card" id="area" onclick="alternar('area', this)">
+        <i class="ti ti-ruler-2 card-icon"></i>
+        <span class="card-title">Conversor de Área</span>
+        <span class="card-sub">m² · hectare · alqueire</span>
+      </div>
+      <div class="card" id="extenso" onclick="alternar('extenso', this)">
+        <i class="ti ti-cash card-icon"></i>
+        <span class="card-title">Valor por Extenso</span>
+        <span class="card-sub">Para contratos</span>
+      </div>
+      <div class="card" id="caracteres" onclick="alternar('caracteres', this)">
+        <i class="ti ti-text-size card-icon"></i>
+        <span class="card-title">Contador de Caracteres</span>
+        <span class="card-sub">Para textos de anúncio</span>
+      </div>
+      <div class="card" id="voz" onclick="alternar('voz', this)">
+        <i class="ti ti-microphone card-icon"></i>
+        <span class="card-title">Texto em Voz</span>
+        <span class="card-sub">Ouvir qualquer texto</span>
+      </div>
+    </div>
+
+    <div class="painel" id="painel-area">
+      <div class="campo"><label>Valor em m²</label><input type="number" id="area-m2" placeholder="ex: 5000" oninput="converterArea()" /></div>
+      <div class="resultado" id="resultado-area" style="display:none;"></div>
+    </div>
+
+    <div class="painel" id="painel-extenso">
+      <div class="campo"><label>Valor em R$</label><input type="number" id="ext-valor" placeholder="ex: 350000" step="0.01" /></div>
+      <button class="btn" onclick="gerarExtenso()"><i class="ti ti-abc"></i>Converter</button>
+      <div class="resultado" id="resultado-extenso" style="display:none;"></div>
+      <div class="acoes" id="acoes-extenso" style="display:none;">
+        <button class="btn secundario" onclick="copiar(document.getElementById('resultado-extenso').textContent, this)"><i class="ti ti-copy"></i>Copiar</button>
+      </div>
+    </div>
+
+    <div class="painel" id="painel-caracteres">
+      <div class="campo">
+        <label>Texto do anúncio</label>
+        <textarea id="txt-conteudo" placeholder="Cole aqui o texto do anúncio..." oninput="contarCaracteres()" style="min-height:140px;"></textarea>
+      </div>
+      <div class="resultado" id="resultado-caracteres"></div>
+    </div>
+
+    <div class="painel" id="painel-voz">
+      <div class="campo">
+        <label>Texto a ser falado</label>
+        <textarea id="voz-texto" placeholder="Digite ou cole aqui o texto..." style="min-height:120px;"></textarea>
+      </div>
+      <button class="btn secundario" onclick="importarDescricaoParaVoz()" style="margin-bottom:14px;"><i class="ti ti-file-text"></i>Usar texto da Descrição de Imóvel</button>
+      <div class="campo">
+        <label>Voz (português do Brasil)</label>
+        <select id="voz-select"></select>
+        <p class="aviso" id="voz-status" style="margin-top:8px;"><i class="ti ti-info-circle"></i>Carregando vozes do aparelho...</p>
+        <button class="btn secundario" onclick="recarregarVozesManual()" style="margin-top:8px;"><i class="ti ti-refresh"></i>Recarregar vozes</button>
+      </div>
+      <div class="linha">
+        <div class="campo"><label>Velocidade: <span id="voz-velocidade-valor">1</span>x</label><input type="range" id="voz-velocidade" min="0.5" max="2" value="1" step="0.1" oninput="document.getElementById('voz-velocidade-valor').textContent=this.value" /></div>
+        <div class="campo"><label>Tom: <span id="voz-tom-valor">1</span></label><input type="range" id="voz-tom" min="0.5" max="2" value="1" step="0.1" oninput="document.getElementById('voz-tom-valor').textContent=this.value" /></div>
+      </div>
+      <div class="acoes">
+        <button class="btn" onclick="falarTexto()"><i class="ti ti-player-play"></i>Ouvir</button>
+        <button class="btn secundario" onclick="pausarOuRetomarVoz()"><i class="ti ti-player-pause"></i>Pausar/Retomar</button>
+        <button class="btn perigo" onclick="pararVoz()"><i class="ti ti-player-stop"></i>Parar</button>
+      </div>
+      <div style="margin-top:16px; padding-top:14px; border-top:0.5px solid var(--divider);">
+        <button class="btn secundario" onclick="gravarEBaixarVoz()"><i class="ti ti-download"></i>Gravar e baixar áudio</button>
+        <p class="resultado" id="voz-gravacao-status" style="display:none; margin-top:10px;"></p>
+        <p class="aviso"><i class="ti ti-info-circle"></i>Só o Chrome e o Edge no computador conseguem gravar o áudio pra baixar. Quando clicar, escolha "Esta guia" e marque "Compartilhar áudio da guia" na janela que abrir. Em celular ou Safari não é possível baixar — só ouvir.</p>
+        <p class="aviso"><i class="ti ti-info-circle"></i>Não há limite de caracteres — pode colar o texto inteiro. Para evitar que o navegador trave em textos longos, o sistema divide automaticamente em pedaços por frase e fala em sequência.</p>
+      </div>
+
+      <details class="guia-voz">
+        <summary><i class="ti ti-sparkles"></i> Como deixar a voz mais natural (grátis)</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Android:</strong> Configurações → Acessibilidade (ou Configurações gerais) → Conversão de texto em voz (Text-to-speech) → engine "Google" → ⚙️ ao lado → Instalar dados de voz → escolha "Português (Brasil)" e baixe. Depois volte aqui e toque em "Recarregar vozes".</p>
+          <p><strong>iPhone/iPad:</strong> Ajustes → Acessibilidade → Conteúdo Falado → Vozes → Português (Brasil) → baixe as opções marcadas como "Aprimorada" ou "Premium" (são bem mais naturais que a padrão).</p>
+          <p><strong>Windows:</strong> Configurações → Hora e Idioma → Fala → em "Vozes", adicione o idioma Português (Brasil) e baixe as vozes disponíveis.</p>
+          <p><strong>Mac:</strong> Ajustes do Sistema → Acessibilidade → Conteúdo Falado → Vozes do Sistema → Personalizar → baixe vozes em Português (Brasil).</p>
+          <p>Depois de instalar, as vozes novas aparecem sozinhas na lista aqui em cima — as marcadas com 🔊 são as de melhor qualidade.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>FCosta</span> · Sérgio Fernandes da Costa · CRECI-SP 294791-F · CNAI 52708
+</footer>
+
+<script>
+/* ── ABRIR/FECHAR PAINÉIS ─────────────────────── */
+function alternar(id, cardEl) {
+  const painel = document.getElementById('painel-' + id);
+  const jaAberto = painel.classList.contains('aberto');
+  document.querySelectorAll('.painel').forEach(p => p.classList.remove('aberto'));
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('aberto'));
+  if (!jaAberto) {
+    painel.classList.add('aberto');
+    cardEl.classList.add('aberto');
+    if (id === 'senha') renderizarCofre();
+    if (id === 'leads') renderizarLeads();
+    painel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+/* ── COPIAR ────────────────────────────────────── */
+function copiar(texto, btnEl) {
+  navigator.clipboard.writeText(texto).then(() => {
+    const original = btnEl.innerHTML;
+    btnEl.innerHTML = '<i class="ti ti-check"></i>Copiado';
+    setTimeout(() => btnEl.innerHTML = original, 1500);
+  });
+}
+
+/* ── GERADOR DE SENHAS ─────────────────────────── */
+function gerarSenha() {
+  const tamanho = parseInt(document.getElementById('tamanho').value);
+  const usarMai = document.getElementById('op-maiusculas').checked;
+  const usarMin = document.getElementById('op-minusculas').checked;
+  const usarNum = document.getElementById('op-numeros').checked;
+  const usarSim = document.getElementById('op-simbolos').checked;
+
+  let conjunto = '';
+  if (usarMai) conjunto += 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  if (usarMin) conjunto += 'abcdefghijkmnpqrstuvwxyz';
+  if (usarNum) conjunto += '23456789';
+  if (usarSim) conjunto += '!@#$%&*-_+=?';
+
+  if (!conjunto) { alert('Selecione ao menos um tipo de caractere.'); return; }
+
+  const valores = new Uint32Array(tamanho);
+  crypto.getRandomValues(valores);
+  let senha = '';
+  for (let i = 0; i < tamanho; i++) senha += conjunto[valores[i] % conjunto.length];
+
+  document.getElementById('resultado-senha').textContent = senha;
+  document.getElementById('resultado-senha').style.display = 'block';
+  document.getElementById('acoes-senha').style.display = 'flex';
+}
+
+function salvarNoCofre() {
+  const senha = document.getElementById('resultado-senha').textContent;
+  if (!senha) { alert('Gere uma senha antes de salvar.'); return; }
+  const site = document.getElementById('cofre-site').value.trim() || 'Sem nome';
+  const user = document.getElementById('cofre-user').value.trim();
+
+  const cofre = JSON.parse(localStorage.getItem('fcosta_cofre_senhas') || '[]');
+  cofre.unshift({ site, user, senha, data: new Date().toLocaleDateString('pt-BR') });
+  localStorage.setItem('fcosta_cofre_senhas', JSON.stringify(cofre));
+
+  document.getElementById('cofre-site').value = '';
+  document.getElementById('cofre-user').value = '';
+  renderizarCofre();
+}
+
+function renderizarCofre() {
+  const cofre = JSON.parse(localStorage.getItem('fcosta_cofre_senhas') || '[]');
+  const lista = document.getElementById('lista-cofre');
+  if (cofre.length === 0) { lista.innerHTML = '<div class="vazio">Nenhuma senha salva ainda.</div>'; return; }
+
+  lista.innerHTML = cofre.map((item, i) => `
+    <div class="item-cofre">
+      <div class="info">
+        <div class="site">${item.site}</div>
+        ${item.user ? `<div class="user">${item.user}</div>` : ''}
+        <div class="senha" id="senha-${i}">••••••••</div>
+      </div>
+      <button class="btn secundario" onclick="mostrarSenha(${i})"><i class="ti ti-eye"></i></button>
+      <button class="btn secundario" onclick="copiar('${item.senha.replace(/'/g, "\\'")}', this)"><i class="ti ti-copy"></i></button>
+      <button class="btn perigo" onclick="excluirDoCofre(${i})"><i class="ti ti-trash"></i></button>
+    </div>
+  `).join('');
+}
+
+function mostrarSenha(i) {
+  const cofre = JSON.parse(localStorage.getItem('fcosta_cofre_senhas') || '[]');
+  document.getElementById('senha-' + i).textContent = cofre[i].senha;
+}
+
+function excluirDoCofre(i) {
+  const cofre = JSON.parse(localStorage.getItem('fcosta_cofre_senhas') || '[]');
+  cofre.splice(i, 1);
+  localStorage.setItem('fcosta_cofre_senhas', JSON.stringify(cofre));
+  renderizarCofre();
+}
+
+/* ── GESTOR DE LEADS (Kanban) ──────────────────── */
+const ETAPAS_LEAD = ['Novo', 'Em contato', 'Visita agendada', 'Proposta', 'Fechado', 'Perdido'];
+
+function salvarLead() {
+  const nome = document.getElementById('lead-nome').value.trim();
+  if (!nome) { alert('Digite o nome do lead.'); return; }
+  const lead = {
+    nome,
+    telefone: document.getElementById('lead-telefone').value.trim(),
+    imovel: document.getElementById('lead-imovel').value.trim(),
+    status: document.getElementById('lead-status').value,
+    obs: document.getElementById('lead-obs').value.trim(),
+    data: new Date().toLocaleDateString('pt-BR')
+  };
+  const leads = JSON.parse(localStorage.getItem('fcosta_leads') || '[]');
+  leads.unshift(lead);
+  localStorage.setItem('fcosta_leads', JSON.stringify(leads));
+
+  document.getElementById('lead-nome').value = '';
+  document.getElementById('lead-telefone').value = '';
+  document.getElementById('lead-imovel').value = '';
+  document.getElementById('lead-obs').value = '';
+  document.getElementById('lead-status').value = 'Novo';
+  renderizarLeads();
+}
+
+function renderizarLeads() {
+  const leads = JSON.parse(localStorage.getItem('fcosta_leads') || '[]');
+  const kanban = document.getElementById('kanban-leads');
+  if (!kanban) return;
+
+  kanban.innerHTML = ETAPAS_LEAD.map(etapa => {
+    const leadsDaEtapa = leads
+      .map((lead, indiceReal) => ({ ...lead, indiceReal }))
+      .filter(l => l.status === etapa);
+
+    const cards = leadsDaEtapa.map(lead => {
+      const numeroZap = lead.telefone.replace(/\D/g, '');
+      const linkZap = numeroZap ? `https://wa.me/${numeroZap.startsWith('55') ? numeroZap : '55' + numeroZap}` : '';
+      const indiceEtapa = ETAPAS_LEAD.indexOf(etapa);
+      return `
+        <div class="kanban-card">
+          <div class="nome">${lead.nome}</div>
+          <div class="info">
+            ${lead.imovel ? lead.imovel + '<br>' : ''}
+            ${lead.telefone || 'sem telefone'}${lead.obs ? '<br>' + lead.obs : ''}
+          </div>
+          <div class="acoes-card">
+            ${indiceEtapa > 0 ? `<button onclick="moverLead(${lead.indiceReal}, -1)" title="Voltar"><i class="ti ti-chevron-left"></i></button>` : ''}
+            ${indiceEtapa < ETAPAS_LEAD.length - 1 ? `<button onclick="moverLead(${lead.indiceReal}, 1)" title="Avançar"><i class="ti ti-chevron-right"></i></button>` : ''}
+            ${linkZap ? `<a href="${linkZap}" target="_blank" rel="noopener" title="WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>` : ''}
+            <button class="perigo-mini" onclick="excluirLead(${lead.indiceReal})" title="Excluir"><i class="ti ti-trash"></i></button>
+          </div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="kanban-coluna">
+        <div class="kanban-coluna-titulo">${etapa} <span class="contagem">${leadsDaEtapa.length}</span></div>
+        ${cards || '<div class="kanban-vazio">Vazio</div>'}
+      </div>`;
+  }).join('');
+}
+
+function moverLead(i, direcao) {
+  const leads = JSON.parse(localStorage.getItem('fcosta_leads') || '[]');
+  const atual = ETAPAS_LEAD.indexOf(leads[i].status);
+  const novoIndice = Math.min(Math.max(atual + direcao, 0), ETAPAS_LEAD.length - 1);
+  leads[i].status = ETAPAS_LEAD[novoIndice];
+  localStorage.setItem('fcosta_leads', JSON.stringify(leads));
+  renderizarLeads();
+}
+
+function excluirLead(i) {
+  const leads = JSON.parse(localStorage.getItem('fcosta_leads') || '[]');
+  leads.splice(i, 1);
+  localStorage.setItem('fcosta_leads', JSON.stringify(leads));
+  renderizarLeads();
+}
+
+/* ── PRECIFICAÇÃO POR COMPARÁVEIS ──────────────── */
+function calcularPrecificacao() {
+  const comparaveis = [
+    [parseFloat(document.getElementById('prec-valor1').value), parseFloat(document.getElementById('prec-area1').value)],
+    [parseFloat(document.getElementById('prec-valor2').value), parseFloat(document.getElementById('prec-area2').value)],
+    [parseFloat(document.getElementById('prec-valor3').value), parseFloat(document.getElementById('prec-area3').value)]
+  ].filter(([v, a]) => v > 0 && a > 0);
+
+  if (comparaveis.length === 0) { alert('Informe ao menos um comparável (valor e área).'); return; }
+
+  const areaAlvo = parseFloat(document.getElementById('prec-area-alvo').value);
+  if (!areaAlvo || areaAlvo <= 0) { alert('Informe a área do imóvel avaliado.'); return; }
+
+  const ajuste = parseFloat(document.getElementById('prec-ajuste').value) || 0;
+
+  const precosPorM2 = comparaveis.map(([v, a]) => v / a);
+  const mediaM2 = precosPorM2.reduce((s, v) => s + v, 0) / precosPorM2.length;
+  const mediaAjustada = mediaM2 * (1 + ajuste / 100);
+  const estimado = mediaAjustada * areaAlvo;
+  const faixaMin = estimado * 0.9;
+  const faixaMax = estimado * 1.1;
+
+  const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  document.getElementById('resultado-precificacao').innerHTML = `
+    Média dos comparáveis: <strong>${fmt(mediaM2)}/m²</strong><br>
+    Valor estimado: <strong>${fmt(estimado)}</strong><br>
+    Faixa sugerida: ${fmt(faixaMin)} — ${fmt(faixaMax)}
+  `;
+  document.getElementById('resultado-precificacao').style.display = 'block';
+}
+
+/* ── QR CODE ───────────────────────────────────── */
+function gerarQR() {
+  const texto = document.getElementById('qr-texto').value.trim();
+  if (!texto) { alert('Digite um link ou texto.'); return; }
+  const canvas = document.getElementById('qrcanvas');
+  canvas.style.display = 'block';
+  QRCode.toCanvas(canvas, texto, { width: 512, margin: 2, color: { dark: '#0a1f1a', light: '#ffffff' } }, (erro) => {
+    if (erro) { alert('Não foi possível gerar o QR Code. Tente um texto mais curto.'); return; }
+    document.getElementById('acoes-qr').style.display = 'flex';
+  });
+}
+
+function baixarQR() {
+  const canvas = document.getElementById('qrcanvas');
+  const link = document.createElement('a');
+  link.download = 'qrcode-anuncio.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+/* ── WHATSAPP ──────────────────────────────────── */
+function gerarWhatsapp() {
+  let numero = document.getElementById('zap-numero').value.replace(/\D/g, '');
+  const msg = document.getElementById('zap-msg').value;
+  if (!numero) { alert('Digite o número.'); return; }
+  if (!numero.startsWith('55')) numero = '55' + numero;
+  const link = `https://wa.me/${numero}?text=${encodeURIComponent(msg)}`;
+  document.getElementById('resultado-zap').textContent = link;
+  document.getElementById('resultado-zap').style.display = 'block';
+  document.getElementById('acoes-zap').style.display = 'flex';
+  document.getElementById('abrir-zap').href = link;
+}
+
+/* ── COMISSÃO ──────────────────────────────────── */
+function calcularComissao() {
+  const valor = parseFloat(document.getElementById('com-valor').value) || 0;
+  const percentual = parseFloat(document.getElementById('com-percentual').value) || 0;
+  const partes = parseInt(document.getElementById('com-partes').value) || 1;
+  const total = valor * (percentual / 100);
+  const porParte = total / partes;
+  const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  document.getElementById('resultado-comissao').innerHTML =
+    `Comissão total: ${fmt(total)}` + (partes > 1 ? `<br>Por corretor (${partes}): ${fmt(porParte)}` : '');
+  document.getElementById('resultado-comissao').style.display = 'block';
+}
+
+/* ── CONVERSOR DE ÁREA ─────────────────────────── */
+function converterArea() {
+  const m2 = parseFloat(document.getElementById('area-m2').value);
+  const el = document.getElementById('resultado-area');
+  if (!m2 && m2 !== 0) { el.style.display = 'none'; return; }
+  const hectare = m2 / 10000;
+  const alqueirePaulista = m2 / 24200;
+  const alqueireMineiro = m2 / 48400;
+  const ft2 = m2 * 10.7639;
+  el.innerHTML = `
+    Hectares: <strong>${hectare.toLocaleString('pt-BR', {maximumFractionDigits: 4})}</strong><br>
+    Alqueire paulista: <strong>${alqueirePaulista.toLocaleString('pt-BR', {maximumFractionDigits: 4})}</strong><br>
+    Alqueire mineiro: <strong>${alqueireMineiro.toLocaleString('pt-BR', {maximumFractionDigits: 4})}</strong><br>
+    Pés quadrados: <strong>${ft2.toLocaleString('pt-BR', {maximumFractionDigits: 2})}</strong>
+  `;
+  el.style.display = 'block';
+}
+
+/* ── VALOR POR EXTENSO ─────────────────────────── */
+function gerarExtenso() {
+  const valor = parseFloat(document.getElementById('ext-valor').value);
+  if (isNaN(valor)) { alert('Digite um valor.'); return; }
+  const texto = valorPorExtenso(valor);
+  document.getElementById('resultado-extenso').textContent = texto;
+  document.getElementById('resultado-extenso').style.display = 'block';
+  document.getElementById('acoes-extenso').style.display = 'flex';
+}
+
+function valorPorExtenso(valor) {
+  const unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
+  const dezA19 = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
+  const dezenas = ['', '', 'vinte', 'trinta', 'quarenta', 'cinquenta', 'sessenta', 'setenta', 'oitenta', 'noventa'];
+  const centenas = ['', 'cento', 'duzentos', 'trezentos', 'quatrocentos', 'quinhentos', 'seiscentos', 'setecentos', 'oitocentos', 'novecentos'];
+
+  function trescentos(n) {
+    if (n === 0) return '';
+    if (n === 100) return 'cem';
+    let partes = [];
+    const c = Math.floor(n / 100), d = Math.floor((n % 100) / 10), u = n % 10;
+    if (c) partes.push(centenas[c]);
+    if (d === 1) partes.push(dezA19[u]);
+    else {
+      if (d) partes.push(dezenas[d]);
+      if (u) partes.push(unidades[u]);
+    }
+    return partes.join(' e ');
+  }
+
+  function grupo(n, singular, plural) {
+    if (n === 0) return '';
+    const texto = n === 1 ? singular : trescentos(n) + ' ' + plural;
+    return texto;
+  }
+
+  const inteiro = Math.floor(Math.abs(valor));
+  const centavos = Math.round((Math.abs(valor) - inteiro) * 100);
+
+  if (inteiro === 0 && centavos === 0) return 'zero reais';
+
+  const milhoes = Math.floor(inteiro / 1000000);
+  const milhares = Math.floor((inteiro % 1000000) / 1000);
+  const resto = inteiro % 1000;
+
+  let partes = [];
+  if (milhoes) partes.push(grupo(milhoes, 'um milhão', 'milhões'));
+  if (milhares) partes.push(milhares === 1 ? 'mil' : trescentos(milhares) + ' mil');
+  if (resto) partes.push(trescentos(resto));
+
+  let textoInteiro = partes.join(' e ');
+  const palavraReais = inteiro === 1 ? 'real' : 'reais';
+  let resultado = inteiro > 0 ? `${textoInteiro} ${palavraReais}` : '';
+
+  if (centavos > 0) {
+    const palavraCentavos = centavos === 1 ? 'centavo' : 'centavos';
+    const e = inteiro > 0 ? ' e ' : '';
+    resultado += `${e}${trescentos(centavos)} ${palavraCentavos}`;
+  }
+
+  return resultado.charAt(0).toUpperCase() + resultado.slice(1);
+}
+
+/* ── FINANCIAMENTO (SAC) ───────────────────────── */
+function calcularFinanciamento() {
+  const valor = parseFloat(document.getElementById('fin-valor').value) || 0;
+  const entrada = parseFloat(document.getElementById('fin-entrada').value) || 0;
+  const prazo = parseInt(document.getElementById('fin-prazo').value) || 0;
+  const taxaMes = (parseFloat(document.getElementById('fin-taxa').value) || 0) / 100;
+
+  const financiado = valor - entrada;
+  if (financiado <= 0 || prazo <= 0) { alert('Confira os valores informados.'); return; }
+
+  const amortizacao = financiado / prazo;
+  const primeiraParcela = amortizacao + financiado * taxaMes;
+  const ultimaParcela = amortizacao + amortizacao * taxaMes;
+  const totalJuros = (financiado + 0) * taxaMes * (prazo + 1) / 2; // aproximação SAC
+  const totalPago = financiado + totalJuros;
+
+  const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  document.getElementById('resultado-financiamento').innerHTML = `
+    Valor financiado: <strong>${fmt(financiado)}</strong><br>
+    1ª parcela (aprox.): <strong>${fmt(primeiraParcela)}</strong><br>
+    Última parcela (aprox.): <strong>${fmt(ultimaParcela)}</strong><br>
+    Total de juros (aprox.): <strong>${fmt(totalJuros)}</strong><br>
+    Total pago ao final (aprox.): <strong>${fmt(totalPago)}</strong>
+  `;
+  document.getElementById('resultado-financiamento').style.display = 'block';
+}
+
+/* ── TAGS SELECIONÁVEIS (tipo/transação: única · diferenciais: múltipla) ── */
+function selecionarTag(botao, grupoId) {
+  document.querySelectorAll(`#${grupoId} .tag-btn`).forEach(b => b.classList.remove('selecionada'));
+  botao.classList.add('selecionada');
+}
+
+function alternarTagMulti(botao) {
+  botao.classList.toggle('selecionada');
+}
+
+function pegarTagSelecionada(grupoId) {
+  const el = document.querySelector(`#${grupoId} .tag-btn.selecionada`);
+  return el ? el.dataset.valor : '';
+}
+
+function pegarTagsMultiSelecionadas(grupoId) {
+  return Array.from(document.querySelectorAll(`#${grupoId} .tag-btn.selecionada`)).map(b => b.dataset.valor);
+}
+
+/* ── DITADO POR VOZ (fala → texto, nativo do navegador) ─────────── */
+function ditarNoCampo(idCampo, botaoMic) {
+  const Reconhecimento = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!Reconhecimento) {
+    alert('Seu navegador não tem suporte a ditado por voz. Funciona no Chrome e no Edge.');
+    return;
+  }
+  const campo = document.getElementById(idCampo);
+  const reconhecimento = new Reconhecimento();
+  reconhecimento.lang = 'pt-BR';
+  reconhecimento.interimResults = false;
+  reconhecimento.maxAlternatives = 1;
+
+  botaoMic.classList.add('gravando');
+  reconhecimento.start();
+
+  reconhecimento.onresult = (evento) => {
+    const texto = evento.results[0][0].transcript;
+    campo.value = campo.value.trim() ? campo.value.trim() + ' ' + texto : texto;
+  };
+  reconhecimento.onerror = () => { botaoMic.classList.remove('gravando'); };
+  reconhecimento.onend = () => { botaoMic.classList.remove('gravando'); };
+}
+
+/* ── DESCRIÇÃO DE IMÓVEL ───────────────────────── */
+function gerarDescricao(modo) {
+  const tipo = pegarTagSelecionada('desc-tipo-tags') || 'Imóvel';
+  const transacao = pegarTagSelecionada('desc-transacao-tags') || 'Venda';
+  const titulo = document.getElementById('desc-titulo').value.trim();
+  const bairro = document.getElementById('desc-bairro').value.trim();
+  const quartos = document.getElementById('desc-quartos').value;
+  const suites = document.getElementById('desc-suites').value;
+  const banheiros = document.getElementById('desc-banheiros').value;
+  const vagas = document.getElementById('desc-vagas').value;
+  const area = document.getElementById('desc-area').value;
+  const valor = parseFloat(document.getElementById('desc-valor').value);
+  const condominio = parseFloat(document.getElementById('desc-condominio').value);
+  const diferenciais = pegarTagsMultiSelecionadas('desc-diferenciais-tags');
+  const observacoes = document.getElementById('desc-observacoes').value.trim();
+
+  const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const acaoTransacao = transacao === 'Aluguel' ? 'para alugar' : (transacao === 'Venda e Aluguel' ? 'à venda ou para alugar' : 'à venda');
+
+  let carac = [];
+  if (quartos) carac.push(`${quartos} quarto${quartos > 1 ? 's' : ''}`);
+  if (suites) carac.push(`${suites} suíte${suites > 1 ? 's' : ''}`);
+  if (banheiros) carac.push(`${banheiros} banheiro${banheiros > 1 ? 's' : ''}`);
+  if (vagas) carac.push(`${vagas} vaga${vagas > 1 ? 's' : ''} de garagem`);
+  if (area) carac.push(`${area} m²`);
+
+  let linhas = [];
+
+  if (modo === 'curta') {
+    linhas.push(`${titulo || tipo}${bairro ? ' em ' + bairro : ''} — ${acaoTransacao}!`);
+    if (carac.length) linhas.push(carac.join(' · '));
+    if (diferenciais.length) linhas.push(diferenciais.join(' · '));
+    if (!isNaN(valor) && valor > 0) linhas.push(fmt(valor) + (transacao === 'Aluguel' ? '/mês' : ''));
+    linhas.push('Chame agora e agende sua visita! 📲');
+  } else {
+    linhas.push(`${tipo} ${acaoTransacao}${bairro ? ' em ' + bairro : ''}${titulo ? ' — ' + titulo : ''}`);
+    linhas.push('');
+    if (carac.length) { linhas.push(carac.join(' · ')); linhas.push(''); }
+    if (diferenciais.length) {
+      linhas.push('Diferenciais: ' + diferenciais.join(', ') + '.');
+      linhas.push('');
+    }
+    if (observacoes) { linhas.push(observacoes); linhas.push(''); }
+    if (!isNaN(valor) && valor > 0) {
+      linhas.push(`Valor: ${fmt(valor)}${transacao === 'Aluguel' ? '/mês' : ''}`);
+    }
+    if (!isNaN(condominio) && condominio > 0) linhas.push(`Condomínio: ${fmt(condominio)}/mês`);
+    linhas.push('');
+    linhas.push('Fale com a gente e agende sua visita! 📲');
+  }
+
+  document.getElementById('resultado-descricao').textContent = linhas.join('\n');
+  document.getElementById('resultado-descricao').style.display = 'block';
+  document.getElementById('acoes-descricao').style.display = 'flex';
+}
+
+/* ── ITBI ──────────────────────────────────────── */
+function calcularItbi() {
+  const valor = parseFloat(document.getElementById('itbi-valor').value) || 0;
+  const aliquota = parseFloat(document.getElementById('itbi-aliquota').value) || 0;
+  const total = valor * (aliquota / 100);
+  document.getElementById('resultado-itbi').textContent =
+    `ITBI estimado: ${total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`;
+  document.getElementById('resultado-itbi').style.display = 'block';
+}
+
+/* ── ABRIR FERRAMENTA DIRETO PELO LINK (#âncora) ─ */
+window.addEventListener('DOMContentLoaded', () => {
+  const id = location.hash.replace('#', '');
+  if (id) {
+    const card = document.getElementById(id);
+    if (card && card.classList.contains('card')) alternar(id, card);
+  }
+});
+
+/* ── BANNER DE IMÓVEL ──────────────────────────── */
+let bannerFotos = [];
+let bannerSelecionada = null;
+
+function carregarFotosBanner(evento) {
+  const arquivos = Array.from(evento.target.files);
+  arquivos.forEach(arquivo => {
+    const leitor = new FileReader();
+    leitor.onload = e => {
+      bannerFotos.push(e.target.result);
+      if (!bannerSelecionada) bannerSelecionada = e.target.result;
+      renderizarThumbs();
+    };
+    leitor.readAsDataURL(arquivo);
+  });
+  evento.target.value = '';
+}
+
+function renderizarThumbs() {
+  const cont = document.getElementById('banner-thumbs');
+  cont.innerHTML = bannerFotos.map((foto, i) => `
+    <div class="thumb ${foto === bannerSelecionada ? 'selecionada' : ''}" onclick="selecionarFotoBanner(${i})">
+      <img src="${foto}" />
+      ${foto === bannerSelecionada ? '<div class="marca"><i class="ti ti-check"></i></div>' : ''}
+    </div>
+  `).join('');
+}
+
+function selecionarFotoBanner(i) {
+  bannerSelecionada = bannerFotos[i];
+  renderizarThumbs();
+}
+
+function truncarTexto(ctx, texto, larguraMax) {
+  if (ctx.measureText(texto).width <= larguraMax) return texto;
+  let t = texto;
+  while (t.length > 0 && ctx.measureText(t + '…').width > larguraMax) t = t.slice(0, -1);
+  return t + '…';
+}
+
+function hexParaRgb(hex) {
+  const r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+  return `${r}, ${g}, ${b}`;
+}
+
+async function gerarBanner() {
+  if (!bannerSelecionada) { alert('Envie e selecione ao menos uma foto.'); return; }
+  const formato = document.getElementById('banner-formato').value;
+  const estilo = document.getElementById('banner-estilo').value;
+  const corDestaque = pegarTagSelecionada('banner-cor-tags') || '#10b981';
+  const corRgb = hexParaRgb(corDestaque);
+  const [w, h] = formato === 'quadrado' ? [1080, 1080] : [1200, 628];
+  const canvas = document.getElementById('bannercanvas');
+  canvas.width = w; canvas.height = h;
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+
+  const img = new Image();
+  img.onerror = () => alert('Não foi possível carregar essa foto. Tente enviar novamente.');
+  img.onload = async () => {
+    await document.fonts.ready;
+
+    const titulo = document.getElementById('banner-titulo').value.trim();
+    const preco = document.getElementById('banner-preco').value.trim();
+    const mostrarValor = document.getElementById('banner-mostrar-valor').checked;
+    const quartos = document.getElementById('banner-quartos').value;
+    const area = document.getElementById('banner-area').value;
+    let carac = [];
+    if (quartos) carac.push(`${quartos} quartos`);
+    if (area) carac.push(`${area} m²`);
+
+    const nomeCorretor = document.getElementById('banner-corretor-nome').value.trim();
+    const creci = document.getElementById('banner-corretor-creci').value.trim();
+    const contato = document.getElementById('banner-contato').value.trim();
+    let assinaturaPartes = [];
+    if (nomeCorretor) assinaturaPartes.push(nomeCorretor);
+    if (creci) assinaturaPartes.push('CRECI ' + creci);
+    if (contato) assinaturaPartes.push(contato);
+    const assinatura = assinaturaPartes.join('  ·  ');
+
+    if (estilo === 'lateral') {
+      const larguraPainel = w * 0.36;
+      // foto ocupa a parte direita
+      const escala = Math.max((w - larguraPainel) / img.width, h / img.height);
+      const sw = (w - larguraPainel) / escala, sh = h / escala;
+      const sx = (img.width - sw) / 2, sy = (img.height - sh) / 2;
+      ctx.drawImage(img, sx, sy, sw, sh, larguraPainel, 0, w - larguraPainel, h);
+
+      ctx.fillStyle = `rgba(${corRgb}, 0.94)`;
+      ctx.fillRect(0, 0, larguraPainel, h);
+
+      const margem = larguraPainel * 0.14;
+      const larguraMax = larguraPainel - margem * 2;
+      let y = h * 0.14;
+
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.font = `600 ${Math.round(w * 0.02)}px Sora, sans-serif`;
+      ctx.fillText('FCosta', margem, y);
+      y += h * 0.09;
+
+      if (titulo) {
+        ctx.fillStyle = '#fff';
+        ctx.font = `600 ${Math.round(w * 0.028)}px Sora, sans-serif`;
+        y = desenharTextoQuebrado(ctx, titulo, margem, y, larguraMax, w * 0.036);
+        y += h * 0.03;
+      }
+      if (carac.length) {
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.font = `400 ${Math.round(w * 0.02)}px DM Sans, sans-serif`;
+        y = desenharTextoQuebrado(ctx, carac.join('  ·  '), margem, y, larguraMax, w * 0.028);
+        y += h * 0.05;
+      }
+      if (mostrarValor && preco) {
+        ctx.fillStyle = '#fff';
+        ctx.font = `700 ${Math.round(w * 0.034)}px Sora, sans-serif`;
+        y = desenharTextoQuebrado(ctx, preco, margem, y, larguraMax, w * 0.042);
+      }
+      if (assinatura) {
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.font = `400 ${Math.round(w * 0.015)}px DM Sans, sans-serif`;
+        desenharTextoQuebrado(ctx, assinatura, margem, h - margem, larguraMax, w * 0.022);
+      }
+
+    } else {
+      // FAIXA (inferior) ou TOPO
+      const escala = Math.max(w / img.width, h / img.height);
+      const sw = w / escala, sh = h / escala;
+      const sx = (img.width - sw) / 2, sy = (img.height - sh) / 2;
+      ctx.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
+
+      const grad = ctx.createLinearGradient(0, estilo === 'topo' ? 0 : h * 0.42, 0, estilo === 'topo' ? h * 0.4 : h);
+      if (estilo === 'topo') {
+        grad.addColorStop(0, 'rgba(10,31,26,0.94)');
+        grad.addColorStop(1, 'rgba(10,31,26,0)');
+      } else {
+        grad.addColorStop(0, 'rgba(10,31,26,0)');
+        grad.addColorStop(1, 'rgba(10,31,26,0.94)');
+      }
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.fillStyle = `rgba(${corRgb}, 0.85)`;
+      const seloTexto = 'FCosta';
+      ctx.font = `600 ${Math.round(w * 0.024)}px Sora, sans-serif`;
+      const seloLargura = ctx.measureText(seloTexto).width + w * 0.05;
+      const seloY = estilo === 'topo' ? h * 0.86 : h * 0.035;
+      desenharPilula(ctx, w * 0.04, seloY, seloLargura, w * 0.045);
+      ctx.fillStyle = '#fff';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(seloTexto, w * 0.04 + w * 0.025, seloY + (w * 0.045) / 2);
+      ctx.textBaseline = 'alphabetic';
+
+      const margem = w * 0.05;
+      const larguraMax = w - margem * 2;
+
+      if (estilo === 'topo') {
+        let y = h * 0.09;
+        if (carac.length) {
+          ctx.font = `500 ${Math.round(w * 0.024)}px DM Sans, sans-serif`;
+          ctx.fillStyle = corDestaque;
+          ctx.fillText(truncarTexto(ctx, carac.join('   ·   '), larguraMax), margem, y);
+          y += w * 0.05;
+        }
+        if (titulo) {
+          ctx.font = `600 ${Math.round(w * 0.03)}px Sora, sans-serif`;
+          ctx.fillStyle = '#fff';
+          ctx.fillText(truncarTexto(ctx, titulo, larguraMax), margem, y);
+          y += w * 0.06;
+        }
+        if (mostrarValor && preco) {
+          ctx.font = `700 ${Math.round(w * 0.045)}px Sora, sans-serif`;
+          ctx.fillStyle = corDestaque;
+          ctx.fillText(truncarTexto(ctx, preco, larguraMax), margem, y);
+        }
+        if (assinatura) {
+          ctx.font = `400 ${Math.round(w * 0.018)}px DM Sans, sans-serif`;
+          ctx.fillStyle = 'rgba(255,255,255,0.85)';
+          ctx.fillText(truncarTexto(ctx, assinatura, larguraMax), margem, h - margem * 0.6);
+        }
+      } else {
+        let y = h - margem * 0.8;
+        if (assinatura) {
+          ctx.font = `400 ${Math.round(w * 0.018)}px DM Sans, sans-serif`;
+          ctx.fillStyle = 'rgba(255,255,255,0.8)';
+          ctx.fillText(truncarTexto(ctx, assinatura, larguraMax), margem, y);
+          y -= w * 0.04;
+        }
+        if (carac.length) {
+          ctx.font = `500 ${Math.round(w * 0.026)}px DM Sans, sans-serif`;
+          ctx.fillStyle = corDestaque;
+          ctx.fillText(truncarTexto(ctx, carac.join('   ·   '), larguraMax), margem, y);
+          y -= w * 0.06;
+        }
+        if (titulo) {
+          ctx.font = `600 ${Math.round(w * 0.033)}px Sora, sans-serif`;
+          ctx.fillStyle = '#fff';
+          ctx.fillText(truncarTexto(ctx, titulo, larguraMax), margem, y);
+          y -= w * 0.075;
+        }
+        if (mostrarValor && preco) {
+          ctx.font = `700 ${Math.round(w * 0.05)}px Sora, sans-serif`;
+          ctx.fillStyle = corDestaque;
+          ctx.fillText(truncarTexto(ctx, preco, larguraMax), margem, y);
+        }
+      }
+    }
+
+    document.getElementById('acoes-banner').style.display = 'flex';
+  };
+  img.src = bannerSelecionada;
+}
+
+function quebrarLinhas(ctx, texto, larguraMax) {
+  const palavras = texto.split(' ');
+  let linhas = [];
+  let atual = '';
+  palavras.forEach(p => {
+    const teste = atual ? atual + ' ' + p : p;
+    if (ctx.measureText(teste).width > larguraMax && atual) {
+      linhas.push(atual);
+      atual = p;
+    } else {
+      atual = teste;
+    }
+  });
+  if (atual) linhas.push(atual);
+  return linhas;
+}
+
+function desenharTextoQuebrado(ctx, texto, x, y, larguraMax, alturaLinha) {
+  const linhas = quebrarLinhas(ctx, texto, larguraMax);
+  linhas.forEach((linha, i) => ctx.fillText(linha, x, y + i * alturaLinha));
+  return y + linhas.length * alturaLinha;
+}
+
+function desenharPilula(ctx, x, y, largura, altura) {
+  const r = altura / 2;
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + largura, y, x + largura, y + altura, r);
+  ctx.arcTo(x + largura, y + altura, x, y + altura, r);
+  ctx.arcTo(x, y + altura, x, y, r);
+  ctx.arcTo(x, y, x + largura, y, r);
+  ctx.closePath();
+  ctx.fill();
+}
+
+function baixarBanner() {
+  const canvas = document.getElementById('bannercanvas');
+  const link = document.createElement('a');
+  link.download = 'banner-imovel.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+/* ── TEXTO EM VOZ (somente português do Brasil) ── */
+let vozesDisponiveis = [];   // todas as vozes do aparelho
+let vozesPtBr = [];          // só as vozes em pt-BR, já filtradas
+
+function ehVozPtBr(v) {
+  const lang = v.lang.toLowerCase().replace('_', '-');
+  return lang.startsWith('pt-br');
+}
+
+function classificarGenero(nomeVoz) {
+  const nome = nomeVoz.toLowerCase();
+  const femininos = ['maria', 'luciana', 'camila', 'vitória', 'vitoria', 'helena', 'fernanda', 'isabela', 'joana', 'carla', 'raquel', 'francisca', 'antônia', 'antonia', 'letícia', 'leticia', 'valentina', 'yara', 'female', 'feminina'];
+  const masculinos = ['daniel', 'felipe', 'ricardo', 'bruno', 'pedro', 'marcelo', 'thiago', 'joão', 'joao', 'diego', 'rodrigo', 'gustavo', 'eduardo', 'antônio', 'antonio', 'male', 'masculina'];
+  if (femininos.some(n => nome.includes(n))) return ' — feminina';
+  if (masculinos.some(n => nome.includes(n))) return ' — masculina';
+  return '';
+}
+
+function classificarQualidade(v) {
+  const nome = v.name.toLowerCase();
+  // "localService: false" = a voz roda em nuvem (geralmente muito mais natural).
+  // nomes com "enhanced/premium/natural/neural/wavenet" também indicam voz de melhor qualidade.
+  const marcasQualidade = ['enhanced', 'premium', 'natural', 'neural', 'wavenet', 'aprimorada'];
+  if (!v.localService || marcasQualidade.some(m => nome.includes(m))) return 'alta';
+  return 'padrao';
+}
+
+function carregarVozes() {
+  vozesDisponiveis = speechSynthesis.getVoices();
+  vozesPtBr = vozesDisponiveis.filter(ehVozPtBr);
+
+  // coloca as vozes de melhor qualidade (online/aprimoradas) primeiro na lista
+  vozesPtBr.sort((a, b) => {
+    const qa = classificarQualidade(a) === 'alta' ? 0 : 1;
+    const qb = classificarQualidade(b) === 'alta' ? 0 : 1;
+    return qa - qb;
+  });
+
+  const select = document.getElementById('voz-select');
+  const status = document.getElementById('voz-status');
+  if (!select) return;
+
+  if (vozesDisponiveis.length === 0) {
+    select.innerHTML = '<option value="">Voz padrão do aparelho</option>';
+    if (status) status.innerHTML = '<i class="ti ti-info-circle"></i>Nenhuma voz detectada ainda — toque em "Recarregar vozes".';
+    return;
+  }
+
+  if (vozesPtBr.length === 0) {
+    select.innerHTML = '<option value="">Nenhuma voz em português do Brasil encontrada</option>';
+    if (status) status.innerHTML = '<i class="ti ti-alert-triangle"></i>Este aparelho não tem nenhuma voz em português do Brasil instalada. Vá nas configurações de acessibilidade/voz do seu celular ou computador e instale uma voz em "Português (Brasil)".';
+    return;
+  }
+
+  select.innerHTML = vozesPtBr.map((v, i) => {
+    const selo = classificarQualidade(v) === 'alta' ? ' 🔊 melhor qualidade' : '';
+    return `<option value="${i}">${v.name}${classificarGenero(v.name)}${selo}</option>`;
+  }).join('');
+
+  const temAltaQualidade = vozesPtBr.some(v => classificarQualidade(v) === 'alta');
+  if (status) {
+    status.innerHTML = temAltaQualidade
+      ? `<i class="ti ti-check"></i>${vozesPtBr.length} voz(es) encontrada(s) — as marcadas com 🔊 tendem a soar mais naturais.`
+      : `<i class="ti ti-info-circle"></i>${vozesPtBr.length} voz(es) encontrada(s), todas do tipo "local" (mais robóticas). Veja abaixo como instalar vozes melhores no seu aparelho, de graça.`;
+  }
+}
+
+function recarregarVozesManual() {
+  // alguns navegadores só liberam a lista de vozes após uma interação do usuário
+  speechSynthesis.cancel();
+  carregarVozes();
+  if (vozesDisponiveis.length === 0) {
+    // dispara uma fala silenciosa/curta para forçar o navegador a inicializar as vozes
+    const teste = new SpeechSynthesisUtterance(' ');
+    teste.volume = 0;
+    speechSynthesis.speak(teste);
+    setTimeout(carregarVozes, 400);
+  }
+}
+
+if ('speechSynthesis' in window) {
+  speechSynthesis.onvoiceschanged = carregarVozes;
+  carregarVozes();
+  // várias tentativas nos primeiros segundos, pois em muitos aparelhos
+  // a lista de vozes carrega com atraso e sem disparar o evento acima
+  let tentativasVoz = 0;
+  const intervaloVoz = setInterval(() => {
+    tentativasVoz++;
+    carregarVozes();
+    if (vozesDisponiveis.length > 0 || tentativasVoz > 12) clearInterval(intervaloVoz);
+  }, 500);
+}
+
+function dividirTextoEmPedacos(texto, tamanhoMax) {
+  tamanhoMax = tamanhoMax || 180;
+  // separa por frase (mantendo a pontuação) para não cortar no meio de uma palavra
+  const frases = texto.match(/[^.!?]+[.!?]*(\s+|$)/g) || [texto];
+  const pedacos = [];
+  let atual = '';
+  frases.forEach(frase => {
+    if (atual && (atual + frase).length > tamanhoMax) {
+      pedacos.push(atual.trim());
+      atual = frase;
+    } else {
+      atual += frase;
+    }
+  });
+  if (atual.trim()) pedacos.push(atual.trim());
+  return pedacos;
+}
+
+function montarFilaDeFala() {
+  const texto = document.getElementById('voz-texto').value.trim();
+  if (!texto) { alert('Digite um texto.'); return null; }
+  if (!('speechSynthesis' in window)) { alert('Este navegador não tem suporte a leitura de texto.'); return null; }
+  if (vozesPtBr.length === 0) { alert('Nenhuma voz em português do Brasil disponível neste aparelho.'); return null; }
+
+  const idx = document.getElementById('voz-select').value;
+  const voz = (idx !== '' && vozesPtBr[idx]) ? vozesPtBr[idx] : null;
+  const velocidade = parseFloat(document.getElementById('voz-velocidade').value);
+  const tom = parseFloat(document.getElementById('voz-tom').value);
+
+  // o navegador (principalmente o Chrome) trava a leitura em textos muito longos
+  // (mais de ~15 segundos seguidos), então dividimos em pedaços menores e
+  // colocamos todos na fila — eles tocam em sequência, sem pausa perceptível
+  const pedacosTexto = dividirTextoEmPedacos(texto);
+  return pedacosTexto.map(pedaco => {
+    const utter = new SpeechSynthesisUtterance(pedaco);
+    if (voz) utter.voice = voz;
+    utter.lang = 'pt-BR';
+    utter.rate = velocidade;
+    utter.pitch = tom;
+    return utter;
+  });
+}
+
+function falarTexto() {
+  const fila = montarFilaDeFala();
+  if (!fila) return;
+  speechSynthesis.cancel();
+  fila.forEach(utter => speechSynthesis.speak(utter));
+}
+
+function pausarOuRetomarVoz() {
+  if (speechSynthesis.speaking && !speechSynthesis.paused) speechSynthesis.pause();
+  else if (speechSynthesis.paused) speechSynthesis.resume();
+}
+
+function pararVoz() {
+  speechSynthesis.cancel();
+}
+
+function importarDescricaoParaVoz() {
+  const texto = document.getElementById('resultado-descricao').textContent;
+  if (!texto) { alert('Gere uma descrição de imóvel primeiro.'); return; }
+  document.getElementById('voz-texto').value = texto;
+}
+
+/* ── GRAVAR E BAIXAR O ÁUDIO DA VOZ ─────────────── */
+async function gravarEBaixarVoz() {
+  const status = document.getElementById('voz-gravacao-status');
+  const mostrarStatus = (msg) => { if (status) { status.style.display = 'block'; status.textContent = msg; } };
+
+  const fila = montarFilaDeFala();
+  if (!fila) return;
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia || !window.MediaRecorder) {
+    alert('Este navegador não permite gravar o áudio para baixar. Use o Chrome ou o Edge no computador.');
+    return;
+  }
+
+  let streamTela;
+  try {
+    mostrarStatus('Escolha "Esta guia" e marque "Compartilhar áudio da guia" na janela que vai abrir...');
+    streamTela = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+  } catch (err) {
+    mostrarStatus('');
+    status.style.display = 'none';
+    return; // usuário cancelou a seleção
+  }
+
+  const faixasAudio = streamTela.getAudioTracks();
+  if (faixasAudio.length === 0) {
+    mostrarStatus('Não veio áudio nenhum. Repita e marque a opção "Compartilhar áudio da guia" na janela de seleção.');
+    streamTela.getTracks().forEach(t => t.stop());
+    return;
+  }
+
+  const streamAudio = new MediaStream(faixasAudio);
+  const gravador = new MediaRecorder(streamAudio);
+  const blocosAudio = [];
+  gravador.ondataavailable = e => { if (e.data.size > 0) blocosAudio.push(e.data); };
+
+  gravador.onstop = () => {
+    streamTela.getTracks().forEach(t => t.stop());
+    if (blocosAudio.length === 0) {
+      mostrarStatus('Não foi possível gravar áudio nenhum. Tente novamente.');
+      return;
+    }
+    const blob = new Blob(blocosAudio, { type: 'audio/webm' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'voz-anuncio.webm';
+    a.click();
+    URL.revokeObjectURL(url);
+    mostrarStatus('Áudio baixado com sucesso.');
+  };
+
+  gravador.start();
+  mostrarStatus('Gravando...');
+  speechSynthesis.cancel();
+  fila.forEach(utter => speechSynthesis.speak(utter));
+
+  // só encerra a gravação quando o ÚLTIMO pedaço da fila terminar de falar
+  const ultimo = fila[fila.length - 1];
+  ultimo.onend = () => { if (gravador.state !== 'inactive') gravador.stop(); };
+  ultimo.onerror = () => { if (gravador.state !== 'inactive') gravador.stop(); };
+
+  // se o usuário parar de compartilhar a guia manualmente, encerra a gravação também
+  faixasAudio[0].addEventListener('ended', () => { if (gravador.state !== 'inactive') gravador.stop(); });
+}
+
+/* ── CONTADOR DE CARACTERES ────────────────────── */
+function contarCaracteres() {
+  const texto = document.getElementById('txt-conteudo').value;
+  const caracteres = texto.length;
+  const palavras = texto.trim() === '' ? 0 : texto.trim().split(/\s+/).length;
+  document.getElementById('resultado-caracteres').innerHTML = `
+    ${caracteres} caracteres · ${palavras} palavras<br>
+    <span style="color:${caracteres > 1000 ? 'var(--danger)' : 'var(--text-muted)'}">Limite OLX (1000): ${caracteres}/1000</span><br>
+    <span style="color:${caracteres > 2200 ? 'var(--danger)' : 'var(--text-muted)'}">Limite Instagram (2200): ${caracteres}/2200</span>
+  `;
+}
+</script>
+
+</body>
+</html>
