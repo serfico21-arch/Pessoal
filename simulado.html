@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado — Palestra 6: O Equilíbrio Entre o Ministério e a Família</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#141F2E;
+    --ink-2:#1D2C40;
+    --gold:#C9A24B;
+    --gold-soft:#E4CD8F;
+    --ivory:#F4EFE3;
+    --ivory-dim:#D9D2C0;
+    --teal:#5C8374;
+    --burgundy:#9A4B45;
+    --line: rgba(244,239,227,0.14);
+    --shadow: 0 20px 50px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% 0%, #1c2c42 0%, transparent 45%),
+      radial-gradient(circle at 100% 100%, #16233a 0%, transparent 55%),
+      var(--ink);
+    color:var(--ivory);
+    font-family:'Source Serif 4', Georgia, serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    padding: 36px 18px 80px;
+  }
+  .page{
+    width:100%;
+    max-width:760px;
+  }
+
+  /* ---------- Header ---------- */
+  header.hero{
+    position:relative;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding: 34px 30px 28px;
+    background: linear-gradient(160deg, var(--ink-2), var(--ink));
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+  header.hero::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0; height:6px;
+    background: linear-gradient(90deg, var(--gold-soft), var(--gold) 40%, var(--burgundy) 100%);
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    font-size:11px;
+    color:var(--gold-soft);
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:700;
+    font-size: clamp(26px, 5vw, 36px);
+    line-height:1.12;
+    margin:0 0 8px;
+    color:var(--ivory);
+  }
+  .subline{
+    font-style:italic;
+    color:var(--ivory-dim);
+    font-size:15px;
+    margin:0 0 22px;
+  }
+  .ribbon-track{
+    display:flex;
+    gap:8px;
+    margin-top:6px;
+  }
+  .ribbon-track .tab{
+    flex:1;
+    text-align:center;
+    padding:10px 4px;
+    border:1px solid var(--line);
+    border-radius:3px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:.06em;
+    color:var(--ivory-dim);
+    cursor:pointer;
+    background: rgba(244,239,227,0.02);
+    transition: all .2s ease;
+    user-select:none;
+  }
+  .ribbon-track .tab .n{
+    display:block;
+    font-family:'Fraunces', serif;
+    font-size:18px;
+    font-weight:600;
+    color:var(--ivory);
+    margin-bottom:2px;
+  }
+  .ribbon-track .tab.active{
+    border-color: var(--gold);
+    background: linear-gradient(180deg, rgba(201,162,75,.16), rgba(201,162,75,.04));
+    color: var(--gold-soft);
+  }
+  .ribbon-track .tab.done .n::after{
+    content:" ✓";
+    color:var(--teal);
+    font-size:13px;
+  }
+
+  /* ---------- Card ---------- */
+  main{margin-top:22px;}
+  .card{
+    border:1px solid var(--line);
+    border-radius:4px;
+    background: var(--ink-2);
+    box-shadow: var(--shadow);
+    padding: 30px;
+    position:relative;
+  }
+  .card::after{
+    /* stitched notebook edge */
+    content:"";
+    position:absolute;
+    left:0; top:14px; bottom:14px; width:2px;
+    background-image: linear-gradient(var(--line) 50%, transparent 0);
+    background-size: 2px 10px;
+    opacity:.6;
+  }
+  .progress-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:20px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--ivory-dim);
+    letter-spacing:.04em;
+  }
+  .dots{
+    display:flex;
+    gap:6px;
+  }
+  .dot{
+    width:8px;height:8px;border-radius:50%;
+    background: rgba(244,239,227,0.16);
+    border:1px solid transparent;
+  }
+  .dot.current{background:var(--gold); }
+  .dot.correct{background:var(--teal);}
+  .dot.wrong{background:var(--burgundy);}
+
+  .qnum{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--gold-soft);
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .question{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size: clamp(19px, 3.4vw, 23px);
+    line-height:1.35;
+    margin:0 0 22px;
+    color:var(--ivory);
+  }
+  .options{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .opt{
+    text-align:left;
+    padding:14px 16px;
+    border:1px solid var(--line);
+    background: rgba(244,239,227,0.03);
+    color:var(--ivory);
+    border-radius:3px;
+    font-family:'Source Serif 4', serif;
+    font-size:15.5px;
+    line-height:1.4;
+    cursor:pointer;
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    transition: border-color .15s ease, background .15s ease, transform .1s ease;
+  }
+  .opt:hover:not(.locked){
+    border-color: var(--gold);
+    background: rgba(201,162,75,0.08);
+  }
+  .opt .letter{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    color:var(--gold-soft);
+    border:1px solid var(--line);
+    width:22px;height:22px;
+    min-width:22px;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:50%;
+    margin-top:1px;
+  }
+  .opt.locked{cursor:default;}
+  .opt.correct{
+    border-color:var(--teal);
+    background: rgba(92,131,116,0.18);
+  }
+  .opt.correct .letter{border-color:var(--teal); color:var(--teal);}
+  .opt.wrong{
+    border-color:var(--burgundy);
+    background: rgba(154,75,69,0.16);
+  }
+  .opt.wrong .letter{border-color:var(--burgundy); color:#d98f89;}
+
+  .feedback{
+    margin-top:18px;
+    padding:14px 16px;
+    border-left:3px solid var(--gold);
+    background: rgba(201,162,75,0.06);
+    font-size:14.5px;
+    color:var(--ivory-dim);
+    line-height:1.5;
+    display:none;
+  }
+  .feedback.show{display:block;}
+  .feedback b{color:var(--gold-soft);}
+
+  .nav-row{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:24px;
+  }
+  button.next{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    background: var(--gold);
+    color: var(--ink);
+    border:none;
+    padding:12px 22px;
+    border-radius:3px;
+    cursor:pointer;
+    font-weight:600;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity .2s ease;
+  }
+  button.next.show{opacity:1; pointer-events:all;}
+  button.next:hover{background:var(--gold-soft);}
+
+  /* ---------- Result screen ---------- */
+  .result{
+    text-align:center;
+    display:none;
+  }
+  .result.show{display:block;}
+  .seal{
+    width:86px;height:86px;
+    border-radius:50%;
+    border:2px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    margin: 0 auto 18px;
+    font-family:'Fraunces', serif;
+    font-size:26px;
+    font-weight:700;
+    color:var(--gold-soft);
+    background: radial-gradient(circle, rgba(201,162,75,.14), transparent 70%);
+  }
+  .result h2{
+    font-family:'Fraunces', serif;
+    font-size:24px;
+    margin: 0 0 6px;
+  }
+  .result p{color:var(--ivory-dim); font-size:14.5px; margin:0 0 24px;}
+  .result-actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  .btn-ghost, .btn-solid{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    padding:11px 18px;
+    border-radius:3px;
+    cursor:pointer;
+    border:1px solid var(--gold);
+  }
+  .btn-solid{background:var(--gold); color:var(--ink); font-weight:600;}
+  .btn-ghost{background:transparent; color:var(--gold-soft);}
+  .btn-solid:hover{background:var(--gold-soft);}
+  .btn-ghost:hover{background:rgba(201,162,75,0.08);}
+
+  .review{
+    text-align:left;
+    margin-top:26px;
+    border-top:1px solid var(--line);
+    padding-top:18px;
+    display:none;
+  }
+  .review.show{display:block;}
+  .review-item{
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+    font-size:13.5px;
+  }
+  .review-item:last-child{border-bottom:none;}
+  .review-item .rq{color:var(--ivory); margin-bottom:4px; font-weight:600;}
+  .review-item .ra{color:var(--ivory-dim);}
+  .review-item .ra.wrong-mark{color:#d98f89;}
+  .review-item .ra.correct-mark{color:#9ecab8;}
+
+  footer{
+    text-align:center;
+    margin-top:26px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.08em;
+    color: rgba(244,239,227,0.35);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+  @media (max-width:480px){
+    .card{padding:22px 18px;}
+    header.hero{padding:26px 20px 22px;}
+    .ribbon-track{flex-wrap:wrap;}
+    .ribbon-track .tab{flex:1 1 30%;}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="hero">
+    <p class="eyebrow">Simulado de memorização</p>
+    <h1>O Equilíbrio Entre o Ministério e a Família</h1>
+    <p class="subline">Palestra 6 — Pr. Walter Bastos · 5 rodadas · 10 perguntas por rodada</p>
+    <div class="ribbon-track" id="ribbonTrack"></div>
+  </header>
+
+  <main>
+    <div class="card" id="quizCard">
+      <div class="progress-row">
+        <span id="roundLabel">Rodada 1 de 5</span>
+        <div class="dots" id="dots"></div>
+        <span id="scoreLabel">Acertos: 0/10</span>
+      </div>
+
+      <div id="qArea">
+        <p class="qnum" id="qnum">Pergunta 1 de 10</p>
+        <h2 class="question" id="questionText"></h2>
+        <div class="options" id="options"></div>
+        <div class="feedback" id="feedback"></div>
+      </div>
+
+      <div class="nav-row">
+        <button class="next" id="nextBtn">Próxima →</button>
+      </div>
+
+      <div class="result" id="resultArea">
+        <div class="seal" id="sealScore">10/10</div>
+        <h2 id="resultTitle">Rodada concluída</h2>
+        <p id="resultText">Você acertou tudo. Bora para a próxima rodada.</p>
+        <div class="result-actions">
+          <button class="btn-ghost" id="reviewBtn">Ver revisão</button>
+          <button class="btn-ghost" id="retryBtn">Repetir rodada</button>
+          <button class="btn-solid" id="nextRoundBtn">Próxima rodada →</button>
+        </div>
+        <div class="review" id="reviewArea"></div>
+      </div>
+    </div>
+  </main>
+
+  <footer>PALESTRA 6 · MINISTÉRIO &amp; FAMÍLIA · MATERIAL DE ESTUDO PESSOAL</footer>
+</div>
+
+<script>
+const ROUNDS = [
+  { // Rodada 1 — Introdução geral
+    title: "Introdução geral",
+    questions: [
+      {q:"Qual é o título da Palestra 6?", o:["O chamado ao ministério","O equilíbrio entre o ministério e a família","A disciplina no lar cristão","Os deveres do bispo"], c:1},
+      {q:"Quem é o autor/palestrante da Palestra 6?", o:["Pr. Walter Bastos","Pr. Antônio Gomes","Pr. Josué Ribeiro","Pr. Filipe Santos"], c:0},
+      {q:"Qual texto bíblico abre a palestra, tratando dos requisitos do bispo?", o:["1 Coríntios 13","1 Timóteo 3.1-5","Tito 1.6-9","Efésios 5.22-25"], c:1},
+      {q:"Segundo 1Tm 3.1-5, o bispo deve governar bem a própria casa, criando os filhos:", o:["Com liberdade total","Sob disciplina, com todo o respeito","Longe da igreja","Sem envolvimento pessoal"], c:1},
+      {q:"Segundo a palestra, obedecer ao chamado de Deus é:", o:["Um fardo obrigatório","Um privilégio antes de um dever","Uma opção entre outras","Uma tarefa apenas dos pastores"], c:1},
+      {q:"Qual atividade é chamada de 'a mais sublime que pode existir no mundo'?", o:["O casamento","O ministério da palavra","A vida acadêmica","O trabalho secular"], c:1},
+      {q:"Segundo o texto, a família do líder é chamada de:", o:["Seu maior desafio","Seu primeiro 'rebanho'","Sua base financeira","Seu público-alvo"], c:1},
+      {q:"O que a palestra diz que existe, em alguns casos, entre família e ministério?", o:["Uma parceria natural","Uma 'competição' não assumida","Uma separação bíblica","Uma hierarquia clara"], c:1},
+      {q:"Segundo a palestra, se o líder fracassar na família, o que ocorre?", o:["Nada muda no ministério","Ele não conseguirá sucesso no ministério","A igreja deve escondê-lo","Ele deve trocar de igreja"], c:1},
+      {q:"Qual é a pergunta central que a palestra se propõe a responder?", o:["Como aumentar a igreja","Como conciliar o exercício ministerial e o cuidado da família","Como escolher um bom líder","Como interpretar 1 Timóteo"], c:1},
+    ]
+  },
+  { // Rodada 2 — O lar antes da igreja
+    title: "O lar antes da igreja",
+    questions: [
+      {q:"Qual é a primeira prioridade estabelecida por Deus, segundo a palestra?", o:["A igreja antes do lar","O lar antes da igreja","O trabalho antes do lar","Os amigos antes da família"], c:1},
+      {q:"Segundo Paulo, o que acontece com o líder que falha no cuidado da própria casa?", o:["Recebe uma nova chance automática","Fica desqualificado para cuidar da igreja","Deve pedir ajuda financeira","Nada, pois são áreas separadas"], c:1},
+      {q:"No texto, a família do obreiro é chamada de:", o:["'Cartão de visitas'","'Escudo protetor'","'Sinal dos tempos'","'Prova de fé'"], c:0},
+      {q:"O pai-pastor também deve ser, segundo o texto:", o:["Um pai-provedor apenas","Um pai-professor","Um pai ausente por vocação","Um pai-conselheiro financeiro"], c:1},
+      {q:"Quais atitudes o texto cita que o obreiro deve exercer também em favor dos filhos?", o:["Cobrar, punir, exigir, comparar","Orar, ensinar, aconselhar, disciplinar, ouvir","Ignorar, permitir, evitar, delegar","Trabalhar, viajar, pregar, descansar"], c:1},
+      {q:"Por que os filhos de pastores e líderes são muito cobrados, segundo o texto?", o:["Pela sociedade em geral","Pela igreja","Pelo governo","Pela mídia"], c:1},
+      {q:"Que ferramenta o texto sugere para encorajar os filhos e cumprir deveres espirituais com eles?", o:["O culto doméstico","As redes sociais","A escola dominical apenas","O aconselhamento pastoral externo"], c:0},
+      {q:"Qual referência bíblica é citada junto ao tema dos filhos de líderes e sua criação?", o:["Colossenses 3.21","Romanos 12.1","Provérbios 3.5","Gálatas 6.9"], c:0},
+      {q:"Sem o apoio de quem, especialmente, o ministério do obreiro não prospera?", o:["Dos diáconos","Da esposa","Dos amigos íntimos","Da denominação"], c:1},
+      {q:"Qual verbo grego Paulo emprega, traduzido como 'governar', ao falar do cuidado do bispo com sua casa?", o:["'Poimen'","'Prostenai'","'Diakonos'","'Presbyteros'"], c:1},
+    ]
+  },
+  { // Rodada 3 — A esposa antes dos filhos e de si mesmo
+    title: "A esposa antes dos filhos e de si mesmo",
+    questions: [
+      {q:"Qual é a segunda prioridade estabelecida por Deus, segundo a palestra?", o:["Os filhos antes da esposa","A esposa antes dos filhos e de si mesmo","O ministério antes da esposa","Os amigos antes da esposa"], c:1},
+      {q:"Segundo Gênesis 2.24, com quem está o elo/ligação principal do homem?", o:["Com seus pais","Com sua esposa","Com seus filhos","Com sua igreja"], c:1},
+      {q:"De acordo com 1 Pedro 3.7, como o marido deve tratar a esposa?", o:["Com autoridade e distância","Com dignidade, tendo consideração por ela","Com indiferença cordial","Apenas com provisão financeira"], c:1},
+      {q:"Segundo o texto, sem oração respondida não há:", o:["Crescimento financeiro","Ministério bem-sucedido","Paz na igreja","Comunhão entre irmãos"], c:1},
+      {q:"Qual referência bíblica fala em 'amai vossa mulher, como também Cristo amou a igreja'?", o:["Efésios 5.25","Colossenses 3.19","1 Coríntios 13.4","Provérbios 31.10"], c:0},
+      {q:"Segundo o texto, com quem o pastor ou dirigente está 'casado'?", o:["Com o ministério e a igreja","Somente com sua mulher","Com sua vocação","Com a denominação"], c:1},
+      {q:"O investimento no casamento precisa ser, segundo o texto:", o:["Igual ao da obra de Deus","Menor do que o da igreja","Maior do que aquele feito para a igreja ou obra de Deus","Irrelevante diante do ministério"], c:2},
+      {q:"O que os maridos cristãos podem 'sacrificar' por suas esposas, segundo o texto?", o:["Reputação e amizades","Tempo e recursos","Fé e convicções","Ministério e vocação"], c:1},
+      {q:"Qual referência é citada sobre atender necessidades materiais e estéticas da esposa?", o:["Êxodo 21.10","Levítico 19.18","Deuteronômio 24.5","Provérbios 5.18"], c:0},
+      {q:"Segundo o texto, quando os pais são unidos, o que acontece com os filhos?", o:["Ficam mais independentes","Crescem bem ajustados","Amadurecem mais rápido","Tornam-se mais rígidos"], c:1},
+    ]
+  },
+  { // Rodada 4 — Os filhos antes dos amigos
+    title: "Os filhos antes dos amigos",
+    questions: [
+      {q:"Qual é a terceira prioridade estabelecida por Deus, segundo a palestra?", o:["Os amigos antes dos filhos","Os filhos antes dos amigos","A igreja antes dos filhos","O trabalho antes dos filhos"], c:1},
+      {q:"Qual referência bíblica fala do crescimento de Jesus 'em sabedoria'?", o:["Lucas 2.40","Mateus 4.1","João 3.16","Marcos 10.14"], c:0},
+      {q:"Com quantos anos Jesus foi ao templo com os pais, segundo o relato citado?", o:["Dez anos","Doze anos","Quinze anos","Sete anos"], c:1},
+      {q:"Segundo Deuteronômio 6.7, qual o dever do obreiro em relação aos filhos?", o:["Prover apenas o sustento material","Incutir na mente deles a Palavra de Deus","Matriculá-los na escola cristã","Levá-los aos cultos apenas aos domingos"], c:1},
+      {q:"Quem, segundo o texto, fracassou na área do relacionamento com os filhos?", o:["Salomão","Davi","Moisés","Josué"], c:1},
+      {q:"Qual filho de Davi cresceu alimentando ódio do pai, segundo o texto?", o:["Absalão","Adonias","Amnom","Salomão"], c:0},
+      {q:"Qual patriarca é citado como exemplo de 'sacerdote' em seu próprio lar?", o:["Abraão","Jó","Isaque","Jacó"], c:1},
+      {q:"Segundo Jó 1.5, o que o patriarca fazia de madrugada por seus filhos?", o:["Orava em silêncio","Oferecia holocaustos","Escrevia cartas","Reunia a família para jejum"], c:1},
+      {q:"Segundo 1 Timóteo 3.4, como o ministro deve criar os filhos?", o:["Com liberdade irrestrita","Sob disciplina, com todo o respeito","Sob rigor sem afeto","Apenas com exemplo, sem correção"], c:1},
+      {q:"Segundo o texto, não adianta sermos um sucesso no ministério e, no lar, sermos:", o:["Um exemplo","Um fracasso","Um modelo","Um líder"], c:1},
+    ]
+  },
+  { // Rodada 5 — Verdade prática e revisão geral
+    title: "Verdade prática e revisão geral",
+    questions: [
+      {q:"Qual é a 'Verdade Prática' apresentada ao final da palestra?", o:[
+        "Nosso compromisso com Deus e Seu reino começa em casa, primeiro com o cônjuge e depois com os filhos",
+        "Nosso compromisso com Deus começa na igreja, depois se estende ao lar",
+        "O ministério deve vir sempre antes da família",
+        "A igreja é o primeiro rebanho de todo líder"
+      ], c:0},
+      {q:"Qual frase de alerta é citada na palestra sobre agenda cheia?", o:["'Tempo é dinheiro'","'Agenda lotada é o mesmo que relacionamento vazio'","'Quem não planeja, fracassa'","'Ocupação é sinal de fé'"], c:1},
+      {q:"Segundo o texto, essa 'agenda lotada' é chamada, em última análise, de:", o:["Uma virtude ministerial","Uma cilada diabólica","Um sinal de dedicação","Uma bênção disfarçada"], c:1},
+      {q:"Qual referência bíblica traz a frase 'eu e minha família serviremos ao Senhor'?", o:["Josué 24.15","Rute 1.16","Salmos 23.1","Provérbios 22.6"], c:0},
+      {q:"Qual exemplo do livro de Atos é citado sobre um obreiro que incluiu a família no ministério?", o:["Paulo e Timóteo","Filipe, o evangelista, e suas quatro filhas","Pedro e sua sogra","Áquila e Priscila apenas"], c:1},
+      {q:"Qual salmo é citado ao tratar das regras para o funcionamento do casamento?", o:["Salmos 127.1","Salmos 91.1","Salmos 23.1","Salmos 51.10"], c:0},
+      {q:"Qual palavra grega o texto usa para descrever o amor sacrificial de Cristo pela igreja, citado em Ef 5.25?", o:["Eros","Ágape","Storge","Filia"], c:1},
+      {q:"Segundo o texto, o líder eclesiástico não pode ignorar os problemas de sua casa nem:", o:["Comentá-los com a igreja","'Transferi-los' para a esposa","Resolvê-los em oração","Pedir ajuda ao conselho"], c:1},
+      {q:"Qual é a ordem correta das três prioridades enumeradas na palestra?", o:[
+        "Filhos, esposa, lar",
+        "O lar antes da igreja; a esposa antes dos filhos e de si mesmo; os filhos antes dos amigos",
+        "A igreja antes do lar; os filhos antes da esposa; os amigos antes dos filhos",
+        "A esposa antes da igreja; a igreja antes dos filhos; os filhos antes de si mesmo"
+      ], c:1},
+      {q:"Segundo o texto, a esposa deve estar na ordem de prioridade logo após:", o:["O ministério da palavra","A devoção pessoal do obreiro a Deus","O sustento financeiro do lar","A vida social do casal"], c:1},
+    ]
+  }
+];
+
+let currentRound = 0;
+let currentQ = 0;
+let score = 0;
+let answers = []; // {picked, correct, q}
+let roundDone = new Array(ROUNDS.length).fill(false);
+let roundScores = new Array(ROUNDS.length).fill(null);
+
+const ribbonTrack = document.getElementById('ribbonTrack');
+const roundLabel = document.getElementById('roundLabel');
+const scoreLabel = document.getElementById('scoreLabel');
+const dotsEl = document.getElementById('dots');
+const qnum = document.getElementById('qnum');
+const questionText = document.getElementById('questionText');
+const optionsEl = document.getElementById('options');
+const feedbackEl = document.getElementById('feedback');
+const nextBtn = document.getElementById('nextBtn');
+const qArea = document.getElementById('qArea');
+const resultArea = document.getElementById('resultArea');
+const sealScore = document.getElementById('sealScore');
+const resultTitle = document.getElementById('resultTitle');
+const resultText = document.getElementById('resultText');
+const reviewBtn = document.getElementById('reviewBtn');
+const retryBtn = document.getElementById('retryBtn');
+const nextRoundBtn = document.getElementById('nextRoundBtn');
+const reviewArea = document.getElementById('reviewArea');
+
+function buildRibbon(){
+  ribbonTrack.innerHTML = '';
+  ROUNDS.forEach((r, i) => {
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (i===currentRound ? ' active':'') + (roundDone[i] ? ' done':'');
+    tab.innerHTML = `<span class="n">${i+1}</span>${r.title}`;
+    tab.addEventListener('click', () => { startRound(i); });
+    ribbonTrack.appendChild(tab);
+  });
+}
+
+function buildDots(){
+  dotsEl.innerHTML = '';
+  for(let i=0;i<10;i++){
+    const d = document.createElement('div');
+    d.className = 'dot';
+    if(i < answers.length){
+      d.classList.add(answers[i].correct ? 'correct' : 'wrong');
+    } else if(i === currentQ){
+      d.classList.add('current');
+    }
+    dotsEl.appendChild(d);
+  }
+}
+
+function startRound(idx){
+  currentRound = idx;
+  currentQ = 0;
+  score = 0;
+  answers = [];
+  qArea.style.display = 'block';
+  resultArea.classList.remove('show');
+  reviewArea.classList.remove('show');
+  buildRibbon();
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const round = ROUNDS[currentRound];
+  const item = round.questions[currentQ];
+  roundLabel.textContent = `Rodada ${currentRound+1} de ${ROUNDS.length} — ${round.title}`;
+  scoreLabel.textContent = `Acertos: ${score}/10`;
+  qnum.textContent = `Pergunta ${currentQ+1} de 10`;
+  questionText.textContent = item.q;
+  optionsEl.innerHTML = '';
+  feedbackEl.classList.remove('show');
+  feedbackEl.textContent = '';
+  nextBtn.classList.remove('show');
+  buildDots();
+
+  const letters = ['A','B','C','D'];
+  item.o.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = `<span class="letter">${letters[i]}</span><span>${opt}</span>`;
+    btn.addEventListener('click', () => selectOption(i));
+    optionsEl.appendChild(btn);
+  });
+}
+
+function selectOption(i){
+  const round = ROUNDS[currentRound];
+  const item = round.questions[currentQ];
+  const opts = optionsEl.querySelectorAll('.opt');
+  const isCorrect = i === item.c;
+
+  opts.forEach((o, idx) => {
+    o.classList.add('locked');
+    if(idx === item.c) o.classList.add('correct');
+    if(idx === i && !isCorrect) o.classList.add('wrong');
+  });
+
+  if(isCorrect) score++;
+  answers.push({q: item.q, picked: item.o[i], correctAnswer: item.o[item.c], correct: isCorrect});
+
+  feedbackEl.classList.add('show');
+  feedbackEl.innerHTML = isCorrect
+    ? `<b>Correto.</b> Resposta: ${item.o[item.c]}`
+    : `<b>Quase.</b> A resposta certa é: ${item.o[item.c]}`;
+
+  scoreLabel.textContent = `Acertos: ${score}/10`;
+  buildDots();
+  nextBtn.classList.add('show');
+  nextBtn.textContent = (currentQ === 9) ? 'Ver resultado →' : 'Próxima →';
+}
+
+nextBtn.addEventListener('click', () => {
+  if(currentQ < 9){
+    currentQ++;
+    renderQuestion();
+  } else {
+    finishRound();
+  }
+});
+
+function finishRound(){
+  qArea.style.display = 'none';
+  nextBtn.classList.remove('show');
+  resultArea.classList.add('show');
+  reviewArea.classList.remove('show');
+  reviewArea.innerHTML = '';
+
+  roundDone[currentRound] = true;
+  roundScores[currentRound] = score;
+  buildRibbon();
+
+  sealScore.textContent = `${score}/10`;
+  if(score === 10){
+    resultTitle.textContent = 'Rodada perfeita';
+    resultText.textContent = 'Você acertou todas as 10 perguntas desta rodada.';
+  } else if(score >= 7){
+    resultTitle.textContent = 'Muito bom domínio';
+    resultText.textContent = `Você acertou ${score} de 10. Revise as que errou antes de seguir.`;
+  } else {
+    resultTitle.textContent = 'Continue revisando';
+    resultText.textContent = `Você acertou ${score} de 10. Vale a pena reler o conteúdo desta seção.`;
+  }
+
+  nextRoundBtn.style.display = (currentRound < ROUNDS.length - 1) ? 'inline-block' : 'none';
+  if(currentRound === ROUNDS.length - 1){
+    resultTitle.textContent = score === 10 ? 'Simulado completo — nota máxima' : 'Simulado completo';
+  }
+}
+
+reviewBtn.addEventListener('click', () => {
+  reviewArea.classList.toggle('show');
+  if(reviewArea.classList.contains('show')){
+    reviewArea.innerHTML = answers.map((a, i) => `
+      <div class="review-item">
+        <div class="rq">${i+1}. ${a.q}</div>
+        <div class="ra ${a.correct ? 'correct-mark' : 'wrong-mark'}">
+          Sua resposta: ${a.picked} ${a.correct ? '(correta)' : `— correta: ${a.correctAnswer}`}
+        </div>
+      </div>
+    `).join('');
+    reviewBtn.textContent = 'Ocultar revisão';
+  } else {
+    reviewBtn.textContent = 'Ver revisão';
+  }
+});
+
+retryBtn.addEventListener('click', () => {
+  startRound(currentRound);
+});
+
+nextRoundBtn.addEventListener('click', () => {
+  if(currentRound < ROUNDS.length - 1){
+    startRound(currentRound + 1);
+  }
+});
+
+// init
+buildRibbon();
+startRound(0);
+</script>
+</body>
+</html>
