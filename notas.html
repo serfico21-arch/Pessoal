@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bloco de Notas — Sérgio Costa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --tinta: #101a29; --tinta2: #0a121e; --papel: #f3ead9;
+  --latao: #c9a227; --latao-claro: #e6c358; --latao-fundo: #8f6f16;
+  --card-bg: rgba(201,162,39,0.06); --card-border: rgba(201,162,39,0.20);
+  --card-hover-border: rgba(230,195,88,0.55);
+  --text-muted: rgba(243,234,217,0.46); --text-soft: rgba(243,234,217,0.74);
+  --divider: rgba(201,162,39,0.16); --foco: #7fb8ff;
+  --perigo: #d97757;
+}
+body { font-family: 'Inter', sans-serif; background: var(--tinta2);
+  background-image: radial-gradient(ellipse 900px 500px at 50% -10%, rgba(201,162,39,0.10), transparent 60%);
+  min-height: 100vh; color: var(--papel); }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; border-radius: 4px; }
+header { background: linear-gradient(180deg, var(--tinta) 0%, var(--tinta2) 100%);
+  border-bottom: 1px solid var(--divider); padding: 1.25rem 2rem; display: flex;
+  align-items: center; gap: 14px; position: sticky; top: 0; z-index: 50; }
+.voltar { display: flex; align-items: center; gap: 6px; font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-soft);
+  text-decoration: none; border: 1px solid var(--card-border); border-radius: 20px;
+  padding: 7px 13px; transition: color 0.15s, border-color 0.15s; flex-shrink: 0; }
+.voltar:hover { color: var(--latao-claro); border-color: var(--card-hover-border); }
+.header-info h1 { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; line-height: 1.2; }
+.header-info p { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--text-muted);
+  margin-top: 3px; letter-spacing: 0.02em; }
+main { max-width: 720px; margin: 0 auto; padding: 2.25rem 1.5rem 4rem; }
+
+.compositor { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 16px; margin-bottom: 2rem; }
+.compositor textarea { width: 100%; min-height: 84px; resize: vertical; background: transparent;
+  border: none; color: var(--papel); font-family: 'Inter', sans-serif; font-size: 14px;
+  line-height: 1.55; }
+.compositor textarea:focus { outline: none; }
+.compositor textarea::placeholder { color: var(--text-muted); }
+.compositor-rodape { display: flex; justify-content: flex-end; align-items: center; gap: 10px;
+  margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--divider); }
+.contagem { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--text-muted);
+  margin-right: auto; }
+button.salvar { background: var(--latao); border: none; color: var(--tinta2); font-weight: 600;
+  font-size: 12.5px; font-family: 'Inter', sans-serif; border-radius: 20px; padding: 9px 18px;
+  cursor: pointer; transition: background 0.15s, transform 0.1s; }
+button.salvar:hover { background: var(--latao-claro); }
+button.salvar:active { transform: scale(0.96); }
+
+.section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; font-weight: 500;
+  letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 14px;
+  padding-left: 12px; position: relative; display: flex; align-items: center; gap: 10px; }
+.section-label::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+  width: 3px; height: 16px; background: var(--latao); border-radius: 2px; }
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--divider); }
+
+.lista { display: flex; flex-direction: column; gap: 10px; }
+.nota { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px;
+  padding: 14px 16px; display: flex; gap: 12px; align-items: flex-start;
+  animation: fadeUp 0.25s ease both; }
+.nota-corpo { flex: 1; }
+.nota-texto { font-size: 13.5px; line-height: 1.6; color: var(--papel); white-space: pre-wrap;
+  word-break: break-word; }
+.nota-data { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text-muted);
+  margin-top: 8px; letter-spacing: 0.02em; }
+.nota-excluir { flex-shrink: 0; background: transparent; border: 1px solid var(--card-border);
+  color: var(--text-muted); border-radius: 8px; width: 30px; height: 30px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: color 0.15s, border-color 0.15s; }
+.nota-excluir:hover { color: var(--perigo); border-color: var(--perigo); }
+
+.vazio { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 13px; }
+.vazio i { display: block; font-size: 26px; margin-bottom: 10px; color: var(--card-border); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+footer { text-align: center; padding: 1.75rem 1.5rem 2rem; font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px; letter-spacing: 0.03em; color: var(--text-muted); border-top: 1px solid var(--divider); }
+footer .selo-mini { display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--latao); margin: 0 8px 1px; vertical-align: middle; }
+footer strong { color: var(--latao-claro); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="voltar" href="index.html"><i class="ti ti-arrow-left"></i>Painel</a>
+  <div class="header-info">
+    <h1>Bloco de Notas</h1>
+    <p>Anotações rápidas, salvas neste navegador</p>
+  </div>
+</header>
+
+<main>
+  <div class="compositor">
+    <textarea id="campo-nota" placeholder="Escreva uma anotação rápida — um lembrete, uma ideia, algo para não esquecer..." maxlength="600"></textarea>
+    <div class="compositor-rodape">
+      <span class="contagem" id="contagem">0 / 600</span>
+      <button class="salvar" id="btn-salvar"><i class="ti ti-plus" style="margin-right:4px;"></i>Salvar nota</button>
+    </div>
+  </div>
+
+  <div class="section-label">Suas notas</div>
+  <div class="lista" id="lista-notas"></div>
+  <div class="vazio" id="estado-vazio" hidden>
+    <i class="ti ti-notes"></i>
+    Nenhuma nota ainda. Escreva algo acima para começar.
+  </div>
+</main>
+
+<footer>
+  <strong>FCosta</strong> · Sérgio Fernandes da Costa<span class="selo-mini"></span>CRECI-SP 294791-F · CNAI 52708
+</footer>
+
+<script>
+const CHAVE = 'fcosta_notas_pessoais';
+const campo = document.getElementById('campo-nota');
+const contagem = document.getElementById('contagem');
+const lista = document.getElementById('lista-notas');
+const vazio = document.getElementById('estado-vazio');
+const btnSalvar = document.getElementById('btn-salvar');
+
+function carregar() {
+  try { return JSON.parse(localStorage.getItem(CHAVE)) || []; }
+  catch { return []; }
+}
+function salvar(notas) { localStorage.setItem(CHAVE, JSON.stringify(notas)); }
+
+function formatarData(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }) + ' às ' +
+    d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
+function renderizar() {
+  const notas = carregar();
+  lista.innerHTML = '';
+  vazio.hidden = notas.length > 0;
+  notas.slice().reverse().forEach(nota => {
+    const el = document.createElement('div');
+    el.className = 'nota';
+    el.innerHTML = `
+      <div class="nota-corpo">
+        <div class="nota-texto"></div>
+        <div class="nota-data">${formatarData(nota.data)}</div>
+      </div>
+      <button class="nota-excluir" title="Excluir" aria-label="Excluir nota"><i class="ti ti-trash"></i></button>
+    `;
+    el.querySelector('.nota-texto').textContent = nota.texto;
+    el.querySelector('.nota-excluir').addEventListener('click', () => {
+      const atuais = carregar().filter(n => n.id !== nota.id);
+      salvar(atuais);
+      renderizar();
+    });
+    lista.appendChild(el);
+  });
+}
+
+campo.addEventListener('input', () => {
+  contagem.textContent = `${campo.value.length} / 600`;
+});
+
+function adicionarNota() {
+  const texto = campo.value.trim();
+  if (!texto) return;
+  const notas = carregar();
+  notas.push({ id: Date.now(), texto, data: new Date().toISOString() });
+  salvar(notas);
+  campo.value = '';
+  contagem.textContent = '0 / 600';
+  renderizar();
+}
+
+btnSalvar.addEventListener('click', adicionarNota);
+campo.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) adicionarNota();
+});
+
+renderizar();
+</script>
+
+</body>
+</html>

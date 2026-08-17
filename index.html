@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sérgio Costa — Painel Pessoal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* ── PALETA — encadernação & selo ─────────── */
+  --tinta: #101a29;        /* fundo principal */
+  --tinta2: #0a121e;       /* fundo profundo */
+  --papel: #f3ead9;        /* branco-papel (uso pontual) */
+  --latao: #c9a227;        /* latão / dourado — cor de assinatura */
+  --latao-claro: #e6c358;
+  --latao-fundo: #8f6f16;
+  --card-bg: rgba(201,162,39,0.06);
+  --card-border: rgba(201,162,39,0.20);
+  --card-hover-bg: rgba(201,162,39,0.13);
+  --card-hover-border: rgba(230,195,88,0.55);
+  --text-muted: rgba(243,234,217,0.46);
+  --text-soft: rgba(243,234,217,0.72);
+  --divider: rgba(201,162,39,0.16);
+  --group-bg: rgba(201,162,39,0.035);
+  --group-border: rgba(201,162,39,0.14);
+  --foco: #7fb8ff;
+}
+
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--tinta2);
+  background-image:
+    radial-gradient(ellipse 900px 500px at 50% -10%, rgba(201,162,39,0.10), transparent 60%);
+  min-height: 100vh;
+  color: var(--papel);
+}
+
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; border-radius: 4px; }
+
+/* ── HEADER ─────────────────────────────────── */
+header {
+  background: linear-gradient(180deg, var(--tinta) 0%, var(--tinta2) 100%);
+  border-bottom: 1px solid var(--divider);
+  padding: 1.5rem 2rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.selo {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  background:
+    radial-gradient(circle at 32% 28%, var(--latao-claro), var(--latao) 45%, var(--latao-fundo) 100%);
+  box-shadow: 0 0 0 1px rgba(201,162,39,0.35), 0 4px 14px rgba(0,0,0,0.35);
+}
+.selo::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  border: 1px dashed rgba(16,26,41,0.55);
+}
+.selo span {
+  font-family: 'Fraunces', serif;
+  font-size: 17px; font-weight: 600;
+  color: var(--tinta2);
+  letter-spacing: -0.4px;
+}
+
+.header-info h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 19px; font-weight: 600; color: var(--papel); line-height: 1.2;
+  letter-spacing: -0.2px;
+}
+.header-info p {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; color: var(--text-muted); margin-top: 4px;
+  letter-spacing: 0.02em;
+}
+
+.header-badge {
+  margin-left: auto;
+  background: rgba(201,162,39,0.12);
+  border: 1px solid rgba(201,162,39,0.38);
+  border-radius: 3px;
+  padding: 6px 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  color: var(--latao-claro);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── NAVEGAÇÃO RÁPIDA ────────────────────────── */
+.quicknav {
+  position: sticky;
+  top: 85px;
+  z-index: 99;
+  background: rgba(10,18,30,0.88);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid var(--divider);
+  display: flex;
+  gap: 8px;
+  padding: 10px 2rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.quicknav::-webkit-scrollbar { display: none; }
+.quicknav a {
+  flex-shrink: 0;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--text-soft);
+  border: 1px solid var(--card-border);
+  border-radius: 20px;
+  padding: 6px 13px;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.quicknav a:hover { color: var(--latao-claro); border-color: var(--card-hover-border); background: var(--card-bg); }
+
+/* ── MAIN ────────────────────────────────────── */
+main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2.25rem 1.5rem 3rem;
+}
+
+/* ── SECTION ─────────────────────────────────── */
+section { margin-bottom: 2rem; scroll-margin-top: 150px; }
+
+.section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  padding-left: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* aba de pasta — remete ao arquivo físico de um corretor */
+.section-label::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  transform: translateY(-50%);
+  width: 3px; height: 16px;
+  background: var(--latao);
+  border-radius: 2px;
+}
+.section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--divider);
+}
+.section-label .ref {
+  color: var(--latao-claro);
+  opacity: 0.7;
+}
+
+/* ── GRID ────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+}
+
+/* ── CARD BUTTON ─────────────────────────────── */
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 9px;
+  padding: 16px 14px 14px;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.18s, border-color 0.18s, transform 0.12s;
+  animation: fadeUp 0.35s ease both;
+}
+.card:hover {
+  background: var(--card-hover-bg);
+  border-color: var(--card-hover-border);
+  transform: translateY(-2px);
+}
+.card:active { transform: scale(0.97); }
+
+.card-icon {
+  font-size: 21px;
+  color: var(--latao);
+  margin-bottom: 2px;
+  display: block;
+}
+.card-title {
+  font-family: 'Fraunces', serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--papel);
+  line-height: 1.3;
+}
+.card-sub {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* destaque — dobra de canto, como um documento marcado */
+.card.destaque {
+  background: rgba(201,162,39,0.11);
+  border-color: rgba(201,162,39,0.4);
+}
+.card.destaque::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 0; height: 0;
+  border-style: solid;
+  border-width: 0 16px 16px 0;
+  border-color: transparent var(--latao) transparent transparent;
+  opacity: 0.85;
+}
+
+/* ── GRUPOS ──────────────────────────────────── */
+.subject-group {
+  background: var(--group-bg);
+  border: 1px solid var(--group-border);
+  border-radius: 12px;
+  padding: 14px 14px 12px;
+  margin-bottom: 10px;
+}
+.subject-name {
+  font-family: 'Fraunces', serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--latao-claro);
+  margin-bottom: 10px;
+  padding-left: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.subject-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.subject-row .card { animation: none; padding: 12px 12px 11px; }
+.subject-row .card-title { font-size: 12.5px; }
+.subject-row .card-sub { font-size: 10.5px; }
+.subject-row .card-icon { font-size: 18px; }
+
+.theo-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+}
+@media (max-width: 480px) { .theo-groups { grid-template-columns: 1fr; } }
+
+/* ── ANIMAÇÃO ────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.card:nth-child(1) { animation-delay: 0.03s; }
+.card:nth-child(2) { animation-delay: 0.06s; }
+.card:nth-child(3) { animation-delay: 0.09s; }
+.card:nth-child(4) { animation-delay: 0.12s; }
+.card:nth-child(5) { animation-delay: 0.15s; }
+
+/* ── RODAPÉ ──────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 1.75rem 1.5rem 2rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  border-top: 1px solid var(--divider);
+}
+footer .selo-mini {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--latao);
+  margin: 0 8px 1px;
+  vertical-align: middle;
+}
+footer strong { color: var(--latao-claro); font-weight: 500; }
+
+/* ── RESPONSIVO ──────────────────────────────── */
+@media (max-width: 480px) {
+  header { padding: 1.1rem 1.25rem 1rem; }
+  .header-badge { display: none; }
+  .quicknav { padding: 9px 1.25rem; top: 78px; }
+  main { padding: 1.5rem 1rem 2.5rem; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="selo"><span>SC</span></div>
+  <div class="header-info">
+    <h1>Sérgio Costa — Painel Pessoal</h1>
+    <p>CRECI-SP 294791-F · CNAI 52708</p>
+  </div>
+  <div class="header-badge">
+    <i class="ti ti-lock" style="font-size:11px; vertical-align:-1px; margin-right:4px;"></i>Acesso pessoal
+  </div>
+</header>
+
+<!-- NAV RÁPIDA -->
+<nav class="quicknav" aria-label="Navegação rápida">
+  <a href="#agenda">Agenda &amp; Produtividade</a>
+  <a href="#financeiro">Financeiro &amp; Metas</a>
+  <a href="#ferramentas">Ferramentas</a>
+  <a href="#acesso">Acesso Rápido</a>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <!-- AGENDA & CONTRATOS -->
+  <section id="agenda">
+    <div class="section-label">Agenda &amp; Produtividade <span class="ref">— 01</span></div>
+    <div class="grid">
+      <a class="card destaque" href="agenda_p.html">
+        <i class="ti ti-calendar card-icon"></i>
+        <span class="card-title">Agenda Pessoal</span>
+        <span class="card-sub">Compromissos e eventos</span>
+      </a>
+      <a class="card" href="notas.html">
+        <i class="ti ti-notes card-icon"></i>
+        <span class="card-title">Bloco de Notas</span>
+        <span class="card-sub">Anotações rápidas</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- FINANCEIRO & AVALIAÇÕES -->
+  <section id="financeiro">
+    <div class="section-label">Financeiro &amp; Metas <span class="ref">— 02</span></div>
+    <div class="grid">
+      <a class="card destaque" href="controle_fin.html">
+        <i class="ti ti-chart-bar card-icon"></i>
+        <span class="card-title">Controle Financeiro</span>
+        <span class="card-sub">Receitas e despesas</span>
+      </a>
+      <a class="card" href="metas.html">
+        <i class="ti ti-target-arrow card-icon"></i>
+        <span class="card-title">Metas do Mês</span>
+        <span class="card-sub">Leads, visitas e fechamentos</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- FERRAMENTAS -->
+  <section id="ferramentas">
+    <div class="section-label">Ferramentas <span class="ref">— 03</span></div>
+    <div class="grid">
+      <a class="card destaque" href="ferramentas.html">
+        <i class="ti ti-tool card-icon"></i>
+        <span class="card-title">Canivete Suíço</span>
+        <span class="card-sub">Ver todas as ferramentas</span>
+      </a>
+      <a class="card destaque" href="documentacao-imoveis.html">
+        <svg class="card-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="selo-fcosta" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop offset="0" stop-color="#e6c358"/>
+              <stop offset="1" stop-color="#8f6f16"/>
+            </linearGradient>
+          </defs>
+          <rect x="1.5" y="1.5" width="21" height="21" rx="7" fill="url(#selo-fcosta)" opacity="0.18"/>
+          <rect x="1.5" y="1.5" width="21" height="21" rx="7" stroke="url(#selo-fcosta)" stroke-width="1.3"/>
+          <path d="M7 12.2 12 8l5 4.2" stroke="#e6c358" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M8.3 11.1v4.4a.6.6 0 0 0 .6.6h6.2a.6.6 0 0 0 .6-.6v-4.4" stroke="#e6c358" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="11" y="12.6" width="2" height="3.5" rx="0.4" fill="#e6c358"/>
+          <circle cx="17.3" cy="17.3" r="3.15" fill="#0a121e" stroke="#c9a227" stroke-width="1.1"/>
+          <circle cx="16.35" cy="16.35" r="0.85" stroke="#c9a227" stroke-width="1"/>
+          <path d="M17 17 18.35 18.35M18.35 18.35 19.05 17.65M18.35 18.35 17.65 19.05" stroke="#c9a227" stroke-width="1" stroke-linecap="round"/>
+        </svg>
+        <span class="card-title">Documentação Imobiliária</span>
+        <span class="card-sub">Acesso pessoal do corretor</span>
+      </a>
+      <a class="card" href="areas-imoveis.html">
+        <i class="ti ti-ruler-2 card-icon"></i>
+        <span class="card-title">Guia de Áreas do Imóvel</span>
+        <span class="card-sub">Útil, construída, fração ideal</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ACESSO RÁPIDO FCOSTA -->
+  <section id="acesso">
+    <div class="section-label">Acesso Rápido — FCosta <span class="ref">— 04</span></div>
+    <div class="grid">
+      <a class="card" href="https://fcostacorretor.com" target="_blank" rel="noopener">
+        <i class="ti ti-world card-icon"></i>
+        <span class="card-title">Site FCosta</span>
+        <span class="card-sub">fcostacorretor.com</span>
+      </a>
+      <a class="card" href="https://obpcsaofernando199-sudo.github.io/Obpc/" target="_blank" rel="noopener">
+        <i class="ti ti-world card-icon"></i>
+        <span class="card-title">Site OBPC</span>
+        <span class="card-sub">OBPC São Fernando</span>
+      </a>
+      <a class="card destaque" href="simulado.html">
+        <i class="ti ti-clipboard-text card-icon"></i>
+        <span class="card-title">Simulado</span>
+        <span class="card-sub">Palestra 6: Ministério e Família</span>
+      </a>
+      <a class="card" href="https://serfico21-arch.github.io/Apostilas-creci/" target="_blank" rel="noopener">
+        <i class="ti ti-brand-github card-icon"></i>
+        <span class="card-title">Apostilas CRECI</span>
+        <span class="card-sub">Repositório de estudo</span>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<!-- RODAPÉ -->
+<footer>
+  <strong>FCosta</strong> · Sérgio Fernandes da Costa<span class="selo-mini"></span>CRECI-SP 294791-F · CNAI 52708
+</footer>
+
+</body>
+</html>
