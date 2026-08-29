@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor de Esboços de Sermão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Cinzel:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#faf6ee;
+    --paper-line:#e7ddc9;
+    --ink:#2b2620;
+    --ink-soft:#5b5346;
+    --gold:#a9822f;
+    --gold-deep:#7c5e21;
+    --navy-deep:#141d29;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    font-family:'EB Garamond', serif;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(169,130,47,0.10), transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(169,130,47,0.08), transparent 45%),
+      var(--navy-deep);
+    color:var(--ink);
+    min-height:100vh;
+  }
+
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.25), transparent),
+      radial-gradient(1px 1px at 70% 60%, rgba(255,255,255,0.18), transparent),
+      radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.2), transparent),
+      radial-gradient(1px 1px at 90% 20%, rgba(255,255,255,0.15), transparent),
+      radial-gradient(1px 1px at 55% 15%, rgba(255,255,255,0.2), transparent);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  header{
+    position:relative; z-index:1;
+    text-align:center;
+    padding:38px 20px 26px;
+  }
+  header .kicker{
+    font-family:'Cinzel', serif;
+    letter-spacing:.35em;
+    font-size:11px;
+    color:var(--gold);
+    text-transform:uppercase;
+  }
+  header h1{
+    font-family:'Cinzel', serif;
+    color:#f4ecd8;
+    font-weight:600;
+    font-size:clamp(24px,4vw,34px);
+    margin:10px 0 6px;
+    letter-spacing:.02em;
+  }
+  header p{
+    color:#b9c2cf;
+    font-size:14px;
+    margin:0;
+    font-style:italic;
+    max-width:520px;
+    margin:0 auto;
+  }
+  header .rule{
+    width:80px; height:1px; margin:16px auto 0;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  main{
+    position:relative; z-index:1;
+    max-width:1180px;
+    margin:0 auto;
+    padding:10px 20px 70px;
+    display:grid;
+    grid-template-columns:1fr;
+    gap:26px;
+  }
+  @media(min-width:960px){
+    main{grid-template-columns: 0.95fr 1.05fr; align-items:start;}
+  }
+
+  .panel{
+    background:linear-gradient(180deg,#20293a,#171f2c);
+    border:1px solid rgba(169,130,47,0.25);
+    border-radius:14px;
+    padding:24px 22px 26px;
+    box-shadow:0 20px 45px rgba(0,0,0,0.45);
+  }
+
+  .panel > label.top{
+    display:block;
+    font-family:'Cinzel', serif;
+    font-size:11.5px;
+    letter-spacing:.16em;
+    color:var(--gold);
+    text-transform:uppercase;
+    margin:18px 0 8px;
+  }
+  .panel > label.top:first-child{margin-top:0;}
+
+  input[type=text], textarea{
+    width:100%;
+    background:#faf6ee;
+    border:1px solid #d8cba7;
+    border-radius:8px;
+    padding:11px 13px;
+    font-family:'EB Garamond', serif;
+    font-size:16px;
+    color:var(--ink);
+    resize:vertical;
+    transition:border-color .2s, box-shadow .2s;
+  }
+  input[type=text].grande{font-size:19px;}
+  input:focus, textarea:focus{
+    outline:none;
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(169,130,47,0.18);
+  }
+
+  .row2{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  @media(max-width:480px){.row2{grid-template-columns:1fr;}}
+
+  select{
+    width:100%;
+    background:#faf6ee;
+    border:1px solid #d8cba7;
+    border-radius:8px;
+    padding:11px 13px;
+    font-family:'EB Garamond', serif;
+    font-size:16px;
+    color:var(--ink);
+  }
+  select:focus{
+    outline:none;
+    border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(169,130,47,0.18);
+  }
+  .tipo-desc{
+    font-size:12.5px;
+    font-style:italic;
+    color:#c9a45c;
+    margin:6px 2px 4px;
+    line-height:1.4;
+  }
+
+  /* Painel do gerador com IA */
+  .ia-painel{
+    border:1px solid var(--gold);
+    border-radius:10px;
+    padding:16px 16px 18px;
+    margin:18px 0 20px;
+    background:linear-gradient(180deg, #f4e9cc, #ecdcae);
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+  }
+  .ia-painel .ia-titulo{
+    font-family:'Cinzel', serif;
+    font-size:11.5px;
+    letter-spacing:.14em;
+    color:var(--gold-deep);
+    text-transform:uppercase;
+    display:flex; align-items:center; gap:6px;
+  }
+  .ia-cabecalho{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:10px;
+  }
+  .ia-chave-link{
+    background:none;
+    border:none;
+    padding:2px 4px;
+    font-family:'EB Garamond', serif;
+    font-size:11.5px;
+    font-style:italic;
+    color:var(--ink-soft);
+    opacity:.75;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .ia-chave-link:hover{opacity:1; text-decoration:underline;}
+  .ia-chave-caixa{
+    display:none;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:10px;
+  }
+  .ia-chave-caixa.aberta{display:flex;}
+  .ia-painel input[type=password]{
+    flex:1 1 200px;
+    background:#faf6ee;
+    border:1px solid #d8cba7;
+    border-radius:8px;
+    padding:10px 12px;
+    font-family:'EB Garamond', serif;
+    font-size:14px;
+    color:var(--ink);
+  }
+  .ia-painel input[type=password]:focus{
+    outline:none; border-color:var(--gold);
+    box-shadow:0 0 0 3px rgba(169,130,47,0.18);
+  }
+  button.ia-btn-mini{
+    flex-shrink:0;
+    font-family:'Cinzel', serif;
+    font-size:10.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    padding:9px 14px;
+    border-radius:8px;
+    border:1px solid var(--gold-deep);
+    background:transparent;
+    color:var(--gold-deep);
+    cursor:pointer;
+  }
+  button.ia-btn-mini:hover{background:rgba(124,94,33,0.1);}
+  button.ia-btn{
+    font-family:'Cinzel', serif;
+    font-size:11.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    padding:10px 16px;
+    border-radius:8px;
+    border:none;
+    background:linear-gradient(180deg,#d9b566,#a9822f);
+    color:#4a3a1a;
+    cursor:pointer;
+    transition:filter .2s;
+    white-space:nowrap;
+  }
+  button.ia-btn-full{width:100%;}
+  button.ia-btn:hover{filter:brightness(1.08);}
+  button.ia-btn:disabled{opacity:.6; cursor:wait; filter:none;}
+  .ia-nota{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:8px;
+    line-height:1.5;
+  }
+  .ia-status{
+    font-size:12.5px;
+    margin-top:10px;
+    min-height:16px;
+    color:var(--ink-soft);
+  }
+  .ia-status.erro{color:#a13d3d;}
+  .ia-status.ok{color:#3f7a4a;}
+
+  /* Bloco de seção com ideia sugerida */
+  .campo{ margin-bottom:6px; }
+  .campo-cabecalho{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+  }
+  .ideia-btn{
+    flex-shrink:0;
+    font-family:'EB Garamond', serif;
+    font-size:12.5px;
+    font-style:italic;
+    color:#e8d29a;
+    background:rgba(169,130,47,0.12);
+    border:1px solid rgba(169,130,47,0.4);
+    border-radius:20px;
+    padding:4px 12px;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:all .15s;
+  }
+  .ideia-btn:hover{ background:rgba(169,130,47,0.25); }
+  .ideia-texto{
+    font-size:12.5px;
+    font-style:italic;
+    color:#c9a45c;
+    margin:6px 2px 10px;
+    min-height:16px;
+    line-height:1.4;
+  }
+  textarea.intro-conc{ min-height:80px; }
+  textarea.explicacao{ min-height:70px; }
+
+  /* Bloco de tópico */
+  .topico-bloco{
+    border:1px solid rgba(169,130,47,0.3);
+    border-radius:10px;
+    padding:16px 16px 4px;
+    margin-bottom:18px;
+    background:rgba(0,0,0,0.12);
+  }
+  .topico-bloco .numero{
+    display:inline-block;
+    font-family:'Cinzel', serif;
+    font-size:11px;
+    letter-spacing:.14em;
+    color:var(--gold-deep);
+    background:rgba(169,130,47,0.18);
+    border-radius:20px;
+    padding:3px 12px;
+    margin-bottom:10px;
+  }
+
+  .actions{
+    margin-top:22px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  button.acao{
+    font-family:'Cinzel', serif;
+    font-size:12.5px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    padding:12px 20px;
+    border-radius:8px;
+    border:1px solid var(--gold);
+    background:transparent;
+    color:var(--gold);
+    cursor:pointer;
+    transition:all .2s;
+  }
+  button.acao:hover{background:var(--gold); color:#1c1508;}
+  button.acao.primary{
+    background:linear-gradient(180deg,#c49a3f,var(--gold-deep));
+    color:#1c1508;
+    border-color:transparent;
+  }
+  button.acao.primary:hover{filter:brightness(1.08);}
+
+  .stats{
+    display:flex; gap:18px; margin-top:16px;
+    font-size:12px; color:#8993a3;
+  }
+
+  /* PREVIEW / FOLHA A4 */
+  .sheet{
+    background:var(--paper);
+    border-radius:4px;
+    box-shadow:0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.06);
+    padding:60px 54px 66px;
+    min-height:900px;
+    position:relative;
+  }
+  .sheet::before{
+    content:"";
+    position:absolute; inset:14px;
+    border:1px solid var(--paper-line);
+    pointer-events:none;
+  }
+  .sheet-meta{
+    text-align:center;
+  }
+  .sheet-meta .igreja{
+    font-family:'Cinzel', serif;
+    font-size:12px;
+    letter-spacing:.3em;
+    color:var(--gold-deep);
+    text-transform:uppercase;
+  }
+  .divider{
+    width:60px; height:2px; margin:20px auto 26px;
+    background:var(--gold-deep);
+  }
+  .sheet h2.tema{
+    font-family:'Cinzel', serif;
+    font-weight:600;
+    font-size:clamp(21px,3vw,28px);
+    text-align:center;
+    color:var(--ink);
+    margin:0 0 4px;
+    line-height:1.3;
+  }
+  .sheet .placeholder{color:#a89d86; font-style:italic;}
+  .sheet .subline{
+    text-align:center;
+    font-size:13px;
+    color:var(--ink-soft);
+    letter-spacing:.05em;
+    margin-bottom:10px;
+  }
+  .sheet .corpo{
+    font-size:17.5px;
+    line-height:1.8;
+    color:var(--ink);
+    margin-top:30px;
+  }
+  .sheet .corpo p{margin:0 0 18px; text-align:justify;}
+  .sheet .corpo h3.topico{
+    font-family:'Cinzel', serif;
+    font-size:15.5px;
+    letter-spacing:.04em;
+    color:var(--gold-deep);
+    text-transform:uppercase;
+    margin:28px 0 6px;
+    padding-bottom:6px;
+    border-bottom:1px solid var(--paper-line);
+  }
+  .sheet .corpo .versiculo-box{
+    margin:6px 0 16px;
+    padding:8px 14px;
+    background:rgba(169,130,47,0.06);
+    border-left:2px solid var(--gold);
+    font-size:14.5px;
+    font-style:italic;
+    color:var(--ink-soft);
+  }
+  .sheet-footer{
+    margin-top:46px;
+    padding-top:14px;
+    border-top:1px solid var(--paper-line);
+    text-align:center;
+    font-size:11px;
+    color:#a99a7a;
+    letter-spacing:.05em;
+  }
+
+  @media print{
+    body{background:#fff !important;}
+    body::before{display:none;}
+    header, .panel, .stats{display:none !important;}
+    main{display:block; padding:0; max-width:none;}
+    .sheet{box-shadow:none; border-radius:0; min-height:auto; padding:20px 10px;}
+    .sheet::before{display:none;}
+    .cuecards{display:none;}
+  }
+
+  /* CUE CARDS — uma única folha A4, fonte grande, ocupando a folha toda */
+  .cuecards{display:none;}
+  @media print{
+    @page{ size: A4; margin: 8mm; }
+    html, body{height:auto;}
+    body.modo-cuecard header,
+    body.modo-cuecard .panel,
+    body.modo-cuecard .stats,
+    body.modo-cuecard .sheet-wrap{display:none !important;}
+    body.modo-cuecard main{display:block; padding:0; max-width:none;}
+    body.modo-cuecard .cuecards{
+      display:flex !important;
+      flex-direction:column;
+      gap:4mm;
+      width:100%;
+      height:281mm; /* A4 (297mm) menos as margens de 8mm em cima e embaixo */
+    }
+    body.modo-cuecard .cuecards .cc-tema{
+      text-align:center;
+      flex:0 0 auto;
+      margin-bottom:0;
+    }
+    body.modo-cuecard .cuecard{
+      flex:1 1 0;
+      justify-content:center;
+    }
+  }
+  .cc-tema-titulo{
+    font-family:'Cinzel', serif;
+    font-weight:600;
+    font-size:18px;
+    color:var(--ink);
+    margin:0 0 1mm;
+  }
+  .cc-tema-ref{
+    font-size:13px;
+    font-style:italic;
+    color:var(--gold-deep);
+    margin:0 0 2mm;
+  }
+  .cuecard{
+    border:1.6px solid var(--gold-deep);
+    border-radius:8px;
+    padding:6mm 8mm;
+    break-inside:avoid;
+    page-break-inside:avoid;
+    display:flex;
+    flex-direction:column;
+    background:var(--paper);
+  }
+  .cuecard .cc-etiqueta{
+    font-family:'Cinzel', serif;
+    font-size:13px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    margin-bottom:6px;
+    border-bottom:1px solid var(--paper-line);
+    padding-bottom:5px;
+  }
+  .cuecard .cc-titulo{
+    font-family:'Cinzel', serif;
+    font-weight:600;
+    font-size:16px;
+    color:var(--ink);
+    line-height:1.25;
+    margin-bottom:8px;
+  }
+  .cuecard .cc-versiculo{
+    font-size:20px;
+    font-style:italic;
+    color:var(--gold-deep);
+    background:rgba(169,130,47,0.08);
+    border-left:3px solid var(--gold);
+    padding:6px 10px;
+    margin-bottom:8px;
+    line-height:1.45;
+  }
+  .cuecard .cc-pontos{
+    font-size:21px;
+    line-height:1.55;
+    color:var(--ink);
+    flex:1;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="kicker">OBPC · Jardim São Fernando</div>
+  <h1>Editor de Esboço de Sermão</h1>
+  <p>Um espaço pra organizar seu raciocínio — os botões "ideia" sugerem perguntas para você pensar; o gerador com IA monta um rascunho para você revisar e tornar seu.</p>
+  <div class="rule"></div>
+</header>
+
+<main>
+  <section class="panel">
+    <label class="top" for="tema">Tema</label>
+    <input type="text" class="grande" id="tema" placeholder="Ex.: A Fé que Vence o Mundo" oninput="atualizar()">
+
+    <label class="top" for="referencia">Texto-base</label>
+    <input type="text" id="referencia" placeholder="Ex.: 1 João 5:4-5" oninput="atualizar()">
+
+    <label class="top" for="tipoSermao">Tipo de Sermão</label>
+    <select id="tipoSermao" onchange="mudarTipoSermao()">
+      <option value="tematico">Temático</option>
+      <option value="textual">Textual</option>
+      <option value="palavras">Por Palavras-Chave (Tônicas)</option>
+    </select>
+    <div class="tipo-desc" id="tipoSermaoDesc"></div>
+
+    <div class="ia-painel">
+      <div class="ia-cabecalho">
+        <div class="ia-titulo">✨ Gerador de Esboço com IA</div>
+        <button type="button" class="ia-chave-link" id="btnChaveToggle" onclick="toggleChavePainel()">🔑 <span id="chaveStatusTexto">configurar chave</span></button>
+      </div>
+
+      <div class="ia-chave-caixa" id="chaveCaixa">
+        <input type="password" id="geminiApiKey" placeholder="Cole aqui sua chave da API Gemini" autocomplete="off">
+        <button type="button" class="ia-btn-mini" onclick="salvarChave()">Salvar</button>
+      </div>
+
+      <button type="button" class="ia-btn ia-btn-full" id="btnGerarIA" onclick="gerarComIA()">Gerar Esboço</button>
+
+      <div class="ia-nota">Preencha o Tema OU o Texto-base (a IA completa o que faltar) e escolha o Tipo de Sermão antes de gerar. As citações bíblicas são pedidas na versão NTLH (Nova Tradução na Linguagem de Hoje, Sociedade Bíblica do Brasil).</div>
+      <div class="ia-status" id="iaStatus"></div>
+    </div>
+
+    <label class="top" for="introducao">Introdução</label>
+    <div class="campo">
+      <div class="campo-cabecalho">
+        <span></span>
+        <button type="button" class="ideia-btn" onclick="sugerirIdeia('introducao')">💡 Ideia</button>
+      </div>
+      <textarea id="introducao" class="intro-conc" placeholder="Como você vai captar a atenção logo no início?" oninput="atualizar()"></textarea>
+      <div class="ideia-texto" id="ideia-introducao"></div>
+    </div>
+
+    <label class="top" data-desenvolvimento>Desenvolvimento — 3 tópicos</label>
+
+    <div class="topico-bloco" id="bloco-1">
+      <span class="numero">TÓPICO 1</span>
+      <div class="campo">
+        <input type="text" id="top1-titulo" placeholder="Título do tópico 1" oninput="atualizar()">
+      </div>
+      <div class="row2">
+        <input type="text" id="top1-subtitulo" placeholder="Subtópico (opcional)" oninput="atualizar()">
+        <input type="text" id="top1-versiculo" placeholder="Versículo (ex: Tiago 2:17)" oninput="atualizar()">
+      </div>
+      <div class="campo">
+        <div class="campo-cabecalho">
+          <span></span>
+          <button type="button" class="ideia-btn" onclick="sugerirIdeia('top1-explicacao')">💡 Ideia</button>
+        </div>
+        <textarea id="top1-explicacao" class="explicacao" placeholder="Explique esse ponto com suas palavras..." oninput="atualizar()"></textarea>
+        <div class="ideia-texto" id="ideia-top1-explicacao"></div>
+      </div>
+    </div>
+
+    <div class="topico-bloco" id="bloco-2">
+      <span class="numero">TÓPICO 2</span>
+      <div class="campo">
+        <input type="text" id="top2-titulo" placeholder="Título do tópico 2" oninput="atualizar()">
+      </div>
+      <div class="row2">
+        <input type="text" id="top2-subtitulo" placeholder="Subtópico (opcional)" oninput="atualizar()">
+        <input type="text" id="top2-versiculo" placeholder="Versículo (ex: Romanos 5:3-4)" oninput="atualizar()">
+      </div>
+      <div class="campo">
+        <div class="campo-cabecalho">
+          <span></span>
+          <button type="button" class="ideia-btn" onclick="sugerirIdeia('top2-explicacao')">💡 Ideia</button>
+        </div>
+        <textarea id="top2-explicacao" class="explicacao" placeholder="Explique esse ponto com suas palavras..." oninput="atualizar()"></textarea>
+        <div class="ideia-texto" id="ideia-top2-explicacao"></div>
+      </div>
+    </div>
+
+    <div class="topico-bloco" id="bloco-3">
+      <span class="numero">TÓPICO 3</span>
+      <div class="campo">
+        <input type="text" id="top3-titulo" placeholder="Título do tópico 3" oninput="atualizar()">
+      </div>
+      <div class="row2">
+        <input type="text" id="top3-subtitulo" placeholder="Subtópico (opcional)" oninput="atualizar()">
+        <input type="text" id="top3-versiculo" placeholder="Versículo (ex: 1 Pedro 5:10)" oninput="atualizar()">
+      </div>
+      <div class="campo">
+        <div class="campo-cabecalho">
+          <span></span>
+          <button type="button" class="ideia-btn" onclick="sugerirIdeia('top3-explicacao')">💡 Ideia</button>
+        </div>
+        <textarea id="top3-explicacao" class="explicacao" placeholder="Explique esse ponto com suas palavras..." oninput="atualizar()"></textarea>
+        <div class="ideia-texto" id="ideia-top3-explicacao"></div>
+      </div>
+    </div>
+
+    <label class="top" for="conclusao">Conclusão</label>
+    <div class="campo">
+      <div class="campo-cabecalho">
+        <span></span>
+        <button type="button" class="ideia-btn" onclick="sugerirIdeia('conclusao')">💡 Ideia</button>
+      </div>
+      <textarea id="conclusao" class="intro-conc" placeholder="Qual o passo prático que fecha o sermão?" oninput="atualizar()"></textarea>
+      <div class="ideia-texto" id="ideia-conclusao"></div>
+    </div>
+
+    <div class="stats">
+      <span id="statPalavras">0 palavras</span>
+      <span id="statTempo">~0 min de leitura</span>
+    </div>
+
+    <div class="actions">
+      <button class="acao primary" onclick="imprimir()">Imprimir / Salvar em PDF</button>
+      <button class="acao" onclick="imprimirCueCard()">📇 Imprimir em Cue Cards</button>
+      <button class="acao" onclick="limpar()">Limpar tudo</button>
+    </div>
+  </section>
+
+  <section class="sheet-wrap">
+    <div class="sheet" id="folha">
+      <div class="sheet-meta">
+        <div class="igreja">O Brasil para Cristo — Jardim São Fernando</div>
+      </div>
+      <div class="divider"></div>
+      <h2 class="tema" id="previewTema"><span class="placeholder">Seu tema aparecerá aqui</span></h2>
+      <div class="subline" id="previewSub"></div>
+      <div class="corpo" id="previewCorpo">
+        <span class="placeholder">Preencha os campos ao lado — a folha se monta sozinha, pronta para imprimir.</span>
+      </div>
+      <div class="sheet-footer">OBPC São Fernando</div>
+    </div>
+  </section>
+
+  <div class="cuecards" id="cuecards"></div>
+</main>
+
+<script>
+// Bancos de PERGUNTAS para ajudar a pensar — nunca conteúdo teológico pronto.
+const IDEIAS = {
+  introducao: [
+    'Comece com uma pergunta que todo mundo já se fez.',
+    'Conte uma cena rápida do dia a dia que conecte com o tema.',
+    'Cite uma situação atual ou notícia relacionada ao tema.',
+    'Compartilhe uma experiência pessoal breve que introduza o assunto.',
+    'Desafie uma ideia comum que as pessoas têm sobre esse tema.',
+    'Comece pelo texto-base: o que chama atenção nele à primeira leitura?'
+  ],
+  topico: [
+    'O que esse ponto revela sobre o caráter de Deus?',
+    'Que exemplo bíblico ou história ilustra essa ideia?',
+    'Como isso aparece na vida real de quem está ouvindo?',
+    'Qual erro comum as pessoas cometem nesse ponto?',
+    'O que muda na prática se alguém levar isso a sério?',
+    'Existe uma pergunta que esse ponto responde?',
+    'Que objeção alguém poderia ter, e como o texto-base responde?'
+  ],
+  conclusao: [
+    'Qual é o único passo prático que a pessoa deve dar ainda hoje?',
+    'Termine retomando a pergunta ou cena da introdução.',
+    'Faça um convite direto — decisão, oração, ou mudança de atitude.',
+    'Resuma os 3 tópicos numa única frase de efeito.',
+    'Deixe uma pergunta final para a pessoa refletir durante a semana.'
+  ]
+};
+
+const indiceIdeia = {};
+
+// Descrições e placeholders por tipo de sermão
+const TIPOS_SERMAO = {
+  tematico: {
+    desc: '↳ Um tema central é dividido em pontos que nem sempre seguem a ordem do texto bíblico — bom para assuntos amplos (fé, família, perdão...).',
+    labelDesenvolvimento: 'Desenvolvimento — 3 Pontos Temáticos',
+    placeholderTitulo: n => `Ponto ${n} do tema (ex.: "A fé que ouve")`
+  },
+  textual: {
+    desc: '↳ Os pontos seguem a ordem natural do texto-base, trecho por trecho — o esboço "nasce" direto da passagem.',
+    labelDesenvolvimento: 'Desenvolvimento — 3 Divisões do Texto',
+    placeholderTitulo: n => `Trecho ${n} do texto-base`
+  },
+  palavras: {
+    desc: '↳ Cada ponto é resumido em UMA ÚNICA palavra tônica (chave), tirada daquele versículo — ex.: "guardar", "vencer", "crer" — para dar logo a ideia do que o texto vai dizer.',
+    labelDesenvolvimento: 'Desenvolvimento — 3 Palavras-Chave (Tônicas)',
+    placeholderTitulo: n => `Uma só palavra (ex.: "Vencer")`
+  }
+};
+
+function mudarTipoSermao(){
+  const tipo = document.getElementById('tipoSermao').value;
+  const cfg = TIPOS_SERMAO[tipo];
+  document.getElementById('tipoSermaoDesc').textContent = cfg.desc;
+
+  const labelDesenv = document.querySelector('label.top[data-desenvolvimento]');
+  if(labelDesenv) labelDesenv.textContent = cfg.labelDesenvolvimento;
+
+  for(let n = 1; n <= 3; n++){
+    const campo = document.getElementById(`top${n}-titulo`);
+    if(campo) campo.placeholder = cfg.placeholderTitulo(n);
+  }
+}
+
+function tipoDoCampo(id){
+  if(id === 'introducao') return 'introducao';
+  if(id === 'conclusao') return 'conclusao';
+  return 'topico';
+}
+
+function sugerirIdeia(campoId){
+  const tipo = tipoDoCampo(campoId);
+  const lista = IDEIAS[tipo];
+  const atual = indiceIdeia[campoId] === undefined ? -1 : indiceIdeia[campoId];
+  const proximo = (atual + 1) % lista.length;
+  indiceIdeia[campoId] = proximo;
+  document.getElementById('ideia-' + campoId).textContent = '↳ ' + lista[proximo];
+}
+
+function escapeHtml(str){
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function montarCorpoHtml(){
+  const partes = [];
+
+  const intro = document.getElementById('introducao').value.trim();
+  if(intro){
+    partes.push(`<p>${escapeHtml(intro).replace(/\n/g,'<br>')}</p>`);
+  }
+
+  for(let n = 1; n <= 3; n++){
+    const titulo = document.getElementById(`top${n}-titulo`).value.trim();
+    const subtitulo = document.getElementById(`top${n}-subtitulo`).value.trim();
+    const versiculo = document.getElementById(`top${n}-versiculo`).value.trim();
+    const explicacao = document.getElementById(`top${n}-explicacao`).value.trim();
+
+    if(!titulo && !subtitulo && !versiculo && !explicacao) continue;
+
+    const tituloExibido = titulo || `Tópico ${n}`;
+    partes.push(`<h3 class="topico">${n}. ${escapeHtml(tituloExibido)}${subtitulo ? ' — ' + escapeHtml(subtitulo) : ''}</h3>`);
+    if(explicacao) partes.push(`<p>${escapeHtml(explicacao).replace(/\n/g,'<br>')}</p>`);
+    if(versiculo) partes.push(`<div class="versiculo-box">${escapeHtml(versiculo)}</div>`);
+  }
+
+  const conclusao = document.getElementById('conclusao').value.trim();
+  if(conclusao){
+    partes.push(`<h3 class="topico">Conclusão</h3>`);
+    partes.push(`<p>${escapeHtml(conclusao).replace(/\n/g,'<br>')}</p>`);
+  }
+
+  return partes.join('');
+}
+
+function contarPalavras(){
+  const campos = ['introducao','conclusao','top1-explicacao','top2-explicacao','top3-explicacao'];
+  let total = 0;
+  campos.forEach(id => {
+    const v = document.getElementById(id).value.trim();
+    if(v) total += v.split(/\s+/).filter(Boolean).length;
+  });
+  return total;
+}
+
+function atualizar(){
+  const tema = document.getElementById('tema').value.trim();
+  const referencia = document.getElementById('referencia').value.trim();
+
+  const previewTema = document.getElementById('previewTema');
+  previewTema.innerHTML = tema ? escapeHtml(tema) : '<span class="placeholder">Seu tema aparecerá aqui</span>';
+  document.getElementById('previewSub').textContent = referencia;
+
+  const corpoHtml = montarCorpoHtml();
+  const corpoEl = document.getElementById('previewCorpo');
+  corpoEl.innerHTML = corpoHtml || '<span class="placeholder">Preencha os campos ao lado — a folha se monta sozinha, pronta para imprimir.</span>';
+
+  const palavras = contarPalavras();
+  document.getElementById('statPalavras').textContent = palavras + ' palavras';
+  document.getElementById('statTempo').textContent = '~' + Math.max(1, Math.round(palavras / 130)) + ' min de leitura';
+}
+
+function imprimir(){
+  window.print();
+}
+
+// ---------- GERADOR DE ESBOÇO COM IA (Gemini) ----------
+
+const NOMES_TIPO_SERMAO = {
+  tematico: 'temático (pontos organizados por assunto, não necessariamente na ordem do texto)',
+  textual: 'textual (pontos seguindo a ordem natural do texto-base, trecho por trecho)',
+  palavras: 'por palavras-chave/tônicas (cada ponto gira em torno de uma palavra de peso encontrada no texto)'
+};
+
+function mostrarStatusIA(msg, classe){
+  const el = document.getElementById('iaStatus');
+  el.textContent = msg;
+  el.className = 'ia-status' + (classe ? ' ' + classe : '');
+}
+
+// ---------- CHAVE API: salvar uma única vez, de forma discreta ----------
+const CHAVE_STORAGE_ID = 'esbocos_gemini_api_key';
+
+function chaveSalva(){
+  try{ return localStorage.getItem(CHAVE_STORAGE_ID) || ''; }
+  catch(e){ return ''; }
+}
+
+function atualizarStatusChave(){
+  const texto = document.getElementById('chaveStatusTexto');
+  if(chaveSalva()){
+    texto.textContent = 'chave salva ✓ (alterar)';
+  }else{
+    texto.textContent = 'configurar chave';
+  }
+}
+
+function toggleChavePainel(forcarAberto){
+  const caixa = document.getElementById('chaveCaixa');
+  const abrir = forcarAberto === true ? true : !caixa.classList.contains('aberta');
+  caixa.classList.toggle('aberta', abrir);
+  if(abrir){
+    document.getElementById('geminiApiKey').value = chaveSalva();
+    document.getElementById('geminiApiKey').focus();
+  }
+}
+
+function salvarChave(){
+  const valor = document.getElementById('geminiApiKey').value.trim();
+  if(!valor){
+    mostrarStatusIA('Cole a chave antes de salvar.', 'erro');
+    return;
+  }
+  try{
+    localStorage.setItem(CHAVE_STORAGE_ID, valor);
+  }catch(e){
+    mostrarStatusIA('Não foi possível salvar a chave neste navegador.', 'erro');
+    return;
+  }
+  document.getElementById('geminiApiKey').value = '';
+  atualizarStatusChave();
+  toggleChavePainel(false);
+  mostrarStatusIA('Chave salva neste navegador. Você não precisa colá-la de novo.', 'ok');
+}
+
+atualizarStatusChave();
+
+async function gerarComIA(){
+  const apiKey = chaveSalva();
+  const tema = document.getElementById('tema').value.trim();
+  const referencia = document.getElementById('referencia').value.trim();
+  const tipo = document.getElementById('tipoSermao').value;
+
+  if(!apiKey){
+    mostrarStatusIA('Configure sua chave da API primeiro (link "🔑 configurar chave" acima).', 'erro');
+    toggleChavePainel(true);
+    return;
+  }
+  if(!tema && !referencia){
+    mostrarStatusIA('Preencha ao menos o Tema ou o Texto-base antes de gerar.', 'erro');
+    return;
+  }
+
+  const btn = document.getElementById('btnGerarIA');
+  btn.disabled = true;
+  const rotuloOriginal = btn.textContent;
+  btn.textContent = 'Gerando...';
+  mostrarStatusIA('Consultando a IA, aguarde alguns segundos...', '');
+
+  let contextoBase;
+  if(tema && referencia){
+    contextoBase = `Tema: ${tema}\nTexto-base: ${referencia}`;
+  } else if(tema){
+    contextoBase = `Tema: ${tema}\nTexto-base: (não informado — sugira uma referência bíblica adequada ao tema e inclua no campo "referenciaSugerida")`;
+  } else {
+    contextoBase = `Texto-base: ${referencia}\nTema: (não informado — sugira um tema adequado a partir do texto-base e inclua no campo "temaSugerido")`;
+  }
+
+  const instrucaoTitulo = tipo === 'palavras'
+    ? '  - titulo: OBRIGATORIAMENTE uma única palavra (a palavra tônica/chave daquele versículo — sem frases, sem artigos, só a palavra isolada, ex.: "Vencer", "Guardar", "Crer").'
+    : '  - titulo: curto e direto, coerente com o tipo de sermão escolhido.';
+
+  const prompt = `Você é um assistente que ajuda um pastor a organizar (não substituir) o raciocínio de um esboço de sermão evangélico, em português do Brasil.
+
+${contextoBase}
+Tipo de sermão: ${NOMES_TIPO_SERMAO[tipo]}
+
+Gere um esboço com:
+- temaSugerido: preencha SOMENTE se o tema não foi informado acima; caso contrário deixe vazio.
+- referenciaSugerida: preencha SOMENTE se o texto-base não foi informado acima; caso contrário deixe vazio.
+- introducao: um parágrafo curto (3-5 frases) para captar a atenção e apresentar o tema.
+- três tópicos de desenvolvimento (topico1, topico2, topico3), cada um com:
+${instrucaoTitulo}
+  - subtitulo: opcional, uma frase complementar (pode ser vazio).
+  - versiculo: uma referência bíblica curta relacionada a esse ponto, com o texto do versículo citado na versão NTLH (Nova Tradução na Linguagem de Hoje, da Sociedade Bíblica do Brasil). Formato: "Referência — texto do versículo".
+  - explicacao: um parágrafo curto (3-5 frases) explicando o ponto de forma pastoral e prática, partindo justamente da palavra-chave do título quando o tipo de sermão for por palavras-chave.
+- conclusao: um parágrafo curto com uma aplicação prática e um convite claro.
+
+Responda em tom pastoral, simples e direto, evitando jargão acadêmico. Não invente referências bíblicas que não existam.`;
+
+  const schema = {
+    type: 'OBJECT',
+    properties: {
+      temaSugerido: {type:'STRING'},
+      referenciaSugerida: {type:'STRING'},
+      introducao: {type:'STRING'},
+      topico1: {type:'OBJECT', properties:{titulo:{type:'STRING'},subtitulo:{type:'STRING'},versiculo:{type:'STRING'},explicacao:{type:'STRING'}}, required:['titulo','explicacao']},
+      topico2: {type:'OBJECT', properties:{titulo:{type:'STRING'},subtitulo:{type:'STRING'},versiculo:{type:'STRING'},explicacao:{type:'STRING'}}, required:['titulo','explicacao']},
+      topico3: {type:'OBJECT', properties:{titulo:{type:'STRING'},subtitulo:{type:'STRING'},versiculo:{type:'STRING'},explicacao:{type:'STRING'}}, required:['titulo','explicacao']},
+      conclusao: {type:'STRING'}
+    },
+    required: ['introducao','topico1','topico2','topico3','conclusao']
+  };
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+  try{
+    const resp = await fetch(url, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{ parts:[{ text: prompt }] }],
+        generationConfig:{
+          responseMimeType:'application/json',
+          responseSchema: schema
+        }
+      })
+    });
+
+    if(!resp.ok){
+      const erroTxt = await resp.text();
+      throw new Error(`A API respondeu com erro (${resp.status}). Verifique se a chave está correta. Detalhe: ${erroTxt.slice(0,200)}`);
+    }
+
+    const data = await resp.json();
+    const textoBruto = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if(!textoBruto) throw new Error('A resposta da IA veio vazia. Tente novamente.');
+
+    const esboco = JSON.parse(textoBruto);
+
+    if(!tema && esboco.temaSugerido) document.getElementById('tema').value = esboco.temaSugerido;
+    if(!referencia && esboco.referenciaSugerida) document.getElementById('referencia').value = esboco.referenciaSugerida;
+
+    document.getElementById('introducao').value = esboco.introducao || '';
+    for(let n = 1; n <= 3; n++){
+      const t = esboco['topico'+n] || {};
+      document.getElementById(`top${n}-titulo`).value = t.titulo || '';
+      document.getElementById(`top${n}-subtitulo`).value = t.subtitulo || '';
+      document.getElementById(`top${n}-versiculo`).value = t.versiculo || '';
+      document.getElementById(`top${n}-explicacao`).value = t.explicacao || '';
+    }
+    document.getElementById('conclusao').value = esboco.conclusao || '';
+
+    atualizar();
+    mostrarStatusIA('Esboço gerado! Revise e ajuste com suas próprias palavras antes de pregar.', 'ok');
+  }catch(err){
+    mostrarStatusIA('Não foi possível gerar: ' + err.message, 'erro');
+  }finally{
+    btn.disabled = false;
+    btn.textContent = rotuloOriginal;
+  }
+}
+
+// ---------- CUE CARDS ----------
+
+function montarCueCards(){
+  const tema = document.getElementById('tema').value.trim() || 'Tema do sermão';
+  const referencia = document.getElementById('referencia').value.trim();
+  const intro = document.getElementById('introducao').value.trim();
+  const conclusao = document.getElementById('conclusao').value.trim();
+
+  const cards = [];
+
+  // Cabeçalho: tema + referência, ocupando a largura toda
+  cards.push(`
+    <div class="cc-tema">
+      <div class="cc-tema-titulo">${escapeHtml(tema)}</div>
+      ${referencia ? `<div class="cc-tema-ref">${escapeHtml(referencia)}</div>` : ''}
+    </div>`);
+
+  if(intro){
+    cards.push(`
+      <div class="cuecard">
+        <div class="cc-etiqueta">Abertura</div>
+        <div class="cc-pontos">${escapeHtml(intro).replace(/\n/g,'<br>')}</div>
+      </div>`);
+  }
+
+  for(let n = 1; n <= 3; n++){
+    const titulo = document.getElementById(`top${n}-titulo`).value.trim();
+    const subtitulo = document.getElementById(`top${n}-subtitulo`).value.trim();
+    const versiculo = document.getElementById(`top${n}-versiculo`).value.trim();
+    const explicacao = document.getElementById(`top${n}-explicacao`).value.trim();
+    if(!titulo && !subtitulo && !versiculo && !explicacao) continue;
+
+    cards.push(`
+      <div class="cuecard">
+        <div class="cc-etiqueta">Ponto ${n}</div>
+        <div class="cc-titulo">${escapeHtml(titulo || `Tópico ${n}`)}${subtitulo ? ' — ' + escapeHtml(subtitulo) : ''}</div>
+        ${versiculo ? `<div class="cc-versiculo">${escapeHtml(versiculo)}</div>` : ''}
+        <div class="cc-pontos">${explicacao ? escapeHtml(explicacao).replace(/\n/g,'<br>') : ''}</div>
+      </div>`);
+  }
+
+  if(conclusao){
+    cards.push(`
+      <div class="cuecard cc-conclusao">
+        <div class="cc-etiqueta">Conclusão &amp; Convite</div>
+        <div class="cc-pontos">${escapeHtml(conclusao).replace(/\n/g,'<br>')}</div>
+      </div>`);
+  }
+
+  document.getElementById('cuecards').innerHTML = cards.join('');
+}
+
+function imprimirCueCard(){
+  montarCueCards();
+  document.body.classList.add('modo-cuecard');
+  window.print();
+}
+
+window.addEventListener('afterprint', () => {
+  document.body.classList.remove('modo-cuecard');
+});
+
+function limpar(){
+  if(!confirm('Limpar todos os campos do esboço?')) return;
+  ['tema','referencia','introducao','conclusao',
+   'top1-titulo','top1-subtitulo','top1-versiculo','top1-explicacao',
+   'top2-titulo','top2-subtitulo','top2-versiculo','top2-explicacao',
+   'top3-titulo','top3-subtitulo','top3-versiculo','top3-explicacao'
+  ].forEach(id => document.getElementById(id).value = '');
+  ['ideia-introducao','ideia-conclusao','ideia-top1-explicacao','ideia-top2-explicacao','ideia-top3-explicacao']
+    .forEach(id => document.getElementById(id).textContent = '');
+  document.getElementById('tipoSermao').value = 'tematico';
+  mudarTipoSermao();
+  mostrarStatusIA('', '');
+  atualizar();
+}
+
+mudarTipoSermao();
+atualizar();
+</script>
+
+</body>
+</html>
