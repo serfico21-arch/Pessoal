@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia de IAs Gratuitas // Terminal</title>
+<style>
+  :root{
+    --bg: #050607;
+    --bg-panel: #0b0f0d;
+    --bg-card: #0d1210;
+    --line: #17231d;
+    --green: #00FF9D;
+    --green-dim: #0a8f5c;
+    --cyan: #2ee6ff;
+    --text: #d7e8e0;
+    --text-dim: #6f8a80;
+    --danger: #ff5470;
+    --radius: 3px;
+    --mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    background-image:
+      linear-gradient(rgba(0,255,157,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,255,157,0.025) 1px, transparent 1px);
+    background-size: 42px 42px;
+    min-height: 100vh;
+  }
+
+  ::selection { background: var(--green); color: #000; }
+
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--green-dim); border-radius: 0; }
+
+  a { color: inherit; }
+
+  /* ---------- TOPO ---------- */
+  .scanline {
+    position: fixed; top:0; left:0; right:0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+    opacity: 0.6; animation: sweep 6s linear infinite; pointer-events: none; z-index: 999;
+  }
+  @keyframes sweep {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(100vh); }
+  }
+
+  header {
+    border-bottom: 1px solid var(--line);
+    padding: 28px 5vw 22px;
+    position: relative;
+  }
+
+  .prompt-line {
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.02em;
+    margin-bottom: 10px;
+  }
+  .prompt-line .k { color: var(--green); }
+
+  h1 {
+    font-size: clamp(28px, 4.2vw, 52px);
+    margin: 0 0 6px 0;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+  }
+  h1 .glitch { color: var(--green); text-shadow: 0 0 18px rgba(0,255,157,0.45); }
+
+  .subhead {
+    color: var(--text-dim);
+    font-size: 14px;
+    max-width: 640px;
+    line-height: 1.6;
+    margin-bottom: 22px;
+  }
+
+  .top-actions { display:flex; gap: 10px; flex-wrap: wrap; }
+
+  .btn {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    padding: 10px 16px;
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--text);
+    cursor: pointer;
+    border-radius: var(--radius);
+    transition: border-color .15s ease, color .15s ease, background .15s ease;
+    white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--green); color: var(--green); }
+  .btn.primary { border-color: var(--green-dim); color: var(--green); }
+  .btn.primary:hover { background: rgba(0,255,157,0.08); }
+  .btn.cyan { border-color: rgba(46,230,255,0.35); color: var(--cyan); }
+  .btn.cyan:hover { background: rgba(46,230,255,0.08); border-color: var(--cyan); }
+
+  /* ---------- BUSCA + ABAS ---------- */
+  .control-strip {
+    padding: 20px 5vw 0;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+
+  .search-wrap { position: relative; max-width: 520px; }
+  .search-wrap::before {
+    content: '>'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--green); font-weight: 700;
+  }
+  #searchInput {
+    width: 100%;
+    font-family: var(--mono);
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 12px 14px 12px 30px;
+    font-size: 13.5px;
+    border-radius: var(--radius);
+    outline: none;
+  }
+  #searchInput:focus { border-color: var(--green); box-shadow: 0 0 0 1px rgba(0,255,157,0.2); }
+  #searchInput::placeholder { color: var(--text-dim); }
+
+  .tabs {
+    display: flex; gap: 4px; flex-wrap: wrap;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 0;
+  }
+  .tab {
+    padding: 10px 16px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    user-select: none;
+    transition: color .15s ease, border-color .15s ease;
+    white-space: nowrap;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--green); border-bottom-color: var(--green); }
+  .tab .count { color: var(--text-dim); font-size: 11px; }
+  .tab.active .count { color: var(--green-dim); }
+
+  /* ---------- GRID DE CARDS ---------- */
+  main { padding: 26px 5vw 60px; }
+
+  #resultsMeta {
+    font-size: 12px; color: var(--text-dim); margin-bottom: 16px;
+  }
+  #resultsMeta .n { color: var(--green); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px 18px 16px;
+    display: flex; flex-direction: column; gap: 10px;
+    position: relative;
+    transition: border-color .15s ease, transform .15s ease;
+  }
+  .card:hover { border-color: var(--green-dim); }
+  .card.guide { border-color: rgba(0,255,157,0.35); background: linear-gradient(180deg, rgba(0,255,157,0.045), var(--bg-card) 60%); }
+
+  .card-top { display:flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .card-name { font-size: 16px; font-weight: 700; color: var(--text); }
+  .card-name .flag { margin-left: 6px; font-size: 13px; }
+
+  .badge {
+    font-size: 10px;
+    padding: 3px 7px;
+    border-radius: var(--radius);
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .badge.guide-badge { border-color: var(--green); background: rgba(0,255,157,0.1); }
+
+  .card-model {
+    font-size: 12px; color: var(--cyan);
+  }
+  .card-model .lbl { color: var(--text-dim); }
+
+  .card-desc {
+    font-size: 12.8px; color: var(--text); line-height: 1.55;
+    flex-grow: 1;
+  }
+  .card-desc .lbl { color: var(--green); display:block; font-size: 11px; margin-bottom: 4px; }
+
+  .card-free {
+    font-size: 11.5px; color: var(--text-dim); line-height: 1.5;
+    border-top: 1px dashed var(--line); padding-top: 10px;
+  }
+  .card-free .lbl { color: var(--text-dim); }
+  .card-free b { color: var(--text); font-weight: 600; }
+
+  .card-footer { display:flex; gap:8px; margin-top: 4px; }
+  .card-link {
+    flex-grow: 1;
+    text-align: center;
+    font-size: 12px;
+    text-decoration: none;
+    padding: 9px 10px;
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    border-radius: var(--radius);
+    transition: background .15s ease;
+  }
+  .card-link:hover { background: rgba(0,255,157,0.12); }
+
+  .no-results { color: var(--text-dim); font-size: 13px; padding: 40px 0; text-align:center; }
+
+  /* ---------- MODAL DICAS ---------- */
+  .modal-overlay {
+    position: fixed; inset:0; background: rgba(0,0,0,0.75);
+    display:none; align-items:center; justify-content:center; z-index: 1000;
+    padding: 20px;
+    backdrop-filter: blur(2px);
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background: var(--bg-panel); border: 1px solid var(--green-dim);
+    border-radius: var(--radius); max-width: 640px; width:100%;
+    max-height: 82vh; overflow-y:auto; padding: 26px 26px 22px;
+  }
+  .modal h2 { color: var(--green); font-size: 18px; margin: 0 0 4px; }
+  .modal .modal-sub { color: var(--text-dim); font-size: 12px; margin-bottom: 18px; }
+  .tip-item { border-left: 2px solid var(--green-dim); padding: 4px 0 4px 14px; margin-bottom: 16px; }
+  .tip-item h3 { font-size: 13.5px; color: var(--cyan); margin: 0 0 5px; }
+  .tip-item p { font-size: 12.5px; color: var(--text); line-height: 1.6; margin:0; }
+  .tip-item code { color: var(--green); background: rgba(0,255,157,0.08); padding: 1px 5px; border-radius: 2px; }
+  .modal-close { margin-top: 6px; }
+
+  /* ---------- MODAL PROMPT BUILDER ---------- */
+  .pb-field { margin-bottom: 14px; }
+  .pb-field label { display:block; font-size: 11.5px; color: var(--text-dim); margin-bottom: 6px; }
+  .pb-field textarea, .pb-field input, .pb-field select {
+    width: 100%; font-family: var(--mono); background: var(--bg-card);
+    border: 1px solid var(--line); color: var(--text); padding: 9px 10px;
+    font-size: 12.5px; border-radius: var(--radius); outline:none; resize: vertical;
+  }
+  .pb-field textarea:focus, .pb-field input:focus, .pb-field select:focus { border-color: var(--green); }
+  .pb-row { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width:480px){ .pb-row{ grid-template-columns: 1fr; } }
+
+  .pb-output {
+    margin-top: 16px; background: #000; border: 1px solid var(--green-dim);
+    border-radius: var(--radius); padding: 14px; font-size: 12px; color: var(--green);
+    white-space: pre-wrap; line-height: 1.6; min-height: 60px;
+  }
+  .pb-actions { display:flex; gap: 8px; margin-top: 12px; }
+
+  .copied-toast {
+    position: fixed; bottom: 24px; left:50%; transform: translateX(-50%);
+    background: var(--green); color: #000; font-size: 12.5px; font-weight: 600;
+    padding: 10px 18px; border-radius: var(--radius); opacity:0; pointer-events:none;
+    transition: opacity .2s ease, transform .2s ease; z-index: 1100;
+  }
+  .copied-toast.show { opacity: 1; transform: translateX(-50%) translateY(-6px); }
+
+  footer {
+    border-top: 1px solid var(--line); padding: 20px 5vw 40px;
+    color: var(--text-dim); font-size: 11.5px; line-height: 1.6;
+  }
+  footer .green { color: var(--green-dim); }
+
+  @media (max-width: 640px) {
+    .tabs { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div class="scanline"></div>
+
+<header>
+  <div class="prompt-line"><span class="k">root@guia-ias</span>:~$ <span id="typedCmd"></span></div>
+  <h1>Guia de <span class="glitch">IAs Gratuitas</span></h1>
+  <div class="subhead">
+    Painel de referência rápida para não travar entre chats, agentes e ferramentas de dev.
+    Chinesas do guia (Qwen, Kimi, MiniMax) lado a lado com as principais IAs gratuitas do mercado.
+  </div>
+  <div class="top-actions">
+    <button class="btn primary" onclick="openTipsModal()">⚠ Dicas para não travar</button>
+    <button class="btn cyan" onclick="openPromptModal()">✎ Gerador de prompts</button>
+  </div>
+</header>
+
+<div class="control-strip">
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="buscar por nome, funcionalidade ou modelo... ex: 'imagem', 'K3', 'contexto grande'">
+  </div>
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<main>
+  <div id="resultsMeta"></div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>
+  Dados de referência reunidos manualmente — links e limites de gratuidade mudam com frequência nos provedores de IA.<br>
+  <span class="green">Confira sempre o site oficial</span> antes de assumir cota ou modelo disponível.
+</footer>
+
+<!-- MODAL: DICAS -->
+<div class="modal-overlay" id="tipsOverlay">
+  <div class="modal">
+    <h2>Dicas para não travar</h2>
+    <div class="modal-sub">Resumo prático para não confundir link, modelo ou cota entre as plataformas.</div>
+
+    <div class="tip-item">
+      <h3>1. Confira o endereço exato</h3>
+      <p>Cada IA chinesa do guia tem domínio próprio e fácil de confundir: <code>chat.qwen.ai</code> (Qwen), <code>www.kimi.ai</code> (Kimi) e <code>agent.minimax.io</code> (MiniMax Agent). Um "www." a mais ou a menos já leva pra outro produto da mesma empresa.</p>
+    </div>
+
+    <div class="tip-item">
+      <h3>2. Chat normal ≠ modo agente</h3>
+      <p>Kimi e MiniMax têm um modo "conversa" leve e um modo "agente/dev" mais pesado (que processa PDFs grandes, roda tarefas longas ou gera artefatos). Comece sempre pelo chat simples; só entre no modo agente se a tarefa realmente exigir.</p>
+    </div>
+
+    <div class="tip-item">
+      <h3>3. Créditos gratuitos somem rápido em tarefas pesadas</h3>
+      <p>MiniMax Agent dá créditos de entrada generosos, mas uma tarefa de "Deep Research" ou geração de vídeo consome muito mais que uma pergunta simples. Reserve o modo agente para o que realmente precisa dele.</p>
+    </div>
+
+    <div class="tip-item">
+      <h3>4. Contexto grande não é ilimitado</h3>
+      <p>Kimi K3 e MiniMax aceitam janelas de contexto enormes, ótimas para PDFs longos — mas em sessões muito extensas o modelo pode "esquecer" o início. Se a resposta começar a fugir do assunto, abra uma conversa nova.</p>
+    </div>
+
+    <div class="tip-item">
+      <h3>5. Um app, funções diferentes</h3>
+      <p>Qwen Studio mistura chat, busca web e geração de imagem na mesma tela. Se o resultado não é o esperado, verifique se o modo certo (texto / busca / imagem) está ativado antes de trocar de IA.</p>
+    </div>
+
+    <button class="btn primary modal-close" onclick="closeTipsModal()">Fechar</button>
+  </div>
+</div>
+
+<!-- MODAL: PROMPT BUILDER -->
+<div class="modal-overlay" id="promptOverlay">
+  <div class="modal">
+    <h2>Gerador de prompts</h2>
+    <div class="modal-sub">Estruture função, objetivo e formato de saída antes de colar na IA escolhida.</div>
+
+    <div class="pb-field">
+      <label>Função / papel que a IA deve assumir</label>
+      <input type="text" id="pbRole" placeholder="ex: consultor de marketing, revisor de código, professor de história">
+    </div>
+
+    <div class="pb-field">
+      <label>Objetivo (o que você quer que ela resolva)</label>
+      <textarea id="pbGoal" rows="3" placeholder="ex: revisar meu contrato de aluguel e apontar cláusulas abusivas"></textarea>
+    </div>
+
+    <div class="pb-row">
+      <div class="pb-field">
+        <label>Formato de saída</label>
+        <select id="pbFormat">
+          <option>Lista com marcadores</option>
+          <option>Texto corrido</option>
+          <option>Tabela</option>
+          <option>Passo a passo numerado</option>
+          <option>Código</option>
+          <option>Resumo curto (até 5 linhas)</option>
+        </select>
+      </div>
+      <div class="pb-field">
+        <label>Tom desejado</label>
+        <select id="pbTone">
+          <option>Direto e objetivo</option>
+          <option>Formal</option>
+          <option>Didático / explicativo</option>
+          <option>Criativo</option>
+          <option>Técnico</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="pb-field">
+      <label>Restrições ou contexto extra (opcional)</label>
+      <textarea id="pbExtra" rows="2" placeholder="ex: em português, máximo 200 palavras, considerar legislação brasileira"></textarea>
+    </div>
+
+    <button class="btn primary" onclick="generatePrompt()">Gerar prompt</button>
+
+    <div class="pb-output" id="pbOutput">O prompt otimizado aparece aqui...</div>
+    <div class="pb-actions">
+      <button class="btn cyan" onclick="copyPrompt()">📋 Copiar prompt</button>
+      <button class="btn" onclick="closePromptModal()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="copied-toast" id="toast">Copiado!</div>
+
+<script>
+/* ================= DADOS ================= */
+const DATA = [
+  {
+    name: "Qwen Studio", flag: "🇨🇳", guide: true, cat: "chinesas",
+    model: "Qwen3.7-Plus",
+    does: "Chat geral, busca web integrada e geração de imagem na mesma interface. Bom para pesquisa rápida e criação visual sem trocar de app.",
+    free: "Uso gratuito com limites diários de mensagens; busca web e imagem consomem cota à parte do chat comum.",
+    link: "https://chat.qwen.ai/",
+    tags: "busca web imagem geração china alibaba"
+  },
+  {
+    name: "Kimi AI", flag: "🇨🇳", guide: true, cat: "chinesas",
+    model: "K3",
+    does: "Leitura pesada de PDFs e documentos longos, Deep Research para pesquisas aprofundadas com múltiplas fontes, e conversa geral.",
+    free: "Cota diária generosa no chat; Deep Research e arquivos muito grandes consomem mais rápido a cota gratuita.",
+    link: "https://www.kimi.ai/",
+    tags: "pdf documentos pesquisa profunda contexto grande moonshot"
+  },
+  {
+    name: "MiniMax Agent", flag: "🇨🇳", guide: true, cat: "chinesas",
+    model: "MiniMax M2 / Agent",
+    does: "Modo agente para tarefas longas (planejamento, automação, geração de artefatos), com contexto gigante para lidar com projetos inteiros.",
+    free: "Créditos gratuitos generosos na entrada da conta; tarefas pesadas de agente consomem os créditos mais rápido que o chat simples.",
+    link: "https://agent.minimax.io/",
+    tags: "agente automação contexto gigante tarefas longas"
+  },
+
+  {
+    name: "DeepSeek", flag: "🇨🇳", guide: false, cat: "raciocinio",
+    model: "DeepSeek-R1 / V3",
+    does: "Raciocínio passo a passo, matemática, lógica e geração de código com boa relação custo-benefício.",
+    free: "Chat web gratuito com limites de uso; modelo R1 mostra o raciocínio completo antes da resposta final.",
+    link: "https://chat.deepseek.com/",
+    tags: "codigo raciocinio matematica logica programacao"
+  },
+  {
+    name: "ChatGPT", flag: "🇺🇸", guide: false, cat: "raciocinio",
+    model: "GPT-4o / GPT-5 (camada gratuita)",
+    does: "Assistente geral: escrita, código, análise de dados, imagens e navegação web em um único chat.",
+    free: "Camada gratuita com limite de mensagens por período; recursos avançados (voz, navegação) podem ter cota reduzida.",
+    link: "https://chat.openai.com/",
+    tags: "codigo escrita geral openai raciocinio"
+  },
+  {
+    name: "Claude", flag: "🇺🇸", guide: false, cat: "raciocinio",
+    model: "Claude (camada gratuita)",
+    does: "Análise de documentos longos, código, escrita cuidadosa e conversas que exigem contexto extenso.",
+    free: "Camada gratuita com limite de mensagens que se renova periodicamente; anexos grandes consomem mais rápido a cota.",
+    link: "https://claude.ai/",
+    tags: "codigo documentos escrita anthropic raciocinio"
+  },
+
+  {
+    name: "Perplexity AI", flag: "🌐", guide: false, cat: "busca",
+    model: "Perplexity (modelo padrão gratuito)",
+    does: "Busca com respostas citadas e fontes verificáveis — ótimo para checar fatos e pesquisar com referências.",
+    free: "Buscas gratuitas ilimitadas no modo padrão; modos avançados (Pro Search) têm cota diária limitada.",
+    link: "https://www.perplexity.ai/",
+    tags: "busca fontes citacoes pesquisa web"
+  },
+  {
+    name: "Google Gemini", flag: "🌐", guide: false, cat: "busca",
+    model: "Gemini 2.0 Flash (camada gratuita)",
+    does: "Chat integrado à busca do Google, análise de imagens e arquivos, e boa integração com apps do Google.",
+    free: "Camada gratuita com limite de mensagens por dia; integração com Google Workspace pode exigir conta paga.",
+    link: "https://gemini.google.com/",
+    tags: "busca google imagem arquivos integracao"
+  },
+  {
+    name: "Microsoft Copilot", flag: "🌐", guide: false, cat: "busca",
+    model: "GPT-4 (via Copilot, camada gratuita)",
+    does: "Busca conversacional com respostas atualizadas da web e geração de imagem integrada via Bing.",
+    free: "Uso gratuito no navegador e app; limite de interações mais intensas (voz, imagem) por sessão.",
+    link: "https://copilot.microsoft.com/",
+    tags: "busca bing microsoft imagem"
+  },
+
+  {
+    name: "Bing Image Creator", flag: "🎨", guide: false, cat: "imagens",
+    model: "DALL-E 3",
+    does: "Geração de imagens a partir de texto, com boa fidelidade a descrições detalhadas e estilos variados.",
+    free: "Créditos de geração rápida (boost) por dia; após acabarem, geração continua mas mais lenta.",
+    link: "https://www.bing.com/images/create",
+    tags: "imagem dalle geracao arte microsoft"
+  },
+  {
+    name: "Leonardo.Ai", flag: "🎨", guide: false, cat: "imagens",
+    model: "Phoenix / Lucid Origin",
+    does: "Geração de imagens com controle fino de estilo, modelos treináveis e ferramentas de upscale e edição.",
+    free: "Cota diária de créditos gratuitos que se renova a cada 24h; modelos e resoluções maiores consomem mais créditos.",
+    link: "https://leonardo.ai/",
+    tags: "imagem arte geracao upscale estilo"
+  },
+
+  {
+    name: "MiniMax Agent", flag: "🇨🇳", guide: false, cat: "agentes", hideDup: true,
+    model: "MiniMax M2 / Agent",
+    does: "Já listado na aba Chinesas do Guia — modo agente para automação e tarefas longas.",
+    free: "Ver aba Chinesas do Guia.",
+    link: "https://agent.minimax.io/",
+    tags: "agente automacao"
+  },
+  {
+    name: "Kimi AI (modo agente)", flag: "🇨🇳", guide: false, cat: "agentes",
+    model: "K3 Agent",
+    does: "Executa tarefas em múltiplas etapas: pesquisa, leitura de arquivos e geração de relatórios encadeados.",
+    free: "Mesma cota do chat Kimi; tarefas de agente consomem mais rápido por serem multi-etapa.",
+    link: "https://www.kimi.ai/",
+    tags: "agente tarefas relatorio pesquisa"
+  }
+];
+
+const CATEGORIES = [
+  { id: "todos", label: "Todos" },
+  { id: "chinesas", label: "Chinesas do Guia" },
+  { id: "busca", label: "Busca & Web" },
+  { id: "raciocinio", label: "Raciocínio & Código" },
+  { id: "imagens", label: "Imagens & Mídia" },
+  { id: "agentes", label: "Agentes" },
+];
+
+let activeCat = "todos";
+let searchTerm = "";
+
+/* ================= RENDER ================= */
+function buildTabs(){
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = '';
+  CATEGORIES.forEach(c => {
+    const count = c.id === 'todos'
+      ? DATA.filter(d => !d.hideDup).length
+      : DATA.filter(d => d.cat === c.id && !d.hideDup).length;
+    const div = document.createElement('div');
+    div.className = 'tab' + (c.id === activeCat ? ' active' : '');
+    div.innerHTML = `${c.label} <span class="count">(${count})</span>`;
+    div.onclick = () => { activeCat = c.id; buildTabs(); render(); };
+    tabsEl.appendChild(div);
+  });
+}
+
+function matchesSearch(item, term){
+  if(!term) return true;
+  const hay = (item.name + ' ' + item.model + ' ' + item.does + ' ' + item.free + ' ' + item.tags).toLowerCase();
+  return hay.includes(term.toLowerCase());
+}
+
+function render(){
+  const grid = document.getElementById('grid');
+  const meta = document.getElementById('resultsMeta');
+  grid.innerHTML = '';
+
+  let list = DATA.filter(d => !d.hideDup);
+  if(activeCat !== 'todos') list = list.filter(d => d.cat === activeCat);
+  list = list.filter(d => matchesSearch(d, searchTerm));
+
+  meta.innerHTML = `<span class="n">${list.length}</span> resultado${list.length===1?'':'s'} encontrado${list.length===1?'':'s'}`;
+
+  if(list.length === 0){
+    grid.innerHTML = `<div class="no-results">Nenhuma IA encontrada para esse termo. Tente outra palavra-chave.</div>`;
+    return;
+  }
+
+  list.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'card' + (item.guide ? ' guide' : '');
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="card-name">${item.name}<span class="flag">${item.flag}</span></div>
+        ${item.guide ? '<span class="badge guide-badge">GUIA</span>' : '<span class="badge">GRÁTIS</span>'}
+      </div>
+      <div class="card-model"><span class="lbl">Modelo ativo:</span> ${item.model}</div>
+      <div class="card-desc"><span class="lbl">O que você consegue fazer</span>${item.does}</div>
+      <div class="card-free"><span class="lbl">Gratuito:</span> ${item.free}</div>
+      <div class="card-footer">
+        <a class="card-link" href="${item.link}" target="_blank" rel="noopener">Acessar →</a>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  searchTerm = e.target.value;
+  render();
+});
+
+/* ================= MODAIS ================= */
+function openTipsModal(){ document.getElementById('tipsOverlay').classList.add('open'); }
+function closeTipsModal(){ document.getElementById('tipsOverlay').classList.remove('open'); }
+function openPromptModal(){ document.getElementById('promptOverlay').classList.add('open'); }
+function closePromptModal(){ document.getElementById('promptOverlay').classList.remove('open'); }
+
+[document.getElementById('tipsOverlay'), document.getElementById('promptOverlay')].forEach(ov => {
+  ov.addEventListener('click', (e) => { if(e.target === ov) ov.classList.remove('open'); });
+});
+
+function generatePrompt(){
+  const role = document.getElementById('pbRole').value.trim() || "assistente especialista";
+  const goal = document.getElementById('pbGoal').value.trim() || "[descreva o objetivo aqui]";
+  const format = document.getElementById('pbFormat').value;
+  const tone = document.getElementById('pbTone').value;
+  const extra = document.getElementById('pbExtra').value.trim();
+
+  let prompt = `Atue como ${role}.\n\nObjetivo: ${goal}\n\nFormato de saída: ${format}.\nTom: ${tone}.`;
+  if(extra){ prompt += `\nRestrições/contexto: ${extra}.`; }
+  prompt += `\n\nSe faltar alguma informação para cumprir bem essa tarefa, pergunte antes de responder.`;
+
+  document.getElementById('pbOutput').textContent = prompt;
+}
+
+function copyPrompt(){
+  const text = document.getElementById('pbOutput').textContent;
+  if(!text || text.startsWith('O prompt otimizado')) return;
+  navigator.clipboard.writeText(text).then(() => showToast());
+}
+
+function showToast(){
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1600);
+}
+
+/* ================= TYPED HEADER LINE ================= */
+const cmdText = "load --source=qwen,kimi,minimax,deepseek,chatgpt,gemini,claude,perplexity,leonardo";
+let ci = 0;
+function typeCmd(){
+  const el = document.getElementById('typedCmd');
+  if(ci <= cmdText.length){
+    el.textContent = cmdText.slice(0, ci);
+    ci++;
+    setTimeout(typeCmd, 18);
+  }
+}
+
+/* ================= INIT ================= */
+buildTabs();
+render();
+typeCmd();
+</script>
+
+</body>
+</html>
