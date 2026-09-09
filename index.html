@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sérgio Costa — Painel do Corretor</title>
+<meta name="description" content="Painel pessoal de Sérgio Costa: agenda, financeiro, ferramentas do corretor e captação rápida de leads." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* ── DOSSIÊ — couro, ouro, esmeralda & safira ────────── */
+  --bg: #121009;
+  --surface: #1c1810;
+  --surface-2: #241f15;
+  --surface-3: #2c2519;
+  --texto: #f3ecd9;
+  --texto-muted: rgba(243,236,217,0.56);
+  --texto-soft: rgba(243,236,217,0.78);
+  --divider: rgba(243,236,217,0.1);
+
+  --ouro: #e3b53c;
+  --ouro-forte: #c8942a;
+  --ouro-fraco: #8f6c1f;
+  --ouro-dim: rgba(227,181,60,0.13);
+  --ouro-dim-hover: rgba(227,181,60,0.22);
+  --ouro-border: rgba(227,181,60,0.38);
+  --ouro-border-hover: rgba(227,181,60,0.7);
+
+  --esmeralda: #4fb98a;
+  --esmeralda-forte: #2f8563;
+  --esmeralda-dim: rgba(79,185,138,0.13);
+  --esmeralda-dim-hover: rgba(79,185,138,0.22);
+  --esmeralda-border: rgba(79,185,138,0.38);
+  --esmeralda-border-hover: rgba(79,185,138,0.7);
+
+  --safira: #6fa8dc;
+  --safira-forte: #4a84b8;
+  --safira-dim: rgba(111,168,220,0.13);
+  --safira-dim-hover: rgba(111,168,220,0.22);
+  --safira-border: rgba(111,168,220,0.38);
+  --safira-border-hover: rgba(111,168,220,0.7);
+
+  --perigo: #d97a68;
+  --foco: #6fb4ff;
+}
+
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  background-image:
+    radial-gradient(ellipse 1000px 560px at 12% -8%, rgba(227,181,60,0.16), transparent 60%),
+    radial-gradient(ellipse 900px 520px at 100% 15%, rgba(79,185,138,0.11), transparent 62%),
+    radial-gradient(ellipse 700px 500px at 90% 100%, rgba(227,181,60,0.07), transparent 60%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: var(--texto);
+}
+
+a { color: inherit; }
+button { font-family: inherit; }
+:focus-visible { outline: 2px solid var(--foco); outline-offset: 3px; border-radius: 6px; }
+
+/* ── HEADER ─────────────────────────────────── */
+header {
+  background: linear-gradient(180deg, var(--surface) 0%, rgba(28,24,16,0.85) 100%);
+  border-bottom: 1px solid var(--divider);
+  padding: 1.4rem 1.5rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+}
+
+.selo {
+  width: 54px; height: 54px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  background: radial-gradient(circle at 30% 26%, #f3d888, var(--ouro) 48%, var(--ouro-forte) 78%, var(--ouro-fraco) 100%);
+  box-shadow:
+    0 0 0 1px rgba(227,181,60,0.45),
+    0 0 0 5px rgba(227,181,60,0.08),
+    0 6px 18px rgba(0,0,0,0.45);
+}
+.selo::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  border: 1px dashed rgba(28,24,16,0.55);
+}
+.selo span {
+  font-family: 'Fraunces', serif;
+  font-size: 17px; font-weight: 700;
+  color: #201a0d;
+  letter-spacing: -0.4px;
+}
+
+.header-info { min-width: 0; }
+.header-info h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 18.5px; font-weight: 700; color: var(--texto); line-height: 1.2;
+  letter-spacing: -0.2px;
+}
+.header-info p {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px; color: var(--ouro); margin-top: 5px;
+  letter-spacing: 0.02em;
+  font-weight: 500;
+}
+
+.header-right {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.relogio {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  color: var(--texto-muted);
+  white-space: nowrap;
+}
+.relogio strong { color: var(--texto-soft); font-weight: 600; }
+
+/* ── ALTERNADOR DE MODO ──────────────────────── */
+.modeswitch {
+  display: inline-flex;
+  background: var(--surface-2);
+  border: 1px solid var(--divider);
+  border-radius: 30px;
+  padding: 3px;
+  gap: 2px;
+}
+.modeswitch button {
+  border: none;
+  background: transparent;
+  color: var(--texto-muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 6px 12px;
+  border-radius: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.15s, color 0.15s;
+}
+.modeswitch button[aria-pressed="true"] {
+  background: var(--ouro-dim);
+  color: var(--ouro);
+}
+.modeswitch button.pessoal[aria-pressed="true"] {
+  background: var(--safira-dim);
+  color: var(--safira);
+}
+.modeswitch button.pastor[aria-pressed="true"] {
+  background: var(--esmeralda-dim);
+  color: var(--esmeralda);
+}
+.modeswitch button:hover:not([aria-pressed="true"]) { color: var(--texto-soft); }
+
+/* ── NAVEGAÇÃO RÁPIDA ────────────────────────── */
+.quicknav {
+  position: sticky;
+  top: 82px;
+  z-index: 99;
+  background: rgba(18,16,9,0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--divider);
+  display: flex;
+  gap: 8px;
+  padding: 10px 1.5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.quicknav::-webkit-scrollbar { display: none; }
+.quicknav a {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  color: var(--texto-soft);
+  border: 1px solid var(--divider);
+  background: var(--surface);
+  border-radius: 20px;
+  padding: 7px 13px;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.quicknav a:hover, .quicknav a:focus-visible { color: var(--ouro); border-color: var(--ouro-border-hover); background: var(--ouro-dim); }
+.quicknav a.tag-ibbc { color: var(--esmeralda-forte); }
+.quicknav a.tag-ibbc:hover, .quicknav a.tag-ibbc:focus-visible { color: var(--esmeralda); border-color: var(--esmeralda-border-hover); background: var(--esmeralda-dim); }
+.quicknav a.tag-ibbc[hidden] { display: none; }
+
+/* ── INTRO + BUSCA ───────────────────────────── */
+.intro-wrap {
+  max-width: 760px;
+  margin: 1.5rem auto 0;
+  padding: 0 1.5rem;
+}
+.intro {
+  font-size: 12.5px;
+  color: var(--texto-muted);
+  line-height: 1.6;
+  margin-bottom: 14px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--divider);
+  border-radius: 14px;
+  padding: 11px 14px;
+  transition: border-color 0.15s;
+}
+.search-box:focus-within { border-color: var(--ouro-border-hover); }
+.search-box i { color: var(--texto-muted); font-size: 16px; flex-shrink: 0; }
+.search-box input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--texto);
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+}
+.search-box input::placeholder { color: var(--texto-muted); }
+.search-clear {
+  background: none; border: none; color: var(--texto-muted);
+  cursor: pointer; font-size: 15px; padding: 2px; display: none;
+}
+.search-box.has-value .search-clear { display: block; }
+
+/* ── CONTINUAR DE ONDE PAROU ─────────────────── */
+.recentes {
+  max-width: 760px;
+  margin: 14px auto 0;
+  padding: 0 1.5rem;
+  display: none;
+}
+.recentes.show { display: block; }
+.recentes-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--texto-muted);
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+.recentes-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; }
+.recentes-chips::-webkit-scrollbar { display: none; }
+.recentes-chips a {
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 6px;
+  text-decoration: none;
+  color: var(--texto-soft);
+  background: var(--surface-2);
+  border: 1px solid var(--divider);
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 11.5px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.recentes-chips a:hover { border-color: var(--ouro-border-hover); color: var(--ouro); }
+.recentes-chips i { font-size: 13px; color: var(--ouro-fraco); }
+
+/* ── MAIN ────────────────────────────────────── */
+main {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1.4rem 1.5rem 3rem;
+}
+
+/* ── SECTION ─────────────────────────────────── */
+section { margin-bottom: 2rem; scroll-margin-top: 165px; }
+section[hidden] { display: none; }
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: var(--ouro-dim);
+  border: 1px solid var(--ouro-border);
+  border-radius: 5px 14px 5px 5px;
+  padding: 6px 15px 6px 6px;
+  margin-bottom: 14px;
+}
+.section-icon {
+  width: 24px; height: 24px;
+  border-radius: 4px;
+  background: var(--ouro);
+  color: #1c1810;
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.section-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--ouro);
+}
+.section-title .sub {
+  display: block;
+  font-size: 10px;
+  color: var(--texto-muted);
+  letter-spacing: 0.01em;
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.section-ibbc .section-label { background: var(--esmeralda-dim); border-color: var(--esmeralda-border); }
+.section-ibbc .section-icon { background: var(--esmeralda); color: #12261d; }
+.section-ibbc .section-title { color: var(--esmeralda); }
+
+.section-rapido .section-label { background: var(--safira-dim); border-color: var(--safira-border); }
+.section-rapido .section-icon { background: var(--safira); color: #10202e; }
+.section-rapido .section-title { color: var(--safira); }
+
+.empty-state {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  color: var(--texto-muted);
+  font-size: 12.5px;
+  padding: 14px 4px;
+}
+
+/* ── LISTA DE BOTÕES ─────────────────────────── */
+.row-list { display: flex; flex-direction: column; gap: 10px; }
+
+.rowbtn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--divider);
+  border-radius: 16px;
+  padding: 13px 14px;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  transition: background 0.16s, border-color 0.16s, transform 0.14s, box-shadow 0.2s;
+}
+.rowbtn[hidden] { display: none; }
+.rowbtn:hover, .rowbtn:focus-visible {
+  background: var(--surface-3);
+  border-color: var(--ouro-border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(227,181,60,0.12);
+}
+.rowbtn:active { transform: scale(0.98); }
+
+.rowbtn.destaque {
+  background: linear-gradient(135deg, rgba(227,181,60,0.14), var(--surface-2) 60%);
+  border-color: var(--ouro-border);
+}
+.rowbtn.destaque:hover, .rowbtn.destaque:focus-visible { border-color: var(--ouro); }
+
+.icon-badge {
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(150deg, rgba(227,181,60,0.28), rgba(227,181,60,0.1));
+  border: 1px solid var(--ouro-border);
+  color: var(--ouro);
+  font-size: 19px;
+}
+.rowbtn-text { flex: 1; min-width: 0; }
+.rowbtn-title {
+  font-family: 'Fraunces', serif;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--texto);
+  line-height: 1.3;
+}
+.rowbtn-sub {
+  font-size: 11.5px;
+  color: var(--texto-muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+.chevron {
+  flex-shrink: 0;
+  color: var(--ouro-fraco);
+  font-size: 18px;
+  transition: transform 0.16s, color 0.16s;
+}
+.rowbtn:hover .chevron, .rowbtn:focus-visible .chevron { transform: translateX(3px); color: var(--ouro); }
+
+.star {
+  position: absolute;
+  top: 10px; right: 12px;
+  font-size: 9px;
+  color: var(--ouro-forte);
+  letter-spacing: 0.04em;
+  font-family: 'IBM Plex Mono', monospace;
+  opacity: 0.85;
+}
+
+/* variante esmeralda — IBBC */
+.rowbtn.ibbc { background: var(--esmeralda-dim); border-color: var(--esmeralda-border); }
+.rowbtn.ibbc:hover, .rowbtn.ibbc:focus-visible { background: var(--esmeralda-dim-hover); border-color: var(--esmeralda-border-hover); }
+.rowbtn.ibbc .icon-badge { background: linear-gradient(150deg, rgba(79,185,138,0.3), rgba(79,185,138,0.1)); border-color: var(--esmeralda-border); color: var(--esmeralda); }
+.rowbtn.ibbc .chevron { color: var(--esmeralda-forte); }
+.rowbtn.ibbc:hover .chevron, .rowbtn.ibbc:focus-visible .chevron { color: var(--esmeralda); }
+.rowbtn.ibbc.destaque { background: linear-gradient(135deg, rgba(79,185,138,0.18), var(--esmeralda-dim) 60%); border-color: var(--esmeralda-border-hover); }
+.rowbtn.ibbc .star { color: var(--esmeralda-forte); }
+
+/* ── GRUPOS TEMÁTICOS (IBBC) ─────────────────── */
+.subject-group { margin-bottom: 14px; }
+.subject-group:last-child { margin-bottom: 0; }
+.subject-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--esmeralda);
+  margin-bottom: 8px;
+  padding-left: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── PAINEL RÁPIDO — mini ferramentas ────────── */
+.mini-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+.mini-card {
+  background: var(--surface-2);
+  border: 1px solid var(--divider);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.mini-card h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--texto);
+}
+.mini-card h3 i { color: var(--safira); font-size: 16px; }
+
+.campo { display: flex; flex-direction: column; gap: 4px; }
+.campo label {
+  font-size: 10.5px;
+  color: var(--texto-muted);
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.02em;
+}
+.campo input, .campo select {
+  background: var(--surface);
+  border: 1px solid var(--divider);
+  border-radius: 9px;
+  padding: 8px 10px;
+  color: var(--texto);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.campo input:focus, .campo select:focus { border-color: var(--safira-border-hover); }
+
+.linha-dois { display: flex; gap: 8px; }
+.linha-dois .campo { flex: 1; min-width: 0; }
+
+.resultado-calc {
+  margin-top: 2px;
+  background: var(--safira-dim);
+  border: 1px solid var(--safira-border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12.5px;
+  color: var(--texto-soft);
+}
+.resultado-calc strong { color: var(--safira); font-size: 15px; display: block; margin-top: 2px; }
+
+.btn-mini {
+  border: 1px solid var(--safira-border);
+  background: var(--safira-dim);
+  color: var(--safira);
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.btn-mini:hover { background: var(--safira-dim-hover); border-color: var(--safira-border-hover); }
+
+.lead-lista { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
+.lead-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--divider);
+  border-radius: 9px;
+  padding: 7px 9px;
+  font-size: 11.5px;
+}
+.lead-item .lead-info { flex: 1; min-width: 0; }
+.lead-item .lead-nome { color: var(--texto); font-weight: 600; }
+.lead-item .lead-detalhe { color: var(--texto-muted); font-size: 10.5px; }
+.lead-item a { color: var(--esmeralda); font-size: 15px; flex-shrink: 0; }
+.lead-item button { background: none; border: none; color: var(--perigo); font-size: 15px; cursor: pointer; flex-shrink: 0; }
+.lead-vazio { font-size: 11.5px; color: var(--texto-muted); font-style: italic; }
+
+.atalho-links { display: flex; flex-direction: column; gap: 8px; }
+.atalho-links a {
+  display: flex; align-items: center; gap: 9px;
+  text-decoration: none;
+  color: var(--texto-soft);
+  background: var(--surface);
+  border: 1px solid var(--divider);
+  border-radius: 9px;
+  padding: 8px 10px;
+  font-size: 12px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.atalho-links a:hover { border-color: var(--safira-border-hover); color: var(--safira); }
+.atalho-links i { font-size: 15px; width: 18px; text-align: center; }
+
+/* ── RODAPÉ ──────────────────────────────────── */
+footer {
+  text-align: center;
+  padding: 1.75rem 1.5rem 2.25rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+  color: var(--texto-muted);
+  border-top: 1px solid var(--divider);
+}
+footer .selo-mini {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--ouro);
+  margin: 0 8px 1px;
+  vertical-align: middle;
+}
+footer strong { color: var(--ouro); font-weight: 600; }
+footer .footer-nota { display: block; margin-top: 8px; opacity: 0.7; font-size: 9.5px; }
+
+/* ── RESPONSIVO ──────────────────────────────── */
+@media (max-width: 480px) {
+  header { padding: 1.1rem 1.1rem 1rem; gap: 10px; }
+  .selo { width: 46px; height: 46px; }
+  .header-info h1 { font-size: 16px; }
+  .relogio { display: none; }
+  .quicknav { padding: 9px 1.1rem; top: 74px; }
+  .intro-wrap { padding: 0 1.1rem; margin-top: 1.2rem; }
+  .recentes { padding: 0 1.1rem; }
+  main { padding: 1.2rem 1.1rem 2.5rem; }
+  .rowbtn { padding: 12px; }
+  .icon-badge { width: 38px; height: 38px; font-size: 17px; }
+  .mini-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="selo"><span>SC</span></div>
+  <div class="header-info">
+    <h1>Sérgio Costa</h1>
+    <p>CRECI-SP 294791-F · CNAI 52708</p>
+  </div>
+  <div class="header-right">
+    <div class="modeswitch" role="group" aria-label="Alternar modo do painel">
+      <button type="button" id="btn-modo-corretor" aria-pressed="true"><i class="ti ti-building-skyscraper"></i>Corretor</button>
+      <button type="button" id="btn-modo-pessoal" class="pessoal" aria-pressed="false"><i class="ti ti-user"></i>Pessoal</button>
+      <button type="button" id="btn-modo-pastor" class="pastor" aria-pressed="false"><i class="ti ti-book-2"></i>Pastor</button>
+    </div>
+    <div class="relogio" id="relogio" aria-live="polite"></div>
+  </div>
+</header>
+
+<!-- NAV RÁPIDA -->
+<nav class="quicknav" aria-label="Navegação rápida">
+  <a id="nav-rapido" href="#rapido"><i class="ti ti-bolt"></i>Painel rápido</a>
+  <a id="nav-financeiro" href="#financeiro"><i class="ti ti-chart-bar"></i>Financeiro</a>
+  <a id="nav-ferramentas" href="#ferramentas"><i class="ti ti-tool"></i>Ferramentas</a>
+  <a id="nav-acesso" href="#acesso"><i class="ti ti-external-link"></i>Acesso externo</a>
+  <a id="nav-agenda" href="#agenda"><i class="ti ti-calendar-event"></i>Agenda</a>
+  <a class="tag-ibbc" id="nav-ibbc" href="#ibbc" hidden><i class="ti ti-book-2"></i>Pastor</a>
+</nav>
+
+<div class="intro-wrap">
+  <p class="intro">Painel privado de organização. <strong>Corretor</strong>: finanças, ferramentas e captação de leads. <strong>Pessoal</strong>: agenda e notas do dia a dia. <strong>Pastor</strong>: site da OBPC e trilha de estudos do IBBC.</p>
+  <div class="search-box" id="search-box">
+    <i class="ti ti-search"></i>
+    <input type="text" id="busca" placeholder="Buscar ferramenta, agenda, atalho..." aria-label="Buscar no painel" autocomplete="off" />
+    <button type="button" class="search-clear" id="busca-limpar" aria-label="Limpar busca">✕</button>
+  </div>
+</div>
+
+<!-- CONTINUAR DE ONDE PAROU -->
+<div class="recentes" id="recentes">
+  <div class="recentes-label"><i class="ti ti-history"></i>Continuar de onde parou</div>
+  <div class="recentes-chips" id="recentes-chips"></div>
+</div>
+
+<!-- MAIN -->
+<main id="main-conteudo">
+
+  <!-- PAINEL RÁPIDO -->
+  <section id="rapido" class="section-rapido" data-nao-filtrar="true">
+    <div class="section-label">
+      <span class="section-icon"><i class="ti ti-bolt"></i></span>
+      <span class="section-title">Painel rápido<span class="sub">Comissão, leads e atalhos do dia a dia</span></span>
+    </div>
+
+    <div class="mini-grid">
+
+      <!-- Calculadora de comissão -->
+      <div class="mini-card">
+        <h3><i class="ti ti-calculator"></i>Calculadora de comissão</h3>
+        <div class="linha-dois">
+          <div class="campo">
+            <label for="calc-valor">Valor do imóvel (R$)</label>
+            <input type="number" id="calc-valor" placeholder="450000" min="0" step="1000" />
+          </div>
+          <div class="campo">
+            <label for="calc-perc">Comissão (%)</label>
+            <input type="number" id="calc-perc" value="6" min="0" step="0.5" />
+          </div>
+        </div>
+        <div class="campo">
+          <label for="calc-divisor">Dividir entre quantos corretores</label>
+          <input type="number" id="calc-divisor" value="1" min="1" step="1" />
+        </div>
+        <div class="resultado-calc" id="calc-resultado">
+          Comissão total<strong id="calc-total">R$ 0,00</strong>
+        </div>
+      </div>
+
+      <!-- Captação de lead -->
+      <div class="mini-card">
+        <h3><i class="ti ti-user-plus"></i>Captação rápida de lead</h3>
+        <div class="campo">
+          <label for="lead-nome">Nome</label>
+          <input type="text" id="lead-nome" placeholder="Nome do cliente" />
+        </div>
+        <div class="linha-dois">
+          <div class="campo">
+            <label for="lead-tel">WhatsApp</label>
+            <input type="text" id="lead-tel" placeholder="11 99999-0000" inputmode="tel" />
+          </div>
+          <div class="campo">
+            <label for="lead-interesse">Interesse</label>
+            <select id="lead-interesse">
+              <option>Compra</option>
+              <option>Venda</option>
+              <option>Aluguel</option>
+              <option>Avaliação</option>
+            </select>
+          </div>
+        </div>
+        <button type="button" class="btn-mini" id="lead-salvar"><i class="ti ti-device-floppy"></i>Salvar lead</button>
+        <div class="lead-lista" id="lead-lista">
+          <div class="lead-vazio">Nenhum lead salvo ainda.</div>
+        </div>
+      </div>
+
+      <!-- Atalhos úteis -->
+      <div class="mini-card">
+        <h3><i class="ti ti-external-link"></i>Atalhos úteis</h3>
+        <div class="atalho-links">
+          <a href="https://web.whatsapp.com" target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp"></i>WhatsApp Web</a>
+          <a href="https://www.google.com/maps" target="_blank" rel="noopener"><i class="ti ti-map-pin"></i>Google Maps</a>
+          <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener"><i class="ti ti-mailbox"></i>Consulta de CEP</a>
+          <a href="https://www.crecisp.gov.br" target="_blank" rel="noopener"><i class="ti ti-certificate"></i>CRECI-SP</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- AGENDA & PRODUTIVIDADE -->
+  <section id="agenda">
+    <div class="section-label">
+      <span class="section-icon"><i class="ti ti-calendar-event"></i></span>
+      <span class="section-title">Agenda &amp; produtividade</span>
+    </div>
+    <div class="row-list">
+      <a class="rowbtn destaque" href="agenda_p.html" data-nome="agenda pessoal compromissos eventos">
+        <span class="star">Principal</span>
+        <div class="icon-badge"><i class="ti ti-calendar"></i></div>
+        <div class="rowbtn-text">
+          <div class="rowbtn-title">Agenda Pessoal</div>
+          <div class="rowbtn-sub">Compromissos e eventos</div>
+        </div>
+        <i class="ti ti-chevron-right chevron"></i>
+      </a>
+      <a class="rowbtn" href="notas.html" data-nome="bloco de notas anotações rápidas">
+        <div class="icon-badge"><i class="ti ti-notes"></i></div>
+        <div class="rowbtn-text">
+          <div class="rowbtn-title">Bloco de Notas</div>
+          <div class="rowbtn-sub">Anotações rápidas</div>
+        </div>
+        <i class="ti ti-chevron-right chevron"></i>
+      </a>
+    </div>
+    <div class="empty-state"><i class="ti ti-mood-empty"></i>Nenhum item corresponde à busca.</div>
+  </section>
+
+  <!-- FINANCEIRO & METAS -->
+  <section id="financeiro">
+    <div class="section-label">
+      <span class="section-icon"><i class="ti ti-report-money"></i></span>
+      <span class="section-title">Financeiro &amp; metas</span>
+    </div>
+    <div class="row-list">
+      <a class="rowbtn destaque" href="controle_fin.html" data-nome="controle financeiro receitas despesas">
+        <span class="star">Principal</span>
+        <div class="icon-badge"><i class="ti ti-report-money"></i></div>
+        <div class="rowbtn-text">
+          <div class="rowbtn-title">Controle Financeiro</div>
+          <div class="rowbtn-sub">Receitas e despesas</div>
+        </div>
+        <i class="ti ti-chevron-right chevron"></i>
+      </a>
+      <a class="rowbtn" href="metas.html" data-nome="metas do mês leads visitas fechamentos">
+        <div class="icon-badge"><i class="ti ti-target-arrow"></i></div>
+        <div class="rowbtn-text">
+          <div class="rowbtn-title">Metas do Mês</div>
+          <div class="rowbtn-sub">Leads, visitas e fechamentos</div>
+        </div>
+        <i class="ti ti-chevron-right chevron"></i>
+      </a>
+    </div>
+    <div class="empty-state"><i class="ti ti-mood-empty"></i>Nenhum item corresponde à busca.</div>
+  </section>
+
+  <!-- FERRAMENTAS DO CORRETOR -->
+  <section id="ferramentas">
+    <div class="section-label">
+      <span class="section-icon"><i class="ti ti-tool"></i></span>
+      <span class="section-title">Ferramentas do corretor</span>
+    </div>
+    <div class="row-list">
+      <a class="rowbtn destaque" href="ferramentas.html" data-nome="canivete suíço todas as ferramentas">
+        <span class="star">Principal</span>
+        <div class="icon-badge"><i class="ti ti-tool"></i></div>
+        <div class="rowbtn-text">
+          <div class="rowbtn-title">Canivete Suíço</div>
+          <div class="rowbtn-sub">Ver todas as ferramentas</div>
+        </div>
+        <i class="ti ti-chevron-right chevron"></i>
+      </a>
+      <a class="rowbtn" href="documentacao-imoveis.html" data-nome="documentação imobiliária acesso pessoal">
+        <div class="icon-badge"><i class="ti ti-file-certificate"></i></div>
+        <div class="rowbtn-text">
+          <div class="rowbtn-title">Documentação Imobiliária</div>
+          <div class="rowbtn-sub">Checklist de documentos por transação</div>
+        </div>
+        <i class="ti ti-chevron-right chevron"></i>
+      </a>
+      <a class="rowbtn" href="areas-imoveis.html" data-nome="guia de áreas do imóvel útil construída fração ideal">
+        <div class="icon-badge"><i class="ti ti-ruler-2"></i></div>
+        <div class="rowbtn-text">
+          <div class="rowbtn-title">Guia de Áreas do Imóvel</div>
+          <div class="rowbtn-sub">Útil, construída, fração ideal</div>
+        </div>
+        <i class="ti ti-chevron-right chevron"></i>
+      </a>
+      <a class="rowbtn" href="honorarios.html" data-nome="tabela de honorários corretagem estruturador perícia">
+        <div class="icon-badge"><i class="ti ti-receipt-2"></i></div>
+        <div class="rowbtn-text">
+          <div class="rowbtn-title">Tabela de Honorários</div>
+          <div class="rowbtn-sub">Corretagem, estruturador e perícia</div>
+        </div>
+        <i class="ti ti-chevron-right chevron"></i>
+      </a>
+      <a class="rowbtn" href="vistoria_pro.html" data-nome="vistoria fotos vídeo laudo pdf">
+        <div class="icon-badge"><i class="ti ti-camera-check"></i></div>
+        <div class="rowbtn-text">
+          <div class="rowbtn-title">Vistoria</div>
+          <div class="rowbtn-sub">Fotos, vídeo e laudo em PDF</div>
+        </div>
+        <i class="ti ti-chevron-right chevron"></i>
+      </a>
+      <a class="rowbtn" href="guia-ias-gratuitas.html" data-nome="guia de ias gratuitas qwen kimi minimax deepseek">
+        <div class="icon-badge"><i class="ti ti-brain"></i></div>
+        <div class="rowbtn-text">
+          <div class="rowbtn-title">Guia de IAs Gratuitas</div>
+          <div class="rowbtn-sub">Qwen, Kimi, MiniMax, DeepSeek e mais</div>
+        </div>
+        <i class="ti ti-chevron-right chevron"></i>
+      </a>
+    </div>
+    <div class="empty-state"><i class="ti ti-mood-empty"></i>Nenhum item corresponde à busca.</div>
+  </section>
+
+  <!-- ACESSO EXTERNO -->
+  <section id="acesso">
+    <div class="section-label">
+      <span class="section-icon"><i class="ti ti-external-link"></i></span>
+      <span class="section-title">Acesso externo<span class="sub">Sites e materiais de estudo</span></span>
+    </div>
+    <div class="row-list">
+      <a class="rowbtn" href="https://fcostacorretor.com" target="_blank" rel="noopener" data-nome="site fcosta fcostacorretor.com">
+        <div class="icon-badge"><i class="ti ti-world"></i></div>
+        <div class="rowbtn-text">
+          <div class="rowbtn-title">Site FCosta</div>
+          <div class="rowbtn-sub">fcostacorretor.com</div>
+        </div>
+        <i class="ti ti-chevron-right chevron"></i>
+      </a>
+      <a class="rowbtn" href="https://serfico21-arch.github.io/Apostilas-creci/" target="_blank" rel="noopener" data-nome="apostilas creci repositório de estudo">
+        <div class="icon-badge"><i class="ti ti-brand-github"></i></div>
+        <div class="rowbtn-text">
+          <div class="rowbtn-title">Apostilas CRECI</div>
+          <div class="rowbtn-sub">Repositório de estudo</div>
+        </div>
+        <i class="ti ti-chevron-right chevron"></i>
+      </a>
+    </div>
+    <div class="empty-state"><i class="ti ti-mood-empty"></i>Nenhum item corresponde à busca.</div>
+  </section>
+
+  <!-- PASTOR — visível apenas no modo Pastor -->
+  <section id="ibbc" class="section-ibbc" hidden>
+    <div class="section-label">
+      <span class="section-icon"><i class="ti ti-book-2"></i></span>
+      <span class="section-title">Pastor<span class="sub">Igreja OBPC e Instituto Bíblico O Brasil Para Cristo</span></span>
+    </div>
+
+    <div class="subject-group">
+      <div class="subject-name"><i class="ti ti-world"></i>Igreja</div>
+      <div class="row-list">
+        <a class="rowbtn ibbc destaque" href="https://obpcsaofernando199-sudo.github.io/Obpc/" target="_blank" rel="noopener" data-nome="site obpc são fernando igreja">
+          <span class="star">Principal</span>
+          <div class="icon-badge"><i class="ti ti-world"></i></div>
+          <div class="rowbtn-text">
+            <div class="rowbtn-title">Site OBPC</div>
+            <div class="rowbtn-sub">OBPC São Fernando</div>
+          </div>
+          <i class="ti ti-chevron-right chevron"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="subject-group">
+      <div class="subject-name"><i class="ti ti-feather"></i>Estudos</div>
+      <div class="row-list">
+        <a class="rowbtn ibbc destaque" href="ensaio_tcc.html" data-nome="ensaio tcc pena de morte ética cristã">
+          <div class="icon-badge"><i class="ti ti-feather"></i></div>
+          <div class="rowbtn-text">
+            <div class="rowbtn-title">Ensaio — TCC</div>
+            <div class="rowbtn-sub">A Pena de Morte à luz da Ética Cristã</div>
+          </div>
+          <i class="ti ti-chevron-right chevron"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="subject-group">
+      <div class="subject-name"><i class="ti ti-clipboard-text"></i>Simulados</div>
+      <div class="row-list">
+        <a class="rowbtn ibbc destaque" href="simulado.html" data-nome="simulado palestra ministério e família">
+          <div class="icon-badge"><i class="ti ti-checklist"></i></div>
+          <div class="rowbtn-text">
+            <div class="rowbtn-title">Simulado</div>
+            <div class="rowbtn-sub">Palestra 6: Ministério e Família</div>
+          </div>
+          <i class="ti ti-chevron-right chevron"></i>
+        </a>
+      </div>
+    </div>
+
+    <div class="subject-group">
+      <div class="subject-name"><i class="ti ti-microphone-2"></i>Atividades</div>
+      <div class="row-list">
+        <a class="rowbtn ibbc" href="gerador-esbocos.html" data-nome="gerador de esboços cue cards pregação">
+          <div class="icon-badge"><i class="ti ti-notebook"></i></div>
+          <div class="rowbtn-text">
+            <div class="rowbtn-title">Gerador de Esboços</div>
+            <div class="rowbtn-sub">Cue cards para pregação</div>
+          </div>
+          <i class="ti ti-chevron-right chevron"></i>
+        </a>
+      </div>
+    </div>
+    <div class="empty-state"><i class="ti ti-mood-empty"></i>Nenhum item corresponde à busca.</div>
+  </section>
+
+</main>
+
+<!-- RODAPÉ -->
+<footer>
+  <strong>FCosta</strong> · Sérgio Fernandes da Costa<span class="selo-mini"></span>CRECI-SP 294791-F · CNAI 52708
+  <span class="footer-nota">Leads e preferências ficam salvos apenas neste navegador, em nenhum servidor.</span>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ── RELÓGIO ─────────────────────────────── */
+  var relogioEl = document.getElementById('relogio');
+  function atualizarRelogio() {
+    var agora = new Date();
+    var dataFmt = agora.toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: 'short' });
+    var horaFmt = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    relogioEl.innerHTML = dataFmt + ' · <strong>' + horaFmt + '</strong>';
+  }
+  atualizarRelogio();
+  setInterval(atualizarRelogio, 30000);
+
+  /* ── ARMAZENAMENTO SEGURO (fallback se localStorage falhar) ── */
+  function lerStorage(chave, padrao) {
+    try {
+      var v = localStorage.getItem(chave);
+      return v ? JSON.parse(v) : padrao;
+    } catch (e) { return padrao; }
+  }
+  function gravarStorage(chave, valor) {
+    try { localStorage.setItem(chave, JSON.stringify(valor)); } catch (e) { /* modo privado, ignora */ }
+  }
+
+  /* ── MODO CORRETOR / PESSOAL / PASTOR ────── */
+  var btnCorretor = document.getElementById('btn-modo-corretor');
+  var btnPessoal = document.getElementById('btn-modo-pessoal');
+  var btnPastor = document.getElementById('btn-modo-pastor');
+
+  var secaoRapido = document.getElementById('rapido');
+  var secaoFinanceiro = document.getElementById('financeiro');
+  var secaoFerramentas = document.getElementById('ferramentas');
+  var secaoAcesso = document.getElementById('acesso');
+  var secaoAgenda = document.getElementById('agenda');
+  var secaoIbbc = document.getElementById('ibbc');
+
+  var navRapido = document.getElementById('nav-rapido');
+  var navFinanceiro = document.getElementById('nav-financeiro');
+  var navFerramentas = document.getElementById('nav-ferramentas');
+  var navAcesso = document.getElementById('nav-acesso');
+  var navAgenda = document.getElementById('nav-agenda');
+  var navIbbc = document.getElementById('nav-ibbc');
+
+  function aplicarModo(modo) {
+    var corretor = modo === 'corretor';
+    var pessoal = modo === 'pessoal';
+    var pastor = modo === 'pastor';
+
+    // seções — Corretor
+    secaoRapido.hidden = !corretor;
+    secaoFinanceiro.hidden = !corretor;
+    secaoFerramentas.hidden = !corretor;
+    secaoAcesso.hidden = !corretor;
+    navRapido.hidden = !corretor;
+    navFinanceiro.hidden = !corretor;
+    navFerramentas.hidden = !corretor;
+    navAcesso.hidden = !corretor;
+
+    // seção — Pessoal
+    secaoAgenda.hidden = !pessoal;
+    navAgenda.hidden = !pessoal;
+
+    // seção — Pastor
+    secaoIbbc.hidden = !pastor;
+    navIbbc.hidden = !pastor;
+
+    btnCorretor.setAttribute('aria-pressed', String(corretor));
+    btnPessoal.setAttribute('aria-pressed', String(pessoal));
+    btnPastor.setAttribute('aria-pressed', String(pastor));
+    gravarStorage('painel_modo', modo);
+  }
+  btnCorretor.addEventListener('click', function () { aplicarModo('corretor'); });
+  btnPessoal.addEventListener('click', function () { aplicarModo('pessoal'); });
+  btnPastor.addEventListener('click', function () { aplicarModo('pastor'); });
+  aplicarModo(lerStorage('painel_modo', 'corretor'));
+
+  /* ── BUSCA / FILTRO ──────────────────────── */
+  var busca = document.getElementById('busca');
+  var searchBox = document.getElementById('search-box');
+  var buscaLimpar = document.getElementById('busca-limpar');
+  var secoesFiltraveis = document.querySelectorAll('main > section:not([data-nao-filtrar])');
+
+  function filtrar() {
+    var termo = busca.value.trim().toLowerCase();
+    searchBox.classList.toggle('has-value', termo.length > 0);
+
+    secoesFiltraveis.forEach(function (secao) {
+      if (secao.hidden && secao.id !== 'ibbc') return;
+      if (secao.id === 'ibbc' && secao.hidden) return;
+
+      var linhas = secao.querySelectorAll('.rowbtn');
+      var visiveis = 0;
+      linhas.forEach(function (linha) {
+        var alvo = (linha.getAttribute('data-nome') || linha.textContent).toLowerCase();
+        var corresponde = termo === '' || alvo.indexOf(termo) !== -1;
+        linha.hidden = !corresponde;
+        if (corresponde) visiveis++;
+      });
+
+      var vazio = secao.querySelector('.empty-state');
+      var listaVisivel = termo !== '' && visiveis === 0;
+      if (vazio) vazio.style.display = listaVisivel ? 'flex' : 'none';
+      secao.querySelectorAll('.row-list').forEach(function (lista) {
+        lista.style.display = listaVisivel ? 'none' : 'flex';
+      });
+    });
+  }
+  busca.addEventListener('input', filtrar);
+  buscaLimpar.addEventListener('click', function () {
+    busca.value = '';
+    filtrar();
+    busca.focus();
+  });
+
+  /* ── CONTINUAR DE ONDE PAROU ─────────────── */
+  var recentesWrap = document.getElementById('recentes');
+  var recentesChips = document.getElementById('recentes-chips');
+  var iconesPorHref = {}; // mapeia href -> classe do ícone, para reaproveitar nos chips
+
+  document.querySelectorAll('.rowbtn').forEach(function (link) {
+    var icone = link.querySelector('.icon-badge i');
+    iconesPorHref[link.getAttribute('href')] = icone ? icone.className : 'ti ti-link';
+
+    link.addEventListener('click', function () {
+      var titulo = link.querySelector('.rowbtn-title');
+      var historico = lerStorage('painel_recentes', []);
+      var href = link.getAttribute('href');
+      historico = historico.filter(function (item) { return item.href !== href; });
+      historico.unshift({ href: href, titulo: titulo ? titulo.textContent : href });
+      gravarStorage('painel_recentes', historico.slice(0, 4));
+    });
+  });
+
+  function renderRecentes() {
+    var historico = lerStorage('painel_recentes', []);
+    if (!historico.length) { recentesWrap.classList.remove('show'); return; }
+    recentesChips.innerHTML = '';
+    historico.forEach(function (item) {
+      var a = document.createElement('a');
+      a.href = item.href;
+      if (item.href.indexOf('http') === 0) { a.target = '_blank'; a.rel = 'noopener'; }
+      var classeIcone = iconesPorHref[item.href] || 'ti ti-link';
+      a.innerHTML = '<i class="' + classeIcone + '"></i>' + item.titulo;
+      recentesChips.appendChild(a);
+    });
+    recentesWrap.classList.add('show');
+  }
+  renderRecentes();
+
+  /* ── CALCULADORA DE COMISSÃO ─────────────── */
+  var calcValor = document.getElementById('calc-valor');
+  var calcPerc = document.getElementById('calc-perc');
+  var calcDivisor = document.getElementById('calc-divisor');
+  var calcTotal = document.getElementById('calc-total');
+  var calcResultado = document.getElementById('calc-resultado');
+
+  function formatarMoeda(n) {
+    return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+  function recalcular() {
+    var valor = parseFloat(calcValor.value) || 0;
+    var perc = parseFloat(calcPerc.value) || 0;
+    var divisor = parseFloat(calcDivisor.value) || 1;
+    var totalComissao = valor * (perc / 100);
+    var porCorretor = totalComissao / (divisor > 0 ? divisor : 1);
+
+    if (divisor > 1) {
+      calcResultado.innerHTML = 'Comissão total (' + perc + '%)<strong>' + formatarMoeda(totalComissao) + '</strong>' +
+        '<span style="display:block;margin-top:6px;color:var(--texto-muted);">Sua parte (÷' + divisor + ')</span>' +
+        '<strong>' + formatarMoeda(porCorretor) + '</strong>';
+    } else {
+      calcResultado.innerHTML = 'Comissão total (' + perc + '%)<strong>' + formatarMoeda(totalComissao) + '</strong>';
+    }
+  }
+  [calcValor, calcPerc, calcDivisor].forEach(function (el) { el.addEventListener('input', recalcular); });
+  recalcular();
+
+  /* ── CAPTAÇÃO RÁPIDA DE LEADS ────────────── */
+  var leadNome = document.getElementById('lead-nome');
+  var leadTel = document.getElementById('lead-tel');
+  var leadInteresse = document.getElementById('lead-interesse');
+  var leadSalvar = document.getElementById('lead-salvar');
+  var leadLista = document.getElementById('lead-lista');
+
+  function telParaWhatsapp(tel) {
+    var digitos = tel.replace(/\D/g, '');
+    if (digitos.length <= 11) digitos = '55' + digitos;
+    return digitos;
+  }
+
+  function renderLeads() {
+    var leads = lerStorage('painel_leads', []);
+    if (!leads.length) {
+      leadLista.innerHTML = '<div class="lead-vazio">Nenhum lead salvo ainda.</div>';
+      return;
+    }
+    leadLista.innerHTML = '';
+    leads.forEach(function (lead, indice) {
+      var item = document.createElement('div');
+      item.className = 'lead-item';
+      var digitos = telParaWhatsapp(lead.tel || '');
+      var mensagem = encodeURIComponent('Olá ' + lead.nome + ', tudo bem? Aqui é o Sérgio Costa, corretor de imóveis. Vi seu interesse em ' + lead.interesse.toLowerCase() + '.');
+      item.innerHTML =
+        '<div class="lead-info"><div class="lead-nome">' + lead.nome + '</div>' +
+        '<div class="lead-detalhe">' + lead.interesse + (lead.tel ? ' · ' + lead.tel : '') + '</div></div>' +
+        (lead.tel ? '<a href="https://wa.me/' + digitos + '?text=' + mensagem + '" target="_blank" rel="noopener" aria-label="Chamar no WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>' : '') +
+        '<button type="button" aria-label="Remover lead" data-indice="' + indice + '"><i class="ti ti-trash"></i></button>';
+      leadLista.appendChild(item);
+    });
+
+    leadLista.querySelectorAll('button[data-indice]').forEach(function (botao) {
+      botao.addEventListener('click', function () {
+        var leads = lerStorage('painel_leads', []);
+        leads.splice(parseInt(botao.getAttribute('data-indice'), 10), 1);
+        gravarStorage('painel_leads', leads);
+        renderLeads();
+      });
+    });
+  }
+
+  leadSalvar.addEventListener('click', function () {
+    var nome = leadNome.value.trim();
+    if (!nome) { leadNome.focus(); return; }
+    var leads = lerStorage('painel_leads', []);
+    leads.unshift({ nome: nome, tel: leadTel.value.trim(), interesse: leadInteresse.value });
+    gravarStorage('painel_leads', leads.slice(0, 20));
+    leadNome.value = '';
+    leadTel.value = '';
+    renderLeads();
+  });
+  renderLeads();
+
+})();
+</script>
+
+</body>
+</html>
