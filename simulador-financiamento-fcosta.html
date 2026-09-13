@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Financiamento - FCosta</title>
+<style>
+  :root{
+    --azul-ceu:#3B9BD6;
+    --azul-marinho:#1E3A5F;
+    --branco:#FFFFFF;
+    --cinza-bg:#F4F7FA;
+    --cinza-borda:#D8E2EA;
+    --texto-suave:#5A6B7A;
+    --verde-ok:#2E9E5B;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+    background:var(--cinza-bg);
+    margin:0;
+    padding:16px;
+    color:var(--azul-marinho);
+  }
+  .container{max-width:920px;margin:0 auto;}
+  header{
+    background:var(--azul-marinho);
+    color:var(--branco);
+    padding:20px 24px;
+    border-radius:14px;
+    margin-bottom:16px;
+  }
+  header h1{margin:0 0 4px;font-size:20px;}
+  header p{margin:0;font-size:13px;color:#BFD6E8;}
+  .card{
+    background:var(--branco);
+    border:1px solid var(--cinza-borda);
+    border-radius:14px;
+    padding:20px;
+    margin-bottom:16px;
+  }
+  .card h2{
+    font-size:15px;
+    margin:0 0 14px;
+    color:var(--azul-marinho);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:520px){.grid2{grid-template-columns:1fr;}}
+  label{
+    display:block;
+    font-size:12.5px;
+    color:var(--texto-suave);
+    margin-bottom:5px;
+    font-weight:600;
+  }
+  input[type=text], input[type=number], select{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--cinza-borda);
+    border-radius:9px;
+    font-size:15px;
+    background:var(--cinza-bg);
+    color:var(--azul-marinho);
+  }
+  input:focus, select:focus{outline:2px solid var(--azul-ceu);}
+  .campo{margin-bottom:18px;}
+  .campo-cabecalho{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-bottom:6px;
+  }
+  .campo-cabecalho label{margin-bottom:0;}
+  .campo-valor{
+    font-size:15px;
+    font-weight:700;
+    color:var(--azul-marinho);
+  }
+  input[type=range]{
+    width:100%;
+    height:6px;
+    border-radius:4px;
+    background:var(--cinza-borda);
+    -webkit-appearance:none;
+    appearance:none;
+    margin:6px 0;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    appearance:none;
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    background:var(--azul-ceu);
+    border:3px solid var(--branco);
+    box-shadow:0 0 0 1px var(--azul-ceu);
+    cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    background:var(--azul-ceu);
+    border:3px solid var(--branco);
+    box-shadow:0 0 0 1px var(--azul-ceu);
+    cursor:pointer;
+  }
+  .campo-limites{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:var(--texto-suave);
+  }
+  .info-faixa{
+    margin-top:8px;
+    background:#EAF5FC;
+    border:1px solid #BEE0F5;
+    border-radius:9px;
+    padding:8px 12px;
+    font-size:12.5px;
+    color:var(--azul-marinho);
+    font-weight:600;
+  }
+  .toggle-group{display:flex;gap:8px;margin-bottom:14px;}
+  .toggle-btn{
+    flex:1;
+    padding:10px;
+    border-radius:9px;
+    border:1px solid var(--cinza-borda);
+    background:var(--cinza-bg);
+    color:var(--texto-suave);
+    font-weight:600;
+    font-size:14px;
+    text-align:center;
+    cursor:pointer;
+  }
+  .toggle-btn.ativo{
+    background:var(--azul-ceu);
+    color:var(--branco);
+    border-color:var(--azul-ceu);
+  }
+  button.principal{
+    width:100%;
+    padding:14px;
+    background:var(--azul-ceu);
+    color:var(--branco);
+    border:none;
+    border-radius:10px;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+  }
+  button.principal:active{opacity:0.85;}
+  .resultados{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:600px){.resultados{grid-template-columns:1fr;}}
+  .painel-resultado{
+    border-radius:12px;
+    padding:16px;
+    border:1px solid var(--cinza-borda);
+  }
+  .painel-mcmv{background:#EAF5FC;border-color:#BEE0F5;}
+  .painel-sbpe{background:#F6F6F8;border-color:#DDDDE2;}
+  .destaque-parcela{
+    background:var(--azul-marinho);
+    border-radius:10px;
+    padding:12px 14px;
+    text-align:center;
+    margin-bottom:12px;
+  }
+  .destaque-parcela-sbpe{background:#3D4C5C;}
+  .destaque-parcela .destaque-label{
+    display:block;
+    font-size:11px;
+    color:#BFD6E8;
+    font-weight:600;
+    margin-bottom:4px;
+  }
+  .destaque-parcela .destaque-valor{
+    display:block;
+    font-size:23px;
+    font-weight:800;
+    color:var(--branco);
+  }
+  .painel-resultado h3{
+    margin:0 0 12px;
+    font-size:14px;
+    color:var(--azul-marinho);
+  }
+  .linha-resultado{
+    display:flex;
+    justify-content:space-between;
+    font-size:13.5px;
+    padding:6px 0;
+    border-bottom:1px dashed rgba(0,0,0,0.08);
+  }
+  .linha-resultado:last-child{border-bottom:none;}
+  .linha-resultado span.valor{font-weight:700;}
+  .badge-taxa{
+    display:inline-block;
+    background:var(--azul-marinho);
+    color:var(--branco);
+    font-size:11px;
+    padding:2px 8px;
+    border-radius:20px;
+    margin-top:6px;
+  }
+  .economia-box{
+    background:#E6F6EC;
+    border:1px solid #BEE7CE;
+    border-radius:12px;
+    padding:16px;
+    margin-top:14px;
+    text-align:center;
+  }
+  .economia-box .valor-grande{
+    font-size:24px;
+    font-weight:700;
+    color:var(--verde-ok);
+    display:block;
+    margin:4px 0;
+  }
+  details{margin-top:8px;}
+  summary{
+    cursor:pointer;
+    font-size:13px;
+    font-weight:700;
+    color:var(--azul-ceu);
+    padding:8px 0;
+  }
+  .tabela-regras{width:100%;border-collapse:collapse;margin-top:8px;font-size:12.5px;}
+  .tabela-regras th{
+    text-align:left;
+    color:var(--texto-suave);
+    font-weight:600;
+    padding:6px 4px;
+    border-bottom:1px solid var(--cinza-borda);
+  }
+  .tabela-regras td{padding:5px 4px;border-bottom:1px solid #EEF2F5;}
+  .tabela-regras input{padding:6px 8px;font-size:12.5px;}
+  .nota{font-size:11.5px;color:var(--texto-suave);margin-top:10px;line-height:1.5;}
+  .btn-linha{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+  }
+  .btn-secundario{
+    flex:1;
+    padding:9px;
+    background:var(--branco);
+    border:1px solid var(--cinza-borda);
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--azul-marinho);
+    cursor:pointer;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Simulador de Financiamento Imobiliario</h1>
+    <p>Comparativo MCMV (subsidiado) x SBPE (tradicional) - FCosta Corretor</p>
+  </header>
+
+  <div class="card">
+    <h2>Dados do imovel e do cliente</h2>
+    <div class="campo">
+      <div class="campo-cabecalho">
+        <label>Renda familiar mensal</label>
+        <span class="campo-valor" id="rendaValor">R$ 4.000</span>
+      </div>
+      <input type="range" id="renda" min="1000" max="20000" step="100" value="4000" oninput="calcular()">
+      <div class="campo-limites"><span>R$ 1.000</span><span>R$ 20.000</span></div>
+      <div class="info-faixa" id="rendaFaixaInfo">-</div>
+    </div>
+
+    <div class="campo">
+      <div class="campo-cabecalho">
+        <label>Valor do imovel</label>
+        <span class="campo-valor" id="valorImovelValor">R$ 280.000</span>
+      </div>
+      <input type="range" id="valorImovel" min="50000" max="1000000" step="5000" value="280000" oninput="ajustarLimiteEntrada(); calcular()">
+      <div class="campo-limites"><span>R$ 50.000</span><span>R$ 1.000.000</span></div>
+    </div>
+
+    <div class="campo">
+      <div class="campo-cabecalho">
+        <label>Valor de entrada</label>
+        <span class="campo-valor" id="entradaValor">R$ 14.000</span>
+      </div>
+      <input type="range" id="entrada" min="0" max="280000" step="1000" value="14000" oninput="calcular()">
+      <div class="campo-limites"><span>R$ 0</span><span id="entradaMaxLabel">R$ 280.000</span></div>
+      <p class="nota">Pode ser composta por recursos proprios e/ou saldo de FGTS.</p>
+    </div>
+
+    <div class="campo">
+      <div class="campo-cabecalho">
+        <label>Prazo</label>
+        <span class="campo-valor" id="prazoAnosValor">30 anos</span>
+      </div>
+      <input type="range" id="prazoAnos" min="5" max="35" step="1" value="30" oninput="calcular()">
+      <div class="campo-limites"><span>5 anos</span><span>35 anos</span></div>
+    </div>
+
+    <label>Sistema de amortizacao</label>
+    <div class="toggle-group">
+      <div class="toggle-btn ativo" id="btnPrice" onclick="selecionarSistema('PRICE')">PRICE (parcela fixa)</div>
+      <div class="toggle-btn" id="btnSac" onclick="selecionarSistema('SAC')">SAC (parcela decrescente)</div>
+    </div>
+  </div>
+
+  <div class="card" id="cardResultados" style="display:none;">
+    <h2>Resultado da simulacao</h2>
+    <div class="resultados">
+      <div class="painel-resultado painel-mcmv">
+        <h3>Minha Casa Minha Vida</h3>
+        <div class="destaque-parcela">
+          <span class="destaque-label" id="mcmvLabelParcela">Parcela mensal</span>
+          <span class="destaque-valor" id="mcmvParcela">-</span>
+        </div>
+        <div class="linha-resultado" id="mcmvLinhaUltima" style="display:none;"><span>Ultima parcela</span><span class="valor" id="mcmvUltimaParcela">-</span></div>
+        <div class="linha-resultado"><span>Faixa</span><span class="valor" id="mcmvFaixa">-</span></div>
+        <div class="linha-resultado"><span>Subsidio estimado</span><span class="valor" id="mcmvSubsidio">-</span></div>
+        <div class="linha-resultado"><span>Entrada utilizada</span><span class="valor" id="mcmvEntradaUsada">-</span></div>
+        <div class="linha-resultado"><span>Valor financiado</span><span class="valor" id="mcmvFinanciado">-</span></div>
+        <div class="linha-resultado"><span>Comprometimento de renda</span><span class="valor" id="mcmvComprometimento">-</span></div>
+        <div class="linha-resultado"><span>Total pago ao final</span><span class="valor" id="mcmvTotal">-</span></div>
+        <span class="badge-taxa" id="mcmvTaxaBadge">-</span>
+      </div>
+      <div class="painel-resultado painel-sbpe">
+        <h3>SBPE (tradicional)</h3>
+        <div class="destaque-parcela destaque-parcela-sbpe">
+          <span class="destaque-label" id="sbpeLabelParcela">Parcela mensal</span>
+          <span class="destaque-valor" id="sbpeParcela">-</span>
+        </div>
+        <div class="linha-resultado" id="sbpeLinhaUltima" style="display:none;"><span>Ultima parcela</span><span class="valor" id="sbpeUltimaParcela">-</span></div>
+        <div class="linha-resultado"><span>Cota financiada</span><span class="valor" id="sbpeCota">-</span></div>
+        <div class="linha-resultado"><span>Entrada utilizada</span><span class="valor" id="sbpeEntradaUsada">-</span></div>
+        <div class="linha-resultado"><span>Valor financiado</span><span class="valor" id="sbpeFinanciado">-</span></div>
+        <div class="linha-resultado"><span>Comprometimento de renda</span><span class="valor" id="sbpeComprometimento">-</span></div>
+        <div class="linha-resultado"><span>Total pago ao final</span><span class="valor" id="sbpeTotal">-</span></div>
+        <span class="badge-taxa" id="sbpeTaxaBadge">-</span>
+      </div>
+    </div>
+
+    <div class="economia-box" id="economiaBox" style="display:none;">
+      <div>Economia do cliente escolhendo o MCMV</div>
+      <span class="valor-grande" id="economiaValor">-</span>
+      <div style="font-size:12px;color:var(--texto-suave);">em relacao ao financiamento SBPE tradicional</div>
+    </div>
+
+    <div id="avisoRenda" style="display:none;" class="nota" style="color:#A33;"></div>
+
+    <p class="nota">
+      Regras gerais para usar o FGTS na compra do imovel (confira sempre a situacao atual na Caixa antes de orientar o cliente):<br>
+      - Minimo de 3 anos de trabalho com carteira assinada e FGTS, nao precisam ser seguidos<br>
+      - Nao pode ser dono de outro imovel residencial concluido na mesma cidade ou regiao metropolitana onde vai morar<br>
+      - O imovel precisa ser para moradia do proprio comprador (financiamento habitacional SBPE ou MCMV)<br>
+      - O valor do imovel precisa estar dentro do teto de preco permitido para uso do FGTS<br>
+      - E preciso esperar 3 anos entre um uso do FGTS e outro para comprar imovel<br>
+      - O FGTS tambem pode ser usado para amortizar o saldo devedor ou compor parte das parcelas em alguns casos, alem da entrada
+    </p>
+
+    <p class="nota">
+      Composicao de renda familiar (para aumentar a capacidade de financiamento):<br>
+      - Normalmente e permitido compor renda com ate 3 pessoas alem do proponente principal (total de ate 4 rendas somadas)<br>
+      - O parentesco aceito costuma ir ate o 2o grau: conjuge ou companheiro(a), pais, filhos, irmaos, avos e netos<br>
+      - Todos que compoem a renda geralmente precisam constar como compradores no contrato e residir no imovel financiado<br>
+      - O numero de participantes e o grau de parentesco aceito variam de banco para banco e devem ser confirmados no momento da simulacao real
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Regras de taxa (editaveis)</h2>
+    <details>
+      <summary>Faixas MCMV (renda, subsidio e taxa)</summary>
+      <table class="tabela-regras" id="tabelaMcmv">
+        <thead>
+          <tr><th>Faixa</th><th>Renda ate (R$)</th><th>Subsidio max (R$)</th><th>Taxa a.a. (%)</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="btn-linha">
+        <button class="btn-secundario" onclick="adicionarLinhaMcmv()">+ Adicionar faixa</button>
+        <button class="btn-secundario" onclick="restaurarPadraoMcmv()">Restaurar padrao</button>
+      </div>
+    </details>
+
+    <details>
+      <summary>Faixas SBPE (cota financiada e taxa)</summary>
+      <table class="tabela-regras" id="tabelaSbpe">
+        <thead>
+          <tr><th>Cota financiada ate (%)</th><th>Taxa a.a. (%)</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="btn-linha">
+        <button class="btn-secundario" onclick="adicionarLinhaSbpe()">+ Adicionar faixa</button>
+        <button class="btn-secundario" onclick="restaurarPadraoSbpe()">Restaurar padrao</button>
+      </div>
+      <p class="nota">
+        Regra real de mercado: no SBPE, quanto maior o percentual do imovel financiado (cota), maior a taxa de juros cobrada pelo banco.
+        Os valores abaixo sao uma estimativa media de mercado (taxa nominal, TR ja embutida de forma simplificada) e variam por banco e por relacionamento do cliente.
+        Ajuste as faixas para refletir a tabela do banco que voce utiliza.
+      </p>
+    </details>
+
+    <p class="nota">As faixas de renda e subsidio do MCMV tambem sao estimativas de mercado e devem ser conferidas com a Caixa/banco no momento da simulacao real, pois o programa e reajustado periodicamente.</p>
+  </div>
+
+</div>
+
+<script>
+let sistemaAtual = 'PRICE';
+
+let regrasMcmv = [
+  {nome: 'Faixa 1', rendaAte: 2850, subsidioMax: 55000, taxa: 4.0},
+  {nome: 'Faixa 2', rendaAte: 4700, subsidioMax: 40000, taxa: 4.75},
+  {nome: 'Faixa 3', rendaAte: 8600, subsidioMax: 15000, taxa: 7.5},
+  {nome: 'Faixa 4', rendaAte: 12000, subsidioMax: 0, taxa: 9.0}
+];
+
+let regrasSbpe = [
+  {cotaAte: 50, taxa: 10.49},
+  {cotaAte: 70, taxa: 10.99},
+  {cotaAte: 80, taxa: 11.49},
+  {cotaAte: 90, taxa: 11.99}
+];
+
+function formatarMoeda(v){
+  return v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+}
+
+function formatarMoedaCompacta(v){
+  return 'R$ ' + Math.round(v).toLocaleString('pt-BR');
+}
+
+function ajustarLimiteEntrada(){
+  const valorImovel = parseFloat(document.getElementById('valorImovel').value);
+  const inputEntrada = document.getElementById('entrada');
+  inputEntrada.max = valorImovel;
+  if(parseFloat(inputEntrada.value) > valorImovel){
+    inputEntrada.value = valorImovel;
+  }
+  document.getElementById('entradaMaxLabel').textContent = formatarMoedaCompacta(valorImovel);
+}
+
+function atualizarRotulos(){
+  document.getElementById('rendaValor').textContent = formatarMoedaCompacta(document.getElementById('renda').value);
+  document.getElementById('valorImovelValor').textContent = formatarMoedaCompacta(document.getElementById('valorImovel').value);
+  document.getElementById('entradaValor').textContent = formatarMoedaCompacta(document.getElementById('entrada').value);
+  document.getElementById('prazoAnosValor').textContent = document.getElementById('prazoAnos').value + ' anos';
+}
+
+function selecionarSistema(sistema){
+  sistemaAtual = sistema;
+  document.getElementById('btnPrice').classList.toggle('ativo', sistema==='PRICE');
+  document.getElementById('btnSac').classList.toggle('ativo', sistema==='SAC');
+  calcular();
+}
+
+function renderTabelaMcmv(){
+  const tbody = document.querySelector('#tabelaMcmv tbody');
+  tbody.innerHTML = '';
+  regrasMcmv.forEach((linha, i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text" value="${linha.nome}" onchange="regrasMcmv[${i}].nome=this.value"></td>
+      <td><input type="number" value="${linha.rendaAte}" onchange="regrasMcmv[${i}].rendaAte=parseFloat(this.value)||0"></td>
+      <td><input type="number" value="${linha.subsidioMax}" onchange="regrasMcmv[${i}].subsidioMax=parseFloat(this.value)||0"></td>
+      <td><input type="number" step="0.01" value="${linha.taxa}" onchange="regrasMcmv[${i}].taxa=parseFloat(this.value)||0"></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderTabelaSbpe(){
+  const tbody = document.querySelector('#tabelaSbpe tbody');
+  tbody.innerHTML = '';
+  regrasSbpe.forEach((linha, i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="number" value="${linha.cotaAte}" onchange="regrasSbpe[${i}].cotaAte=parseFloat(this.value)||0"></td>
+      <td><input type="number" step="0.01" value="${linha.taxa}" onchange="regrasSbpe[${i}].taxa=parseFloat(this.value)||0"></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function adicionarLinhaMcmv(){
+  regrasMcmv.push({nome:'Nova faixa', rendaAte:0, subsidioMax:0, taxa:0});
+  renderTabelaMcmv();
+}
+function adicionarLinhaSbpe(){
+  regrasSbpe.push({cotaAte:0, taxa:0});
+  renderTabelaSbpe();
+}
+function restaurarPadraoMcmv(){
+  regrasMcmv = [
+    {nome: 'Faixa 1', rendaAte: 2850, subsidioMax: 55000, taxa: 4.0},
+    {nome: 'Faixa 2', rendaAte: 4700, subsidioMax: 40000, taxa: 4.75},
+    {nome: 'Faixa 3', rendaAte: 8600, subsidioMax: 15000, taxa: 7.5},
+    {nome: 'Faixa 4', rendaAte: 12000, subsidioMax: 0, taxa: 9.0}
+  ];
+  renderTabelaMcmv();
+}
+function restaurarPadraoSbpe(){
+  regrasSbpe = [
+    {cotaAte: 50, taxa: 10.49},
+    {cotaAte: 70, taxa: 10.99},
+    {cotaAte: 80, taxa: 11.49},
+    {cotaAte: 90, taxa: 11.99}
+  ];
+  renderTabelaSbpe();
+}
+
+renderTabelaMcmv();
+renderTabelaSbpe();
+ajustarLimiteEntrada();
+atualizarRotulos();
+calcular();
+
+function buscarFaixaMcmv(renda){
+  for(const f of regrasMcmv){
+    if(renda <= f.rendaAte) return f;
+  }
+  return null;
+}
+
+function buscarFaixaSbpe(cotaPercentual){
+  for(const f of regrasSbpe){
+    if(cotaPercentual <= f.cotaAte) return f;
+  }
+  return regrasSbpe[regrasSbpe.length - 1];
+}
+
+function calcularPrice(valorFinanciado, taxaAnual, meses){
+  const i = Math.pow(1 + taxaAnual/100, 1/12) - 1;
+  if(i === 0) return {parcela: valorFinanciado/meses, ultimaParcela: valorFinanciado/meses, total: valorFinanciado};
+  const parcela = valorFinanciado * (i * Math.pow(1+i, meses)) / (Math.pow(1+i, meses) - 1);
+  return {parcela: parcela, ultimaParcela: parcela, total: parcela * meses};
+}
+
+function calcularSac(valorFinanciado, taxaAnual, meses){
+  const i = Math.pow(1 + taxaAnual/100, 1/12) - 1;
+  const amortizacao = valorFinanciado / meses;
+  let saldo = valorFinanciado;
+  let total = 0;
+  let primeiraParcela = 0;
+  let ultimaParcela = 0;
+  for(let m=1; m<=meses; m++){
+    const juros = saldo * i;
+    const parcela = amortizacao + juros;
+    if(m===1) primeiraParcela = parcela;
+    if(m===meses) ultimaParcela = parcela;
+    total += parcela;
+    saldo -= amortizacao;
+  }
+  return {parcela: primeiraParcela, ultimaParcela: ultimaParcela, total: total};
+}
+
+function calcular(){
+  atualizarRotulos();
+
+  const renda = parseFloat(document.getElementById('renda').value);
+  const valorImovel = parseFloat(document.getElementById('valorImovel').value);
+  const entrada = Math.min(parseFloat(document.getElementById('entrada').value), valorImovel);
+  const prazoAnos = parseInt(document.getElementById('prazoAnos').value) || 30;
+  const meses = prazoAnos * 12;
+
+  document.getElementById('cardResultados').style.display = 'block';
+
+  const faixaMcmv = buscarFaixaMcmv(renda);
+  let subsidio = 0, taxaMcmv = 9.0, faixaTexto = 'Fora das faixas';
+  if(faixaMcmv){
+    subsidio = Math.min(faixaMcmv.subsidioMax, valorImovel * 0.2);
+    taxaMcmv = faixaMcmv.taxa;
+    faixaTexto = faixaMcmv.nome;
+  }
+  const financiadoMcmv = Math.max(valorImovel - entrada - subsidio, 0);
+
+  const infoFaixa = document.getElementById('rendaFaixaInfo');
+  if(faixaMcmv){
+    infoFaixa.textContent = faixaMcmv.nome + ' · Renda ate ' + formatarMoedaCompacta(faixaMcmv.rendaAte) + ' · Subsidio ate ' + formatarMoedaCompacta(subsidio) + ' · Taxa ' + taxaMcmv.toFixed(2) + '% a.a.';
+  } else {
+    infoFaixa.textContent = 'Fora das faixas de subsidio do MCMV · Taxa ' + taxaMcmv.toFixed(2) + '% a.a.';
+  }
+
+  const financiadoSbpe = Math.max(valorImovel - entrada, 0);
+  const cotaSbpePercentual = valorImovel > 0 ? (financiadoSbpe / valorImovel) * 100 : 0;
+  const faixaSbpe = buscarFaixaSbpe(cotaSbpePercentual);
+  const taxaSbpe = faixaSbpe.taxa;
+
+  let resMcmv, resSbpe;
+  if(sistemaAtual === 'PRICE'){
+    resMcmv = calcularPrice(financiadoMcmv, taxaMcmv, meses);
+    resSbpe = calcularPrice(financiadoSbpe, taxaSbpe, meses);
+  } else {
+    resMcmv = calcularSac(financiadoMcmv, taxaMcmv, meses);
+    resSbpe = calcularSac(financiadoSbpe, taxaSbpe, meses);
+  }
+
+  document.getElementById('mcmvFaixa').textContent = faixaTexto;
+  document.getElementById('mcmvSubsidio').textContent = formatarMoeda(subsidio);
+  document.getElementById('mcmvEntradaUsada').textContent = formatarMoeda(entrada);
+  document.getElementById('mcmvFinanciado').textContent = formatarMoeda(financiadoMcmv);
+  document.getElementById('mcmvParcela').textContent = formatarMoeda(resMcmv.parcela);
+  document.getElementById('mcmvTotal').textContent = formatarMoeda(resMcmv.total + entrada + subsidio*0);
+  document.getElementById('mcmvTaxaBadge').textContent = taxaMcmv.toFixed(2) + '% a.a.';
+  document.getElementById('mcmvComprometimento').textContent = ((resMcmv.parcela/renda)*100).toFixed(1) + '%';
+
+  document.getElementById('sbpeCota').textContent = cotaSbpePercentual.toFixed(1) + '%';
+  document.getElementById('sbpeEntradaUsada').textContent = formatarMoeda(entrada);
+  document.getElementById('sbpeFinanciado').textContent = formatarMoeda(financiadoSbpe);
+  document.getElementById('sbpeParcela').textContent = formatarMoeda(resSbpe.parcela);
+  document.getElementById('sbpeTotal').textContent = formatarMoeda(resSbpe.total + entrada);
+  document.getElementById('sbpeTaxaBadge').textContent = taxaSbpe.toFixed(2) + '% a.a.';
+  document.getElementById('sbpeComprometimento').textContent = ((resSbpe.parcela/renda)*100).toFixed(1) + '%';
+
+  const mostrarUltima = sistemaAtual === 'SAC';
+  document.getElementById('mcmvLinhaUltima').style.display = mostrarUltima ? 'flex' : 'none';
+  document.getElementById('sbpeLinhaUltima').style.display = mostrarUltima ? 'flex' : 'none';
+  document.getElementById('mcmvUltimaParcela').textContent = formatarMoeda(resMcmv.ultimaParcela);
+  document.getElementById('sbpeUltimaParcela').textContent = formatarMoeda(resSbpe.ultimaParcela);
+  document.getElementById('mcmvLabelParcela').textContent = mostrarUltima ? '1a parcela' : 'Parcela mensal';
+  document.getElementById('sbpeLabelParcela').textContent = mostrarUltima ? '1a parcela' : 'Parcela mensal';
+
+  const totalMcmv = resMcmv.total + entrada;
+  const totalSbpe = resSbpe.total + entrada;
+  const economia = totalSbpe - totalMcmv;
+  const economiaBox = document.getElementById('economiaBox');
+  if(economia > 0){
+    economiaBox.style.display = 'block';
+    document.getElementById('economiaValor').textContent = formatarMoeda(economia);
+  } else {
+    economiaBox.style.display = 'none';
+  }
+
+  const avisoRenda = document.getElementById('avisoRenda');
+  const comprometimentoMcmv = (resMcmv.parcela/renda)*100;
+  if(comprometimentoMcmv > 30){
+    avisoRenda.style.display = 'block';
+    avisoRenda.style.color = '#A33';
+    avisoRenda.textContent = 'Atencao: o comprometimento de renda no MCMV ficou acima de 30%, limite normalmente usado pelos bancos na analise de credito.';
+  } else {
+    avisoRenda.style.display = 'none';
+  }
+}
+</script>
+
+</body>
+</html>
