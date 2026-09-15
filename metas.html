@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Metas do Mês — Sérgio Costa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --verde: #10b981;
+  --verde-claro: #059669;
+  --verde-escuro: #047857;
+  --escuro: #0f2922;
+  --escuro2: #f4f8f6;
+  --branco: #ffffff;
+  --card-bg: #ffffff;
+  --card-border: rgba(16,185,129,0.18);
+  --card-hover-border: rgba(16,185,129,0.45);
+  --text-muted: #6b7c76;
+  --divider: rgba(16,185,129,0.16);
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--escuro2); min-height: 100vh; color: var(--escuro); }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--verde-escuro); outline-offset: 2px; border-radius: 4px; }
+
+header {
+  background: var(--branco); border-bottom: 2px solid var(--verde);
+  padding: 1.4rem 2rem; display: flex; align-items: center; gap: 16px;
+  position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(15,41,34,0.05);
+}
+.voltar {
+  display: flex; align-items: center; gap: 6px; color: var(--verde-claro);
+  text-decoration: none; font-size: 12.5px; font-weight: 500; flex-shrink: 0;
+  border: 1px solid var(--card-border); border-radius: 20px; padding: 7px 13px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.voltar:hover { border-color: var(--card-hover-border); background: rgba(16,185,129,0.06); }
+.header-info h1 { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600; color: var(--escuro); line-height: 1.2; }
+.header-info p { font-size: 12px; color: var(--text-muted); margin-top: 3px; text-transform: capitalize; }
+.header-acao { margin-left: auto; }
+.reiniciar {
+  font-size: 12px; font-weight: 500; color: var(--text-muted); background: transparent;
+  border: 1px solid var(--card-border); border-radius: 20px; padding: 8px 14px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.reiniciar:hover { color: var(--verde-escuro); border-color: var(--card-hover-border); background: rgba(16,185,129,0.06); }
+
+main { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+.resumo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 2rem; }
+@media (max-width: 560px) { .resumo { grid-template-columns: 1fr; } }
+.resumo-item {
+  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;
+  padding: 16px; text-align: center; box-shadow: 0 1px 3px rgba(15,41,34,0.05);
+}
+.resumo-valor { font-family: 'Sora', sans-serif; font-size: 26px; font-weight: 700; color: var(--verde-claro); }
+.resumo-label { font-size: 10.5px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
+
+.section-label {
+  font-size: 10.5px; font-weight: 600; letter-spacing: 0.11em; color: var(--text-muted);
+  text-transform: uppercase; margin-bottom: 14px; padding-left: 2px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-label::after { content: ''; flex: 1; height: 0.5px; background: var(--divider); }
+
+.metas { display: flex; flex-direction: column; gap: 12px; }
+.meta {
+  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px;
+  padding: 16px 18px; box-shadow: 0 1px 3px rgba(15,41,34,0.05); transition: border-color 0.15s;
+}
+.meta.concluida { border-color: rgba(16,185,129,0.45); background: rgba(16,185,129,0.04); }
+.meta-topo { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.meta-nome { display: flex; align-items: center; gap: 10px; }
+.meta-nome i { font-size: 18px; color: var(--verde); }
+.meta-nome span { font-family: 'Sora', sans-serif; font-size: 14.5px; font-weight: 600; color: var(--escuro); }
+.meta-alvo { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-muted); }
+.meta-alvo input {
+  width: 46px; background: var(--branco); border: 1px solid var(--card-border);
+  border-radius: 6px; color: var(--escuro); font-family: 'DM Sans', sans-serif; font-size: 12px;
+  text-align: center; padding: 4px 2px;
+}
+
+.meta-barra-fundo { height: 8px; border-radius: 5px; background: rgba(16,185,129,0.1); overflow: hidden; margin-bottom: 10px; }
+.meta-barra { height: 100%; background: linear-gradient(90deg, var(--verde-escuro), var(--verde)); border-radius: 5px; transition: width 0.3s ease; }
+
+.meta-rodape { display: flex; align-items: center; justify-content: space-between; }
+.meta-contagem { font-size: 12.5px; color: var(--text-muted); }
+.meta-contagem b { color: var(--verde-claro); font-size: 15px; font-family: 'Sora', sans-serif; }
+.meta-botoes { display: flex; gap: 6px; }
+.meta-botoes button {
+  width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--card-border);
+  background: var(--branco); color: var(--escuro); font-size: 16px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s;
+}
+.meta-botoes button:hover { background: var(--verde); color: #fff; border-color: var(--verde); }
+.meta-botoes button:active { transform: scale(0.94); }
+
+footer {
+  text-align: center; padding: 1.75rem 1.5rem 2rem; font-size: 11.5px;
+  color: var(--text-muted); border-top: 0.5px solid var(--divider); margin-top: 1rem;
+}
+footer .selo-mini {
+  display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--verde); margin: 0 8px 1px; vertical-align: middle;
+}
+footer strong { color: var(--verde-claro); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="voltar" href="index.html"><i class="ti ti-arrow-left"></i>Painel</a>
+  <div class="header-info">
+    <h1>Metas do Mês</h1>
+    <p id="mes-atual">carregando...</p>
+  </div>
+  <div class="header-acao">
+    <button class="reiniciar" id="btn-reiniciar"><i class="ti ti-refresh"></i>Zerar mês</button>
+  </div>
+</header>
+
+<main>
+  <div class="resumo">
+    <div class="resumo-item"><div class="resumo-valor" id="resumo-media">0%</div><div class="resumo-label">Média das metas</div></div>
+    <div class="resumo-item"><div class="resumo-valor" id="resumo-concluidas">0</div><div class="resumo-label">Metas batidas</div></div>
+    <div class="resumo-item"><div class="resumo-valor" id="resumo-total">0</div><div class="resumo-label">Ações no mês</div></div>
+  </div>
+
+  <div class="section-label">Indicadores</div>
+  <div class="metas" id="lista-metas"></div>
+</main>
+
+<footer>
+  <strong>FCosta</strong> · Sérgio Fernandes da Costa<span class="selo-mini"></span>CRECI-SP 294791-F · CNAI 52708
+</footer>
+
+<script>
+const CHAVE = 'fcosta_metas_mes';
+const ICONES = {
+  leads: 'ti-users',
+  visitas: 'ti-calendar-event',
+  propostas: 'ti-file-text',
+  fechamentos: 'ti-file-check'
+};
+const PADRAO = {
+  mes: mesAtualISO(),
+  itens: {
+    leads:       { nome: 'Leads captados',      alvo: 20, atual: 0 },
+    visitas:     { nome: 'Visitas agendadas',   alvo: 12, atual: 0 },
+    propostas:   { nome: 'Propostas enviadas',  alvo: 6,  atual: 0 },
+    fechamentos: { nome: 'Contratos fechados',  alvo: 2,  atual: 0 }
+  }
+};
+
+function mesAtualISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function nomeMes() {
+  return new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+}
+
+function carregar() {
+  let dados;
+  try { dados = JSON.parse(localStorage.getItem(CHAVE)); } catch { dados = null; }
+  if (!dados) dados = JSON.parse(JSON.stringify(PADRAO));
+
+  // troca de mês: zera contagens, preserva metas definidas
+  if (dados.mes !== mesAtualISO()) {
+    Object.values(dados.itens).forEach(item => item.atual = 0);
+    dados.mes = mesAtualISO();
+    salvar(dados);
+  }
+  return dados;
+}
+function salvar(dados) { localStorage.setItem(CHAVE, JSON.stringify(dados)); }
+
+function renderizar() {
+  const dados = carregar();
+  document.getElementById('mes-atual').textContent = nomeMes();
+
+  const lista = document.getElementById('lista-metas');
+  lista.innerHTML = '';
+
+  let somaPercent = 0, concluidas = 0, totalAcoes = 0, n = 0;
+
+  Object.entries(dados.itens).forEach(([chave, item]) => {
+    n++;
+    totalAcoes += item.atual;
+    const percent = item.alvo > 0 ? Math.min(100, Math.round((item.atual / item.alvo) * 100)) : 0;
+    somaPercent += percent;
+    const bateu = percent >= 100;
+    if (bateu) concluidas++;
+
+    const el = document.createElement('div');
+    el.className = 'meta' + (bateu ? ' concluida' : '');
+    el.innerHTML = `
+      <div class="meta-topo">
+        <div class="meta-nome"><i class="ti ${ICONES[chave] || 'ti-target'}"></i><span>${item.nome}</span></div>
+        <div class="meta-alvo">meta <input type="number" min="0" value="${item.alvo}" data-chave="${chave}" class="campo-alvo" /></div>
+      </div>
+      <div class="meta-barra-fundo"><div class="meta-barra" style="width:${percent}%"></div></div>
+      <div class="meta-rodape">
+        <div class="meta-contagem"><b>${item.atual}</b> / ${item.alvo} — ${percent}%${bateu ? ' <i class="ti ti-check" style="color:var(--verde-claro);"></i>' : ''}</div>
+        <div class="meta-botoes">
+          <button data-chave="${chave}" data-delta="-1" aria-label="Diminuir">−</button>
+          <button data-chave="${chave}" data-delta="1" aria-label="Aumentar">+</button>
+        </div>
+      </div>
+    `;
+    lista.appendChild(el);
+  });
+
+  document.getElementById('resumo-media').textContent = n ? Math.round(somaPercent / n) + '%' : '0%';
+  document.getElementById('resumo-concluidas').textContent = concluidas + ' / ' + n;
+  document.getElementById('resumo-total').textContent = totalAcoes;
+
+  lista.querySelectorAll('.meta-botoes button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dados = carregar();
+      const chave = btn.dataset.chave;
+      const delta = parseInt(btn.dataset.delta, 10);
+      dados.itens[chave].atual = Math.max(0, dados.itens[chave].atual + delta);
+      salvar(dados);
+      renderizar();
+    });
+  });
+
+  lista.querySelectorAll('.campo-alvo').forEach(input => {
+    input.addEventListener('change', () => {
+      const dados = carregar();
+      const chave = input.dataset.chave;
+      dados.itens[chave].alvo = Math.max(0, parseInt(input.value, 10) || 0);
+      salvar(dados);
+      renderizar();
+    });
+  });
+}
+
+document.getElementById('btn-reiniciar').addEventListener('click', () => {
+  if (!confirm('Zerar as contagens deste mês? As metas definidas serão mantidas.')) return;
+  const dados = carregar();
+  Object.values(dados.itens).forEach(item => item.atual = 0);
+  salvar(dados);
+  renderizar();
+});
+
+renderizar();
+</script>
+
+</body>
+</html>
