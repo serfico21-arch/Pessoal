@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Simulado - Ações de Servos na Família, Igreja e Sociedade</title>
+<style>
+  :root{
+    --bg:#f4f1ea; --card:#ffffff; --ink:#2b2620; --muted:#6b6357;
+    --accent:#7a5c3e; --accent2:#3e5c46; --ok:#3e7d47; --bad:#a5352f;
+    --border:#e2dcce;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:Georgia,'Times New Roman',serif; background:var(--bg); color:var(--ink);
+    padding:24px 14px 60px;
+  }
+  .wrap{max-width:760px;margin:0 auto}
+  h1{font-size:1.5rem; text-align:center; margin-bottom:2px}
+  .sub{text-align:center;color:var(--muted); font-size:.95rem; margin-bottom:22px}
+  .rounds{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:26px;
+  }
+  .round-btn{
+    padding:9px 14px; border-radius:8px; border:1px solid var(--border); background:var(--card);
+    cursor:pointer; font-family:inherit; font-size:.9rem; color:var(--ink);
+  }
+  .round-btn.active{background:var(--accent); color:#fff; border-color:var(--accent)}
+  .round-btn.done{border-color:var(--accent2)}
+  .round-btn.done::after{content:" ✓"; color:var(--accent2)}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:20px 18px; margin-bottom:14px; box-shadow:0 1px 3px rgba(0,0,0,.05);
+  }
+  .qnum{font-weight:bold; color:var(--accent); margin-bottom:6px; font-size:.85rem}
+  .qtext{font-size:1.05rem; margin-bottom:12px; line-height:1.4}
+  label{
+    display:block; padding:9px 12px; margin-bottom:7px; border:1px solid var(--border);
+    border-radius:8px; cursor:pointer; font-size:.97rem; transition:background .15s;
+  }
+  label:hover{background:#faf8f3}
+  label.correct{background:#e6f2e7; border-color:var(--ok); font-weight:bold}
+  label.wrong{background:#f7e6e5; border-color:var(--bad)}
+  input[type=radio]{margin-right:8px}
+  .actions{text-align:center; margin:22px 0}
+  button.primary{
+    background:var(--accent); color:#fff; border:none; padding:12px 26px; border-radius:8px;
+    font-size:1rem; cursor:pointer; font-family:inherit;
+  }
+  button.primary:disabled{opacity:.5; cursor:not-allowed}
+  .score{
+    text-align:center; font-size:1.15rem; margin:14px 0 20px; padding:14px; border-radius:10px;
+    background:#fff; border:1px solid var(--border);
+  }
+  .score b{color:var(--accent)}
+  .nav{display:flex; justify-content:space-between; margin-top:20px}
+  .nav button{
+    background:var(--card); border:1px solid var(--border); padding:9px 16px; border-radius:8px;
+    cursor:pointer; font-family:inherit;
+  }
+  .overall{
+    background:var(--accent2); color:#fff; border-radius:12px; padding:16px 18px; text-align:center;
+    margin-bottom:22px; display:none;
+  }
+  .overall.show{display:block}
+  footer{text-align:center; color:var(--muted); font-size:.8rem; margin-top:30px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Ações de Servos na Família, Igreja e Sociedade</h1>
+  <div class="sub">Palestra 7 — Pr. Vanderlei do Couto · Simulado: 10 rodadas × 10 questões · 4 alternativas</div>
+
+  <div class="overall" id="overall"></div>
+
+  <div class="rounds" id="roundsNav"></div>
+
+  <div id="quizArea"></div>
+
+  <div class="nav">
+    <button onclick="prevRound()">&larr; Rodada anterior</button>
+    <button onclick="nextRound()">Próxima rodada &rarr;</button>
+  </div>
+
+  <footer>Simulado gerado a partir do conteúdo enviado (páginas 51–61). Revise a apostila original para confirmar detalhes finos.</footer>
+</div>
+
+<script>
+const rounds = [
+[
+{q:"Qual o título da Palestra 7?",o:["Ações de Servos na Família, Igreja e Sociedade","O Chamado do Servo Fiel","Liderança Cristã no Lar","Josué e a Terra Prometida"],c:0},
+{q:"Quem é o autor da Palestra 7?",o:["Pr. Vanderson","Pr. Vanderlei do Couto","Pr. Antônio Gilberto","Pr. Caio Fábio"],c:1},
+{q:"Segundo o texto, o que determina o que somos?",o:["Nossa aparência","Como servimos","Nossa riqueza","Nossa idade"],c:1},
+{q:"A influência do homem no ambiente familiar reflete em quê, segundo o texto?",o:["Somente em si mesmo","Na igreja e na sociedade","Apenas no trabalho","Em nada além da própria família"],c:1},
+{q:"O que constitui a base de tudo, segundo o texto?",o:["A igreja","A sociedade","A família","O trabalho"],c:2},
+{q:"Por que as pessoas se frustram, segundo o texto?",o:["Por falta de dinheiro","Por não considerarem a Bíblia detentora das respostas","Por não terem estudado","Por não terem amigos"],c:1},
+{q:"Do que o ser humano é formado, segundo o texto?",o:["Só corpo","Corpo e alma","Corpo, alma e espírito","Só espírito"],c:2},
+{q:"Qual referência bíblica fala de \"vida quieta e sossegada\"?",o:["Romanos 8","1 Timóteo 2:1-4","Efésios 4","Gênesis 1"],c:1},
+{q:"Segundo 1 Timóteo 2:1-4, o que Paulo admoesta fazer antes de tudo?",o:["Jejuar","Deprecações, orações, intercessões e ações de graças","Vender bens","Viajar em missão"],c:1},
+{q:"Deus nos criou para termos uma vida...",o:["Ocupada e ansiosa","Quieta e sossegada, e bem-sucedida","Solitária","Cheia de disputas"],c:1}
+],
+[
+{q:"Depois da morte de quem o SENHOR falou a Josué?",o:["Arão","Moisés","Calebe","Balaão"],c:1},
+{q:"Josué era filho de quem?",o:["Calebe","Num","Moisés","Arão"],c:1},
+{q:"Josué era servo de quem?",o:["De Deus somente","De Moisés","Dos sacerdotes","Do povo"],c:1},
+{q:"O que Deus ordena Josué fazer em Josué 1?",o:["Ficar parado","Levantar-se e passar o Jordão","Voltar ao Egito","Construir um templo"],c:1},
+{q:"Até onde ia o território prometido, segundo Josué 1?",o:["Só até o Jordão","Do deserto e Líbano até o Eufrates e o grande mar","Só até Jericó","Até o Mar Vermelho"],c:1},
+{q:"O que Deus promete que ninguém fará diante de Josué?",o:["Ninguém se sustentará diante dele","Ninguém o seguirá","Ninguém o obedecerá","Ninguém o respeitará"],c:0},
+{q:"Qual promessa reforça o que Deus fez com Moisés?",o:["\"Não te deixarei nem te desampararei\"","\"Te darei riquezas\"","\"Te farei rei\"","\"Te darei descanso eterno\""],c:0},
+{q:"O que Josué deveria fazer com o livro da Lei?",o:["Escondê-lo","Meditar nele dia e noite","Reescrevê-lo","Entregá-lo só aos sacerdotes"],c:1},
+{q:"Qual a consequência de guardar e meditar na Lei?",o:["Riqueza imediata","Prosperar o caminho e conduzir-se prudentemente","Fama","Longevidade apenas"],c:1},
+{q:"Quais duas qualidades Deus pede repetidamente a Josué?",o:["Paciência e humildade","Força e coragem","Sabedoria e riqueza","Silêncio e obediência cega"],c:1}
+],
+[
+{q:"Sobre qual tema o autor teve dúvida em usar a biografia de Josué?",o:["A liderança política","O papel do homem na família, igreja e sociedade","A guerra contra os cananeus","A construção do templo"],c:1},
+{q:"Por que o autor teve essa dúvida?",o:["Porque Josué era pecador","Porque não há detalhes bíblicos de Josué como marido, pai ou filho","Porque Josué não existiu","Porque o tema era proibido"],c:1},
+{q:"O que o autor fez para decidir seguir com o tema?",o:["Consultou um livro","Orou e refletiu, submetendo-se à vontade de Deus","Perguntou só a outros pastores","Ignorou o assunto"],c:1},
+{q:"Para qual igreja foi convidado a pregar pela primeira vez sobre o tema?",o:["Igreja Batista Central","Igreja O Brasil Para Cristo, em Jundiaí/SP","Assembleia de Deus em Salto","Igreja Presbiteriana de São Roque"],c:1},
+{q:"Em que mês e ano ele pregou pela primeira vez sobre o tema?",o:["Janeiro de 2000","Abril de 2006","Dezembro de 1999","Março de 2010"],c:1},
+{q:"O que ele levou para a pregação?",o:["Um livro completo","Um esboço","Slides","Nada, falou totalmente de improviso"],c:1},
+{q:"O que o Espírito Santo fez durante a pregação, segundo o autor?",o:["Nada de especial","Deu-lhe graça e o surpreendeu com a riqueza do tema","Interrompeu a pregação","Mudou o tema"],c:1},
+{q:"Por que decidiu registrar a mensagem por escrito?",o:["Por exigência da igreja","Para edificar vidas e agraciar mais pessoas","Para vender livros","Por obrigação acadêmica"],c:1},
+{q:"O autor descreve estar \"mergulhado\" em quê durante a reflexão?",o:["No mundo espiritual","Em dúvidas teológicas","Em problemas pessoais","Em estudos seculares"],c:0},
+{q:"O que ele deixou de lado para seguir a direção do Espírito Santo?",o:["Sua família","Sua própria vontade","Seu ministério","Sua igreja"],c:1}
+],
+[
+{q:"Como Josué é apresentado no início do livro, ao invés de ser exaltado diretamente?",o:["Como rei","Como servo de Moisés","Como sacerdote","Como profeta maior"],c:1},
+{q:"O que isso (ser chamado servo) demonstra, segundo o autor?",o:["Que Josué era fraco","Que Deus é quem nos adestra para a batalha","Que Moisés era mais importante","Que Josué não tinha valor"],c:1},
+{q:"Qual salmo fala \"que adestra as minhas mãos para a peleja\"?",o:["Salmo 23","Salmo 144:1","Salmo 91","Salmo 51"],c:1},
+{q:"Como se chama a seção sobre agir prudentemente?",o:["\"Fé e obras\"","\"Prudência, a arma do sucesso\"","\"O caminho estreito\"","\"A batalha espiritual\""],c:1},
+{q:"Em Josué 1:11, o que Josué ordena aos príncipes do povo?",o:["Que se armassem","Que se proveem de comida","Que construíssem altares","Que jejuassem sete dias"],c:1},
+{q:"Por que era necessário se prover de alimentos, segundo o texto?",o:["Por prazer","Porque passariam o Jordão e enfrentariam obstáculos, precisavam ficar fortes","Por tradição","Porque Moisés mandou guardar comida por 40 anos"],c:1},
+{q:"Por que muitos homens não são bem-sucedidos, segundo o texto?",o:["Por falta de sorte","Porque não se preparam nem espiritual nem materialmente","Por causa dos outros","Por não terem estudado teologia"],c:1},
+{q:"O que ocorre a quem só se prepara espiritualmente e negligencia o material?",o:["Fica mais espiritual ainda","Torna-se ausente do lar, negligenciando esposa e filhos","Enriquece","Nada muda"],c:1},
+{q:"Qual versículo fala sobre governar a própria casa?",o:["1 Timóteo 3:5","Tito 2:1","Gálatas 5:1","Filipenses 4:6"],c:0},
+{q:"Segundo Hebreus 12:1, do que estamos rodeados?",o:["De anjos guerreiros","De uma tão grande nuvem de testemunhas","De inimigos","De bênçãos materiais"],c:1}
+],
+[
+{q:"Qual salmo fala do \"varão que não anda segundo o conselho dos ímpios\"?",o:["Salmo 1","Salmo 8","Salmo 100","Salmo 119"],c:0},
+{q:"Em que o bem-aventurado tem prazer, segundo o Salmo 1?",o:["Nas riquezas","Na lei do SENHOR","Na fama","No poder"],c:1},
+{q:"Com o que o bem-aventurado é comparado no Salmo 1?",o:["Com uma pedra","Com árvore plantada junto a ribeiros de águas","Com uma nuvem","Com o vento"],c:1},
+{q:"Com o que os ímpios são comparados no Salmo 1?",o:["Com árvores fortes","Com a moinha que o vento espalha","Com rochas","Com rios"],c:1},
+{q:"Segundo Josué 1:8, o que garante prosperidade no caminho?",o:["Sacrifícios diários","Não se apartar do livro da Lei, meditando e cumprindo o que está escrito","Riquezas herdadas","Alianças políticas"],c:1},
+{q:"Quem é o \"fracassado\", segundo o texto?",o:["Quem não tem dinheiro","Aquele que não tem sua vida guiada pelos padrões divinos","Quem não estudou","Quem é solteiro"],c:1},
+{q:"O que acontece a quem não tem certeza de agradar ao Senhor?",o:["Nada muda","Sente-se sempre derrotado e transmite insegurança à família","Fica mais forte","Torna-se líder automaticamente"],c:1},
+{q:"Qual referência fala \"que os homens nos considerem como ministros de Cristo\"?",o:["1 Coríntios 4:1","2 Coríntios 3:1","Gálatas 2:1","Efésios 3:1"],c:0},
+{q:"A sociedade não reconhecerá como ministro (servo) de Cristo quem?",o:["Quem é rico","Quem se sente derrotado e sem certeza de agradar ao Senhor","Quem é jovem","Quem não tem filhos"],c:1},
+{q:"Além da prudência e da força/coragem, o que mais leva ao sucesso nessa seção?",o:["Riqueza material","Certeza de que a vida está pautada na Palavra de Deus","Popularidade","Estudo acadêmico apenas"],c:1}
+],
+[
+{q:"Qual o título da seção sobre reconhecer Deus no comando?",o:["\"O Bom Pastor\"","\"Conhecer o Comandante\"","\"A Grande Comissão\"","\"O Reino de Deus\""],c:1},
+{q:"Qual versículo diz \"não te deixarei nem te desampararei\" (Js 1.5)?",o:["Josué 1:5","Salmo 23:1","João 3:16","Mateus 6:33"],c:0},
+{q:"Josué estava convicto de sucesso por reconhecer o quê?",o:["Sua própria força","O comando de Deus","A opinião do povo","Sua experiência militar apenas"],c:1},
+{q:"Segundo Efésios 5:23, quem é a cabeça da mulher?",o:["O pai dela","O marido","O pastor","Ninguém"],c:1},
+{q:"O que significa ser líder no lar, segundo o texto?",o:["Dar ordens","Ser presente, o que inspira confiança","Ter mais dinheiro","Trabalhar fora o dia todo"],c:1},
+{q:"Que erro alguns homens cometem ao se dizerem \"cabeça\"?",o:["São passivos demais","Subjugam a esposa, tratando-a como doméstica mal remunerada","Dão liberdade demais","Cuidam demais da casa"],c:1},
+{q:"Qual frase o texto cita como pensamento errado de um marido provedor?",o:["\"Vamos decidir juntos\"","\"Eu trabalho, portanto tenho meus direitos\"","\"Ela também trabalha\"","\"Precisamos orar juntos\""],c:1},
+{q:"Segundo Colossenses 3:19 e 21, o que maridos e pais devem/não devem fazer?",o:["Amar a mulher e não irritar os filhos","Ignorar a família e focar no trabalho","Exigir obediência cega","Nada é dito sobre isso"],c:0},
+{q:"Segundo 2 Coríntios 10:5, o que devemos destruir e levar cativo?",o:["Nossos inimigos","Conselhos e altivez; todo entendimento à obediência de Cristo","Nossas posses","Nossos sonhos"],c:1},
+{q:"Qual versículo questiona \"por que me chamais Senhor, Senhor, e não fazeis o que eu vos digo\"?",o:["Lucas 6:46","João 14:6","Mateus 7:21","Marcos 12:30"],c:0}
+],
+[
+{q:"Segundo Provérbios 22:6, o que fazer com o menino?",o:["Deixá-lo livre","Instruí-lo no caminho em que deve andar","Puni-lo sempre","Ignorá-lo até crescer"],c:1},
+{q:"A quem alguns pais erram ao delegar a educação dos filhos?",o:["Aos avós apenas","Aos meios de comunicação, escola ou igreja","Aos vizinhos","A ninguém, é sempre dos pais"],c:1},
+{q:"O que o texto diz que escola, igreja e meios de comunicação são para o cidadão?",o:["Substitutos da família","Complemento na vida do cidadão","Inimigos da família","Desnecessários"],c:1},
+{q:"O que acontece se a família não formar a base e o pai não estiver presente?",o:["Nada, os filhos se ajustam sozinhos","O filho dificilmente se tornará um cidadão de bem","O filho se torna automaticamente rebelde","A igreja resolve tudo"],c:1},
+{q:"Qual versículo fala \"instrui o menino no caminho em que deve andar\"?",o:["Provérbios 22:6","Salmo 127:1","Eclesiastes 12:1","Isaías 54:13"],c:0},
+{q:"Segundo o Salmo 37:25, o que o salmista nunca viu?",o:["O justo rico","O justo desamparado, nem sua descendência mendigando o pão","O ímpio prosperar","Um templo destruído"],c:1},
+{q:"Segundo o Salmo 78:6, para que serve contar a história aos filhos?",o:["Para entretenimento","Para que a geração vindoura soubesse e contasse a seus filhos","Para orgulho familiar","Para fins genealógicos apenas"],c:1},
+{q:"Segundo Efésios 6:4, o que os pais não devem fazer aos filhos?",o:["Educá-los","Provocá-los à ira, mas criá-los na doutrina do Senhor","Elogiá-los","Corrigi-los nunca"],c:1},
+{q:"Segundo 2 Timóteo 3:15, desde quando Timóteo sabia as sagradas letras?",o:["Desde a juventude","Desde a sua meninice","Desde o casamento","Desde a conversão adulta"],c:1},
+{q:"Segundo 1 Samuel 2:26, como Samuel crescia?",o:["Só fisicamente","Fazendo-se agradável ao SENHOR e aos homens","Isolado do povo","Sem instrução religiosa"],c:1}
+],
+[
+{q:"Qual o título da seção sobre honrar antecessores?",o:["\"Herança e bênção\"","\"Honra, a marca do sucesso\"","\"O legado espiritual\"","\"Respeito aos pais\""],c:1},
+{q:"A quem Josué falou para lembrá-los da palavra de Moisés (Js 1.13-15)?",o:["Aos sacerdotes","Aos rubenitas, gaditas e à meia tribo de Manassés","Aos filhos de Israel em geral","Aos anciãos apenas"],c:1},
+{q:"O que essas tribos deveriam deixar na terra que Moisés lhes deu?",o:["Suas armas","Suas mulheres, meninos e gado","Seus bens materiais","Seus sacerdotes"],c:1},
+{q:"O que essas tribos deveriam fazer antes de voltar à sua herança?",o:["Nada, já estava tudo resolvido","Passar armados à frente dos irmãos, ajudando-os até terem descanso","Construir cidades","Esperar 40 anos"],c:1},
+{q:"Segundo Efésios 6:2-3, qual o primeiro mandamento com promessa?",o:["Não matarás","Honra a teu pai e a tua mãe","Amarás o próximo","Guardarás o sábado"],c:1},
+{q:"Qual a promessa de honrar pai e mãe?",o:["Riqueza imediata","Que te vá bem e vivas muito tempo sobre a terra","Filhos numerosos","Proteção contra inimigos"],c:1},
+{q:"Segundo Romanos 13:2, o que ocorre a quem resiste à ordenação de Deus?",o:["Nada acontece","Trará sobre si mesmo a condenação","Será abençoado","Será perdoado automaticamente"],c:1},
+{q:"Segundo Romanos 14:4, o que não compete ao homem fazer quanto a outros?",o:["Amar","Julgar o servo alheio","Ensinar","Orar por eles"],c:1},
+{q:"O que a mãe do autor costumava dizer sobre bom filho?",o:["\"Todo bom filho terá sucesso financeiro\"","\"Todo bom filho será bom marido e bom pai\"","\"Todo bom filho é obediente sempre\"","\"Todo bom filho estuda muito\""],c:1},
+{q:"O que aconteceria a Josué se não honrasse a palavra de Moisés?",o:["Nada mudaria","Teria grande dificuldade em introduzir o povo na terra prometida","Seria abençoado do mesmo jeito","Se tornaria rei"],c:1}
+],
+[
+{q:"Qual o título da seção sobre agir e tomar frente?",o:["\"Fé em ação\"","\"A iniciativa é indispensável\"","\"O poder da oração\"","\"Coragem no combate\""],c:1},
+{q:"Em Josué 1:10-11, o que Josué ordena que se provessem?",o:["Armas","Comida, para atravessar o Jordão em três dias","Roupas","Animais para sacrifício"],c:1},
+{q:"O que aconteceria ao projeto de conquista se Josué ficasse parado?",o:["Nada, tudo continuaria igual","Seria defraudado","Seria adiado só um pouco","Melhoraria"],c:1},
+{q:"Segundo Marcos 16:20, o que o Senhor fazia enquanto os discípulos pregavam?",o:["Nada","Cooperava com eles, confirmando a palavra com sinais","Os testava","Os corrigia constantemente"],c:1},
+{q:"No exemplo do automóvel, o que representa o \"combustível\" da família?",o:["O dinheiro","O Espírito Santo","O amor romântico","A tradição familiar"],c:1},
+{q:"De quem é o dever de conduzir a família, segundo o texto?",o:["Só da mãe","Dos pais, liderados pelo pai (o cabeça)","Da igreja","Dos filhos mais velhos"],c:1},
+{q:"Segundo Hebreus 12:1, com que devemos correr a carreira proposta?",o:["Com pressa","Com paciência","Com medo","Com desconfiança"],c:1},
+{q:"Na conclusão, além de ter iniciativa, o que mais o homem deve ser?",o:["Rico e famoso","Forte e corajoso, com convicção de que em Cristo tudo irá bem","Popular na igreja","Independente de Deus"],c:1},
+{q:"Segundo a conclusão (citando 1 Timóteo 3:5), o que a igreja e a sociedade colherão?",o:["Os frutos, se a família estiver bem","Prejuízos sempre","Nada relacionado à família","Só bênçãos financeiras"],c:0},
+{q:"Qual referência fecha a bênção do texto pedindo saúde e prosperidade?",o:["III João 1:2","Filemom 1:1","Judas 1:1","2 João 1:1"],c:0}
+],
+[
+{q:"Qual o nome completo do autor da Palestra 7?",o:["Vanderson Silva","Vanderlei do Couto","Antônio Vanderlei","Couto Vanderlei Pereira"],c:1},
+{q:"Desde que ano ele é casado, e com quem?",o:["Desde 1980, com Maria de Jesus","Desde 1976, com Maria de Jesus do Couto","Desde 1999, com Sarah Cristina","Desde 1993, com Lilian Maria"],c:1},
+{q:"Quantos filhos ele tem?",o:["Dois","Três","Quatro","Um"],c:1},
+{q:"Em que ano nasceu Fábio Luiz?",o:["1976","1980","1988","1993"],c:0},
+{q:"Em que ano nasceu Lilian Maria?",o:["1976","1980","1988","1999"],c:1},
+{q:"Em que ano nasceu Sarah Cristina?",o:["1976","1980","1988","1999"],c:2},
+{q:"Em qual cidade ele presidiu a Igreja O Brasil Para Cristo de 1991 a 1999?",o:["São Roque","Salto","Jundiaí","Sorocaba"],c:1},
+{q:"Desde quando ele preside a Igreja O Brasil Para Cristo em São Roque?",o:["1991","1993","1999","2002"],c:2},
+{q:"Desde quando ele é superintendente da OBPC na região de São Roque/SP?",o:["1976","1993","1999","2006"],c:1},
+{q:"Desde quando é membro da Comissão Ministerial e de Ética da Convenção OBPC-SP?",o:["1993","1999","2002","2006"],c:2}
+]
+];
+
+let current = 0;
+const answers = rounds.map(r => new Array(r.length).fill(null));
+const corrected = new Array(rounds.length).fill(false);
+
+function buildNav(){
+  const nav = document.getElementById('roundsNav');
+  nav.innerHTML = '';
+  rounds.forEach((r,i)=>{
+    const b = document.createElement('button');
+    b.className = 'round-btn' + (i===current?' active':'') + (corrected[i]?' done':'');
+    b.textContent = 'Rodada ' + (i+1);
+    b.onclick = () => { current = i; render(); };
+    nav.appendChild(b);
+  });
+}
+
+function render(){
+  buildNav();
+  const area = document.getElementById('quizArea');
+  area.innerHTML = '';
+  const rq = rounds[current];
+  rq.forEach((item,qi)=>{
+    const card = document.createElement('div');
+    card.className = 'card';
+    const num = document.createElement('div');
+    num.className = 'qnum';
+    num.textContent = 'Questão ' + (qi+1) + ' de ' + rq.length;
+    card.appendChild(num);
+    const qt = document.createElement('div');
+    qt.className = 'qtext';
+    qt.textContent = item.q;
+    card.appendChild(qt);
+    item.o.forEach((opt,oi)=>{
+      const lab = document.createElement('label');
+      const inp = document.createElement('input');
+      inp.type = 'radio';
+      inp.name = 'r'+current+'q'+qi;
+      inp.value = oi;
+      if(answers[current][qi]===oi) inp.checked = true;
+      inp.onchange = ()=>{ answers[current][qi]=oi; };
+      lab.appendChild(inp);
+      lab.appendChild(document.createTextNode(opt));
+      if(corrected[current]){
+        inp.disabled = true;
+        if(oi===item.c) lab.classList.add('correct');
+        else if(oi===answers[current][qi]) lab.classList.add('wrong');
+      }
+      card.appendChild(lab);
+    });
+    area.appendChild(card);
+  });
+
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  const btn = document.createElement('button');
+  btn.className = 'primary';
+  btn.textContent = corrected[current] ? 'Corrigida ✓' : 'Corrigir esta rodada';
+  btn.disabled = corrected[current];
+  btn.onclick = correctRound;
+  actions.appendChild(btn);
+  area.appendChild(actions);
+
+  if(corrected[current]){
+    const score = document.createElement('div');
+    score.className = 'score';
+    const right = rq.reduce((acc,item,qi)=> acc + (answers[current][qi]===item.c?1:0), 0);
+    score.innerHTML = 'Você acertou <b>' + right + ' de ' + rq.length + '</b> nesta rodada.';
+    area.insertBefore(score, area.firstChild);
+  }
+
+  updateOverall();
+}
+
+function correctRound(){
+  const rq = rounds[current];
+  const missing = answers[current].some(a=>a===null);
+  if(missing && !confirm('Ainda há questões sem resposta nesta rodada. Corrigir mesmo assim?')) return;
+  corrected[current] = true;
+  render();
+}
+
+function updateOverall(){
+  const done = corrected.some(c=>c);
+  const box = document.getElementById('overall');
+  if(!done){ box.classList.remove('show'); return; }
+  let totalRight=0, totalDone=0;
+  rounds.forEach((rq,ri)=>{
+    if(corrected[ri]){
+      totalDone += rq.length;
+      rq.forEach((item,qi)=>{ if(answers[ri][qi]===item.c) totalRight++; });
+    }
+  });
+  box.classList.add('show');
+  box.innerHTML = 'Total corrigido até agora: <b>' + totalRight + ' / ' + totalDone + '</b> acertos' +
+    (corrected.every(c=>c) ? ' — simulado completo!' : '');
+}
+
+function prevRound(){ if(current>0){ current--; render(); } }
+function nextRound(){ if(current<rounds.length-1){ current++; render(); } }
+
+render();
+</script>
+</body>
+</html>
