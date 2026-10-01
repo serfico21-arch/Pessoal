@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meus Aluguéis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--bg:#EEF3F2;--card:#fff;--ink:#17262B;--mute:#5B6B70;--pri:#1F4E5F;--ok:#1E7A46;--okbg:#DDF1E4;--bad:#B3261E;--badbg:#FBE3E1;--wait:#8A5A00;--waitbg:#FCEFCF;--line:#CBD8D6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.5 "Atkinson Hyperlegible",Verdana,Arial,sans-serif}
+header{background:var(--pri);color:#fff;padding:18px 16px}
+header h1{margin:0;font-size:26px}
+header p{margin:2px 0 0;opacity:.85;font-size:15px}
+main{max-width:720px;margin:0 auto;padding:16px}
+button{font:inherit;border:0;border-radius:10px;padding:12px 16px;background:var(--pri);color:#fff;cursor:pointer;font-weight:700}
+button.sec{background:#fff;color:var(--pri);border:2px solid var(--pri)}
+button.del{background:#fff;color:var(--bad);border:2px solid var(--bad)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #E0A526;outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:10px 0}
+.t{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card);color:var(--ink);border:1px solid var(--line);font-weight:400;margin:10px 0}
+.t b{display:block;font-size:20px}.t small{color:var(--mute);font-size:16px}
+.tag{padding:4px 10px;border-radius:99px;font-size:15px;font-weight:700;white-space:nowrap}
+.ok{background:var(--okbg);color:var(--ok)}.bad{background:var(--badbg);color:var(--bad)}.wait{background:var(--waitbg);color:var(--wait)}
+h2{font-size:22px;margin:18px 0 6px}
+.sum{font-size:20px;margin:8px 0}
+.meses{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.meses button{background:#fff;color:var(--ink);border:2px solid var(--line);padding:10px 4px;font-weight:400}
+.meses button small{display:block;font-size:14px}
+.meses .ok{border-color:var(--ok);background:var(--okbg);color:var(--ok);font-weight:700}
+.meses .bad{border-color:var(--bad);background:var(--badbg);color:var(--bad)}
+label{display:block;margin:10px 0 4px;font-weight:700}
+input,textarea,select{width:100%;font:inherit;padding:11px;border:2px solid var(--line);border-radius:10px;background:#fff}
+.dl label{display:flex;gap:10px;align-items:center;font-weight:400;margin:6px 0}
+.dl input{width:24px;height:24px}
+dialog{border:0;border-radius:14px;padding:18px;width:min(92vw,420px)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+#recibo{display:none;position:fixed;inset:0;background:#fff;overflow:auto;padding:20px;z-index:9}
+.paper{max-width:794px;margin:0 auto;background:#fff;border:1px solid #1E3A5F;font-family:Georgia,"Times New Roman",serif;font-size:14px;line-height:1.55;color:#1c2733;box-sizing:border-box;overflow:hidden}
+.paper .top{height:8px;background:linear-gradient(90deg,#1E3A5F,#3B9BD6)}
+.paper .in{padding:22px 28px 16px}
+.paper p{margin:8px 0;text-align:justify}
+.rh{display:flex;flex-wrap:wrap;align-items:center;gap:14px;border-bottom:2px solid #1E3A5F;padding-bottom:12px}
+.rlogo{width:84px;min-height:70px;display:flex;align-items:center;justify-content:center;flex:none}
+.rlogo img{max-width:100%;max-height:84px}
+.mono{width:72px;height:72px;border-radius:50%;background:#1E3A5F;color:#fff;font:700 26px/66px Arial,sans-serif;text-align:center;border:3px solid #3B9BD6}
+.rid{flex:1;min-width:180px;font-family:Arial,sans-serif}
+.rid b{display:block;font-size:19px;color:#1E3A5F}
+.rid span{display:block;font-size:12px;color:#44586b;line-height:1.5}
+.rn{text-align:right;font:12px/1.4 Arial,sans-serif;color:#44586b;margin-left:auto}
+.rn b{display:block;font-size:17px;color:#1E3A5F}
+.rt{text-align:center;margin:16px 0 2px;font:700 20px Arial,sans-serif;letter-spacing:3px;color:#1E3A5F}
+.rs{text-align:center;font:12px Arial,sans-serif;color:#5b6b7a;margin-bottom:10px}
+.rv{border:1.5px solid #1E3A5F;background:#EAF4FB;border-radius:6px;padding:8px 12px;text-align:center;font:700 20px Arial,sans-serif;color:#1E3A5F;margin:10px 0}
+.rv small{display:block;font:italic 12px Georgia,serif;color:#44586b;font-weight:400}
+table.rtb{width:100%;border-collapse:collapse;font:13px Arial,sans-serif;margin:10px 0}
+.rtb th{background:#1E3A5F;color:#fff;text-align:left;padding:6px 8px}
+.rtb td{padding:6px 8px;border-bottom:1px solid #d5e0ea}
+.rtb td:last-child,.rtb th:last-child{text-align:right;white-space:nowrap}
+.rtb tr.tot td{font-weight:700;background:#EAF4FB;border-top:2px solid #1E3A5F}
+.sgw{display:flex;justify-content:space-between;align-items:flex-end;margin-top:22px;gap:14px}
+.sgl{flex:1;text-align:center;font:12px/1.35 Arial,sans-serif}
+.sgl img{max-height:70px;max-width:100%;display:block;margin:0 auto -14px;position:relative}
+.sgl hr{border:0;border-top:1px solid #1c2733;margin:0 0 4px}
+.stp{width:170px;text-align:center}.stp img{max-height:100px;max-width:100%}
+.carimbo{border:2px solid #1E3A5F;color:#1E3A5F;border-radius:6px;padding:6px 10px;transform:rotate(-3deg);font:700 12px/1.4 Arial,sans-serif;display:inline-block}
+.carimbo span{display:block;font-weight:400}
+.rtb th.n,.rtb td.n{text-align:right;white-space:nowrap}.rtb.sm{font-size:11.5px}.rtb.sm th,.rtb.sm td{padding:5px 5px}.rtb.sm small{display:block;color:#5b6b7a;font-size:10px}
+.ciente{margin-top:10px;font:11.5px/1.6 Arial,sans-serif;color:#44586b;border:1px dashed #9db3c6;border-radius:6px;padding:8px 10px}
+.tear{display:flex;align-items:center;gap:8px;margin-top:18px;color:#9aa7b4;font-size:14px}
+.tear hr{flex:1;border:0;border-top:1px dashed #9aa7b4;margin:0}
+.selo{width:92px;height:92px;border-radius:50%;border:3px double #7a1620;color:#7a1620;display:flex;align-items:center;justify-content:center;text-align:center;font:700 9px/1.25 Arial,sans-serif;transform:rotate(-9deg);margin:0 0 6px auto}
+.proto{display:flex;flex-wrap:wrap;gap:4px 18px;justify-content:space-between;background:#F4F7FB;border:1px solid #c9d6e2;border-radius:6px;padding:6px 10px;font:11px/1.5 Arial,sans-serif;color:#1E3A5F;margin:8px 0}
+.proto b{color:#1E3A5F}
+.rlei{margin-top:14px;padding-top:8px;border-top:1px solid #c9d6e2;font:10.5px/1.45 Arial,sans-serif;color:#5b6b7a;text-align:justify}
+.rft{background:#1E3A5F;color:#fff;font:11px Arial,sans-serif;text-align:center;padding:7px}
+.sig{margin-top:56px;text-align:center}.sig hr{border:0;border-top:1px solid #000;width:70%}
+.muted{color:var(--mute);font-size:15px}
+#pcv{width:100%;height:auto;border:2px dashed var(--line);border-radius:10px;touch-action:none;background:#fff;display:block}
+@media print{#app,#recibo .no{display:none!important}#recibo{position:static;padding:0}}
+.ccl{margin:16px 0 0}.ctitle{width:100%;box-sizing:border-box;margin:2px 0 6px;font:700 14px Georgia,serif}.cpart.ed{min-height:2.4em}.cpart[contenteditable]:empty:before{content:attr(data-ph);color:#9a9a9a;pointer-events:none}.ctag{flex-wrap:wrap}.ctag u{padding:6px 2px}
+.ccl h3{font-size:14px;margin:0 0 4px;color:var(--pri);font-family:Georgia,'Times New Roman',serif}
+.cpart{position:relative;margin:4px 0;padding:6px 10px;border-left:3px solid var(--pri);border-radius:0 6px 6px 0;white-space:pre-wrap;text-align:justify;outline:none;font-family:Georgia,'Times New Roman',serif;font-size:14px;background:#fff}
+.cpart.ed{border-left-color:#b4741b;background:#fff8ea}
+.cpart.ed:focus{box-shadow:0 0 0 2px #e6c58a}
+.cpart.lk{cursor:default}
+.ctag{font:12px "Atkinson Hyperlegible",sans-serif;white-space:normal;display:flex;gap:8px;align-items:center;margin:2px 0;user-select:none}
+.ctag i{font-style:normal;padding:1px 8px;border-radius:9px;color:#fff;background:var(--pri)}
+.ctag.e i{background:#b4741b}
+.ctag u{text-decoration:none;color:var(--mute);cursor:pointer;border-bottom:1px dotted}
+.csig{display:grid;grid-template-columns:1fr 1fr;gap:22px 26px;margin-top:28px;text-align:center;font:12px Arial,sans-serif}
+.csig div{border-top:1px solid #1c2733;padding-top:4px}
+.cfld{flex:1;min-width:150px}
+header{background:linear-gradient(135deg,#1F4E5F,#2B7A8C);box-shadow:0 2px 10px rgba(0,0,0,.2)}
+.card{box-shadow:0 1px 6px rgba(23,38,43,.09);border-radius:14px}
+button{box-shadow:0 1px 3px rgba(0,0,0,.15);transition:transform .08s}button:active{transform:scale(.97)}
+body{background:linear-gradient(180deg,#DDEAE8,#F3F7F6 260px)}
+header{border-bottom:3px solid #C9A24B}
+.hrow{display:flex;align-items:center;gap:14px;margin-top:8px}
+#hlogo{width:64px;height:64px;border-radius:50%;background:#111;box-shadow:0 0 0 2px rgba(255,255,255,.55),0 3px 9px rgba(0,0,0,.35)}
+h2{color:var(--pri);border-left:5px solid #C9A24B;padding-left:10px}
+.t{border-left:5px solid var(--pri);box-shadow:0 1px 5px rgba(23,38,43,.09)}
+.t:active{background:#EEF5F4}
+.meses button{border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.paper{border:0;box-shadow:0 6px 26px rgba(0,0,0,.2)}
+.paper .top{height:10px;background:linear-gradient(90deg,#1E3A5F,#3B9BD6 62%,#C9A24B)}
+.rh{border-bottom:3px double #C9A24B}
+.rlogo{width:96px}.rlogo img{max-height:96px}
+.sgl img{max-height:80px}
+</style>
+</head>
+<body>
+<div id="app">
+<header><a href="index.html" style="color:#fff;font-size:15px;text-decoration:none">← Voltar ao painel</a><div class="hrow"><img id="hlogo" alt="FCosta"><div><h1>Meus Aluguéis</h1><p>Locatários, recibos e documentos</p></div></div></header>
+<main id="main"></main>
+</div>
+
+<dialog id="dlg">
+<h2 id="dt" style="margin-top:0"></h2>
+<label for="dd">Data do pagamento</label><input type="date" id="dd" oninput="calcAtraso()">
+<label for="dv">Valor total pago (R$)</label><input type="number" step="0.01" id="dv" inputmode="decimal"><label for="den">Encargos inclusos (R$) — opcional</label><input type="number" step="0.01" id="den" inputmode="decimal" placeholder="0,00" oninput="calcAtraso()"><label for="dend">Quais encargos</label><input id="dend" placeholder="Ex.: condomínio e IPTU"><label for="dmj">Multa e juros de mora (R$) — opcional</label><input type="number" step="0.01" id="dmj" inputmode="decimal" placeholder="0,00" oninput="totalManual()"><label for="dds">Desconto concedido (R$) — opcional</label><input type="number" step="0.01" id="dds" inputmode="decimal" placeholder="0,00" oninput="calcAtraso()"><div class="card" style="margin:12px 0 4px;padding:10px 12px"><b>Atraso no pagamento</b><p class="muted" id="datr" style="margin:4px 0">Escolha a data do pagamento.</p><button type="button" class="sec" onclick="calcAtraso()">Calcular atraso</button></div><label for="dfp">Forma de pagamento</label><select id="dfp"><option>PIX</option><option>Dinheiro</option><option>Transferência</option><option>Boleto</option><option>Cartão</option></select><label for="dob">Observação (opcional)</label><input id="dob" placeholder="Ex.: aluguel + condomínio">
+<div class="row">
+<button onclick="savePay(true)">Salvar e ver recibo</button>
+<button class="sec" onclick="savePay(false)">Só salvar</button>
+<button class="sec" id="ver" onclick="dlg.close();recibo(pay.id,pay.k)">Ver recibo</button>
+<button class="del" id="undo" onclick="undoPay()">Desfazer pagamento</button>
+<button class="sec" onclick="dlg.close()">Cancelar</button>
+</div>
+</dialog>
+
+<dialog id="cbdlg">
+<h2 style="margin-top:0">Cobrança extrajudicial</h2>
+<p class="muted">Marque os meses em aberto que entram na cobrança. Multa e juros são calculados até hoje, com os percentuais das configurações.</p>
+<div class="dl" id="cbm"></div>
+<label for="cbp">Prazo para pagamento (dias)</label><input id="cbp" type="number" min="1" value="5" inputmode="numeric">
+<label for="cbc">Correção monetária acumulada (%) — só se o contrato prevê</label><input id="cbc" type="number" step="0.01" min="0" inputmode="decimal" placeholder="0,00">
+<div class="row"><button onclick="gerarCobranca()">Gerar cobrança</button><button class="sec" onclick="cbdlg.close()">Cancelar</button></div>
+</dialog>
+
+<dialog id="pdlg">
+<h2 style="margin-top:0">Assine com o dedo</h2>
+<canvas id="pcv" width="700" height="260"></canvas>
+<p class="muted">Assine dentro do quadro. A assinatura sai em azul.</p>
+<div class="row"><button onclick="salvarPad()">Salvar assinatura</button><button class="sec" onclick="limparPad()">Limpar</button><button class="sec" onclick="pdlg.close()">Cancelar</button></div>
+</dialog>
+<dialog id="cdlg">
+<h2 style="margin-top:0">Dados do recibo</h2>
+<label for="cn">Nome de quem assina</label><input id="cn">
+<label for="cq">Qualificação (aparece abaixo da assinatura)</label><input id="cq">
+<label for="cc">Cidade</label><input id="cc">
+<label for="cmp">Multa por atraso (%) — conforme o contrato</label><input id="cmp" type="number" step="0.01" min="0" inputmode="decimal">
+<label for="cjp">Juros de mora (% ao mês) — conforme o contrato</label><input id="cjp" type="number" step="0.01" min="0" inputmode="decimal">
+<label for="cs">Número do próximo recibo</label><input id="cs" type="number" min="1" inputmode="numeric">
+<label for="cdrive">Pasta de Recibos no Google Drive (link)</label><input id="cdrive" type="url" placeholder="https://drive.google.com/drive/folders/...">
+<label for="ck">Texto do carimbo (uma linha por linha)</label><textarea id="ck" rows="5"></textarea>
+<label>Foto da sua assinatura <span class="muted" id="sa"></span></label><input type="file" accept="image/*" onchange="foto(this,'assin')"><button class="sec" style="margin-top:8px" onclick="abrirPad()">Assinar com o dedo (azul)</button>
+<label>Logo da FCosta (topo do recibo) <span class="muted" id="sl"></span></label><input type="file" accept="image/*" onchange="logoFoto(this)">
+<label>Foto do seu carimbo (opcional) <span class="muted" id="sk"></span></label><input type="file" accept="image/*" onchange="foto(this,'carImg')">
+<p class="muted">Assine em papel branco, com caneta preta ou azul, e fotografe bem de perto. O fundo branco é removido sozinho. Sem foto de carimbo, o site desenha um com o texto acima.</p>
+<div class="row"><button onclick="salvarCfg()">Salvar</button><button class="sec" onclick="limparFoto()">Remover fotos</button><button class="sec" onclick="cdlg.close()">Cancelar</button></div>
+</dialog>
+<div id="recibo"><div class="no"><p class="muted" style="margin:0 0 6px">Toque em Enviar e escolha o WhatsApp. Para o Drive: toque em Guardar PDF, abra a pasta e solte o arquivo na subpasta do cliente (o nome do arquivo já traz o nome dele).</p><div class="row" style="margin-top:0"><button onclick="enviarRecibo('pdf')">Enviar PDF (WhatsApp)</button><button onclick="enviarRecibo('png')">Enviar imagem (PNG)</button><button class="sec" onclick="baixarRecibo('pdf')">Guardar PDF</button><button class="sec" onclick="baixarRecibo('png')">Guardar PNG</button><button class="sec" onclick="window.print()">Imprimir</button><button class="sec" onclick="abrirRecDrive()">Abrir pasta do Drive</button><button class="sec" onclick="closeRecibo()">Fechar</button></div><div class="row" id="sepb" style="display:none"><button onclick="enviarParte('locatario')">Contrato ao locatário</button><button onclick="enviarParte('locador')">Contrato ao locador</button><button class="sec" onclick="listaDocs('locatario')">Pedir documentos ao locatário</button><button class="sec" onclick="listaDocs('locador')">Pedir documentos ao locador</button></div></div><div id="prova" class="no"></div><div class="paper" id="paper"></div></div>
+
+<script>
+var LOGO_P="data:image/png;base64,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",ASSIN_P="data:image/png;base64,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",DRV="https://drive.google.com/drive/folders/1I5b0WXM1fnClxrX7xYJiC_4mgd-VVMoy",K="alugueis_v1",DOCS=["Contrato assinado","RG","CPF","Comprovante de renda","Comprovante de residência","Documentos do fiador","Termo de vistoria","Fotos do imóvel"],
+MES=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"],
+MESL=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"],
+db=load(),view="list",cur=null,year=new Date().getFullYear(),pay=null,dlg=document.getElementById("dlg");
+function padrao(c){if(!c.recDrive)c.recDrive=DRV;if(!c.logo)c.logo=LOGO_P;if(!c.assin)c.assin=ASSIN_P;return c}
+function load(){try{var d=JSON.parse(localStorage.getItem(K));if(d&&d.t){d.cfg=padrao(d.cfg||{});return d}}catch(e){}return{cfg:padrao({}),t:[]}}
+function save(){try{localStorage.setItem(K,JSON.stringify(db))}catch(e){alert("Não foi possível salvar neste navegador.")}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function brl(n){return Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+function br(d){return d?d.split("-").reverse().join("/"):"—"}
+function ym(y,m){return y+"-"+String(m+1).padStart(2,"0")}
+function get(id){return db.t.find(function(t){return t.id===id})}
+function recebedor(){return db.cfg.rec||"FCosta Corretor de Imóveis — CRECI-SP 294791-F • CNAI 52708"}
+
+/* valor por extenso */
+var U=["zero","um","dois","três","quatro","cinco","seis","sete","oito","nove","dez","onze","doze","treze","quatorze","quinze","dezesseis","dezessete","dezoito","dezenove"],
+D=["","","vinte","trinta","quarenta","cinquenta","sessenta","setenta","oitenta","noventa"],
+C=["","cento","duzentos","trezentos","quatrocentos","quinhentos","seiscentos","setecentos","oitocentos","novecentos"];
+function a999(n){if(n===100)return"cem";var p=[];if(n>=100){p.push(C[Math.floor(n/100)]);n%=100}if(n>0)p.push(n<20?U[n]:D[Math.floor(n/10)]+(n%10?" e "+U[n%10]:""));return p.join(" e ")}
+function ext(n){if(n===0)return"zero";var m=Math.floor(n/1000),r=n%1000,s="";if(m)s=m===1?"mil":a999(m)+" mil";if(r)s+=(s?(r<100||r%100===0?" e ":" "):"")+a999(r);return s}
+function extenso(v){var r=Math.floor(v),c=Math.round((v-r)*100),s=ext(r)+(r===1?" real":" reais");if(c)s+=" e "+ext(c)+(c===1?" centavo":" centavos");return s}
+
+function render(){var hl=document.getElementById("hlogo");if(hl&&db.cfg.logo)hl.src=db.cfg.logo;var m=document.getElementById("main"),y=window.scrollY,same=window.__lv===view;m.innerHTML=view==="list"?vList():view==="form"?vForm():view==="contrato"?vContrato():vDetail();window.scrollTo(0,view==="contrato"&&same?y:0);window.__lv=view}
+
+function vList(){
+ var n=new Date(),k=ym(n.getFullYear(),n.getMonth()),pg=db.t.filter(function(t){return t.pag[k]}).length,h="";
+ h+=aviso()+'<div class="row"><button onclick="novo()">+ Novo locatário</button></div>';
+ if(!db.t.length)return h+'<div class="card">Nenhum locatário ainda. Toque em <b>Novo locatário</b> para começar.</div>'+rodape();
+ var rec=0,esp=0;db.t.forEach(function(t){esp+=Number(t.valor);if(t.pag[k])rec+=t.pag[k].valor});
+ h+='<p class="sum">Em '+MESL[n.getMonth()]+': <b>'+pg+' de '+db.t.length+'</b> pagos<br>Recebido: <b>'+brl(rec)+'</b> de '+brl(esp)+'</p>';
+ db.t.forEach(function(t){
+  var s=t.pag[k]?'<span class="tag ok">Pago</span>':n.getDate()>Number(t.venc)?'<span class="tag bad">Atrasado</span>':'<span class="tag wait">A vencer</span>';
+  h+='<button class="t" onclick="abrir(\''+t.id+'\')"><span><b>'+esc(t.nome)+'</b><small>'+esc(t.end)+' • '+brl(t.valor)+' • dia '+esc(t.venc)+venceIn(t)+'</small></span>'+s+'</button>'});
+ return h+rodape();
+}
+function rodape(){return '<h2>Cópia de segurança</h2><p class="muted">Os dados ficam só neste aparelho. Última cópia: <b>'+(db.cfg.bk?new Date(db.cfg.bk).toLocaleDateString("pt-BR"):"nunca")+'</b>. Envie a cópia para o seu WhatsApp, e-mail ou Drive e guarde lá.</p><div class="row"><button onclick="enviar()">Enviar cópia (WhatsApp, e-mail, Drive)</button><button class="sec" onclick="exportar()">Baixar cópia no aparelho</button><button class="sec" onclick="document.getElementById(\'imp\').click()">Restaurar cópia</button></div><h2>Outros</h2><div class="row"><button class="sec" onclick="planilha()">Baixar planilha (Excel)</button><button class="sec" onclick="cfg()">Assinatura, carimbo e dados do recibo</button></div><div class="row">'+(db.cfg.recDrive?'<button class="sec" onclick="abrirRecDrive()">Abrir pasta de Recibos (Drive)</button>':'<button class="sec" onclick="cfg()">Definir pasta de Recibos (Drive)</button>')+'</div><input type="file" id="imp" accept=".json" hidden onchange="importar(this)">'}
+function abrirRecDrive(){if(db.cfg.recDrive)window.open(db.cfg.recDrive,"_blank")}
+function aviso(){if(!db.t.length)return"";var d=db.cfg.bk?Math.floor((Date.now()-db.cfg.bk)/864e5):null;if(d!==null&&d<7)return"";return'<div class="card" style="border-color:var(--bad);background:var(--badbg)"><b>'+(d===null?"Você ainda não fez cópia de segurança.":"Sua última cópia foi há "+d+" dias.")+'</b><div class="row"><button onclick="enviar()">Enviar cópia agora</button></div></div>'}
+function venceIn(t){if(t.fim){var d=Math.ceil((new Date(t.fim+"T00:00")-Date.now())/864e5);if(d<=60)return d<0?" • contrato vencido":" • contrato vence em "+d+" dias"}return""}
+
+function vForm(){
+ var t=cur?get(cur):{},f=function(id,l,v,ty,x){return'<label for="'+id+'">'+l+'</label><input id="'+id+'" type="'+(ty||"text")+'" value="'+esc(v)+'" '+(x||"")+'>'};
+ return '<h2>'+(cur?"Editar locatário":"Novo locatário")+'</h2><form onsubmit="salvar(event)">'+
+ f("nome","Nome do locatário",t.nome,"text","required")+f("tel","Telefone / WhatsApp",t.tel,"tel")+f("end","Endereço do imóvel",t.end,"text","required")+
+ f("valor","Valor do aluguel (R$)",t.valor,"number",'step="0.01" required inputmode="decimal"')+f("venc","Dia do vencimento",t.venc,"number",'min="1" max="31" required')+
+ f("link","Link da pasta de documentos (Google Drive)",t.link,"url")+f("lnome","Nome do locador (proprietário)",t.lnome)+f("ltel","WhatsApp do locador",t.ltel,"tel")+f("lcpf","CPF/CNPJ do locador",t.lcpf)+f("cpf","CPF do locatário",t.cpf)+f("ini","Início do contrato",t.ini,"date")+f("fim","Fim do contrato",t.fim,"date")+
+ '<label for="obs">Observações</label><textarea id="obs" rows="3">'+esc(t.obs)+'</textarea><div class="row"><button type="submit">Salvar</button><button type="button" class="sec" onclick="voltar()">Cancelar</button></div></form>';
+}
+
+function vDetail(){
+ var t=get(cur),n=new Date(),h='<div class="row"><button class="sec" onclick="voltar()">← Voltar</button><button class="sec" onclick="editar()">Editar</button><button class="del" onclick="excluir()">Excluir</button></div>';
+ h+='<div class="card"><b style="font-size:22px">'+esc(t.nome)+'</b><br>'+(t.tel?'<a href="tel:'+esc(t.tel)+'">'+esc(t.tel)+'</a><br>':'')+esc(t.end)+'<br>Aluguel: <b>'+brl(t.valor)+'</b>, vence dia <b>'+esc(t.venc)+'</b><br>Contrato: '+br(t.ini)+' a '+br(t.fim)+(t.obs?'<br><span class="muted">'+esc(t.obs)+'</span>':'')+'</div>';
+ h+='<div class="row">'+(t.tel?'<button onclick="zap()">Lembrar no WhatsApp</button>':'')+'<button class="sec" onclick="abrirContrato()">Contrato de locação</button>'+'<button class="sec" onclick="cobranca()">Cobrança extrajudicial</button>'+(t.link?'<button class="sec" onclick="pasta()">Abrir pasta de documentos</button>':'')+'</div>';
+ h+='<h2>Pagamentos</h2><div class="row" style="align-items:center"><button class="sec" onclick="ano(-1)">←</button><b style="font-size:22px">'+year+'</b><button class="sec" onclick="ano(1)">→</button></div><div class="meses">';
+ for(var m=0;m<12;m++){
+  var k=ym(year,m),p=t.pag[k],pass=year<n.getFullYear()||(year===n.getFullYear()&&(m<n.getMonth()||(m===n.getMonth()&&n.getDate()>Number(t.venc))));
+  var c=p?"ok":pass?"bad":"";
+  h+='<button class="'+c+'" onclick="pagar(\''+k+'\')">'+MES[m]+'<small>'+(p?"✓ "+br(p.data).slice(0,5):pass?"em aberto":"")+'</small></button>'}
+ h+='</div><p class="muted">Toque no mês para registrar o pagamento.</p><h2>Recibos guardados</h2>';
+ var ks=Object.keys(t.pag).sort().reverse();
+ if(!ks.length)h+='<p class="muted">Nenhum recibo ainda. Registre um pagamento acima.</p>';
+ ks.forEach(function(q){var r=t.pag[q],pt=q.split("-");h+='<button class="t" onclick="recibo(\''+t.id+'\',\''+q+'\')"><span><b>'+MESL[Number(pt[1])-1]+' de '+pt[0]+'</b><small>'+(r.num?'Nº '+numRec(r)+' • ':'')+brl(r.valor)+' • pago em '+br(r.data)+'</small></span><span class="tag ok">Abrir recibo</span></button>'});
+ var nf=t.notifs||[];
+ if(nf.length){h+='<h2>Notificações enviadas</h2><p class="muted">Registro do que foi enviado e da prova de ciência. Marque cada item quando fizer.</p>';
+  for(var i=nf.length-1;i>=0;i--){var o=nf[i];h+='<div class="card"><b>Notificação nº '+esc(o.prot)+'</b> <span class="tag '+(o.conf?'ok':'wait')+'">'+(o.conf?'Confirmada':'Aguardando confirmação')+'</span><br><span class="muted">Enviada em '+fdh(o.data)+' • '+esc(o.canal)+' • Código '+esc(o.cod)+' • '+brl(o.tot)+'</span><div class="dl">'+
+  '<label><input type="checkbox" '+(o.conf?'checked':'')+' onchange="notifSet('+i+',\'conf\',this.checked)">Locatário confirmou o recebimento (CIENTE) <span class="muted" id="nc'+i+'">'+(o.conf?fdh(o.conf):'')+'</span></label>'+
+  '<label><input type="checkbox" '+(o.print?'checked':'')+' onchange="notifSet('+i+',\'print\',this.checked)">Print da conversa guardado</label>'+
+  '<label><input type="checkbox" '+(o.ar?'checked':'')+' onchange="notifSet('+i+',\'ar\',this.checked)">Reforço enviado (carta com AR ou cartório)</label></div></div>'}}
+ h+='<h2>Documentos entregues</h2><div class="card dl">';
+ DOCS.forEach(function(d,i){h+='<label><input type="checkbox" '+(t.docs[i]?"checked":"")+' onchange="doc('+i+',this.checked)">'+d+'</label>'});
+ return h+'</div>';
+}
+
+function novo(){cur=null;view="form";render()}
+function abrir(id){cur=id;view="detail";render()}
+function voltar(){view=cur&&view==="form"&&get(cur)?"detail":"list";render()}
+function editar(){view="form";render()}
+function ano(d){year+=d;render()}
+function v(id){return document.getElementById(id).value}
+function salvar(e){e.preventDefault();
+ var d={nome:v("nome").trim(),tel:v("tel"),end:v("end").trim(),valor:parseFloat(v("valor")),venc:v("venc"),ini:v("ini"),fim:v("fim"),obs:v("obs"),link:v("link").trim(),lnome:v("lnome").trim(),ltel:v("ltel"),lcpf:v("lcpf"),cpf:v("cpf")};
+ if(cur){Object.assign(get(cur),d);view="detail"}else{d.id="t"+Date.now();d.pag={};d.docs={};db.t.push(d);cur=d.id;view="detail"}
+ save();render()}
+function excluir(){var t=get(cur);if(confirm("Excluir "+t.nome+" e todos os registros dele? Isso não pode ser desfeito.")){db.t=db.t.filter(function(x){return x.id!==cur});save();cur=null;view="list";render()}}
+function doc(i,c){get(cur).docs[i]=c;save()}
+
+function pagar(k){
+ var t=get(cur),p=t.pag[k],pt=k.split("-");pay={id:cur,k:k};atrAtual=p&&p.atr?p.atr:null;
+ document.getElementById("dt").textContent=MESL[Number(pt[1])-1]+" de "+pt[0];
+ document.getElementById("dd").value=p?p.data:new Date().toISOString().slice(0,10);
+ document.getElementById("dv").value=p?p.valor:t.valor;document.getElementById("dfp").value=p&&p.forma?p.forma:"PIX";document.getElementById("dob").value=p&&p.obs?p.obs:"";document.getElementById("den").value=p&&p.enc?p.enc:"";document.getElementById("dend").value=p&&p.encd?p.encd:"";document.getElementById("dmj").value=p&&p.mj?p.mj:"";document.getElementById("dds").value=p&&p.ds?p.ds:"";
+ document.getElementById("undo").style.display=p?"":"none";document.getElementById("ver").style.display=p?"":"none";
+ document.getElementById("datr").textContent=p&&p.atr?"Atraso de "+p.atr.d+" dia(s): multa "+brl(p.atr.mu)+" + juros "+brl(p.atr.ju)+".":"Escolha a data do pagamento.";
+ if(!p)calcAtraso();
+ dlg.showModal()}
+
+/* atraso: multa + juros pró-rata dia, percentuais do contrato */
+var atrAtual=null;
+function pMulta(){var x=db.cfg.cmp;return(x==null||!isFinite(x))?10:x}
+function pJuros(){var x=db.cfg.cjp;return(x==null||!isFinite(x))?1:x}
+function r2(n){return Math.round(n*100)/100}
+function calcAtraso(){
+ if(!pay)return;var t=get(pay.id),pt=pay.k.split("-"),a=Number(pt[0]),m=Number(pt[1]),d=v("dd"),msg=document.getElementById("datr");
+ var en=parseFloat(v("den"))||0,ds=parseFloat(v("dds"))||0;
+ if(!d){msg.textContent="Escolha a data do pagamento.";return}
+ var ult=new Date(a,m,0).getDate(),dia=Math.min(Number(t.venc)||1,ult),pg=d.split("-"),
+ dias=Math.round((Date.UTC(+pg[0],+pg[1]-1,+pg[2])-Date.UTC(a,m-1,dia))/86400000),
+ mp=pMulta(),jp=pJuros(),base=Number(t.valor)+en,mu=0,ju=0;
+ if(dias>0){mu=r2(base*mp/100);ju=r2(base*(jp/100)/30*dias);atrAtual={d:dias,mp:mp,jp:jp,mu:mu,ju:ju};
+  msg.textContent="Vencia em "+br(a+"-"+String(m).padStart(2,"0")+"-"+String(dia).padStart(2,"0"))+". Atraso de "+dias+" dia(s): multa de "+mp+"% = "+brl(mu)+" + juros de "+jp+"% ao mês = "+brl(ju)+". Base: "+brl(base)+"."}
+ else{atrAtual=null;msg.textContent="Pagamento em dia (vencimento dia "+dia+"). Sem multa nem juros."}
+ document.getElementById("dmj").value=(mu+ju)>0?r2(mu+ju):"";
+ document.getElementById("dv").value=r2(Number(t.valor)+en+mu+ju-ds)}
+function totalManual(){
+ var t=get(pay.id),en=parseFloat(v("den"))||0,mj=parseFloat(v("dmj"))||0,ds=parseFloat(v("dds"))||0;
+ if(atrAtual&&Math.abs(atrAtual.mu+atrAtual.ju-mj)>=0.01)atrAtual=null;
+ document.getElementById("dv").value=r2(Number(t.valor)+en+mj-ds)}
+function savePay(ver){
+ var d=v("dd"),val=parseFloat(v("dv"));if(!d||!(val>0)){alert("Informe a data e o valor.");return}
+ var en=parseFloat(v("den"))||0,mj=parseFloat(v("dmj"))||0,ds=parseFloat(v("dds"))||0;
+ if(val-en-mj+ds<0){alert("Encargos, multa e desconto não podem passar do valor total. Confira os valores.");return}
+ var t=get(pay.id),o=t.pag[pay.k];t.pag[pay.k]={data:d,valor:val,forma:v("dfp"),obs:v("dob"),enc:en,encd:v("dend").trim(),mj:mj,ds:ds,atr:(atrAtual&&Math.abs(atrAtual.mu+atrAtual.ju-mj)<0.01)?atrAtual:null,num:o&&o.num?o.num:proxNum()};save();dlg.close();render();if(ver)recibo(pay.id,pay.k)}
+function undoPay(){if(confirm("Desfazer este pagamento?")){delete get(pay.id).pag[pay.k];save();dlg.close();render()}}
+
+function recibo(id,k){
+ var t=get(id),p=t.pag[k],c=db.cfg,pt=k.split("-"),dp=p.data.split("-");
+ if(!p.num){p.num=proxNum();save()}
+ rinfo={id:id,k:k,num:numRec(p).replace("/","-")};
+ var mes=MESL[Number(pt[1])-1]+" de "+pt[0],dt=Number(dp[2])+" de "+MESL[Number(dp[1])-1]+" de "+dp[0],cid=c.cid||"São Paulo",
+ en=Number(p.enc)||0,mj=Number(p.mj)||0,ds=Number(p.ds)||0,al=Math.round((p.valor-en-mj+ds)*100)/100,
+ logo=c.logo?'<img src="'+c.logo+'" alt="Logo">':'<div class="mono">FC</div>',
+ car=c.carImg?'<img src="'+c.carImg+'">':'<div class="carimbo">'+esc(sCar()).split("\n").map(function(l,i){return i?'<span>'+l+'</span>':l}).join("")+'</div>',
+ lin='<tr><td>Aluguel — '+mes+'</td><td>'+brl(al)+'</td></tr>'+(en>0?'<tr><td>Encargos'+(p.encd?': '+esc(p.encd):'')+'</td><td>'+brl(en)+'</td></tr>':'')+(mj>0?(p.atr&&Math.abs(p.atr.mu+p.atr.ju-mj)<0.01?'<tr><td>Multa moratória ('+p.atr.mp+'%)</td><td>'+brl(p.atr.mu)+'</td></tr><tr><td>Juros de mora ('+p.atr.jp+'% ao mês, '+p.atr.d+' dia(s) de atraso)</td><td>'+brl(p.atr.ju)+'</td></tr>':'<tr><td>Multa e juros de mora</td><td>'+brl(mj)+'</td></tr>'):'')+(ds>0?'<tr><td>(−) Desconto concedido</td><td>− '+brl(ds)+'</td></tr>':'')+'<tr class="tot"><td>Total recebido</td><td>'+brl(p.valor)+'</td></tr>';
+ document.getElementById("paper").innerHTML=
+ '<div class="top"></div><div class="in">'+
+ '<div class="rh"><div class="rlogo">'+logo+'</div><div class="rid"><b>FCosta Corretor de Imóveis</b><span>Corretor de Imóveis — CRECI-SP 294791-F</span><span>Avaliador Imobiliário — CNAI 52708</span><span>fcostacorretor.com • WhatsApp (11) 99350-9109</span></div><div class="rn">Recibo Nº<b>'+numRec(p)+'</b></div></div>'+
+ '<div class="rt">RECIBO DE ALUGUEL</div><div class="rs">Recibo discriminado de locação de imóvel urbano</div>'+
+ '<div class="rv">'+brl(p.valor)+'<small>('+extenso(p.valor)+')</small></div>'+
+ '<p>Recebi de <b>'+esc(t.nome)+'</b>'+(t.cpf?', CPF/CNPJ '+esc(t.cpf):'')+', na condição de locatário(a), a importância total de <b>'+brl(p.valor)+'</b>, referente à locação do imóvel situado em <b>'+esc(t.end)+'</b>, competência <b>'+mes+'</b>, com vencimento no dia <b>'+esc(t.venc)+'</b>, conforme discriminado abaixo.</p>'+
+ (t.lnome?'<p>O recebimento é feito por <b>'+esc(sNome())+'</b>, na qualidade de administradora e mandatária, por conta e ordem do(a) locador(a) <b>'+esc(t.lnome)+'</b>'+(t.lcpf?', CPF/CNPJ '+esc(t.lcpf):'')+'.</p>':'')+
+ '<table class="rtb"><tr><th>Discriminação</th><th>Valor</th></tr>'+lin+'</table>'+
+ '<p>Pagamento efetuado em <b>'+dt+'</b>, por <b>'+esc(p.forma||"PIX")+'</b>, em '+esc(cid)+'.'+(p.obs?' '+esc(p.obs)+'.':'')+'</p>'+
+ '<p>Dou quitação das importâncias acima discriminadas, referentes exclusivamente à competência indicada, sem presunção de quitação de períodos anteriores ou posteriores, nem de débitos ainda não apurados (art. 322 do Código Civil).</p>'+
+ '<p>'+esc(cid)+', '+dt+'.</p>'+
+ '<div class="sgw"><div class="sgl">'+(c.assin?'<img src="'+c.assin+'">':'<div style="height:60px"></div>')+'<hr><b>'+esc(sNome())+'</b><br>'+esc(sQual())+'</div><div class="stp">'+car+'</div></div>'+
+ '<div class="rlei">Recibo emitido nos termos dos arts. 319, 320 e 322 do Código Civil (Lei 10.406/2002) e do art. 22, VII, da Lei do Inquilinato (Lei 8.245/1991), que exige recibo discriminado das importâncias pagas. Informações prestadas de forma clara e adequada ao consumidor (art. 6º, III, Lei 8.078/1990). Intermediação realizada por corretor de imóveis inscrito no CRECI (Lei 6.530/1978 e Decreto 81.871/1978). Guarde este documento: ele comprova o pagamento (art. 319 do Código Civil).</div>'+
+ '</div><div class="rft">FCosta Corretor de Imóveis • CRECI-SP 294791-F • CNAI 52708 • fcostacorretor.com</div>';
+ abreRecibo()}
+var cbdlg=document.getElementById("cbdlg");
+/* cobrança extrajudicial */
+function cortes(cl,ch){
+ var H=cl.getBoundingClientRect().height,top=cl.getBoundingClientRect().top,f=ch/H,pg=794*281/194,bs=[];
+ cl.querySelectorAll(".in > *, .rtb tr, .rft").forEach(function(e){bs.push(e.getBoundingClientRect().bottom-top)});
+ bs.sort(function(a,b){return a-b});
+ var out=[],s=0;
+ while(H-s>pg+1){var lim=s+pg,e=lim;for(var i=0;i<bs.length;i++){if(bs[i]<=lim&&bs[i]>s+80)e=bs[i]}out.push([s*f,e*f]);s=e}
+ out.push([s*f,ch]);return out}
+function vencUTC(t,k){var pt=k.split("-"),a=+pt[0],m=+pt[1],u=new Date(a,m,0).getDate();return Date.UTC(a,m-1,Math.min(Number(t.venc)||1,u))}
+function hojeUTC(){var n=new Date();return Date.UTC(n.getFullYear(),n.getMonth(),n.getDate())}
+function cobranca(){
+ var t=get(cur),n=new Date(),a=n.getFullYear(),m=n.getMonth(),ini=t.ini?t.ini.split("-"):null,ya=ini?+ini[0]:a-1,ma=ini?+ini[1]-1:m,h="",cnt=0;
+ if((a*12+m)-(ya*12+ma)>36){var s=a*12+m-36;ya=Math.floor(s/12);ma=s%12}
+ for(var y=ya,mm=ma;y*12+mm<=a*12+m;mm++){if(mm>11){mm=0;y++}
+  var k=ym(y,mm),d=Math.round((hojeUTC()-vencUTC(t,k))/86400000);
+  if(!t.pag[k]&&d>0){cnt++;h+='<label><input type="checkbox" value="'+k+'" checked>'+MESL[mm]+' de '+y+' — '+d+' dia(s) de atraso</label>'}}
+ if(!cnt){alert("Não há aluguel vencido em aberto para este locatário.");return}
+ document.getElementById("cbm").innerHTML=h;cbdlg.showModal()}
+function gerarCobranca(){
+ var t=get(cur),c=db.cfg,ks=[].slice.call(document.querySelectorAll("#cbm input:checked")).map(function(i){return i.value});
+ if(!ks.length){alert("Marque pelo menos um mês.");return}
+ var prazo=Math.max(1,parseInt(v("cbp"))||5),cp=Math.max(0,parseFloat(v("cbc"))||0),mp=pMulta(),jp=pJuros(),
+ tA=0,tM=0,tJ=0,tC=0,lin="";
+ ks.sort().forEach(function(k){
+  var pt=k.split("-"),d=Math.round((hojeUTC()-vencUTC(t,k))/86400000),al=Number(t.valor),mu=r2(al*mp/100),ju=r2(al*(jp/100)/30*d),co=r2(al*cp/100),
+  vd=new Date(vencUTC(t,k)),vs=String(vd.getUTCDate()).padStart(2,"0")+"/"+String(vd.getUTCMonth()+1).padStart(2,"0")+"/"+vd.getUTCFullYear();
+  tA+=al;tM+=mu;tJ+=ju;tC+=co;
+  lin+='<tr><td>'+MESL[+pt[1]-1]+'/'+pt[0]+'<small>venc. '+vs+' • '+d+' dia(s)</small></td><td class="n">'+brl(al)+'</td>'+(cp>0?'<td class="n">'+brl(co)+'</td>':'')+'<td class="n">'+brl(mu)+'</td><td class="n">'+brl(ju)+'</td><td class="n"><b>'+brl(al+mu+ju+co)+'</b></td></tr>'});
+ var tot=r2(tA+tM+tJ+tC),n=new Date(),dt=n.getDate()+" de "+MESL[n.getMonth()]+" de "+n.getFullYear(),cid=c.cid||"São Paulo";
+ c.seqn=(c.seqn||0)+1;save();
+ var num=String(c.seqn).padStart(4,"0")+"/"+n.getFullYear();
+ rinfo={id:t.id,k:"cob",num:num.replace("/","-"),pre:"cobranca",tit:"Notificação de cobrança",multi:true};
+ var hhmm=String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0"),
+ vc=vcode(t.id+num+dt+hhmm),
+ selo='<div class="selo">NOTIFICAÇÃO<br>EXTRAJUDICIAL<br>★ ★ ★<br>CRECI-SP<br>294791-F</div>',
+ logo=c.logo?'<img src="'+c.logo+'" alt="Logo">':'<div class="mono">FC</div>',
+ car=c.carImg?'<img src="'+c.carImg+'">':'<div class="carimbo">'+esc(sCar()).split("\n").map(function(l,i){return i?'<span>'+l+'</span>':l}).join("")+'</div>';
+ document.getElementById("paper").innerHTML=
+ '<div class="top"></div><div class="in">'+
+ '<div class="rh"><div class="rlogo">'+logo+'</div><div class="rid"><b>FCosta Corretor de Imóveis</b><span>Corretor de Imóveis — CRECI-SP 294791-F</span><span>Avaliador Imobiliário — CNAI 52708</span><span>fcostacorretor.com • WhatsApp (11) 99350-9109</span></div><div class="rn">'+selo+'Notificação Nº<b>'+num+'</b></div></div>'+
+ '<div class="proto"><span>Protocolo <b>'+num+'</b></span><span>Emitida em <b>'+dt+'</b> às <b>'+hhmm+'</b></span><span>Código de verificação <b>'+vc+'</b></span></div>'+
+ '<div class="rt" style="font-size:16px;letter-spacing:1.5px">NOTIFICAÇÃO EXTRAJUDICIAL DE COBRANÇA</div><div class="rs">Aluguéis vencidos e não pagos — constituição em mora — locação de imóvel urbano</div>'+
+ '<p><b>Notificado(a):</b> '+esc(t.nome)+(t.cpf?', CPF/CNPJ '+esc(t.cpf):'')+', locatário(a) do imóvel situado em <b>'+esc(t.end)+'</b>.</p>'+
+ '<p><b>Notificante:</b> <b>'+esc(sNome())+'</b>, '+esc(sQual())+', na qualidade de administradora e mandatária'+(t.lnome?' do(a) locador(a) <b>'+esc(t.lnome)+'</b>'+(t.lcpf?', CPF/CNPJ '+esc(t.lcpf):''):' do locador')+' (art. 653 do Código Civil).</p>'+
+ '<p>Em nossos registros <b>não consta o pagamento</b> dos aluguéis abaixo, que venceram nas datas indicadas. Nos termos do art. 397 do Código Civil, o não pagamento no vencimento constitui o devedor em mora de pleno direito. Valores atualizados até <b>'+dt+'</b>:</p>'+
+ '<table class="rtb sm"><tr><th>Competência</th><th class="n">Aluguel</th>'+(cp>0?'<th class="n">Correção ('+cp+'%)</th>':'')+'<th class="n">Multa ('+mp+'%)</th><th class="n">Juros ('+jp+'% a.m.)</th><th class="n">Total</th></tr>'+lin+'<tr class="tot"><td>Total do débito</td><td class="n">'+brl(tA)+'</td>'+(cp>0?'<td class="n">'+brl(tC)+'</td>':'')+'<td class="n">'+brl(tM)+'</td><td class="n">'+brl(tJ)+'</td><td class="n">'+brl(tot)+'</td></tr></table>'+
+ '<div class="rv">'+brl(tot)+'<small>('+extenso(tot)+')</small></div>'+
+ '<p>Fica V.Sa. <b>NOTIFICADO(A)</b> para, no prazo de <b>'+prazo+' ('+ext(prazo)+') dia(s)</b> contados do recebimento desta, regularizar o débito acima ou procurar a administradora para negociação, pelo WhatsApp (11) 99350-9109. Multa e juros continuam a correr até o efetivo pagamento; se o pagamento for feito após a data deste documento, solicite o valor atualizado.</p>'+
+ '<p>Esgotado o prazo sem regularização, o locador poderá adotar as medidas legais cabíveis, entre elas a ação de despejo por falta de pagamento, cumulada ou não com cobrança dos aluguéis e acessórios, com custas e honorários advocatícios (arts. 9º, III, e 62 da Lei 8.245/1991), a execução da garantia locatícia, inclusive contra o fiador, se houver, e a cobrança da multa e dos juros previstos em contrato. Na ação de despejo, o locatário pode evitar a rescisão pagando o débito atualizado no prazo de 15 dias contados da citação (art. 62, II). Eventual registro em cadastro de inadimplentes, se cabível, será precedido de comunicação escrita (art. 43, §2º, do Código de Defesa do Consumidor).</p>'+
+ '<p>Se o pagamento já foi feito, desconsidere esta notificação e envie o comprovante para a devida baixa. A aceitação de pagamento posterior não significa renúncia a direitos nem novação da dívida.</p>'+
+ '<p>'+esc(cid)+', '+dt+'.</p>'+
+ '<div class="sgw"><div class="sgl">'+(c.assin?'<img src="'+c.assin+'">':'<div style="height:60px"></div>')+'<hr><b>'+esc(sNome())+'</b><br>'+esc(sQual())+'<br><span class="muted" style="font-size:11px">Notificante — administrador(a) e mandatário(a)</span></div><div class="stp">'+car+'</div></div>'+
+ '<div class="tear"><span>✂</span><hr></div>'+
+ '<div class="ciente"><b>Via do(a) notificado(a) — protocolo de recebimento</b><br>Protocolo '+num+' • Código '+vc+'<br>Ciente do recebimento em ____ / ____ / ________ &nbsp; Assinatura: ______________________________</div>'+
+ '<div class="rlei"><b>Fundamentos legais.</b> Código Civil (Lei 10.406/2002): arts. 389 e 394 a 397 (mora), 395 (juros, atualização monetária e honorários), 406 (juros de mora), 408, 409, 412 e 413 (cláusula penal) e 653 (mandato). Lei do Inquilinato (Lei 8.245/1991): arts. 9º, III (rescisão por falta de pagamento), 23, I (dever de pagar pontualmente), 62 (ação de despejo por falta de pagamento e purgação da mora) e 22, VII (recibo discriminado). Código de Defesa do Consumidor (Lei 8.078/1990), no que couber: arts. 6º, III (informação clara e adequada), 42 (cobrança sem constrangimento ou ameaça) e 43 (comunicação prévia de registro em cadastros). Corretor de imóveis: Lei 6.530/1978 e Decreto 81.871/1978.</div>'+
+ '</div><div class="rft">FCosta Corretor de Imóveis • CRECI-SP 294791-F • CNAI 52708 • fcostacorretor.com</div>';
+ rinfo.cod=vc;rinfo.prot=num;rinfo.prazo=prazo;rinfo.tot=tot;cbdlg.close();abreRecibo()}
+function fdh(s){return new Date(s).toLocaleString("pt-BR",{dateStyle:"short",timeStyle:"short"})}
+function notifSet(i,c,val){var o=get(cur).notifs[i];o[c]=c==="conf"?(val?new Date().toISOString():null):val;save();if(c==="conf"){var e=document.getElementById("nc"+i);if(e)e.textContent=val?fdh(o.conf):""}}
+function abreRecibo(){document.getElementById("sepb").style.display=(typeof rinfo!=="undefined"&&rinfo.k==="contrato")?"flex":"none";document.getElementById("recibo").style.display="block";var el=document.getElementById("prova");
+ el.innerHTML=rinfo&&rinfo.pre==="cobranca"?'<div class="card" style="border-color:var(--pri)"><b>Enviar com validade pelo WhatsApp</b><div class="row"><button id="zapNotif" onclick="zapNotif()">Abrir WhatsApp do locatário (mensagem pronta)</button></div><p class="muted">O botão baixa o PDF, registra o envio no cadastro e abre a conversa com o número cadastrado. Na conversa, <b>anexe o PDF baixado</b> e envie.</p><b>Para valer como prova:</b><ul style="margin:6px 0 0;padding-left:20px"><li>Envie pelo número que o locatário já usa com você.</li><li>A mensagem já pede que ele responda CIENTE. Guarde essa resposta.</li><li>Tire print da conversa mostrando data, hora e número.</li><li>Guarde o PDF e o print na pasta do locatário no Drive.</li><li>Se o caso puder terminar em despejo, reforce com carta com AR ou cartório de títulos e documentos.</li></ul></div>':""}
+async function zapNotif(){
+ var t=get(rinfo.id),n=(t.tel||"").replace(/\D/g,"");if(!n){alert("Cadastre o WhatsApp do locatário primeiro.");return}
+ if(n.length<=11)n="55"+n;
+ var w=window.open("","_blank");
+ try{var f=await arquivo("pdf");baixar(f,f.name)}catch(e){if(w)w.close();alert("Não foi possível gerar o PDF. Verifique a internet e tente de novo.");return}
+ (t.notifs=t.notifs||[]).push({data:new Date().toISOString(),prot:rinfo.prot,cod:rinfo.cod,tot:rinfo.tot,canal:"WhatsApp direto",conf:null,print:false,ar:false});save();
+ var msg="Olá, "+t.nome.split(" ")[0]+". Segue a NOTIFICAÇÃO EXTRAJUDICIAL DE COBRANÇA nº "+rinfo.prot+" (código de verificação "+rinfo.cod+"), sobre aluguéis em aberto do imóvel "+t.end+", no valor de "+brl(rinfo.tot)+", com prazo de "+rinfo.prazo+" dia(s). O documento em PDF está anexo. Por favor, responda esta mensagem com a palavra CIENTE para confirmar o recebimento. "+sNome()+" — "+sQual(),
+ url="https://wa.me/"+n+"?text="+encodeURIComponent(msg);
+ if(w)w.location.href=url;else location.href=url}
+function closeRecibo(){document.getElementById("recibo").style.display="none";if(view==="detail")render()}
+var rinfo=null;
+function slug(s){return s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/gi,"-").toLowerCase()}
+function vcode(s){var h=0;for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0}return h.toString(36).toUpperCase().padStart(8,"0").slice(0,8)}
+async function arquivo(tipo){
+ var t=get(rinfo.id),nome=(rinfo.pre||"recibo")+"-"+rinfo.num+"-"+slug(t.nome),cl=document.getElementById("paper").cloneNode(true),c,cuts=null;
+ cl.removeAttribute("id");cl.style.cssText="position:absolute;left:-10000px;top:0;width:794px;max-width:none;margin:0";
+ document.body.appendChild(cl);window.scrollTo(0,0);
+ try{if(document.fonts&&document.fonts.ready)await document.fonts.ready;c=await html2canvas(cl,{scale:2,backgroundColor:"#ffffff",scrollX:0,scrollY:0,windowWidth:794,useCORS:true});if(rinfo.multi)cuts=cortes(cl,c.height)}finally{document.body.removeChild(cl)}
+ if(tipo==="png"){var b=await new Promise(function(r){c.toBlob(r,"image/png")});return new File([b],nome+".png",{type:"image/png"})}
+ var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),m=8,mw=210-2*m,mh=297-2*m,w=mw,h=c.height*w/c.width;
+ if(cuts&&h>mh*1.2){cuts.forEach(function(s,i){var pc=document.createElement("canvas");pc.width=c.width;pc.height=Math.max(1,Math.round(s[1]-s[0]));pc.getContext("2d").drawImage(c,0,Math.round(s[0]),c.width,pc.height,0,0,c.width,pc.height);if(i)pdf.addPage();pdf.addImage(pc.toDataURL("image/png"),"PNG",m,m,mw,pc.height*mw/pc.width)})}
+ else{if(h>mh){h=mh;w=c.width*h/c.height}
+ pdf.addImage(c.toDataURL("image/png"),"PNG",(210-w)/2,m,w,h)}
+ return new File([pdf.output("blob")],nome+".pdf",{type:"application/pdf"})}
+async function enviarRecibo(tipo){try{var f=await arquivo(tipo);
+ if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:rinfo.tit||"Recibo de aluguel"});else{baixar(f,f.name);alert("Arquivo salvo no aparelho. Anexe no WhatsApp.")}}
+ catch(e){if(e&&e.name==="AbortError")return;alert("Não foi possível gerar o arquivo. Verifique a internet e tente de novo.")}}
+async function baixarRecibo(tipo){try{var f=await arquivo(tipo);baixar(f,f.name)}catch(e){alert("Não foi possível gerar o arquivo. Verifique a internet e tente de novo.")}}
+var cdlg=document.getElementById("cdlg"),CK="FCOSTA\nCorretor de Imóveis\nCRECI-SP 294791-F\nCNAI 52708";
+var NOME_PAD="FCosta Corretor de Imóveis",QUAL_PAD="CRECI-SP 294791-F • CNAI 52708";
+function sNome(){var n=(db.cfg.nome||"").trim();return(!n||/^s[eé]rgio\s+costa$/i.test(n))?NOME_PAD:n}
+function sQual(){var q=(db.cfg.qual||"").trim();return(!q||/^corretor de im[oó]veis\s*[—-]\s*creci-sp 294791-f$/i.test(q))?QUAL_PAD:q}
+function sCar(){var k=db.cfg.car;return(!k||/^S[ÉE]RGIO COSTA/i.test(k))?CK:k}
+function logoFoto(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,500/im.width),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);db.cfg.logo=c.toDataURL("image/png");save();cfgSt()};im.src=r.result};r.readAsDataURL(f)}
+function proxNum(){var n=db.cfg.seq||1;db.cfg.seq=n+1;return n}
+function numRec(p){return String(p.num).padStart(4,"0")+"/"+p.data.slice(0,4)}
+function cfgSt(){document.getElementById("sa").textContent=db.cfg.assin?"✓ salva":"(não enviada)";document.getElementById("sk").textContent=db.cfg.carImg?"✓ salvo":"(não enviado)";document.getElementById("sl").textContent=db.cfg.logo?"✓ salva":"(não enviada — usa o símbolo FC)"}
+function cfg(){var c=db.cfg;document.getElementById("cn").value=sNome();document.getElementById("cq").value=sQual();document.getElementById("cc").value=c.cid||"São Paulo";document.getElementById("cs").value=c.seq||1;document.getElementById("cmp").value=pMulta();document.getElementById("cjp").value=pJuros();document.getElementById("ck").value=sCar();document.getElementById("cdrive").value=c.recDrive||"";cfgSt();cdlg.showModal()}
+function salvarCfg(){var c=db.cfg;c.nome=v("cn").trim();c.qual=v("cq").trim();c.cid=v("cc").trim();c.seq=Math.max(1,parseInt(v("cs"))||1);c.cmp=Math.max(0,parseFloat(v("cmp")));if(!isFinite(c.cmp))c.cmp=10;c.cjp=Math.max(0,parseFloat(v("cjp")));if(!isFinite(c.cjp))c.cjp=1;c.car=v("ck");c.recDrive=v("cdrive").trim();save();cdlg.close();render()}
+var pdlg=document.getElementById("pdlg"),pcv=document.getElementById("pcv"),pd=false,lp,bb;
+function limparPad(){pcv.getContext("2d").clearRect(0,0,pcv.width,pcv.height);bb=null}
+function abrirPad(){limparPad();pdlg.showModal()}
+function ppos(e){var r=pcv.getBoundingClientRect();return[(e.clientX-r.left)*pcv.width/r.width,(e.clientY-r.top)*pcv.height/r.height]}
+function pbox(a){bb=bb?[Math.min(bb[0],a[0]),Math.min(bb[1],a[1]),Math.max(bb[2],a[0]),Math.max(bb[3],a[1])]:[a[0],a[1],a[0],a[1]]}
+function ptraco(a,b){var x=pcv.getContext("2d");x.strokeStyle="#1a3fbf";x.lineWidth=6;x.lineCap="round";x.lineJoin="round";x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();pbox(b)}
+pcv.addEventListener("pointerdown",function(e){e.preventDefault();pcv.setPointerCapture(e.pointerId);lp=ppos(e);pd=true;ptraco(lp,[lp[0]+.1,lp[1]])});
+pcv.addEventListener("pointermove",function(e){if(!pd)return;var a=ppos(e);ptraco(lp,a);lp=a});
+["pointerup","pointercancel"].forEach(function(n){pcv.addEventListener(n,function(){pd=false})});
+function salvarPad(){if(!bb){alert("Assine dentro do quadro antes de salvar.");return}
+ var m=12,x0=Math.max(0,bb[0]-m),y0=Math.max(0,bb[1]-m),w=Math.min(pcv.width,bb[2]+m)-x0,h=Math.min(pcv.height,bb[3]+m)-y0,c=document.createElement("canvas");
+ c.width=w;c.height=h;c.getContext("2d").drawImage(pcv,x0,y0,w,h,0,0,w,h);db.cfg.assin=c.toDataURL("image/png");save();cfgSt();pdlg.close()}
+function limparFoto(){delete db.cfg.assin;delete db.cfg.carImg;save();cfgSt()}
+function foto(inp,key){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,500/im.width),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);var x=c.getContext("2d");x.drawImage(im,0,0,c.width,c.height);var d=x.getImageData(0,0,c.width,c.height),q=d.data;for(var k=0;k<q.length;k+=4){var l=(q[k]+q[k+1]+q[k+2])/3;q[k+3]=Math.max(0,Math.min(255,(235-l)*4));if(key==="assin"){q[k]=26;q[k+1]=63;q[k+2]=191}}x.putImageData(d,0,0);db.cfg[key]=c.toDataURL("image/png");save();cfgSt()};im.src=r.result};r.readAsDataURL(f)}
+
+function baixar(blob,nome){var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nome;a.click()}
+function marca(){db.cfg.bk=Date.now();save();render()}
+function bkNome(){return"copia-alugueis-"+new Date().toISOString().slice(0,10)+".json"}
+function exportar(){baixar(new Blob([JSON.stringify(db)],{type:"application/json"}),bkNome());marca()}
+function enviar(){var f=new File([JSON.stringify(db)],bkNome(),{type:"application/json"});
+ if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:"Cópia dos aluguéis"}).then(marca).catch(function(){})}
+ else{alert("Este aparelho não envia direto. Vou baixar o arquivo; depois mande para o seu WhatsApp ou e-mail.");exportar()}}
+function planilha(){var q=function(s){return'"'+String(s==null?"":s).replace(/"/g,'""')+'"'},r=[["Locatário","Telefone","Endereço","Aluguel","Vencimento","Início","Fim"].concat(MES.map(function(m){return m+"/"+year}))];
+ db.t.forEach(function(t){r.push([t.nome,t.tel,t.end,t.valor,t.venc,br(t.ini),br(t.fim)].concat(MES.map(function(m,i){var p=t.pag[ym(year,i)];return p?br(p.data):""})))});
+ baixar(new Blob(["\ufeff"+r.map(function(l){return l.map(q).join(";")}).join("\r\n")],{type:"text/csv"}),"alugueis-"+year+".csv")}
+function zap(){var t=get(cur),n=(t.tel||"").replace(/\D/g,"");if(n.length<=11)n="55"+n;
+ var msg="Olá, "+t.nome.split(" ")[0]+"! Passando para lembrar do aluguel de "+MESL[new Date().getMonth()]+", no valor de "+brl(t.valor)+", com vencimento no dia "+t.venc+". Qualquer dúvida, estou à disposição. Sérgio Costa";
+ window.open("https://wa.me/"+n+"?text="+encodeURIComponent(msg),"_blank")}
+function pasta(){window.open(get(cur).link,"_blank")}
+function importar(i){var f=i.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);if(!d.t)throw 0;if(confirm("Substituir os dados atuais pela cópia?")){db=d;save();render()}}catch(e){alert("Arquivo de cópia inválido.")}};r.readAsText(f)}
+/* =================== CONTRATO DE LOCAÇÃO (modelo CRECI) =================== */
+var CT={
+c1:"O prazo da locação é de {prazoExt} ({prazo}) meses, iniciando-se no dia {inicio} e findando-se em {fim}, quando então será considerada finda, independentemente de notificação judicial ou extrajudicial, obrigando-se o(a) LOCATÁRIO(A) a restituir o imóvel, completamente livre e desocupado.",
+c1p:"PARÁGRAFO ÚNICO: Estabelecem as partes que, no caso de rescisão judicial ou extrajudicial do presente instrumento e conseqüente desocupação do imóvel, a constatação da existência de animais nele por ocasião de sua retomada, deverá ser comunicada incontinenti à Divisão de Vigilância de Zoonose do Município (DVZ), quando diante de um animal suspeito de zoonose de relevância para a saúde pública, para as imediatas providências cabíveis.",
+c2:"O aluguel convencionado é de R$ {aluguel} ({aluguelExt}) mensais (mais os valores referentes ao pagamento de água, energia e IPTU), devendo ser pago até o dia {dia} do mês subsequente ao vencido, diretamente a {favorecido}, ou a quem vier o(a) LOCADOR(A) indicar, mediante depósito, transferência ou pix, conforme dados: {banco}, ou outra forma de pagamento que seja conveniente para ambas as partes.",
+c2b:"O pagamento do aluguel deverá ser efetuado até o dia {dia} de cada mês, subsequente ao vencido, sob pena de multa, correções e despesas previstas na Cláusula 4.",
+c3:"O valor do locativo mensal será anualmente reajustado, segundo os índices do {indice} acumulados no período e, no caso de sua extinção, de forma alternativa e subsidiária, pelos do {indice2}.",
+c4:"A não observância do prazo estabelecido na cláusula segunda, implicará na incidência de multa por atraso de aluguel de {multa}% sobre o valor do aluguel, acrescido de juros de {juros}% ao mês e correção monetária.",
+c4b:"Além do aluguel, obriga-se o(a) LOCATÁRIO(A) a efetuar o pagamento dos seguintes encargos, que poderão ser exigidos juntamente com o aluguel:\na. o imposto predial e territorial;\nb. o consumo de água e energia elétrica;\nc. o prêmio de seguro contra incêndio, que deverá ser feito pelo valor venal do imóvel, nele figurando o(a) LOCADOR(A) como beneficiário(a);\nd. as taxas de condomínio;\ne. os demais encargos e tributos que normalmente incidem ou venham a incidir sobre o imóvel.",
+c4p:"PARÁGRAFO ÚNICO: O não pagamento desses encargos nas épocas próprias, facultará ao(a) LOCADOR(A) a justa recusa ao recebimento dos aluguéis, sujeitando-se o(a) LOCATÁRIO(A) ao pagamento dos ônus decorrentes do inadimplemento, previstos para cada débito, independentemente de eventual ação de despejo.",
+c5:"O imóvel objeto deste instrumento é locado exclusivamente para servir de residência ao(à) LOCATÁRIO(A) e sua família, não podendo sua destinação ser alterada, substituída ou acrescida de qualquer outra, sem prévia e expressa anuência do(a) LOCADOR(A). Fica vedado outrossim, a sublocação, cessão ou transferência deste contrato, bem como o empréstimo, parcial ou total do imóvel locado, que dependerão também, de prévia e expressa anuência do(a) LOCADOR(A).",
+laudo:"O imóvel objeto deste foi entregue ao(a) LOCATÁRIO(A) nas condições descritas no \u201cTermo (Laudo) de Vistoria\u201d devidamente assinado pelas partes, integrando o presente, obrigando-se a devolvê-lo, uma vez finda a locação, nas mesmas condições em que o recebeu, razão pela qual, no momento da restituição das chaves, será realizada nova vistoria.",
+padrao:"O imóvel objeto deste foi devidamente vistoriado pelo(a) LOCATÁRIO(A), que constatou encontrar-se em perfeitas condições de habitabilidade, com pintura nova, portas com fechaduras em funcionamento e munidas das correspondentes chaves, azulejos e porcelanas da cozinha e banheiro inteiros, aberturas com ferragens em condições e vidros inteiros, instalação elétrica e hidráulica em condições, obrigando-se a devolvê-lo, uma vez finda a locação, nas mesmas condições em que o recebeu, razão pela qual, no momento da restituição das chaves, será realizada nova vistoria.",
+personalizada:"O imóvel objeto deste foi vistoriado pelo(a) LOCATÁRIO(A) no ato da entrega das chaves, tendo sido constatado o seguinte estado de conservação: {vistoriaDesc}. O(A) LOCATÁRIO(A) obriga-se a devolvê-lo, uma vez finda a locação, nas mesmas condições em que o recebeu, ressalvados os desgastes naturais decorrentes do uso regular e do decurso do tempo, razão pela qual, no momento da restituição das chaves, será realizada nova vistoria, com a lavratura do respectivo Termo de Entrega de Chaves e Vistoria.",
+c6p:"PARÁGRAFO ÚNICO: Constatadas eventuais irregularidades e a necessidade de reparos no imóvel em decorrência de uso indevido, fará o(a) LOCADOR(A) apresentar de imediato ao(à) LOCATÁRIO(A), um orçamento prévio assinado por profissional do ramo, sendo-lhe facultado pagar o valor nele declinado, liberando-se assim de eventuais ônus em razão de demora e/ou imperfeições nos serviços. Caso contrário, poderá contratar por sua própria conta e risco mão-de-obra especializada, arcando nessa condição com os riscos de eventuais imperfeições dos serviços e pelo pagamento do aluguel dos dias despendidos para a sua execução, cessando a locação unicamente com o \u201cTermo de Entrega de Chaves e Vistoria\u201d, firmado pelo(a) LOCADOR(A) ou seu(sua) administrador(a).",
+c7:"Obriga-se o(a) LOCATÁRIO(A) a manter o imóvel sempre limpo e bem cuidado na vigência da locação, correndo por sua conta e risco, não só os pequenos reparos tendentes a sua conservação, mas também as multas a que der causa, por inobservância de quaisquer leis, decretos e/ou regulamentos.",
+c8:"O(A) LOCATÁRIO(A) não poderá fazer no imóvel ou em suas dependências, quaisquer obras ou benfeitorias, sem prévia e expressa anuência do(a) LOCADOR(A), não lhe cabendo direito de retenção, por aquelas que, mesmo necessárias ou consentidas, venham a ser realizadas.",
+c8p:"PARÁGRAFO ÚNICO: Caso não convenha ao(à) LOCADOR(A) a permanência de quaisquer obras ou benfeitorias realizadas pelo(a) LOCATÁRIO(A), mesmo necessárias ou consentidas, deverá este(a), uma vez finda a locação, removê-las às suas expensas, de modo a devolver o imóvel nas mesmas condições em que o recebeu.",
+c9:"Obriga-se desde já o(a) LOCATÁRIO(A), a respeitar os regulamentos e as leis vigentes, bem como o direito de vizinhança, evitando a prática de quaisquer atos que possam perturbar a tranquilidade ou ameaçar a saúde pública.",
+fianca:"Como fiadores e principais pagadores solidários de todas as obrigações que incumbem ao(a) LOCATÁRIO(A), por força de lei ou do presente contrato e até a efetiva desocupação do imóvel, nas condições previstas pela cláusula sétima deste, assinam: {fiadores}.",
+fiancaP:"PARÁGRAFO ÚNICO: Fica convencionado que os fiadores supramencionados não se eximirão da obrigação ora assumida, caso a locação, seja por força de lei, de contrato ou por ajuste feito entre LOCADOR(A) e LOCATÁRIO(A), se prorrogue por prazo superior ao convencionado, tornando-se inoperante o disposto no artigo 835, do Código Civil, com o que desde já concordam. Fica também ciente o(s) Fiador(es), que é plenamente válida a penhora do seu bem de família, seja residencial ou comercial, nos termos do inciso VII, do artigo 3º da Lei nº 8.009/1990, bem como entendimento do Superior Tribunal de Justiça, conforme Tema 1091: \u201cÉ válida a penhora do bem de família de fiador apontado em contrato de locação de imóvel, seja residencial, seja comercial, nos termos do inciso VII, do art. 3º da Lei n. 8.009/1990.\u201d",
+caucao:"Como garantia da presente locação, entrega o(a) LOCATÁRIO(A) a título de caução, a importância de R$ {valorGar}, em boa e corrente moeda nacional, a lhe ser restituída, uma vez finda a locação e devolvido o imóvel com todos os seus acessórios, nas mesmas condições em que o recebeu.",
+seguro:"Como garantia da presente locação, apresenta o(a) LOCATÁRIO(A) a apólice de seguro-fiança: {apolice}.",
+titulo:"Para garantir as obrigações assumidas neste contrato, o(a) LOCATÁRIO(A), por ser de seu interesse, dá neste ato em caução ao(a) LOCADOR(A), Título de Capitalização de pagamento único no valor nominal de R$ {valorGar}, conforme dados: {apolice}.",
+tituloB:"Satisfeita a obrigação, o(a) LOCADOR(A) fará a devolução do saldo que estiver em seu favor ao(à) LOCATÁRIO(A), não se responsabilizando a Sociedade de Capitalização pelos débitos do(a) LOCATÁRIO(A).",
+tituloC:"Caso no curso da locação seja necessário o resgate do título caucionado, o Locatário deverá substituí-lo por outra garantia idônea.",
+c11:"Qualquer tolerância ou concessão, com o fito de resolver extrajudicialmente questão legal ou contratual, não se constituirá em precedente invocável pelo(a) LOCATÁRIO(A) e nem modificará quaisquer das condições estabelecidas neste instrumento.",
+c12:"Em caso de morte, exoneração, falência ou insolvência de quaisquer dos fiadores, obriga-se o(a) LOCATÁRIO(A), num prazo de 30 (trinta) dias, contados da verificação do fato, a apresentar substituto idôneo ao(à) LOCADOR(A), a juízo deste(a), sob pena de caracterizar-se infração contratual, ensejadora de ação de despejo.",
+c13:"Obriga-se o(a) LOCATÁRIO(A) a efetuar a ligação de energia elétrica em seu nome, providenciando no seu desligamento, por ocasião da devolução do imóvel.",
+c14:"A falta de cumprimento de qualquer cláusula ou condição deste instrumento, implicará na sua imediata rescisão, ficando a parte infratora sujeita ao pagamento de uma multa, equivalente a três meses de aluguel, pelo valor vigente à época da infração, proporcional ao prazo restante do contrato, além de perdas e danos.",
+c15:"Sempre que as partes forem obrigadas a se valer de medidas judiciais para a defesa de direitos e obrigações decorrentes deste instrumento, o valor devido a título de honorários, será de {honor}% sobre o valor da causa, elegendo, desde já, o Foro da Comarca de {cidade}, para a solução das questões dele emergentes.",
+lgpd:"O(A) LOCADOR(A) e o(a) LOCATÁRIO(A) declaram expresso CONSENTIMENTO para que os dados pessoais necessários ao cumprimento deste contrato sejam coletados, tratados e compartilhados, nos termos do artigo 7º, incisos I e V, da Lei nº 13.709/2018 (LGPD), exclusivamente para a finalidade de execução deste contrato e de procedimentos a ele relacionados.",
+arb:"Qualquer controvérsia decorrente ou relacionada a este contrato, incluindo sua interpretação, existência, validade, rescisão ou extinção, será submetida primeira e obrigatoriamente à mediação, nos termos da Lei nº 13.140/2015, administrada pela câmara de mediação escolhida de comum acordo pelas partes.",
+dig:"As Partes (e as testemunhas) declaram que este documento poderá ser assinado eletronicamente por meio da plataforma \u201c{plataforma}\u201d, com fundamento no artigo 10, parágrafo 2º, da MP 2200-2/2001 e do artigo 6º do Decreto nº 10.278/2020, sendo as assinaturas consideradas válidas, vinculantes e executáveis, desde que firmadas pelos representantes legais das Partes."
+};
+function contratoInit(t){if(!t.contrato)t.contrato={garantia:"fianca",vistoria:"padrao",zoo:true,lgpd:false,arb:false,dig:false,unlock:false,locadorQual:"",locatarioQual:"",fiadoresQual:"",banco:"",indice:"",indice2:"",honor:"",foro:"",favorecido:"",valorGar:"",apolice:"",plataforma:"",vistoriaDesc:"",prazoManual:"",D:null};return t.contrato}
+function cP(k,fixo){return{t:CT[k],fixo:fixo,base:CT[k],ed:false}}
+function cGarParts(c){var g=c.garantia||"fianca";if(g==="caucao")return[cP("caucao",0)];if(g==="seguro")return[cP("seguro",0)];if(g==="titulo")return[cP("titulo",0),cP("tituloB",1),cP("tituloC",1)];return[cP("fianca",0),cP("fiancaP",1)]}
+function cVisParts(c){var v=c.vistoria||"padrao";return[cP(v,0),cP("c6p",1)]}
+function cEnsureD(t){var c=t.contrato;if(c.D)return c.D;
+ var D=[
+  {n:"CLÁUSULA 1",p:c.zoo!==false?[cP("c1",0),cP("c1p",1)]:[cP("c1",0)]},
+  {n:"CLÁUSULA 2",p:[cP("c2",0),cP("c2b",0)]},
+  {n:"CLÁUSULA 3",p:[cP("c3",0)]},
+  {n:"CLÁUSULA 4",p:[cP("c4",0),cP("c4b",1),cP("c4p",1)]},
+  {n:"CLÁUSULA 5",p:[cP("c5",1)]},
+  {n:"CLÁUSULA 6",p:cVisParts(c)},
+  {n:"CLÁUSULA 7",p:[cP("c7",1)]},
+  {n:"CLÁUSULA 8",p:[cP("c8",1),cP("c8p",1)]},
+  {n:"CLÁUSULA 9",p:[cP("c9",1)]},
+  {n:"CLÁUSULA 10",p:cGarParts(c)},
+  {n:"CLÁUSULA 11",p:[cP("c11",1)]},
+  {n:"CLÁUSULA 12",p:[cP("c12",0)]},
+  {n:"CLÁUSULA 13",p:[cP("c13",0)]},
+  {n:"CLÁUSULA 14",p:[cP("c14",0)]},
+  {n:"CLÁUSULA 15",p:[cP("c15",0)]}];
+ if(c.lgpd)D.push({t:"DA PROTEÇÃO DE DADOS (LGPD)",k:"lgpd",extra:1,p:[cP("lgpd",0)]});
+ if(c.arb)D.push({t:"DA MEDIAÇÃO",k:"arb",extra:1,p:[cP("arb",0)]});
+ if(c.dig)D.push({t:"DA ASSINATURA DIGITAL",k:"dig",extra:1,p:[cP("dig",0)]});
+ c.D=D;save();return D}
+function cDefLocador(t){var s=t.lnome||"";if(t.lcpf)s+=(s?", ":"")+"CPF/CNPJ "+t.lcpf;return s}
+function cDefLocatario(t){var s=t.nome||"";if(t.cpf)s+=(s?", ":"")+"CPF/CNPJ "+t.cpf;return s}
+function mesesEntre(a,b){if(!a||!b)return null;var pa=a.split("-").map(Number),pb=b.split("-").map(Number);var m=(pb[0]-pa[0])*12+(pb[1]-pa[1]);if(pb[2]>pa[2])m+=1;return m>0?m:null}
+function numDec(n){return Number(n||0).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function dataExtensoHoje(){var n=new Date();return n.getDate()+" de "+MESL[n.getMonth()]+" de "+n.getFullYear()}
+function cF(t){var c=t.contrato,meses=mesesEntre(t.ini,t.fim),mesesN=meses||(parseInt(c.prazoManual)||null);
+ return{locador:c.locadorQual||cDefLocador(t),locatario:c.locatarioQual||cDefLocatario(t),fiadores:c.fiadoresQual||"",
+ imovel:t.end||"",cidade:c.foro||db.cfg.cid||"",prazo:mesesN||"",prazoExt:mesesN?ext(mesesN):"",
+ inicio:t.ini?br(t.ini):"",fim:t.fim?br(t.fim):"",aluguel:t.valor?numDec(t.valor):"",aluguelExt:t.valor?extenso(t.valor):"",
+ dia:t.venc||"",favorecido:c.favorecido||sNome(),banco:c.banco||"",indice:c.indice||"IGP-M/FGV",indice2:c.indice2||"IPCA/IBGE e INPC/IBGE",
+ multa:pMulta(),juros:pJuros(),honor:c.honor||"20",valorGar:c.valorGar||"",apolice:c.apolice||"",plataforma:c.plataforma||"",
+ vistoriaDesc:c.vistoriaDesc||"",data:(c.foro||db.cfg.cid||"São Paulo")+", "+dataExtensoHoje()}}
+function cSub(str,F){return str.replace(/\{(\w+)\}/g,function(m,k){var val=F[k];val=(val==null?"":String(val)).trim();return val?val:"________"})}
+function abrirContrato(){view="contrato";render()}
+function voltarContrato(){view="detail";render()}
+var CE=(function(){try{var d=document.createElement("div");d.setAttribute("contenteditable","plaintext-only");return d.contentEditable==="plaintext-only"?"plaintext-only":"true"}catch(e){return"true"}})();
+var _sv,_ct={};
+function saveSoon(){clearTimeout(_sv);_sv=setTimeout(save,400)}
+function cRefreshDoc(){var t=get(cur),e=document.getElementById("cdoc");if(t&&e)e.innerHTML=cRenderDocHTML(t)}
+function cNorm(x){return String(x||"").replace(/\u00a0/g," ").replace(/\r/g,"").replace(/[ \t]+\n/g,"\n").replace(/\n{3,}/g,"\n\n").replace(/\s+$/,"")}
+function cIdx(n){return get(cur).contrato.D.findIndex(function(x){return x.n===n})}
+function cCampo(key,el){get(cur).contrato[key]=el.value;save();cRefreshDoc()}
+function cTroca(nome,fn){var t=get(cur),c=t.contrato;cEnsureD(t);var i=cIdx(nome);
+ if(i>=0&&c.D[i].p.some(function(p){return p.ed})&&!confirm("Esta cláusula tem texto editado por você. Trocar a opção substitui o texto pelo modelo. Continuar?")){render();return}
+ fn(c,i);save();render()}
+function cToggleZoo(chk){var t=get(cur),c=t.contrato;cEnsureD(t);var i=cIdx("CLÁUSULA 1"),P=c.D[i].p,j=P.findIndex(function(x){return x.base===CT.c1p});
+ if(chk.checked){if(j<0)P.push(cP("c1p",1))}
+ else if(j>=0){if(P[j].ed&&!confirm("O parágrafo da zoonose foi editado. Remover mesmo assim?")){render();return}P.splice(j,1)}
+ c.zoo=chk.checked;save();cRefreshDoc()}
+function cSetGarantia(sel){cTroca("CLÁUSULA 10",function(c,i){c.garantia=sel.value;c.D[i].p=cGarParts(c)})}
+function cSetVistoria(sel){cTroca("CLÁUSULA 6",function(c,i){c.vistoria=sel.value;c.D[i].p=cVisParts(c)})}
+function cToggleExtra(key,chk,title){var t=get(cur),c=t.contrato;cEnsureD(t);
+ var j=c.D.findIndex(function(x){return x.k===key||(!x.k&&x.t===title)});
+ if(chk.checked){if(j<0)c.D.push({t:title,k:key,extra:1,p:[cP(key,0)]})}
+ else if(j>=0){if(c.D[j].p.some(function(p){return p.ed})&&!confirm("Essa cláusula foi editada por você. Remover mesmo assim?")){render();return}c.D.splice(j,1)}
+ c[key]=chk.checked;save();render()}
+function cToggleUnlock(chk){get(cur).contrato.unlock=chk.checked;save();render()}
+function cClauseEdit(el,ci,pi,soon){var t=get(cur);if(!t||!t.contrato||!t.contrato.D)return;var cl=t.contrato.D[ci],p=cl&&cl.p[pi];if(!p)return;
+ var id=ci+"_"+pi;clearTimeout(_ct[id]);
+ var go=function(){var txt=cNorm(el.innerText),b=p.base?cNorm(cSub(p.base,cF(t))):null;
+  if(b!==null&&txt===b){p.t=p.base;p.ed=false}else{p.t=txt;p.ed=true}
+  var tg=el.previousElementSibling,u=tg&&tg.querySelector?tg.querySelector(".rst"):null;if(u)u.style.display=p.ed?"":"none";
+  save()};
+ if(soon)_ct[id]=setTimeout(go,500);else go()}
+function cPaste(e){e.preventDefault();var x=(e.clipboardData||window.clipboardData).getData("text");document.execCommand("insertText",false,x)}
+function cTitulo(ci,el){var t=get(cur),cl=t.contrato.D[ci];if(!cl)return;cl.t=el.value;var h=el.previousElementSibling;
+ if(h&&h.getAttribute("data-pre")){var v=el.value.trim();h.textContent=h.getAttribute("data-pre")+(v?" – "+v.toLocaleUpperCase("pt-BR"):"")}saveSoon()}
+function cRst(ci,pi){var t=get(cur),x=t.contrato.D[ci].p[pi];if(x.base&&!confirm("Voltar este trecho ao texto padrão do modelo?"))return;x.t=x.base;x.ed=false;save();cRefreshDoc()}
+function cDel(ci){var t=get(cur),c=t.contrato,cl=c.D[ci];if(!cl)return;if(!confirm("Excluir esta cláusula"+(cl.t?" ("+cl.t+")":"")+"?"))return;
+ var key=cl.k||({"DA PROTEÇÃO DE DADOS (LGPD)":"lgpd","DA MEDIAÇÃO":"arb","DA ASSINATURA DIGITAL":"dig"})[cl.t];if(key)c[key]=false;
+ c.D.splice(ci,1);save();render()}
+function cMove(ci,dir){var D=get(cur).contrato.D,ni=ci+dir;if(ni<0||ni>=D.length||!(D[ni].extra||D[ni].x))return;var tmp=D[ci];D[ci]=D[ni];D[ni]=tmp;save();cRefreshDoc()}
+function cAddExtra(){var t=get(cur);cEnsureD(t);t.contrato.D.push({t:"",extra:1,x:1,p:[{t:"",fixo:0,base:"",ed:true}]});save();cRefreshDoc();
+ var a=document.querySelectorAll("#cdoc .ctitle"),l=a[a.length-1];if(l){l.scrollIntoView({block:"center"});l.focus()}}
+function cVisiveis(c,F){return c.D.filter(function(cl){return !((cl.extra||cl.x)&&!cl.p.some(function(p){return String(p.ed?p.t:cSub(p.t,F)).trim()}))})}
+function cRestaurarTudo(){if(confirm('Restaurar todo o modelo do contrato? As edições feitas nas cláusulas serão perdidas.')){var t=get(cur);t.contrato.D=null;save();render()}}
+function cFieldsHTML(t){var c=t.contrato,h='<div class="card">';
+ h+='<label>Qualificação completa do(a) locador(a)</label><textarea rows="2" onchange="cCampo(\'locadorQual\',this)" placeholder="Nacionalidade, estado civil, profissão, RG, endereço...">'+esc(c.locadorQual||cDefLocador(t))+'</textarea>';
+ h+='<label>Qualificação completa do(a) locatário(a)</label><textarea rows="2" onchange="cCampo(\'locatarioQual\',this)" placeholder="Nacionalidade, estado civil, profissão, RG, endereço...">'+esc(c.locatarioQual||cDefLocatario(t))+'</textarea>';
+ h+='<label>Garantia da locação (Cláusula 10)</label><select onchange="cSetGarantia(this)">'+
+  ['fianca','caucao','seguro','titulo'].map(function(g){return '<option value="'+g+'" '+((c.garantia||"fianca")===g?'selected':'')+'>'+({fianca:'Fiança (fiadores)',caucao:'Caução em dinheiro',seguro:'Seguro-fiança',titulo:'Título de capitalização'})[g]+'</option>'}).join('')+'</select>';
+ if((c.garantia||"fianca")==="fianca"){h+='<label>Fiadores — qualificação completa</label><textarea rows="2" onchange="cCampo(\'fiadoresQual\',this)" placeholder="Nomes, profissões, RG, CPF, estado civil, endereço">'+esc(c.fiadoresQual)+'</textarea>'}
+ else{h+='<label>Valor da caução / título (R$)</label><input onchange="cCampo(\'valorGar\',this)" value="'+esc(c.valorGar)+'">';
+  if(c.garantia==="seguro"||c.garantia==="titulo")h+='<label>Apólice / seguradora / dados</label><input onchange="cCampo(\'apolice\',this)" value="'+esc(c.apolice)+'">'}
+ h+='<label>Estado do imóvel na entrega (Cláusula 6)</label><select onchange="cSetVistoria(this)">'+
+  '<option value="laudo" '+(c.vistoria==="laudo"?'selected':'')+'>Termo (Laudo) de Vistoria em anexo</option>'+
+  '<option value="padrao" '+((c.vistoria||"padrao")==="padrao"?'selected':'')+'>Descrição padrão (imóvel em perfeitas condições)</option>'+
+  '<option value="personalizada" '+(c.vistoria==="personalizada"?'selected':'')+'>Descrever o estado real abaixo</option></select>';
+ if(c.vistoria==="personalizada")h+='<label>Descreva o estado do imóvel</label><textarea rows="3" onchange="cCampo(\'vistoriaDesc\',this)" placeholder="Ex.: pintura em bom estado, um desgaste no piso da sala, armários da cozinha novos, hidráulica revisada em 2026...">'+esc(c.vistoriaDesc)+'</textarea>';
+ h+='<div class="dl"><label><input type="checkbox" '+(c.zoo!==false?'checked':'')+' onchange="cToggleZoo(this)">Incluir parágrafo sobre zoonose (Cláusula 1)</label></div>';
+ if(!t.ini||!t.fim)h+='<label>Prazo da locação (meses) — cadastro sem datas de início/fim</label><input type="number" min="1" inputmode="numeric" onchange="cCampo(\'prazoManual\',this)" value="'+esc(c.prazoManual)+'">';
+ h+='<label>Recebedor do aluguel (favorecido)</label><input onchange="cCampo(\'favorecido\',this)" value="'+esc(c.favorecido||sNome())+'">';
+ h+='<label>Banco / agência / conta ou chave Pix</label><input onchange="cCampo(\'banco\',this)" value="'+esc(c.banco)+'" placeholder="Ex.: Pix (11) 99350-9109 — Sérgio Costa">';
+ h+='<div class="row"><div class="cfld"><label>Índice de reajuste</label><input onchange="cCampo(\'indice\',this)" value="'+esc(c.indice||"IGP-M/FGV")+'"></div><div class="cfld"><label>Índice subsidiário</label><input onchange="cCampo(\'indice2\',this)" value="'+esc(c.indice2||"IPCA/IBGE e INPC/IBGE")+'"></div></div>';
+ h+='<div class="row"><div class="cfld"><label>Multa por atraso (%)</label><input value="'+pMulta()+'" disabled></div><div class="cfld"><label>Juros ao mês (%)</label><input value="'+pJuros()+'" disabled></div></div><p class="muted" style="margin:2px 0 10px">Vêm das configurações do recibo. <button type="button" class="sec" onclick="cfg()">Alterar</button></p>';
+ h+='<label>Honorários advocatícios (%)</label><input onchange="cCampo(\'honor\',this)" value="'+esc(c.honor||"20")+'">';
+ h+='<label>Foro (comarca)</label><input onchange="cCampo(\'foro\',this)" value="'+esc(c.foro||db.cfg.cid||"")+'">';
+ h+='<div class="dl">';
+ h+='<label><input type="checkbox" '+(c.lgpd?'checked':'')+' onchange="cToggleExtra(\'lgpd\',this,\'DA PROTEÇÃO DE DADOS (LGPD)\')">Incluir cláusula de proteção de dados (LGPD)</label>';
+ h+='<label><input type="checkbox" '+(c.arb?'checked':'')+' onchange="cToggleExtra(\'arb\',this,\'DA MEDIAÇÃO\')">Incluir cláusula de mediação</label>';
+ h+='<label><input type="checkbox" '+(c.dig?'checked':'')+' onchange="cToggleExtra(\'dig\',this,\'DA ASSINATURA DIGITAL\')">Permitir assinatura eletrônica</label>';
+ h+='</div>';
+ if(c.dig)h+='<label>Plataforma de assinatura eletrônica</label><input onchange="cCampo(\'plataforma\',this)" value="'+esc(c.plataforma)+'" placeholder="Ex.: DocuSign, Clicksign, Autentique">';
+ h+='<div class="dl"><label><input type="checkbox" '+(c.unlock?'checked':'')+' onchange="cToggleUnlock(this)">Destravar cláusulas fixas para edição</label></div>';
+ h+='<div class="row"><button type="button" class="sec" onclick="cAddExtra()">+ Cláusula extra</button><button type="button" class="del" onclick="cRestaurarTudo()">Restaurar tudo</button></div>';
+ h+='<p class="muted" style="margin-top:8px">Cláusula <b style="color:var(--pri)">azul</b> = fixa do modelo (travada). <b style="color:#b4741b">Laranja</b> = editável: toque no texto e digite; "restaurar" volta ao padrão.</p>';
+ return h+'</div>'}
+function cCarimboHTML(){return db.cfg.carImg?'<img src="'+db.cfg.carImg+'">':'<div class="carimbo">'+esc(sCar()).split("\n").map(function(l,i){return i?'<span>'+l+'</span>':l}).join("")+'</div>'}
+function cSigHTML(c){
+ var partes='<div class="csig"><div>LOCADOR(A)</div><div>LOCATÁRIO(A)</div>'+
+  ((c.garantia||"fianca")==="fianca"?'<div>FIADOR(A)</div><div>FIADOR(A)</div>':'')+
+  '<div>TESTEMUNHA 1<br><span class="muted" style="font-weight:400">Nome / RG / Endereço</span></div>'+
+  '<div>TESTEMUNHA 2<br><span class="muted" style="font-weight:400">Nome / RG / Endereço</span></div></div>';
+ var corretor='<div class="sgw" style="margin-top:26px"><div class="sgl">'+(db.cfg.assin?'<img src="'+db.cfg.assin+'">':'<div style="height:60px"></div>')+'<hr><b>'+esc(sNome())+'</b><br>'+esc(sQual())+'<br><span class="muted" style="font-size:11px">Corretor(a) responsável pela intermediação</span></div><div class="stp">'+cCarimboHTML()+'</div></div>';
+ return partes+corretor}
+function cRenderDocHTML(t){cEnsureD(t);var c=t.contrato,F=cF(t),D=c.D,unlock=!!c.unlock;
+ var h='<h3 style="text-align:center;font:700 19px Georgia,serif;margin:0;color:var(--ink)">CONTRATO DE LOCAÇÃO RESIDENCIAL</h3>'+
+ '<p style="text-align:center;color:var(--mute);margin:2px 0 18px;font-family:Georgia,serif;font-size:13px">Minuta – conforme a Lei do Inquilinato (Lei 8.245/1991) e modelo CRECI</p>'+
+ '<p class="q" style="font-family:Georgia,serif"><b>LOCADOR(A):</b> '+esc(cSub("{locador}",F))+'</p>'+
+ '<p class="q" style="font-family:Georgia,serif"><b>LOCATÁRIO(A):</b> '+esc(cSub("{locatario}",F))+'</p>'+
+ '<p class="q" style="font-family:Georgia,serif"><b>OBJETO:</b> '+esc(cSub("{imovel}",F))+', com suas benfeitorias e instalações.</p>'+
+ '<p class="q" style="font-family:Georgia,serif">Por este particular instrumento, as partes supraqualificadas resolvem, de comum acordo e de livre e espontânea vontade, firmar um Contrato de Locação, tendo por objeto o imóvel declinado no preâmbulo, a reger-se pelas seguintes cláusulas e condições:</p>';
+ var k=15;
+ D.forEach(function(cl,ci){var nm=(cl.extra||cl.x)?("CLÁUSULA "+(++k)+(cl.t&&cl.t.trim()?" – "+cl.t.trim().toLocaleUpperCase("pt-BR"):"")):cl.n;
+  var isx=!!(cl.extra||cl.x);h+='<div class="ccl"><h3'+(isx?' data-pre="CLÁUSULA '+k+'"':'')+'>'+esc(nm)+'</h3>'+(isx?'<input class="ctitle" maxlength="80" value="'+esc(cl.t||"")+'" placeholder="Título da cláusula (ex.: DO ANIMAL DE ESTIMAÇÃO)" oninput="cTitulo('+ci+',this)" onchange="save()">':'');
+  cl.p.forEach(function(p,pi){var lock=p.fixo&&!unlock,txt=p.ed?p.t:cSub(p.t,F);
+   h+='<div class="ctag'+(lock?'':' e')+'"><i>'+(lock?'Fixa':'Editável')+'</i>'+
+    '<u class="rst" onclick="cRst('+ci+','+pi+')" style="'+(p.ed?'':'display:none')+'">'+(p.base?'restaurar':'limpar')+'</u>'+
+    (pi===0&&(cl.extra||cl.x)?'<u onclick="cMove('+ci+',-1)">▲ mover</u><u onclick="cMove('+ci+',1)">▼ mover</u><u onclick="cDel('+ci+')">excluir cláusula</u>':'')+'</div>'+
+   '<div class="cpart '+(lock?'lk':'ed')+'" '+(lock?'':'contenteditable="'+CE+'" data-ph="Digite o texto desta cláusula" oninput="cClauseEdit(this,'+ci+','+pi+',1)" onblur="cClauseEdit(this,'+ci+','+pi+')" onpaste="cPaste(event)"')+'>'+esc(txt)+'</div>'});
+  h+='</div>'});
+ h+='<p class="q" style="margin-top:18px;font-family:Georgia,serif">E por estarem assim justas e contratadas, assinam o presente, em tantas vias quantas necessárias, de igual teor e forma, na presença de 2 (duas) testemunhas, para que surta seus legais e jurídicos efeitos.</p>'+
+ '<p class="q" style="font-family:Georgia,serif">'+esc(cSub("{data}",F))+'</p>'+cSigHTML(c);
+ return h}
+function vContrato(){var t=get(cur);contratoInit(t);cEnsureD(t);
+ var h='<div class="row"><button class="sec" onclick="voltarContrato()">← Voltar</button></div>';
+ h+='<h2>Contrato de locação — '+esc(t.nome)+'</h2>';
+ h+='<p class="muted">Preencha os dados abaixo; o texto do contrato se atualiza sozinho. As alterações ficam salvas neste locatário.</p>';
+ h+=cFieldsHTML(t);
+ h+='<div class="row"><button onclick="cVerFinal()">Ver contrato pronto e enviar</button></div>';
+ h+='<div class="card" id="cdoc">'+cRenderDocHTML(t)+'</div>';
+ return h}
+function cVerFinal(){var ae=document.activeElement;if(ae&&ae.isContentEditable)ae.blur();var t=get(cur),c=contratoInit(t);cEnsureD(t);var F=cF(t);
+ var vz=c.D.length-cVisiveis(c,F).length;if(vz&&!confirm(vz+" cláusula(s) extra sem texto serão ignoradas no contrato. Continuar?"))return;
+ var logo=db.cfg.logo?'<img src="'+db.cfg.logo+'" alt="Logo">':'<div class="mono">FC</div>';
+ var body='<p class="q"><b>LOCADOR(A):</b> '+esc(cSub("{locador}",F))+'</p>'+
+  '<p class="q"><b>LOCATÁRIO(A):</b> '+esc(cSub("{locatario}",F))+'</p>'+
+  '<p class="q"><b>OBJETO:</b> '+esc(cSub("{imovel}",F))+', com suas benfeitorias e instalações.</p>'+
+  '<p class="q">Por este particular instrumento, as partes supraqualificadas resolvem, de comum acordo e de livre e espontânea vontade, firmar um Contrato de Locação, tendo por objeto o imóvel declinado no preâmbulo, a reger-se pelas seguintes cláusulas e condições:</p>';
+ var k=15;
+ cVisiveis(c,F).forEach(function(cl){var nm=(cl.extra||cl.x)?("CLÁUSULA "+(++k)+(cl.t&&cl.t.trim()?" – "+cl.t.trim().toLocaleUpperCase("pt-BR"):"")):cl.n;
+  body+='<div style="margin:10px 0"><h3 style="font-size:13px;margin:0 0 3px">'+esc(nm)+'</h3>'+cl.p.filter(function(p){return String(p.ed?p.t:cSub(p.t,F)).trim()}).map(function(p){return '<p class="q" style="font-size:12.5px">'+esc(p.ed?p.t:cSub(p.t,F))+'</p>'}).join('')+'</div>'});
+ body+='<p class="q" style="margin-top:14px;font-size:12.5px">E por estarem assim justas e contratadas, assinam o presente, em tantas vias quantas necessárias, de igual teor e forma, na presença de 2 (duas) testemunhas, para que surta seus legais e jurídicos efeitos.</p>'+
+ '<p class="q" style="font-size:12.5px">'+esc(cSub("{data}",F))+'</p>';
+ var sig=cSigHTML(c);
+ rinfo={id:t.id,k:"contrato",num:new Date().toISOString().slice(0,10),pre:"contrato",tit:"Contrato de locação",multi:true};
+ document.getElementById("paper").innerHTML=
+  '<div class="top"></div><div class="in">'+
+  '<div class="rh"><div class="rlogo">'+logo+'</div><div class="rid"><b>FCosta Corretor de Imóveis</b><span>Corretor de Imóveis — CRECI-SP 294791-F</span><span>Avaliador Imobiliário — CNAI 52708</span><span>fcostacorretor.com • WhatsApp (11) 99350-9109</span></div><div class="rn">'+new Date().toLocaleDateString("pt-BR")+'</div></div>'+
+  '<div class="rt" style="font-size:16px">CONTRATO DE LOCAÇÃO RESIDENCIAL</div><div class="rs">Conforme a Lei do Inquilinato (Lei nº 8.245/1991)</div>'+
+  body+sig+
+  '<div class="rlei">Contrato regido pela Lei do Inquilinato (Lei nº 8.245/1991) e, subsidiariamente, pelo Código Civil (Lei nº 10.406/2002).'+(c.lgpd?' Tratamento de dados pessoais conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).':'')+' Intermediação realizada por corretor de imóveis inscrito no CRECI (Lei nº 6.530/1978 e Decreto nº 81.871/1978).</div>'+
+  '</div><div class="rft">FCosta Corretor de Imóveis • CRECI-SP 294791-F • CNAI 52708 • fcostacorretor.com</div>';
+ abreRecibo()}
+
+/* envio do contrato e pedido de documentos, separados para locador e locatário */
+function abreZap(tel,msg){var n=(tel||"").replace(/\D/g,"");if(n&&n.length<=11)n="55"+n;window.open("https://wa.me/"+n+"?text="+encodeURIComponent(msg),"_blank")}
+async function enviarParte(q){
+ var t=get(rinfo.id),loc=q==="locador",nome=(loc?t.lnome:t.nome)||"",tel=loc?t.ltel:t.tel,quem=loc?"do locador":"do locatário";
+ if(!nome||!tel){alert("Falta cadastrar o nome e o WhatsApp "+quem+" (botão Editar).");return}
+ if(document.getElementById("paper").textContent.indexOf("___")>=0&&!confirm("O contrato ainda tem campos em branco (______). Enviar assim mesmo?"))return;
+ var msg="Olá, "+nome.split(" ")[0]+"! Segue o contrato de locação do imóvel "+t.end+", para você ler e assinar como "+(loc?"LOCADOR(A)":"LOCATÁRIO(A)")+". Se estiver tudo certo, devolva assinado. Qualquer dúvida, é só responder. "+sNome();
+ try{var f=await arquivo("pdf");
+  if(navigator.canShare&&navigator.canShare({files:[f]})){alert("Na próxima tela, escolha o WhatsApp "+quem+".");await navigator.share({files:[f],text:msg})}
+  else{baixar(f,f.name);alert("Arquivo salvo no aparelho. Vou abrir o WhatsApp "+quem+"; anexe o arquivo lá.");abreZap(tel,msg)}}
+ catch(e){if(e&&e.name==="AbortError")return;alert("Não foi possível gerar o arquivo. Verifique a internet e tente de novo.")}}
+function listaDocs(q){
+ var t=get(rinfo.id),loc=q==="locador",nome=(loc?t.lnome:t.nome)||"",tel=loc?t.ltel:t.tel,g=(t.contrato||{}).garantia||"fianca",L;
+ if(!nome||!tel){alert("Falta cadastrar o nome e o WhatsApp "+(loc?"do locador":"do locatário")+" (botão Editar).");return}
+ if(loc)L=["RG e CPF","Certidão de casamento ou de nascimento (estado civil)","Matrícula atualizada do imóvel (certidão de inteiro teor e de ônus, com até 30 dias)","Carnê ou consulta do IPTU","Comprovante de residência","Últimas contas de água, luz, gás e condomínio quitadas","Dados bancários ou chave PIX para receber o aluguel","Procuração, se for representado por outra pessoa"];
+ else{L=["RG e CPF (ou CNH)","Certidão de casamento ou de nascimento (estado civil)","Comprovante de residência atual","Comprovantes de renda dos últimos 3 meses"];
+  if(g==="caucao")L.push("Comprovante do depósito da caução");
+  else if(g==="seguro")L.push("Proposta e apólice do seguro-fiança");
+  else if(g==="titulo")L.push("Proposta de subscrição do título de capitalização");
+  else L.push("Do fiador: RG, CPF, certidão de casamento, comprovantes de renda e matrícula atualizada de um imóvel dele; se casado, o cônjuge também assina")}
+ abreZap(tel,"Olá, "+nome.split(" ")[0]+"! Para preparar o contrato de locação do imóvel "+t.end+", preciso que você me envie estes documentos"+(loc?" (como LOCADOR)":" (como LOCATÁRIO)")+":\n\n"+L.map(function(x,i){return(i+1)+". "+x}).join("\n")+"\n\nPode mandar foto nítida ou PDF. "+sNome())}
+/* =================== fim do bloco de contrato =================== */
+
+render();
+</script>
+</body>
+</html>
