@@ -178,6 +178,17 @@ dialog#dlg-novo::backdrop{background:rgba(3,6,14,.74);backdrop-filter:blur(4px)}
 .meu-item button{width:38px;height:38px;border:0;border-radius:10px;cursor:pointer;font-size:17px;background:rgba(251,113,133,.13);color:var(--ro)}
 .dlg-sep{font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--texto-muted);padding-top:4px}
 @media(max-width:899px){.hello-acoes{flex:1 1 100%;justify-content:stretch}.hello-acoes .search-box{flex:1 1 100%}.novo-btn{flex:1 1 100%}}
+
+/* VISOR DE FERRAMENTAS — botão fixo "Voltar ao painel" */
+#visor{position:fixed;inset:0;z-index:9999;display:none;flex-direction:column;background:var(--bg)}
+#visor.aberto{display:flex}
+#visor-bar{flex:none;display:flex;align-items:center;gap:12px;padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top,0px));background:#0a1120;border-bottom:2px solid var(--cy)}
+#visor-voltar{display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 20px;border:0;border-radius:12px;background:var(--cy);color:#06101c;font:800 16px 'Sora','DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 16px -4px rgba(34,211,238,.6)}
+#visor-voltar i{font-size:22px}
+#visor-voltar:active{transform:scale(.96)}
+#visor-titulo{min-width:0;flex:1;font:600 14px 'DM Sans',sans-serif;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#visor-frame{flex:1;width:100%;border:0;background:#fff}
+@media(max-width:480px){#visor-titulo{display:none}#visor-voltar{flex:1;justify-content:center}}
 </style>
 </head>
 <body>
@@ -848,6 +859,54 @@ var FERRAMENTAS = [
   });
   renderLeads();
 
+})();
+</script>
+
+<!-- VISOR DE FERRAMENTAS: abre as páginas locais com botão fixo para voltar ao painel -->
+<div id="visor" role="dialog" aria-label="Ferramenta aberta">
+  <div id="visor-bar">
+    <button type="button" id="visor-voltar" aria-label="Voltar para o painel"><i class="ti ti-arrow-left"></i>Voltar ao painel</button>
+    <div id="visor-titulo"></div>
+  </div>
+  <iframe id="visor-frame" title="Ferramenta" allow="camera; microphone; clipboard-read; clipboard-write; fullscreen; geolocation; autoplay"></iframe>
+</div>
+<script>
+(function () {
+  var visor = document.getElementById('visor');
+  var frame = document.getElementById('visor-frame');
+  var titulo = document.getElementById('visor-titulo');
+  function abrir(href, nome) {
+    titulo.textContent = nome || href;
+    frame.src = href;
+    visor.classList.add('aberto');
+    document.body.style.overflow = 'hidden';
+  }
+  function fechar() {
+    visor.classList.remove('aberto');
+    frame.src = 'about:blank';
+    document.body.style.overflow = '';
+  }
+  document.getElementById('visor-voltar').addEventListener('click', fechar);
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && visor.classList.contains('aberto')) fechar(); });
+  /* se alguma ferramenta tiver link para o próprio painel, apenas fecha o visor */
+  frame.addEventListener('load', function () {
+    if (!visor.classList.contains('aberto')) return;
+    try {
+      var p = frame.contentWindow.location.pathname;
+      var meu = location.pathname;
+      if (p === meu || /\/(index\.html)?$/.test(p) && p.replace(/index\.html$/, '') === meu.replace(/index\.html$/, '')) fechar();
+    } catch (err) {}
+  });
+  document.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.button || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest('a[href]');
+    if (!a || a.target === '_blank' || a.hasAttribute('download')) return;
+    var h = a.getAttribute('href');
+    if (!h || /^(https?:|\/\/|mailto:|tel:|javascript:|#|data:|blob:)/i.test(h)) return;
+    e.preventDefault();
+    var t = a.querySelector('.rowbtn-title');
+    abrir(h, (t ? t.textContent : a.textContent).trim());
+  }, true);
 })();
 </script>
 </body>
