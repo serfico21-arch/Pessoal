@@ -205,7 +205,12 @@
   }
 
   #stage{
-    display:block;width:100%;background:#000;border-radius:var(--radius);
+    display:block;width:auto;max-width:100%;max-height:min(60vh,520px);
+    margin:16px auto 0;background:#000;border-radius:var(--radius);
+  }
+  .size-fixed{
+    padding:9px 10px;border:1px solid var(--rule);border-radius:var(--radius);
+    background:var(--bg);font-size:14px;color:var(--ink-soft);
   }
   .result{margin-top:20px;}
   .result video{width:100%;border-radius:var(--radius);display:block;}
@@ -221,18 +226,59 @@
     .step-num{font-size:30px;}
   }
 
-  /* ===== Passo 5: adaptar vídeos prontos (acrescentado) ===== */
-  .adp-item{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;border:1px solid var(--rule);border-radius:var(--radius);padding:10px 12px;margin-top:10px;background:var(--surface);}
-  .adp-item .adp-nm{font-size:14px;font-weight:500;word-break:break-all;}
-  .adp-item .adp-st{font-size:12px;color:var(--ink-soft);}
-  .adp-item .adp-x{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:17px;}
-  .adp-item .adp-x:hover{color:var(--danger);}
-  .adp-item .download{margin-top:0;padding:8px 14px;font-size:13px;}
-  .adp-item .adp-ex{grid-column:1 / -1;display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px dashed var(--rule);padding-top:8px;}
-  .adp-item .adp-ex .file-btn{padding:8px 14px;font-size:13px;}
-  .adp-item .adp-ex-st{font-size:12px;color:var(--ink-soft);}
+  /* ===== Passo 5: adaptar vídeos prontos ===== */
+  .btn-secondary{background:var(--surface);color:var(--accent);border:1.5px solid var(--accent);padding:12px 22px;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;}
+  .btn-secondary:hover{background:var(--accent-soft);}
+  .btn-secondary:disabled{color:#9A9486;border-color:var(--rule);background:var(--surface);cursor:not-allowed;}
   .file-btn:disabled{opacity:.5;cursor:not-allowed;}
-  .adp-sub{display:block;font-size:15px;margin:22px 0 10px;}
+  .adp-list{display:flex;flex-direction:column;gap:12px;margin-top:16px;}
+  .adp-list:empty{display:none;}
+  .adp-item{display:grid;grid-template-columns:84px 1fr;gap:14px;border:1px solid var(--rule);border-radius:var(--radius);padding:12px;background:var(--surface);transition:border-color .2s, box-shadow .2s;}
+  .adp-item.working{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+  .adp-pv{width:84px;height:149px;border-radius:4px;background:#23211D;display:block;}
+  .adp-main{min-width:0;display:flex;flex-direction:column;gap:6px;}
+  .adp-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .adp-nm{font-size:14px;font-weight:600;word-break:break-word;}
+  .adp-x{background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:16px;padding:0 2px;line-height:1;}
+  .adp-x:hover{color:var(--danger);}
+  .adp-meta{font-size:12px;color:var(--ink-soft);}
+  .adp-prog{display:none;align-items:center;gap:10px;margin-top:2px;}
+  .adp-item.working .adp-prog{display:flex;}
+  .adp-bar{flex:1;height:10px;background:var(--rule);border-radius:5px;overflow:hidden;}
+  .adp-fill{height:100%;width:0%;background:var(--cta);border-radius:5px;transition:width .25s linear;}
+  .adp-pct{font-size:13px;font-weight:600;min-width:40px;text-align:right;font-variant-numeric:tabular-nums;}
+  .adp-st{font-size:13px;color:var(--ink-soft);}
+  .adp-st.err{color:var(--danger);}
+  .adp-res{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin-top:4px;}
+  .adp-res:empty{display:none;}
+  .adp-res .download{margin-top:0;padding:8px 14px;font-size:13px;}
+  .adp-redo{background:none;border:none;color:var(--accent);font-size:12px;cursor:pointer;text-decoration:underline;padding:0;font-family:inherit;}
+  .adp-list.is-busy .adp-x,.adp-list.is-busy .adp-redo{pointer-events:none;opacity:.4;}
+  .adp-opts{display:flex;flex-wrap:wrap;gap:16px;margin-top:20px;}
+  .adp-more{margin-top:18px;border:1px solid var(--rule);border-radius:var(--radius);}
+  .adp-more{padding:16px;}
+  .adp-more-t{display:block;font-size:15px;margin-bottom:14px;}
+  .adp-play{flex:0 0 100%;width:100%;max-width:220px;max-height:390px;border-radius:4px;background:#000;display:block;}
+  .adp-more .audio-row + .audio-row{margin-top:12px;}
+  .adp-more audio{margin-bottom:4px;}
+  .adp-more .field-row{margin:16px 0;}
+  .adp-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px;}
+  .adp-note{font-size:13px;color:var(--ink-soft);margin:12px 0 0;}
+  .adp-time{background:var(--accent-soft);border:1px solid #C5D5DD;border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;font-size:14px;}
+  .adp-time-t{display:block;font-size:13px;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;}
+  .adp-time-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding:4px 0;}
+  .adp-time-big{font-family:'Fraunces',serif;font-size:22px;font-weight:700;color:var(--accent);}
+  .adp-time-nm{font-size:12px;color:var(--ink-soft);word-break:break-all;}
+  .adp-time-words{font-size:13px;color:var(--ink-soft);}
+  .adp-time-ok{flex:1 1 100%;font-size:13px;font-weight:600;color:#2F7A4D;}
+  .adp-time-bad{flex:1 1 100%;font-size:13px;font-weight:600;color:var(--danger);}
+  .adp-time-tip{margin:8px 0 0;font-size:12px;color:var(--ink-soft);}
+  .adp-msg{font-size:14px;font-weight:500;margin:12px 0 0;}
+  .adp-msg:empty{display:none;}
+  @media (max-width:560px){
+    .adp-item{grid-template-columns:64px 1fr;gap:12px;}
+    .adp-pv{width:64px;height:114px;}
+  }
 </style>
 </head>
 <body>
@@ -296,9 +342,7 @@
           </div>
           <div class="field">
             <label for="sizeLimit">Tamanho do arquivo</label>
-            <select id="sizeLimit">
-              <option value="wa" selected>Até 15 MB (limite do editor · cabe no Status do WhatsApp)</option>
-            </select>
+            <div class="size-fixed">Até 15 MB (limite do editor)</div>
           </div>
         </div>
         <div class="field-row" style="margin-top:20px;">
@@ -407,16 +451,18 @@
   <div class="step">
     <div class="step-num">5</div>
     <div class="step-body">
-      <h2>Adaptar vídeos já prontos para Stories e Reels</h2>
-      <p>Tem vídeos feitos antes (ou de outro programa) que ficam cortados no Stories? Envie aqui e receba versões 1080×1920 com o vídeo inteiro visível e o som preservado. Se quiser, adicione música e narração por cima, ou extraia só o áudio dos vídeos. Todos os arquivos gerados ficam com no máximo 15 MB.</p>
+      <h2>Adaptar vídeos prontos para Stories e Reels</h2>
+      <p>Envie o vídeo, escolha uma música de fundo e/ou uma narração, troque o som original pelo seu áudio e baixe o MP4 vertical (1080×1920) pronto para Stories e Reels, com até 15 MB.</p>
       <div class="card">
         <label class="dropzone" id="adpDrop" style="display:block;">
           <input type="file" id="adpFiles" accept="video/*" multiple>
           <strong>Clique ou arraste os vídeos aqui</strong>
           <span>Pode enviar vários de uma vez (MP4, MOV, WebM)</span>
         </label>
-        <div id="adpList"></div>
-        <div class="field-row" style="margin-top:20px;">
+
+        <div class="adp-list" id="adpList"></div>
+
+        <div class="adp-opts">
           <div class="field">
             <label for="adpMode">Como preencher a tela vertical</label>
             <select id="adpMode">
@@ -425,60 +471,76 @@
               <option value="fill">Preencher a tela (corta as laterais)</option>
             </select>
           </div>
-          <div class="field">
-            <label for="adpColor">Cor do fundo (modo sólido)</label>
+          <div class="field" id="adpColorField" style="display:none;">
+            <label for="adpColor">Cor do fundo</label>
             <input type="color" id="adpColor" value="#23211D">
           </div>
         </div>
-        <div class="field" style="margin-top:20px;">
-          <label for="adpSize">Tamanho do arquivo</label>
-          <select id="adpSize">
-            <option value="wa">Até 15 MB (limite do editor · cabe no Status do WhatsApp)</option>
-          </select>
+
+        <div class="adp-more">
+          <strong class="adp-more-t">Informações no vídeo</strong>
+          <div class="toggle-row" style="margin-bottom:16px;">
+            <input type="checkbox" id="adpInfoOn" checked>
+            <label for="adpInfoOn" style="margin:0;">Mostrar logo, descrição do imóvel e WhatsApp no vídeo</label>
+          </div>
+          <div class="field-row">
+            <div class="field" style="flex:1 1 100%;">
+              <label for="adpDesc">Descrição do imóvel (opcional)</label>
+              <input type="text" id="adpDesc" maxlength="140" placeholder="Ex.: Apto 3 dorms · 92 m² · Vila Mariana · R$ 850.000">
+            </div>
+            <div class="field" style="flex:1 1 100%;">
+              <label for="adpContact">WhatsApp / contato</label>
+              <input type="text" id="adpContact" maxlength="50" value="WhatsApp (11) 99350-9109">
+            </div>
+          </div>
+          <p class="hint" style="margin-top:0;">O vídeo é ampliado ao máximo, sem cortar nada. O logo, a descrição e o WhatsApp ficam nas áreas livres, longe do que o Instagram cobre com nome do perfil e botões. Se apagar o contato, o vídeo usa (11) 99350-9109.</p>
         </div>
 
-        <strong class="adp-sub">Música e narração (opcional)</strong>
-        <div class="audio-row">
-          <label class="file-btn">
-            Escolher música
-            <input type="file" id="adpAudioInput" accept="audio/*" style="display:none;">
-          </label>
-          <span class="audio-name" id="adpAudioName">Nenhuma música selecionada</span>
-          <button type="button" class="file-btn" id="adpClearAudio" style="display:none;">Remover</button>
-        </div>
-        <div class="audio-row" style="margin-top:14px;">
-          <button type="button" class="file-btn" id="adpRecBtn">&#9679; Gravar minha voz</button>
-          <label class="file-btn">
-            Enviar áudio pronto (narração)
-            <input type="file" id="adpNarrInput" accept="audio/*" style="display:none;">
-          </label>
-          <span class="audio-name" id="adpNarrName">Nenhuma narração</span>
-          <button type="button" class="file-btn" id="adpClearNarr" style="display:none;">Remover</button>
-        </div>
-        <audio id="adpNarrPreview" controls style="display:none;width:100%;margin-top:12px;"></audio>
-        <div class="field-row" style="margin-top:16px;">
-          <div class="field">
-            <label for="adpOrigVol">Som original do vídeo</label>
+        <div class="adp-more">
+          <strong class="adp-more-t">Áudio do vídeo</strong>
+          <div class="adp-time" id="adpTimeInfo"></div>
+          <div class="field" style="margin-bottom:16px;">
+            <label for="adpOrigVol">O que fazer com o som original</label>
             <select id="adpOrigVol">
-              <option value="keep" selected>Manter</option>
-              <option value="low">Abaixar (30%)</option>
-              <option value="mute">Silenciar (usar só música/narração)</option>
+              <option value="replace" selected>Remover o som original e usar a minha música/narração</option>
+              <option value="low">Manter baixinho (30%) junto com a minha música/narração</option>
+              <option value="keep">Manter o som original junto com a minha música/narração</option>
             </select>
           </div>
-          <div class="field">
-            <label for="adpMusicVol">Volume da música</label>
-            <input type="range" id="adpMusicVol" min="0" max="100" step="5" value="30">
-            <div class="val"><span id="adpMusicVolVal">30</span>%</div>
+          <div class="audio-row">
+            <label class="file-btn">
+              Subir música de fundo
+              <input type="file" id="adpAudioInput" accept="audio/*" style="display:none;">
+            </label>
+            <span class="audio-name" id="adpAudioName">Nenhuma música selecionada</span>
+            <button type="button" class="file-btn" id="adpClearAudio" style="display:none;">Remover</button>
           </div>
+          <div class="audio-row">
+            <label class="file-btn">
+              Subir narração
+              <input type="file" id="adpNarrInput" accept="audio/*" style="display:none;">
+            </label>
+            <button type="button" class="file-btn" id="adpRecBtn">&#9679; Gravar minha voz</button>
+            <span class="audio-name" id="adpNarrName">Nenhuma narração</span>
+            <button type="button" class="file-btn" id="adpClearNarr" style="display:none;">Remover</button>
+          </div>
+          <audio id="adpNarrPreview" controls style="display:none;width:100%;margin-top:12px;"></audio>
+          <div class="field-row">
+            <div class="field">
+              <label for="adpMusicVol">Volume da música quando há narração</label>
+              <input type="range" id="adpMusicVol" min="0" max="60" step="5" value="20">
+              <div class="val"><span id="adpMusicVolVal">20</span>%</div>
+            </div>
+          </div>
+          <p class="hint" style="margin-top:0;">A música toca em loop do começo ao fim do vídeo e a narração começa junto com ele (se for mais longa, é cortada no final). Sem narração, a música toca em volume cheio. Se não subir nenhum áudio, o som original é mantido.</p>
         </div>
-        <p class="hint">A música toca em loop durante o vídeo e a narração começa junto com ele (se for mais longa que o vídeo, é cortada no final). Para gravar a voz aqui, permita o microfone quando o navegador pedir. Sem música nem narração, o vídeo sai só com o som original, como antes.</p>
-        <p class="hint">Vídeos que já são verticais (9:16) são mantidos, apenas ajustados para 1080×1920.</p>
-        <button class="btn-primary" id="adpGo" disabled style="margin-top:16px;">Adaptar vídeos</button>
-        <p style="font-size:13px;color:var(--ink-soft);margin:10px 0 0;">Processa em tempo real (30 s de vídeo levam cerca de 30 s). Mantenha esta aba aberta e em primeiro plano até terminar.</p>
-        <div class="audio-row" style="margin-top:20px;border-top:1px solid var(--rule);padding-top:16px;">
-          <button type="button" class="file-btn" id="adpExAll" disabled>&#9835; Extrair áudio de todos os vídeos</button>
-          <span class="audio-name">Gera um arquivo de áudio (M4A, ou WebM se o navegador não gravar M4A) de cada vídeo da lista, com até 15 MB. Cada vídeo também tem o seu botão "Extrair áudio". Leva o mesmo tempo do vídeo.</span>
+
+        <div class="adp-actions">
+          <button class="btn-primary" id="adpGo" disabled>Adaptar e gerar MP4</button>
+          <button class="btn-secondary" id="adpExAll" disabled>Só extrair o áudio original</button>
         </div>
+        <div class="adp-msg" id="adpMsg"></div>
+        <p class="adp-note">Cada vídeo é processado em tempo real (30 s de vídeo levam cerca de 30 s). Mantenha esta aba aberta e em primeiro plano até terminar. O vídeo é ampliado ao máximo dentro de 1080×1920, sem cortar nada.</p>
         <canvas id="adpStage" width="1080" height="1920" style="display:none;"></canvas>
       </div>
     </div>
@@ -527,6 +589,7 @@
   const BROKER_LOGO_SRC = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUAAAAFACAYAAADNkKWqAABfMklEQVR42u29e3QU150u+lWpGwk9WtCWaLn1cqQBO4AQEPvYISLYETgRhrEEBIFtDjAxyvh6DraTyVxEYGIfGMOZjGObEy+fCCeGiW0kAgiPiUkMjEPgEmc5w8PCxMEHzYiHkEBuUOuBmm5V3T9au7VVqqquqq5+728tFlKru2vXrr2//Xv/ODAkPUQR3A/Xr+Pum+bKBIDZWXO57Hnf9FhTswfUPnfjyp4c8rO7y7cAAFwXPwYAeFy9S5Q+19bV3wsAxTnpmVrHmGrP3MNbi9PI70Vlzj3k5/H5S7qCfb55V52N/Dy/ZkI/z/3AEuz+GBIfHJuC5MP6+nX8D/7uXvvvfv/BbYyp9NQsrvXIvc/r6U7r7TqUSQhuUEQlAKSl9T/W3uryAYCl54w1Vu5rYCD9/bau/l4uJeW31sKqdwBgwYJvcUpE17h2ZSYApH41lf/4E3vvi1u2Cmx1MAJkSDDp7rZnQ8r7zdfSH/z6w2PkpCVCdESKkxKds8Ruod+vh/zOXxFMI5XOdrem9epw2kQA6LdX8uS1O8de3e3zWA4WTBg7Nt+Xt0tJwl1fv46f1nc1PXXOfK8aeTIwAmSIUXgGNljeb76WDgA1yxvccqorTXZpaf2PKX0XITstaP3sVIpZJBYqHE6b2Nnu5rJ8FwPX67EUiYQcASA7f/KeOzKzBGsKfl9U5twjdzgQKbHmnwsHUtM2+9jqYgTIEMOkJ1XlvJ7uNABo/+zgMjWyE262yK6FDle+FwDOXrNb011HBJrITl63cVZ3y4j3X77k0jTeQ6c7dN3fvOl5o14rKLQPS7G2MgDAzFy3CAA08QHAiTYRs4qHX5KS4bDEzO/JzJ168H77l/bLSYnNu+psWm2kDIwAGcIE2j4nlVyIhKdXurP0nLHSKiuR1k5et3EAQJPd5Usu3SQWTtAEWVBox+VLrhEECWAEAZ5oG8V9KCstFmkJst9eyU/N7W20puD3cmrz+vp1/Pe+NjPrJ//fyR5mP2QEyBAh0vvdR4M9tOOCvH7juu9lNcKT4oOPwBGpjpboYo3cwkGQcphVzKHHUjRCgiS/E2mx5O77d+cWTPjAeU9Vo5QMp/VdTV/8420+JhkyAmQwESTchJb0pFIeUWH5cWWicLOF48eVjRBxrp35kCPS3eFjLXysSnLRIkc1UqTVZikZWlPw+8kPrdxBk17j2pWZqV9N5Rcs+vFtRoaMABkMwDOwwdJzeFpGzoKl3XpVW0Z4oUuKSoRIq8sBIrxnxiDEMXuJqkw/s64Du7OZvZARIIMGiCI43+3uVEH8sY94HL2e7rSeG+drb3ZcmBuM9NpbXT7iiSWk9+Z759jEhojVCyf7TQ1DjhYAmDP+rKpkKKcmN65dmclUZEaADBIQTy29Mbye7rRu12cNlrF3P0Fe6+/YJ8p9/vj7R8SDZ8Bb3S2M8CJIiEQSlP6dOFDSXUeEkrvv310+d+Xf0M+3eW9T6vxHWgZZWA0jwKQnvgMHfiMShwaR9gRRqKSJT0qAxHlx8Ax4AOj89ChTa2NAXfbaygJhOARZU2u4qRNc3rPX7NYZeb3/D20vFEVwX/x6t+2OR5a6OQ4im1FGgEmBG1f25NAODTlpT470AIAQ31tvN7GJjANVmWBmrlskZAhxzN7S6c619Bpg6jEjQKbmypDfBx+BO/rhETDCiz8ypImQlgxp50lufsF3aVth8646G8tLZgSYsGouALg6Pl45cLPlF+l5izg10mPqbWKoyQWF9lGZKoQI++2V/NQJLq+VH/MMrR43721KrT591stt2sSIkBFg/BMfse/xaRPfVCI9ouIePtbCM2dG4pKhnOPkq9+Y4wOAURIhI0JGgPFIfmQBqxEfIb/j7x8RGeklp1Qo5zQBgK9PT3+78MtVa2jVmAVWMwKMeeID/Ha+G1f25IgpxY+oSXxHPzwCFrrCiFCNCKfm9jaWz135N7REyMp0MQKMWeID/DY+KfFJQ1iYxMeglQinTnB5papx14Hd2XTGCQMjwKgQX2/XoUwSziBHfLTE13O2WWy50MYx4mNQI0I5G6ESEdLmFgZGgBElP3oRyoWzEOJjEh+DGRIh7TUumTmnLmv8pCZravYAU4sZAUYMzXubUmnPrhrxMRsfQ7iJsLxyTTYhPmmAPQMjQFMlPsBv5xM/FC03vvynx+XU3f3797FQFoawEiEpUFtVDqHknhmDdmfB7hEeY+qQZmAEaKq623amcZU1tf/n6XmLuP6OfSL5/7NrHr7rT8cHGfExhBMkw0QqEUqzSljYDCNAU6W+G1f25MhVXCbEx/JzGSJJggTEYUJIUJpnzKRBRoAhS320d5cuSUXKUDHiY4gmEUp7mUjV4q4Du7NZxRlGgLqlPqWafKxAAUMsqsVV5RBII6usqTXcww9AzP3S4gxmG2QEqAn0AlEKZmZpawyxiHnT8+CYMkfWNkhLg8276mxyvaIZASYxRBHcbc+GlNS0zT6p1EdncBz98AirzsIQF9IgIUI6ZKa0/K788flLurye7jS67QIjwCSGZ2CDhed+YLGmZg9IPbzkPR98BO7Eu6+weD6GuJMGHU6b2Nnu5hxOm1gxv5IbGEh/Z2d57coXOE5g0mCSEyAJHG3eVWcr//I3XiMeXkKAzMnBkGjSIFGJx+danhufv6Qr2XOKk5IARRHc/n1NY2oW13puXNmTc6vH3Sl9D7P1MSQKCRLQrTwr5ldyXk/6d4rLl+3werrTLJv/5XYy1hxMOgJcX7+Of+H5+jG0ykv/nXl4GZKFCEc5SJLQS5xUBEhUXq+nO+3Snw9ulwY1M6mPIRlIcFRTdwAkpzjZ7IJJQ4CE/ORUXla4gCFZQJfcIiRIvMS5+QXfLS5ftqPrwO7s7Hnf9CRDGl3CE6DX0512YN8PxtQsb3AzlZeBYVgaJCRIvMQkn7i4fNkOsncSnQQTmgDlihhIVd4d7xzlWVwfQ7JKg44pcwIZJHJ2wUQvsWVJ1Btr3tuUSmwa5V/+xmvW1GF7H1WdmZEfQ9Li0OkOzMNRHHbb+bLSYtGfRncqBcBS4CC8nu411tTsrkR2jiSkBEhOrQt7nxrPlc7ZRjs7WGwfA4M2lbhifiU3NsvmSOR4QT7hJL9ddTbi7Bg75b4uKfkdPtbCyI+BQYI33zuHlgttHCG/znY3d/z9I+KtHnenq+PjlTkLlnY376qzMQkwhkFOqa4Du7Nv/1Wvi/4bC3FhYDAuCaaNK/sbe959OxOt0GpKopHfjSt7cjyZPQGjbXury3fmDyc4Rn4MDMFx+vx1OHPHcH+56eDuzPCgr8fDuTraRWdhRvXaNcsvPjC3/o+DgxD+/civUzdt3hr3xRQSQgIkNj+pp7e91eX7w78ftXzvlYOs6g0Dgw5Iy2sRD/FdM2Y3ZdvvqfvR81tuk4wqJgHGGPm1t7p8f/jL2JRfHTiR8uPt+xn5MTDoRGtHLz5p+RS5pV8JSIKX/7ONzxrLTfZ6rpU++u3V7wPA4CCEY8ePx22l6bgmQCXya/3sVMrhj/6TY84OBobQ4Ej5AgODtzmHfRwAwOu5waWlZkz2eq6VZudOfO93vzs+OHt2BRevJBi3XmBCfmd+s+1vabW39bNTKczTy8BgDg6d7gh4iEnqXOtnp1Jc7ZeXXvrzwe0vPF8/xk+M/lYS8Ya4VA8v7H1qfOni12+c+c22v829K/O1EZIfc3YwMIQFtIcY8BdSsDsLdpdMX7aC7qXDCDCM8AxssKSmbfYx8mNgiB0SLPxy1ZofPb/lNgC8uGVr3NQVjCsb4I0re3Iy7X/Xe+q976+aUFrwM/I6C3NhYIgMSJhMhnUsMrNScaOrgyc2wUe/vfr9ecf/OOj92qy4sQnGjQTI1F4GhtiTBIHR3efIe+JBHY4LJwghv7YzjasY+TEwRB/EMUJ+px0jAGDZ/C+348ExEvMESMjv1HvfHx3qwsiPgSHqJEiasbd+diolLa3/sUt/Prjdt+Hvx3Qf+m1qrJNgTBNg8646W+ni129c2PvU+Nxc4ReM/BgYYlsSPP7+ETEtrf+x9s8OLstZsLS7+9BvU2N5/DFrAyS9CS7sfWr8jbGlHXn2K9auti6cvyIIjPwYGGILUu8w3XUulouqxiQBkgKMXQd2Z/8Xf/EaAFh6zlgZ+TEwxBcJkioysVpeP+ZU4I0bSlLmP9Iy2Lyrzna5770bzhK7BQCT/BgY4kQdJjbB4+8fEQdutvzixpU9OdbU7IGuA7uzGQGqQAS4mVPmZvDcDyzeq32unOIcXDvzIWfpOWM9eAaM/BgY4pAEb/W4O29c2ZOTs2Bpd6w5RWKKAFv3PjWuZnmD+z8a/2HPpHye72rzmw1efV9gXdsYGOIEly+5cPK6jQMAurI06dAYSyQYMwToGdhgIeEuBXenzydq77GPb4qM/BgY4geHTneg89OjOHyshSf2QAC49OeD22uWN7i7D/02VRRjw/8QEwTYvKvOlpq22Xfqve+vys0VfkEkv4yBz/mDvzvF6vkxMMQhCV6+5EL/xbM8UYXT0vofaz3d+MucBUu79zfWZcXCOKNOLuvr1/EvPF8/5uKBdWN7fL1fkNeZ0yP5sHrhZFW1irUwjc9nOquYQ3rRVAEYGR5DQt2SlgBFEdz+xrqs+TUT+v/8btttRn7Jh3nT81BQaAeAESEUBMSYfvK6jbO6WxgRJggJ5n5pcYY1NXsg2j2Ho1oNZvo9/hNgwcQv/1teafbE/u5+Rn5JRHxz7ivCt6alo3Ach3E5/sT6vh4PR/9zOG1iZlYqJuZBzLCOxcS77oQzdwyXm56C1o5eNpFxgNPnryPHkYuSYocIABc//0/k5A78cOtL//rPfzWxeVAYnIVoVY+xRGtS3q2vyHh0eYP71HvfX8X1X5vf1eYnv/6LZxn5JYHEN6uYQ4+lSOwBkOW7GNBEpBIgjeG/FaOstBgFhW0ckwjjA5cvuXDwDPiqcgiAP6V1YODg9pLpm1c0721KBRAVKTAqKvD6+nX8i1u2Cs276mxf4m/dJGpvZ7ubO/i7Uxxb0Imv6pLXafIDgNwJqehLm6i5oGZnu5truWAeEc6bnhfyd7D1qzy3VQ/OiKl0uYgToCiCa9331LhP8GD/l3wHbhHyA4Ad7xzl2eJJTOKjSU+O+IIhd4I/p16JHAkRGtUeVi+cDK+tLNAGUg1qUioAHDwD1pNGZZ6l6XLEHhiNdLmIh8G8//7MlNLFr9+4s/ff99Lkd/hYCyO/BFzsesiPkBz9O/mXncFzapKhw2kTZxVz2P53U1S9yUokTZOfHME5nDaxxN7Jldg7gxL3zFy3aIYkmYiQVo/54CNw1/9zb5/X050miD/2RTpIOqI2wAt7nxpf+og/2JnrvzafvM6cHolHfMFUXTlcv+YZRYI0nCkXUrr7BFnpqy9tokC8jHOLAK+tjAegOYOIlvyI55kec/9FcP0BYv6cp68rR5YFhXYO7ECXBbEHzsx1iw4cEdpbZwwSe+CNK9PHAYiYFBgxAlxfv44vWlB/68JejO/pv/YLerFdvuRiqyKB1JtQVF0lElQiPiUSIsZ2oJa3ulug94DVO26CSfk8f+zjmyJb08o4dLoDqwtbgNxiAP5Cqs4S+2NtZxqPjM9fEtH4wIipwF+r+IC3pmYP/Om/el8nqu+xj2+KzOkR35g3PQ+rF07GT56tEvWoumqS3vVr+hyCGQOf8xkDfqlsUj7PT8rneZoI584uE37ybJWophpn+S5y9L9gJC13bQb9qjBdNMGa2v9zr6c77eNP7L3ixo0RmdOIXKR5V53tkUdO+na/smr13QVYSl5vudDGyC/OiW9pxR2jVN1gJHL9micoycm9R+0z2Rk8RxMfLZERtZQ9tdgkQfJ7e6vLd+nPB7e/uGWr8MX9ZRFJlQu7Cjxk1LzdvAu2L/G3fk6kv852N8fsfvFJfHQ4S0+IKqMUxI5HS1V9aRMFklNKq7z0ezLzJooA0NvxOUd+JmuNPbXYJkGvrYyvKodAVGFXx8eH7Xn37YxEaEzYJcAD+34wxpqaPXC7/VYDeY3E+7HHH38SHyG/WcUctKqMSuixFInpRVOFHkuRSP7RJEf+dba7ufSiqUJ60dTA7+Q9+aV3oy9tonDlwl9w5cJfRkh+UnU4kmCajXa89XZTwPH0wUfgSBHV9DtO31xfvy6szy+sEmDXgd3ZOQuWdu9+ZdXqSXcOLiWnccuFNhbyEocSH5H6zJD2eixFI/J+s3wXuRNtIlougLt8ySUbNE1Af04q4XX3CSI6PudoyXBSPs8HkwQJ+ZolyTLow8nrNq7KCTHddUT44KNK/uvTfS+Pz9+8onlXnQ1A2BwiYSPA9fXr+Dv+2NLTvKvO5r3at50ImyzkJT6Jb1bxEC+EQBC0hEc0AWIDGpXJMfTz6oUkWL94FPnRoNXi7j5BzM7gOVolnpTP84c1jtGMkB0G/VIgUMtXlUNIdx0R0tIqI6IKh40Ap/VdTee27extemlFw90FwycwI7/YhtRTGiA+EyQ+6WtaMjfI3+dNd3GOKXOA6+Bm5rpFNSKclM/zvR2fj/rbrGIOb7JHHLOwulvQ2V7MOZw28YOPwD38QMsvvJ7uph89v8UVriyRsBAgiePZ/cqq1RC8S2jpjz3m2Jb2zCI8JfIzmrd76HQHcNof1Nw5PY9zTJmjSITnrwhCxoDAEymQIT7w5nvnsHohOIezTEx3HRGASq7b9VnDi1u2/vf77p0RFi9+WFVgCJe2kwXJvL6xTXwBW5vJNrAeS5Fodi0/QobWhZO5lgvg5OoIAn57YH7p3QFSPNEmsgM4xnH5kgud7W7O4bSJx98/IlbMx+NeT3dduGoHmk6AIx0fftWXeX1jk/hCzdrQIvW1XGjjOsNUsopWjwsK7SOIkMoO4VkoTPzg0OkOFBS2cUAxAqow9vZ5Pd0ZBw78RhQhchw406RBUwlw44aSlOx53/Rc2PvU+P9oc28/fwXE68sCnmOY+MwiP5r0gMjV6vNLhB0AznHzpudx5B71Bj+T9/df1FYliTlCwqcKP/F4WcArDFRyPTfO19Ysrt1540pKDvJhmkPEVAKcOWVuhjU129300oodxPHBvL6xp+aSjd7Z7uZCJT6pfY+oMaES37zpeYa+g5AhkQo7/UQIAPDaygCor8WMgc/5fh3Xy87gue4+QcwY+JzvS5soDEmbnNHxM/hhdbfg4Bl/gDTtEDlw4Dc9ZjpETCPAxrUrM2uWN7iHwl6WEOmPJYVHD9JeDNKNnuUzbk4hxEfse6ESH03UfqICnpji3wjGnSZ+qXD1wskc+U6G+JECVy8EgDJIpcChCtKxJwE276qz3W6/1cANyRSsxl/0iE+LCpg7IVV34QESJ0e8uQGyMVUldwekSa+tDI4p8FcPMUiyfg1EWfIrKLQjy3eRyxhI1S0N01VqSMA1C6Y2B3QZfUlYzG2zpEBTCHDjhpKUZZt39u4uWbWa44QlfjvKWZ5Jf5FXddWIL9SqJSfaRAChq7nS6su0Sg747ZHD4Thn/dJmbrE/WwR2rC60x0x3OKkdcFI+z5++yNajGQiUzRqSAttbZwyOyfaHxbzwfH3sSID/k3tcHKz3BsJeyGZh0l/kia/knhmDlp4zVmBkmpge8pOz69GncqjENzdQq89GpCZRzR5Jv05Ji5xZRHj5kgsovsOU53H+iiD0WIq4gkKRmweWE2yGKuy1lfH+w/JUirPE/rjX011HNM5Q6waGTIAbN5SkcJs2DfqDnv2vsSKnkSE+x5Q5gcKfQ0n/HHrO8LQ0MvyJu0cUCyDSixzpyRFEKGouGWe/vdI/HteRUePTqjZm+S5yPZaiQO3BstJiOKb47ZDRdrZdufAXZAC8wzlRcDjLxM52N8c614UOq3u4eOpwN7llK7oO7E4FGqInAXo93Wk/en7L7eZdrqF832GpgT3w8IC27w0RiGbJjg4KpiVCKfmZEbhMj7PfXsmXTHANAi6/dGpyhZaZuW7xJMo4v9F8WHLQi760iYIeSVnNhup/NjbB4Szzq/lTwHd+epQRoUEpkGSIkJJZXk/3GmtqdneoecIhEeD7zz+S8uKW48LuV1YtJq+xvr7hIz4AmDu7TJiUz/O+rHKfDwiou3pUNLLZ04uG7W408YUSuPzE47UgKWol98wYdJbYLQBEwG65duZDWSlPb+gJkRZp4p6Z6xaJlOCfL+iSvHosRWK6zntVJz+pBC4IKJ+DgkJ/OijbI/pBMkTaW10+YG8fgJTBU4I3KhKgKIL74fqKW827Jgekv/6LZ3m/oZzBTFW3oNAeID4i8eklPpr8pCDE91YIm/KJx2sx56FKPPwAAjY6en0JN1tM94wSdVi+i5tf8qp6MPK9pqVFWUeQ4rJy8hx4phqHIgVWwtXx8Up73n07Q/EIGybA1n1PjXtxy9YbtPR3ok1kcX8xoOpqPU1DbSj+xOO1AdseRXwjQIivq60rqDqpJlWpkSDJ3JBrqu5w2sSqB2dAiy3OLw07xCwEt0eqlc0iNQnbB0sHpQQY+Hl2mUAIOpR+xskEOk/4g4/AVVdPfBPAzohLgCLAYfHrN+mCB6RkOTvRzCM+WoXUSiTBpD+ziA8A5jxUiYoHwKXnLUJ/xz7Vz+QU5xgeux5IS+kDwOz7xnEOp004fKyF19Oq0igpExLMgD87RElN9s8JD4fTJnhtZXwsOHJiGXSecJYd6O/YJ7o6Pl5pTc02XDPQEAH+W31F+qNbjvf9TPxsJZAxQkxlME58c2eXEWkqoEKGojrSKi+x9YWiDkolvvS8RVx/xz70d+yLut1DLieXpKcRwuksLRaBc6ao4krSH0mNAwJOJ0XJvautCznFOQC6+En5wPkrZYwINUiBZaXFGK4cfWFuKFKgIQL8IypuNa4tzeQn+N4gm+vg8S/Y0wmB+Cbl8/yE8oc44WYLhJvKyfhaJSlCfoePtYRsayJjHOnUgGnEl186OkRHL9QKE1AHgSr5yRVD0CL9kWvT9QeH8oIhpwIrYVI+z5fcU+49e63SOnf2EZZHryAFOqYMl89PS6skHuEuz8AGS2raZl9YCXDjhpKUTZu3Dv5sXfWS8UPSHwt70Yf7K6Zh8ngf5g7ZgSrmV3KEVNSkBa1SX8bA5/zhjwdC8jbSXmdqjCFFDaiRt94QFL0kqCa1yUmTWlp3KkmfSmpvsOeaU5wDfpzd4iyB2N46Y3AugLLS4pBNFokGunI0iQsEsKL/i+njAH2VYnQv6MHBpaL4o638T/sGfw5ApNsVMmiVpr4sDBGKaZ5RWuILhfhI4DLJ1hgap2Hw48pEPWq8kfxkrfCHzXxq6lho8gvkBadpk/ikhwMAXDvzITeh/CHRWWK3OEsq/cT9EdBztlksKGTOErK2SbksOi7QMib7C71SoC4C9KeebHXft6vO5rjaJ9IDYtBmPwtGfEqEQTaInAR17OOb4snrNt7fWMYY6IwNidc5MB5+XFnYbH2T8nn+yoXQvyfSNfpogiTXlXah00KG9HMVbrZw9Fw//ABEPFCDr7a6vHNnn0phqjHQ+elRoHwOAH92iNdzcFlxOXZ0HZiWAaA7LATo+YNHAID2U13bvvaVDP7YxzfFFhb3pyrteW1ldHxcUOmDXvw0EZLXJozzSwnnrwgCibu8fMnFmVGRxeEECbkJEC49BunGTGQYJVFi+yPPZlYxh/OYKmglQjLvciBSYb+9EmWlzWIyh88cOt2BqgdJEP+pFGeJ/edeT3cjAI+euEDNBCiK4DhuZ2/j2pWZ1wXXClL4kcX9KRPfrJGBwZpVRrmf21tdvtbPTqUAwMEz4Kzu0KQAQnykXmAgl5iSSOQ2YzhJ0Aw7YDSkQCVcvuTC7ksIZH+Q2D8lIqTnW22eiUSY9RGSmghbLrRxJCd8WApctsPr6U4zXQJs3ffUOOD1G1+k9fzUkWcTSTwZM8yOJJVVj80RKuZXcul5izgAQePjtOCDj8Clu8xRfWjiC5DEwOd8bwc/KnshHCSoxYsdTjtgRNSzdjfXQldDGvr/8iUXX1BoB4bTGb2WnjNWX1a513/g2S201B1snpNdNZaxBf7c6+lu/NHzW26bToBFC7bealzbn3ldcK0AxorkhGMYGR83FBgcsnODSHwHz4DEhYUkGRGvLqmzR0tIdBNx8lpm3kRRTR3TK9VqcYSYZQeMNhxOm9hyYbS5g1SpfvO9c7w/4P2mxeG0CSX3DD/zoTCjURqAGohqXDG/Upw7+4iYTERIe4QBoLfrUOY/vbj1i/vu1dZBThMBbtxQkmJNzR742brqVY4JTPqjiW9mrlvMmlrJ0RkRRuPj/EnewBDxWUPNz6UlPq+tLFA6S6pmdvcJIh3DJpUE1dR0s6VAs9RgAhIMPSmf5zvbETH7ZbAm7ENVqrnVCydzZUPpXf6/zPA5S8oMhRul5y3iKuYD/fZKJEsc4eVLLnhtfimwvdXlszvTXx6fjxXNu46kAjCHAAcHl4rAVozLzfoWICDLdzGpbX+0qjv0UsiBwbTEF4o3Vyr10RWiSdHRfow28tM9dNVUYCXyo6VeuXmIpXCYcMFve/ycb3U5NDsHCRHO8zd7RxVOwdLjP4wmlD+kaz2Rea+uXoT+DnDJIBHSVaMlpbLcWpwhQQlQ/BF47oWtQuPalZkc51sCJG+1Z6LqUhkRIaO91eX7w78ftbRcaLOGe5E6nDaxs73IT1hpsmXzeb2Sn5y6P5Qil3ThAcPFGNyckY2M0014623wJPPGl+UytM76O/aJ5LnQEuGOd44mZI8eqTDWc+N8LYCdvV2HMgGERoD/OFjCAa3ozTz/YxtKRtSPSzbiIzY+hJgRQaS9IVOCNRKnMzFbkN/lbFT9xRx6LEXi7PvGjfAGAyTQ+sio5+9wHhmV9UDlM+uGP4bOXDV4ePz621VGQxJ9871zuHzJxTum+BsCAYDeQ5eQYHreIu7hB/aJQCUHQHBM8R9yZmkZsSIFkrny21H9zZMA9IasAm/a3DoIAJb+/u8CEOhuYIkOokISGx8Qug3p+PtHxINnYI1GdeBg6VRvApg3/QvO4ZxDwmJAPJWd7Yp19bjR89YC4FlObwhQNOFPk5sqTsrn+d6O4YIG0SJBIhF2fprHE9X47LVKXXNKS+HpeYu4h/9mEVfRsU/84CP/M0ukCtXEGQKcSgFm+MZmHcocn7+kK5garEqA6+vX8S9u2Sr87HuzaiH0BU7/RFd/JVkbMIv4hmwxUZOgtTw3EmA6KX/cCOmp5UKbZvXpzffOYe5sfy9XpfeoOUISxRtsJhH6VeMW9JwthsNpE/WmKNJk+PADEB9+oBIffFTJVZ1NjDhCOiQGAG5c970MYEUwNViVAO+b5soE4PZZ8qpuC96EDn2RNu8Zkvh0QeoI+OAjcEc/9DcAeuvtpqiaDk5et0X0+nKmEr2OkHjD9Wse9FjCZyKiPccHz0B6SOvGww9AbJ8wx+dwnkrx2soSpmfJ2Wt268Ml/Y/duLLnuXHOJV8YVoFrlje4SeaH326UeKEvNPFJyz3pJT5yyg4RHxcLthbiAba6W3Sqg+PMuG5IZBCK6hkr2SBhJEJY3ZP5zvZR/Vd0OaFIDGHJPS5v62dIiefmTYGYQPh7COfmpy8Yn48dzXuVYwIVCZD03OxO715CYv8SjfhIrw1q8eh2btDkN2Tf42PJwExKiM8q5nBZhwOAJPNPyj9jBSCEY2zRLo8VTnhtZQDCq1YSiRAAt3phCz93dplQMb8yKPnJZZgkAhFK1eBBEZUAduC2ckyg4oY/+enhPgDwCfyD5LVEUH+l/XRDrXP3wS+eFoayNbho2veCocdSJNLNuudNz5N9X0Gh3V/cM+VCCgmIpnpY8MqbXWJzslfyQ4HhhuynzA6of/O/+d45fvWxFrqyuCjVTogpItElQq0xgYobf9Pm1kGi/na2e5HluxjX6q+0u9qE8ocMk5UkTY17K4YNyMS76XDaxCwfx52AHasL7bLvHZEfLENIJJlfSnRytqWhH6NuByTByXqKlIaijpNOdXpMDuEgwiceB9JdEPvtMOSNH648A/TkuuOmFqF/3ocP5PbPDi4DsEPJGSJLgI1rV2Yu27azt9vy+SPAHQD8wc/xCqWS7lK1INjpSBGfNR7jqNKLpgpzi4ZVY4m9zq96IlCtZMQ8+LMSPuRlshNEqTkAANffsU/UIv0FU4NzJ3zORyIExUhfYDUES4ULN9562+85HiZC5c59aiAFFxzvHxHKSosj3mLUyAHgtZUFYgLtzvRKADt++7/eG9CsAtdmF/UvA+Cz5FVB8MZl6hspSUVU3Un5PD+hxM7JkZ6aakBLe52fHrXGmxRs1sbWUqFEq7obT95gs3OTo0WEqxe24OiHZZyWTCa5Z1MxvxLXznzIOZxzhFhv5UmkwKHycUtvXNnznFLHOPlJ2LRJXF+/js+4dfC/91iKxHiS/qS9LErumTEIADn2K7zaplOpvWeN5/AAWrqj2xdkDf1/ok1Elo/j/OXiibo7btT3ECmtq60LaPuQI9IbP65MlFYxSSTEM/lJJSPiOfae8WdNyEmFSntEuNnC5RTnYEJ5GecnQlvAJhxrRKgkrMmVyx+1aNfXr+O5LVuFxr6rGdfHFAVi/2KdAGgbHyE+S88ZK3rO+BewfVjVIgn+UkmmvdXlO3vNbjWr9l4sQu4w87/WxpFSWXIhMKQCNS1ZOq4I4lB6nMXx2cjc4lB7iRCp3awy+elDqn9BoR1yvYGJrdTfVErgwzHPsUSEtHpMS4Ry1chHHIJDh9+kfJ6ftKwc568IgtdWFlORDySY3+G0iZaeM1Z3V8ECADt6Do8ulz+KAO/H8bEA+r5I6/lpeIIfzJf4SMWTEb0sCPFpkPhIifnDx1pIXm7CNHoiYTCd7W7uez/9VH1zDB0kPZabI/KBh+ZGciB8Ku1tMmLDvA3tQbrBiqRGMhVNTuLrS5soJGLzL6Iez5t+lCeREeSZqRGh9JACBKGqvBYq6ZIRx8nrNm4m3ABsQkV5PymU2hNUBb7VV8oBxyEI3hXki2JR+pOWegrWb4GUdiIPlpDeUJEAXL7kSrhKGV5bGRxOfYZv/+k5sqm6UciFYMQjJuXz/OmLSFiQdDurezJPMkyIekwLCjlo4eQOquG9ZxOqHpyBgsLYa+PZ23Uo88UtW0flBo8gwI0bSlKWbd7Z+259RcZFr/+1aLnz1YhPqY9FMBARfoj40HKhjTWeDoKSe2YMEnsoQ2JDTj0ma8BZYrfw48pEJRIMqMX54+Bw2oTOdjcXzdCZzk+PAg/OCPzu7vItALDjwL4fjAEVDiNruO7wCAvAI6a8v1KJj6hmag1myIMiFU0oVS4pehlLY6KMSD4+YDAcY4uWJ9hIhsb5K4KQOyFVVzhOtMNgzFKPVy+cjLkAWj+DWDG/0h8BMGQHVJorwO98czjLRNLYPdJEeOh0BwoK2ziHs0w8/v4R8d5vLKz0erobD+z7gboKDAApaeKDuB39h0C3bCSTqrXhdIcr32tBl9Uv7R21JKqaG445Jw4BALD0hC8VTgvyS+/GlQt/iZgdMN7DXsIhFZIeJiTveFI+r/ng8gssxVi9cLiDZDT2YFpa/2MA1tQsb3D7O1z6pdsRBLhpc+vgjyZPTrH0938XFojRqvw8slftCNLTNPGE9ACITM0dKUUrLUKl1Dhaorkc5D0FVIZJv72S12P709ItLpxQi5ckhBjv3epMUI+51Qsnc506bO80CZaVFqPlQlsgHTPSINkgtz0bUgB/OEyAAEntv5mP2tNu3OqJKVVXr7qSbO0BtaiygE3I8nFcT+kMEQCqHhz+u1/iGwZlXx3+fP40TP/qyO/V27OChhH1N5kJKNaIcN70PI60+NTyObLGZhVzQPEdKCi0hz287vIlVyAKAhi2A9LhMAECJOEvHR5hwW1LkSjdFJGQ+GYNlWSXO116Oz7n5Br3UJ5c4nli6osC0oumCrSUo1ThJ2Pg80D8XXbG6H7BJI4ynE3S5dTgWAAjYQxrEKc7Ar2Ogwkt6UVTR4QSRYIIaTvgtTMfcr7M+x4GsONYz+HAOAMEOPXesjHA8T6fJa/KkTdWPHxMDKsDhKhcNPGlO20j1BDi5PAbVkuBNOD8FWHEBm650MbHQ6B2tOAnOZugdipLQcpI0f2CaRKkA8q15FDLQc4JEm01WAnZGSNL5DOMJsJ5011cQaGd89rKMDPXrVmDm1XM4QTsCLdafP6KIJTcc3vxjSt7csbnL+kSAY4DxAABlix+/SYACIJ3RWe7V9ZOZCbxLa24Y9j2MkR8tPGZVO+Qi0eTSHxsFWpQgYfr+/ml6iHPpmFpRtou0wgRGvEEhyqBxVpYV6IRIXAOnf4WnxxNhJ3tbi5L4fkREiRVisw0XykJcbcHNqQgbbPPAgBeT3cal5o90Lh2ZeZ1hEfqk6q5GJI+snwXuf6L4EhLQSUPHCM9YyCVmQnxEVUyI8RsF2laoREpMFalMOYJNoMMm9DptxNyJIojvWiq0Nru5rIwWvMgaZgn2sRAPr8ZREinxQGj7YAWACDBgd3p3UvgU2dOo8RHbpJOuqfR6nKIDuew5EfsUyev2ziruwWM+MxRA4wQn9QGGA1k5k0Uu0OwA5L1pBQHSIf+SMHUX1PUYwDFAa1PyQwjR4Sh7v2T122jqkQf84gDwJANkP/knOnBrtIYPgCA7yKn5lyhjfKE+N5i3lzTpRt/kQF1Mrl+zQNMSB3ldFJTg2MZpFCp0t9PtIkgtRK1zBUpHKumjuvtQZwE6jFHKrLPzHWLhAzlOGG4MAcC6rFRIqQTAtLS/M2SfvfRYE+AAEn+r7/8/SCMeoBpNZcmPbXPSBclU3PDJ/0ZkQTVsm1oGFV/pUn3wQqk+slHX5FUeo0p2QBHrFkNUnOw60crhjbO1GP4nSb+56PEO0RzLCstNpxn7BeuTqU4SyqRmTOvt2Zxtsfr6U6zAEDttp19Y+srMi56/QUQ9JbykRJfetFUARhZf05tUbZcaOPMEHUZlEE7QmgySS8a+ZzIc3E4bWKfThIMBVqrj5Cx91jcXDhDtegS+uRnOiC6L22i0Nk+PAYiyahJmQyy6jFaCv2FistKi2WlQXpOhzRKbnWhXbONkG6W9MFH4B7N8gdEHzjwG9FC0kLeNXATREcnxQnI62Sh9MvcCLlBQnpkgAzhgVIYDG1uyFIxRxDjMU2ehAyl4TBmOEFICqOaBGtE8tPy3mCVs6V9RfxlxooMXY9BSoR5AJXpRYQpuTklZjWSXqdFaKLVYOIIwe0jqZZ/W1+RDhzv6/AIC7KE4Wjt3ZdG2zBoh4Zc4GPGgF81yZBxdZMb6bEUJUQn+njAm++dC8Rnaf9UGzfSdsaN+uyx9iJJUYprQz8dGfE+uYZJUqS7jkiJLQUKuccjSNt3kVPTVEbYnodw8rqNs0Zw/pkN0DAR4gQIzyh/Zu7sMqGz3c05pvj9BVo4Jd11RBgUF/rbZY6p9FjkJLQeS5FY9aD/ZKt60L9wAAQNcOxLmyikFwGt7W4OFnJCujlm24v+wjJMorKv+ouhBssfBo4CGJkjTEwdBAWFdl7pb6r3FBTnAuML9n6SMdByAVxZabFIHHCk3afV3eKPVdNpGmJr3eB6BQJk6LWVccRhonQgzsx1iydRxq1eOLyGgs2919OdduDAb4YDoVPSxAcdOTax/yI4QoKE7KoCRTVtsqfxSJVg+HUWu5ckizUY1N4XxnWhZ80R6WHedBcnJXAA2H2JkVo01tc8HMVBgAsWSjcz1y0i1x9m47WVcfOGnh39vDIG/O1R09L6H7OmZq8AAMsfUXFr44b2FAjDxvATbSIuXzoVUJ3oxtdqkfQtF4Z1eEZ6DAlN6gxRkQhPwI5ZxcrOJofTJs6EmyqGeirASaQ3THury0cqQwf+uOPZcoHZ5xgYGOIBxAErZ+uVgjheife+5J4Zg6Xld+WPz1/SZQEAfwn88RGtAMPAwMBgFERIW71Qm+dYCuIJtkhZMt4aoDMwMDAinDc9L2CnBb4YJcgVFNoxC8PtUW9evZYGDGWCdHiEBeMl9boYGBgY4gVBbbenO4CFkzG3CGj97FRKyd33fx3A/+GBoR4gAI7emMqMwAwMDAkJWru19H68DEigBuAMDAwMeuD1dKfxAGDp7/8uwIpFMjAwJDZInLIvq9zb23Uo0wIMuYfZ3BjCE4/XanrfW283xfX44+FejN5XPNwPQ+jwF0cdUoF7zliBu2BpXLsysy/NJ8TCxgoFkVrE9H3Neagy8HN19SLFz+zfvw9zHqrE0Q+PxMSGI/dAxq829li/F7X70nJvZt1PpNd7NPYHPb9HPzwyYp5pkLmM5cPFl1XudXf5FnCNa1dm8nf5bgKAWe0kt7/RoGtTmYH9+/dhzZN1Yd1ccx6qNO2+9u/fh6MfHokocZs5fvo+yKKP1mI3896MPJcnHq/Fy6++FtMEGOr+MDrH4d6XRu6jqhxCyT0zBnPzC75rSf1qKt/9x9O8mReINPnFI3FUVy9CdfWiwGkaLvII1/ilElYk7iUS92bkuShJQmwP+OczmoejFKQsll8FLoDl2plri0gMYDwHQVdXLzL1pAk3ccipaGYukkiNPxqkHgmpK1zPJV73RyjraM5DlTE1h53tbm5S/jgMiqg0PQwmEU7DSJNHdfUivPzqa9j+RkPckp/0fuY8VBk2u9j2NxoionKS+0h2mDEHsWgjdbVfXmoqAQavDxd+4op38jBLMor2+Ampm73wo2FfZjBPmo4l+K5/fogfnzeOA/T3AUlUW0c0ySPU6xLyjiWYLdky8ov8njBjzmNVkuavt7vnJMrDCsXOECuePKMSE1ELY5EgqqsXhSwJxiK5xxOItz6axBULajDxc5y/Ighpaf3zLYLgXQGMFZP1ASfC5jJTMpLOo1nfS+bX6CFl1CxBh+nIjYdJlJE7BKXPIBZgmXDnuF8BwpJ4JC4aoUxuqDY/pU1m5jXCRd4k7k3LvIZCGuQzkfIG0vcld8233m7CE4/XBt4TyvM5+uER1cBgM80eRveLkf1htskh1rzB568IwoimSJGuBBNKMPATj9eaMpmhGNWDbTLphiObxOxFZVQy0jv3hDRCIUEjz1vvRtQafCsdh9HnQ76Hnh/6u5XWqt65VHpmctc0Y4+YrRXFWkwgMFQPMFoIZTLMSu2JFHmQMb/1dhPWPFlnijczlPEbjQkj93D0wyOGbKZGVGE9GzGYRKuFxGhpTu93KUmbau/V8wyNfL/RtaVnzuPVlJDU5bCMnHBmpbCtebIOzz3z9AiVZv/+fWEjBoLnnnnalIDxt95uGjX+cKh80TgcySEVa9JKpKHlWek9cMIZH8oIMMzSk9n5u0Ta2L9/n+6FZGT8zz3ztKkbmow/2qqVVKuIFSJNBuFA736ItqQoNfPx7AFHRmUPJm2sebIurNKfXulSz/iNGOb1SAHMUxt54cCIZhQLByCTAGPgAcea9GrULhYuqStSnk+G8Ku/5FCNxRAXJdDdL3n2gKMn/UUS4Ry7ESkwXFIAC5aOrPpr5KAyIzA+FNBtM/l4mOhoXzdc6qNR6U/v+CNxOseKBFBdvci01DsmHGg/VPXuj1g5qEwlwIH0v0rIxuqxJt7rVX8jJWHquVY4pYBoSxjxDK2Hh9yzjic1OCwEmNb/f2M+pc6I/SzeyTsZvZmkCAMjQn17I1ShIF7U4JiQAOPlxGBNc+JTAg93XcJkVX+VSC4e1eCkc4LEu5Fc7/gjSd56iUrrvRgNtSEbmpYGGRmGVyjQuwai/TxYY/QEkVLZc9BGhHMeqmSqcYgHkll7IhrxndKizVG1AUZaPYn3gpp65yrR4ufMuB/St4TZCI3tjWDPQK+0Hm2NzBLtiZ/zUKXhSYiH/qPJBr2J8VorlhgpHKCVDCPdzS6epT8te+3oh0fCsgbCQoAcF71agKEuZvL5cMXpsQyE2AJ5xmZX7ibriBGheeqv1oMw0nUipeBFkd/DHmv8INHyYo2UFAvHwURLg8mmFpttGoqnA4TnUlJ+y2iFIZ5ASomF64Axs5FTIqm/ejSteHAeTsrneeYFTqDTLNmeS25OTtjMFCSljjlJjJNaLAZFFxTaAz8PDKS/P4IAo93XN1QxPp6+1yiYXXL0piT1FMNBgoleXEGP91dv+4RwSKFmwpI7cV6AAGcVh57GG81cYCapJa8kSKo3h4MIEz2vOFaK00Z6nifl8zzEMXstVseYvd6r3u1sKzHEOxHStenMbD4VakvPRNCaEi0hwJdV7rXy+H1CFENg2Rqxg1jwUpNS/UZ6lsTqPUXzeRmdQyNB0eGWAr22ssDP4+6cMDAiELqg0A5EoTVmLC8ORq7xeXDJdXkLhcgSUQoMt91NL5lFY79ZPH/wCPxdQHrRVAFtLRH1CpvdZEjLpghXg/JIjl/PgjKjA1yiqMehEGGiHYZ6ySmUjC291wknH8zMdQe0VFuO5YBl2badvbt/8njUJIBYP1FjrZu9kYUeqfHHuseUngcjJBjva8Goap/IJgAeAFg2CFMbo01Ikbzmmifrkj6cKFYPq3B6g0mYn8NpG9kTxKxsEL1hMNF4CEYIJJ7DICI1x/FWqSaZSTDWqyJFas2Oz1/SNcLmR3tIjCAeSuIbOZHiPRg2EgQej7ZVZh+Nb9U8JIhj9ooiOB4ArI4xe4GRBsJEVefClUwfSehtPhSL448VVT4ZpcB4ONDDfWj7uj61cRxEXklPZoiMXSIRFrwRlYpl7iSuNhCrKCi0B+x/Yx1TDgBDNkD+k3OD9JsSHUakj1gpk0TCOWKFwI30KWZIAhXThEM7XGu2317Jt/Y53gQAiwhw2HK8/1c/KQ75iw+d7sDSOFIj9SwE+r1mSy/0gw6XZBSuQF4jtj8jjXOYxBh5bSAcedV63mummUSq2c5O5dIAeCz/Vl+R/uiW431NIr/H4bQtabkALtEXgdHy6uGoXkskKD3fbSSgO1xj1zuHequKkPkJR7VmveOP9xAkPRJVOOy0Rz88oquadzjjLrPnfdMDUD1BuJSU30IQlswq5vAmOyiDEkmom1FKfHqlHb19F+ixm+H93P5GgyFVykjrTHIdM/t3JKPqrufQDFeSgt52BrNnVXDHThwP2TlLm/amTnB5AWB9/TregiRFKP0ljPaQICcw2Xih2GKMpvXRBK5XIqTHb2TsRqQ/s+Zey+ETSXUwWaHH9DSkBovHTphz7UDJP3HMXmtq9kDzrjqb5a/HHL8F+ENhvFe923ssReK86V9whwwURbi/YlrckWAouaFSqUSL7cVMA7QRKZCMobp60ahNrUYmRkhDuvCNSJ5y11Oa+2BkGAqBx3uzJD3qfriajBlZs2aqwT2WIjEdgDUFvyevWfA8RLwAkKIIQ27ihLcDhkoicoQSTwQuN245ldCs+wqX/Yy+h5dffU1VUguFvJPJCRPuKj161ixxhpgx/3QKXIAAOQ5i8646W/Xyhp7dL63Yw3HCkmiUxYpHVTgWQKQqM4gqXCT+3DNPR4xAwnEPieD8YKFKw5j80ModwFosWPTj2zzgl/44QEzWCYn37BBSDj4WESr5Rfu+EkX6iwX11+iBEip5z5ueNyLNt7frUOb6+nW8NTV7gAeAsRkXRGC4KEJZabGYbBkhsZIcb2TxkeDoWCPBUMkv2sQTSyl7oSAWpT+96ZyhBEXTHuDs/Ml7xucv6bpvmisTGMoE+SMqAo6QUG7Kx4+Pa9thOPvNhlvaiSUS3L9/n2lqb7QIiDhtki0AOxLzHY05JXUOfB7LQfp1HgBe3LJVEAHu5KeH+wC/sTASKXGxeDK99XaTab0kjGy4UMcebRI0u8p3NMwTZjyLWIHe4OdIkVOk1WCCWZWlvwaA6nOOXoAKhL49sCFlU9pmX9NLX9vDccKSRDltQj2hwu3dDQdhmNUHI5r3IZXMI3E/kW7RECn1V0/wcyT3WKTWp9/+5x6prW74+zHYtGm4KVLzP1xKA9BLMkKMXOg/fn9UPFqYF9ZOU5F8QHThAbMfVrg3m5QIw0XmkSKNcBJ7vBBfOAkqHpyARnLC503Pw8xct+hw2kRR5PeMz1/SRRwgABXv17yrzlazvMHdvKvO5r3a5+psd3MHf3dKd0D0lPtmczMmOUU1kdVIFkIsqRJ6CYUsLnoBR/reQxl/LN2H9H7odRZPzyPYvZi5X4KFwURrPwa7bzPGt3rhZJSVFosOp00Eb13z7Wd27NjfWJdVs7zBPYIACd6tr8jw5BZ3d7a7uZYLbdyb750DQ3DbivQhSk/rWCN7rYsvXg4tLfcTK4THEDnQBPiNSY/ekbNgaTcR9kYR4IW9T40vXfz6jaaXVjRynLDk8LEWnhEgAwNDPGLe9DwUFNoxd3aZ0G+v5B9fvjjdmpo9IIrgOM4f9zyiGMKOU7/1s2IIdkAGBgZzJVsi1SaagybcKCi0Bwog3Dn26m5SAIHjGgIekREE+Nm0VgDDhRHKSotF4BzHppKBITrkR6doJlJL1EiBFEDIy876ndzfR/QE+dVSDK6vX8eTEvkOp01cvXAym0UGhiiSn5mB5ckGUgAh35e3CwDm10zoVyRAAJjWdzX90S3H+1izdAaG6GL//n0JGZsYCUhTeVNm8FZRBJeattlHvz6qIGrqnPlebNsZsANGUw020itDKfI9XhaQkVgnvZ+RmyO2wYzPfzjGIPVmBxuXnnGT529GVe1g3yNda5GaWzqTjcT/Ne+qswENblUCrFlc6wGG7YAOp02cNz3PUIHUUBcAievav3+fpgrASkU7SdyX0mdDiZPS8lm916Vfo+0+ateRC8ORXpe+Hj1HdBBsOOZICdvfaFD9u5bnHWxe9BRLpb+Hfr/cdbRKZdLv1bqGpc9I6fmojVvrfWotl0WPPdh15YrPat3HZoCu/jJp0oTfAMDsrLkcMHLNyZbE37ihJKVmeYO7KcL1AZUILFhPiGDViknRTLXJVwuipcuwS3NEg2UlGB2z2jj0gF7gweZH6R61jFXt80rPOtj9kLkDlPuYBKvjWF29SFOBC+n90c9K7d7VNrJa3xQlItNaAVstXTPYISZti6B1HUoPY6X50rKPIyEN+gsg2HDXzK8eAIA7Hlnqlr5HlgDvHXSmAa19dDjMvOl5CKcUGEx6oyePfhByn6MlGvp1tQUud025zwdbfNLxql1Xye5DPkNnLMx5qFJ3K08t86rlHoONU7rIjZ7wweZO7vBR+g6jpha9h5He+5Rr9yj19hpZw0rfreewDnUela4jdy/h7Pgml/7WuHZlJsft7NVEgH9KaR+g1eBZxRx2X4qs5Ke1Fluwz0lzR4ORkdx1pWXjlR4c/Vm566rdj9y45caodGorzZfW98mVxjdyn0YXNy2lyX2nlo52SpJesLGQxHyz17Qc2cgRi9wBrGUNk/xo+m9a516t8ovReZS7b9qJ88TjtYF7CWdID23/41JSfisCnNLIZQlw0+bWwca1KzOJGpxeNHVJQWELHy41WG6TShc6bXsgP0tVDKVQAWkf4GBkpKYiV1cvCoxNKjkYUa+1LjClv6m16VRbjKHMj3Q8Sp/XQ4JyY5IjQiVjf6RKOdFSuNp90qSmJrlLn5HeNawkBQZbh0rP1+x5pMci/T+89j+/tjvv2wve457dIYqv7uxbtm30e3mlL5GrEh0u6S+YBKaFCIKJ7NLv1HriGyElNaLXOr5QxqV0PTVSktYR1GNYN1N9kiPBUGyg4SJBtWdKk5p0PUvJXEqUanOttEa0rB16n5lNcmrPJdI1P2n1l1R/7jqwO5ukvmkmwPnP/3oQAIRW8Vf0l0cCRkRtPfY1PYtFjqCNLo5g9plw2q2CLXolD7fRsRgJ5dEyLrV5CqVsul6phn6+oVzXaEUeOSlTbY70rK9Q7kdOIt3+RkPEng2t/pLqz4c/8HOZZhUYAKyp2QPixo08t2lTb9NLK/Y4nLYlBYV2LhxqcKyc7HKLRY/hWO1zwYhT6RpGKxPr6QNLb2y5z8gtXrUm70bsO2qEqcX5Q3v6tUq9ZqnCauuAXJ92cpg9HjkbJm0qkDPVBFuHZP3Sjjit45bOjZYoDDPVX4fTL+3dzrirEQAW/3ibD9t26iNAAGjqvpgOqkhqMuQGyzlL1OxncptQbkFoefByn43FLIBQ7zMSzy8UaVQv4dBOI6n6q3Q4yY0pFMcAfXjJ2XCDjUlpDvVEMEgPbbkIAUKE4Wg5sHrhZHiHfhZFfk/N4lpP8646mzU1261bAgSA2m07+5ZhZFD06oWTWY3AMKn1cosz3jI0Qgl/MdM2ZwapGCEcI8HS4ZBKaW+wVDo0YirSO49qtlszm51LQWL/MnOnHtTyflUC5ACxeW9Tas3i2kBQdDKQlVIMVrg+ByAmkt312ImU7tVoKlmoKWiRbmRkNPwk2Pwb/Q6lUB496q+Z80hCdJT2AzEJmLnmafWXND8ihU+VwAf91ttHUgFgjHNsHZD4PYOJGkca8dDBuVpKd0s/Rz4bKSOwUclKjyODbBJyr/R9GvH6VVcvUs1eiDUbsZKUQ4dlRaPBuFyAtZHD2Ox1RtrNhrPvCM1JgdzfvU2pwT4XlABrlje4N24oSSFt5MLRMlM6MVrIQm+7RKlTQkuojZxHS+vYjIbdhEsV1TJ2oxslFMk32AYK1moglmAkzi6UNaz2zMlhpCfMJtzrMVLBz2PuWrASABYs+FZQfwWv5cunuGeP5TZtEsBb1xApMJwbdc5DlYqbVel1ssGVPJZ6PLJqG05P/KAeKTAcBCk3dqUxGCUauYVtRNrV+tz0VB6JxKaWW0vB1pdSFRW1NaI1HEu65ox45/XOo5SUI/0c5k3Pg9dWhpm5bjE7fzLt/BgI9lmLlgt8knFnPzDsDCEXNSs3mDwY2qispE7RaUDSz7386msjKk4onZp6DLBSW48eA650fMFsPHLVUUIxFsuNnYxDarTXQzRa7GF67DvSz8ltqmAB8nLfQT+DcEk+SqFDapk70jQ3+vMvv/raiBL4SpVhlNaF0ni0PlO1edSShEDymul7kNuHZkqjBYV2lA0FP3df/fy3APDxJ/ZeLZ/VRIAvbtkq0M4Qs2MClYylwdQpaXqQlES1qCBGFrlWY7XUMK01TUmLpBzK4RJsfkJVVbSk0um5/1DCiKKhNuu5HrknOk4w2DNSc5iZ0XBcq5qtpkmo3YMZa0wq/ZHUN2th1Ttez6tp1jHZHmwJ/nle86ScPusFwucMIRKdmvpAKuRK81C1GFhJWXEjHi41eyN5Xenv9IOORvNpLfMajGiUCjJIX9N7f1qemRr5adlEZjsA5Nqd0vehZZ3Iza+eNWwkNVFtrsycRy172MwQGGL7czhtYkbOtO/ULK71dB/6bSoUUt8MSYAAwG3aJHg93WnW1Gz37p88TpwhpmaGENc5LfprUWXUPqdFDZKrwiL3HqWNr6Yi0LFYevrSBnsveU2LiqdlfrSMx0iOtpH3a90gSnFuRr6L3J9cpZJg9y79uxpZK32PGc9I7V60pEHqyVVXmpNge9hsUwSx/XW2g1s+6Uv7ASB73jc9mnlNz8Wad9XZqpc39PzqlVWrIHi39188y+8+/gUiWS2agYGBgai/VQ/OCNT9q/3+L5c1rl2ZuWzbzl6t38HruWD1soYeThwukNBjKTI9JIaBgYFBj/oLDIe+pM6Z79XzHboIkOMgvru+In3Ztp29N671PUlazjEwMDBEWvqjw/EWLPgWJ27cyJOeRmEhQMBfJsvr6U6bUD5hH+B3hrDewQwMDNGQ/hxOmwjeusaamj2wf/pUq97v0U2A1tTsgfeffySlZnmDG7x1DZMCGRgYIi390Vj67I43jUh/hggQAP6IilvAsC0wXNWiGRgYGOSkv0Dby6HstKHSfbphiABf3LJVaN5VZ1u2bWevKPJ7hspksSfDwMAQdumPhL4A/p4foghOj+c3ZAIEgOpzjl4R4JKlSgwDA0NsSH+A3/bnKLjjyfH5S7r272saY/T7DBMgt2mTsH9XXVbN8gY3kQJZSAwDA0M4pT8aNU+9umt9/TpeS9UXJVhCGdDHn9h7RRHc/saxdd6rfUtmFXPAwsmIp4rR0t4WSpHzwSpchFqlRMvng1Ubpq9jNOJe2qlM6VrB7isS1zcyR1qfUShNotQ+S68zM8dm5HvMfG6Rkv68tjJUlUMgnt/19et4LVVfwkKAL27ZKkzrW5m5bFuDe/crq9akF03djrYWPl6IT67SBmkEI23gQjeJkatUotTwRek69GeVFp9cw3ga9DXp95Lv1LOY1cYp18dB7npKYzPr+kbmV8s8SOdZbv7kKvWoPU+6IZHSOgs2R3KfDaWKitIalj6/WCRBIv2RkvfE88tt2iSE8r2WUAf2qe3YLa+nO+3Avh/s9V71bvfHBSKm+4aQkj1KoJuNS1+TW/T03+QavqglkstdS88Y5RYsXTJM7+ZQu57cgaB2f3oa4Gi5vtw9qX2OrocXjGTkKgopzasapJ81Or5gh58RKD0vve1loyX9BaJNhjy/+yd3ZoKUgYkWAW7a3Dp47+AjaTVbjrt3v7JqjcNp237yehkHnIsb8pOegEonu1JnLenm0Vo7zewxGt0scoVH5Zr8qEGpKrSRBjh0GwI1ElYbNz1/av0nQiUZOY2AjIEuka82Pmn9xGCHn1mIZBMpM21/S5/d8eb6+nV8zfKt7lC/22LGAP/6xeP967GOtzpce71XvduryiFY3ZP5WJQCpRtarryQXCULucq6SnUMleoFai0FJL223OfkFqqW/rlarkdfi6jX0vuV1kikP0PmT0+BVLq6CP09akQgLfcunaNgJKKn34i0/4new0c6Prkiu1oPFbPIT3qYxKr9j9j+HE6IGTnTvgO8h/vunWEF4IkJAuQ4iM17Z4ypWVzr3v3KqjUQzK8abZb0p6UqrbSjVbCGQdKio2rQaswPRpqRXKxKkpPSPCoVgjUyL2qkrqa6aSkMKr2HYM9QaYxy3yN3aOpZM0ak8FCea6ySHx33d73D+tbS7/2/O9fXrzOU9SEH0xwWNYtrPeLGjfzpzrydADB3dpkQ62ExevpemFXMNJgnTq55U6QXp1rvkEginP0/pA3Mjap+0kPV6POiSe6tt5uw5sm6uOsJHQ44pszBzKFy984ZOWtFEZyZ32+qx7ap+2L6i1u2CtY7M+xAbAVHS8MrQiE0miDkjNVKm4lu+ET/i7WDoLp6EV5+9TVsf6PBlPEZnWs5FVWpY59eNd+sBuZau65FuiugGYdxtDEiu4y3rqlZ3uD+4fp13ItbtgpmXcNi5oCXbdvZ27yrzlazvCEsvUMiKWGoQWrb0tPsRdqpS20skSqhr6QuqqmYtA1QTsU1w7MoZwtVUo+l3nQ19Vcq/YUSVxesl4m0abySpB9pyDU/ioa2oUX1dThtorWw6p319Xn8P23ZKr5o4nUsZg/85KeH+9bXr+PFtqtPcncJS/xSoItLtKrRSp5iIz1HwjkmtdNei02KEHYwolCLxTOiXirZQqXfK/U4ayEVMtZQn5ecE0bvwRdOic5oE6lYIEHHlDmBnzNypn3nkcW1nua9TamcCY6PsBLgps2tg41rr2Yu27azl4TFOKbM4ebhaFyXzjdr8cptFK0tFLV8t9w4peEYSiolsT3JvZ/8rkQYat2/9G4oJbOCnCNIqyRF5pGW2kIJ+VBTzwnIXOkZXyjmHel19AajxwrooGeet/7y4dq/bWr807nMmsW1vWZfyxKOG1i2bWdv49qVmac783ZOz720vaocwmG3nY+mKiz1TJKFY2RxSD10UjVHzaMZ6QVpxM5DQj7kAoS1xjga7ccrt5nVOqGphafIPRt6Dcx5qDJAEkrB0EqEr7WRvNL4gmWvmHFAqx2gShJrrEl/zhk5a0nKWziuZQnXTaR+NZV/cflWoXlXnd17tc8VCxkiwexWapuSlq6kJCC1Q8XSiUuIX689kQ4F0rJJn3vm6ZA3kV7yC3Y9OceDnh7SSoQvp55r6bqmZXyhaBZ690IsSoarF05G2VCpqzGWlO/ULG9wr69fx5vp+IgIAZKB1yzfGnCIxFqGiNEG58HUsFCCSuWasKttIi3XCoddUqv3U+936nEoGVFR9Tof5NaIVq+/1nsN1dkljVs1c+1HWvWlm5xPKJ+wz+9UDT3jI+IECAAvPF8/ZlrfVYvYhie5u4QlsZAhouY5lG5uPT1ltUqWakQqt0m1BPKGupBJor9UbdUaOG4GlOyUwZw3cgeANJWMHrdaj1/pZ5SkPz1zIpdFoyV2UM10IfediQBa9S34yp3jiRAVzmuGlQCtqdkDpE8nUYW9tjLMm+6KikNETqWjvZxyapJWNZAmVqXTla40ozY+Je+m3BhDlR7ozRhsfOHKE1ULJ5Ebi7TSCt0AXE6K1NqQXvpZrYdfMJVer5QbrDJOrNnszFJ9vRh2fNQsb3A3721KNSvjIyoECIyMDXztHxa9VVU+9oloOkTIgpHmiaqFb2itBSiVApVIMNj3KFUSCUcYhVaJU7pRpVJvONRspbHQc6s2brOdTnLB9FoJVW18eu5d6YA2YmqJJQR6fACo2/Tm3zpn5NhqFte6w31dSyRurnpZQ8/GT0tSnFNy1nqv9j0xd3aZACBqqjBNMNIFRSQqaUEALQZrIgXKBezKSYJqC1JaWEDus3JjpP+mFTR5BZsLtfsKlYT1Pj96DHrGrYUU1OZP6xwrxVbSxGekahBZA3pJLFKB9UYOFgxJf7m37dlDXt/bkbg2F6mb/PWvZ1oeeeSkr3lXnc17tc/V2e7mWi60Rb1uYDAbkx7bi1JFZrMqQpsxRr1zYeR+zXoOWudKz/xoHYeZ92xkfOGo3mzm8zJV9R3K+Jhw57hf1X7/l8vC6fWNGgECALEHNr20opHjhCWHj7Xwly+5kGhZIgwMDMExb3reCMfHX38rYxzgjyCJ1BgiWr6+dtvOvuZddbZ778p8KmPgcz4eKsYwMDCEB4T8Zua6xb/+Vsa4muUN7o8/sfdGcgwRJUAOEE9+erivdPHrN3w9Y7IAYFYxB9ZTmIEhuUD2/Mxct0gCnpt31dkipfoSpET6xn//+xti8646W/Wzzb3frvrKJastZ2Eed50buJ2C1o5etjIkeOLxWkybNnXEv09aPlV9r9Lf6fcFe4+e79PzndGYt2iOS88cJpPqO7bwvwEA8rOEXz71v5qfX1+/jv+7Z18diPRYuGhNwrv1FRmPbjneR9sD46mdZrg3jVrGglwVEzr4Vy2Il+4MptbuUpqpoPZe+rpmhsNo6agnLesuF2cHjPQIk8BvaSyl9Bp0Gp5ShzYAss9CKcIgHosThEP6Iw2OrlqnWAF/0kQo7S2NwhKtSXh0y/G+ofjAZf/77xcORjs0Jl7Ij95U0h4T0r8Hq0uotYiA3qo0ZkJLpzq1eVMKHNYSX0ln2qh9t5TUlJ6fGfF7iUB+JN2t4Ct3jv8fy7cKofb2DQVR7eF78tPDfaIILve2PRvwV5BOdnugnARD/6M3k1rsXHX1IlMr/mqN04tGlWElyU/PfMlBroQWLfnRc0NXCFd6fkbHkUjkB/jtftf6xq6Jlt0vZghw0+bWwaZnVmYs27azF7x1jcNpE2cVc4iVMvrR2MjSzbPmyboR/6SbWo1wjGw0pbS0aFYvJnORm5OD5555Grk5OYGfpRLd/v378NwzTwfmi65SQ7DmyboR30H+p+eWzvKQZn+Q75UjNbkiqdKSWGYfTvEk+XltZeB56y83vb77Fxs3lKREMuQl5ggQ8KfKbdxQkrL02R1vgreuSS+aKiytuCPpSFAuzUrOnnb0wyOyEqFZUqBa35RIb1ppuXap6khnwZD5CGZj01I1WZplodQSVYtZQC5rJdkwXOUFuNdx61+f/ue9q9fXr+M3bW4djPbYLLEwQZs2tw5e2PvU+NLFr7/Z9NKKb6YXTV1SUNjCzwOSKkhab1tNLXYkPRVj5KQ/LUUewnUgSO+DrtIjvac1T9ZpKg2mVpsvmI1OC4FJ09/o+zCjD0k8oqDQHih04Lz/ie+KIocfrl8XE2OzxMoklSx6/WbzrjobgLrb7bdQVlr8bQBcspGgdCPp2cTSjUr3odBT3FQqBWkp8hDJw0GJqNSqqmgl/mA5tloIlvYAm9UjJd5VX5LnW7O41hPJVLeYV4EJOA7ix5/Ye2uWN7jFNv5Jh9MmPnpfGpIxUyRUVUla845WhdW+W65DmLQnciQN+HLSKI2XX30tqA1UC7Hp6YymdD16jrUUUkgm8gP81Z2XbdvZG0vkF1MSIAC8uGWrQEpnNe+qs/ddneiaVXyWvzw9j+UL64Q0dOPlV1+TdQioqb9KG12NJIyQh9Jnnnvm6VFqr7R/h5JaLi2wqhbHaOahpdZ/Wk4iTwbyK0j3Pvndrft3xBr5xRwBAv5E6HfrKzIeXd7g3v3KqjXpRVO3Vz3o5oBTXLKQoFlxd3Ll9bUWHlWT9IzYAqVVmqUEIdfxTY0olFoQKIXEaLH9mWGbUwoglxaeTeSAaFrtvdKT+vqm1/f8IhbJL6ZUYBqPbjne17h2ZebSZ3e8eeNa35MAkGyeYTUC2v5GQ+CfmgQjVV/VGoXLEczLr76Gl199LeohMFrVZKWmSlqzU0I9dKSEJq3XmAzqLy358bz1l5u2/fzv19ev4194vn5MLI7XEqsTSVprLtu6c8fP1lWjB0U/r3qwCIksCSr19VVSVY14JbUQSShqsJInVqnoqVbVVJppIadi6u0oJ1X7tTQSTyYHRijk5w932bfq6X/eR8xbA7E4ZkssT2jttp19Y+srMh7dsn9H00srvsVxwpJEaLKuJj3INVeSy0c1+r1apE0lYpWq03pVOD15wnJd0/SQmV5pS+39cqFAWp6FWU2r4k3tBQDnjDvXiiK4H65fx8Wi6hsXBMgBovji8f53UZFxq41/siutb6CqfOwTBzGHT1QSlDou6I0kR2JaN5eSdCkljmBSU7j7gMhJrjT5SOeBboYkHSdR4+k5oMes5TCRSq5y4ThKHmat9td4Bwl0JuQX6Oj2SWza/eKGAAF/eIyI4/0+z69TranZq5peWpFWVS4sSVQSlFNZlSqhaCUgNSlQT5MfqVPFiEQaikQsNwdSB0MwGOnZLBcPqaTGk2dCv1etykyiSX65t+3ZNcsbemPV6RF3BEgkwY2bZnjX16/ja7+/dVnTSysaq8qFJYfd9oTLFpFuDCW1Tkp+hJyUVDk1G5zcz3q+g5aCzNzYSt3x5K6lpfGUdH613rvSM1FSzdWaTCWS91cq+V21TrH+j3/ZKjSuXZm5bMvW3jjhlvgB3SQ5f/D8LwTBu+LkdRvX+enRhI0T1JK7mgyIpYY+ehpPxWIjIrPIzzFlzmi1N04kv7gkQADwerrTAH/T9df+YdGO3LyxTxw8Az7Zi0wyMESL/HJv27Pp/t/xdC9cPD4A4l0CgPKcK+9cu3rz2y0X2jjWYY6BIbygbX4Op00U/ssyLl7JD4jRQOigrM1BJD/Xfv+XyybcOe5Xc2eXCY4pc5K2liADQyTIr6y0WKwqhzCC/PY2pcYj+cUtAQL+vGGiEtd+/5fLRJHfU1WOpKwlyMAQKfJzOG0iAFjvzLCTWp41i2s98XpfXLw/GFEE948bS3gAmDr+a29znLCk/+JZfvfxL5g6zMAQIuZNz0NBoX0E+cW72psQEiCtDv/PTa3C4OBSsfb7v1x241rfkz2WIrHqwRki6zfMwBAaqh6cIc6dXSY4nDbxesettxKJ/IA4iQPUQoLAVnF9/Tr+u1u27vjZumqMn5DxBlCM1QvBsXabDAz6JT/HlDkA3EOaFr+nbtObf2tNzR5YX7+Or1m+1Z0I95mSSA/t98ePY2Z9RcbjWz/4+NtVX7mUmWldmGEdC2fuGO70+etsVTMwaMDqhZMxtvC/BTy9osjvOef+18e+UZnm896Orzi/oMJTIj5A0nS9ce3KTP4u383OdjfHwmQYGLSRH23vA29ds/TZHW9u3FCSEgtNjBgBGiDB62Nc3QDASJCBQZ385s4uG5buhsivce3KzGXbdvYm4j1zifxAiaF2ff06nqTOtVxo4wCA2QUZGPwgnl6a/Kx3Zthrlje4E5n8Ep4AAX/+MLFZkNS5/otn+RNtIiNBBkZ+EvITRX7PGOfYukBrii3H+xL5/rlkeMiiCA7/uJHjNm0Sdr+yajUE73ZmF2RgKu9Ie58o8nvO/fw/Hn/h3LnBRAlzYQQoIw0yuyBDsuOJx2tRVY5R9j7An11lTc0eSIZ54JLtwRNvVuPalZlfpPX8VBC8K7J8FzmmEjMki9TntZWhqhxCv72ST3cdEYi9r3lXna16eUMPh+Fce0aACQjasPuz782qvc3f8Q6TBhmSgfyIra/fXsmP/eLD3cTel+jODkaAEogAh41+u+C79RUZN2719ADAiTb/4cekQYZEJT+pyitu3MhzmzYJyTgvXLIvjB9Nnpzywrlzgxs3lKTk3Z7+cxYqw5BoxDcisBnDIS7JqPIyApQBHeX+s3XVq277Bn/O7IIM8Q6po0MU+T3VTxc/kZq22ZcsXl5GgDpA7CDv1ldkXB6c8BrpOWJ1tzAiZIg7dbffXslPneDytn52KoVIfcDI2FhGgAxBpUEAYETIEOsgFVyIhxcApub2Nl4acKyuWVzrSVZHByNAnRBFcE3PrMxYtm1nb+PalZlcsfAGxwlLWPA0Q7xIfQBwqft8LpH6PAMbLKlpm31sphgBagZtJ6GlQQA4+LtTHCNBhliS+irmV3LtrS7fFz2e5n7LX62sWVzrYbY+RoAhS4M/XL+Oe3HLVoG2DRInyeVLLgBgEiFDxCU+AIHQlpJ7ZgzanQW7bZf5v8tZsLRbeoAzMAI0TRpUIkJGggyRVHcBoGJ+JQcA1/+r9+nyb639P4z4GAGGFSOySIbUYofTJjL7IEM0iM/rSf+O7/8efbd08es3vJ7utB89v+U28/AyAgwr1tev4/9py1aRA8TGtSszu9O7l0iJkHmLGcwmvn57Jf/wA/6g5fYLvU13iXlPBdTdvU2p8dyekhFgnKvFzbvqbLfbbzVIvcUAsw8yGCc+ksVRcs+MQWeJ3TIwkP5OCocjxeXLdpB1t2DRj28nS/UWRoAxCDp2kA6bAQBWfJUhFOIjqq4c8X38ib2XqbuMAGNGLb5vmitTTiIEgINnwLNAaga9Eh/gt/MR4hM3buT3T59qZeouI8CYJcKUlN0ckQh3v7JqtTg4+E1ChIePtfAAmNeYAcBwHB9pQUkkPkJ8GZf45pwFS7vX16/j77t3BiM+RoDxgca1KzNrX93Z52/aPpoIiWrMiDC5JT6pc4OouoT4AODGlT054/OXdLEZYwQYd5AaqaWqMS0VMvU4OUjPayvDnIcqQUiPJj6i6pK1Ur2soYccogyMAOOaCAGAthF6O28vhuDdTt7DYgkTm/RIaSravjcwkP7O+FzLc0TC83q60w7s+8EY5tllBJiQkHOW3JWZtejzzzvekBIhwGyF8QxpdRZa4vN60r9jy7EcGEF8B34jMhsfI8CkIcL7cXws3XdVTj0m3mNGhPEl8Ulte7SaSxNf896mVABgxMcIMCkhiuD272saQ28AOfWYkWF8qLikHBVRceXUXMDv2PjxT//kYnF8jAAZCBlu3Mj/o/h2IIRGSSpkKnJskB6AAPERu1563iIOAHy3/vJW37X//HepmtvbdSgzM2deL7PvMQJkUIBcUjuRCulQGiYZRl+9JYSnRHpE2mOkxwiQwQCkTpNgZEhLiIwQQwdpLERKzNM2PaLejssrPcwNtv1aSnqDpwRv9rxvehjxMQJkCFU9FsHtb6zL8vzBI9B9HTwDGyyXf/1F1n9culUttRlK1WWmMqtLdl5bWeB3mvSqqxeNeK/v1l/e4jn+SNb4SU00uTXvbUpdsOBbHAAw0mMEyBAuMgS4/bvqsvhPzg3SXmRaOiwan7q44O70+eT1EyeuCVKVOdkJkbbjzXmoEkTCo9VaKeFJyc3r6U4jPzPSYwTIEAXJ8LZnQ8r7zdfSpVWA362vyJh6b9kY95j0R8+fv/Ytoi6X3DNjEABaPzuVQkuKpPNdopHi/RXTMHm8b0QwspwNTwvhEdJjzgxGgAwxiPX16/ivVXzAA8Ajj5wc0QWM2KWuWDqWewfxdQCw9H68jH7P+SuCICVF+u+xRpDzpuehoNA+Qn2l1Via7MjreiQ8QngHDvxGZOotI0CGOJUOgeE0PKnKPG1MSso9tdu/+OjI2kYAcKSKywCAH1cWII32Vpfv7DW7Nd11RJCSI1GniUqtFXIkOm96XuDngkK74mcJ4Sk5KOQkO5rsAEBqwyPwDGyw9H8xfRwAMCmPESBDohAiwP2wfh133zRX5oNff3iMUiDur38903LPwP1ZBY/c0fPZ7yY8mZU34WuuK9dSnKWZte2tLh8d5KuG9lZXQAI9e81uBQBCoEqQCySWgxLBEZIDAFqqU5PcaJWWSXiMABmSCCT5nvw+v2ZCv1oD7RtX9uSQn91dvgXk50ERlfT70tL6HzN7rAMD6e+Qn8fllR4mP2shOXKvAMDIjoHg/wfR96iIGmIgFgAAAABJRU5ErkJggg==";
   const brokerLogo = new Image();
   brokerLogo.src = BROKER_LOGO_SRC;
+  window.__brokerLogoSrc = BROKER_LOGO_SRC; // usado também pelo adaptador de vídeos
 
   dropzone.addEventListener('click', () => fileInput.click());
   ['dragover','dragenter'].forEach(evt=>{
@@ -796,6 +859,7 @@
     generateBtn.disabled = true;
     statusBox.classList.add('show');
     resultBox.style.display = 'none';
+    stage.style.display = 'block'; // mostra a prévia ao vivo enquanto grava
     statusText.textContent = 'Carregando fotos...';
     barFill.style.width = '0%';
 
@@ -805,6 +869,7 @@
       console.error(err);
       statusText.textContent = 'Não foi possível gerar o vídeo (' + (err && err.message ? err.message : 'erro desconhecido') + '). Tente com menos fotos ou em outro navegador (Chrome).';
     }finally{
+      stage.style.display = 'none';
       generateBtn.disabled = false;
       if(wakeLock){ try{ await wakeLock.release(); }catch(e){} wakeLock = null; }
     }
@@ -923,7 +988,7 @@
     const isMp4 = mimeType.startsWith('video/mp4');
 
     const LIMITE_MB = 15 * 1024 * 1024;
-    const limitado = document.getElementById('sizeLimit').value === 'wa';
+    const limitado = true; // todos os vídeos do editor ficam com no máximo 15 MB
     let vbps = leve ? 3_000_000 : 8_000_000;
     // áudio em 96 kbps; só em vídeos muito longos (mais de ~5 min) reduz para caber nos 15 MB
     let abps = 96_000, vfloor = 250_000;
@@ -1348,52 +1413,64 @@
 </script>
 <script>
 (function(){
-  const W = 1080, H = 1920;
-  const stage = document.getElementById('adpStage'), ctx = stage.getContext('2d');
-  const small = document.createElement('canvas'); small.width = 54; small.height = 96;
+  const W = 1080, H = 1920, MB = 1048576, LIMIT = 15 * MB, BUDGET = 14 * MB; // vídeos do editor: no máximo 15 MB
+  const $ = id => document.getElementById(id);
+  const stage = $('adpStage'), ctx = stage.getContext('2d');
+  const small = document.createElement('canvas'); small.width = 72; small.height = 128;
   const sctx = small.getContext('2d');
-  const list = document.getElementById('adpList'), go = document.getElementById('adpGo');
-  const exAll = document.getElementById('adpExAll');
-  let queue = [];
-  let busy = false;
-  function setBusy(b){
-    busy = b;
-    exAll.disabled = b || !queue.length;
-    list.querySelectorAll('.adp-ex-btn').forEach(x => x.disabled = b);
+  const list = $('adpList'), go = $('adpGo'), exAll = $('adpExAll'), msgBox = $('adpMsg');
+  const modeSel = $('adpMode'), colorField = $('adpColorField');
+  let queue = [], busy = false, wakeLock = null;
+
+  const AC = window.AudioContext || window.webkitAudioContext;
+  const fmtMB = n => (n / MB).toFixed(1).replace('.', ',');
+  const fmtTime = s => { s = Math.max(0, Math.round(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+  const isVideo = f => (f.type || '').startsWith('video/') || /\.(mp4|m4v|mov|webm|mkv|3gp)$/i.test(f.name);
+  const baseName = f => f.name.replace(/\.[^.]+$/, '');
+  const msg = t => { msgBox.textContent = t || ''; };
+
+  modeSel.addEventListener('change', () => { colorField.style.display = modeSel.value === 'solid' ? '' : 'none'; });
+
+  function sync(){
+    go.disabled = busy || !queue.length;
+    exAll.disabled = busy || !queue.length;
+    list.classList.toggle('is-busy', busy);
   }
 
-  // ---------- Música e narração (mesmo comportamento do gerador de vídeo) ----------
+  // ---------- Música e narração (igual ao gerador de vídeo) ----------
+  let narrDur = null, narrFallback = null;
   let musicFile = null, narrBlob = null, narrRec = null, narrStream = null, narrTimer = null;
-  const aIn = document.getElementById('adpAudioInput'), aName = document.getElementById('adpAudioName'), aClr = document.getElementById('adpClearAudio');
-  const nIn = document.getElementById('adpNarrInput'), nName = document.getElementById('adpNarrName'), nClr = document.getElementById('adpClearNarr');
-  const nPrev = document.getElementById('adpNarrPreview'), recBtn = document.getElementById('adpRecBtn');
-  const mVol = document.getElementById('adpMusicVol'), mVolVal = document.getElementById('adpMusicVolVal');
-  mVol.addEventListener('input', () => mVolVal.textContent = mVol.value);
-  aIn.addEventListener('change', e => {
-    const f = e.target.files[0];
+  const aIn = $('adpAudioInput'), aName = $('adpAudioName'), aClr = $('adpClearAudio');
+  const nIn = $('adpNarrInput'), nName = $('adpNarrName'), nClr = $('adpClearNarr');
+  const nPrev = $('adpNarrPreview'), recBtn = $('adpRecBtn');
+  const mVol = $('adpMusicVol'), mVolVal = $('adpMusicVolVal');
+  mVol.addEventListener('input', () => { mVolVal.textContent = mVol.value; });
+  aIn.addEventListener('change', ev => {
+    const f = ev.target.files[0];
     if(f){ musicFile = f; aName.textContent = f.name; aClr.style.display = 'inline-block'; }
+    aIn.value = '';
   });
   aClr.addEventListener('click', () => {
-    musicFile = null; aIn.value = ''; aName.textContent = 'Nenhuma música selecionada'; aClr.style.display = 'none';
+    musicFile = null; aName.textContent = 'Nenhuma música selecionada'; aClr.style.display = 'none';
   });
-  function setNarr(blob, label){
-    narrBlob = blob;
+  function setNarr(blob, label, secs){
+    narrBlob = blob; narrFallback = secs || null; narrDur = null;
     if(nPrev.src) URL.revokeObjectURL(nPrev.src);
     nPrev.src = URL.createObjectURL(blob);
     nPrev.style.display = 'block';
     nName.textContent = label;
     nClr.style.display = 'inline-block';
   }
-  function resetNarr(){
-    narrBlob = null;
+  nClr.addEventListener('click', () => {
+    narrBlob = null; narrDur = null; narrFallback = null; updateTimeInfo();
+    if(nPrev.src) URL.revokeObjectURL(nPrev.src);
     nPrev.removeAttribute('src'); nPrev.load();
     nPrev.style.display = 'none';
     nName.textContent = 'Nenhuma narração';
     nClr.style.display = 'none';
-  }
-  nClr.addEventListener('click', resetNarr);
-  nIn.addEventListener('change', e => {
-    const f = e.target.files[0];
+  });
+  nIn.addEventListener('change', ev => {
+    const f = ev.target.files[0];
     if(f) setNarr(f, f.name);
     nIn.value = '';
   });
@@ -1404,242 +1481,421 @@
   recBtn.addEventListener('click', async () => {
     if(narrRec && narrRec.state === 'recording'){ narrRec.stop(); return; }
     if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder){
-      alert('Este navegador não consegue gravar áudio por aqui. Grave a narração no gravador do celular e use "Enviar áudio pronto".');
+      alert('Este navegador não consegue gravar áudio por aqui. Grave a narração no gravador do celular e use "Enviar narração pronta".');
       return;
     }
     try{
       narrStream = await navigator.mediaDevices.getUserMedia({ audio:{ echoCancellation:true, noiseSuppression:true } });
     }catch(err){
-      alert('Não consegui acessar o microfone. Permita o acesso no navegador ou grave no celular e use "Enviar áudio pronto".');
+      alert('Não consegui acessar o microfone. Permita o acesso no navegador ou grave no celular e use "Enviar narração pronta".');
       return;
     }
-    const parts = [];
-    const t0 = performance.now();
+    const parts = [], t0 = performance.now();
     narrRec = new MediaRecorder(narrStream);
-    narrRec.ondataavailable = e => { if(e.data.size > 0) parts.push(e.data); };
+    narrRec.ondataavailable = ev => { if(ev.data.size > 0) parts.push(ev.data); };
     narrRec.onstop = () => {
       const secs = Math.round((performance.now() - t0) / 1000);
       stopMic();
       recBtn.innerHTML = '&#9679; Gravar minha voz';
-      if(parts.length) setNarr(new Blob(parts, { type: narrRec.mimeType || 'audio/webm' }), 'Narração gravada (' + secs + ' s)');
+      if(parts.length) setNarr(new Blob(parts, { type: narrRec.mimeType || 'audio/webm' }), 'Narração gravada (' + secs + ' s)', secs);
     };
     narrRec.start();
     recBtn.innerHTML = '&#9632; Parar (0 s)';
     narrTimer = setInterval(() => { recBtn.innerHTML = '&#9632; Parar (' + Math.round((performance.now() - t0) / 1000) + ' s)'; }, 500);
   });
 
-  function addFiles(fl){
-    for(const f of fl){
-      if(!f.type.startsWith('video/')) continue;
+  // ---------- Lista de vídeos ----------
+  function drawContain(g, v, w, h){
+    g.fillStyle = '#23211D'; g.fillRect(0, 0, w, h);
+    const s = Math.min(w / v.videoWidth, h / v.videoHeight), dw = v.videoWidth * s, dh = v.videoHeight * s;
+    g.drawImage(v, (w - dw) / 2, (h - dh) / 2, dw, dh);
+  }
+
+  function addFiles(files){
+    for(const f of files){
+      if(!isVideo(f)) continue;
       const el = document.createElement('div'); el.className = 'adp-item';
-      el.innerHTML = '<div><div class="adp-nm"></div><div class="adp-st">Aguardando</div><div class="bar"><div class="bar-fill"></div></div></div><div class="adp-act"><button class="adp-x" title="Remover">\u2715</button></div><div class="adp-ex"><button type="button" class="file-btn adp-ex-btn">&#9835; Extrair áudio</button><span class="adp-ex-st"></span></div>';
-      el.querySelector('.adp-nm').textContent = f.name;
-      const entry = {file:f, el, done:false};
-      el.querySelector('.adp-x').onclick = () => { queue = queue.filter(q => q !== entry); el.remove(); go.disabled = !queue.length; exAll.disabled = !queue.length; };
-      el.querySelector('.adp-ex-btn').onclick = () => runExtract([entry]);
+      el.innerHTML =
+        '<canvas class="adp-pv" width="162" height="288"></canvas>' +
+        '<div class="adp-main">' +
+          '<div class="adp-top"><div class="adp-nm"></div><button type="button" class="adp-x" title="Remover" aria-label="Remover">&#10005;</button></div>' +
+          '<div class="adp-meta">Lendo o vídeo...</div>' +
+          '<div class="adp-prog"><div class="adp-bar"><div class="adp-fill"></div></div><span class="adp-pct">0%</span></div>' +
+          '<div class="adp-st">Aguardando</div>' +
+          '<div class="adp-res"></div>' +
+        '</div>';
+      const q = sel => el.querySelector(sel);
+      q('.adp-nm').textContent = f.name;
+      const entry = { file:f, el, pv:q('.adp-pv'), meta:q('.adp-meta'), fill:q('.adp-fill'), pct:q('.adp-pct'), st:q('.adp-st'), res:q('.adp-res'), dur:0, vUrl:null, aUrl:null, vTxt:'', aTxt:'' };
+      entry.pvctx = entry.pv.getContext('2d');
+      entry.pvctx.fillStyle = '#23211D'; entry.pvctx.fillRect(0, 0, entry.pv.width, entry.pv.height);
+      q('.adp-x').onclick = () => {
+        if(busy) return;
+        if(entry.vUrl) URL.revokeObjectURL(entry.vUrl);
+        if(entry.aUrl) URL.revokeObjectURL(entry.aUrl);
+        queue = queue.filter(x => x !== entry); el.remove(); sync(); updateTimeInfo();
+      };
       list.appendChild(el); queue.push(entry);
+      loadInfo(entry);
     }
-    go.disabled = !queue.length;
-    exAll.disabled = !queue.length;
-  }
-  const input = document.getElementById('adpFiles');
-  input.onchange = e => { addFiles(e.target.files); e.target.value = ''; };
-  const drop = document.getElementById('adpDrop');
-  ['dragover','dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('drag'); }));
-  ['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('drag'); }));
-  drop.addEventListener('drop', e => addFiles(e.dataTransfer.files));
-
-  function cover(sw, sh, dw, dh){
-    const s = Math.max(dw/sw, dh/sh), w = sw*s, h = sh*s;
-    return [(dw-w)/2, (dh-h)/2, w, h];
-  }
-  function drawFrame(v, mode, color){
-    const vw = v.videoWidth, vh = v.videoHeight;
-    const vertical = Math.abs(vw/vh - 9/16) < 0.03;
-    if(mode === 'fill' || vertical){
-      const [x,y,w,h] = cover(vw, vh, W, H); ctx.drawImage(v, x, y, w, h); return;
-    }
-    if(mode === 'blur'){
-      const [bx,by,bw,bh] = cover(vw, vh, 54, 96);
-      sctx.drawImage(v, bx, by, bw, bh);
-      ctx.imageSmoothingQuality = 'high';
-      ctx.drawImage(small, 0, 0, W, H);
-      ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(0, 0, W, H);
-    } else { ctx.fillStyle = color; ctx.fillRect(0, 0, W, H); }
-    const h = vh * (W / vw);
-    ctx.drawImage(v, 0, (H-h)/2, W, h);
-  }
-  function pickMime(){
-    const c = ['video/mp4;codecs=avc1.640028,mp4a.40.2','video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
-    return c.find(t => MediaRecorder.isTypeSupported(t)) || '';
+    sync();
   }
 
-  async function processOne(entry, scale){
-    scale = scale || 1;
-    const st = entry.el.querySelector('.adp-st'), bar = entry.el.querySelector('.bar-fill');
-    const mode = document.getElementById('adpMode').value, color = document.getElementById('adpColor').value;
+  // duração, tamanho e miniatura do vídeo
+  function loadInfo(entry){
     const url = URL.createObjectURL(entry.file);
-    const v = document.createElement('video'); v.src = url; v.playsInline = true; v.preload = 'auto';
-    await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = () => rej(new Error('não foi possível abrir este vídeo')); });
-    const ac = new (window.AudioContext || window.webkitAudioContext)();
-    const dest = ac.createMediaStreamDestination();
-    const origVol = { keep:1, low:0.3, mute:0 }[document.getElementById('adpOrigVol').value];
-    const vsrc = ac.createMediaElementSource(v);
-    if(origVol === 1){ vsrc.connect(dest); }
-    else { const og = ac.createGain(); og.gain.value = origVol; vsrc.connect(og); og.connect(dest); }
-    let musicEl = null, musicUrl = null, narrSrc = null, narrBuf = null;
-    if(musicFile){
-      musicUrl = URL.createObjectURL(musicFile);
-      musicEl = new Audio(musicUrl);
-      musicEl.loop = true;
-      musicEl.crossOrigin = 'anonymous';
-      const msrc = ac.createMediaElementSource(musicEl);
-      const mg = ac.createGain();
-      mg.gain.value = parseInt(mVol.value, 10) / 100;
-      msrc.connect(mg); mg.connect(dest);
-    }
-    if(narrBlob){
-      try{ narrBuf = await ac.decodeAudioData(await narrBlob.arrayBuffer()); }
-      catch(e){ throw new Error('não consegui ler o áudio da narração; tente gravar de novo ou enviar um MP3/M4A'); }
-    }
-    const stream = new MediaStream([...stage.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
-    const mime = pickMime();
-    const LIMIT = 15 * 1024 * 1024;
-    const limited = document.getElementById('adpSize').value === 'wa';
-    let vbps = 8000000;
-    // áudio em 96 kbps; só em vídeos muito longos (mais de ~5 min) reduz para caber nos 15 MB
-    let abps = 96000, vfloor = 250000;
-    if(limited && isFinite(v.duration) && v.duration > 0 && (14 * 1024 * 1024 * 8 / v.duration) < 346000){ abps = 48000; vfloor = 60000; }
-    if(limited){
-      // orçamento de 14 MB para sobrar margem; o restante é descontado do áudio
-      vbps = Math.max(vfloor, Math.min(8000000, (14 * 1024 * 1024 * 8 / v.duration - abps) * scale));
-    }
-    const rec = new MediaRecorder(stream, {...(mime ? {mimeType:mime} : {}), videoBitsPerSecond: Math.round(vbps), audioBitsPerSecond: abps});
-    const chunks = []; rec.ondataavailable = e => { if(e.data.size) chunks.push(e.data); };
-    const stopped = new Promise(r => rec.onstop = r);
-    drawFrame(v, mode, color);
-    rec.start(500);
-    await ac.resume();
-    if(musicEl){ musicEl.currentTime = 0; musicEl.play().catch(() => {}); }
-    if(narrBuf){ narrSrc = ac.createBufferSource(); narrSrc.buffer = narrBuf; narrSrc.connect(dest); narrSrc.start(); }
-    await v.play();
-    st.textContent = (narrBuf && isFinite(v.duration) && narrBuf.duration > v.duration + 0.5) ? 'Processando... (a narração é mais longa que o vídeo e será cortada)' : 'Processando...';
-    let raf;
-    const loop = () => {
-      drawFrame(v, mode, color);
-      bar.style.width = (v.currentTime / v.duration * 100) + '%';
-      if(!v.ended) raf = requestAnimationFrame(loop);
+    const v = document.createElement('video');
+    v.muted = true; v.playsInline = true; v.preload = 'metadata';
+    const fin = () => { v.onerror = v.onloadedmetadata = v.onseeked = null; URL.revokeObjectURL(url); try{ v.removeAttribute('src'); v.load(); }catch(e){} };
+    v.onerror = () => { entry.meta.textContent = fmtMB(entry.file.size) + ' MB · o navegador não conseguiu ler este vídeo'; fin(); };
+    v.onloadedmetadata = () => {
+      entry.dur = isFinite(v.duration) ? v.duration : 0;
+      entry.meta.textContent = [v.videoWidth ? v.videoWidth + '×' + v.videoHeight : '', entry.dur ? fmtTime(entry.dur) : '', fmtMB(entry.file.size) + ' MB'].filter(Boolean).join(' · ');
+      updateTimeInfo();
+      try{ v.currentTime = Math.min(1, (entry.dur || 2) / 2); }catch(e){ fin(); }
     };
-    loop();
-    await new Promise(r => v.onended = r);
-    cancelAnimationFrame(raf);
-    if(musicEl) musicEl.pause();
-    if(narrSrc){ try{ narrSrc.stop(); }catch(e){} }
-    await new Promise(r => setTimeout(r, 300));
-    rec.stop(); await stopped;
-    ac.close(); URL.revokeObjectURL(url);
-    if(musicUrl) URL.revokeObjectURL(musicUrl);
-    const type = rec.mimeType || mime || 'video/webm';
-    const ext = type.includes('mp4') ? 'mp4' : 'webm';
-    const blob = new Blob(chunks, {type});
-    if(limited && blob.size > LIMIT && scale > 0.35){
-      st.textContent = 'Passou de 15 MB, refazendo com mais compressão...';
-      bar.style.width = '0%';
-      return processOne(entry, scale * (14 * 1024 * 1024 / blob.size) * 0.92);
-    }
-    const mb = (blob.size / 1048576).toFixed(1).replace('.', ',');
-    const a = document.createElement('a'); a.className = 'download';
-    a.href = URL.createObjectURL(blob);
-    a.download = entry.file.name.replace(/\.[^.]+$/, '') + '-stories.' + ext;
-    a.textContent = 'Baixar .' + ext;
-    entry.el.querySelector('.adp-act').replaceChildren(a);
-    bar.style.width = '100%';
-    st.textContent = (ext === 'webm' ? 'Pronto (WebM: converta para MP4 antes de postar)' : 'Pronto \u2014 1080\u00d71920') + ' \u00b7 ' + mb + ' MB' + (limited && blob.size > LIMIT ? ' \u26a0 acima de 15 MB' : '');
-    entry.done = true;
+    v.onseeked = () => { try{ if(v.videoWidth) drawContain(entry.pvctx, v, entry.pv.width, entry.pv.height); }catch(e){} fin(); };
+    v.src = url;
   }
 
-  go.onclick = async () => {
-    if(!window.MediaRecorder){ alert('Este navegador não suporta gravação de vídeo. Use o Chrome.'); return; }
-    if(busy) return;
-    go.disabled = true;
-    setBusy(true);
-    for(const e of queue.filter(q => !q.done)){
-      try{ await processOne(e); }
-      catch(err){ e.el.querySelector('.adp-st').textContent = 'Erro: ' + err.message; }
-    }
-    setBusy(false);
-    go.disabled = !queue.some(q => !q.done);
-  };
+  const input = $('adpFiles');
+  input.onchange = ev => { addFiles(ev.target.files); ev.target.value = ''; };
+  const drop = $('adpDrop');
+  ['dragover','dragenter'].forEach(n => drop.addEventListener(n, ev => { ev.preventDefault(); drop.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(n => drop.addEventListener(n, ev => { ev.preventDefault(); drop.classList.remove('drag'); }));
+  drop.addEventListener('drop', ev => addFiles(ev.dataTransfer.files));
 
-  // ---------- Extrator de áudio ----------
-  function pickAudioMime(){
-    const c = ['audio/mp4;codecs=mp4a.40.2','audio/mp4','audio/webm;codecs=opus','audio/webm'];
-    return c.find(t => MediaRecorder.isTypeSupported(t)) || '';
+  // ---------- Resultados ----------
+  function renderResults(entry){
+    entry.res.replaceChildren();
+    if(entry.vUrl){ const pl = document.createElement('video'); pl.className = 'adp-play'; pl.controls = true; pl.playsInline = true; pl.src = entry.vUrl; entry.res.appendChild(pl); }
+    const add = (url, name, label, redo) => {
+      const a = document.createElement('a'); a.className = 'download'; a.href = url; a.download = name; a.textContent = label;
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'adp-redo'; b.textContent = 'Refazer';
+      b.onclick = () => redo();
+      entry.res.append(a, b);
+    };
+    if(entry.vUrl) add(entry.vUrl, entry.vName, (entry.vExt === 'mp4' ? 'Baixar MP4 para Stories/Reels' : 'Baixar vídeo (.webm)'), () => { URL.revokeObjectURL(entry.vUrl); entry.vUrl = null; renderResults(entry); runJobs('video', [entry]); });
+    if(entry.aUrl) add(entry.aUrl, entry.aName, 'Baixar áudio (.' + entry.aExt + ')', () => { URL.revokeObjectURL(entry.aUrl); entry.aUrl = null; renderResults(entry); runJobs('audio', [entry]); });
   }
-  async function extractOne(entry){
-    const st = entry.el.querySelector('.adp-ex-st'), box = entry.el.querySelector('.adp-ex');
-    box.querySelectorAll('a.download').forEach(a => { URL.revokeObjectURL(a.href); a.remove(); });
-    st.textContent = 'Abrindo vídeo...';
+  function progress(entry, cur, dur, text){
+    const p = dur ? Math.min(100, Math.round(cur / dur * 100)) : 0;
+    entry.fill.style.width = p + '%';
+    entry.pct.textContent = dur ? p + '%' : '';
+    entry.st.textContent = text + (dur ? ' · faltam ~' + fmtTime(dur - cur) : '');
+  }
+
+  // ---------- Desenho do quadro vertical ----------
+  function cover(sw, sh, dw, dh){
+    const s = Math.max(dw / sw, dh / sh), w = sw * s, h = sh * s;
+    return [(dw - w) / 2, (dh - h) / 2, w, h];
+  }
+  // Enquadramento: o vídeo é ampliado ao máximo dentro de 1080×1920 SEM cortar (só o modo "Preencher" corta, por escolha).
+  function fitRect(vw, vh, mode){
+    if(mode === 'fill'){ const [x, y, w, h] = cover(vw, vh, W, H); return { x, y, w, h }; }
+    const k = Math.min(W / vw, H / vh), w = vw * k, h = vh * k;
+    return { x: (W - w) / 2, y: (H - h) / 2, w, h };
+  }
+  function drawFrame(v, mode, color, rect, overlay){
+    ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    if(mode !== 'fill'){
+      if(mode === 'blur'){
+        const [bx, by, bw, bh] = cover(v.videoWidth, v.videoHeight, small.width, small.height);
+        sctx.drawImage(v, bx, by, bw, bh);
+        ctx.drawImage(small, 0, 0, W, H);
+        ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(0, 0, W, H);
+      } else { ctx.fillStyle = color; ctx.fillRect(0, 0, W, H); }
+    }
+    ctx.drawImage(v, rect.x, rect.y, rect.w, rect.h);
+    if(overlay) ctx.drawImage(overlay, 0, 0);
+  }
+
+  // ---------- Logo, descrição e WhatsApp (camada fixa, desenhada uma vez) ----------
+  const DEFAULT_CONTACT = 'WhatsApp (11) 99350-9109';
+  const logoImg = new Image();
+  if(window.__brokerLogoSrc) logoImg.src = window.__brokerLogoSrc;
+  function roundRect(g, x, y, w, h, r){
+    g.beginPath(); g.moveTo(x + r, y);
+    g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
+  }
+  function wrapText(g, text, maxW, maxLines){
+    const words = text.split(/\s+/).filter(Boolean), lines = []; let cur = '';
+    for(const wd of words){
+      const t = cur ? cur + ' ' + wd : wd;
+      if(cur && g.measureText(t).width > maxW){ lines.push(cur); cur = wd; } else cur = t;
+    }
+    if(cur) lines.push(cur);
+    if(lines.length > maxLines){
+      lines.length = maxLines;
+      let last = lines[maxLines - 1] + '…';
+      while(last.length > 2 && g.measureText(last).width > maxW) last = last.slice(0, -2) + '…';
+      lines[maxLines - 1] = last;
+    }
+    return lines;
+  }
+  async function buildOverlay(rect){
+    if(!$('adpInfoOn').checked) return null;
+    try{ await Promise.all([document.fonts.load('500 40px Inter'), document.fonts.load('700 40px Inter')]); }catch(err){}
+    if(logoImg.src && !logoImg.complete) await new Promise(r => { logoImg.onload = logoImg.onerror = r; });
+    const c = document.createElement('canvas'); c.width = W; c.height = H;
+    const g = c.getContext('2d');
+    const SANS = 'Inter, Arial, sans-serif', ACCENT = '#E0AA47';
+    const SAFE_TOP = 270, SAFE_BOTTOM = 1580, mx = 48; // áreas que o Instagram/TikTok/Reels cobrem com a interface
+    const desc = $('adpDesc').value.trim();
+    const contact = $('adpContact').value.trim() || DEFAULT_CONTACT;
+
+    if(logoImg.naturalWidth){
+      g.save(); g.globalAlpha = 0.95; g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 18;
+      g.drawImage(logoImg, mx, SAFE_TOP, 170, 170); g.restore();
+    }
+
+    const padX = 36, padY = 30, lh = 52, pillH = 76, cw = W - mx * 2, vidBottom = rect.y + rect.h;
+    g.font = '500 40px ' + SANS;
+    let lines = [], ch = 0;
+    for(const ml of [3, 2, 1]){
+      lines = desc ? wrapText(g, desc, cw - padX * 2, ml) : [];
+      ch = padY * 2 + lines.length * lh + (lines.length ? 18 : 0) + pillH;
+      if(vidBottom + 28 + ch <= SAFE_BOTTOM) break; // cabe na faixa livre abaixo do vídeo
+    }
+    let y0 = vidBottom + 28;
+    if(y0 + ch > SAFE_BOTTOM) y0 = SAFE_BOTTOM - ch; // vídeo muito alto: o cartão fica sobre a base do vídeo, dentro da zona segura
+
+    g.save(); g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 24;
+    g.fillStyle = 'rgba(22,20,17,0.84)'; roundRect(g, mx, y0, cw, ch, 28); g.fill(); g.restore();
+    g.fillStyle = ACCENT; roundRect(g, mx, y0 + 26, 8, ch - 52, 4); g.fill();
+
+    g.textBaseline = 'top'; g.fillStyle = '#FFFFFF'; g.font = '500 40px ' + SANS;
+    let ty = y0 + padY;
+    for(const ln of lines){ g.fillText(ln, mx + padX, ty + 4); ty += lh; }
+    if(lines.length) ty += 18;
+    g.font = '700 40px ' + SANS;
+    let label = contact;
+    while(label.length > 3 && g.measureText(label).width > cw - padX * 2 - 64) label = label.slice(0, -2) + '…';
+    const pw = g.measureText(label).width + 64;
+    g.fillStyle = ACCENT; roundRect(g, mx + padX, ty, pw, pillH, pillH / 2); g.fill();
+    g.fillStyle = '#23211D'; g.textBaseline = 'middle'; g.fillText(label, mx + padX + 32, ty + pillH / 2 + 1);
+    return c;
+  }
+  const pickMime = list_ => list_.find(t => MediaRecorder.isTypeSupported(t)) || '';
+  const videoMime = () => pickMime(['video/mp4;codecs=avc1.640028,mp4a.40.2','video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm']);
+  const audioMime = () => pickMime(['audio/mp4;codecs=mp4a.40.2','audio/mp4','audio/webm;codecs=opus','audio/webm']);
+
+  async function openVideo(entry){
     const url = URL.createObjectURL(entry.file);
-    const v = document.createElement('video'); v.src = url; v.playsInline = true; v.preload = 'auto';
-    let ac = null, timer = null, safety = null;
+    const v = document.createElement('video'); v.playsInline = true; v.preload = 'auto';
     try{
-      await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = () => rej(new Error('não foi possível abrir este vídeo')); });
+      await new Promise((res, rej) => { v.onloadedmetadata = res; v.onerror = () => rej(new Error('não foi possível abrir este vídeo (formato não suportado pelo navegador)')); v.src = url; });
+    }catch(err){ URL.revokeObjectURL(url); throw err; }
+    v.onerror = null;
+    return { v, url };
+  }
+
+  // ---------- Adaptar vídeo (grava uma vez; refaz com mais compressão se passar de 15 MB) ----------
+  async function recordOnce(entry, scale){
+    const mode = modeSel.value, color = $('adpColor').value, pvctx = entry.pvctx;
+    const { v, url } = await openVideo(entry);
+    let ac = null, musicEl = null, musicUrl = null, narrSrc = null, ui = null, safety = null, raf = 0;
+    try{
+      if(!v.videoWidth) throw new Error('este arquivo não tem imagem que o navegador consiga ler');
       const dur = isFinite(v.duration) && v.duration > 0 ? v.duration : 0;
-      ac = new (window.AudioContext || window.webkitAudioContext)();
+
+      // áudio: som original + música (loop) + narração, tudo misturado
+      ac = new AC();
       const dest = ac.createMediaStreamDestination();
-      ac.createMediaElementSource(v).connect(dest); // não vai para os alto-falantes: extrai em silêncio
-      const mime = pickAudioMime();
-      // até 128 kbps, reduzindo só se o áudio for tão longo que passaria de 15 MB
-      const abps = dur ? Math.max(16000, Math.min(128000, Math.floor(14 * 1024 * 1024 * 8 / dur))) : 96000;
-      const rec = new MediaRecorder(dest.stream, {...(mime ? {mimeType:mime} : {}), audioBitsPerSecond: abps});
-      const chunks = []; rec.ondataavailable = e => { if(e.data.size) chunks.push(e.data); };
-      const stopped = new Promise(r => rec.onstop = r);
+      const origSel = $('adpOrigVol').value;
+      const origVol = origSel === 'replace' ? ((musicFile || narrBlob) ? 0 : 1) : (origSel === 'low' ? 0.3 : 1); // sem áudio novo, mantém o original
+      const vsrc = ac.createMediaElementSource(v);
+      if(origVol === 1){ vsrc.connect(dest); }
+      else { const og = ac.createGain(); og.gain.value = origVol; vsrc.connect(og); og.connect(dest); }
+      if(musicFile){
+        musicUrl = URL.createObjectURL(musicFile);
+        musicEl = new Audio(musicUrl); musicEl.loop = true;
+        const mg = ac.createGain(); mg.gain.value = narrBlob ? parseInt(mVol.value, 10) / 100 : (origSel === 'replace' ? 1 : 0.6);
+        ac.createMediaElementSource(musicEl).connect(mg); mg.connect(dest);
+      }
+      let narrBuf = null, note = '';
+      if(narrBlob){
+        try{ narrBuf = await ac.decodeAudioData(await narrBlob.arrayBuffer()); }
+        catch(err){ throw new Error('não consegui ler o áudio da narração; tente gravar de novo ou enviar um MP3/M4A'); }
+        if(dur && narrBuf.duration > dur + 0.5) note = ' · a narração é mais longa que o vídeo e será cortada';
+      }
+
+      // taxa de bits: orçamento de 14 MB (margem de segurança). Áudio 96 kbps; só em vídeos muito longos reduz.
+      let abps = 96000, vfloor = 250000;
+      if(dur && BUDGET * 8 / dur < 346000){ abps = 48000; vfloor = 60000; }
+      const vbps = dur ? Math.max(vfloor, Math.min(8000000, (BUDGET * 8 / dur - abps) * scale)) : 4000000;
+      const mime = videoMime();
+      const stream = new MediaStream([...stage.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
+      const rec = new MediaRecorder(stream, {...(mime ? {mimeType:mime} : {}), videoBitsPerSecond: Math.round(vbps), audioBitsPerSecond: abps});
+      const chunks = []; rec.ondataavailable = ev => { if(ev.data.size) chunks.push(ev.data); };
+      const stopped = new Promise(r => { rec.onstop = r; });
+
+      const rect = fitRect(v.videoWidth, v.videoHeight, mode);
+      const overlay = await buildOverlay(rect);
+      const paint = () => { drawFrame(v, mode, color, rect, overlay); pvctx.drawImage(stage, 0, 0, entry.pv.width, entry.pv.height); };
+      paint();
       rec.start(500);
       await ac.resume();
+      if(musicEl){ musicEl.play().catch(() => {}); }
+      if(narrBuf){ narrSrc = ac.createBufferSource(); narrSrc.buffer = narrBuf; narrSrc.connect(dest); narrSrc.start(); }
+      const ended = new Promise(r => { v.onended = r; v.onerror = r; safety = setTimeout(r, ((dur || 600) + 20) * 1000); });
       await v.play();
-      st.textContent = 'Extraindo áudio... 0%';
-      timer = setInterval(() => { if(dur) st.textContent = 'Extraindo áudio... ' + Math.min(99, Math.round(v.currentTime / dur * 100)) + '%'; }, 300);
-      safety = setTimeout(() => { try{ v.pause(); v.dispatchEvent(new Event('ended')); }catch(e){} }, ((dur || 600) + 20) * 1000);
-      await new Promise(r => v.addEventListener('ended', r, { once:true }));
-      clearInterval(timer); timer = null; clearTimeout(safety); safety = null;
+
+      // a barra e o texto usam timer (continuam atualizando mesmo se o navegador pausar a animação)
+      ui = setInterval(() => progress(entry, v.currentTime, dur, (document.hidden ? 'Aba em segundo plano: volte para esta aba' : 'Adaptando') + note), 250);
+      progress(entry, 0, dur, 'Adaptando' + note);
+      const loop = () => { paint(); if(!v.ended) raf = requestAnimationFrame(loop); };
+      loop();
+
+      await ended;
+      cancelAnimationFrame(raf); clearInterval(ui); ui = null; clearTimeout(safety); safety = null;
+      paint();
+      if(musicEl) musicEl.pause();
+      if(narrSrc){ try{ narrSrc.stop(); }catch(err){} }
+      await new Promise(r => setTimeout(r, 300));
+      rec.stop(); await stopped;
+
+      const type = rec.mimeType || mime || 'video/webm';
+      const blob = new Blob(chunks, { type });
+      if(blob.size < 1000) throw new Error('a gravação saiu vazia. Mantenha esta aba em primeiro plano e tente de novo');
+      return { blob, ext: type.includes('mp4') ? 'mp4' : 'webm' };
+    } finally {
+      if(ui) clearInterval(ui);
+      if(safety) clearTimeout(safety);
+      cancelAnimationFrame(raf);
+      try{ v.pause(); }catch(err){}
+      if(musicEl){ try{ musicEl.pause(); }catch(err){} }
+      if(musicUrl) URL.revokeObjectURL(musicUrl);
+      if(ac){ try{ ac.close(); }catch(err){} }
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  async function adaptVideo(entry){
+    let scale = 1, r;
+    for(;;){
+      r = await recordOnce(entry, scale);
+      if(r.blob.size > LIMIT && scale > 0.35){
+        scale = scale * (BUDGET / r.blob.size) * 0.92;
+        entry.fill.style.width = '0%'; entry.pct.textContent = '0%';
+        entry.st.textContent = 'Passou de 15 MB, refazendo com mais compressão...';
+        continue;
+      }
+      break;
+    }
+    entry.vUrl = URL.createObjectURL(r.blob);
+    entry.vExt = r.ext; entry.vName = baseName(entry.file) + '-stories.' + r.ext;
+    entry.fill.style.width = '100%'; entry.pct.textContent = '100%';
+    entry.st.textContent = 'Vídeo pronto · 1080×1920 · ' + fmtMB(r.blob.size) + ' MB'
+      + (r.ext === 'webm' ? ' · WebM: converta para MP4 antes de postar' : '')
+      + (r.blob.size > LIMIT ? ' · ⚠ acima de 15 MB (vídeo muito longo)' : '');
+    renderResults(entry);
+  }
+
+  // ---------- Extrair áudio ----------
+  async function extractAudio(entry){
+    const { v, url } = await openVideo(entry);
+    let ac = null, ui = null, safety = null;
+    try{
+      const dur = isFinite(v.duration) && v.duration > 0 ? v.duration : 0;
+      ac = new AC();
+      const dest = ac.createMediaStreamDestination();
+      ac.createMediaElementSource(v).connect(dest); // não vai para os alto-falantes: extrai em silêncio
+      const mime = audioMime();
+      // até 128 kbps; reduz só se o áudio for tão longo que passaria de 15 MB
+      const abps = dur ? Math.max(16000, Math.min(128000, Math.floor(BUDGET * 8 / dur))) : 96000;
+      const rec = new MediaRecorder(dest.stream, {...(mime ? {mimeType:mime} : {}), audioBitsPerSecond: abps});
+      const chunks = []; rec.ondataavailable = ev => { if(ev.data.size) chunks.push(ev.data); };
+      const stopped = new Promise(r => { rec.onstop = r; });
+      rec.start(500);
+      await ac.resume();
+      const ended = new Promise(r => { v.onended = r; v.onerror = r; safety = setTimeout(r, ((dur || 600) + 20) * 1000); });
+      await v.play();
+      ui = setInterval(() => progress(entry, v.currentTime, dur, document.hidden ? 'Aba em segundo plano: volte para esta aba' : 'Extraindo o áudio'), 250);
+      progress(entry, 0, dur, 'Extraindo o áudio');
+      await ended;
+      clearInterval(ui); ui = null; clearTimeout(safety); safety = null;
       await new Promise(r => setTimeout(r, 300));
       rec.stop(); await stopped;
       const type = rec.mimeType || mime || 'audio/webm';
       const ext = type.includes('mp4') ? 'm4a' : 'webm';
-      const blob = new Blob(chunks, {type: type.split(';')[0]});
+      const blob = new Blob(chunks, { type: type.split(';')[0] });
       if(blob.size < 1500 || (typeof v.webkitAudioDecodedByteCount === 'number' && v.webkitAudioDecodedByteCount === 0)){
         throw new Error('este vídeo não tem faixa de áudio');
       }
-      const a = document.createElement('a'); a.className = 'download';
-      a.href = URL.createObjectURL(blob);
-      a.download = entry.file.name.replace(/\.[^.]+$/, '') + '-audio.' + ext;
-      a.textContent = 'Baixar áudio .' + ext;
-      box.appendChild(a);
-      const mb = (blob.size / 1048576).toFixed(1).replace('.', ',');
-      st.textContent = 'Áudio pronto · ' + mb + ' MB' + (blob.size > 15 * 1024 * 1024 ? ' \u26a0 acima de 15 MB' : '') + (ext === 'webm' ? ' (WebM)' : '');
+      entry.aUrl = URL.createObjectURL(blob);
+      entry.aExt = ext; entry.aName = baseName(entry.file) + '-audio.' + ext;
+      entry.fill.style.width = '100%'; entry.pct.textContent = '100%';
+      entry.st.textContent = 'Áudio pronto · ' + fmtMB(blob.size) + ' MB' + (ext === 'webm' ? ' · formato WebM' : '') + (blob.size > LIMIT ? ' · ⚠ acima de 15 MB' : '');
+      renderResults(entry);
     } finally {
-      if(timer) clearInterval(timer);
+      if(ui) clearInterval(ui);
       if(safety) clearTimeout(safety);
-      try{ v.pause(); }catch(e){}
-      if(ac){ try{ ac.close(); }catch(e){} }
+      try{ v.pause(); }catch(err){}
+      if(ac){ try{ ac.close(); }catch(err){} }
       URL.revokeObjectURL(url);
     }
   }
-  async function runExtract(entries){
+
+  // ---------- Executa a fila ----------
+  async function runJobs(kind, entries){
     if(busy) return;
-    if(!window.MediaRecorder){ alert('Este navegador não suporta gravação de áudio. Use o Chrome.'); return; }
-    const prevGo = go.disabled;
-    go.disabled = true;
-    setBusy(true);
-    for(const e of entries){
-      try{ await extractOne(e); }
-      catch(err){ e.el.querySelector('.adp-ex-st').textContent = 'Erro: ' + err.message; }
+    if(!entries.length){ msg(kind === 'video' ? 'Todos os vídeos da lista já foram adaptados. Use "Refazer" ou adicione outros.' : 'O áudio de todos os vídeos já foi extraído. Use "Refazer" ou adicione outros.'); return; }
+    if(!window.MediaRecorder){ alert('Este navegador não suporta gravação de vídeo. Use o Chrome.'); return; }
+    busy = true; sync(); msg('');
+    try{ if('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); }catch(err){}
+    let ok = 0;
+    for(let i = 0; i < entries.length; i++){
+      const entry = entries[i];
+      msg('Processando ' + (i + 1) + ' de ' + entries.length + '...');
+      entry.st.classList.remove('err');
+      entry.el.classList.add('working');
+      entry.fill.style.width = '0%'; entry.pct.textContent = '0%'; entry.st.textContent = 'Preparando...';
+      try{
+        if(kind === 'video') await adaptVideo(entry); else await extractAudio(entry);
+        ok++;
+      }catch(err){
+        entry.st.classList.add('err');
+        entry.st.textContent = 'Erro: ' + (err && err.message ? err.message : 'falha ao processar');
+      }
+      entry.el.classList.remove('working');
     }
-    setBusy(false);
-    go.disabled = prevGo;
+    if(wakeLock){ try{ await wakeLock.release(); }catch(err){} wakeLock = null; }
+    busy = false; sync();
+    msg(ok === entries.length ? 'Pronto! Baixe os arquivos em cada vídeo da lista.' : ok + ' de ' + entries.length + ' concluído(s). Veja o aviso de erro no vídeo que falhou.');
   }
-  exAll.onclick = () => runExtract(queue.slice());
+
+  // ---------- Tempo do vídeo (para fazer a narração no tamanho certo) ----------
+  nPrev.addEventListener('loadedmetadata', () => {
+    narrDur = isFinite(nPrev.duration) && nPrev.duration > 0 ? nPrev.duration : narrFallback;
+    updateTimeInfo();
+  });
+  function updateTimeInfo(){
+    const box = $('adpTimeInfo'); box.replaceChildren();
+    const mk = (tag, cls, txt) => { const el = document.createElement(tag); if(cls) el.className = cls; el.textContent = txt; return el; };
+    const dec = n => n.toFixed(1).replace('.', ',');
+    const vids = queue.filter(q => q.dur);
+    if(!vids.length){ box.appendChild(mk('div', '', 'Suba o vídeo para ver aqui o tempo disponível para a sua narração.')); return; }
+    box.appendChild(mk('strong', 'adp-time-t', vids.length === 1 ? 'Tempo do vídeo (faça a narração dentro dele)' : 'Tempo de cada vídeo (faça a narração dentro dele)'));
+    for(const q of vids){
+      const row = document.createElement('div'); row.className = 'adp-time-row';
+      row.appendChild(mk('span', 'adp-time-big', fmtTime(q.dur) + ' · ' + dec(q.dur) + ' s'));
+      if(vids.length > 1) row.appendChild(mk('span', 'adp-time-nm', q.file.name));
+      row.appendChild(mk('span', 'adp-time-words', '≈ ' + Math.round(q.dur * 2.3) + ' a ' + Math.round(q.dur * 2.7) + ' palavras em ritmo calmo'));
+      if(narrDur){
+        const diff = narrDur - q.dur;
+        if(diff > 0.3) row.appendChild(mk('span', 'adp-time-bad', '⚠ Sua narração tem ' + fmtTime(narrDur) + ' (' + dec(narrDur) + ' s): passa ' + dec(diff) + ' s do vídeo e será cortada no final.'));
+        else row.appendChild(mk('span', 'adp-time-ok', '✓ Sua narração tem ' + fmtTime(narrDur) + ' (' + dec(narrDur) + ' s) e cabe no vídeo' + (diff < -0.3 ? ' (sobram ' + dec(-diff) + ' s)' : '') + '.'));
+      }
+      box.appendChild(row);
+    }
+    box.appendChild(mk('p', 'adp-time-tip', 'Dica: peça para a IA um texto com essa quantidade de palavras e gere a voz com o tempo total igual ou um pouco menor que o do vídeo.'));
+  }
+  updateTimeInfo();
+
+  go.onclick = () => runJobs('video', queue.filter(q => !q.vUrl));
+  exAll.onclick = () => runJobs('audio', queue.filter(q => !q.aUrl));
 })();
 </script>
 <!-- fc-voltar-painel -->
