@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Academy — Sérgio Costa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --verde: #10b981;
+  --verde-claro: #34d399;
+  --verde-escuro: #047857;
+  --escuro: #0f2922;
+  --escuro2: #0a1f1a;
+  --branco: #ffffff;
+  --card-bg: rgba(16,185,129,0.07);
+  --card-border: rgba(16,185,129,0.22);
+  --card-hover-bg: rgba(16,185,129,0.16);
+  --card-hover-border: rgba(16,185,129,0.5);
+  --text-muted: rgba(255,255,255,0.45);
+  --divider: rgba(16,185,129,0.14);
+  --group-bg: rgba(16,185,129,0.04);
+  --group-border: rgba(16,185,129,0.16);
+  --danger: #f87171;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--escuro2); min-height: 100vh; color: #fff; }
+header {
+  background: var(--escuro); border-bottom: 2px solid var(--verde);
+  padding: 1.4rem 2rem; display: flex; align-items: center; gap: 16px;
+  position: sticky; top: 0; z-index: 100;
+}
+.logo {
+  width: 50px; height: 50px; border-radius: 50%; background: var(--verde);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; color: #fff;
+  flex-shrink: 0; letter-spacing: -0.5px;
+}
+.header-info h1 { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600; color: #fff; line-height: 1.2; }
+.header-info p { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+.header-badge {
+  margin-left: auto; background: rgba(16,185,129,0.15); border: 0.5px solid rgba(16,185,129,0.4);
+  border-radius: 20px; padding: 5px 14px; font-size: 12px; color: var(--verde-claro); font-weight: 500; white-space: nowrap;
+}
+.voltar {
+  margin-left: auto; display: flex; align-items: center; gap: 6px; color: var(--verde-claro);
+  text-decoration: none; font-size: 12.5px; font-weight: 500;
+}
+main { max-width: 820px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+section { margin-bottom: 1.75rem; }
+.section-label {
+  font-size: 10.5px; font-weight: 500; letter-spacing: 0.11em; color: var(--text-muted);
+  text-transform: uppercase; margin-bottom: 12px; padding-left: 2px; display: flex; align-items: center; gap: 8px;
+}
+.section-label::after { content: ''; flex: 1; height: 0.5px; background: var(--divider); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.card {
+  background: var(--card-bg); border: 0.5px solid var(--card-border); border-radius: 12px;
+  padding: 16px 14px 14px; display: flex; flex-direction: column; gap: 7px;
+  cursor: pointer; transition: background 0.18s, border-color 0.18s, transform 0.12s;
+}
+.card:hover { background: var(--card-hover-bg); border-color: var(--card-hover-border); transform: translateY(-2px); }
+.card.destaque { background: rgba(16,185,129,0.13); border-color: rgba(16,185,129,0.42); }
+.card:active { transform: scale(0.97); }
+.card.aberto { background: var(--card-hover-bg); border-color: var(--card-hover-border); }
+.card-icon { font-size: 22px; color: var(--verde); margin-bottom: 2px; display: block; }
+.card-title { font-family: 'Sora', sans-serif; font-size: 13.5px; font-weight: 500; color: #fff; line-height: 1.3; }
+.card-sub { font-size: 11.5px; color: var(--text-muted); font-weight: 400; line-height: 1.4; }
+
+.painel {
+  display: none; background: var(--group-bg); border: 1px solid var(--group-border);
+  border-radius: 14px; padding: 18px; margin-top: 10px;
+}
+.painel.aberto { display: block; }
+.campo { margin-bottom: 14px; }
+.campo label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+.campo input[type="text"], .campo input[type="number"], .campo textarea {
+  width: 100%; background: rgba(255,255,255,0.05); border: 0.5px solid var(--card-border);
+  border-radius: 8px; padding: 10px 12px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 13.5px;
+}
+.campo textarea { resize: vertical; min-height: 80px; }
+.campo input[type="range"] { width: 100%; accent-color: var(--verde); }
+.linha { display: flex; gap: 10px; flex-wrap: wrap; }
+.linha .campo { flex: 1; min-width: 130px; }
+.checks { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+.checks label { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #fff; cursor: pointer; }
+.checks input { accent-color: var(--verde); }
+.seg-toggle { display: flex; background: rgba(255,255,255,0.06); border: 0.5px solid var(--group-border); border-radius: 10px; padding: 3px; gap: 3px; margin-bottom: 16px; }
+.seg-toggle button { flex: 1; border: none; background: transparent; color: var(--text-muted); font-family: 'DM Sans', sans-serif; font-size: 12.5px; font-weight: 500; padding: 8px 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.15s, color 0.15s; }
+.seg-toggle button.ativo { background: var(--verde); color: #fff; }
+.seg-toggle button:not(.ativo):hover { color: #fff; }
+.senha-olho { position: relative; }
+.senha-olho input { padding-right: 40px !important; }
+.senha-olho button { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 4px; }
+.forca-senha { margin-top: 8px; }
+.forca-barra { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.1); overflow: hidden; }
+.forca-barra span { display: block; height: 100%; width: 0%; border-radius: 3px; transition: width 0.2s, background 0.2s; }
+.forca-texto { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+.btn {
+  background: var(--verde); color: #fff; border: none; border-radius: 8px; padding: 10px 16px;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s;
+}
+.btn:hover { background: var(--verde-escuro); }
+.btn.secundario { background: rgba(255,255,255,0.08); }
+.btn.secundario:hover { background: rgba(255,255,255,0.15); }
+.btn.perigo { background: rgba(248,113,113,0.15); color: var(--danger); }
+.btn.perigo:hover { background: rgba(248,113,113,0.28); }
+.resultado {
+  margin-top: 12px; background: rgba(16,185,129,0.1); border: 1px solid var(--card-border);
+  border-radius: 8px; padding: 12px 14px; font-size: 13.5px; word-break: break-word;
+}
+.resultado.destaque { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600; color: var(--verde-claro); }
+.acoes { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.lista-cofre { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
+.item-cofre {
+  background: rgba(255,255,255,0.04); border: 0.5px solid var(--card-border); border-radius: 8px;
+  padding: 10px 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.item-cofre .info { flex: 1; min-width: 140px; }
+.item-cofre .site { font-family: 'Sora', sans-serif; font-size: 12.5px; font-weight: 600; }
+.item-cofre .user { font-size: 11px; color: var(--text-muted); }
+.item-cofre .senha { font-size: 12.5px; font-family: monospace; color: var(--verde-claro); }
+.vazio { font-size: 12px; color: var(--text-muted); text-align: center; padding: 10px; }
+canvas#qrcanvas { display: block; margin: 12px auto 0; border-radius: 8px; background: #fff; padding: 10px; }
+.upload-area {
+  border: 1.5px dashed var(--card-border); border-radius: 10px; padding: 20px; text-align: center;
+  cursor: pointer; transition: border-color 0.15s, background 0.15s; margin-bottom: 12px;
+}
+.upload-area:hover { border-color: var(--verde); background: rgba(16,185,129,0.05); }
+.upload-area i { font-size: 26px; color: var(--verde); display: block; margin-bottom: 6px; }
+.upload-area span { font-size: 12.5px; color: var(--text-muted); }
+.thumbs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.thumb {
+  width: 70px; height: 70px; border-radius: 8px; overflow: hidden; cursor: pointer;
+  border: 2px solid transparent; position: relative; flex-shrink: 0;
+}
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb.selecionada { border-color: var(--verde); }
+.thumb .marca {
+  position: absolute; top: 3px; right: 3px; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--verde); color: #fff; font-size: 10px; display: flex; align-items: center; justify-content: center;
+}
+canvas#bannercanvas { display: block; margin: 12px auto 0; border-radius: 10px; max-width: 100%; height: auto; border: 0.5px solid var(--card-border); }
+select#banner-formato, select#voz-select {
+  width: 100%; background: rgba(255,255,255,0.05); border: 0.5px solid var(--card-border);
+  border-radius: 8px; padding: 10px 12px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 13.5px;
+}
+.badge-mini {
+  display: inline-block; align-self: flex-start; background: rgba(16,185,129,0.15);
+  border: 0.5px solid rgba(16,185,129,0.4); border-radius: 20px; padding: 2px 9px;
+  font-size: 9.5px; color: var(--verde-claro); font-weight: 600; letter-spacing: 0.04em;
+}
+.badge-mini.alerta { background: rgba(248,113,113,0.15); border-color: rgba(248,113,113,0.4); color: var(--danger); }
+.guia-voz {
+  margin-top: 14px; padding-top: 14px; border-top: 0.5px solid var(--divider);
+}
+.guia-voz summary {
+  cursor: pointer; font-size: 12.5px; font-weight: 500; color: var(--verde-claro);
+  display: flex; align-items: center; gap: 6px; list-style: none;
+}
+.guia-voz summary::-webkit-details-marker { display: none; }
+.guia-voz-conteudo { margin-top: 10px; }
+.guia-voz-conteudo p {
+  font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 10px;
+}
+.guia-voz-conteudo strong { color: #fff; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-btn {
+  background: rgba(255,255,255,0.05); border: 0.5px solid var(--card-border); border-radius: 20px;
+  padding: 7px 14px; font-family: 'DM Sans', sans-serif; font-size: 12.5px; color: rgba(255,255,255,0.75);
+  cursor: pointer; transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.tag-btn:hover { border-color: var(--card-hover-border); }
+.tag-btn.selecionada { background: var(--verde); border-color: var(--verde); color: #fff; font-weight: 500; }
+.btn-mic {
+  position: absolute; right: 8px; top: 8px; width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(16,185,129,0.15); border: 0.5px solid rgba(16,185,129,0.4); color: var(--verde-claro);
+  cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;
+  transition: background 0.15s;
+}
+.btn-mic:hover { background: rgba(16,185,129,0.3); }
+.btn-mic.gravando { background: var(--danger); border-color: var(--danger); color: #fff; animation: pulsar 1s infinite; }
+@keyframes pulsar { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+.kanban { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
+.kanban-coluna {
+  flex: 0 0 200px; background: var(--group-bg); border: 1px solid var(--group-border);
+  border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px;
+}
+.kanban-coluna-titulo {
+  font-family: 'Sora', sans-serif; font-size: 11.5px; font-weight: 600; color: #fff;
+  display: flex; justify-content: space-between; align-items: center; padding: 2px 4px 6px;
+  border-bottom: 0.5px solid var(--divider);
+}
+.kanban-coluna-titulo .contagem {
+  background: rgba(16,185,129,0.18); color: var(--verde-claro); border-radius: 20px;
+  font-size: 10px; padding: 1px 7px; font-weight: 600;
+}
+.kanban-card {
+  background: rgba(255,255,255,0.05); border: 0.5px solid var(--card-border); border-radius: 8px;
+  padding: 9px 10px; font-size: 12px;
+}
+.kanban-card .nome { font-family: 'Sora', sans-serif; font-weight: 600; font-size: 12.5px; color: #fff; margin-bottom: 2px; }
+.kanban-card .info { color: var(--text-muted); font-size: 11px; margin-bottom: 6px; line-height: 1.4; }
+.kanban-card .acoes-card { display: flex; gap: 5px; flex-wrap: wrap; }
+.kanban-card .acoes-card button, .kanban-card .acoes-card a {
+  flex: none; background: rgba(255,255,255,0.08); border: none; border-radius: 6px; color: #fff;
+  width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; cursor: pointer; text-decoration: none;
+}
+.kanban-card .acoes-card .perigo-mini { background: rgba(248,113,113,0.2); color: var(--danger); }
+.kanban-vazio { font-size: 11px; color: var(--text-muted); text-align: center; padding: 10px 0; }
+.cor-btn {
+  width: 34px; height: 34px; border-radius: 50%; border: 2px solid transparent; cursor: pointer;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.cor-btn:hover { transform: scale(1.1); }
+.cor-btn.selecionada { border-color: #fff; }
+.aviso { font-size: 11.5px; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
+.aviso i { color: var(--verde); margin-right: 4px; }
+.comp-box {
+  background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); border-radius: 10px;
+  padding: 13px 13px 4px; margin-bottom: 12px;
+}
+.comp-box-titulo {
+  font-family: 'Sora', sans-serif; font-size: 12.5px; font-weight: 600; color: var(--verde-claro);
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+.foto-mini { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.foto-mini-preview {
+  width: 56px; height: 56px; border-radius: 8px; overflow: hidden; flex-shrink: 0;
+  border: 1px solid var(--card-border); background: rgba(255,255,255,0.04);
+  display: flex; align-items: center; justify-content: center;
+}
+.foto-mini-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.foto-mini-preview i { color: var(--text-muted); font-size: 20px; }
+.foto-mini-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.btn-mini { font-size: 11.5px; padding: 6px 10px; }
+.foto-thumbs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.foto-thumb {
+  width: 56px; height: 56px; border-radius: 8px; overflow: hidden; position: relative;
+  border: 1px solid var(--card-border); flex-shrink: 0;
+}
+.foto-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.foto-thumb .remover {
+  position: absolute; top: 2px; right: 2px; width: 17px; height: 17px; border-radius: 50%;
+  background: rgba(0,0,0,0.65); color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; cursor: pointer;
+}
+.foto-thumb-add {
+  width: 56px; height: 56px; border-radius: 8px; border: 1.5px dashed var(--card-border);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+  color: var(--text-muted); font-size: 20px; transition: border-color 0.15s, color 0.15s;
+}
+.foto-thumb-add:hover { border-color: var(--verde); color: var(--verde); }
+.foto-thumb { cursor: grab; touch-action: none; transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s; }
+.foto-thumb:active { cursor: grabbing; }
+.foto-thumb.arrastando { opacity: 0.55; transform: scale(1.08); box-shadow: 0 6px 18px rgba(0,0,0,0.5); z-index: 5; }
+.foto-thumb.destaque { border: 2px solid var(--verde); box-shadow: 0 0 0 2px rgba(16,185,129,0.25); }
+.foto-thumb .badge-destaque {
+  position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--verde); color: #04120d; display: flex; align-items: center; justify-content: center;
+  font-size: 9px; box-shadow: 0 1px 3px rgba(0,0,0,0.4); pointer-events: none;
+}
+.foto-thumbs-dica { font-size: 10.5px; color: var(--text-muted); margin: -8px 0 10px; display: flex; align-items: center; gap: 4px; }
+.foto-thumbs-dica i { color: var(--verde-claro); }
+
+/* Foto do imóvel avaliando — preview grande, tipo capa, clicável pra ampliar */
+.foto-hero {
+  width: 100%; height: 170px; border-radius: 12px; overflow: hidden; position: relative;
+  border: 1px solid var(--card-border); background: rgba(255,255,255,0.04);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  margin-bottom: 10px; transition: border-color 0.15s;
+}
+.foto-hero:hover { border-color: var(--verde); }
+.foto-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.foto-hero i { color: var(--text-muted); font-size: 30px; }
+.foto-hero .foto-hero-zoom {
+  position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.55); color: #fff;
+  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+}
+.foto-hero-btns { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+
+.lightbox-overlay {
+  position: fixed; inset: 0; background: rgba(4,18,15,0.92); z-index: 999;
+  display: flex; align-items: center; justify-content: center; padding: 24px; cursor: zoom-out;
+}
+.lightbox-overlay img { max-width: 100%; max-height: 100%; border-radius: 10px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+.lightbox-overlay .fechar-lightbox {
+  position: absolute; top: 16px; right: 16px; width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.12); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+footer { text-align: center; padding: 1.5rem; font-size: 11.5px; color: var(--text-muted); border-top: 0.5px solid var(--divider); }
+footer span { color: var(--verde); }
+@media (max-width: 480px) {
+  header { padding: 1rem 1.25rem; }
+  .header-badge { display: none; }
+  main { padding: 1.5rem 1rem 2.5rem; }
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SC</div>
+  <div class="header-info">
+    <h1>Academy</h1>
+    <p>Dicas para corretores</p>
+  </div>
+  <a class="voltar" href="index.html"><i class="ti ti-arrow-left"></i>Painel</a>
+</header>
+
+<main>
+  <section>
+    <div class="painel aberto" id="painel-academy">
+      <details class="guia-voz">
+        <summary><i class="ti ti-file-certificate"></i> Documentação necessária</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Confira a matrícula atualizada:</strong> sempre peça a matrícula do imóvel com no máximo 30 dias antes de fechar negócio.</p>
+          <p><strong>ITBI e escritura:</strong> use a calculadora de ITBI aqui na ferramenta pra já adiantar essa conta pro cliente na negociação.</p>
+          <p><strong>Documentos básicos do vendedor:</strong> RG/CPF, certidão de casamento (se houver), comprovante de residência e certidão de ônus reais do imóvel.</p>
+          <p><strong>Documentos básicos do comprador:</strong> RG/CPF, comprovante de renda e comprovante de residência — peça antes de agendar a visita à financeira.</p>
+        </div>
+      </details>
+      <details class="guia-voz">
+        <summary><i class="ti ti-handshake"></i> Técnicas de negociação</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Ancore com o valor de mercado:</strong> mostre 2 ou 3 comparáveis (use a ferramenta de Precificação) antes de falar em desconto.</p>
+          <p><strong>Nunca ofereça desconto primeiro:</strong> pergunte "qual valor você tinha em mente?" — deixa a outra parte se posicionar antes.</p>
+          <p><strong>Separe preço de condição:</strong> às vezes o cliente quer prazo maior ou incluir móveis — nem sempre é sobre baixar o preço.</p>
+          <p><strong>Feche com prazo:</strong> "essa condição vale até sexta" cria decisão sem parecer pressão, quando é verdade.</p>
+        </div>
+      </details>
+      <details class="guia-voz">
+        <summary><i class="ti ti-chart-line"></i> Análise de mercado</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Compare por R$/m², não só pelo valor total:</strong> dois imóveis de tamanhos diferentes só são comparáveis de verdade por metro quadrado — use a ferramenta de Precificação aqui.</p>
+          <p><strong>Observe o tempo de anúncio:</strong> imóveis parados há meses no mercado geralmente indicam preço acima do valor real da região.</p>
+          <p><strong>Acompanhe a região, não só o imóvel:</strong> obras, novo comércio ou linha de transporte perto mudam o valor futuro do bairro.</p>
+        </div>
+      </details>
+      <details class="guia-voz">
+        <summary><i class="ti ti-message-2 card-icon-inline"></i> Script de abordagem</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Primeiro contato (lead novo):</strong> "Oi [nome]! Vi seu interesse no imóvel de [bairro]. Posso te mandar mais fotos e já ver um horário pra visita?"</p>
+          <p><strong>Reativar lead frio:</strong> "Oi [nome], tudo bem? Surgiu uma condição nova nesse imóvel que você viu — ainda tem interesse ou já resolveu de outro jeito?"</p>
+          <p><strong>Depois da visita:</strong> "E aí, o que achou do imóvel? Ficou alguma dúvida que eu possa esclarecer agora?"</p>
+        </div>
+      </details>
+      <details class="guia-voz">
+        <summary><i class="ti ti-target-arrow"></i> Vendas</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Responda rápido:</strong> leads que recebem resposta em até 5 minutos têm muito mais chance de virar visita. Configure o link do WhatsApp pronto pra não perder tempo digitando.</p>
+          <p><strong>Sempre agende a visita na hora:</strong> não deixe "depois eu ligo" — feche um horário ainda na primeira conversa.</p>
+          <p><strong>Use a escassez com verdade:</strong> "tenho outra visita marcada essa semana" funciona quando é real — evite forçar urgência falsa.</p>
+        </div>
+      </details>
+      <details class="guia-voz">
+        <summary><i class="ti ti-speakerphone"></i> Marketing e anúncios</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Foto de capa é o que decide o clique:</strong> escolha a foto mais clara e bem iluminada como primeira imagem do anúncio.</p>
+          <p><strong>Preço no título ajuda a filtrar curioso:</strong> anúncios com valor visível tendem a gerar contatos mais qualificados.</p>
+          <p><strong>Poste no mesmo horário sempre:</strong> criar rotina de postagem ajuda o algoritmo das redes sociais a entregar mais gente.</p>
+        </div>
+      </details>
+      <details class="guia-voz">
+        <summary><i class="ti ti-headset"></i> Atendimento</summary>
+        <div class="guia-voz-conteudo">
+          <p><strong>Escute antes de oferecer:</strong> pergunte o que o cliente realmente precisa (quantos quartos, motivo da mudança) antes de indicar imóveis.</p>
+          <p><strong>Anote tudo no Gestor de Leads:</strong> um cliente que sente que você lembra dos detalhes dele confia muito mais rápido.</p>
+        </div>
+      </details>
+    </div>
+
+  </section>
+</main>
+
+<footer>
+  <span>FCosta</span> · Sérgio Fernandes da Costa · CRECI-SP 294791-F · CNAI 52708
+</footer>
+
+
+
+</body>
+</html>
