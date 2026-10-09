@@ -9,17 +9,19 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#EFEAE2;
-    --surface:#FFFFFF;
-    --ink:#23211D;
-    --ink-soft:#5B564C;
-    --rule:#D8D2C4;
-    --accent:#24506B;
-    --accent-soft:#E4ECF0;
-    --cta:#B9822E;
-    --cta-hover:#9C6D26;
-    --danger:#A6432F;
-    --radius:6px;
+    --bg:#0B111A;
+    --bg2:#0F1826;
+    --surface:#141E2E;
+    --surface2:#1A2639;
+    --ink:#EEF1F6;
+    --ink-soft:#9AA7BA;
+    --rule:#25344A;
+    --accent:#E0AA47;
+    --accent-soft:rgba(224,170,71,.12);
+    --cta:#E0AA47;
+    --cta-hover:#F0C46A;
+    --danger:#FF8A73;
+    --radius:10px;
   }
   *{box-sizing:border-box;}
   body{
@@ -279,6 +281,140 @@
     .adp-item{grid-template-columns:64px 1fr;gap:12px;}
     .adp-pv{width:64px;height:114px;}
   }
+
+  /* ===== Tema elegante (escuro + dourado) ===== */
+  html{background:var(--bg);}
+  body{
+    color-scheme:dark;min-height:100vh;
+    background:
+      radial-gradient(1100px 560px at 88% -8%, rgba(224,170,71,.13), transparent 60%),
+      radial-gradient(900px 520px at -10% 8%, rgba(86,175,212,.09), transparent 55%),
+      var(--bg);
+    background-attachment:fixed;
+  }
+  header{
+    position:relative;overflow:hidden;
+    border:1px solid var(--rule);border-radius:20px;
+    padding:34px 32px 32px;margin-bottom:46px;
+    background:linear-gradient(135deg, rgba(224,170,71,.16), rgba(20,30,46,.92) 58%);
+    box-shadow:0 24px 50px -28px rgba(0,0,0,.7);
+  }
+  header::before{
+    content:"FCOSTA CORRETOR  ·  TOUR DE IMÓVEIS";
+    display:block;margin-bottom:12px;
+    font-size:11px;font-weight:600;letter-spacing:.22em;color:var(--cta);
+  }
+  header::after{
+    content:"";position:absolute;left:0;top:0;right:0;height:3px;
+    background:linear-gradient(90deg,#B9822E,#F0C46A,#B9822E);
+  }
+  header h1{font-size:clamp(30px,5vw,46px);letter-spacing:-.015em;}
+  header p{color:var(--ink-soft);}
+  .step{grid-template-columns:68px 1fr;}
+  .step-num{
+    width:52px;height:52px;border-radius:50%;align-self:start;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;color:#1B1304;
+    background:linear-gradient(145deg,#F4CE7A,#B9822E);
+    box-shadow:0 8px 20px -6px rgba(224,170,71,.45), inset 0 1px 0 rgba(255,255,255,.35);
+  }
+  .step-body h2{font-size:22px;letter-spacing:-.01em;}
+  .card{
+    background:linear-gradient(180deg,var(--surface),#111A29);
+    border:1px solid var(--rule);border-radius:18px;padding:26px;
+    box-shadow:0 22px 44px -26px rgba(0,0,0,.75), inset 0 1px 0 rgba(255,255,255,.045);
+  }
+  .dropzone{
+    border:1.5px dashed rgba(224,170,71,.38);border-radius:16px;
+    background:rgba(255,255,255,.02);padding:40px 20px;
+  }
+  .dropzone:hover,.dropzone.drag{border-color:var(--cta);background:var(--accent-soft);}
+  .dropzone strong{font-family:'Fraunces',serif;font-size:18px;}
+  .thumb{background:var(--bg2);border-color:var(--rule);border-radius:14px;}
+  .thumb .thumb-img{background:#000;border-radius:8px;}
+  .thumb .order{background:linear-gradient(145deg,#F4CE7A,#B9822E);color:#1B1304;}
+  .thumb button:hover{color:var(--danger);}
+  .thumb button.move:hover{color:var(--cta);}
+  .field input[type=text],
+  .thumb .fields input[type=text],
+  select{
+    background:var(--bg2);color:var(--ink);
+    border:1px solid var(--rule);border-radius:10px;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .field input[type=text]:focus,
+  .thumb .fields input[type=text]:focus,
+  select:focus{outline:none;border-color:var(--cta);box-shadow:0 0 0 3px rgba(224,170,71,.18);}
+  ::placeholder{color:#62718A;}
+  select option{background:#141E2E;color:var(--ink);}
+  input[type=color]{
+    width:100%;height:42px;padding:3px;cursor:pointer;
+    background:var(--bg2);border:1px solid var(--rule);border-radius:10px;
+  }
+  input[type=checkbox]{accent-color:var(--cta);}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;height:6px;border-radius:6px;
+    background:rgba(255,255,255,.14);outline:none;margin:10px 0 4px;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;
+    background:#fff;border:4px solid var(--cta);box-shadow:0 3px 10px rgba(0,0,0,.55);cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:16px;height:16px;border-radius:50%;
+    background:#fff;border:4px solid var(--cta);box-shadow:0 3px 10px rgba(0,0,0,.55);cursor:pointer;
+  }
+  .field label{color:var(--ink-soft);letter-spacing:.01em;}
+  .field .val{color:var(--cta);font-weight:600;}
+  .file-btn{background:var(--surface2);color:var(--ink);border:1px solid var(--rule);border-radius:10px;transition:border-color .15s, background .15s;}
+  .file-btn:hover{border-color:var(--cta);background:#1F2D44;}
+  .btn-primary{
+    background:linear-gradient(135deg,#F4CE7A,#D49A36);color:#1B1304;
+    border-radius:12px;padding:14px 30px;font-weight:700;letter-spacing:.01em;
+    box-shadow:0 12px 26px -12px rgba(224,170,71,.65);
+    transition:transform .12s, box-shadow .12s, filter .12s;
+  }
+  .btn-primary:hover{background:linear-gradient(135deg,#F8D88F,#E0A93F);transform:translateY(-1px);}
+  .btn-primary:disabled{background:#223049;color:#66758F;box-shadow:none;transform:none;}
+  .btn-secondary{background:transparent;color:var(--cta);border:1.5px solid rgba(224,170,71,.6);border-radius:12px;}
+  .btn-secondary:hover{background:var(--accent-soft);}
+  .btn-secondary:disabled{color:#66758F;border-color:var(--rule);background:transparent;}
+  .download{background:linear-gradient(135deg,#F4CE7A,#D49A36);color:#1B1304;border-radius:10px;}
+  .download:hover{background:linear-gradient(135deg,#F8D88F,#E0A93F);}
+  .bar,.adp-bar{background:#1D2A3E;}
+  .bar-fill,.adp-fill{background:linear-gradient(90deg,#D49A36,#F4CE7A);}
+  .size-fixed{background:var(--bg2);border-color:var(--rule);color:var(--ink-soft);}
+  #stage{border-radius:14px;box-shadow:0 18px 40px -20px #000;}
+  .result video{border-radius:14px;}
+  .adp-item{background:var(--bg2);border-radius:14px;}
+  .adp-item.working{border-color:var(--cta);box-shadow:0 0 0 3px rgba(224,170,71,.16);}
+  .adp-more{border-radius:16px;background:rgba(255,255,255,.02);}
+  .adp-more-t{font-family:'Fraunces',serif;font-size:17px;}
+  .adp-redo{color:var(--cta);}
+  .adp-time{background:rgba(224,170,71,.08);border-color:rgba(224,170,71,.3);}
+  .adp-time-big{color:var(--cta);}
+  .adp-time-ok{color:#6FD39A;}
+  .adp-time-bad{color:#FF9A85;}
+  audio{color-scheme:dark;}
+
+  /* Controle deslizante de tempo (igual no gerador e no adaptador) */
+  .time-box{
+    margin-top:16px;padding:16px 18px 14px;border-radius:16px;
+    border:1px solid rgba(224,170,71,.35);
+    background:linear-gradient(135deg,rgba(224,170,71,.11),rgba(224,170,71,.02));
+  }
+  .time-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px;}
+  .time-head strong{font-family:'Fraunces',serif;font-size:16px;}
+  .time-scale{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--ink-soft);}
+  .time-read{margin-top:12px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;}
+  .time-read.ok{color:#6FD39A;}
+  .time-read.bad{color:#FF9A85;}
+  @media (max-width:560px){
+    header{padding:26px 20px 24px;}
+    .step{grid-template-columns:46px 1fr;}
+    .step-num{width:38px;height:38px;font-size:18px;}
+    .card{padding:18px;}
+  }
 </style>
 </head>
 <body>
@@ -363,6 +499,22 @@
               <option value="red">Terracota</option>
             </select>
           </div>
+          <div class="field">
+            <label for="bandTheme">Cor de fundo da faixa (preço, descrição e WhatsApp)</label>
+            <select id="bandTheme">
+              <option value="carvao" selected>Carvão (padrão)</option>
+              <option value="marinho">Azul-marinho</option>
+              <option value="floresta">Verde-floresta</option>
+              <option value="vinho">Vinho</option>
+              <option value="marfim">Marfim (claro)</option>
+              <option value="destaque">Cor de destaque</option>
+              <option value="custom">Personalizada…</option>
+            </select>
+          </div>
+          <div class="field" id="bandColorField" style="display:none;">
+            <label for="bandColor">Cor personalizada da faixa</label>
+            <input type="color" id="bandColor" value="#12202F">
+          </div>
           <div class="field" style="flex:1 1 100%;">
             <label for="propertyDesc">Descrição curta (até 2 linhas no vídeo)</label>
             <input type="text" id="propertyDesc" maxlength="120" placeholder="Ex.: Reformado, varanda gourmet, 2 vagas, a 5 min do metrô.">
@@ -415,12 +567,21 @@
             <input type="range" id="musicVol" min="0" max="60" step="5" value="20">
             <div class="val"><span id="musicVolVal">20</span>%</div>
           </div>
-          <div class="field">
+          <div class="field" style="display:none;">
             <div class="toggle-row" style="margin-top:22px;">
               <input type="checkbox" id="fitNarr" checked>
               <label for="fitNarr" style="margin:0;">Esticar o tempo das fotos se a narração for mais longa</label>
             </div>
           </div>
+        </div>
+        <div class="time-box" id="timeBox" style="display:none;">
+          <div class="time-head">
+            <strong>Tempo do vídeo × narração</strong>
+            <button type="button" class="file-btn" id="matchNarr">Igualar à narração</button>
+          </div>
+          <input type="range" id="totalDur" min="5" max="120" step="0.5" value="30">
+          <div class="time-scale"><span>Mais curto</span><span>Mais longo</span></div>
+          <div class="time-read ok" id="timeRead"></div>
         </div>
         <p class="hint">Dica: a narração começa junto com o vídeo. Grave algo como "Bem-vindo! Esta é a sala..." em ritmo calmo, uns 4 segundos por foto. Se gravar direto aqui, permita o uso do microfone quando o navegador pedir.</p>
       </div>
@@ -485,8 +646,41 @@
           </div>
           <div class="field-row">
             <div class="field" style="flex:1 1 100%;">
+              <label for="adpTitle">Título do imóvel (opcional)</label>
+              <input type="text" id="adpTitle" maxlength="70" placeholder="Ex.: Apto 3 dorms · 92 m² · Vila Mariana">
+            </div>
+            <div class="field">
+              <label for="adpPrice">Preço (opcional)</label>
+              <input type="text" id="adpPrice" maxlength="30" placeholder="Ex.: 850000 ou R$ 3.500/mês">
+            </div>
+            <div class="field">
+              <label for="adpAccent">Cor de destaque</label>
+              <select id="adpAccent">
+                <option value="gold">Dourado</option>
+                <option value="teal">Azul</option>
+                <option value="green">Verde</option>
+                <option value="red">Terracota</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="adpBand">Cor de fundo da faixa (descrição e WhatsApp)</label>
+              <select id="adpBand">
+                <option value="carvao" selected>Carvão (padrão)</option>
+                <option value="marinho">Azul-marinho</option>
+                <option value="floresta">Verde-floresta</option>
+                <option value="vinho">Vinho</option>
+                <option value="marfim">Marfim (claro)</option>
+                <option value="destaque">Cor de destaque</option>
+                <option value="custom">Personalizada…</option>
+              </select>
+            </div>
+            <div class="field" id="adpBandColorField" style="display:none;">
+              <label for="adpBandColor">Cor personalizada da faixa</label>
+              <input type="color" id="adpBandColor" value="#12202F">
+            </div>
+            <div class="field" style="flex:1 1 100%;">
               <label for="adpDesc">Descrição do imóvel (opcional)</label>
-              <input type="text" id="adpDesc" maxlength="140" placeholder="Ex.: Apto 3 dorms · 92 m² · Vila Mariana · R$ 850.000">
+              <input type="text" id="adpDesc" maxlength="140" placeholder="Ex.: Reformado, varanda gourmet, 2 vagas, a 5 min do metrô.">
             </div>
             <div class="field" style="flex:1 1 100%;">
               <label for="adpContact">WhatsApp / contato</label>
@@ -499,6 +693,15 @@
         <div class="adp-more">
           <strong class="adp-more-t">Áudio do vídeo</strong>
           <div class="adp-time" id="adpTimeInfo"></div>
+          <div class="time-box" style="margin-top:0;margin-bottom:16px;">
+            <div class="time-head">
+              <strong>Tempo do vídeo × narração</strong>
+              <button type="button" class="file-btn" id="adpMatch" disabled>Igualar à narração</button>
+            </div>
+            <input type="range" id="adpSpeed" min="50" max="200" step="1" value="100">
+            <div class="time-scale"><span>Mais lento (0,5×)</span><span>Normal</span><span>Mais rápido (2×)</span></div>
+            <div class="time-read ok" id="adpSpeedRead"></div>
+          </div>
           <div class="field" style="margin-bottom:16px;">
             <label for="adpOrigVol">O que fazer com o som original</label>
             <select id="adpOrigVol">
@@ -532,7 +735,7 @@
               <div class="val"><span id="adpMusicVolVal">20</span>%</div>
             </div>
           </div>
-          <p class="hint" style="margin-top:0;">A música toca em loop do começo ao fim do vídeo e a narração começa junto com ele (se for mais longa, é cortada no final). Sem narração, a música toca em volume cheio. Se não subir nenhum áudio, o som original é mantido.</p>
+          <p class="hint" style="margin-top:0;">A música toca em loop do começo ao fim do vídeo e a narração começa junto com ele (se for mais longa, é cortada no final — use o controle de tempo acima para deixar o vídeo do tamanho da narração). Sem narração, a música toca em volume cheio. Se não subir nenhum áudio, o som original é mantido.</p>
         </div>
 
         <div class="adp-actions">
@@ -548,6 +751,138 @@
 
 </div>
 
+<script>
+/* ===== Faixa de informações compartilhada: o gerador e o adaptador desenham a mesma faixa ===== */
+window.FCBand = (function(){
+  const SERIF = 'Fraunces, Georgia, serif', SANS = 'Inter, Arial, sans-serif';
+  const ACCENTS = { gold:'#E0AA47', teal:'#56AFD4', green:'#62C894', red:'#E5715A' };
+  const BANDS = {
+    carvao:   { rgb:[18,17,15],   a:.84 },
+    marinho:  { rgb:[12,30,52],   a:.88 },
+    floresta: { rgb:[12,42,32],   a:.88 },
+    vinho:    { rgb:[58,16,30],   a:.88 },
+    marfim:   { rgb:[250,247,240],a:.95 }
+  };
+  const R = Math.round;
+  const lum = c => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); }; return .2126*f(c[0]) + .7152*f(c[1]) + .0722*f(c[2]); };
+  const hex2rgb = h => { h = (h || '#000000').replace('#', ''); if(h.length === 3) h = h.split('').map(x => x + x).join(''); const n = parseInt(h, 16) || 0; return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+  const mix = (a, b, t) => a.map((v, i) => R(v + (b[i] - v) * t));
+  const css = (c, a) => 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + (a == null ? 1 : a) + ')';
+
+  // Cores da faixa a partir das escolhas (fundo + destaque)
+  function resolve(bandKey, customHex, accentKey){
+    const accentHex = ACCENTS[accentKey] || ACCENTS.gold, acc = hex2rgb(accentHex);
+    let bg, alpha, onAccent = false;
+    if(bandKey === 'custom'){ bg = hex2rgb(customHex); alpha = .92; }
+    else if(bandKey === 'destaque'){ bg = acc; alpha = .97; onAccent = true; }
+    else { const b = BANDS[bandKey] || BANDS.carvao; bg = b.rgb; alpha = b.a; }
+    const light = onAccent ? true : lum(bg) > .45;
+    const T = { accent: accentHex, bg, alpha, light, ink: light ? '#1F1D19' : '#FFFFFF', inkSoft: light ? 'rgba(31,29,25,.84)' : 'rgba(255,255,255,.92)', line: light ? 'rgba(31,29,25,.18)' : 'rgba(255,255,255,.18)' };
+    if(onAccent){ T.priceCol = T.dot = T.pillBg = '#1B1A17'; T.pillInk = accentHex; }
+    else if(light){ const d = css(mix(acc, [0,0,0], .45)); T.priceCol = T.dot = T.pillBg = d; T.pillInk = '#FFFFFF'; }
+    else { T.priceCol = T.dot = T.pillBg = accentHex; T.pillInk = '#1B1A17'; }
+    T.fill = a => css(bg, a == null ? alpha : a);
+    return T;
+  }
+
+  function layer(w, h){ const c = document.createElement('canvas'); c.width = Math.max(1, R(w)); c.height = Math.max(1, R(h)); return c; }
+  function rr(g, x, y, w, h, r){ g.beginPath(); g.moveTo(x+r, y); g.arcTo(x+w, y, x+w, y+h, r); g.arcTo(x+w, y+h, x, y+h, r); g.arcTo(x, y+h, x, y, r); g.arcTo(x, y, x+w, y, r); g.closePath(); }
+  function fitText(g, text, maxW){
+    if(g.measureText(text).width <= maxW) return text;
+    let t = text; while(t.length > 1 && g.measureText(t + '…').width > maxW) t = t.slice(0, -1);
+    return t.trim() + '…';
+  }
+  function wrapText(g, text, maxW, maxLines){
+    const words = text.split(/\s+/).filter(Boolean), lines = []; let cur = '';
+    for(const w of words){ const t = cur ? cur + ' ' + w : w; if(g.measureText(t).width <= maxW || !cur) cur = t; else { lines.push(cur); cur = w; } }
+    if(cur) lines.push(cur);
+    if(lines.length > maxLines){ lines.length = maxLines; lines[maxLines-1] = lines[maxLines-1].replace(/[.,;:]$/, '') + '…'; }
+    return lines.map(l => fitText(g, l, maxW));
+  }
+  function formatPrice(v){
+    v = (v || '').trim(); if(!v) return '';
+    if(/^[\d.,\s]+$/.test(v)){
+      if(/,\d{1,2}$/.test(v)) return 'R$ ' + v;
+      const n = parseInt(v.replace(/\D/g, ''), 10);
+      if(!isNaN(n)) return 'R$ ' + n.toLocaleString('pt-BR');
+    }
+    return v;
+  }
+
+  // Faixa: filete de cor no topo, preço em serifa, divisória, descrição e botão de WhatsApp
+  function build(o){
+    const maxW = o.maxW, u = o.u, price = o.price || '', desc = o.desc || '', contact = o.contact || '';
+    if(!price && !desc && !contact) return null;
+    const T = resolve(o.bandKey, o.bandColor, o.accentKey);
+    const padH = R(34*u), padV = R(28*u), gap = R(14*u), topLine = Math.max(3, R(7*u)), radius = R(28*u), hair = Math.max(1, R(2*u));
+    const innerW = maxW - padH*2;
+    const probe = layer(4, 4).getContext('2d');
+
+    let priceSize = R(76*u);
+    if(price){ probe.font = '700 ' + priceSize + 'px ' + SERIF; while(probe.measureText(price).width > innerW && priceSize > 20){ priceSize -= 2; probe.font = '700 ' + priceSize + 'px ' + SERIF; } }
+    const descSize = R(32*u), descLH = R(43*u);
+    probe.font = '400 ' + descSize + 'px ' + SANS;
+    const descLines = desc ? wrapText(probe, desc, innerW, o.maxDescLines || 2) : [];
+
+    const conSize = R(30*u), pillPadX = R(26*u), pillH = R(conSize*2), iconD = R(conSize*1.05), iconGap = R(12*u);
+    probe.font = '700 ' + conSize + 'px ' + SANS;
+    let conText = '', pillW = 0;
+    if(contact){
+      conText = fitText(probe, contact, innerW - pillPadX*2 - iconD - iconGap);
+      pillW = R(probe.measureText(conText).width + pillPadX*2 + iconD + iconGap);
+    }
+
+    const priceH = price ? R(priceSize*1.15) : 0;
+    const hasBelow = descLines.length || conText;
+    const divH = (price && hasBelow) ? gap*2 + hair : 0;
+    const descH = descLines.length * descLH;
+    const conH = conText ? (descLines.length ? gap : 0) + pillH : 0;
+    const h = topLine + padV*2 + priceH + divH + descH + conH;
+
+    const c = layer(maxW, h), g = c.getContext('2d');
+    g.save(); rr(g, 0, 0, maxW, h, radius); g.clip();
+    g.fillStyle = T.fill(); g.fillRect(0, 0, maxW, h);
+    if(!T.light){ const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(255,255,255,.10)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, maxW, h); }
+    g.fillStyle = T.dot; g.fillRect(0, 0, maxW, topLine);
+    g.restore();
+    g.save(); rr(g, 1, 1, maxW-2, h-2, radius); g.strokeStyle = T.line; g.lineWidth = hair; g.stroke(); g.restore();
+
+    g.textBaseline = 'top';
+    let y = topLine + padV;
+    if(price){ g.font = '700 ' + priceSize + 'px ' + SERIF; g.fillStyle = T.priceCol; g.fillText(price, padH, y); y += priceH; }
+    if(divH){ y += gap; g.fillStyle = T.line; g.fillRect(padH, y, innerW, hair); y += hair + gap; }
+    if(descLines.length){
+      g.font = '400 ' + descSize + 'px ' + SANS; g.fillStyle = T.inkSoft;
+      descLines.forEach((ln, k) => g.fillText(ln, padH, y + k*descLH));
+      y += descH;
+    }
+    if(conText){
+      if(descLines.length) y += gap;
+      g.fillStyle = T.pillBg; rr(g, padH, y, pillW, pillH, pillH/2); g.fill();
+      // ícone de conversa
+      const cx = padH + pillPadX + iconD/2, cy = y + pillH/2, ir = iconD/2;
+      g.fillStyle = T.pillInk; g.beginPath(); g.arc(cx, cy, ir, 0, Math.PI*2); g.fill();
+      g.beginPath(); g.moveTo(cx - ir*.95, cy + ir*1.0); g.lineTo(cx - ir*.15, cy + ir*.78); g.lineTo(cx - ir*.62, cy + ir*.2); g.closePath(); g.fill();
+      g.fillStyle = T.pillBg; g.beginPath(); g.arc(cx, cy, ir*.34, 0, Math.PI*2); g.fill();
+      g.font = '700 ' + conSize + 'px ' + SANS; g.fillStyle = T.pillInk; g.textBaseline = 'middle';
+      g.fillText(conText, padH + pillPadX + iconD + iconGap, cy + 1);
+    }
+    return c;
+  }
+
+  // Duração real de um áudio (gravações .webm costumam vir sem duração no <audio>; aqui decodifica)
+  async function blobDuration(blob, fallback){
+    try{
+      const AC = window.AudioContext || window.webkitAudioContext, ac = new AC();
+      try{ const buf = await ac.decodeAudioData(await blob.arrayBuffer()); if(buf && buf.duration > 0) return buf.duration; }
+      finally{ try{ ac.close(); }catch(e){} }
+    }catch(e){}
+    return fallback || 0;
+  }
+
+  return { ACCENTS, BANDS, resolve, build, formatPrice, wrapText, fitText, blobDuration };
+})();
+</script>
 <script>
 (function(){
   const dropzone = document.getElementById('dropzone');
@@ -576,6 +911,10 @@
   const resultBox = document.getElementById('result');
   const resultVideo = document.getElementById('resultVideo');
   const downloadLink = document.getElementById('downloadLink');
+  const bandThemeSelect = document.getElementById('bandTheme');
+  const bandColorInput = document.getElementById('bandColor');
+  const bandColorField = document.getElementById('bandColorField');
+  bandThemeSelect.addEventListener('change', ()=>{ bandColorField.style.display = bandThemeSelect.value === 'custom' ? '' : 'none'; });
 
   let photos = []; // { file, url, img }
   let audioFile = null;
@@ -719,6 +1058,7 @@
       });
       thumbs.appendChild(el);
     });
+    updateTimeRead();
   }
 
   durationSlider.addEventListener('input', ()=> durationVal.textContent = durationSlider.value);
@@ -750,7 +1090,39 @@
   const fitNarr = document.getElementById('fitNarr');
   musicVol.addEventListener('input', ()=> musicVolVal.textContent = musicVol.value);
 
-  function setNarration(blob, label){
+  // ---------- Tempo do vídeo x narração ----------
+  const timeBox = document.getElementById('timeBox');
+  const totalDur = document.getElementById('totalDur');
+  const timeRead = document.getElementById('timeRead');
+  const matchNarr = document.getElementById('matchNarr');
+  let narrSecs = 0;
+  const fmtS = n => n.toFixed(1).replace('.', ',');
+  function updateTimeRead(){
+    if(!narrSecs){ timeBox.style.display = 'none'; return; }
+    const n = Math.max(1, photos.length);
+    totalDur.min = Math.max(3, Math.ceil(n * 1.5));
+    totalDur.max = Math.max(60, Math.ceil(narrSecs * 2), n * 10);
+    if(parseFloat(totalDur.value) < parseFloat(totalDur.min)) totalDur.value = totalDur.min;
+    const total = parseFloat(totalDur.value), diff = total - narrSecs;
+    let txt = 'Vídeo: ' + fmtS(total) + ' s' + (photos.length ? ' (' + fmtS(total / n) + ' s por foto)' : '') + ' · Narração: ' + fmtS(narrSecs) + ' s';
+    if(diff < -0.3) txt += ' — ⚠ a narração passa ' + fmtS(-diff) + ' s do vídeo e será cortada no final.';
+    else if(diff > 3) txt += ' — sobram ' + fmtS(diff) + ' s de vídeo sem voz.';
+    else txt += ' — ✓ vídeo e narração combinam.';
+    timeRead.className = 'time-read ' + (diff < -0.3 ? 'bad' : 'ok');
+    timeRead.textContent = txt;
+    timeBox.style.display = 'block';
+  }
+  function matchNow(){
+    if(!narrSecs) return;
+    updateTimeRead();
+    const v = Math.ceil((narrSecs + 1) * 2) / 2; // narração + 1 s de respiro
+    totalDur.value = Math.min(parseFloat(totalDur.max), Math.max(parseFloat(totalDur.min), v));
+    updateTimeRead();
+  }
+  totalDur.addEventListener('input', updateTimeRead);
+  matchNarr.addEventListener('click', matchNow);
+
+  function setNarration(blob, label, secs){
     narrationBlob = blob;
     if(narrPreview.src) URL.revokeObjectURL(narrPreview.src);
     narrPreview.src = URL.createObjectURL(blob);
@@ -758,6 +1130,11 @@
     narrName.textContent = label;
     clearNarr.style.display = 'inline-block';
     narrOpts.style.display = 'flex';
+    window.FCBand.blobDuration(blob, secs).then(d => {
+      if(narrationBlob !== blob) return;
+      narrSecs = d || 0;
+      matchNow(); // já deixa o vídeo no tamanho da narração; dá para ajustar no controle deslizante
+    });
   }
   function resetNarration(){
     narrationBlob = null;
@@ -766,6 +1143,7 @@
     narrName.textContent = 'Nenhuma narração';
     clearNarr.style.display = 'none';
     narrOpts.style.display = 'none';
+    narrSecs = 0; timeBox.style.display = 'none';
   }
   clearNarr.addEventListener('click', resetNarration);
   narrInput.addEventListener('change', e=>{
@@ -801,7 +1179,7 @@
       stopMic();
       recBtn.innerHTML = '&#9679; Gravar minha voz';
       if(parts.length){
-        setNarration(new Blob(parts, { type: narrRecorder.mimeType || 'audio/webm' }), 'Narração gravada (' + secs + ' s)');
+        setNarration(new Blob(parts, { type: narrRecorder.mimeType || 'audio/webm' }), 'Narração gravada (' + secs + ' s)', secs);
       }
     };
     const t0 = performance.now();
@@ -925,6 +1303,7 @@
       : { x: 0, y: 0, w: W, h: H };
     const ACCENTS = { gold:'#E0AA47', teal:'#56AFD4', green:'#62C894', red:'#E5715A' };
     const accent = ACCENTS[accentSelect.value] || ACCENTS.gold;
+    const T = window.FCBand.resolve(bandThemeSelect.value, bandColorInput.value, accentSelect.value);
     const SERIF = 'Fraunces, Georgia, serif';
     const SANS = 'Inter, Arial, sans-serif';
     try{
@@ -959,7 +1338,11 @@
           throw new Error('não consegui ler o áudio da narração; tente gravar de novo ou enviar um MP3/M4A');
         }
         // se a narração é mais longa que as fotos, estica o tempo de cada foto
-        if(fitNarr.checked){
+        if(narrSecs > 0){
+          // o controle deslizante de tempo define a duração total do vídeo
+          perPhoto = Math.max(1, parseFloat(totalDur.value) / photos.length);
+          totalDuration = perPhoto * photos.length;
+        }else if(fitNarr.checked){
           const need = narrBuf.duration + 1;
           if(need > totalDuration){
             totalDuration = need;
@@ -1174,76 +1557,16 @@
       return c;
     }
 
-    // Cartão com preço + descrição + contato (pré-desenhado uma vez; no vídeo só desliza/aparece)
+    // Faixa com preço + descrição + WhatsApp (mesmo desenho do adaptador de vídeos)
     function buildCard(maxW){
-      const price = formatPrice(propertyPriceInput.value);
-      const desc = propertyDescInput.value.trim();
-      const contact = propertyContactInput.value.trim();
-      if(!price && !desc && !contact) return null;
-
-      const padH = Math.round(30*u), padV = Math.round(26*u), barW = Math.round(12*u), gap = Math.round(10*u);
-      const innerW = maxW - barW - padH*2;
-      const probe = newLayer(4, 4).getContext('2d');
-
-      let priceSize = Math.round(78*u);
-      if(price){
-        probe.font = '700 ' + priceSize + 'px ' + SERIF;
-        while(probe.measureText(price).width > innerW && priceSize > 20){
-          priceSize -= 2; probe.font = '700 ' + priceSize + 'px ' + SERIF;
-        }
-      }
-      const descSize = Math.round(34*u), descLH = Math.round(44*u);
-      probe.font = '400 ' + descSize + 'px ' + SANS;
-      const descLines = desc ? wrapText(probe, desc, innerW, 2) : [];
-      const conSize = Math.round(30*u);
-      probe.font = '600 ' + conSize + 'px ' + SANS;
-      const conText = contact ? fitText(probe, contact, innerW) : '';
-
-      const priceH = price ? Math.round(priceSize * 1.15) : 0;
-      const descH = descLines.length ? gap + descLines.length * descLH : 0;
-      const conH = conText ? gap + Math.round(conSize * 1.3) : 0;
-      const h = padV*2 + priceH + descH + conH;
-
-      const c = newLayer(maxW, h);
-      const g = c.getContext('2d');
-      g.save();
-      roundRect(g, 0, 0, maxW, h, Math.round(26*u));
-      g.fillStyle = 'rgba(12,12,10,0.68)';
-      g.fill();
-      g.clip();
-      g.fillStyle = accent;
-      g.fillRect(0, 0, barW, h);
-      g.restore();
-      g.save();
-      roundRect(g, 1, 1, maxW-2, h-2, Math.round(26*u));
-      g.strokeStyle = 'rgba(255,255,255,0.16)';
-      g.lineWidth = Math.max(1, Math.round(2*u));
-      g.stroke();
-      g.restore();
-
-      g.textBaseline = 'top';
-      const x0 = barW + padH;
-      let y = padV;
-      if(price){
-        g.font = '700 ' + priceSize + 'px ' + SERIF;
-        g.fillStyle = accent;
-        g.fillText(price, x0, y);
-        y += priceH;
-      }
-      if(descLines.length){
-        y += gap;
-        g.font = '400 ' + descSize + 'px ' + SANS;
-        g.fillStyle = 'rgba(255,255,255,0.93)';
-        descLines.forEach((ln, k)=> g.fillText(ln, x0, y + k*descLH));
-        y += descLines.length * descLH;
-      }
-      if(conText){
-        y += gap;
-        g.font = '600 ' + conSize + 'px ' + SANS;
-        g.fillStyle = 'rgba(255,255,255,0.78)';
-        g.fillText(conText, x0, y);
-      }
-      return c;
+      return window.FCBand.build({
+        maxW, u,
+        price: formatPrice(propertyPriceInput.value),
+        desc: propertyDescInput.value.trim(),
+        contact: propertyContactInput.value.trim(),
+        bandKey: bandThemeSelect.value, bandColor: bandColorInput.value, accentKey: accentSelect.value,
+        maxDescLines: 2
+      });
     }
 
     // Faixa de título (vertical): logo + título em até 2 linhas
@@ -1253,7 +1576,7 @@
       if(!title && !hasLogo) return null;
       const c = newLayer(maxW, maxH);
       const g = c.getContext('2d');
-      const logoS = Math.min(Math.round(84*u), maxH);
+      const logoS = Math.min(Math.round(104*u), maxH);
       let x = 0;
       if(hasLogo){
         g.save(); g.globalAlpha = 0.92;
@@ -1262,7 +1585,7 @@
         x = logoS + Math.round(22*u);
       }
       if(title){
-        const size = Math.round(40*u), lh = Math.round(size*1.18);
+        const size = Math.round(44*u), lh = Math.round(size*1.18);
         g.font = '700 ' + size + 'px ' + SERIF;
         const lines = wrapText(g, title, maxW - x, 2);
         g.fillStyle = '#FFFFFF';
@@ -1288,12 +1611,12 @@
       const c = newLayer(w, h);
       const g = c.getContext('2d');
       roundRect(g, 0, 0, w, h, Math.round(h*0.22));
-      g.fillStyle = 'rgba(12,12,10,0.66)';
+      g.fillStyle = T.fill(0.8);
       g.fill();
-      g.fillStyle = accent;
+      g.fillStyle = T.dot;
       g.fillRect(0, Math.round(h*0.2), Math.max(3, Math.round(5*u)), Math.round(h*0.6));
       g.font = '600 ' + size + 'px ' + SANS;
-      g.fillStyle = '#FFFFFF';
+      g.fillStyle = T.ink;
       g.textBaseline = 'middle';
       g.fillText(text, padX, h/2 + 1);
       return c;
@@ -1368,13 +1691,13 @@
       const baseY = portrait ? Math.min(r.y + r.h - h - Math.round(18*u), Math.round(H * 0.675) - h - Math.round(14*u)) : H - h - Math.round(H*0.05);
       const y = baseY + (1 - alpha) * Math.round(14*u);
       roundRect(ctx, x, y, w, h, Math.round(h/2));
-      ctx.fillStyle = 'rgba(12,12,10,0.72)';
+      ctx.fillStyle = T.fill(0.82);
       ctx.fill();
-      ctx.fillStyle = accent;
+      ctx.fillStyle = T.dot;
       ctx.beginPath();
       ctx.arc(x + padX + dot, y + h/2, dot, 0, Math.PI*2);
       ctx.fill();
-      ctx.fillStyle = '#FFFFFF';
+      ctx.fillStyle = T.ink;
       ctx.textBaseline = 'middle';
       ctx.fillText(text, x + padX + dot*2 + Math.round(size*0.4), y + h/2 + 1);
       ctx.restore();
@@ -1430,6 +1753,7 @@
   const msg = t => { msgBox.textContent = t || ''; };
 
   modeSel.addEventListener('change', () => { colorField.style.display = modeSel.value === 'solid' ? '' : 'none'; });
+  $('adpBand').addEventListener('change', () => { $('adpBandColorField').style.display = $('adpBand').value === 'custom' ? '' : 'none'; });
 
   function sync(){
     go.disabled = busy || !queue.length;
@@ -1460,6 +1784,7 @@
     nPrev.style.display = 'block';
     nName.textContent = label;
     nClr.style.display = 'inline-block';
+    window.FCBand.blobDuration(blob, secs).then(d => { if(narrBlob === blob && d){ narrDur = d; updateTimeInfo(); } });
   }
   nClr.addEventListener('click', () => {
     narrBlob = null; narrDur = null; narrFallback = null; updateTimeInfo();
@@ -1636,45 +1961,49 @@
   }
   async function buildOverlay(rect){
     if(!$('adpInfoOn').checked) return null;
-    try{ await Promise.all([document.fonts.load('500 40px Inter'), document.fonts.load('700 40px Inter')]); }catch(err){}
+    try{ await Promise.all([document.fonts.load('400 40px Inter'), document.fonts.load('700 40px Inter'), document.fonts.load('700 40px Fraunces')]); }catch(err){}
     if(logoImg.src && !logoImg.complete) await new Promise(r => { logoImg.onload = logoImg.onerror = r; });
     const c = document.createElement('canvas'); c.width = W; c.height = H;
     const g = c.getContext('2d');
-    const SANS = 'Inter, Arial, sans-serif', ACCENT = '#E0AA47';
-    const SAFE_TOP = 270, SAFE_BOTTOM = 1580, mx = 48; // áreas que o Instagram/TikTok/Reels cobrem com a interface
-    const desc = $('adpDesc').value.trim();
+    const B = window.FCBand;
+    const SAFE_BOTTOM = 1580, mx = 48, headTop = Math.round(H * 0.13); // áreas que o Instagram/TikTok/Reels cobrem com a interface (as mesmas do gerador)
+    const title = $('adpTitle').value.trim();
     const contact = $('adpContact').value.trim() || DEFAULT_CONTACT;
+    const opts = {
+      maxW: W - mx * 2, u: 1,
+      price: B.formatPrice($('adpPrice').value), desc: $('adpDesc').value.trim(), contact,
+      bandKey: $('adpBand').value, bandColor: $('adpBandColor').value, accentKey: $('adpAccent').value
+    };
 
+    // topo: logo + título (mesmo desenho do gerador no formato vertical)
+    const logoS = 104; let tx = mx;
     if(logoImg.naturalWidth){
       g.save(); g.globalAlpha = 0.95; g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 18;
-      g.drawImage(logoImg, mx, SAFE_TOP, 170, 170); g.restore();
+      g.drawImage(logoImg, mx, headTop, logoS, logoS); g.restore();
+      tx = mx + logoS + 22;
+    }
+    if(title){
+      const size = 44, lh = Math.round(size * 1.18);
+      g.save();
+      g.font = '700 ' + size + 'px Fraunces, Georgia, serif';
+      const lines = wrapText(g, title, W - mx - tx, 2);
+      g.fillStyle = '#FFFFFF'; g.textBaseline = 'top'; g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = 10;
+      const y0 = headTop + Math.round((logoS - lines.length * lh) / 2);
+      lines.forEach((ln, k) => g.fillText(ln, tx, y0 + k * lh));
+      g.restore();
     }
 
-    const padX = 36, padY = 30, lh = 52, pillH = 76, cw = W - mx * 2, vidBottom = rect.y + rect.h;
-    g.font = '500 40px ' + SANS;
-    let lines = [], ch = 0;
+    // faixa de baixo: preço, descrição e WhatsApp (mesma do gerador)
+    const vidBottom = rect.y + rect.h; let band = null;
     for(const ml of [3, 2, 1]){
-      lines = desc ? wrapText(g, desc, cw - padX * 2, ml) : [];
-      ch = padY * 2 + lines.length * lh + (lines.length ? 18 : 0) + pillH;
-      if(vidBottom + 28 + ch <= SAFE_BOTTOM) break; // cabe na faixa livre abaixo do vídeo
+      band = B.build({ ...opts, maxDescLines: ml });
+      if(!band || vidBottom + 28 + band.height <= SAFE_BOTTOM) break; // cabe na faixa livre abaixo do vídeo
     }
-    let y0 = vidBottom + 28;
-    if(y0 + ch > SAFE_BOTTOM) y0 = SAFE_BOTTOM - ch; // vídeo muito alto: o cartão fica sobre a base do vídeo, dentro da zona segura
-
-    g.save(); g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 24;
-    g.fillStyle = 'rgba(22,20,17,0.84)'; roundRect(g, mx, y0, cw, ch, 28); g.fill(); g.restore();
-    g.fillStyle = ACCENT; roundRect(g, mx, y0 + 26, 8, ch - 52, 4); g.fill();
-
-    g.textBaseline = 'top'; g.fillStyle = '#FFFFFF'; g.font = '500 40px ' + SANS;
-    let ty = y0 + padY;
-    for(const ln of lines){ g.fillText(ln, mx + padX, ty + 4); ty += lh; }
-    if(lines.length) ty += 18;
-    g.font = '700 40px ' + SANS;
-    let label = contact;
-    while(label.length > 3 && g.measureText(label).width > cw - padX * 2 - 64) label = label.slice(0, -2) + '…';
-    const pw = g.measureText(label).width + 64;
-    g.fillStyle = ACCENT; roundRect(g, mx + padX, ty, pw, pillH, pillH / 2); g.fill();
-    g.fillStyle = '#23211D'; g.textBaseline = 'middle'; g.fillText(label, mx + padX + 32, ty + pillH / 2 + 1);
+    if(band){
+      let y0 = vidBottom + 28;
+      if(y0 + band.height > SAFE_BOTTOM) y0 = SAFE_BOTTOM - band.height; // vídeo muito alto: a faixa fica sobre a base do vídeo, dentro da zona segura
+      g.drawImage(band, mx, y0);
+    }
     return c;
   }
   const pickMime = list_ => list_.find(t => MediaRecorder.isTypeSupported(t)) || '';
@@ -1699,6 +2028,8 @@
     try{
       if(!v.videoWidth) throw new Error('este arquivo não tem imagem que o navegador consiga ler');
       const dur = isFinite(v.duration) && v.duration > 0 ? v.duration : 0;
+      const rate = rateNow(), eff = dur ? dur / rate : 0; // eff = duração final do vídeo, já com a velocidade escolhida
+      v.defaultPlaybackRate = rate; v.playbackRate = rate;
 
       // áudio: som original + música (loop) + narração, tudo misturado
       ac = new AC();
@@ -1718,13 +2049,13 @@
       if(narrBlob){
         try{ narrBuf = await ac.decodeAudioData(await narrBlob.arrayBuffer()); }
         catch(err){ throw new Error('não consegui ler o áudio da narração; tente gravar de novo ou enviar um MP3/M4A'); }
-        if(dur && narrBuf.duration > dur + 0.5) note = ' · a narração é mais longa que o vídeo e será cortada';
+        if(eff && narrBuf.duration > eff + 0.5) note = ' · a narração é mais longa que o vídeo e será cortada';
       }
 
       // taxa de bits: orçamento de 14 MB (margem de segurança). Áudio 96 kbps; só em vídeos muito longos reduz.
       let abps = 96000, vfloor = 250000;
-      if(dur && BUDGET * 8 / dur < 346000){ abps = 48000; vfloor = 60000; }
-      const vbps = dur ? Math.max(vfloor, Math.min(8000000, (BUDGET * 8 / dur - abps) * scale)) : 4000000;
+      if(eff && BUDGET * 8 / eff < 346000){ abps = 48000; vfloor = 60000; }
+      const vbps = eff ? Math.max(vfloor, Math.min(8000000, (BUDGET * 8 / eff - abps) * scale)) : 4000000;
       const mime = videoMime();
       const stream = new MediaStream([...stage.captureStream(30).getVideoTracks(), ...dest.stream.getAudioTracks()]);
       const rec = new MediaRecorder(stream, {...(mime ? {mimeType:mime} : {}), videoBitsPerSecond: Math.round(vbps), audioBitsPerSecond: abps});
@@ -1739,12 +2070,12 @@
       await ac.resume();
       if(musicEl){ musicEl.play().catch(() => {}); }
       if(narrBuf){ narrSrc = ac.createBufferSource(); narrSrc.buffer = narrBuf; narrSrc.connect(dest); narrSrc.start(); }
-      const ended = new Promise(r => { v.onended = r; v.onerror = r; safety = setTimeout(r, ((dur || 600) + 20) * 1000); });
-      await v.play();
+      const ended = new Promise(r => { v.onended = r; v.onerror = r; safety = setTimeout(r, ((eff || 600) + 20) * 1000); });
+      await v.play(); v.playbackRate = rate;
 
       // a barra e o texto usam timer (continuam atualizando mesmo se o navegador pausar a animação)
-      ui = setInterval(() => progress(entry, v.currentTime, dur, (document.hidden ? 'Aba em segundo plano: volte para esta aba' : 'Adaptando') + note), 250);
-      progress(entry, 0, dur, 'Adaptando' + note);
+      ui = setInterval(() => progress(entry, v.currentTime / rate, eff, (document.hidden ? 'Aba em segundo plano: volte para esta aba' : 'Adaptando') + note), 250);
+      progress(entry, 0, eff, 'Adaptando' + note);
       const loop = () => { paint(); if(!v.ended) raf = requestAnimationFrame(loop); };
       loop();
 
@@ -1868,15 +2199,47 @@
 
   // ---------- Tempo do vídeo (para fazer a narração no tamanho certo) ----------
   nPrev.addEventListener('loadedmetadata', () => {
-    narrDur = isFinite(nPrev.duration) && nPrev.duration > 0 ? nPrev.duration : narrFallback;
+    narrDur = isFinite(nPrev.duration) && nPrev.duration > 0 ? nPrev.duration : (narrDur || narrFallback);
     updateTimeInfo();
   });
+  // ---------- Tempo do vídeo x narração (velocidade do vídeo) ----------
+  const spd = $('adpSpeed'), spdRead = $('adpSpeedRead'), spdMatch = $('adpMatch');
+  const rateNow = () => (parseInt(spd.value, 10) || 100) / 100;
+  function updateSpeedRead(){
+    const vids = queue.filter(q => q.dur), rate = rateNow();
+    const dec = n => n.toFixed(1).replace('.', ',');
+    const parts = ['Velocidade ' + rate.toFixed(2).replace('.', ',') + '×'];
+    let bad = false;
+    if(vids.length){
+      const v0 = vids[0], fin = v0.dur / rate;
+      parts.push(vids.length === 1 ? 'Vídeo: ' + dec(v0.dur) + ' s → ' + dec(fin) + ' s' : vids.length + ' vídeos (ex.: ' + dec(v0.dur) + ' s → ' + dec(fin) + ' s)');
+      if(narrDur){
+        const diff = fin - narrDur;
+        parts.push('Narração: ' + dec(narrDur) + ' s');
+        if(diff < -0.3){ bad = true; parts.push('⚠ passa ' + dec(-diff) + ' s do vídeo e será cortada'); }
+        else if(diff > 3) parts.push('sobram ' + dec(diff) + ' s sem voz');
+        else parts.push('✓ combinam');
+      }
+    }
+    spdRead.className = 'time-read ' + (bad ? 'bad' : 'ok');
+    spdRead.textContent = parts.join(' · ');
+    spdMatch.disabled = !(vids.length && narrDur);
+  }
+  spd.addEventListener('input', updateSpeedRead);
+  spdMatch.addEventListener('click', () => {
+    const v0 = queue.find(q => q.dur);
+    if(!v0 || !narrDur) return;
+    const r = Math.min(2, Math.max(0.5, v0.dur / (narrDur + 0.5))); // narração + meio segundo de respiro
+    spd.value = Math.round(r * 100);
+    updateSpeedRead();
+  });
+
   function updateTimeInfo(){
     const box = $('adpTimeInfo'); box.replaceChildren();
     const mk = (tag, cls, txt) => { const el = document.createElement(tag); if(cls) el.className = cls; el.textContent = txt; return el; };
     const dec = n => n.toFixed(1).replace('.', ',');
     const vids = queue.filter(q => q.dur);
-    if(!vids.length){ box.appendChild(mk('div', '', 'Suba o vídeo para ver aqui o tempo disponível para a sua narração.')); return; }
+    if(!vids.length){ box.appendChild(mk('div', '', 'Suba o vídeo para ver aqui o tempo disponível para a sua narração.')); updateSpeedRead(); return; }
     box.appendChild(mk('strong', 'adp-time-t', vids.length === 1 ? 'Tempo do vídeo (faça a narração dentro dele)' : 'Tempo de cada vídeo (faça a narração dentro dele)'));
     for(const q of vids){
       const row = document.createElement('div'); row.className = 'adp-time-row';
@@ -1891,6 +2254,7 @@
       box.appendChild(row);
     }
     box.appendChild(mk('p', 'adp-time-tip', 'Dica: peça para a IA um texto com essa quantidade de palavras e gere a voz com o tempo total igual ou um pouco menor que o do vídeo.'));
+    updateSpeedRead();
   }
   updateTimeInfo();
 
