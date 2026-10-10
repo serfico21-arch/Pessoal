@@ -314,7 +314,7 @@ textarea{width:100%;min-height:220px;border:1px solid var(--line);border-radius:
 <script>
 const $=id=>document.getElementById(id);
 const cam=$('cam'),out=$('out'),ctx=out.getContext('2d',{alpha:false}),pr=$('prompter'),txt=$('txt'),script=$('script'),stage=$('stage');
-let stream=null,rec=null,chunks=[],facing='user',scrolling=false,raf=0,last=0,acc=0,blob=null,t0=0,timer=0,wake=null,mode='video',recMode='video',pcm=null,pcmOn=false,proc=null,tap=null,an=null,anBuf=null,mp3=null,outKind='video';
+let stream=null,rec=null,chunks=[],facing='user',scrolling=false,raf=0,last=0,acc=0,blob=null,t0=0,timer=0,wake=null,mode='video',recMode='video',pcm=null,pcmOn=false,proc=null,tap=null,an=null,anBuf=null,mp3=null,outKind='video',capStream=null,pausedHidden=false;
 
 // ---------- gaveta e abas ----------
 const mqD=matchMedia('(min-width:980px)');
@@ -663,8 +663,9 @@ async function begin(){
   ensureAudio();
   const nar=recMode==='nar';
   const mt=nar?pickMimeA():pickMime();
-  const ms=new MediaStream(nar?[...dest.stream.getAudioTracks()]:[...out.captureStream(30).getVideoTracks(),...dest.stream.getAudioTracks()]);
-  const opts={audioBitsPerSecond:128000};if(!nar)opts.videoBitsPerSecond=4000000;if(mt)opts.mimeType=mt;
+  capStream=nar?null:out.captureStream(30);
+  const ms=new MediaStream(nar?[...dest.stream.getAudioTracks()]:[...capStream.getVideoTracks(),...dest.stream.getAudioTracks()]);
+  const opts={audioBitsPerSecond:128000};if(!nar){opts.videoBitsPerSecond=4000000;opts.videoKeyFrameIntervalDuration=1000}if(mt)opts.mimeType=mt;
   try{rec=new MediaRecorder(ms,opts)}catch(e){try{rec=new MediaRecorder(ms)}catch(e2){alert('Seu navegador não consegue gravar vídeo aqui.');return}}
   rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
   rec.onstop=async()=>{
@@ -701,8 +702,20 @@ async function begin(){
   setRec(true);
   pr.scrollTop=0;startScroll(false);
 }
+document.addEventListener('visibilitychange',async()=>{
+  if(!rec)return;
+  if(document.hidden&&rec.state==='recording'){
+    pausedHidden=true;pcmOn=false;rec.pause();aud.pause();stopScroll();
+  }else if(!document.hidden&&pausedHidden&&rec.state==='paused'){
+    pausedHidden=false;rec.resume();pcmOn=true;
+    if($('musAuto').checked&&aud.src)aud.play().catch(()=>{});
+    try{if(navigator.wakeLock)wake=await navigator.wakeLock.request('screen')}catch(e){}
+    startScroll(false);
+  }
+});
 function end(){
-  pcmOn=false;
+  pausedHidden=false;pcmOn=false;
+  if(rec&&rec.state==='paused')rec.resume();
   if(rec&&rec.state!=='inactive')rec.stop();
   if($('musAuto').checked){aud.pause();$('musTest').textContent='Testar música'}
   try{if(wake)wake.release()}catch(e){}wake=null;
