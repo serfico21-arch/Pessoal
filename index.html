@@ -20,7 +20,11 @@
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{font-family:'DM Sans',sans-serif;color:var(--tx);min-height:100vh;padding-top:var(--hh);background:var(--bg) radial-gradient(900px 520px at 12% -10%,rgba(34,211,238,.13),transparent 60%),radial-gradient(800px 500px at 100% 0,rgba(167,139,250,.11),transparent 60%);position:relative;-webkit-tap-highlight-color:transparent}
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:38px 38px}
-body.modo-pessoal{--ac:var(--sk)}body.modo-pastor{--ac:var(--vi)}
+body.modo-pessoal{--ac:var(--sk)}body.modo-pastor{--ac:var(--vi)}body.modo-geral{--ac:var(--cy)}
+.modeswitch button.geral{--c:var(--cy)}
+.bloco-modo{margin-bottom:40px}.bloco-modo section{margin-bottom:26px}
+.modo-titulo{display:flex;align-items:center;gap:12px;margin:6px 0 22px;padding:13px 18px;border-radius:14px;border:1px solid color-mix(in srgb,var(--c) 42%,transparent);background:color-mix(in srgb,var(--c) 11%,transparent);color:var(--c);font:800 18px 'Sora',sans-serif}
+.modo-titulo i{font-size:22px}.modo-titulo small{margin-left:auto;font:500 11px 'JetBrains Mono',monospace;color:var(--texto-muted);letter-spacing:.06em}
 a{color:inherit}button{font-family:inherit}
 :focus-visible{outline:2px solid var(--cy);outline-offset:3px;border-radius:8px}
 /* HEADER */
@@ -197,6 +201,7 @@ dialog#dlg-novo::backdrop{background:rgba(3,6,14,.74);backdrop-filter:blur(4px)}
   <div class="header-info"><h1>Sérgio Costa</h1><p>CRECI-SP 294791-F · CNAI 52708</p></div>
   <div class="header-right">
     <div class="modeswitch" role="group" aria-label="Alternar modo do painel">
+      <button type="button" id="btn-modo-geral" class="geral" aria-pressed="false"><i class="ti ti-layout-dashboard"></i>Geral</button>
       <button type="button" id="btn-modo-corretor" aria-pressed="true"><i class="ti ti-building-skyscraper"></i>Corretor</button>
       <button type="button" id="btn-modo-pessoal" class="pessoal" aria-pressed="false"><i class="ti ti-user"></i>Pessoal</button>
       <button type="button" id="btn-modo-pastor" class="pastor" aria-pressed="false"><i class="ti ti-book-2"></i>Pastor</button>
@@ -386,6 +391,14 @@ var FERRAMENTAS = [
   {m:"corretor", g:"avaliacao", t:"Conversor de Área", s:"m² · hectare · alqueire", i:"ti-ruler-2", h:"conversor-area.html", k:"conversor de área m² hectare alqueire"},
   {m:"corretor", g:"avaliacao", t:"Guia de Áreas do Imóvel", s:"Útil, construída, fração ideal", i:"ti-ruler-2", h:"areas-imoveis.html", k:"guia de áreas do imóvel útil construída fração ideal"},
   {m:"corretor", g:"avaliacao", t:"Vistoria", s:"Fotos, vídeo e laudo em PDF", i:"ti-camera-check", h:"vistoria_pro.html", k:"vistoria fotos vídeo laudo pdf"},
+  {m:"corretor", g:"avaliacao", t:"PTAM Oficial (COFECI/CRECI)", s:"Sistema oficial para cadastro e emissão", i:"ti-building-bank", h:"https://ptam.creci.org.br/admin/perfil_frm.php?new", k:"ptam oficial cofeci creci parecer técnico avaliação mercadológica"},
+  {m:"corretor", g:"avaliacao", t:"Editor PTAM Pro", s:"Completo: NBR 14653, amostras, CEF e judicial", i:"ti-layout-sidebar", h:"https://serfico21-arch.github.io/PTAM_FCOSTA/ptam.html", k:"editor ptam pro completo nbr 14653 amostras cef cpc judicial pdf"},
+  {m:"corretor", g:"avaliacao", t:"Editor PTAM (simples)", s:"Versão enxuta para preencher rápido", i:"ti-edit", h:"https://serfico21-arch.github.io/PTAM_FCOSTA/ptam-editor.html", k:"editor ptam simples enxuto preenchimento rápido"},
+  {m:"corretor", g:"avaliacao", t:"PTAM — Modelo Completo", s:"Capa, sumário e todas as seções para editar", i:"ti-file-text", h:"https://serfico21-arch.github.io/PTAM_FCOSTA/PTAM_FCosta.html", k:"ptam modelo completo capa sumário parecer editar"},
+  {m:"corretor", g:"avaliacao", t:"PTAM — Modelo Manual", s:"Modelo simples para casos rápidos", i:"ti-writing", h:"https://serfico21-arch.github.io/PTAM_FCOSTA/ptam-modelo-manual.html", k:"ptam modelo manual simplificado parecer"},
+  {m:"corretor", g:"avaliacao", t:"Opinião de Valor (OVM)", s:"Avaliação rápida do preço de venda", i:"ti-currency-dollar", h:"https://serfico21-arch.github.io/PTAM_FCOSTA/opiniao-valor-ovm.html", k:"opinião de valor ovm avaliação rápida preço venda m2"},
+  {m:"corretor", g:"avaliacao", t:"Laudos & Autorizações (IA)", s:"Laudo e autorização de venda com IA", i:"ti-sparkles", h:"https://serfico21-arch.github.io/PTAM_FCOSTA/laudo-autorizacoes-ia.html", k:"laudos autorizações ia laudo geral autorização de venda exclusividade pdf"},
+  {m:"corretor", g:"avaliacao", t:"Guia NBR 14653-2", s:"Busca rápida: métodos, vistoria e laudo", i:"ti-search", h:"https://serfico21-arch.github.io/PTAM_FCOSTA/nbr14653-2-referencia.html", k:"guia nbr 14653 2 norma busca rápida avaliação imóveis urbanos"},
   {m:"corretor", g:"consulta", t:"Matrícula", s:"RI Digital — pedir certidão de matrícula", i:"ti-file-certificate", h:"https://ridigital.org.br/Acesso.aspx", k:"matrícula ri digital registro de imóveis certidão"},
   {m:"corretor", g:"consulta", t:"Geo Sampa", s:"Mapa digital da cidade de São Paulo", i:"ti-map-2", h:"https://novogeosampa.prefeitura.sp.gov.br/#map=9.83/-23.67359/-46.60345/0&layers=103/100/100/&basemap=5/100/100", k:"geo sampa geosampa mapa zoneamento prefeitura são paulo"},
   {m:"corretor", g:"consulta", t:"Prefeitura — IPTU", s:"Secretaria da Fazenda de São Paulo", i:"ti-building-bank", h:"https://prefeitura.sp.gov.br/fazenda/", k:"prefeitura iptu fazenda são paulo imposto predial débitos"},
@@ -508,6 +521,7 @@ var FERRAMENTAS = [
     return grupos;
   }
 
+  var btnGeral = document.getElementById('btn-modo-geral');
   var btnCorretor = document.getElementById('btn-modo-corretor');
   var btnPessoal = document.getElementById('btn-modo-pessoal');
   var btnPastor = document.getElementById('btn-modo-pastor');
@@ -519,7 +533,12 @@ var FERRAMENTAS = [
   var buscaLimpar = document.getElementById('busca-limpar');
 
   var modo = lerStorage('painel_modo', 'corretor');
-  if (modo !== 'corretor' && modo !== 'pessoal' && modo !== 'pastor') modo = 'corretor';
+  if (modo !== 'geral' && modo !== 'corretor' && modo !== 'pessoal' && modo !== 'pastor') modo = 'corretor';
+  var MODOS_GERAL = [
+    { id: 'corretor', n: 'Corretor', i: 'ti-building-skyscraper', c: '--em' },
+    { id: 'pessoal', n: 'Pessoal', i: 'ti-user', c: '--sk' },
+    { id: 'pastor', n: 'Pastor', i: 'ti-book-2', c: '--vi' }
+  ];
   var aba = null;
 
   function tile(it) {
@@ -540,8 +559,11 @@ var FERRAMENTAS = [
 
   function render() {
     var itens = todosItens();
-    var grupos = gruposDoModo(modo, itens);
-    var doModo = itens.filter(function (it) { return it.m === modo; });
+    var geral = modo === 'geral';
+    var grupos = geral ? [] : gruposDoModo(modo, itens);
+    var gruposGeral = {};
+    if (geral) MODOS_GERAL.forEach(function (mm) { gruposGeral[mm.id] = gruposDoModo(mm.id, itens); });
+    var doModo = geral ? itens.slice() : itens.filter(function (it) { return it.m === modo; });
     var termo = norm(busca.value.trim());
     searchBox.classList.toggle('has-value', busca.value.trim().length > 0);
 
@@ -553,6 +575,12 @@ var FERRAMENTAS = [
       if (q > 0) abas.push({ id: g.id, n: g.n, i: g.i, c: g.c, q: q, g: g });
     });
     abas.push({ id: 'todas', n: 'Todas (A–Z)', i: 'ti-list', c: '--sk', q: doModo.length });
+    if (geral) {
+      abas = [{ id: 'tudo', n: 'Tudo', i: 'ti-layout-dashboard', c: '--cy', q: doModo.length }];
+      MODOS_GERAL.forEach(function (mm) {
+        abas.push({ id: 'm-' + mm.id, n: mm.n, i: mm.i, c: mm.c, q: doModo.filter(function (it) { return it.m === mm.id; }).length });
+      });
+    }
 
     var existe = abas.some(function (a) { return a.id === aba; });
     if (!existe) aba = abas[0].id;
@@ -577,6 +605,19 @@ var FERRAMENTAS = [
       } else {
         html = '<div class="empty-state" style="display:flex"><i class="ti ti-mood-empty"></i>Nenhum item corresponde à busca.</div>';
       }
+    } else if (geral) {
+      var escolhidos = MODOS_GERAL.filter(function (mm) { return aba === 'tudo' || aba === 'm-' + mm.id; });
+      html = escolhidos.map(function (mm) {
+        var doMm = doModo.filter(function (it) { return it.m === mm.id; });
+        var blocos = gruposGeral[mm.id].map(function (g) {
+          var lista = doMm.filter(function (it) { return it._g === g; }).sort(porNome);
+          if (!lista.length) return '';
+          return '<section>' + cabecalho(g, (g.s ? g.s + ' · ' : '') + plural(lista.length)) +
+            '<div class="row-list">' + lista.map(tile).join('') + '</div></section>';
+        }).join('');
+        return '<div class="bloco-modo"><div class="modo-titulo" style="--c:var(' + mm.c + ')"><i class="ti ' + mm.i + '"></i>' + mm.n +
+          '<small>' + plural(doMm.length) + '</small></div>' + blocos + '</div>';
+      }).join('');
     } else if (aba === 'todas') {
       var todas = doModo.slice().sort(porNome);
       html = '<section><div class="section-label" style="--c:var(--sk)"><span class="section-icon"><i class="ti ti-list"></i></span>' +
@@ -597,7 +638,8 @@ var FERRAMENTAS = [
     btnCorretor.setAttribute('aria-pressed', String(m === 'corretor'));
     btnPessoal.setAttribute('aria-pressed', String(m === 'pessoal'));
     btnPastor.setAttribute('aria-pressed', String(m === 'pastor'));
-    document.body.classList.remove('modo-corretor', 'modo-pessoal', 'modo-pastor');
+    btnGeral.setAttribute('aria-pressed', String(m === 'geral'));
+    document.body.classList.remove('modo-geral', 'modo-corretor', 'modo-pessoal', 'modo-pastor');
     document.body.classList.add('modo-' + m);
     gravarStorage('painel_modo', m);
     aba = lerStorage('painel_aba_' + m, null);
@@ -609,6 +651,7 @@ var FERRAMENTAS = [
     busca.value = '';
     render();
   }
+  btnGeral.addEventListener('click', function () { aplicarModo('geral'); });
   btnCorretor.addEventListener('click', function () { aplicarModo('corretor'); });
   btnPessoal.addEventListener('click', function () { aplicarModo('pessoal'); });
   btnPastor.addEventListener('click', function () { aplicarModo('pastor'); });
@@ -716,7 +759,7 @@ var FERRAMENTAS = [
   function abrirDialogo() {
     nvTitulo.value = ''; nvSub.value = ''; nvHref.value = ''; nvGrupoNovo.value = '';
     iconeEscolhido = 'ti-star';
-    nvModo.value = modo;
+    nvModo.value = modo === 'geral' ? 'corretor' : modo;
     preencherGrupos(aba);
     desenharIcones(); listarMeus();
     if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
@@ -753,7 +796,8 @@ var FERRAMENTAS = [
     btnCorretor.setAttribute('aria-pressed', String(m === 'corretor'));
     btnPessoal.setAttribute('aria-pressed', String(m === 'pessoal'));
     btnPastor.setAttribute('aria-pressed', String(m === 'pastor'));
-    document.body.classList.remove('modo-corretor', 'modo-pessoal', 'modo-pastor');
+    btnGeral.setAttribute('aria-pressed', String(m === 'geral'));
+    document.body.classList.remove('modo-geral', 'modo-corretor', 'modo-pessoal', 'modo-pastor');
     document.body.classList.add('modo-' + m);
     gravarStorage('painel_modo', m);
     irParaAba(alvo ? alvo.id : 'todas');
