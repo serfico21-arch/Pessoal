@@ -17,6 +17,7 @@ details{margin:8px 0;font-size:14px}details input{margin:6px 0}h2{font-size:15px
 #d h3{margin:0 0 4px;font-size:20px}
 .r{margin:8px 0}.r b{color:var(--ac)}
 .m{overflow-x:auto}.dt::after{content:" ★";color:var(--ac)}.sm{border-left:3px solid var(--ac);padding-left:10px;margin-top:14px}.cg{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}.cg .c{min-width:38px;padding:6px;border:1px solid var(--ln);background:var(--ca);color:var(--fg);border-radius:8px;font:13px Georgia,serif;cursor:pointer}.cg .has{background:var(--n2);border-color:var(--ac)}.vs li{margin:4px 0}.ov{color:var(--mu);margin:18px 0 4px;font-size:14px}.ai h5{color:var(--ac);margin:12px 0 2px;font-size:15px}.ai p{margin:4px 0}.ai .li{margin:2px 0 2px 8px}.eb{float:right;margin-left:8px;padding:0 6px;border:1px solid var(--ln);border-radius:10px}.vr{padding:6px 4px;border-bottom:1px solid var(--ln);cursor:pointer}.ac{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.ac input{width:140px}.sm h4{margin:0 0 4px;color:var(--ac)}.sr::after{content:" ★✝"}ul,ol{margin:4px 0;padding-left:20px}svg{width:100%;min-width:340px;height:auto}
+.tb{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.tb select{flex:1;min-width:150px;max-width:100%;padding:9px;border:1px solid var(--ln);border-radius:10px;background:var(--ca);color:var(--fg);font:14px Georgia,serif}.tv{padding:6px 4px;border-bottom:1px solid var(--ln);cursor:pointer}.tv.sel{background:var(--n1)}.tv>b{color:var(--ac);margin-right:5px;font-size:12px;vertical-align:super}.tv .t2{color:var(--mu);margin-top:3px;font-size:15px}.tl{font-size:11px;color:var(--ac);border:1px solid var(--ln);border-radius:8px;padding:0 5px;margin-right:5px;white-space:nowrap}
 </style></head><body>
 <p class="s"><a href="index.html" style="color:var(--ac)">← Voltar ao painel</a></p>
 <h1>📖 Bíblia Explicada FCosta</h1>
@@ -173,7 +174,43 @@ document.getElementById("be").onclick=()=>{const v=+document.getElementById("vn"
 document.getElementById("bk").onclick=()=>esb(b,n,0,(((CH[b.n]||{})[n-1])||""));
 (()=>{ai(PL,Li,t=>{Li.innerHTML="<h5>Versículo a versículo (toque para explicar)</h5>"+t.split("\n").map(l=>l.match(/^\D*(\d+)\s*[:.-]\s*(.+)$/)).filter(Boolean).map(m=>`<div class="vr" data-v="${m[1]}"><b>${m[1]}</b> ${m[2].replace(/&/g,"&amp;").replace(/</g,"&lt;")} <span class="eb" title="Gerar esboço deste versículo">📝</span></div>`).join("");Li.querySelectorAll(".vr").forEach(r=>{r.onclick=()=>open(r.dataset.v);r.querySelector(".eb").onclick=ev=>{ev.stopPropagation();esb(b,n,r.dataset.v,r.textContent.replace(/^\s*\d+\s*/,"").replace("📝","").trim())}})});
 ai(P1,C);ai(P2,D)})()}
-function chap(b,n){chap0(b,n);acts(b,n)}
+/* ===== Traduções bíblicas (acréscimo) ===== */
+const BIBURL="https://raw.githubusercontent.com/thiagobodruk/bible/master/json/";
+const BIBV=[["Português",[["pt_arc","ARC","Almeida Revista e Corrigida"],["pt_ara","ARA","Almeida Revista e Atualizada"],["pt_acf","ACF","Almeida Corrigida Fiel"],["pt_aa","AA","Almeida Atualizada (Imprensa Bíblica)"],["pt_naa","NAA","Nova Almeida Atualizada"],["pt_a21","A21","Almeida Século 21"],["pt_rc69","RC69","Almeida Revista e Corrigida 1969"],["pt_nvi2011","NVI","Nova Versão Internacional"],["pt_nvt","NVT","Nova Versão Transformadora"],["pt_ntlh","NTLH","Nova Tradução na Linguagem de Hoje"],["pt_nbv","NBV","Nova Bíblia Viva"],["pt_vfl","VFL","Versão Fácil de Ler"],["pt_kja","KJA","King James Atualizada"],["pt_bkj","BKJ","King James Fiel"],["pt_tb","TB","Tradução Brasileira"],["pt_ol","OL","O Livro"]]],["English",[["en_kjv","KJV","King James Version"],["en_asv","ASV","American Standard Version"],["en_web","WEB","World English Bible"],["en_bbe","BBE","Bible in Basic English"]]],["Español",[["es_rvr1960","RVR60","Reina-Valera 1960"]]]];
+const BIBM={};BIBV.forEach(g=>g[1].forEach(x=>{BIBM[x[0]]=x}));
+const BIBC={};let BIBTK=0;
+function bsv(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}}
+function bss(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+function besc(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+function bget(id){if(BIBC[id])return BIBC[id];
+BIBC[id]=(async()=>{const u=BIBURL+id+".json";let t=null,ca=null;
+try{ca=await caches.open("bib-fcosta-v1");const h=await ca.match(u);if(h)t=await h.text()}catch(e){ca=null}
+if(t===null){const r=await fetch(u);if(!r.ok)throw new Error("erro "+r.status);const cl=r.clone();t=await r.text();try{if(ca)await ca.put(u,cl)}catch(e){}}
+const d=JSON.parse(t.replace(/^\uFEFF/,""));if(!Array.isArray(d)||d.length!==66)throw new Error("arquivo fora do formato");return d})().catch(e=>{delete BIBC[id];throw e});
+return BIBC[id]}
+function bopts(cur,none){return(none?`<option value=""${cur===""?" selected":""}>＋ Comparar com outra tradução</option>`:"")+BIBV.map(g=>`<optgroup label="${g[0]}">${g[1].map(x=>`<option value="${x[0]}"${x[0]===cur?" selected":""}>${x[1]} — ${x[2]}</option>`).join("")}</optgroup>`).join("")}
+function bib(b,n){const cv=document.getElementById("cv");if(!cv)return;
+const idx=T[0][1].concat(T[1][1]).indexOf(b);if(idx<0)return;
+const old=document.getElementById("bibx");if(old)old.remove();
+let v1=bsv("bib_v1","pt_arc"),v2=bsv("bib_v2","");if(!BIBM[v1])v1="pt_arc";if(v2&&!BIBM[v2])v2="";
+const box=document.createElement("div");box.className="sm";box.id="bibx";
+box.innerHTML=`<h4>📖 Texto bíblico — ${besc(b.n)} ${n}</h4><div class="tb"><select id="bv1" aria-label="Tradução">${bopts(v1,false)}</select><select id="bv2" aria-label="Comparar com">${bopts(v2,true)}</select></div><div id="bt"></div>`;
+const ac=cv.querySelector(".ac");if(ac)ac.insertAdjacentElement("beforebegin",box);else cv.appendChild(box);
+const bt=box.querySelector("#bt");
+const go=async()=>{const my=++BIBTK;const ids=[v1];if(v2&&v2!==v1)ids.push(v2);
+bt.innerHTML='<p class="s">⏳ Carregando a tradução… (na primeira vez baixa cerca de 4 MB e depois fica guardada no aparelho)</p>';
+try{const ds=await Promise.all(ids.map(bget));if(my!==BIBTK||!box.isConnected)return;
+const A=ds[0][idx].chapters[n-1],B=ds[1]?ds[1][idx].chapters[n-1]:null;
+if(!A&&!B){bt.innerHTML='<p class="s">Este capítulo não existe nesta tradução.</p>';return}
+const len=Math.max(A?A.length:0,B?B.length:0),l1=BIBM[ids[0]][1],l2=ids[1]?BIBM[ids[1]][1]:"";let h="";
+for(let i=0;i<len;i++){h+=`<div class="tv" data-v="${i+1}"><b>${i+1}</b>`+(B?`<span class="tl">${l1}</span>`:"")+(A&&A[i]!==undefined?besc(A[i]):"<i>—</i>")+(B?`<div class="t2"><span class="tl">${l2}</span>${B[i]!==undefined?besc(B[i]):"—"}</div>`:"")+`</div>`}
+bt.innerHTML=h+'<p class="s">Toque em um versículo para selecioná-lo; depois use os botões abaixo (Explicar versículo / Esboço do versículo). Em alguns Salmos a numeração dos versículos varia entre traduções.</p>';
+bt.querySelectorAll(".tv").forEach(r=>{r.onclick=()=>{const vn=document.getElementById("vn");if(vn)vn.value=r.dataset.v;bt.querySelectorAll(".tv.sel").forEach(x=>x.classList.remove("sel"));r.classList.add("sel")}})}
+catch(e){if(my!==BIBTK||!box.isConnected)return;bt.innerHTML=`<p class="s">Não foi possível carregar a tradução (${besc(e&&e.message||"erro")}). Na primeira vez é preciso estar com internet.</p><button class="b" id="brt">↻ Tentar de novo</button>`;box.querySelector("#brt").onclick=go}};
+box.querySelector("#bv1").onchange=ev=>{v1=ev.target.value;bss("bib_v1",v1);go()};
+box.querySelector("#bv2").onchange=ev=>{v2=ev.target.value;bss("bib_v2",v2);go()};
+go()}
+function chap(b,n){chap0(b,n);acts(b,n);try{bib(b,n)}catch(e){console.error(e)}}
 function sec(b,n){const o=((DET[b.n]||"").split("#")[4]||"").split(";");for(const i of o){const m=i.match(/^(.*)\((\d+)(?:[–-](\d+))?\)/);if(m&&n>=+m[2]&&n<=+(m[3]||m[2]))return`<p><b>Parte do livro:</b> ${m[1].trim()}</p>`}return""}
 function cap(b){const e=document.getElementById("cp"),h=CH[b.n]||{};
 e.innerHTML=`<div class="sm"><h4>🔍 Capítulos de ${b.n} (${b.c})</h4><input id="ci" type="number" min="1" max="${b.c}" placeholder="🔍 Digite o capítulo (1–${b.c})"><div class="cg">${Array.from({length:b.c},(_,i)=>`<button class="c${h[i]?" has":""}" data-n="${i+1}">${i+1}</button>`).join("")}</div><div id="cv"></div></div>`;
