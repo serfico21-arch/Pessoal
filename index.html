@@ -858,6 +858,10 @@ var FERRAMENTAS = [
     var h = a.getAttribute('href');
     if (!h || /^(mailto:|tel:|javascript:|#|data:|blob:|sms:|whatsapp:)/i.test(h) || /^(https?:)?\/\/(wa\.me|api\.whatsapp\.com)/i.test(h)) return;
     if (a.target === '_blank' && !/^(https?:)?\/\//i.test(h)) return;
+    /* site de outro domínio (RI Digital, GeoSampa, Prefeitura...) bloqueia iframe: deixa abrir em nova aba */
+    if (/^(https?:)?\/\//i.test(h)) {
+      try { if (new URL(h, location.href).origin !== location.origin) return; } catch (err) { return; }
+    }
     e.preventDefault();
     var t = a.querySelector('.t');
     abrir(h, (t ? t.textContent : a.textContent).trim());
