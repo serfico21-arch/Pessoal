@@ -17,7 +17,7 @@
 <style>
 :root{--bg:#070b16;--card:#0f1729;--card2:#131d33;--line:rgba(148,163,184,.16);--tx:#eaf0ff;--texto-muted:#8d9bbd;--cy:#22d3ee;--em:#34d399;--am:#fbbf24;--vi:#a78bfa;--ro:#fb7185;--sk:#60a5fa;--or:#fb923c;--ac:var(--cy);--dock:92px;--hh:64px}
 [data-theme=light]{--bg:#f3f6fb;--card:#fff;--card2:#fff;--line:rgba(15,23,42,.1);--tx:#0f172a;--texto-muted:#5b6784;--cy:#0891b2;--em:#059669;--am:#d97706;--vi:#7c3aed;--ro:#e11d48;--sk:#2563eb;--or:#ea580c}
-body[data-view=corretor]{--ac:var(--em)}body[data-view=pessoal]{--ac:var(--sk)}body[data-view=pastor]{--ac:var(--vi)}
+body[data-view=corretor]{--ac:var(--em)}body[data-view=pessoal]{--ac:var(--sk)}body[data-view=pastor]{--ac:var(--vi)}body[data-view=favoritos]{--ac:var(--am)}
 *{box-sizing:border-box;margin:0;padding:0}[hidden]{display:none!important}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{font:15px/1.45 'DM Sans',sans-serif;color:var(--tx);background:var(--bg);min-height:100vh;padding-left:var(--dock)}
@@ -75,6 +75,8 @@ kbd{font:600 12px 'DM Sans';padding:2px 8px;border-radius:7px;border:1px solid v
 .pill{flex:none;display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:30px;border:1px solid var(--line);background:var(--card);font-size:13.5px;font-weight:600;white-space:nowrap}
 .pill i{color:var(--c);font-size:17px}.pill em{font-style:normal;font-size:11.5px;color:var(--texto-muted)}
 .pill.on{background:color-mix(in srgb,var(--c) 18%,transparent);border-color:var(--c)}
+.pill-busca{position:sticky;left:0;z-index:2;color:var(--bg);background:var(--ac);border-color:var(--ac);box-shadow:6px 0 10px -4px var(--bg)}
+.pill-busca i{color:var(--bg)}
 .gdesc{font-size:13px;color:var(--texto-muted);margin:4px 0 14px}.vazio{font-size:13.5px;color:var(--texto-muted)}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 a.chip{display:flex;align-items:center;gap:8px;min-height:0;padding:9px 14px;border-radius:30px;font-size:13.5px}a.chip i{color:var(--ac)}
@@ -168,6 +170,7 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
   <button type="button" data-go="corretor" style="--c:var(--em)"><i class="ti ti-building-skyscraper"></i>Corretor</button>
   <button type="button" data-go="pessoal" style="--c:var(--sk)"><i class="ti ti-user"></i>Pessoal</button>
   <button type="button" data-go="pastor" style="--c:var(--vi)"><i class="ti ti-book-2"></i>Pastor</button>
+  <button type="button" data-go="favoritos" style="--c:var(--am)"><i class="ti ti-star"></i>Favoritos</button>
 </nav>
 <main id="vista"></main>
 <footer><strong>FCosta</strong> · Sérgio Fernandes da Costa · CRECI-SP 294791-F · CNAI 52708<small>Leads, favoritos e botões novos ficam salvos apenas neste navegador, em nenhum servidor.</small></footer>
@@ -451,7 +454,7 @@ var FERRAMENTAS = [
   };
   var vistaEl = document.getElementById('vista');
   var modo = lerStorage('painel_vista', 'inicio');
-  if (modo !== 'inicio' && !MUNDOS[modo]) modo = 'inicio';
+  if (modo !== 'inicio' && modo !== 'favoritos' && !MUNDOS[modo]) modo = 'inicio';
   var aba = null;
   var favs = lerStorage('painel_favs', null);
   if (!Array.isArray(favs)) {
@@ -489,15 +492,31 @@ var FERRAMENTAS = [
       return '<button type="button" class="mundo" style="--c:var(' + M.c + ')" data-go="' + m + '"><i class="ti ' + M.i + ' big"></i>' +
         '<span class="mn">' + M.n + '</span><span class="md">' + M.d + '</span>' +
         '<span class="mq">' + q + (q === 1 ? ' ferramenta' : ' ferramentas') + ' <i class="ti ti-arrow-right"></i></span></button>';
-    }).join('') + '</div>';
-    var fv = favs.map(function (k) { return itens.filter(function (i) { return chave(i) === k; })[0]; }).filter(Boolean);
-    html += '<h2 class="sec">Favoritos</h2>' + (fv.length ? '<div class="lista">' + fv.map(item).join('') + '</div>' :
-      '<p class="vazio">Toque na ★ de qualquer ferramenta para fixar aqui.</p>');
+    }).join('') + (function () {
+      var n = favs.map(function (k) { return itens.filter(function (i) { return chave(i) === k; })[0]; }).filter(Boolean).length;
+      return '<button type="button" class="mundo" style="--c:var(--am)" data-go="favoritos"><i class="ti ti-star-filled big"></i>' +
+        '<span class="mn">Favoritos</span><span class="md">Suas ferramentas fixadas com ★</span>' +
+        '<span class="mq">' + n + (n === 1 ? ' favorito' : ' favoritos') + ' <i class="ti ti-arrow-right"></i></span></button>';
+    })() + '</div>';
     var rec = lerStorage('painel_recentes', []);
     if (rec.length) html += '<h2 class="sec">Continuar de onde parou</h2><div class="chips">' + rec.map(function (r) {
       return '<a class="item-link chip" href="' + esc(r.href) + '"' + (r.href.indexOf('http') === 0 ? ' target="_blank" rel="noopener"' : '') +
         '><i class="ti ti-history"></i><span class="t">' + esc(r.titulo) + '</span></a>';
     }).join('') + '</div>';
+    return html;
+  }
+
+  function htmlFavoritos() {
+    var itens = ligar(todosItens());
+    var fv = favs.map(function (k) { return itens.filter(function (i) { return chave(i) === k; })[0]; }).filter(Boolean);
+    var html = '<section class="mhead" style="--c:var(--am)"><span class="mh-ic"><i class="ti ti-star-filled"></i></span><div><h1>Favoritos</h1><p>' +
+      fv.length + (fv.length === 1 ? ' ferramenta fixada' : ' ferramentas fixadas') + ' de todas as áreas</p></div></section>' +
+      '<button type="button" class="busca-pill" data-open="busca" style="margin-bottom:14px"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button>';
+    if (!fv.length) return html + '<p class="vazio">Nenhum favorito ainda. Toque na ★ de qualquer ferramenta para fixar aqui.</p>';
+    ORDEM.forEach(function (m) {
+      var l = fv.filter(function (i) { return i.m === m; }).sort(porNome);
+      if (l.length) html += '<h2 class="sec">' + esc(MUNDOS[m].n) + '</h2><div class="lista">' + l.map(item).join('') + '</div>';
+    });
     return html;
   }
 
@@ -508,25 +527,27 @@ var FERRAMENTAS = [
       return { id: g.id, n: g.n, i: g.i, c: g.c, g: g, q: lista.filter(function (i) { return i._g === g; }).length };
     }).filter(function (a) { return a.q > 0; });
     abas.push({ id: 'todas', n: 'A–Z', i: 'ti-list', c: '--sk', q: lista.length });
-    if (!abas.some(function (a) { return a.id === aba; })) aba = abas[0].id;
+    var favLista = lista.filter(function (i) { return favs.indexOf(chave(i)) > -1; });
+    abas.unshift({ id: 'favoritos', n: 'Favoritos', i: 'ti-star-filled', c: '--am', q: favLista.length, fav: true });
+    if (!abas.some(function (a) { return a.id === aba; })) aba = (favLista.length ? abas[0] : abas[1]).id;
     var at = abas.filter(function (a) { return a.id === aba; })[0];
-    var sel = (aba === 'todas' ? lista : lista.filter(function (i) { return i._g === at.g; })).slice().sort(porNome);
+    var sel = (aba === 'favoritos' ? favLista : aba === 'todas' ? lista : lista.filter(function (i) { return i._g === at.g; })).slice().sort(porNome);
     return '<section class="mhead" style="--c:var(' + M.c + ')"><span class="mh-ic"><i class="ti ' + M.i + '"></i></span><div><h1>' + M.n + '</h1><p>' + M.d + '</p></div>' +
       '<button type="button" class="btn-sec" data-open="novo"><i class="ti ti-plus"></i><span>Novo botão</span></button></section>' +
-      '<div class="pills">' + abas.map(function (a) {
-        return '<button type="button" class="pill' + (a.id === aba ? ' on' : '') + '" style="--c:var(' + a.c + ')" data-aba="' + esc(a.id) + '"><i class="ti ' + esc(a.i) + '"></i>' + esc(a.n) + '<em>' + a.q + '</em></button>';
+      '<div class="pills"><button type="button" class="pill pill-busca" data-open="busca" aria-label="Buscar ferramenta"><i class="ti ti-search"></i>Buscar</button>' + abas.map(function (a) {
+        return '<button type="button" class="pill' + (a.id === aba ? ' on' : '') + '" style="--c:var(' + a.c + ')" data-aba="' + esc(a.id) + '"><i class="ti ' + esc(a.i) + '"></i>' + esc(a.n) + '<em' + (a.fav ? ' class="fav-n"' : '') + '>' + a.q + '</em></button>';
       }).join('') + '</div>' + (at.g && at.g.s ? '<p class="gdesc">' + esc(at.g.s) + '</p>' : '') +
-      '<div class="lista">' + sel.map(item).join('') + '</div>';
+      (aba === 'favoritos' && !sel.length ? '<p class="vazio">Nenhum favorito nesta área ainda. Toque na ★ de qualquer ferramenta para fixar aqui.</p>' : '<div class="lista">' + sel.map(item).join('') + '</div>');
   }
 
   function render() {
     document.body.setAttribute('data-view', modo);
     [].forEach.call(document.querySelectorAll('.dock [data-go]'), function (b) { b.classList.toggle('on', b.getAttribute('data-go') === modo); });
-    vistaEl.innerHTML = modo === 'inicio' ? htmlInicio() : htmlMundo(modo);
+    vistaEl.innerHTML = modo === 'inicio' ? htmlInicio() : modo === 'favoritos' ? htmlFavoritos() : htmlMundo(modo);
   }
   function aplicarModo(m) {
     modo = m; gravarStorage('painel_vista', m);
-    aba = m === 'inicio' ? null : lerStorage('painel_aba_' + m, null);
+    aba = (m === 'inicio' || m === 'favoritos') ? null : lerStorage('painel_aba_' + m, null);
     render(); window.scrollTo(0, 0);
   }
   function irParaAba(id) { aba = id; gravarStorage('painel_aba_' + modo, id); render(); }
@@ -536,7 +557,9 @@ var FERRAMENTAS = [
     var k = b.getAttribute('data-fav'), i = favs.indexOf(k), on = i < 0;
     if (on) favs.push(k); else favs.splice(i, 1);
     gravarStorage('painel_favs', favs);
-    if (modo === 'inicio') { render(); return; }
+    if (modo === 'inicio' || modo === 'favoritos' || aba === 'favoritos') { render(); return; }
+    var fn = document.querySelector('.fav-n');
+    if (fn) fn.textContent = todosItens().filter(function (i) { return i.m === modo && favs.indexOf(chave(i)) > -1; }).length;
     [].forEach.call(document.querySelectorAll('.fav'), function (x) {
       if (x.getAttribute('data-fav') !== k) return;
       x.classList.toggle('on', on); x.setAttribute('aria-pressed', on);
@@ -669,7 +692,7 @@ var FERRAMENTAS = [
   function abrirDialogo() {
     nvTitulo.value = ''; nvSub.value = ''; nvHref.value = ''; nvGrupoNovo.value = '';
     iconeEscolhido = 'ti-star';
-    nvModo.value = modo === 'inicio' ? 'corretor' : modo;
+    nvModo.value = (modo === 'inicio' || modo === 'favoritos') ? 'corretor' : modo;
     preencherGrupos(aba);
     desenharIcones(); listarMeus();
     if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
