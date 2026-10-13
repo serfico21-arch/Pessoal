@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meus Aluguéis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--bg:#EEF3F2;--card:#fff;--ink:#17262B;--mute:#5B6B70;--pri:#1F4E5F;--ok:#1E7A46;--okbg:#DDF1E4;--bad:#B3261E;--badbg:#FBE3E1;--wait:#8A5A00;--waitbg:#FCEFCF;--line:#CBD8D6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.5 "Atkinson Hyperlegible",Verdana,Arial,sans-serif}
+header{background:var(--pri);color:#fff;padding:18px 16px}
+header h1{margin:0;font-size:26px}
+header p{margin:2px 0 0;opacity:.85;font-size:15px}
+main{max-width:720px;margin:0 auto;padding:16px}
+button{font:inherit;border:0;border-radius:10px;padding:12px 16px;background:var(--pri);color:#fff;cursor:pointer;font-weight:700}
+button.sec{background:#fff;color:var(--pri);border:2px solid var(--pri)}
+button.del{background:#fff;color:var(--bad);border:2px solid var(--bad)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #E0A526;outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:10px 0}
+.t{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;background:var(--card);color:var(--ink);border:1px solid var(--line);font-weight:400;margin:10px 0}
+.t b{display:block;font-size:20px}.t small{color:var(--mute);font-size:16px}
+.tag{padding:4px 10px;border-radius:99px;font-size:15px;font-weight:700;white-space:nowrap}
+.ok{background:var(--okbg);color:var(--ok)}.bad{background:var(--badbg);color:var(--bad)}.wait{background:var(--waitbg);color:var(--wait)}
+h2{font-size:22px;margin:18px 0 6px}
+.sum{font-size:20px;margin:8px 0}
+.meses{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.meses button{background:#fff;color:var(--ink);border:2px solid var(--line);padding:10px 4px;font-weight:400}
+.meses button small{display:block;font-size:14px}
+.meses .ok{border-color:var(--ok);background:var(--okbg);color:var(--ok);font-weight:700}
+.meses .bad{border-color:var(--bad);background:var(--badbg);color:var(--bad)}
+label{display:block;margin:10px 0 4px;font-weight:700}
+input,textarea,select{width:100%;font:inherit;padding:11px;border:2px solid var(--line);border-radius:10px;background:#fff}
+.dl label{display:flex;gap:10px;align-items:center;font-weight:400;margin:6px 0}
+.dl input{width:24px;height:24px}
+dialog{border:0;border-radius:14px;padding:18px;width:min(92vw,420px)}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+#recibo{display:none;position:fixed;inset:0;background:#fff;overflow:auto;padding:20px;z-index:9}
+.paper{max-width:794px;margin:0 auto;background:#fff;border:1px solid #1E3A5F;font-family:Georgia,"Times New Roman",serif;font-size:14px;line-height:1.55;color:#1c2733;box-sizing:border-box;overflow:hidden}
+.paper .top{height:8px;background:linear-gradient(90deg,#1E3A5F,#3B9BD6)}
+.paper .in{padding:22px 28px 16px}
+.paper p{margin:8px 0;text-align:justify}
+.rh{display:flex;flex-wrap:wrap;align-items:center;gap:14px;border-bottom:2px solid #1E3A5F;padding-bottom:12px}
+.rlogo{width:84px;min-height:70px;display:flex;align-items:center;justify-content:center;flex:none}
+.rlogo img{max-width:100%;max-height:84px}
+.mono{width:72px;height:72px;border-radius:50%;background:#1E3A5F;color:#fff;font:700 26px/66px Arial,sans-serif;text-align:center;border:3px solid #3B9BD6}
+.rid{flex:1;min-width:180px;font-family:Arial,sans-serif}
+.rid b{display:block;font-size:19px;color:#1E3A5F}
+.rid span{display:block;font-size:12px;color:#44586b;line-height:1.5}
+.rn{text-align:right;font:12px/1.4 Arial,sans-serif;color:#44586b;margin-left:auto}
+.rn b{display:block;font-size:17px;color:#1E3A5F}
+.rt{text-align:center;margin:16px 0 2px;font:700 20px Arial,sans-serif;letter-spacing:3px;color:#1E3A5F}
+.rs{text-align:center;font:12px Arial,sans-serif;color:#5b6b7a;margin-bottom:10px}
+.rv{border:1.5px solid #1E3A5F;background:#EAF4FB;border-radius:6px;padding:8px 12px;text-align:center;font:700 20px Arial,sans-serif;color:#1E3A5F;margin:10px 0}
+.rv small{display:block;font:italic 12px Georgia,serif;color:#44586b;font-weight:400}
+table.rtb{width:100%;border-collapse:collapse;font:13px Arial,sans-serif;margin:10px 0}
+.rtb th{background:#1E3A5F;color:#fff;text-align:left;padding:6px 8px}
+.rtb td{padding:6px 8px;border-bottom:1px solid #d5e0ea}
+.rtb td:last-child,.rtb th:last-child{text-align:right;white-space:nowrap}
+.rtb tr.tot td{font-weight:700;background:#EAF4FB;border-top:2px solid #1E3A5F}
+.sgw{display:flex;justify-content:space-between;align-items:flex-end;margin-top:22px;gap:14px}
+.sgl{flex:1;text-align:center;font:12px/1.35 Arial,sans-serif}
+.sgl img{max-height:70px;max-width:100%;display:block;margin:0 auto -14px;position:relative}
+.sgl hr{border:0;border-top:1px solid #1c2733;margin:0 0 4px}
+.stp{width:170px;text-align:center}.stp img{max-height:100px;max-width:100%}
+.carimbo{border:2px solid #1E3A5F;color:#1E3A5F;border-radius:6px;padding:6px 10px;transform:rotate(-3deg);font:700 12px/1.4 Arial,sans-serif;display:inline-block}
+.carimbo span{display:block;font-weight:400}
+.rtb th.n,.rtb td.n{text-align:right;white-space:nowrap}.rtb.sm{font-size:11.5px}.rtb.sm th,.rtb.sm td{padding:5px 5px}.rtb.sm small{display:block;color:#5b6b7a;font-size:10px}
+.ciente{margin-top:16px;font:11.5px/1.6 Arial,sans-serif;color:#44586b;border-top:1px dashed #9db3c6;padding-top:6px}
+.rlei{margin-top:14px;padding-top:8px;border-top:1px solid #c9d6e2;font:10.5px/1.45 Arial,sans-serif;color:#5b6b7a;text-align:justify}
+.rft{background:#1E3A5F;color:#fff;font:11px Arial,sans-serif;text-align:center;padding:7px}
+.sig{margin-top:56px;text-align:center}.sig hr{border:0;border-top:1px solid #000;width:70%}
+.muted{color:var(--mute);font-size:15px}
+#pcv{width:100%;height:auto;border:2px dashed var(--line);border-radius:10px;touch-action:none;background:#fff;display:block}
+@media print{#app,#recibo .no{display:none!important}#recibo{position:static;padding:0}}
+</style>
+</head>
+<body>
+<div id="app">
+<header><a href="index.html" style="color:#fff;font-size:15px;text-decoration:none">← Voltar ao painel</a><h1>Meus Aluguéis</h1><p>Locatários, recibos e documentos</p></header>
+<main id="main"></main>
+</div>
+
+<dialog id="dlg">
+<h2 id="dt" style="margin-top:0"></h2>
+<label for="dd">Data do pagamento</label><input type="date" id="dd" oninput="calcAtraso()">
+<label for="dv">Valor total pago (R$)</label><input type="number" step="0.01" id="dv" inputmode="decimal"><label for="den">Encargos inclusos (R$) — opcional</label><input type="number" step="0.01" id="den" inputmode="decimal" placeholder="0,00" oninput="calcAtraso()"><label for="dend">Quais encargos</label><input id="dend" placeholder="Ex.: condomínio e IPTU"><label for="dmj">Multa e juros de mora (R$) — opcional</label><input type="number" step="0.01" id="dmj" inputmode="decimal" placeholder="0,00" oninput="totalManual()"><label for="dds">Desconto concedido (R$) — opcional</label><input type="number" step="0.01" id="dds" inputmode="decimal" placeholder="0,00" oninput="calcAtraso()"><div class="card" style="margin:12px 0 4px;padding:10px 12px"><b>Atraso no pagamento</b><p class="muted" id="datr" style="margin:4px 0">Escolha a data do pagamento.</p><button type="button" class="sec" onclick="calcAtraso()">Calcular atraso</button></div><label for="dfp">Forma de pagamento</label><select id="dfp"><option>PIX</option><option>Dinheiro</option><option>Transferência</option><option>Boleto</option><option>Cartão</option></select><label for="dob">Observação (opcional)</label><input id="dob" placeholder="Ex.: aluguel + condomínio">
+<div class="row">
+<button onclick="savePay(true)">Salvar e ver recibo</button>
+<button class="sec" onclick="savePay(false)">Só salvar</button>
+<button class="sec" id="ver" onclick="dlg.close();recibo(pay.id,pay.k)">Ver recibo</button>
+<button class="del" id="undo" onclick="undoPay()">Desfazer pagamento</button>
+<button class="sec" onclick="dlg.close()">Cancelar</button>
+</div>
+</dialog>
+
+<dialog id="cbdlg">
+<h2 style="margin-top:0">Cobrança extrajudicial</h2>
+<p class="muted">Marque os meses em aberto que entram na cobrança. Multa e juros são calculados até hoje, com os percentuais das configurações.</p>
+<div class="dl" id="cbm"></div>
+<label for="cbp">Prazo para pagamento (dias)</label><input id="cbp" type="number" min="1" value="5" inputmode="numeric">
+<label for="cbc">Correção monetária acumulada (%) — só se o contrato prevê</label><input id="cbc" type="number" step="0.01" min="0" inputmode="decimal" placeholder="0,00">
+<div class="row"><button onclick="gerarCobranca()">Gerar cobrança</button><button class="sec" onclick="cbdlg.close()">Cancelar</button></div>
+</dialog>
+
+<dialog id="ctdlg" style="max-height:92vh;overflow:auto">
+<h2 style="margin-top:0">Contrato de locação</h2>
+<p class="muted">Modelo conforme a Lei do Inquilinato (Lei 8.245/1991). Confira os dados e mostre a um advogado antes de assinar.</p>
+<label for="ctf">Finalidade</label><select id="ctf"><option>Residencial</option></select>
+<label for="cti">Início da locação</label><input type="date" id="cti">
+<label for="ctp">Prazo (meses)</label><input type="number" min="1" id="ctp" value="30" inputmode="numeric">
+<label for="ctx">Reajuste anual pelo índice</label><select id="ctx"><option>IGP-M (FGV)</option><option>IPCA (IBGE)</option><option>INPC (IBGE)</option></select>
+<label for="ctt">IPTU por conta de</label><select id="ctt"><option>Locatário</option><option>Locador</option></select>
+<label for="ctg">Garantia (só uma, a lei proíbe somar)</label><select id="ctg"><option>Fiador</option><option>Caução em dinheiro</option><option>Seguro-fiança</option><option>Título de capitalização</option></select>
+<label for="ctz">Parágrafo da Vigilância de Zoonose (DVZ)</label><select id="ctz"><option>Incluir</option><option>Não incluir</option></select><label for="ctd">Nome do fiador e cônjuge, ou nº da apólice</label><input id="ctd">
+<label for="ctc">Caução: quantos aluguéis (máx. 3)</label><input type="number" min="1" max="3" id="ctc" value="2" inputmode="numeric">
+<label for="ctv">Entrega do imóvel (cláusula Vistoria)</label><select id="ctv"><option>Termo (Laudo) de Vistoria</option><option>Descrição no contrato</option></select><label for="ctvd">Estado do imóvel (só se for descrição no contrato) — opcional</label><textarea id="ctvd" rows="3" placeholder="Ex.: pintura nova, portas e fechaduras funcionando, vidros inteiros"></textarea><label for="cta">Quem recebe o aluguel (administrador)</label><input id="cta" placeholder="Ex.: FCosta Corretor de Imóveis"><label for="ctbk">Dados para pagamento (banco, agência, conta ou PIX)</label><input id="ctbk"><label for="cth">Honorários advocatícios (% sobre o valor da causa)</label><input type="number" min="1" max="100" id="cth" inputmode="numeric" placeholder="20"><label for="ctfo">Foro (comarca do imóvel)</label><input id="ctfo" placeholder="São Paulo"><div class="row"><button id="ctab" class="sec" style="display:none" onclick="ctdlg.close();edAbrir()">Abrir contrato salvo</button><button onclick="gerarContrato()">Gerar contrato novo</button><button class="sec" onclick="ctdlg.close()">Cancelar</button></div>
+</dialog>
+<dialog id="cerdlg" style="max-height:88vh;overflow:auto"><h2 style="margin-top:0">Certidões do locatário</h2><div class="card" style="padding:10px 12px"><b id="cern"></b><br><span id="cerc"></span> <button class="sec" onclick="copiarCpf()">Copiar CPF</button></div><p class="muted">Peça a autorização por escrito do locatário antes de consultar (Lei 13.709/2018). Se preferir, peça que ele mesmo envie as certidões.</p><h3 style="margin:14px 0 2px;font-size:16px">Situação e dívidas</h3><a href="https://servicos.receita.fazenda.gov.br/servicos/cpf/consultasituacao/consultapublica.asp" target="_blank" rel="noopener" style="display:block;padding:10px 12px;border:1px solid #d9d9d9;border-radius:10px;margin:6px 0;text-decoration:none;color:inherit"><b>Situação do CPF (Receita Federal)</b><br><span class="muted">Confere se o CPF está regular e se o nome bate.</span></a><a href="https://solucoes.receita.fazenda.gov.br/Servicos/certidaointernet/PF/Emitir" target="_blank" rel="noopener" style="display:block;padding:10px 12px;border:1px solid #d9d9d9;border-radius:10px;margin:6px 0;text-decoration:none;color:inherit"><b>Certidão de débitos federais (Receita e PGFN)</b><br><span class="muted">Dívidas com a União no CPF.</span></a><a href="https://www.protestosp.com.br/consulta-de-protesto" target="_blank" rel="noopener" style="display:block;padding:10px 12px;border:1px solid #d9d9d9;border-radius:10px;margin:6px 0;text-decoration:none;color:inherit"><b>Protestos em cartório (SP)</b><br><span class="muted">Títulos protestados no CPF.</span></a><a href="https://cndt-certidao.tst.jus.br/inicio.faces" target="_blank" rel="noopener" style="display:block;padding:10px 12px;border:1px solid #d9d9d9;border-radius:10px;margin:6px 0;text-decoration:none;color:inherit"><b>Certidão de débitos trabalhistas (TST)</b><br><span class="muted">Dívidas e condenações trabalhistas.</span></a><h3 style="margin:14px 0 2px;font-size:16px">Processos na Justiça</h3><a href="https://esaj.tjsp.jus.br/sco/abrirCadastro.do" target="_blank" rel="noopener" style="display:block;padding:10px 12px;border:1px solid #d9d9d9;border-radius:10px;margin:6px 0;text-decoration:none;color:inherit"><b>Certidões do Tribunal de Justiça de SP</b><br><span class="muted">Distribuição cível, execuções, falência e criminal.</span></a><a href="https://esaj.tjsp.jus.br/cpopg/open.do" target="_blank" rel="noopener" style="display:block;padding:10px 12px;border:1px solid #d9d9d9;border-radius:10px;margin:6px 0;text-decoration:none;color:inherit"><b>Consulta de processos (TJSP)</b><br><span class="muted">Busca por nome ou CPF nos processos de 1º grau.</span></a><a href="https://www.cjf.jus.br/cjf/certidao-negativa" target="_blank" rel="noopener" style="display:block;padding:10px 12px;border:1px solid #d9d9d9;border-radius:10px;margin:6px 0;text-decoration:none;color:inherit"><b>Certidão da Justiça Federal</b><br><span class="muted">Processos cíveis e criminais na Justiça Federal.</span></a><h3 style="margin:14px 0 2px;font-size:16px">Antecedentes</h3><a href="https://servicos.pf.gov.br/epol-sinic-publico/" target="_blank" rel="noopener" style="display:block;padding:10px 12px;border:1px solid #d9d9d9;border-radius:10px;margin:6px 0;text-decoration:none;color:inherit"><b>Antecedentes criminais (Polícia Federal)</b><br><span class="muted">Certidão emitida na hora, com CPF.</span></a><a href="https://portalbnmp.cnj.jus.br" target="_blank" rel="noopener" style="display:block;padding:10px 12px;border:1px solid #d9d9d9;border-radius:10px;margin:6px 0;text-decoration:none;color:inherit"><b>Mandados de prisão (CNJ)</b><br><span class="muted">Consulta pública do Banco Nacional de Mandados de Prisão.</span></a><p class="muted">Consulta em Serasa ou SPC exige autorização do locatário e cadastro próprio, e não tem link aberto.</p><div class="row"><button class="sec" onclick="cerdlg.close()">Fechar</button></div></dialog>
+<dialog id="cedlg" style="width:min(96vw,760px);max-height:92vh;overflow:auto"><h2 style="margin-top:0">Editar contrato</h2><p class="muted">Modelo básico do CRECI. As cláusulas <b>fixas</b> são o padrão e ficam travadas; toque em "Editar" para liberar. As <b>editáveis</b> já vêm preenchidas com os dados do cadastro. Onde aparecer ______, complete.</p><div id="edl"></div><div class="card" style="padding:10px"><b>Adicionar cláusula</b><select id="edp"><option value="ele">Assinatura eletrônica</option><option value="med">Mediação</option><option value="arb">Arbitragem</option><option value="nov">Em branco</option></select><div class="row"><button class="sec" onclick="edAdd()">Adicionar ao final</button></div></div><div class="row"><button onclick="verContrato()">Ver contrato e enviar</button><button class="sec" onclick="cedlg.close()">Fechar</button></div></dialog>
+<dialog id="pdlg">
+<h2 style="margin-top:0">Assine com o dedo</h2>
+<canvas id="pcv" width="700" height="260"></canvas>
+<p class="muted">Assine dentro do quadro. A assinatura sai em azul.</p>
+<div class="row"><button onclick="salvarPad()">Salvar assinatura</button><button class="sec" onclick="limparPad()">Limpar</button><button class="sec" onclick="pdlg.close()">Cancelar</button></div>
+</dialog>
+<dialog id="cdlg">
+<h2 style="margin-top:0">Dados do recibo</h2>
+<label for="cn">Nome de quem assina</label><input id="cn">
+<label for="cq">Qualificação (aparece abaixo da assinatura)</label><input id="cq">
+<label for="cc">Cidade</label><input id="cc">
+<label for="cmp">Multa por atraso (%) — conforme o contrato</label><input id="cmp" type="number" step="0.01" min="0" inputmode="decimal">
+<label for="cjp">Juros de mora (% ao mês) — conforme o contrato</label><input id="cjp" type="number" step="0.01" min="0" inputmode="decimal">
+<label for="cs">Número do próximo recibo</label><input id="cs" type="number" min="1" inputmode="numeric">
+<label for="ck">Texto do carimbo (uma linha por linha)</label><textarea id="ck" rows="5"></textarea>
+<label>Foto da sua assinatura <span class="muted" id="sa"></span></label><input type="file" accept="image/*" onchange="foto(this,'assin')"><button class="sec" style="margin-top:8px" onclick="abrirPad()">Assinar com o dedo (azul)</button>
+<label>Logo da FCosta (topo do recibo) <span class="muted" id="sl"></span></label><input type="file" accept="image/*" onchange="logoFoto(this)">
+<label>Foto do seu carimbo (opcional) <span class="muted" id="sk"></span></label><input type="file" accept="image/*" onchange="foto(this,'carImg')">
+<p class="muted">Assine em papel branco, com caneta preta ou azul, e fotografe bem de perto. O fundo branco é removido sozinho. Sem foto de carimbo, o site desenha um com o texto acima.</p>
+<div class="row"><button onclick="salvarCfg()">Salvar</button><button class="sec" onclick="limparFoto()">Remover fotos</button><button class="sec" onclick="cdlg.close()">Cancelar</button></div>
+</dialog>
+<div id="recibo"><div class="no"><p class="muted" style="margin:0 0 6px">Toque em Enviar e escolha o WhatsApp do locatário. Repita para o locador e para você (ou salve no Drive).</p><div class="row" style="margin-top:0"><button onclick="enviarRecibo('pdf')">Enviar PDF (WhatsApp)</button><button onclick="enviarRecibo('png')">Enviar imagem (PNG)</button><button class="sec" onclick="baixarRecibo('pdf')">Guardar PDF</button><button class="sec" onclick="baixarRecibo('png')">Guardar PNG</button><button class="sec" onclick="closeRecibo()">Fechar</button></div><div class="row" id="sepb" style="display:none"><button onclick="enviarParte('locatario')">Contrato ao locatário</button><button onclick="enviarParte('locador')">Contrato ao locador</button><button class="sec" onclick="listaDocs('locatario')">Pedir documentos ao locatário</button><button class="sec" onclick="listaDocs('locador')">Pedir documentos ao locador</button></div></div><div class="paper" id="paper"></div></div>
+
+<script>
+var K="alugueis_v1",DOCS=["Contrato assinado","RG","CPF","Comprovante de renda","Comprovante de residência","Documentos do fiador","Termo de vistoria","Fotos do imóvel"],
+MES=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"],
+MESL=["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"],
+db=load(),view="list",cur=null,year=new Date().getFullYear(),pay=null,dlg=document.getElementById("dlg");
+function semear(d){d.cfg=d.cfg||{};var s=d.cfg.seeds=d.cfg.seeds||[],
+ pg=function(dt,n,v,en,ed){return{data:dt,valor:v,forma:"PIX",obs:"",enc:en||0,encd:ed||"",mj:0,ds:0,atr:null,num:n}},
+ tem=function(cpf){return d.t.some(function(t){return t.cpf===cpf})},
+ base=function(o){o.tel=o.tel||"";o.ini="";o.fim="";o.link="";o.lnome="";o.ltel="";o.lcpf="";o.docs={};return o};
+ if(s.indexOf("jailda")<0){s.push("jailda");
+  if(!tem("067.654.624-22"))d.t.push(base({id:"t_jailda",nome:"Jailda Barbosa dos Santos",end:"R. Heitor Villa Lobos, 215",valor:800,venc:"5",obs:"",cpf:"067.654.624-22",
+   pag:{"2026-05":pg("2026-06-06",null,800),"2026-06":pg("2026-07-06",4,800),"2026-07":pg("2026-08-05",null,800),"2026-09":pg("2026-10-05",7,800)}}))}
+ if(s.indexOf("wilder2")<0){s.push("wilder2");
+  var np={"2026-06":pg("2026-07-06",2,870,120,"Água / Gás"),"2026-07":pg("2026-07-14",3,870,120,"Água / Gás"),"2026-08":pg("2026-08-14",5,870,120,"Água / Gás"),"2026-09":pg("2026-09-14",6,870,120,"Água / Gás")},
+   old={"2026-06":"2026-07-06","2026-07":"2026-08-14","2026-08":"2026-09-14"},
+   w=d.t.find(function(t){return t.cpf==="901.732.148-27"});
+  if(!w)d.t.push(base({id:"t_wilder",nome:"Wilder Flores Fernandes",end:"Rua Des. Flávio Torres, 245",valor:750,venc:"14",obs:"Contrato FCA001. Aluguel R$ 750,00 + água/gás R$ 120,00",cpf:"901.732.148-27",pag:np}));
+  else{w.pag=w.pag||{};Object.keys(np).forEach(function(k){if(!w.pag[k]||w.pag[k].data===old[k])w.pag[k]=np[k]})}
+  var jt=d.t.find(function(t){return t.cpf==="067.654.624-22"}),jg=jt&&jt.pag;
+  if(jg){if(jg["2026-07"]&&jg["2026-07"].num===5)jg["2026-07"].num=null;if(jg["2026-05"]&&jg["2026-05"].num===3)jg["2026-05"].num=null}}
+ d.cfg.seq=Math.max(d.cfg.seq||1,8);return d}
+function load(){try{var d=JSON.parse(localStorage.getItem(K));if(d&&d.t){d.cfg=d.cfg||{};return semear(d)}}catch(e){}return semear({cfg:{},t:[]})}
+function save(){try{localStorage.setItem(K,JSON.stringify(db))}catch(e){alert("Não foi possível salvar neste navegador.")}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function brl(n){return Number(n||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+function br(d){return d?d.split("-").reverse().join("/"):"—"}
+function ym(y,m){return y+"-"+String(m+1).padStart(2,"0")}
+function get(id){return db.t.find(function(t){return t.id===id})}
+function recebedor(){return db.cfg.rec||"FCosta Corretor de Imóveis — CRECI-SP 294791-F • CNAI 52708"}
+
+/* valor por extenso */
+var U=["zero","um","dois","três","quatro","cinco","seis","sete","oito","nove","dez","onze","doze","treze","quatorze","quinze","dezesseis","dezessete","dezoito","dezenove"],
+D=["","","vinte","trinta","quarenta","cinquenta","sessenta","setenta","oitenta","noventa"],
+C=["","cento","duzentos","trezentos","quatrocentos","quinhentos","seiscentos","setecentos","oitocentos","novecentos"];
+function a999(n){if(n===100)return"cem";var p=[];if(n>=100){p.push(C[Math.floor(n/100)]);n%=100}if(n>0)p.push(n<20?U[n]:D[Math.floor(n/10)]+(n%10?" e "+U[n%10]:""));return p.join(" e ")}
+function ext(n){if(n===0)return"zero";var m=Math.floor(n/1000),r=n%1000,s="";if(m)s=m===1?"mil":a999(m)+" mil";if(r)s+=(s?(r<100||r%100===0?" e ":" "):"")+a999(r);return s}
+function extenso(v){var r=Math.floor(v),c=Math.round((v-r)*100),s=ext(r)+(r===1?" real":" reais");if(c)s+=" e "+ext(c)+(c===1?" centavo":" centavos");return s}
+
+function render(){var m=document.getElementById("main");m.innerHTML=view==="list"?vList():view==="form"?vForm():vDetail();window.scrollTo(0,0)}
+
+function vList(){
+ var n=new Date(),k=ym(n.getFullYear(),n.getMonth()),pg=db.t.filter(function(t){return t.pag[k]}).length,h="";
+ h+=aviso()+'<div class="row"><button onclick="novo()">+ Novo locatário</button></div>';
+ if(!db.t.length)return h+'<div class="card">Nenhum locatário ainda. Toque em <b>Novo locatário</b> para começar.</div>'+rodape();
+ var rec=0,esp=0;db.t.forEach(function(t){esp+=Number(t.valor);if(t.pag[k])rec+=t.pag[k].valor});
+ h+='<p class="sum">Em '+MESL[n.getMonth()]+': <b>'+pg+' de '+db.t.length+'</b> pagos<br>Recebido: <b>'+brl(rec)+'</b> de '+brl(esp)+'</p>';
+ db.t.forEach(function(t){
+  var s=t.pag[k]?'<span class="tag ok">Pago</span>':n.getDate()>Number(t.venc)?'<span class="tag bad">Atrasado</span>':'<span class="tag wait">A vencer</span>';
+  h+='<button class="t" onclick="abrir(\''+t.id+'\')"><span><b>'+esc(t.nome)+'</b><small>'+esc(t.end)+' • '+brl(t.valor)+' • dia '+esc(t.venc)+venceIn(t)+'</small></span>'+s+'</button>'});
+ return h+rodape();
+}
+function rodape(){return '<h2>Cópia de segurança</h2><p class="muted">Os dados ficam só neste aparelho. Última cópia: <b>'+(db.cfg.bk?new Date(db.cfg.bk).toLocaleDateString("pt-BR"):"nunca")+'</b>. Envie a cópia para o seu WhatsApp, e-mail ou Drive e guarde lá.</p><div class="row"><button onclick="enviar()">Enviar cópia (WhatsApp, e-mail, Drive)</button><button class="sec" onclick="exportar()">Baixar cópia no aparelho</button><button class="sec" onclick="document.getElementById(\'imp\').click()">Restaurar cópia</button></div><h2>Outros</h2><div class="row"><button class="sec" onclick="planilha()">Baixar planilha (Excel)</button><button class="sec" onclick="cfg()">Assinatura, carimbo e dados do recibo</button></div><input type="file" id="imp" accept=".json" hidden onchange="importar(this)">'}
+function aviso(){if(!db.t.length)return"";var d=db.cfg.bk?Math.floor((Date.now()-db.cfg.bk)/864e5):null;if(d!==null&&d<7)return"";return'<div class="card" style="border-color:var(--bad);background:var(--badbg)"><b>'+(d===null?"Você ainda não fez cópia de segurança.":"Sua última cópia foi há "+d+" dias.")+'</b><div class="row"><button onclick="enviar()">Enviar cópia agora</button></div></div>'}
+function venceIn(t){if(t.fim){var d=Math.ceil((new Date(t.fim+"T00:00")-Date.now())/864e5);if(d<=60)return d<0?" • contrato vencido":" • contrato vence em "+d+" dias"}return""}
+
+function vForm(){
+ var t=cur?get(cur):{},f=function(id,l,v,ty,x){return'<label for="'+id+'">'+l+'</label><input id="'+id+'" type="'+(ty||"text")+'" value="'+esc(v)+'" '+(x||"")+'>'};
+ return '<h2>'+(cur?"Editar locatário":"Novo locatário")+'</h2><form onsubmit="salvar(event)">'+
+ f("nome","Nome do locatário",t.nome,"text","required")+f("tel","Telefone / WhatsApp",t.tel,"tel")+f("end","Endereço do imóvel",t.end,"text","required")+
+ f("valor","Valor do aluguel (R$)",t.valor,"number",'step="0.01" required inputmode="decimal"')+f("venc","Dia do vencimento",t.venc,"number",'min="1" max="31" required')+
+ f("link","Link da pasta de documentos (Google Drive)",t.link,"url")+f("lnome","Nome do locador (proprietário)",t.lnome)+f("ltel","WhatsApp do locador",t.ltel,"tel")+f("lcpf","CPF/CNPJ do locador",t.lcpf)+f("cpf","CPF do locatário",t.cpf)+f("ini","Início do contrato",t.ini,"date")+f("fim","Fim do contrato",t.fim,"date")+
+ '<label for="obs">Observações</label><textarea id="obs" rows="3">'+esc(t.obs)+'</textarea><div class="row"><button type="submit">Salvar</button><button type="button" class="sec" onclick="voltar()">Cancelar</button></div></form>';
+}
+
+function vDetail(){
+ var t=get(cur),n=new Date(),h='<div class="row"><button class="sec" onclick="voltar()">← Voltar</button><button class="sec" onclick="editar()">Editar</button><button class="del" onclick="excluir()">Excluir</button></div>';
+ h+='<div class="card"><b style="font-size:22px">'+esc(t.nome)+'</b><br>'+(t.tel?'<a href="tel:'+esc(t.tel)+'">'+esc(t.tel)+'</a><br>':'')+esc(t.end)+'<br>Aluguel: <b>'+brl(t.valor)+'</b>, vence dia <b>'+esc(t.venc)+'</b><br>Contrato: '+br(t.ini)+' a '+br(t.fim)+(t.obs?'<br><span class="muted">'+esc(t.obs)+'</span>':'')+'</div>';
+ h+='<div class="row">'+(t.tel?'<button onclick="zap()">Lembrar no WhatsApp</button>':'')+'<button class="sec" onclick="cobranca()">Cobrança extrajudicial</button><button class="sec" onclick="contrato()">Contrato de locação</button><button class="sec" onclick="certidoes()">Certidões do locatário</button>'+(t.link?'<button class="sec" onclick="pasta()">Abrir pasta de documentos</button>':'')+'</div>';
+ h+='<h2>Pagamentos</h2><div class="row" style="align-items:center"><button class="sec" onclick="ano(-1)">←</button><b style="font-size:22px">'+year+'</b><button class="sec" onclick="ano(1)">→</button></div><div class="meses">';
+ for(var m=0;m<12;m++){
+  var k=ym(year,m),p=t.pag[k],pass=year<n.getFullYear()||(year===n.getFullYear()&&(m<n.getMonth()||(m===n.getMonth()&&n.getDate()>Number(t.venc))));
+  var c=p?"ok":pass?"bad":"";
+  h+='<button class="'+c+'" onclick="pagar(\''+k+'\')">'+MES[m]+'<small>'+(p?"✓ "+br(p.data).slice(0,5):pass?"em aberto":"")+'</small></button>'}
+ h+='</div><p class="muted">Toque no mês para registrar o pagamento.</p><h2>Recibos guardados</h2>';
+ var ks=Object.keys(t.pag).sort().reverse();
+ if(!ks.length)h+='<p class="muted">Nenhum recibo ainda. Registre um pagamento acima.</p>';
+ ks.forEach(function(q){var r=t.pag[q],pt=q.split("-");h+='<button class="t" onclick="recibo(\''+t.id+'\',\''+q+'\')"><span><b>'+MESL[Number(pt[1])-1]+' de '+pt[0]+'</b><small>'+(r.num?'Nº '+numRec(r)+' • ':'')+brl(r.valor)+' • pago em '+br(r.data)+'</small></span><span class="tag ok">Abrir recibo</span></button>'});
+ h+='<h2>Documentos entregues</h2><div class="card dl">';
+ DOCS.forEach(function(d,i){h+='<label><input type="checkbox" '+(t.docs[i]?"checked":"")+' onchange="doc('+i+',this.checked)">'+d+'</label>'});
+ return h+'</div>';
+}
+
+function novo(){cur=null;view="form";render()}
+function abrir(id){cur=id;view="detail";render()}
+function voltar(){view=cur&&view==="form"&&get(cur)?"detail":"list";render()}
+function editar(){view="form";render()}
+function ano(d){year+=d;render()}
+function v(id){return document.getElementById(id).value}
+function salvar(e){e.preventDefault();
+ var d={nome:v("nome").trim(),tel:v("tel"),end:v("end").trim(),valor:parseFloat(v("valor")),venc:v("venc"),ini:v("ini"),fim:v("fim"),obs:v("obs"),link:v("link").trim(),lnome:v("lnome").trim(),ltel:v("ltel"),lcpf:v("lcpf"),cpf:v("cpf")};
+ if(cur){Object.assign(get(cur),d);view="detail"}else{d.id="t"+Date.now();d.pag={};d.docs={};db.t.push(d);cur=d.id;view="detail"}
+ save();render()}
+function excluir(){var t=get(cur);if(confirm("Excluir "+t.nome+" e todos os registros dele? Isso não pode ser desfeito.")){db.t=db.t.filter(function(x){return x.id!==cur});save();cur=null;view="list";render()}}
+function doc(i,c){get(cur).docs[i]=c;save()}
+
+function pagar(k){
+ var t=get(cur),p=t.pag[k],pt=k.split("-");pay={id:cur,k:k};atrAtual=p&&p.atr?p.atr:null;
+ document.getElementById("dt").textContent=MESL[Number(pt[1])-1]+" de "+pt[0];
+ document.getElementById("dd").value=p?p.data:new Date().toISOString().slice(0,10);
+ document.getElementById("dv").value=p?p.valor:t.valor;document.getElementById("dfp").value=p&&p.forma?p.forma:"PIX";document.getElementById("dob").value=p&&p.obs?p.obs:"";document.getElementById("den").value=p&&p.enc?p.enc:"";document.getElementById("dend").value=p&&p.encd?p.encd:"";document.getElementById("dmj").value=p&&p.mj?p.mj:"";document.getElementById("dds").value=p&&p.ds?p.ds:"";
+ document.getElementById("undo").style.display=p?"":"none";document.getElementById("ver").style.display=p?"":"none";
+ document.getElementById("datr").textContent=p&&p.atr?"Atraso de "+p.atr.d+" dia(s): multa "+brl(p.atr.mu)+" + juros "+brl(p.atr.ju)+".":"Escolha a data do pagamento.";
+ if(!p)calcAtraso();
+ dlg.showModal()}
+
+/* atraso: multa + juros pró-rata dia, percentuais do contrato */
+var atrAtual=null;
+function pMulta(){var x=db.cfg.cmp;return(x==null||!isFinite(x))?10:x}
+function pJuros(){var x=db.cfg.cjp;return(x==null||!isFinite(x))?1:x}
+function r2(n){return Math.round(n*100)/100}
+function calcAtraso(){
+ if(!pay)return;var t=get(pay.id),pt=pay.k.split("-"),a=Number(pt[0]),m=Number(pt[1]),d=v("dd"),msg=document.getElementById("datr");
+ var en=parseFloat(v("den"))||0,ds=parseFloat(v("dds"))||0;
+ if(!d){msg.textContent="Escolha a data do pagamento.";return}
+ var ult=new Date(a,m,0).getDate(),dia=Math.min(Number(t.venc)||1,ult),pg=d.split("-"),
+ dias=Math.round((Date.UTC(+pg[0],+pg[1]-1,+pg[2])-Date.UTC(a,m-1,dia))/86400000),
+ mp=pMulta(),jp=pJuros(),base=Number(t.valor)+en,mu=0,ju=0;
+ if(dias>0){mu=r2(base*mp/100);ju=r2(base*(jp/100)/30*dias);atrAtual={d:dias,mp:mp,jp:jp,mu:mu,ju:ju};
+  msg.textContent="Vencia em "+br(a+"-"+String(m).padStart(2,"0")+"-"+String(dia).padStart(2,"0"))+". Atraso de "+dias+" dia(s): multa de "+mp+"% = "+brl(mu)+" + juros de "+jp+"% ao mês = "+brl(ju)+". Base: "+brl(base)+"."}
+ else{atrAtual=null;msg.textContent="Pagamento em dia (vencimento dia "+dia+"). Sem multa nem juros."}
+ document.getElementById("dmj").value=(mu+ju)>0?r2(mu+ju):"";
+ document.getElementById("dv").value=r2(Number(t.valor)+en+mu+ju-ds)}
+function totalManual(){
+ var t=get(pay.id),en=parseFloat(v("den"))||0,mj=parseFloat(v("dmj"))||0,ds=parseFloat(v("dds"))||0;
+ if(atrAtual&&Math.abs(atrAtual.mu+atrAtual.ju-mj)>=0.01)atrAtual=null;
+ document.getElementById("dv").value=r2(Number(t.valor)+en+mj-ds)}
+function savePay(ver){
+ var d=v("dd"),val=parseFloat(v("dv"));if(!d||!(val>0)){alert("Informe a data e o valor.");return}
+ var en=parseFloat(v("den"))||0,mj=parseFloat(v("dmj"))||0,ds=parseFloat(v("dds"))||0;
+ if(val-en-mj+ds<0){alert("Encargos, multa e desconto não podem passar do valor total. Confira os valores.");return}
+ var t=get(pay.id),o=t.pag[pay.k];t.pag[pay.k]={data:d,valor:val,forma:v("dfp"),obs:v("dob"),enc:en,encd:v("dend").trim(),mj:mj,ds:ds,atr:(atrAtual&&Math.abs(atrAtual.mu+atrAtual.ju-mj)<0.01)?atrAtual:null,num:o&&o.num?o.num:proxNum()};save();dlg.close();render();if(ver)recibo(pay.id,pay.k)}
+function undoPay(){if(confirm("Desfazer este pagamento?")){delete get(pay.id).pag[pay.k];save();dlg.close();render()}}
+
+function recibo(id,k){
+ var t=get(id),p=t.pag[k],c=db.cfg,pt=k.split("-"),dp=p.data.split("-");
+ if(!p.num){p.num=proxNum();save()}
+ document.getElementById("sepb").style.display="none";rinfo={id:id,k:k,num:numRec(p).replace("/","-")};
+ var mes=MESL[Number(pt[1])-1]+" de "+pt[0],dt=Number(dp[2])+" de "+MESL[Number(dp[1])-1]+" de "+dp[0],cid=c.cid||"São Paulo",
+ en=Number(p.enc)||0,mj=Number(p.mj)||0,ds=Number(p.ds)||0,al=Math.round((p.valor-en-mj+ds)*100)/100,
+ logo=c.logo?'<img src="'+c.logo+'" alt="Logo">':'<div class="mono">FC</div>',
+ car=c.carImg?'<img src="'+c.carImg+'">':'<div class="carimbo">'+esc(sCar()).split("\n").map(function(l,i){return i?'<span>'+l+'</span>':l}).join("")+'</div>',
+ lin='<tr><td>Aluguel — '+mes+'</td><td>'+brl(al)+'</td></tr>'+(en>0?'<tr><td>Encargos'+(p.encd?': '+esc(p.encd):'')+'</td><td>'+brl(en)+'</td></tr>':'')+(mj>0?(p.atr&&Math.abs(p.atr.mu+p.atr.ju-mj)<0.01?'<tr><td>Multa moratória ('+p.atr.mp+'%)</td><td>'+brl(p.atr.mu)+'</td></tr><tr><td>Juros de mora ('+p.atr.jp+'% ao mês, '+p.atr.d+' dia(s) de atraso)</td><td>'+brl(p.atr.ju)+'</td></tr>':'<tr><td>Multa e juros de mora</td><td>'+brl(mj)+'</td></tr>'):'')+(ds>0?'<tr><td>(−) Desconto concedido</td><td>− '+brl(ds)+'</td></tr>':'')+'<tr class="tot"><td>Total recebido</td><td>'+brl(p.valor)+'</td></tr>';
+ document.getElementById("paper").innerHTML=
+ '<div class="top"></div><div class="in">'+
+ '<div class="rh"><div class="rlogo">'+logo+'</div><div class="rid"><b>FCosta Corretor de Imóveis</b><span>Corretor de Imóveis — CRECI-SP 294791-F</span><span>Avaliador Imobiliário — CNAI 52708</span><span>fcostacorretor.com • WhatsApp (11) 99350-9109</span></div><div class="rn">Recibo Nº<b>'+numRec(p)+'</b></div></div>'+
+ '<div class="rt">RECIBO DE ALUGUEL</div><div class="rs">Recibo discriminado de locação de imóvel urbano</div>'+
+ '<div class="rv">'+brl(p.valor)+'<small>('+extenso(p.valor)+')</small></div>'+
+ '<p>Recebi de <b>'+esc(t.nome)+'</b>'+(t.cpf?', CPF/CNPJ '+esc(t.cpf):'')+', na condição de locatário(a), a importância total de <b>'+brl(p.valor)+'</b>, referente à locação do imóvel situado em <b>'+esc(t.end)+'</b>, competência <b>'+mes+'</b>, com vencimento no dia <b>'+esc(t.venc)+'</b>, conforme discriminado abaixo.</p>'+
+ (t.lnome?'<p>O recebimento é feito por <b>'+esc(sNome())+'</b>, na qualidade de administradora e mandatária, por conta e ordem do(a) locador(a) <b>'+esc(t.lnome)+'</b>'+(t.lcpf?', CPF/CNPJ '+esc(t.lcpf):'')+'.</p>':'')+
+ '<table class="rtb"><tr><th>Discriminação</th><th>Valor</th></tr>'+lin+'</table>'+
+ '<p>Pagamento efetuado em <b>'+dt+'</b>, por <b>'+esc(p.forma||"PIX")+'</b>, em '+esc(cid)+'.'+(p.obs?' '+esc(p.obs)+'.':'')+'</p>'+
+ '<p>Dou quitação das importâncias acima discriminadas, referentes exclusivamente à competência indicada, sem presunção de quitação de períodos anteriores ou posteriores, nem de débitos ainda não apurados (art. 322 do Código Civil).</p>'+
+ '<p>'+esc(cid)+', '+dt+'.</p>'+
+ '<div class="sgw"><div class="sgl">'+(c.assin?'<img src="'+c.assin+'">':'<div style="height:60px"></div>')+'<hr><b>'+esc(sNome())+'</b><br>'+esc(sQual())+'</div><div class="stp">'+car+'</div></div>'+
+ '<div class="rlei">Recibo emitido nos termos dos arts. 319, 320 e 322 do Código Civil (Lei 10.406/2002) e do art. 22, VII, da Lei do Inquilinato (Lei 8.245/1991), que exige recibo discriminado das importâncias pagas. Informações prestadas de forma clara e adequada ao consumidor (art. 6º, III, Lei 8.078/1990). Intermediação realizada por corretor de imóveis inscrito no CRECI (Lei 6.530/1978 e Decreto 81.871/1978). Guarde este documento: ele comprova o pagamento (art. 319 do Código Civil).</div>'+
+ '</div><div class="rft">FCosta Corretor de Imóveis • CRECI-SP 294791-F • CNAI 52708 • fcostacorretor.com</div>';
+ document.getElementById("recibo").style.display="block"}
+var cbdlg=document.getElementById("cbdlg");
+/* cobrança extrajudicial */
+function cortes(cl,ch){
+ var H=cl.getBoundingClientRect().height,top=cl.getBoundingClientRect().top,f=ch/H,pg=794*281/194,bs=[];
+ cl.querySelectorAll(".in > *, .rtb tr, .rft").forEach(function(e){bs.push(e.getBoundingClientRect().bottom-top)});
+ bs.sort(function(a,b){return a-b});
+ var out=[],s=0;
+ while(H-s>pg+1){var lim=s+pg,e=lim;for(var i=0;i<bs.length;i++){if(bs[i]<=lim&&bs[i]>s+80)e=bs[i]}out.push([s*f,e*f]);s=e}
+ out.push([s*f,ch]);return out}
+function vencUTC(t,k){var pt=k.split("-"),a=+pt[0],m=+pt[1],u=new Date(a,m,0).getDate();return Date.UTC(a,m-1,Math.min(Number(t.venc)||1,u))}
+function hojeUTC(){var n=new Date();return Date.UTC(n.getFullYear(),n.getMonth(),n.getDate())}
+function cobranca(){
+ var t=get(cur),n=new Date(),a=n.getFullYear(),m=n.getMonth(),ini=t.ini?t.ini.split("-"):null,ya=ini?+ini[0]:a-1,ma=ini?+ini[1]-1:m,h="",cnt=0;
+ if((a*12+m)-(ya*12+ma)>36){var s=a*12+m-36;ya=Math.floor(s/12);ma=s%12}
+ for(var y=ya,mm=ma;y*12+mm<=a*12+m;mm++){if(mm>11){mm=0;y++}
+  var k=ym(y,mm),d=Math.round((hojeUTC()-vencUTC(t,k))/86400000);
+  if(!t.pag[k]&&d>0){cnt++;h+='<label><input type="checkbox" value="'+k+'" checked>'+MESL[mm]+' de '+y+' — '+d+' dia(s) de atraso</label>'}}
+ if(!cnt){alert("Não há aluguel vencido em aberto para este locatário.");return}
+ document.getElementById("cbm").innerHTML=h;cbdlg.showModal()}
+function gerarCobranca(){
+ var t=get(cur),c=db.cfg,ks=[].slice.call(document.querySelectorAll("#cbm input:checked")).map(function(i){return i.value});
+ if(!ks.length){alert("Marque pelo menos um mês.");return}
+ var prazo=Math.max(1,parseInt(v("cbp"))||5),cp=Math.max(0,parseFloat(v("cbc"))||0),mp=pMulta(),jp=pJuros(),
+ tA=0,tM=0,tJ=0,tC=0,lin="";
+ ks.sort().forEach(function(k){
+  var pt=k.split("-"),d=Math.round((hojeUTC()-vencUTC(t,k))/86400000),al=Number(t.valor),mu=r2(al*mp/100),ju=r2(al*(jp/100)/30*d),co=r2(al*cp/100),
+  vd=new Date(vencUTC(t,k)),vs=String(vd.getUTCDate()).padStart(2,"0")+"/"+String(vd.getUTCMonth()+1).padStart(2,"0")+"/"+vd.getUTCFullYear();
+  tA+=al;tM+=mu;tJ+=ju;tC+=co;
+  lin+='<tr><td>'+MESL[+pt[1]-1]+'/'+pt[0]+'<small>venc. '+vs+' • '+d+' dia(s)</small></td><td class="n">'+brl(al)+'</td>'+(cp>0?'<td class="n">'+brl(co)+'</td>':'')+'<td class="n">'+brl(mu)+'</td><td class="n">'+brl(ju)+'</td><td class="n"><b>'+brl(al+mu+ju+co)+'</b></td></tr>'});
+ var tot=r2(tA+tM+tJ+tC),n=new Date(),dt=n.getDate()+" de "+MESL[n.getMonth()]+" de "+n.getFullYear(),cid=c.cid||"São Paulo";
+ c.seqn=(c.seqn||0)+1;save();
+ var num=String(c.seqn).padStart(4,"0")+"/"+n.getFullYear();
+ document.getElementById("sepb").style.display="none";rinfo={id:t.id,k:"cob",num:num.replace("/","-"),pre:"cobranca",tit:"Notificação de cobrança",multi:true};
+ var logo=c.logo?'<img src="'+c.logo+'" alt="Logo">':'<div class="mono">FC</div>',
+ car=c.carImg?'<img src="'+c.carImg+'">':'<div class="carimbo">'+esc(sCar()).split("\n").map(function(l,i){return i?'<span>'+l+'</span>':l}).join("")+'</div>';
+ document.getElementById("paper").innerHTML=
+ '<div class="top"></div><div class="in">'+
+ '<div class="rh"><div class="rlogo">'+logo+'</div><div class="rid"><b>FCosta Corretor de Imóveis</b><span>Corretor de Imóveis — CRECI-SP 294791-F</span><span>Avaliador Imobiliário — CNAI 52708</span><span>fcostacorretor.com • WhatsApp (11) 99350-9109</span></div><div class="rn">Notificação Nº<b>'+num+'</b></div></div>'+
+ '<div class="rt" style="font-size:16px;letter-spacing:1.5px">NOTIFICAÇÃO EXTRAJUDICIAL DE COBRANÇA</div><div class="rs">Aluguéis vencidos e não pagos — constituição em mora — locação de imóvel urbano</div>'+
+ '<p><b>Notificado(a):</b> '+esc(t.nome)+(t.cpf?', CPF/CNPJ '+esc(t.cpf):'')+', locatário(a) do imóvel situado em <b>'+esc(t.end)+'</b>.</p>'+
+ '<p><b>Notificante:</b> <b>'+esc(sNome())+'</b>, '+esc(sQual())+', na qualidade de administradora e mandatária'+(t.lnome?' do(a) locador(a) <b>'+esc(t.lnome)+'</b>'+(t.lcpf?', CPF/CNPJ '+esc(t.lcpf):''):' do locador')+' (art. 653 do Código Civil).</p>'+
+ '<p>Em nossos registros <b>não consta o pagamento</b> dos aluguéis abaixo, que venceram nas datas indicadas. Nos termos do art. 397 do Código Civil, o não pagamento no vencimento constitui o devedor em mora de pleno direito. Valores atualizados até <b>'+dt+'</b>:</p>'+
+ '<table class="rtb sm"><tr><th>Competência</th><th class="n">Aluguel</th>'+(cp>0?'<th class="n">Correção ('+cp+'%)</th>':'')+'<th class="n">Multa ('+mp+'%)</th><th class="n">Juros ('+jp+'% a.m.)</th><th class="n">Total</th></tr>'+lin+'<tr class="tot"><td>Total do débito</td><td class="n">'+brl(tA)+'</td>'+(cp>0?'<td class="n">'+brl(tC)+'</td>':'')+'<td class="n">'+brl(tM)+'</td><td class="n">'+brl(tJ)+'</td><td class="n">'+brl(tot)+'</td></tr></table>'+
+ '<div class="rv">'+brl(tot)+'<small>('+extenso(tot)+')</small></div>'+
+ '<p>Fica V.Sa. <b>NOTIFICADO(A)</b> para, no prazo de <b>'+prazo+' ('+ext(prazo)+') dia(s)</b> contados do recebimento desta, regularizar o débito acima ou procurar a administradora para negociação, pelo WhatsApp (11) 99350-9109. Multa e juros continuam a correr até o efetivo pagamento; se o pagamento for feito após a data deste documento, solicite o valor atualizado.</p>'+
+ '<p>Esgotado o prazo sem regularização, o locador poderá adotar as medidas legais cabíveis, entre elas a ação de despejo por falta de pagamento, cumulada ou não com cobrança dos aluguéis e acessórios, com custas e honorários advocatícios (arts. 9º, III, e 62 da Lei 8.245/1991), a execução da garantia locatícia, inclusive contra o fiador, se houver, e a cobrança da multa e dos juros previstos em contrato. Na ação de despejo, o locatário pode evitar a rescisão pagando o débito atualizado no prazo de 15 dias contados da citação (art. 62, II). Eventual registro em cadastro de inadimplentes, se cabível, será precedido de comunicação escrita (art. 43, §2º, do Código de Defesa do Consumidor).</p>'+
+ '<p>Se o pagamento já foi feito, desconsidere esta notificação e envie o comprovante para a devida baixa. A aceitação de pagamento posterior não significa renúncia a direitos nem novação da dívida.</p>'+
+ '<p>'+esc(cid)+', '+dt+'.</p>'+
+ '<div class="sgw"><div class="sgl">'+(c.assin?'<img src="'+c.assin+'">':'<div style="height:60px"></div>')+'<hr><b>'+esc(sNome())+'</b><br>'+esc(sQual())+'</div><div class="stp">'+car+'</div></div>'+
+ '<div class="ciente">Ciente do recebimento em ____ / ____ / ________ &nbsp; Assinatura: ______________________________</div>'+
+ '<div class="rlei"><b>Fundamentos legais.</b> Código Civil (Lei 10.406/2002): arts. 389 e 394 a 397 (mora), 395 (juros, atualização monetária e honorários), 406 (juros de mora), 408, 409, 412 e 413 (cláusula penal) e 653 (mandato). Lei do Inquilinato (Lei 8.245/1991): arts. 9º, III (rescisão por falta de pagamento), 23, I (dever de pagar pontualmente), 62 (ação de despejo por falta de pagamento e purgação da mora) e 22, VI (recibo discriminado). Código de Defesa do Consumidor (Lei 8.078/1990), no que couber: arts. 6º, III (informação clara e adequada), 42 (cobrança sem constrangimento ou ameaça) e 43 (comunicação prévia de registro em cadastros). Corretor de imóveis: Lei 6.530/1978 e Decreto 81.871/1978.</div>'+
+ '</div><div class="rft">FCosta Corretor de Imóveis • CRECI-SP 294791-F • CNAI 52708 • fcostacorretor.com</div>';
+ cbdlg.close();document.getElementById("recibo").style.display="block"}
+function closeRecibo(){document.getElementById("recibo").style.display="none"}
+var rinfo=null;
+function slug(s){return s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/gi,"-").toLowerCase()}
+async function arquivo(tipo){
+ var t=get(rinfo.id),nome=(rinfo.pre||"recibo")+"-"+rinfo.num+"-"+slug(t.nome),cl=document.getElementById("paper").cloneNode(true),c,cuts=null;
+ cl.removeAttribute("id");cl.style.cssText="position:absolute;left:-10000px;top:0;width:794px;max-width:none;margin:0";
+ document.body.appendChild(cl);window.scrollTo(0,0);
+ try{if(document.fonts&&document.fonts.ready)await document.fonts.ready;c=await html2canvas(cl,{scale:2,backgroundColor:"#ffffff",scrollX:0,scrollY:0,windowWidth:794,useCORS:true});if(rinfo.multi)cuts=cortes(cl,c.height)}finally{document.body.removeChild(cl)}
+ if(tipo==="png"){var b=await new Promise(function(r){c.toBlob(r,"image/png")});return new File([b],nome+".png",{type:"image/png"})}
+ var pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4"}),m=8,mw=210-2*m,mh=297-2*m,w=mw,h=c.height*w/c.width;
+ if(cuts&&h>mh*1.2){cuts.forEach(function(s,i){var pc=document.createElement("canvas");pc.width=c.width;pc.height=Math.max(1,Math.round(s[1]-s[0]));pc.getContext("2d").drawImage(c,0,Math.round(s[0]),c.width,pc.height,0,0,c.width,pc.height);if(i)pdf.addPage();pdf.addImage(pc.toDataURL("image/png"),"PNG",m,m,mw,pc.height*mw/pc.width)})}
+ else{if(h>mh){h=mh;w=c.width*h/c.height}
+ pdf.addImage(c.toDataURL("image/png"),"PNG",(210-w)/2,m,w,h)}
+ return new File([pdf.output("blob")],nome+".pdf",{type:"application/pdf"})}
+async function enviarRecibo(tipo){try{var f=await arquivo(tipo);
+ if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:rinfo.tit||"Recibo de aluguel"});else{baixar(f,f.name);alert("Arquivo salvo no aparelho. Anexe no WhatsApp.")}}
+ catch(e){if(e&&e.name==="AbortError")return;alert("Não foi possível gerar o arquivo. Verifique a internet e tente de novo.")}}
+async function baixarRecibo(tipo){try{var f=await arquivo(tipo);baixar(f,f.name)}catch(e){alert("Não foi possível gerar o arquivo. Verifique a internet e tente de novo.")}}
+var cdlg=document.getElementById("cdlg"),CK="FCOSTA\nCorretor de Imóveis\nCRECI-SP 294791-F\nCNAI 52708";
+var NOME_PAD="FCosta Corretor de Imóveis",QUAL_PAD="CRECI-SP 294791-F • CNAI 52708";
+function sNome(){var n=(db.cfg.nome||"").trim();return(!n||/^s[eé]rgio\s+costa$/i.test(n))?NOME_PAD:n}
+function sQual(){var q=(db.cfg.qual||"").trim();return(!q||/^corretor de im[oó]veis\s*[—-]\s*creci-sp 294791-f$/i.test(q))?QUAL_PAD:q}
+function sCar(){var k=db.cfg.car;return(!k||/^S[ÉE]RGIO COSTA/i.test(k))?CK:k}
+function logoFoto(inp){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,500/im.width),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);db.cfg.logo=c.toDataURL("image/png");save();cfgSt()};im.src=r.result};r.readAsDataURL(f)}
+function proxNum(){var n=db.cfg.seq||1;db.cfg.seq=n+1;return n}
+function numRec(p){return String(p.num).padStart(4,"0")+"/"+p.data.slice(0,4)}
+function cfgSt(){document.getElementById("sa").textContent=db.cfg.assin?"✓ salva":"(não enviada)";document.getElementById("sk").textContent=db.cfg.carImg?"✓ salvo":"(não enviado)";document.getElementById("sl").textContent=db.cfg.logo?"✓ salva":"(não enviada — usa o símbolo FC)"}
+function cfg(){var c=db.cfg;document.getElementById("cn").value=sNome();document.getElementById("cq").value=sQual();document.getElementById("cc").value=c.cid||"São Paulo";document.getElementById("cs").value=c.seq||1;document.getElementById("cmp").value=pMulta();document.getElementById("cjp").value=pJuros();document.getElementById("ck").value=sCar();cfgSt();cdlg.showModal()}
+function salvarCfg(){var c=db.cfg;c.nome=v("cn").trim();c.qual=v("cq").trim();c.cid=v("cc").trim();c.seq=Math.max(1,parseInt(v("cs"))||1);c.cmp=Math.max(0,parseFloat(v("cmp")));if(!isFinite(c.cmp))c.cmp=10;c.cjp=Math.max(0,parseFloat(v("cjp")));if(!isFinite(c.cjp))c.cjp=1;c.car=v("ck");save();cdlg.close()}
+var pdlg=document.getElementById("pdlg"),pcv=document.getElementById("pcv"),pd=false,lp,bb;
+function limparPad(){pcv.getContext("2d").clearRect(0,0,pcv.width,pcv.height);bb=null}
+function abrirPad(){limparPad();pdlg.showModal()}
+function ppos(e){var r=pcv.getBoundingClientRect();return[(e.clientX-r.left)*pcv.width/r.width,(e.clientY-r.top)*pcv.height/r.height]}
+function pbox(a){bb=bb?[Math.min(bb[0],a[0]),Math.min(bb[1],a[1]),Math.max(bb[2],a[0]),Math.max(bb[3],a[1])]:[a[0],a[1],a[0],a[1]]}
+function ptraco(a,b){var x=pcv.getContext("2d");x.strokeStyle="#1a3fbf";x.lineWidth=6;x.lineCap="round";x.lineJoin="round";x.beginPath();x.moveTo(a[0],a[1]);x.lineTo(b[0],b[1]);x.stroke();pbox(b)}
+pcv.addEventListener("pointerdown",function(e){e.preventDefault();pcv.setPointerCapture(e.pointerId);lp=ppos(e);pd=true;ptraco(lp,[lp[0]+.1,lp[1]])});
+pcv.addEventListener("pointermove",function(e){if(!pd)return;var a=ppos(e);ptraco(lp,a);lp=a});
+["pointerup","pointercancel"].forEach(function(n){pcv.addEventListener(n,function(){pd=false})});
+function salvarPad(){if(!bb){alert("Assine dentro do quadro antes de salvar.");return}
+ var m=12,x0=Math.max(0,bb[0]-m),y0=Math.max(0,bb[1]-m),w=Math.min(pcv.width,bb[2]+m)-x0,h=Math.min(pcv.height,bb[3]+m)-y0,c=document.createElement("canvas");
+ c.width=w;c.height=h;c.getContext("2d").drawImage(pcv,x0,y0,w,h,0,0,w,h);db.cfg.assin=c.toDataURL("image/png");save();cfgSt();pdlg.close()}
+function limparFoto(){delete db.cfg.assin;delete db.cfg.carImg;save();cfgSt()}
+function foto(inp,key){var f=inp.files[0];if(!f)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,500/im.width),c=document.createElement("canvas");c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);var x=c.getContext("2d");x.drawImage(im,0,0,c.width,c.height);var d=x.getImageData(0,0,c.width,c.height),q=d.data;for(var k=0;k<q.length;k+=4){var l=(q[k]+q[k+1]+q[k+2])/3;q[k+3]=Math.max(0,Math.min(255,(235-l)*4));if(key==="assin"){q[k]=26;q[k+1]=63;q[k+2]=191}}x.putImageData(d,0,0);db.cfg[key]=c.toDataURL("image/png");save();cfgSt()};im.src=r.result};r.readAsDataURL(f)}
+
+function baixar(blob,nome){var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nome;a.click()}
+function marca(){db.cfg.bk=Date.now();save();render()}
+function bkNome(){return"copia-alugueis-"+new Date().toISOString().slice(0,10)+".json"}
+function exportar(){baixar(new Blob([JSON.stringify(db)],{type:"application/json"}),bkNome());marca()}
+function enviar(){var f=new File([JSON.stringify(db)],bkNome(),{type:"application/json"});
+ if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:"Cópia dos aluguéis"}).then(marca).catch(function(){})}
+ else{alert("Este aparelho não envia direto. Vou baixar o arquivo; depois mande para o seu WhatsApp ou e-mail.");exportar()}}
+function planilha(){var q=function(s){return'"'+String(s==null?"":s).replace(/"/g,'""')+'"'},r=[["Locatário","Telefone","Endereço","Aluguel","Vencimento","Início","Fim"].concat(MES.map(function(m){return m+"/"+year}))];
+ db.t.forEach(function(t){r.push([t.nome,t.tel,t.end,t.valor,t.venc,br(t.ini),br(t.fim)].concat(MES.map(function(m,i){var p=t.pag[ym(year,i)];return p?br(p.data):""})))});
+ baixar(new Blob(["\ufeff"+r.map(function(l){return l.map(q).join(";")}).join("\r\n")],{type:"text/csv"}),"alugueis-"+year+".csv")}
+function zap(){var t=get(cur),n=(t.tel||"").replace(/\D/g,"");if(n.length<=11)n="55"+n;
+ var msg="Olá, "+t.nome.split(" ")[0]+"! Passando para lembrar do aluguel de "+MESL[new Date().getMonth()]+", no valor de "+brl(t.valor)+", com vencimento no dia "+t.venc+". Qualquer dúvida, estou à disposição. Sérgio Costa";
+ window.open("https://wa.me/"+n+"?text="+encodeURIComponent(msg),"_blank")}
+function pasta(){window.open(get(cur).link,"_blank")}
+function importar(i){var f=i.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var d=JSON.parse(r.result);if(!d.t)throw 0;if(confirm("Substituir os dados atuais pela cópia?")){db=d;save();render()}}catch(e){alert("Arquivo de cópia inválido.")}};r.readAsText(f)}
+render();
+
+/* contrato de locação (Lei 8.245/1991) e envio separado a cada parte */
+function addM(d,n){var q=d.split("-");return new Date(Date.UTC(+q[0],+q[1]-1+n,+q[2]-1)).toISOString().slice(0,10)}
+function contrato(){
+ var t=get(cur),o=t.ctr||{};
+ if(!t.lnome&&!confirm("O nome do locador não está cadastrado (botão Editar). Continuar assim mesmo?"))return;
+ document.getElementById("cti").value=o.ini||t.ini||new Date().toISOString().slice(0,10);
+ document.getElementById("ctp").value=o.prazo||30;
+ ["ctf:fin","ctx:idx","ctt:iptu","ctg:gar","ctv:vis"].forEach(function(x){var a=x.split(":");if(o[a[1]])document.getElementById(a[0]).value=o[a[1]]});
+ document.getElementById("ctd").value=o.gd||"";document.getElementById("ctz").value=o.zoo||"Incluir";document.getElementById("ctab").style.display=o.cl?"":"none";document.getElementById("ctc").value=o.gc||2;document.getElementById("ctvd").value=o.vd||"";document.getElementById("cta").value=o.adm||"";document.getElementById("ctbk").value=o.bco||"";document.getElementById("cth").value=o.hon||"";document.getElementById("ctfo").value=o.foro!=null?o.foro:(db.cfg.cid||"");
+ ctdlg.showModal()}
+function gerarContrato(){
+ var t=get(cur),c=db.cfg,ini=v("cti"),old=t.ctr||{};
+ if(!ini){alert("Informe o início da locação.");return}
+ if(old.cl&&!confirm("Já existe um contrato salvo. Gerar novo apaga as edições feitas. Continuar?"))return;
+ var o={ini:ini,prazo:Math.max(1,parseInt(v("ctp"))||30),fin:"Residencial",idx:v("ctx"),iptu:v("ctt"),gar:v("ctg"),gd:v("ctd").trim(),gc:Math.min(3,Math.max(1,parseInt(v("ctc"))||2)),zoo:v("ctz"),vis:v("ctv"),vd:v("ctvd").trim(),adm:v("cta").trim(),bco:v("ctbk").trim(),hon:Math.min(100,Math.max(0,parseInt(v("cth"))||0)),foro:v("ctfo").trim()};
+ if(!old.num){c.seqc=(c.seqc||0)+1;o.num=String(c.seqc).padStart(4,"0")+"/"+new Date().getFullYear()}else o.num=old.num;
+ o.cl=modeloCl(t,o);t.ctr=o;save();ctdlg.close();edAbrir()}
+function subIdx(x){return["IGP-M (FGV)","IPCA (IBGE)","INPC (IBGE)"].filter(function(i){return i!==x})}
+/* modelo básico CRECI: f=fixa, n=numerada, h=dica */
+function modeloCl(t,o){
+ var R="______",vst=function(o){return o.vis==="Descrição no contrato"?"O imóvel objeto deste foi devidamente vistoriado pelo(a) LOCATÁRIO(A), que constatou encontrar-se "+(o.vd?"nas seguintes condições: "+o.vd.replace(/[.;\s]+$/,""):"em perfeitas condições de habitabilidade, com pintura nova, portas com fechaduras em funcionamento e munidas das correspondentes chaves, azulejos e porcelanas da cozinha e banheiro inteiros, aberturas com ferragens em condições e vidros inteiros, instalação elétrica e hidráulica em condições")+", obrigando-se a devolvê-lo, uma vez finda a locação, nas mesmas condições em que o recebeu, razão pela qual, no momento da restituição das chaves, será realizada nova vistoria.":"O imóvel objeto deste foi entregue ao(à) LOCATÁRIO(A) nas condições descritas no “Termo (Laudo) de Vistoria” devidamente assinado pelas partes, integrando o presente, obrigando-se a devolvê-lo, uma vez finda a locação, nas mesmas condições em que o recebeu, razão pela qual, no momento da restituição das chaves, será realizada nova vistoria."},fia=o.gar==="Fiador",fim=addM(o.ini,o.prazo),va=t.valor,
+ pj=function(nm,cp){return"**"+(nm||R)+"**, nacionalidade "+R+", estado civil "+R+" (informar união estável, se houver), profissão "+R+", RG nº "+R+" SSP/"+R+", CPF/CNPJ nº "+(cp||R)+", residente e domiciliado(a) na "+R+", CEP "+R+", telefone/WhatsApp "+R+", e-mail "+R+"."},
+ enc=["o consumo de água e energia elétrica;","o prêmio de seguro contra incêndio, que deverá ser feito pelo valor venal do imóvel, nele figurando o(a) LOCADOR(A) como beneficiário(a);","as taxas de condomínio;","os demais encargos e tributos que normalmente incidem ou venham a incidir sobre o imóvel."];
+ if(o.iptu!=="Locador")enc.unshift("o imposto predial e territorial (IPTU);");
+ var gx=fia?"Como fiadores e principais pagadores solidários de todas as obrigações que incumbem ao(à) LOCATÁRIO(A), por força de lei ou do presente contrato e até a efetiva desocupação do imóvel, assinam **"+(o.gd||R+" e "+R)+"**, profissão "+R+", RG nº "+R+" SSP/"+R+", CPF nº "+R+", nacionalidade "+R+", casados pelo regime "+R+", residentes e domiciliados na "+R+", cidade de "+R+".\n\nPARÁGRAFO ÚNICO: Fica convencionado que os fiadores supramencionados não se eximirão da obrigação ora assumida, caso a locação, seja por força de lei, de contrato ou por ajuste feito entre LOCADOR(A) e LOCATÁRIO(A), se prorrogue por prazo superior ao convencionado, tornando-se inoperante o disposto no art. 835 do Código Civil, com o que desde já concordam. Ficam também cientes de que é plenamente válida a penhora do seu bem de família, residencial ou comercial, nos termos do art. 3º, VII, da Lei nº 8.009/1990 e do Tema 1091 do Superior Tribunal de Justiça."
+ :o.gar==="Caução em dinheiro"?"Como garantia da presente locação, entrega o(a) LOCATÁRIO(A), a título de caução, a importância de **"+brl(va*o.gc)+"** ("+extenso(va*o.gc)+"), equivalente a "+o.gc+" aluguel(is), em boa e corrente moeda nacional, a lhe ser restituída com a correção da caderneta de poupança, uma vez finda a locação e devolvido o imóvel com todos os seus acessórios, nas mesmas condições em que o recebeu."
+ :o.gar==="Seguro-fiança"?"Como garantia da presente locação, apresenta o(a) LOCATÁRIO(A) a apólice nº **"+(o.gd||R)+"**, da Empresa de Seguros "+R+", com vigência de "+R+" dias."
+ :"Para garantir as obrigações assumidas neste contrato, o(a) LOCATÁRIO(A), por ser de seu interesse, dá neste ato em caução ao(à) LOCADOR(A) Título de Capitalização de pagamento único no valor nominal de R$ "+R+" ("+R+"), emitido pela Sociedade de Capitalização "+R+", conforme proposta de subscrição de título nº "+(o.gd||R)+".\n\nSatisfeita a obrigação, o(a) LOCADOR(A) fará a devolução do saldo que estiver em favor do(a) LOCATÁRIO(A), não se responsabilizando a Sociedade de Capitalização pelos débitos do(a) LOCATÁRIO(A).\n\nCaso no curso da locação seja necessário o resgate do título caucionado, o(a) LOCATÁRIO(A) deverá substituí-lo por outra garantia idônea.";
+ var A=[
+ ["LOCADOR(A)",pj(t.lnome,t.lcpf),0,0],["LOCATÁRIO(A)",pj(t.nome,t.cpf),0,0],
+ ["OBJETO","Imóvel residencial, sito na **"+t.end+"**, com suas benfeitorias e instalações.",0,0],
+ ["","Por este particular instrumento, as partes supraqualificadas resolvem, de comum acordo e de livre e espontânea vontade, firmar um Contrato de Locação, tendo por objeto o imóvel declinado no preâmbulo, a reger-se pelas seguintes cláusulas e condições:",1,0],
+ ["PRAZO","O prazo da locação é de **"+o.prazo+" ("+ext(o.prazo)+") meses**, iniciando-se no dia **"+br(o.ini)+"** e findando-se em **"+br(fim)+"**, quando então será considerada finda, independentemente de notificação judicial ou extrajudicial, obrigando-se o(a) LOCATÁRIO(A) a restituir o imóvel, completamente livre e desocupado."+(o.zoo==="Incluir"?"\n\nPARÁGRAFO ÚNICO: Estabelecem as partes que, no caso de rescisão judicial ou extrajudicial do presente instrumento e consequente desocupação do imóvel, a constatação da existência de animais nele por ocasião de sua retomada deverá ser comunicada incontinenti à Divisão de Vigilância de Zoonose do Município (DVZ), quando diante de um animal suspeito de zoonose de relevância para a saúde pública, para as imediatas providências cabíveis.":""),0,1],
+ ["ALUGUEL","O aluguel convencionado é de **"+brl(va)+"** ("+extenso(va)+") mensais (mais os valores referentes ao pagamento de água, energia e IPTU), devendo ser pago até o dia **"+t.venc+"** do mês subsequente ao vencido, diretamente à "+(o.adm?"**"+o.adm+"**":R+" [nome do(a) administrador(a)]")+", ou a quem vier o(a) LOCADOR(A) indicar, mediante "+(o.bco?"depósito, transferência ou PIX, conforme dados: **"+o.bco+"**, ou outra forma de pagamento que seja conveniente para ambas as partes.":"depósito na conta corrente mantida junto ao Banco "+R+", Agência "+R+", Conta nº "+R+", ou por transferência, PIX ou outra forma de pagamento que seja conveniente para ambas as partes.")+"\n\nO pagamento do aluguel deverá ser efetuado até o dia **"+t.venc+"** de cada mês, subsequente ao vencido, sob pena de multa, correções e despesas previstas na Cláusula 4.",0,1],
+ ["REAJUSTE","O valor do locativo mensal será anualmente reajustado, segundo os índices do **"+o.idx+"** acumulados no período e, no caso de sua extinção, de forma alternativa e subsidiária, pelos do **"+subIdx(o.idx)[0]+"** e do **"+subIdx(o.idx)[1]+"**.",0,1],
+ ["MULTA E ENCARGOS","A não observância do prazo estabelecido na cláusula 2, implicará na incidência de multa por atraso de aluguel de **"+pMulta()+"%** sobre o valor do aluguel, acrescido de juros de **"+pJuros()+"% ao mês** e correção monetária.\n\nAlém do aluguel, obriga-se o(a) LOCATÁRIO(A) a efetuar o pagamento dos seguintes encargos, que poderão ser exigidos juntamente com o aluguel:\n"+enc.map(function(x,i){return"abcde"[i]+". "+x}).join("\n")+(o.iptu==="Locador"?"\n\nO IPTU permanece por conta do(a) LOCADOR(A).":"")+"\n\nPARÁGRAFO ÚNICO: O não pagamento desses encargos nas épocas próprias, facultará ao(à) LOCADOR(A) a justa recusa ao recebimento dos aluguéis, sujeitando-se o(a) LOCATÁRIO(A) ao pagamento dos ônus decorrentes do inadimplemento, previstos para cada débito, independentemente de eventual ação de despejo.",0,1,"CRECI: nunca entregue o carnê do IPTU ao locatário nem deixe o condomínio ser enviado direto a ele. Contrate o seguro-incêndio."],
+ ["DESTINAÇÃO","O imóvel objeto deste instrumento é locado exclusivamente para servir de residência ao(à) LOCATÁRIO(A) e sua família, não podendo sua destinação ser alterada, substituída ou acrescida de qualquer outra, sem prévia e expressa anuência do(a) LOCADOR(A). Fica vedado outrossim, a sublocação, cessão ou transferência deste contrato, bem como o empréstimo, parcial ou total do imóvel locado, que dependerão também, de prévia e expressa anuência do(a) LOCADOR(A).",1,1],
+ ["VISTORIA",vst(o)+"\n\nPARÁGRAFO ÚNICO: Constatadas eventuais irregularidades e a necessidade de reparos no imóvel em decorrência de uso indevido, fará o(a) LOCADOR(A) apresentar de imediato ao(à) LOCATÁRIO(A) um orçamento prévio assinado por profissional do ramo, sendo-lhe facultado pagar o valor nele declinado, liberando-se assim de eventuais ônus em razão de demora e/ou imperfeições nos serviços. Caso contrário, poderá contratar por sua própria conta e risco mão de obra especializada, arcando nessa condição com os riscos de eventuais imperfeições dos serviços e pelo pagamento do aluguel dos dias despendidos para a sua execução, cessando a locação unicamente com o “Termo de Entrega de Chaves e Vistoria”, firmado pelo(a) LOCADOR(A) ou seu(sua) administrador(a).",0,1,"CRECI: o Termo de Vistoria é o mais correto. O locatário tem 48 horas para reclamar por escrito de qualquer anormalidade; o silêncio vale como aceite."],
+ ["CONSERVAÇÃO","Obriga-se o(a) LOCATÁRIO(A) a manter o imóvel sempre limpo e bem cuidado na vigência da locação, correndo por sua conta e risco, não só os pequenos reparos tendentes a sua conservação, mas também as multas a que der causa, por inobservância de quaisquer leis, decretos e/ou regulamentos.",1,1],
+ ["BENFEITORIAS","O(A) LOCATÁRIO(A) não poderá fazer no imóvel ou em suas dependências quaisquer obras ou benfeitorias, sem prévia e expressa anuência do(a) LOCADOR(A), não lhe cabendo direito de retenção por aquelas que, mesmo necessárias ou consentidas, venham a ser realizadas.\n\nPARÁGRAFO ÚNICO: Caso não convenha ao(à) LOCADOR(A) a permanência de quaisquer obras ou benfeitorias realizadas pelo(a) LOCATÁRIO(A), mesmo necessárias ou consentidas, deverá este(a), uma vez finda a locação, removê-las às suas expensas, de modo a devolver o imóvel nas mesmas condições em que o recebeu.",1,1],
+ ["VIZINHANÇA","Obriga-se desde já o(a) LOCATÁRIO(A) a respeitar os regulamentos e as leis vigentes, bem como o direito de vizinhança, evitando a prática de quaisquer atos que possam perturbar a tranquilidade ou ameaçar a saúde pública.",1,1],
+ ["GARANTIA",gx,0,1,"CRECI: só uma garantia pode ser exigida. Fiador casado: o cônjuge também assina. Se o prazo ou o reajuste mudarem, exija nova concordância do fiador. Na desoneração do fiador, o CRECI orienta aplicar o art. 40 da Lei 8.245/91 (120 dias) no lugar do art. 835 do Código Civil."],
+ ["TOLERÂNCIA","Qualquer tolerância ou concessão, com o fito de resolver extrajudicialmente questão legal ou contratual, não se constituirá em precedente invocável pelo(a) LOCATÁRIO(A) e nem modificará quaisquer das condições estabelecidas neste instrumento.",1,1]];
+ if(fia)A.push(["SUBSTITUIÇÃO DO FIADOR","Em caso de morte, exoneração, falência ou insolvência de quaisquer dos fiadores, obriga-se o(a) LOCATÁRIO(A), num prazo de 30 (trinta) dias, contados da verificação do fato, a apresentar substituto idôneo ao(à) LOCADOR(A), a juízo deste(a), sob pena de caracterizar-se infração contratual, ensejadora de ação de despejo.",1,1]);
+ A.push(["ENERGIA ELÉTRICA","Obriga-se o(a) LOCATÁRIO(A) a efetuar a ligação de energia elétrica em seu nome, providenciando no seu desligamento, por ocasião da devolução do imóvel.",1,1,"CRECI: a ligação deve ficar no nome do locatário, para que uma eventual cobrança ou negativação não recaia sobre o locador."],
+ ["INFRAÇÃO E MULTA","A falta de cumprimento de qualquer cláusula ou condição deste instrumento, implicará na sua imediata rescisão, ficando a parte infratora sujeita ao pagamento de uma multa, equivalente a três meses de aluguel, pelo valor vigente à época da infração, proporcional ao prazo restante do contrato, além de perdas e danos.",1,1,"CRECI: a multa indenizatória é sempre proporcional ao prazo que falta do contrato."],
+ ["HONORÁRIOS E FORO","Sempre que as partes forem obrigadas a se valer de medidas judiciais para a defesa de direitos e obrigações decorrentes deste instrumento, o valor devido a título de honorários será de "+(o.hon?"**"+o.hon+"% ("+ext(o.hon)+" por cento)**":R+"% ("+R+" por cento)")+" sobre o valor da causa, elegendo, desde já, o Foro da Comarca de "+(o.foro?"**"+o.foro+"**":R)+" (situação do imóvel) para a solução das questões dele emergentes.",0,1],
+ ["PROTEÇÃO DE DADOS","As partes declaram expresso CONSENTIMENTO para que os dados pessoais necessários à elaboração, execução e cobrança deste contrato sejam coletados, tratados e compartilhados, exclusivamente para essa finalidade, nos termos do art. 7º, I e V, da Lei nº 13.709/2018 (LGPD).",0,1,"CRECI: a LGPD pede que o consentimento conste em cláusula destacada e com finalidade determinada."],
+ ["","E por estarem assim justas e contratadas, assinam o presente, em 3 (três) vias, de igual teor e forma, na presença de 2 (duas) testemunhas, para que surta seus legais e jurídicos efeitos.",1,0]);
+ return A.map(function(a){return{t:a[0],x:a[1],pad:a[1],f:!!a[2],n:!!a[3],u:false,h:a[4]||""}})}
+var PRONTAS={ele:["ASSINATURA ELETRÔNICA","As Partes (e as testemunhas) declaram que este documento poderá ser assinado eletronicamente por meio da plataforma “______”, com fundamento no art. 10, §2º, da MP nº 2.200-2/2001 e no art. 6º do Decreto nº 10.278/2020, sendo as assinaturas consideradas válidas, vinculantes e executáveis, desde que firmadas pelos representantes legais das Partes. As Partes renunciam à exigência de troca ou entrega das vias originais não digitais."],
+ med:["MEDIAÇÃO","Qualquer controvérsia decorrente ou relacionada a este contrato, incluindo sua interpretação, existência, validade, rescisão ou extinção, será submetida primeira e obrigatoriamente à mediação, administrada pela Câmara de Mediação e Arbitragem de ______, nos termos da Lei nº 13.140/2015 e do Regulamento de Mediação da instituição."],
+ arb:["ARBITRAGEM","Qualquer divergência, controvérsia ou litígio decorrente da interpretação ou execução deste contrato será resolvido por meio do tribunal arbitral de ______, denominado ______ - Câmara de Mediação e Arbitragem, CNPJ nº ______, situada na ______, nos termos de seu regulamento e da Lei nº 9.307/1996, com renúncia expressa de qualquer outro foro."],
+ nov:["NOVA CLÁUSULA","______"]};
+/* editor de cláusulas */
+function edAbrir(){edRender();cedlg.showModal()}
+function edRender(){
+ var cl=get(cur).ctr.cl,n=0;
+ document.getElementById("edl").innerHTML=cl.map(function(c,i){
+  if(c.n)n++;
+  var ed=!c.f||c.u,tt=(c.n?"CLÁUSULA "+n+(c.t?" – ":""):"")+(c.t||(c.n?"":"Texto de abertura"));
+  return'<div class="card" style="padding:10px"><div class="row" style="margin:0;align-items:center;justify-content:space-between"><b>'+esc(tt)+'</b><span class="tag'+(ed?" ok":"")+'">'+(c.f&&!c.u?"Fixa":"Editável")+'</span></div>'+(c.h?'<p class="muted" style="margin:4px 0">'+esc(c.h)+'</p>':'')+
+  (ed?'<textarea rows="'+Math.min(14,Math.max(4,Math.ceil(c.x.length/60)))+'" oninput="edSet('+i+',this.value)">'+esc(c.x)+'</textarea>':'<p class="muted" style="white-space:pre-wrap;margin:6px 0">'+esc(c.x)+'</p>')+
+  '<div class="row" style="margin-top:6px">'+(c.f&&!c.u?'<button class="sec" onclick="edLib('+i+')">Editar esta cláusula</button>':'<button class="sec" onclick="edRest('+i+')">Restaurar padrão</button>')+'<button class="sec" onclick="edMv('+i+',-1)">↑</button><button class="sec" onclick="edMv('+i+',1)">↓</button><button class="del" onclick="edDel('+i+')">Remover</button></div></div>'}).join("")}
+function edSet(i,x){get(cur).ctr.cl[i].x=x;save()}
+function edLib(i){get(cur).ctr.cl[i].u=true;save();edRender()}
+function edRest(i){var c=get(cur).ctr.cl[i];if(!c.pad&&!confirm("Esta cláusula não tem texto padrão. Limpar?"))return;c.x=c.pad||"";c.u=false;save();edRender()}
+function edDel(i){if(confirm("Remover esta cláusula do contrato?")){get(cur).ctr.cl.splice(i,1);save();edRender()}}
+function edMv(i,d){var a=get(cur).ctr.cl,j=i+d;if(j<0||j>=a.length)return;var x=a[i];a[i]=a[j];a[j]=x;save();edRender()}
+function edAdd(){var a=get(cur).ctr.cl,p=PRONTAS[v("edp")],k=a.length;if(k&&!a[k-1].n&&!a[k-1].t)k--;a.splice(k,0,{t:p[0],x:p[1],pad:p[1],f:false,n:true,u:false,h:""});save();edRender()}
+function verContrato(){var n=0;get(cur).ctr.cl.forEach(function(c){n+=(c.x.match(/______/g)||[]).length});if(n&&!confirm("Ainda há "+n+" campo(s) com ______ sem preencher. Ver o contrato assim mesmo?"))return;cedlg.close();renderContrato()}
+function renderContrato(){
+ var t=get(cur),c=db.cfg,o=t.ctr,fia=o.gar==="Fiador",cid=c.cid||"São Paulo",n=new Date(),
+ dt=n.getDate()+" de "+MESL[n.getMonth()]+" de "+n.getFullYear(),k=0,
+ fm=function(x){return esc(x).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>")},
+ body=o.cl.map(function(a){if(a.n)k++;
+  return"<p>"+(a.n?"<b>CLÁUSULA "+k+(a.t?" – "+esc(a.t):"")+".</b> ":(a.t?"<b>"+esc(a.t)+":</b> ":""))+fm(a.x)+"</p>"}).join(""),
+ bl=function(nm,pp){return'<div class="sgl" style="width:auto"><div style="height:44px"></div><hr><b>'+esc(nm||"______________________")+"</b><br>"+pp+"</div>"},
+ tst=function(x){return'<div style="font-size:13px;line-height:1.9"><b>TESTEMUNHA '+x+'</b><br>Nome: ____________________________<br>Qualificação: ______________________<br>Endereço: _________________________</div>'},
+ logo=c.logo?'<img src="'+c.logo+'" alt="Logo">':'<div class="mono">FC</div>';
+ document.getElementById("sepb").style.display="flex";
+ rinfo={id:t.id,k:"ctr",num:o.num.replace("/","-"),pre:"contrato",tit:"Contrato de locação",multi:true};
+ document.getElementById("paper").innerHTML=
+ '<div class="top"></div><div class="in"><div class="rh"><div class="rlogo">'+logo+'</div><div class="rid"><b>FCosta Corretor de Imóveis</b><span>Corretor de Imóveis — CRECI-SP 294791-F</span><span>Avaliador Imobiliário — CNAI 52708</span></div><div class="rn">Contrato Nº<b>'+o.num+'</b></div></div>'+
+ '<div class="rt" style="font-size:16px;letter-spacing:1.5px">CONTRATO DE LOCAÇÃO RESIDENCIAL</div>'+body+'<p>'+esc(cid)+', '+dt+'.</p>'+
+ '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 26px;margin-top:14px">'+bl(t.lnome,"LOCADOR(A)")+bl(t.nome,"LOCATÁRIO(A)")+(fia?bl("","FIADOR")+bl("","FIADORA"):"")+'</div>'+
+ '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 26px;margin-top:22px">'+tst(1)+tst(2)+'</div></div>'+
+ '<div class="rft">FCosta Corretor de Imóveis • CRECI-SP 294791-F • CNAI 52708 • fcostacorretor.com</div>';
+ document.getElementById("recibo").style.display="block"}
+function abreZap(tel,msg){var n=(tel||"").replace(/\D/g,"");if(n&&n.length<=11)n="55"+n;window.open("https://wa.me/"+n+"?text="+encodeURIComponent(msg),"_blank")}
+async function enviarParte(q){
+ var t=get(rinfo.id),loc=q==="locador",nome=(loc?t.lnome:t.nome)||"",tel=loc?t.ltel:t.tel,
+ msg="Olá, "+nome.split(" ")[0]+"! Segue o contrato de locação do imóvel "+t.end+", para você ler e assinar como "+(loc?"LOCADOR(A)":"LOCATÁRIO(A)")+". Qualquer dúvida é só responder. "+sNome();
+ try{var f=await arquivo("pdf");
+  if(navigator.canShare&&navigator.canShare({files:[f]})){alert("Na próxima tela, escolha o WhatsApp "+(loc?"do locador":"do locatário")+".");await navigator.share({files:[f],text:msg})}
+  else{baixar(f,f.name);alert("Arquivo salvo no aparelho. Vou abrir o WhatsApp "+(loc?"do locador":"do locatário")+"; anexe o arquivo lá.");abreZap(tel,msg)}}
+ catch(e){if(e&&e.name==="AbortError")return;alert("Não foi possível gerar o arquivo. Verifique a internet e tente de novo.")}}
+function listaDocs(q){
+ var t=get(rinfo.id),o=t.ctr||{},loc=q==="locador",nome=(loc?t.lnome:t.nome)||"",tel=loc?t.ltel:t.tel,L;
+ if(loc)L=["RG e CPF","Certidão de casamento ou de nascimento (estado civil)","Matrícula atualizada do imóvel (certidão de inteiro teor e de ônus, com até 30 dias)","Carnê ou consulta do IPTU","Comprovante de residência","Últimas contas de água, luz, gás e condomínio quitadas","Dados bancários ou chave PIX para receber o aluguel","Procuração, se for representado por outra pessoa"];
+ else{L=["RG e CPF (ou CNH)","Certidão de casamento ou de nascimento (estado civil)","Comprovante de residência atual","Comprovantes de renda dos últimos 3 meses"];
+  if(o.gar==="Caução em dinheiro")L.push("Comprovante do depósito da caução");
+  else if(o.gar==="Seguro-fiança")L.push("Proposta e apólice do seguro-fiança");else if(o.gar==="Título de capitalização")L.push("Proposta de subscrição do título de capitalização");
+  else L.push("Do fiador: RG, CPF, certidão de casamento, comprovantes de renda e matrícula atualizada de um imóvel dele; se casado, o cônjuge também assina")}
+ abreZap(tel,"Olá, "+nome.split(" ")[0]+"! Para preparar o contrato de locação do imóvel "+t.end+", preciso que você me envie estes documentos"+(loc?" (como LOCADOR)":" (como LOCATÁRIO)")+":\n\n"+L.map(function(x,i){return(i+1)+". "+x}).join("\n")+"\n\nPode mandar foto nítida ou PDF. "+sNome())}
+
+function certidoes(){var t=get(cur);document.getElementById("cern").textContent=t.nome;document.getElementById("cerc").textContent=t.cpf?"CPF "+t.cpf:"CPF não cadastrado (use Editar)";cerdlg.showModal()}
+function copiarCpf(){var t=get(cur);if(!t.cpf){alert("Cadastre o CPF do locatário em Editar.");return}try{navigator.clipboard.writeText(t.cpf).then(function(){alert("CPF copiado.")},function(){alert("Não consegui copiar. Selecione o CPF na tela e copie.")})}catch(e){alert("Não consegui copiar. Selecione o CPF na tela e copie.")}}
+</script>
+</body>
+</html>
