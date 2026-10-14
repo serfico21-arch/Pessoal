@@ -1128,6 +1128,8 @@ window.TB={mount(r){root=r;r.innerHTML=SKEL;wire();render();},count(){return doc
       '<a class="mundo" style="--c:var(--or)" href="repositorios-github.html"><i class="ti ti-brand-github big"></i>' +
       '<span class="mn">Repositórios</span><span class="md">Pessoal, IBBC, Apostilas CRECI, ADM e PTAM</span>' +
       '<span class="mq">5 repositórios <i class="ti ti-arrow-right"></i></span></a></div>';
+    var novos = itens.filter(function (i) { return i.b === 'Novo'; }).sort(porNome);
+    if (novos.length) html += '<h2 class="sec">Novidades</h2><div class="lista">' + novos.map(item).join('') + '</div>';
     var rec = lerStorage('painel_recentes', []);
     if (rec.length) html += '<h2 class="sec">Continuar de onde parou</h2><div class="chips">' + rec.map(function (r) {
       return '<a class="item-link chip" href="' + esc(r.href) + '"' + (r.href.indexOf('http') === 0 ? ' target="_blank" rel="noopener"' : '') +
@@ -1186,22 +1188,22 @@ window.TB={mount(r){root=r;r.innerHTML=SKEL;wire();render();},count(){return doc
   function htmlMundo(m) {
     var M = MUNDOS[m], itens = ligar(todosItens()), gs = gruposDoModo(m, itens);
     var lista = itens.filter(function (i) { return i.m === m; });
-    var abas = gs.map(function (g) {
-      return { id: g.id, n: g.n, i: g.i, c: g.c, g: g, q: lista.filter(function (i) { return i._g === g; }).length };
-    }).filter(function (a) { return a.q > 0; });
-    abas.push({ id: 'todas', n: 'A–Z', i: 'ti-list', c: '--sk', q: lista.length });
-    var favLista = lista.filter(function (i) { return favs.indexOf(chave(i)) > -1; });
-    abas.unshift({ id: 'favoritos', n: 'Favoritos', i: 'ti-star-filled', c: '--am', q: favLista.length, fav: true });
-    if (m === 'corretor') abas.splice(1, 0, { id: 'tabeloes', n: 'Tabelões', i: 'ti-table', c: '--em', q: null });
-    if (!abas.some(function (a) { return a.id === aba; })) aba = (favLista.length ? abas[0] : abas.filter(function (a) { return a.id !== 'tabeloes'; })[1]).id;
-    var at = abas.filter(function (a) { return a.id === aba; })[0];
-    var sel = (aba === 'favoritos' ? favLista : aba === 'todas' ? lista : lista.filter(function (i) { return i._g === at.g; })).slice().sort(porNome);
-    return '<section class="mhead" style="--c:var(' + M.c + ')"><span class="mh-ic"><i class="ti ' + M.i + '"></i></span><div><h1>' + M.n + '</h1><p>' + M.d + '</p></div>' +
-      '<button type="button" class="btn-sec" data-open="novo"><i class="ti ti-plus"></i><span>Novo botão</span></button></section>' +
-      '<div class="pills"><button type="button" class="pill pill-busca" data-open="busca" aria-label="Buscar ferramenta"><i class="ti ti-search"></i>Buscar</button>' + abas.map(function (a) {
-        return '<button type="button" class="pill' + (a.id === aba ? ' on' : '') + '" style="--c:var(' + a.c + ')" data-aba="' + esc(a.id) + '"><i class="ti ' + esc(a.i) + '"></i>' + esc(a.n) + (a.q == null ? '' : '<em' + (a.fav ? ' class="fav-n"' : '') + '>' + a.q + '</em>') + '</button>';
-      }).join('') + '</div>' + (at.g && at.g.s ? '<p class="gdesc">' + esc(at.g.s) + '</p>' : '') +
-      (aba === 'tabeloes' ? '<div id="tb-root"></div>' : aba === 'favoritos' && !sel.length ? '<p class="vazio">Nenhum favorito nesta área ainda. Toque na ★ de qualquer ferramenta para fixar aqui.</p>' : '<div class="lista">' + sel.map(item).join('') + '</div>');
+    var cab = '<section class="mhead" style="--c:var(' + M.c + ')"><span class="mh-ic"><i class="ti ' + M.i + '"></i></span><div><h1>' + M.n + '</h1><p>' + M.d + '</p></div>' +
+      '<button type="button" class="btn-sec" data-open="novo"><i class="ti ti-plus"></i><span>Novo botão</span></button></section>';
+    if (m === 'corretor' && aba === 'tabeloes') {
+      return cab + '<button type="button" class="btn-sec" data-aba="lista" style="margin-bottom:12px"><i class="ti ti-arrow-left"></i><span>Voltar aos botões</span></button><div id="tb-root"></div>';
+    }
+    var html = cab + '<button type="button" class="busca-pill" data-open="busca" style="margin-bottom:6px"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button>';
+    if (m === 'corretor') {
+      html += '<h3 class="gtit" style="--c:var(--em)"><i class="ti ti-table"></i>Tabelões<em>1</em></h3><div class="lista">' +
+        '<button type="button" class="item-link" style="--c:var(--em);width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer" data-aba="tabeloes">' +
+        '<span class="ic"><i class="ti ti-table"></i></span><span class="tx"><b class="t">Tabelões</b><small>Tabelas de imóveis e simulador</small></span></button></div>';
+    }
+    gs.forEach(function (g) {
+      var l = lista.filter(function (i) { return i._g === g; }).sort(porNome);
+      if (l.length) html += '<h3 class="gtit" style="--c:var(' + g.c + ')"><i class="ti ' + esc(g.i) + '"></i>' + esc(g.n) + '<em>' + l.length + '</em></h3><div class="lista">' + l.map(item).join('') + '</div>';
+    });
+    return html;
   }
 
   function render() {
@@ -1213,7 +1215,7 @@ window.TB={mount(r){root=r;r.innerHTML=SKEL;wire();render();},count(){return doc
   }
   function aplicarModo(m) {
     modo = m; gravarStorage('painel_vista', m);
-    aba = (m === 'inicio' || m === 'favoritos' || m === 'mapa') ? null : lerStorage('painel_aba_' + m, null);
+    aba = null;
     render(); window.scrollTo(0, 0);
   }
   function irParaAba(id) { aba = id; gravarStorage('painel_aba_' + modo, id); render(); }
@@ -1267,7 +1269,7 @@ window.TB={mount(r){root=r;r.innerHTML=SKEL;wire();render();},count(){return doc
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-go],[data-goaba],[data-open],[data-aba],[data-fav],[data-fechar]');
     if (t) {
-      if (t.hasAttribute('data-goaba')) { var ga = t.getAttribute('data-goaba').split('|'); gravarStorage('painel_aba_' + ga[0], ga[1]); aplicarModo(ga[0]); }
+      if (t.hasAttribute('data-goaba')) { var ga = t.getAttribute('data-goaba').split('|'); aplicarModo(ga[0]); irParaAba(ga[1]); }
       else if (t.hasAttribute('data-go')) aplicarModo(t.getAttribute('data-go'));
       else if (t.hasAttribute('data-aba')) irParaAba(t.getAttribute('data-aba'));
       else if (t.hasAttribute('data-fav')) alternarFav(t);
