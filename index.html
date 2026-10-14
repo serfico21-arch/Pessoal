@@ -447,6 +447,7 @@ var FERRAMENTAS = [
   {m:"corretor", g:"contratos", t:"Autorização de Venda — Sem exclusividade", s:"Vendedor preenche e assina pelo celular", i:"ti-file-text", h:"autorizacao-sem-exclusividade.html", k:"autorização de venda sem exclusividade contrato intermediação assinatura"},
   {m:"corretor", g:"contratos", t:"Contratos Modelo CRECI-SP", s:"Modelos de documentos — área restrita", i:"ti-file-text", h:"https://www.crecisp.gov.br/arearestrita/modelodedocumentos", k:"contratos modelo creci sp modelo de documentos"},
   {m:"corretor", g:"contratos", t:"Contratos CRECI", s:"Preencher, editar, baixar Word e PDF", i:"ti-file-certificate", h:"contratos-creci.html", k:"contratos creci locação compra e venda administração proposta recibo editar preencher word pdf"},
+  {m:"corretor", g:"contratos", t:"CDHU — Painel do Corretor", s:"Requisitos, checklist, passo a passo e contrato de transferência", i:"ti-building-community", h:"cdhu-corretor.html", k:"cdhu painel corretor requisitos checklist gaveta transferência contrato procuração cpvc quitação dívidas apartamento casa habitacional", b:"Novo"},
   {m:"corretor", g:"contratos", t:"Meus Documentos (Google Docs)", s:"Abrir meus arquivos no Google Docs", i:"ti-brand-google-drive", h:"https://docs.google.com/document/u/1/", k:"google docs meus documentos contratos drive"},
   {m:"corretor", g:"financas", t:"Controle Financeiro", s:"Receitas e despesas", i:"ti-report-money", h:"controle_fin.html", k:"controle financeiro receitas despesas", d:1, b:"Principal"},
   {m:"corretor", g:"financas", t:"Metas do Mês", s:"Leads, visitas e fechamentos", i:"ti-target-arrow", h:"metas.html", k:"metas do mês leads visitas fechamentos"},
@@ -1162,6 +1163,22 @@ window.TB={mount(r){root=r;r.innerHTML=SKEL;wire();render();},count(){return doc
         if (l.length) html += '<h3 class="gtit" style="--c:var(' + g.c + ')"><i class="ti ' + esc(g.i) + '"></i>' + esc(g.n) + '<em>' + l.length + '</em></h3><div class="lista">' + l.map(item).join('') + '</div>';
       });
     });
+    var rap = function (ic, t, sub, attr, href) {
+      var ext = href && /^https?:\/\//i.test(href);
+      var inner = '<span class="ic"><i class="ti ' + ic + '"></i></span><span class="tx"><b class="t">' + t + '</b><small>' + sub + '</small></span>';
+      return href ? '<a class="item-link" style="--c:var(--or)" href="' + href + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' + inner + '</a>'
+        : '<button type="button" class="item-link" style="--c:var(--or);width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer" ' + attr + '>' + inner + '</button>';
+    };
+    html += '<h2 class="sec">Recursos e atalhos do painel</h2><div class="lista">' +
+      rap('ti-table', 'Tabelões', 'Tabelas de imóveis e simulador (área Corretor)', 'data-goaba="corretor|tabeloes"') +
+      rap('ti-calculator', 'Comissão rápida', 'Calcular a comissão sem sair do painel', 'data-open="comissao"') +
+      rap('ti-user-plus', 'Novo lead', 'Registrar um contato rapidamente', 'data-open="lead"') +
+      rap('ti-plus', 'Novo botão', 'Adicionar uma ferramenta ao painel', 'data-open="novo"') +
+      rap('ti-search', 'Buscar', 'Procurar em todas as ferramentas', 'data-open="busca"') +
+      rap('ti-brand-whatsapp', 'WhatsApp Web', 'Atalho útil', '', 'https://web.whatsapp.com') +
+      rap('ti-map-pin', 'Google Maps', 'Atalho útil', '', 'https://www.google.com/maps') +
+      rap('ti-mailbox', 'Consulta de CEP', 'Correios', '', 'https://buscacepinter.correios.com.br/app/endereco/index.php') +
+      rap('ti-certificate', 'CRECI-SP', 'Site oficial', '', 'https://www.crecisp.gov.br') + '</div>';
     html += '<h2 class="sec">Repositórios</h2><div class="lista"><a class="item-link" style="--c:var(--or)" href="repositorios-github.html"><span class="ic"><i class="ti ti-brand-github"></i></span><span class="tx"><b class="t">Repositórios no GitHub</b><small>Pessoal, IBBC, Apostilas CRECI, ADM e PTAM</small></span></a></div>';
     return html;
   }
@@ -1248,9 +1265,10 @@ window.TB={mount(r){root=r;r.innerHTML=SKEL;wire();render();},count(){return doc
   });
 
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-go],[data-open],[data-aba],[data-fav],[data-fechar]');
+    var t = e.target.closest('[data-go],[data-goaba],[data-open],[data-aba],[data-fav],[data-fechar]');
     if (t) {
-      if (t.hasAttribute('data-go')) aplicarModo(t.getAttribute('data-go'));
+      if (t.hasAttribute('data-goaba')) { var ga = t.getAttribute('data-goaba').split('|'); gravarStorage('painel_aba_' + ga[0], ga[1]); aplicarModo(ga[0]); }
+      else if (t.hasAttribute('data-go')) aplicarModo(t.getAttribute('data-go'));
       else if (t.hasAttribute('data-aba')) irParaAba(t.getAttribute('data-aba'));
       else if (t.hasAttribute('data-fav')) alternarFav(t);
       else if (t.hasAttribute('data-fechar')) fecharDlg(t.closest('dialog'));
