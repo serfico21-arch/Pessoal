@@ -37,6 +37,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 18px; line-height: 1.5; }
 .wrap {
   max-width: 780px;
@@ -120,6 +121,13 @@ details { margin-top: 4px; }
 summary { cursor: pointer; font-weight: 600; min-height: 36px; display: flex; align-items: center; }
 details > .tool { margin-top: 10px; }
 
+.seg { display: flex; gap: 8px; }
+.seg button { flex: 1; }
+.seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.lbl { font-weight: 600; font-size: 0.95rem; }
+.meter { background: var(--tint); border-radius: 8px; padding: 10px 14px; font-size: 0.98rem; display: flex; flex-direction: column; gap: 4px; }
+.meter.over { color: var(--warn); font-weight: 600; }
+.meter .ref { font-size: 0.88rem; font-weight: 400; color: var(--muted); }
 .modelbar { margin-top: 18px; background: var(--tint); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
 .modelbar .tag { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .modelbar .who { font-weight: 600; }
@@ -184,6 +192,13 @@ html, body { margin: 0; }
       <div class="block-title"><span class="num">2</span><h3>Descreva a modelo</h3></div>
       <p class="example" id="exampleBanner">Estes dados são um exemplo. Troque pelos da sua modelo.</p>
       <form id="form" autocomplete="off">
+        <div class="field wide">
+          <span class="lbl" id="lbl-genero">A modelo é</span>
+          <div class="seg" role="group" aria-labelledby="lbl-genero">
+            <button type="button" id="g-f" aria-pressed="true">Mulher</button>
+            <button type="button" id="g-m" aria-pressed="false">Homem</button>
+          </div>
+        </div>
         <div class="field">
           <label for="f-nome">Nome</label>
           <input id="f-nome" type="text" data-key="nome" placeholder="Ex.: Camila">
@@ -265,18 +280,34 @@ html, body { margin: 0; }
 
     <div class="block">
       <div class="block-title"><span class="num">2</span><h3>Escreva o que a modelo vai falar</h3></div>
+      <div class="fields">
+        <div class="field">
+          <label for="f-dur">Duração do vídeo <span class="hint">(segundos)</span></label>
+          <input id="f-dur" type="number" inputmode="numeric" min="3" max="600" step="1" value="30">
+        </div>
+        <div class="field">
+          <label for="f-ritmo">Ritmo da fala</label>
+          <select id="f-ritmo">
+            <option value="130">Calmo (130 palavras por minuto)</option>
+            <option value="150" selected>Normal (150 palavras por minuto)</option>
+            <option value="170">Rápido (170 palavras por minuto)</option>
+          </select>
+        </div>
+      </div>
+      <div class="meter" id="meter" role="status" aria-live="polite"></div>
       <div class="field">
         <label for="f-roteiro">Roteiro</label>
         <textarea id="f-roteiro" data-key="roteiro" rows="4" placeholder="Ex.: Olá, eu sou da FCOSTA Corretor de Imóveis..."></textarea>
         <span class="count" id="count" aria-live="polite"></span>
       </div>
       <button type="button" class="btn" id="copy-roteiro">Copiar roteiro</button>
+      <button type="button" class="btn" id="reset-roteiro">Voltar à fala padrão</button>
       <span class="status" id="status-roteiro" role="status" aria-live="polite"></span>
     </div>
 
     <div class="block">
       <div class="block-title"><span class="num">3</span><h3>Gere o áudio</h3></div>
-      <p class="how">Abra o site, cole o roteiro, escolha uma voz feminina e baixe o áudio.</p>
+      <p class="how">Abra o site, cole o roteiro, escolha uma voz <span id="vozgen">feminina</span> e baixe o áudio.</p>
       <div data-tools="fish,minimax,vocloner"></div>
     </div>
   </section>
@@ -351,21 +382,47 @@ html, body { margin: 0; }
 (function () {
   var KEYS = ["nome", "idade", "aparencia", "cabelo", "olhos", "pele", "personalidade", "voz", "fala", "estilo", "roupa", "cena", "roteiro"];
   var STORE = "fcosta-modelo-ia-v2";
-  var DEFAULT_ROUPA = "terno feminino preto e camisa branca, com crachá escrito FCOSTA no peito";
-  var EXAMPLE = {
-    nome: "Camila", idade: "28",
-    aparencia: "elegante, sorriso largo, corpo atlético, 1,68 m",
-    cabelo: "castanho escuro, ondulado, na altura dos ombros",
-    olhos: "castanhos, expressivos",
-    pele: "morena clara, com poros e textura natural",
-    personalidade: "cativante, simpática e confiante",
-    voz: "suave e calorosa, com sotaque paulista",
-    fala: "calma, clara, frases curtas e bom humor",
-    estilo: "elegante e profissional, tons de preto e dourado",
-    roupa: DEFAULT_ROUPA,
-    cena: "em frente a uma casa moderna, sorrindo e olhando para a câmera",
-    roteiro: "Olá, tudo bem? Eu sou da FCOSTA Corretor de Imóveis e estou aqui para ajudar você a encontrar o imóvel ideal. Fale comigo!"
+  var OLD_ROTEIRO = "Olá, tudo bem? Eu sou da FCOSTA Corretor de Imóveis e estou aqui para ajudar você a encontrar o imóvel ideal. Fale comigo!";
+  var DEFAULT_ROTEIRO = "Olá, tudo bem? Aqui é da FCOSTA Corretor de Imóveis. Quer comprar, vender ou alugar um imóvel com segurança? Eu cuido de tudo para você, da avaliação até a entrega das chaves. Atendimento rápido, transparente e com as melhores opções para o seu bolso. Chame agora no WhatsApp e dê o primeiro passo para o seu novo lar!";
+  var GEN = {
+    f: {
+      roupa: "terno feminino preto e camisa branca, com crachá escrito FCOSTA no peito",
+      plNome: "Ex.: Camila", plPers: "Ex.: cativante e simpática", plRoupa: "Ex.: terno feminino preto, crachá escrito FCOSTA",
+      ex: {
+        nome: "Camila", idade: "28",
+        aparencia: "elegante, sorriso largo, corpo atlético, 1,68 m",
+        cabelo: "castanho escuro, ondulado, na altura dos ombros",
+        olhos: "castanhos, expressivos",
+        pele: "morena clara, com poros e textura natural",
+        personalidade: "cativante, simpática e confiante",
+        voz: "suave e calorosa, com sotaque paulista",
+        fala: "calma, clara, frases curtas e bom humor",
+        estilo: "elegante e profissional, tons de preto e dourado",
+        roupa: "terno feminino preto e camisa branca, com crachá escrito FCOSTA no peito",
+        cena: "em frente a uma casa moderna, sorrindo e olhando para a câmera",
+        roteiro: DEFAULT_ROTEIRO
+      }
+    },
+    m: {
+      roupa: "terno masculino preto, camisa branca e gravata, com crachá escrito FCOSTA no peito",
+      plNome: "Ex.: Rafael", plPers: "Ex.: cativante e simpático", plRoupa: "Ex.: terno masculino preto, gravata, crachá escrito FCOSTA",
+      ex: {
+        nome: "Rafael", idade: "32",
+        aparencia: "elegante, sorriso confiante, barba bem aparada, corpo atlético, 1,80 m",
+        cabelo: "castanho escuro, curto, bem penteado",
+        olhos: "castanhos, expressivos",
+        pele: "morena clara, com poros e textura natural",
+        personalidade: "cativante, simpático e confiante",
+        voz: "firme e acolhedora, com sotaque paulista",
+        fala: "calma, clara, frases curtas e bom humor",
+        estilo: "elegante e profissional, tons de preto e dourado",
+        roupa: "terno masculino preto, camisa branca e gravata, com crachá escrito FCOSTA no peito",
+        cena: "em frente a uma casa moderna, sorrindo e olhando para a câmera",
+        roteiro: DEFAULT_ROTEIRO
+      }
+    }
   };
+  var genero = "f";
 
   var inputs = {};
   KEYS.forEach(function (k) { inputs[k] = document.querySelector('[data-key="' + k + '"]'); });
@@ -373,6 +430,7 @@ html, body { margin: 0; }
   function get() {
     var v = {};
     KEYS.forEach(function (k) { v[k] = (inputs[k].value || "").trim(); });
+    v.genero = genero;
     return v;
   }
   function set(values) { KEYS.forEach(function (k) { inputs[k].value = values[k] || ""; }); }
@@ -381,21 +439,21 @@ html, body { margin: 0; }
   /* Os textos seguem os modelos das aulas (PDFs), com a marca FCOSTA. */
   var BUILD = {
     personagem: function (v) {
-      var p = [];
-      p.push("chat, quero criar uma modelo, personagem com ia, vou usar ela pra fazer comerciais, criativos e conteúdos de imóveis, pra minha empresa, a FCOSTA Corretor de Imóveis (CRECI-SP 294791-F, CNAI 52708), ela vai ser cara da minha marca");
-      if (v.nome) p.push("o nome dela é " + v.nome);
-      p.push("minha personagem tem " + ph(v.idade, "idade") + " anos");
-      p.push("quero ela " + ph(v.aparencia, "aparência"));
+      var m = v.genero === "m", ele = m ? "ele" : "ela", p = [];
+      p.push("chat, quero criar uma modelo, personagem com ia, vou usar " + ele + " pra fazer comerciais, criativos e conteúdos de imóveis, pra minha empresa, a FCOSTA Corretor de Imóveis (CRECI-SP 294791-F, CNAI 52708), " + ele + " vai ser cara da minha marca");
+      if (v.nome) p.push("o nome " + (m ? "dele" : "dela") + " é " + v.nome);
+      p.push((m ? "meu personagem tem " : "minha personagem tem ") + ph(v.idade, "idade") + " anos");
+      p.push("quero " + ele + " " + ph(v.aparencia, "aparência"));
       p.push("cabelo " + ph(v.cabelo, "cabelo"));
       if (v.olhos) p.push("olhos " + v.olhos);
       if (v.pele) p.push("pele " + v.pele);
       if (v.roupa) p.push("vestindo " + v.roupa);
-      p.push("personalidade " + (v.personalidade || "cativante e simpática"));
-      p.push("cara de brasileira, deixe com aspecto real, rosto com poros, e expressões, quero ela, bonita e atraente, gere pra mim");
+      p.push("personalidade " + (v.personalidade || (m ? "cativante e simpático" : "cativante e simpática")));
+      p.push((m ? "cara de brasileiro" : "cara de brasileira") + ", deixe com aspecto real, rosto com poros, e expressões, quero " + ele + ", " + (m ? "bonito" : "bonita") + " e atraente, gere pra mim");
       return p.join(", ");
     },
     ficha: function (v) {
-      var rows = [["Nome", v.nome], ["Idade", v.idade], ["Aparência", v.aparencia], ["Cabelo", v.cabelo],
+      var rows = [["Nome", v.nome], ["Gênero", v.genero === "m" ? "Masculino" : "Feminino"], ["Idade", v.idade], ["Aparência", v.aparencia], ["Cabelo", v.cabelo],
         ["Olhos", v.olhos], ["Tom de pele", v.pele], ["Personalidade", v.personalidade],
         ["Voz", v.voz], ["Forma de falar", v.fala], ["Estilo", v.estilo], ["Roupa e crachá", v.roupa]];
       var blank = false;
@@ -407,7 +465,7 @@ html, body { margin: 0; }
     book: function (v) {
       var s = [];
       if (v.nome) s.push(v.nome);
-      s.push("Brazilian woman");
+      s.push(v.genero === "m" ? "Brazilian man" : "Brazilian woman");
       if (v.idade) s.push(v.idade + " years old");
       if (v.aparencia) s.push(v.aparencia);
       if (v.cabelo) s.push("hair: " + v.cabelo);
@@ -421,8 +479,9 @@ html, body { margin: 0; }
     },
     video: function (v) {
       var who = [v.nome, v.aparencia, v.cabelo && "cabelo " + v.cabelo, v.olhos && "olhos " + v.olhos, v.pele && "pele " + v.pele, v.roupa && "vestindo " + v.roupa].filter(Boolean).join(", ");
-      return "Use a imagem anexada como referência da mesma personagem" + (who ? " (" + who + ")" : "") + ". Não mude o rosto, o cabelo nem a roupa. Cena: " + ph(v.cena, "cena") +
-        ". A personagem olha para a câmera e se move de forma natural, com expressões reais. Câmera estável na altura do rosto, luz natural, aspecto de vídeo real, formato vertical 9:16, 8 segundos. Sem texto na tela e sem legendas.";
+      var m = v.genero === "m";
+      return "Use a imagem anexada como referência " + (m ? "do mesmo personagem" : "da mesma personagem") + (who ? " (" + who + ")" : "") + ". Não mude o rosto, o cabelo nem a roupa. Cena: " + ph(v.cena, "cena") +
+        ". " + (m ? "O personagem olha" : "A personagem olha") + " para a câmera e se move de forma natural, com expressões reais. Câmera estável na altura do rosto, luz natural, aspecto de vídeo real, formato vertical 9:16, 8 segundos. Sem texto na tela e sem legendas.";
     }
   };
 
@@ -566,9 +625,42 @@ html, body { margin: 0; }
     countEl.textContent = n + " caracteres" + (n > 500 ? ". O Fish Audio aceita até 500 por vez: divida em partes." : "");
     countEl.className = "count" + (n > 500 ? " over" : "");
   }
+  document.getElementById("reset-roteiro").addEventListener("click", function () {
+    inputs.roteiro.value = DEFAULT_ROTEIRO; render(); save();
+    document.getElementById("status-roteiro").textContent = "Fala padrão da FCOSTA colocada de volta.";
+  });
   document.getElementById("copy-roteiro").addEventListener("click", function () {
     copyText(inputs.roteiro.value, document.getElementById("status-roteiro"), "Roteiro copiado.", inputs.roteiro);
   });
+
+  /* Palavras por tempo de vídeo: ritmo escolhido mais 10% de pausas entre as frases */
+  var TIME_KEY = "fcosta-modelo-ia-tempo";
+  var durEl = document.getElementById("f-dur"), ritmoEl = document.getElementById("f-ritmo"), meterEl = document.getElementById("meter");
+  try {
+    var tv = JSON.parse(localStorage.getItem(TIME_KEY) || "null");
+    if (tv && tv.dur) durEl.value = tv.dur;
+    if (tv && tv.ritmo) ritmoEl.value = tv.ritmo;
+  } catch (e) {}
+  function wordsFor(seconds, wpm) { return Math.floor(seconds * wpm / 60 / 1.1); }
+  function updateMeter() {
+    var dur = Math.max(0, parseFloat(durEl.value) || 0), wpm = parseInt(ritmoEl.value, 10) || 150;
+    var txt = (inputs.roteiro.value || "").trim();
+    var words = txt ? txt.split(/\s+/).filter(Boolean).length : 0;
+    var secs = Math.round(words * 60 / wpm * 1.1);
+    var max = wordsFor(dur, wpm);
+    meterEl.textContent = "";
+    var l1 = el("span", "", "Em " + dur + " segundos cabem até " + max + " palavras.");
+    var l2 = el("span", "", "Seu roteiro tem " + words + " palavras e leva cerca de " + secs + " segundos.");
+    var over = dur > 0 && words > max;
+    var l3 = null;
+    if (over) l3 = el("span", "", "Passou " + (words - max) + " palavras. Corte o texto ou aumente a duração do vídeo.");
+    var ref = el("span", "ref", "Referência neste ritmo: 8 s = " + wordsFor(8, wpm) + " palavras · 15 s = " + wordsFor(15, wpm) + " · 30 s = " + wordsFor(30, wpm) + " · 60 s = " + wordsFor(60, wpm) + ". Contagem aproximada, com 10% de folga para pausas.");
+    meterEl.className = "meter" + (over ? " over" : "");
+    [l1, l2, l3, ref].forEach(function (n) { if (n) meterEl.appendChild(n); });
+  }
+  function saveTime() { try { localStorage.setItem(TIME_KEY, JSON.stringify({ dur: durEl.value, ritmo: ritmoEl.value })); } catch (e) {} }
+  durEl.addEventListener("input", function () { updateMeter(); saveTime(); });
+  ritmoEl.addEventListener("change", function () { updateMeter(); saveTime(); });
 
   /* Estado e atualização */
   var banner = document.getElementById("exampleBanner");
@@ -579,8 +671,11 @@ html, body { margin: 0; }
     var v = get();
     boxes.forEach(function (fn) { fn(v); });
     updateCount();
+    updateMeter();
     var bits = [v.nome || "Modelo sem nome", v.idade && v.idade + " anos", v.cabelo && "cabelo " + v.cabelo, v.roupa].filter(Boolean);
     document.getElementById("modeltext").textContent = bits.join(" · ");
+    var vg = document.getElementById("vozgen");
+    if (vg) vg.textContent = genero === "m" ? "masculina" : "feminina";
   }
 
   /* Arquivos da modelo: o que já foi feito em cada passo */
@@ -616,12 +711,31 @@ html, body { margin: 0; }
     });
   });
   document.getElementById("form").addEventListener("submit", function (e) { e.preventDefault(); });
+  var gF = document.getElementById("g-f"), gM = document.getElementById("g-m");
+  function paintGender() {
+    gF.setAttribute("aria-pressed", genero === "f" ? "true" : "false");
+    gM.setAttribute("aria-pressed", genero === "m" ? "true" : "false");
+    var G = GEN[genero];
+    inputs.nome.placeholder = G.plNome;
+    inputs.personalidade.placeholder = G.plPers;
+    inputs.roupa.placeholder = G.plRoupa;
+  }
+  function setGender(g) {
+    if (g === genero) return;
+    var old = genero;
+    genero = g;
+    if (!banner.hidden) { set(GEN[g].ex); }
+    else if (inputs.roupa.value.trim() === GEN[old].roupa) { inputs.roupa.value = GEN[g].roupa; }
+    paintGender(); render(); save();
+  }
+  gF.addEventListener("click", function () { setGender("f"); });
+  gM.addEventListener("click", function () { setGender("m"); });
   document.getElementById("btn-example").addEventListener("click", function () {
-    set(EXAMPLE); banner.hidden = false; render(); save();
+    set(GEN[genero].ex); banner.hidden = false; render(); save();
   });
   document.getElementById("btn-clear").addEventListener("click", function () {
     var keep = get();
-    set({ roupa: DEFAULT_ROUPA, voz: keep.voz, fala: keep.fala, cena: keep.cena, roteiro: keep.roteiro });
+    set({ roupa: GEN[genero].roupa, voz: keep.voz, fala: keep.fala, cena: keep.cena, roteiro: keep.roteiro });
     banner.hidden = true; render(); save(); inputs.nome.focus();
   });
   var DEST_KEY = "fcosta-modelo-ia-chat";
@@ -636,13 +750,16 @@ html, body { margin: 0; }
 
   var saved = null;
   try { saved = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) {}
+  if (saved && (saved.genero === "m" || saved.genero === "f")) genero = saved.genero;
   if (saved && typeof saved === "object") {
-    KEYS.forEach(function (k) { if (saved[k] === undefined) saved[k] = EXAMPLE[k]; });
+    KEYS.forEach(function (k) { if (saved[k] === undefined) saved[k] = GEN[genero].ex[k]; });
+    if (saved.roteiro === OLD_ROTEIRO) saved.roteiro = DEFAULT_ROTEIRO;
     set(saved);
     banner.hidden = true;
   } else {
-    set(EXAMPLE);
+    set(GEN[genero].ex);
   }
+  paintGender();
 
   /* Passos */
   var panels = Array.prototype.slice.call(document.querySelectorAll("[data-panel]"));
