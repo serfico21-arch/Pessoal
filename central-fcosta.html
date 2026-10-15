@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0a1a36">
+<title>Central Fcosta</title>
+<style>
+:root{--n:#0a1a36;--y:#ffc82c;--g:#17b863;--b:#2f6bff;--r:#e5484d;--p:#8b5cf6;--o:#ff8a1f;--bg:#eef2f9;--ln:#dde4f0;--mut:#62708d}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--n);padding-bottom:72px}
+aside{display:none}
+.top{position:sticky;top:0;z-index:8;background:var(--n);color:#fff;padding:10px 14px;display:flex;gap:8px;align-items:center}
+.logo{font-weight:900;font-size:18px}.logo b{color:var(--y)}
+.sw{position:relative;flex:1}
+.sw input{background:#ffffff1f;border:1px solid #ffffff30;color:#fff}
+.sw input::placeholder{color:#b9c6e4}
+#gr{display:none;position:absolute;left:0;right:0;top:46px;background:#fff;color:var(--n);border-radius:12px;box-shadow:0 10px 30px #0005;overflow:hidden}
+#gr div{padding:10px 12px;border-bottom:1px solid var(--ln);cursor:pointer}
+small{display:block;color:var(--mut);font-size:12px;margin-top:2px}
+.ib{background:#ffffff1f;border:1px solid #ffffff30;color:#fff;border-radius:10px;padding:9px 11px;font-size:15px;cursor:pointer}
+main{padding:14px;max-width:1040px;margin:auto}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--n);display:flex;z-index:8}
+nav button{flex:1;background:none;border:0;color:#9fb0d3;padding:8px 0 9px;font-size:11px;font-weight:700;cursor:pointer}
+nav i{display:block;font-style:normal;font-size:19px}
+nav .on{color:var(--y);box-shadow:inset 0 3px var(--y)}
+@media(min-width:900px){
+ body{padding:0 0 0 210px}
+ aside{display:flex;flex-direction:column;gap:4px;position:fixed;left:0;top:0;bottom:0;width:210px;background:var(--n);padding:18px 12px;color:#fff}
+ aside .logo{font-size:21px;margin:0 6px 16px}
+ aside button{background:none;border:0;color:#b9c6e4;text-align:left;padding:11px 12px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}
+ aside button i{font-style:normal;margin-right:10px}
+ aside .on{background:#ffffff1c;color:var(--y)}
+ nav,.top .logo{display:none}
+ .two{grid-template-columns:1fr 1fr!important}.kp{grid-template-columns:repeat(4,1fr)!important}
+ .dk{display:block!important}
+}
+.kp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.k{background:#fff;border-radius:14px;padding:12px 14px;cursor:pointer;border-top:4px solid var(--b);box-shadow:0 1px 3px #0a1a3614}
+.k span{font-size:12px;color:var(--mut);font-weight:700}.k b{display:block;font-size:30px;font-weight:900}
+.c{background:#fff;border-radius:14px;padding:14px;margin-top:12px;box-shadow:0 1px 3px #0a1a3614}
+.c h2{font-size:15px;font-weight:800;margin-bottom:8px}
+.two{display:grid;grid-template-columns:1fr;gap:0 12px}
+.donut{display:flex;gap:14px;align-items:center}
+.lg{flex:1;font-size:13px}.lg div{display:flex;gap:6px;align-items:center;padding:2px 0}.lg em{margin-left:auto;font-style:normal;font-weight:800}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.bars{display:flex;align-items:flex-end;gap:8px;height:130px}
+.bars div{flex:1;text-align:center;font-size:10px;color:var(--mut);display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+.bars i{display:block;border-radius:5px 5px 0 0;min-height:3px;margin:3px 0}.bars b{color:var(--n);font-size:12px}
+.row{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--ln);cursor:pointer}
+.row:last-child{border:0}
+.row .t{flex:1;min-width:0}.row .t b{font-size:14px}
+.av{width:36px;height:36px;border-radius:50%;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+.dk{display:none;font-size:12px;color:var(--mut)}
+.tag{font-size:11px;font-weight:800;padding:3px 9px;border-radius:99px;color:#fff;white-space:nowrap}
+.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:800;font-size:14px;cursor:pointer;background:var(--g);color:#fff;text-decoration:none;display:inline-block;text-align:center}
+.btn.s{padding:6px 10px;font-size:12px}.btn.y{background:var(--y);color:var(--n)}.btn.n{background:#e6ecf7;color:var(--n)}.btn.d{background:var(--r)}
+.bar{display:flex;gap:8px;align-items:center}
+.act{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--ln);border-radius:10px;font:inherit;font-size:15px;background:#fff;color:var(--n)}
+label{display:block;font-size:12px;font-weight:700;color:var(--mut);margin:10px 0 4px}
+.empty{text-align:center;color:var(--mut);padding:20px 8px;font-size:14px}
+.mod{position:fixed;inset:0;background:#000b;z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.mod>div{background:#fff;width:100%;max-width:580px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px}
+@media(min-width:900px){.mod{align-items:center}.mod>div{border-radius:18px}}
+.hd{display:flex;justify-content:space-between;gap:10px;margin-bottom:8px}.hd h3{font-size:19px}
+.x{background:#e6ecf7;border:0;border-radius:50%;width:34px;height:34px;font-size:15px;cursor:pointer}
+.box{background:#f4f7fc;border-radius:12px;padding:12px;margin-top:10px}.box>b{display:block;margin-bottom:6px}
+.chs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.sec{font-size:13px;font-weight:800;margin:14px 0 2px}
+.late{color:var(--r)!important}
+.kb{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;margin-top:10px}
+.kb>div{min-width:215px;flex:1;background:#e6ecf7;border-radius:12px;padding:8px}
+.kb h4{font-size:13px;display:flex;gap:6px;align-items:center;margin-bottom:8px}.kb h4 em{margin-left:auto;font-style:normal}
+.kc{background:#fff;border-radius:10px;padding:9px;margin-bottom:8px}
+.kc b{font-size:14px}.mv{display:flex;justify-content:space-between;margin-top:6px}
+.mv button{background:#e6ecf7;border:0;border-radius:8px;padding:4px 12px;cursor:pointer}
+.prog{height:10px;background:#e6ecf7;border-radius:9px;overflow:hidden;margin:8px 0}.prog i{display:block;height:100%;background:var(--g)}
+</style>
+</head>
+<body>
+<aside id="sd"></aside>
+<div class="top">
+  <div class="logo">Central <b>Fcosta</b></div>
+  <div class="sw"><input id="gi" placeholder="Buscar cliente, telefone, imóvel..." oninput="gs(this.value)"><div id="gr"></div></div>
+  <button class="ib" onclick="menu()" title="Dados e planilhas">⚙</button>
+</div>
+<main id="m"></main>
+<nav id="nv"></nav>
+<input type="file" id="fl" accept=".json" style="display:none">
+<input type="file" id="fi" accept=".csv,.txt" style="display:none">
+<script>
+const ASSIN='FCosta Corretor · CRECI-SP 294791-F';
+const CS=['Novo contato','Em atendimento','Visita agendada','Proposta enviada','Negócio fechado'];
+const IS=['Disponível','Em negociação','Visitado','Reservado','Vendido'];
+const ET=['Proposta','Negociação','Documentação','Fechado','Perdido'];
+const CC=['#2f6bff','#ffc82c','#8b5cf6','#ff8a1f','#17b863'];
+const IC=['#17b863','#ffc82c','#2f6bff','#8b5cf6','#e5484d'];
+const EC={'Em andamento':'#ffc82c',Proposta:'#ff8a1f',Negociação:'#ffc82c',Documentação:'#8b5cf6',Fechado:'#17b863',Perdido:'#e5484d'};
+const VC={Agendada:'#8b5cf6',Realizada:'#17b863',Cancelada:'#e5484d'};
+const TIPOS=['Apartamento','Casa','Sobrado','Terreno','Comercial','Outro'];
+const S={
+clientes:{n:'Cliente',f:[['nome','Nome'],['tel','Telefone / WhatsApp','tel'],['email','E-mail','email'],['origem','Origem','sel',['Indicação','Instagram','Facebook','Site','Portal','Placa','Outro']],['finalidade','Quer','sel',['Comprar','Alugar']],['tipo','Tipo de imóvel','sel',['Qualquer'].concat(TIPOS)],['bairro','Bairro de interesse'],['vmax','Valor máximo (R$)','number'],['status','Status','sel',CS],['prox','Próximo contato','date'],['obs','Observações','ta']]},
+imoveis:{n:'Imóvel',f:[['cod','Código'],['finalidade','Finalidade','sel',['Venda','Aluguel']],['tipo','Tipo','sel',TIPOS],['bairro','Bairro'],['valor','Valor (R$)','number'],['quartos','Quartos','number'],['area','Área (m²)','number'],['status','Status','sel',IS],['dono','Proprietário'],['donotel','Telefone do proprietário','tel'],['link','Link do anúncio','url'],['obs','Observações','ta']]},
+visitas:{n:'Visita',f:[['cliente','Cliente','ref','clientes'],['imovel','Imóvel','ref','imoveis'],['data','Data e hora','datetime-local'],['status','Situação','sel',['Agendada','Realizada','Cancelada']],['obs','Observações','ta']]},
+negocios:{n:'Negócio',f:[['cliente','Cliente','ref','clientes'],['imovel','Imóvel','ref','imoveis'],['valor','Valor (R$)','number'],['com','Comissão (%)','number'],['etapa','Etapa','sel',ET],['obs','Observações','ta']]}
+};
+const TABS=[['geral','📊','Geral'],['clientes','👥','Clientes'],['imoveis','🏠','Imóveis'],['visitas','📅','Visitas'],['follow','✅','Follow-up'],['negocios','🤝','Negócios']];
+let DB={clientes:[],imoveis:[],visitas:[],negocios:[],meta:0},tab='geral',q='',fs='',vw='lista';
+try{const s=localStorage.getItem('central-fcosta');if(s)DB=Object.assign(DB,JSON.parse(s))}catch(e){}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const save=()=>{try{localStorage.setItem('central-fcosta',JSON.stringify(DB))}catch(e){}};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const today=()=>ymd(new Date());
+const addD=n=>{const d=new Date();d.setDate(d.getDate()+n);return ymd(d)};
+const brl=v=>v===''||v==null||isNaN(v)?'':Number(v).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const fd=s=>s?s.slice(8,10)+'/'+s.slice(5,7)+(s.length>10?' '+s.slice(11,16):''):'';
+const fdt=iso=>{const d=new Date(iso);return pad(d.getDate())+'/'+pad(d.getMonth()+1)+' '+pad(d.getHours())+':'+pad(d.getMinutes())};
+const first=n=>String(n||'').trim().split(' ')[0];
+const byId=(c,id)=>DB[c].find(x=>x.id===id);
+const cn=id=>{const x=byId('clientes',id);return x?x.nome:'—'};
+const im=id=>{const x=byId('imoveis',id);return x?(x.cod?x.cod+' · ':'')+(x.bairro||x.tipo):'—'};
+const tag=(t,c)=>`<span class="tag" style="background:${c||'#62708d'};${c==='#ffc82c'?'color:#0a1a36':''}">${esc(t)}</span>`;
+const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
+const comis=n=>(+n.valor||0)*(+n.com||0)/100;
+const wl=(t,m)=>{const d=String(t||'').replace(/\D/g,'');return 'https://wa.me/'+(d?(d.length<=11?'55':'')+d:'')+'?text='+encodeURIComponent(m||'')};
+const log=(c,t,n)=>{(c.hist=c.hist||[]).push({d:new Date().toISOString(),t,n})};
+const av=(t,c)=>`<div class="av" style="background:${c}">${esc(String(t||'?').trim().charAt(0).toUpperCase())}</div>`;
+
+/* ---------- Compatibilidade cliente x imóvel ---------- */
+const fin=c=>c.finalidade==='Alugar'?'Aluguel':'Venda';
+function fit(c,i){
+  if(!(+c.vmax||c.bairro||(c.tipo&&c.tipo!=='Qualquer')))return -1;
+  if(i.status!==IS[0]&&i.status!==IS[2])return -1;
+  if(c.finalidade&&i.finalidade&&fin(c)!==i.finalidade)return -1;
+  if(+c.vmax&&+i.valor&&+i.valor>+c.vmax*1.1)return -1;
+  let s=1;
+  if(c.tipo&&c.tipo!=='Qualquer'){if(i.tipo&&c.tipo!==i.tipo)return -1;s+=2}
+  if(c.bairro&&i.bairro&&i.bairro.toLowerCase().includes(c.bairro.toLowerCase().trim()))s+=3;
+  return s;
+}
+const matches=c=>DB.imoveis.map(i=>[i,fit(c,i)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+const txtIm=i=>`🏠 *${i.tipo} ${i.finalidade==='Aluguel'?'para alugar':'à venda'}*${i.cod?' ('+i.cod+')':''}\n📍 ${i.bairro||''}\n${i.quartos?'🛏 '+i.quartos+' quarto(s)\n':''}${i.area?'📐 '+i.area+' m²\n':''}💰 ${brl(i.valor)}${i.finalidade==='Aluguel'?'/mês':''}\n${i.link?'🔗 '+i.link+'\n':''}\n${ASSIN}`;
+const TPL={
+'Retorno':c=>`Olá, ${first(c.nome)}! Tudo bem? Aqui é da FCosta Corretor. Passando para saber se você ainda busca imóvel. Posso te enviar novas opções?`,
+'Novas opções':c=>{const m=matches(c)[0];return m?`Olá, ${first(c.nome)}! Separei um imóvel que combina com o que você procura:\n\n${txtIm(m)}`:TPL.Retorno(c)},
+'Pós-visita':c=>`Olá, ${first(c.nome)}! O que achou do imóvel que visitamos? Posso ajudar com os próximos passos?`,
+'Proposta':c=>`Olá, ${first(c.nome)}! Conseguimos conversar sobre a proposta? Posso te ajudar a avançar.`
+};
+
+/* ---------- Render ---------- */
+function render(){
+  const n=TABS.map(t=>`<button class="${tab===t[0]?'on':''}" onclick="go('${t[0]}')"><i>${t[1]}</i>${t[2]}</button>`).join('');
+  $('nv').innerHTML=n;$('sd').innerHTML='<div class="logo">Central <b>Fcosta</b></div>'+n;
+  const V={geral,follow,visitas:vVis,negocios:vNeg,clientes:()=>lista('clientes'),imoveis:()=>lista('imoveis')};
+  $('m').innerHTML=V[tab]();
+}
+function go(t){tab=t;q='';fs='';render();scrollTo(0,0)}
+function donut(arr,cols){
+  const tot=arr.reduce((a,b)=>a+b,0)||1;let off=0;
+  const seg=arr.map((v,i)=>{const l=v/tot*100;const s=`<circle r="15.9" cx="21" cy="21" fill="none" stroke="${cols[i]}" stroke-width="7" stroke-dasharray="${l} ${100-l}" stroke-dashoffset="${-off}"/>`;off+=l;return s}).join('');
+  return `<svg viewBox="0 0 42 42" width="120" height="120" style="transform:rotate(-90deg);flex:none"><circle r="15.9" cx="21" cy="21" fill="none" stroke="#e6ecf7" stroke-width="7"/>${seg}</svg>`;
+}
+const mesAtual=()=>today().slice(0,7);
+const recMes=()=>sum(DB.negocios.filter(n=>n.etapa==='Fechado'&&(n.fech||'').slice(0,7)===mesAtual()),comis);
+
+function agenda(){
+  const t=today(),a=[];
+  DB.clientes.forEach(c=>{if(c.prox&&c.prox<=t&&c.status!==CS[4])a.push({t:'Retornar: '+c.nome,s:c.prox<t?'Atrasado desde '+fd(c.prox):'Hoje',late:c.prox<t,w:c.tel?wl(c.tel,TPL.Retorno(c)):'',on:`det('clientes','${c.id}')`})});
+  DB.visitas.forEach(v=>{if(v.status==='Agendada'&&v.data&&v.data.slice(0,10)<=t){const late=v.data.slice(0,10)<t,c=byId('clientes',v.cliente);a.push({t:'Visita: '+cn(v.cliente),s:(late?'Atrasada · ':'')+fd(v.data)+' · '+im(v.imovel),late,w:c&&c.tel?wl(c.tel,msgVis(v)):'',on:`go('visitas')`})}});
+  return a;
+}
+function geral(){
+  const ci=CS.map(s=>DB.clientes.filter(c=>c.status===s).length),ii=IS.map(s=>DB.imoveis.filter(c=>c.status===s).length);
+  const A=DB.negocios.filter(n=>n.etapa!=='Fechado'&&n.etapa!=='Perdido');
+  const mx=Math.max(1,...ii),hoje=agenda(),emp=!DB.clientes.length&&!DB.imoveis.length;
+  const meta=+DB.meta||0,rec=recMes(),pc=meta?Math.min(100,Math.round(rec/meta*100)):0;
+  const K=(l,v,c,t)=>`<div class="k" style="border-color:${c}" onclick="go('${t}')"><span>${l}</span><b style="color:${c}">${v}</b></div>`;
+  return (emp?`<div class="c" style="margin-top:0"><h2>Comece por aqui</h2><p style="font-size:14px;color:var(--mut);margin-bottom:10px">Cadastre seu primeiro cliente ou imóvel, importe uma lista de clientes (⚙) ou carregue dados de exemplo para ver tudo funcionando.</p><div class="acts"><button class="btn" onclick="edit('clientes')">Novo cliente</button><button class="btn y" onclick="edit('imoveis')">Novo imóvel</button><button class="btn n" onclick="demo()">Carregar exemplo</button></div></div>`:'')+
+  `<div class="kp" style="margin-top:${emp?12:0}px">${K('Clientes cadastrados',DB.clientes.length,'#2f6bff','clientes')}${K('Imóveis cadastrados',DB.imoveis.length,'#ff8a1f','imoveis')}${K('Visitas realizadas',DB.visitas.filter(v=>v.status==='Realizada').length,'#8b5cf6','visitas')}${K('Negócios em andamento',A.length,'#17b863','negocios')}</div>
+  <div class="two"><div class="c"><h2>Rotina de hoje (${hoje.length})</h2>${hoje.map(a=>`<div class="row"><div class="t" onclick="${a.on}"><b>${esc(a.t)}</b><small class="${a.late?'late':''}">${esc(a.s)}</small></div>${a.w?`<a class="btn s" target="_blank" href="${a.w}">WhatsApp</a>`:''}</div>`).join('')||'<div class="empty">Nada pendente. Tudo em dia.</div>'}</div>
+  <div class="c"><h2>Meta de comissão do mês</h2><b style="font-size:24px">${brl(rec)||'R$ 0,00'}</b> <small style="display:inline">de ${meta?brl(meta):'meta não definida'}</small><div class="prog"><i style="width:${pc}%"></i></div><div class="bar"><small style="flex:1">Em negociação: ${brl(sum(A,n=>+n.valor||0))||'R$ 0,00'} · Previsto: ${brl(sum(A,comis))||'R$ 0,00'}</small><button class="btn s n" onclick="setMeta()">Definir meta</button></div></div></div>
+  <div class="two"><div class="c"><h2>Status dos clientes</h2><div class="donut">${donut(ci,CC)}<div class="lg">${CS.map((s,i)=>`<div><span class="dot" style="background:${CC[i]}"></span>${s}<em>${ci[i]}</em></div>`).join('')}</div></div></div>
+  <div class="c"><h2>Status dos imóveis</h2><div class="bars">${IS.map((s,i)=>`<div><b>${ii[i]}</b><i style="background:${IC[i]};height:${ii[i]/mx*80}px"></i>${s}</div>`).join('')}</div></div></div>
+  <div class="two"><div class="c"><h2>Últimos clientes</h2>${DB.clientes.slice(-5).reverse().map(rc).join('')||'<div class="empty">Nenhum cliente ainda.</div>'}</div>
+  <div class="c"><h2>Últimos imóveis</h2>${DB.imoveis.slice(-5).reverse().map(ri).join('')||'<div class="empty">Nenhum imóvel ainda.</div>'}</div></div>`;
+}
+function setMeta(){const v=prompt('Meta de comissão do mês (R$):',DB.meta||'');if(v===null)return;DB.meta=parseFloat(String(v).replace(/\./g,'').replace(',','.'))||0;save();render()}
+
+/* ---------- Linhas ---------- */
+const rc=c=>{const k=CC[CS.indexOf(c.status)];return `<div class="row" onclick="det('clientes','${c.id}')">${av(c.nome,k)}<div class="t"><b>${esc(c.nome)}</b><small>${esc([c.tel,c.bairro].filter(Boolean).join(' · '))}</small></div><span class="dk">${c.prox?'Retorno '+fd(c.prox):''}</span>${tag(c.status,k)}</div>`};
+const ri=i=>{const k=IC[IS.indexOf(i.status)];return `<div class="row" onclick="det('imoveis','${i.id}')">${av('🏠',k)}<div class="t"><b>${esc((i.cod?i.cod+' · ':'')+i.tipo)}</b><small>${esc([i.bairro,brl(i.valor),i.quartos&&i.quartos+' dorm.'].filter(Boolean).join(' · '))}</small></div><span class="dk">${esc(i.finalidade||'')}</span>${tag(i.status,k)}</div>`};
+function lista(c){
+  const st=c==='clientes'?CS:IS;
+  const f=()=>DB[c].filter(x=>(!fs||x.status===fs)&&(!q||JSON.stringify(Object.values(x)).toLowerCase().includes(q))).reverse();
+  window.keep=()=>{$('ls').innerHTML=f().map(c==='clientes'?rc:ri).join('')||'<div class="empty">Nada encontrado.</div>'};
+  const kan=c==='clientes'&&vw==='funil';
+  return `<div class="c" style="margin-top:0"><div class="bar"><input placeholder="Filtrar a lista" value="${esc(q)}" oninput="q=this.value.toLowerCase();keep()"><button class="btn" onclick="edit('${c}')">+ ${S[c].n}</button></div>
+  <div class="bar" style="margin-top:8px"><select onchange="fs=this.value;render()"><option value="">Todos os status</option>${st.map(s=>`<option ${fs===s?'selected':''}>${s}</option>`).join('')}</select>
+  ${c==='clientes'?`<button class="btn s ${kan?'n':'y'}" onclick="vw='lista';render()">Lista</button><button class="btn s ${kan?'y':'n'}" onclick="vw='funil';render()">Funil</button>`:''}<button class="btn s n" onclick="csv('${c}')">⬇ Planilha</button></div>
+  ${kan?kanban():`<div id="ls">${f().map(c==='clientes'?rc:ri).join('')||'<div class="empty">Nada por aqui. Toque em + '+S[c].n+' para cadastrar.</div>'}</div>`}</div>`;
+}
+function kanban(){
+  return '<div class="kb">'+CS.map((s,i)=>{const l=DB.clientes.filter(c=>c.status===s);
+    return `<div><h4><span class="dot" style="background:${CC[i]}"></span>${s}<em>${l.length}</em></h4>${l.map(c=>`<div class="kc"><div onclick="det('clientes','${c.id}')"><b>${esc(c.nome)}</b><small>${esc(c.bairro||c.tel||'')}</small>${c.prox&&c.prox<=today()&&i<4?`<small class="late">Retorno ${fd(c.prox)}</small>`:''}</div><div class="mv">${i>0?`<button onclick="mv('${c.id}',-1)">◀</button>`:'<span></span>'}${i<4?`<button onclick="mv('${c.id}',1)">▶</button>`:''}</div></div>`).join('')||'<small>vazio</small>'}</div>`}).join('')+'</div>';
+}
+function mv(id,d){const c=byId('clientes',id);setStatus(c,CS[CS.indexOf(c.status)+d]);render()}
+function setStatus(c,s){if(c.status===s)return;c.status=s;log(c,'Status',s);save()}
+
+/* ---------- Detalhes ---------- */
+function modal(h){cl();const d=document.createElement('div');d.className='mod';d.id='md';d.innerHTML='<div>'+h+'</div>';d.onclick=e=>{if(e.target===d)cl()};document.body.appendChild(d)}
+const cl=()=>{const d=$('md');if(d)d.remove()};
+function det(c,id){const o=byId(c,id);if(!o)return;modal(c==='clientes'?dCli(o):dImo(o))}
+const opts=(a,v)=>a.map(s=>`<option ${v===s?'selected':''}>${s}</option>`).join('');
+function dCli(c){
+  const m=matches(c).slice(0,6),has=+c.vmax||c.bairro||(c.tipo&&c.tipo!=='Qualquer');
+  return `<div class="hd"><div><h3>${esc(c.nome)}</h3><small>${esc([c.tel,c.email,c.origem].filter(Boolean).join(' · '))}</small></div><button class="x" onclick="cl()">✕</button></div>
+  <div class="chs">${tag(c.status,CC[CS.indexOf(c.status)])}${c.prox?tag('Retorno '+fd(c.prox),c.prox<today()&&c.status!==CS[4]?'#e5484d':'#62708d'):''}${c.finalidade?tag(c.finalidade,'#2f6bff'):''}</div>
+  <div class="act">${c.tel?`<a class="btn" href="tel:${esc(c.tel)}">📞 Ligar</a>`:''}<button class="btn y" onclick="edit('visitas','',{cliente:'${c.id}'})">📅 Visita</button><button class="btn y" onclick="edit('negocios','',{cliente:'${c.id}'})">🤝 Negócio</button><button class="btn n" onclick="edit('clientes','${c.id}')">✏ Editar</button></div>
+  <label>Status</label><select onchange="stSel('${c.id}',this.value)">${opts(CS,c.status)}</select>
+  <div class="box"><b>Enviar WhatsApp</b><div class="bar"><select id="tp">${Object.keys(TPL).map(k=>`<option>${k}</option>`).join('')}</select><button class="btn" onclick="sendWA('${c.id}')">Enviar</button></div></div>
+  <div class="box"><b>Registrar contato</b><div class="bar"><select id="rt">${opts(['Ligação','WhatsApp','Visita','Proposta','Outro'])}</select><select id="rd"><option value="k">Manter data de retorno</option><option value="">Sem retorno</option><option value="1">Retornar amanhã</option><option value="3">Em 3 dias</option><option value="7">Em 7 dias</option><option value="15">Em 15 dias</option><option value="30">Em 30 dias</option></select></div><textarea id="rn" rows="2" style="margin:8px 0" placeholder="O que foi conversado?"></textarea><button class="btn" onclick="regC('${c.id}')">Salvar contato</button></div>
+  <div class="box"><b>Interesse</b><small>${esc([c.finalidade,c.tipo,c.bairro,c.vmax&&'até '+brl(c.vmax)].filter(Boolean).join(' · ')||'Não informado')}</small></div>
+  <div class="sec">Imóveis compatíveis (${m.length})</div>${m.map(i=>`<div class="row"><div class="t" onclick="det('imoveis','${i.id}')"><b>${esc((i.cod?i.cod+' · ':'')+i.tipo)}</b><small>${esc([i.bairro,brl(i.valor)].filter(Boolean).join(' · '))}</small></div><a class="btn s" target="_blank" href="${wl(c.tel,'Olá, '+first(c.nome)+'! Separei um imóvel que combina com o que você procura:\n\n'+txtIm(i))}">Enviar</a></div>`).join('')||`<div class="empty">${has?'Nenhum imóvel disponível combina com esse interesse.':'Preencha o interesse (bairro, tipo e valor máximo) em Editar para ver os imóveis compatíveis.'}</div>`}
+  <div class="sec">Histórico</div>${(c.hist||[]).slice().reverse().slice(0,15).map(h=>`<div class="row" style="cursor:default"><div class="t"><b>${esc(h.t)}</b><small>${esc(h.n||'')}</small></div><small>${fdt(h.d)}</small></div>`).join('')||'<div class="empty">Sem registros ainda.</div>'}`;
+}
+function dImo(i){
+  const m=DB.clientes.filter(c=>c.status!==CS[4]&&fit(c,i)>0).slice(0,8);
+  return `<div class="hd"><div><h3>${esc((i.cod?i.cod+' · ':'')+i.tipo)}</h3><small>${esc(i.bairro||'')}</small></div><button class="x" onclick="cl()">✕</button></div>
+  <div class="chs">${tag(i.status,IC[IS.indexOf(i.status)])}${i.finalidade?tag(i.finalidade,'#2f6bff'):''}</div>
+  <div class="box"><b>${brl(i.valor)||'Valor não informado'}${i.finalidade==='Aluguel'&&i.valor?'/mês':''}</b>${[i.quartos&&i.quartos+' quarto(s)',i.area&&i.area+' m²'].filter(Boolean).length?`<small>${[i.quartos&&i.quartos+' quarto(s)',i.area&&i.area+' m²'].filter(Boolean).join(' · ')}</small>`:''}${i.dono?`<small>Proprietário: ${esc(i.dono)}${i.donotel?` · <a href="tel:${esc(i.donotel)}">${esc(i.donotel)}</a>`:''}</small>`:''}${i.link?`<small><a href="${esc(i.link)}" target="_blank" rel="noopener">Ver anúncio</a></small>`:''}${i.obs?`<small>${esc(i.obs)}</small>`:''}</div>
+  <label>Status</label><select onchange="isSel('${i.id}',this.value)">${opts(IS,i.status)}</select>
+  <div class="act"><a class="btn" target="_blank" href="${wl('',txtIm(i))}">Enviar no WhatsApp</a><button class="btn n" onclick="copyIm('${i.id}')">Copiar anúncio</button><button class="btn y" onclick="edit('visitas','',{imovel:'${i.id}'})">📅 Visita</button><button class="btn n" onclick="edit('imoveis','${i.id}')">✏ Editar</button></div>
+  <div class="sec">Clientes interessados (${m.length})</div>${m.map(c=>`<div class="row"><div class="t" onclick="det('clientes','${c.id}')"><b>${esc(c.nome)}</b><small>${esc(c.tel||'')}</small></div><a class="btn s" target="_blank" href="${wl(c.tel,'Olá, '+first(c.nome)+'! Separei um imóvel que combina com o que você procura:\n\n'+txtIm(i))}">Enviar</a></div>`).join('')||'<div class="empty">Ninguém combina ainda. Preencha o interesse dos clientes (bairro, tipo e valor máximo) para o app sugerir quem enviar.</div>'}`;
+}
+function stSel(id,v){setStatus(byId('clientes',id),v);render();det('clientes',id)}
+function isSel(id,v){byId('imoveis',id).status=v;save();render();det('imoveis',id)}
+function sendWA(id){const c=byId('clientes',id);if(!c.tel){alert('Cadastre o telefone do cliente em Editar.');return}const k=$('tp').value;log(c,'WhatsApp',k);save();window.open(wl(c.tel,TPL[k](c)),'_blank')}
+function regC(id){const c=byId('clientes',id),t=$('rt').value,n=$('rn').value.trim(),d=$('rd').value;log(c,t,n||t);if(d!=='k')c.prox=d===''?'':addD(+d);if(c.status===CS[0])c.status=CS[1];save();render();det('clientes',id)}
+function copyIm(id){const t=txtIm(byId('imoveis',id));(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>alert('Anúncio copiado.')).catch(()=>prompt('Copie o texto:',t))}
+
+/* ---------- Follow-up ---------- */
+function follow(){
+  const t=today(),w=addD(7);
+  const L=DB.clientes.filter(c=>c.status!==CS[4]&&c.prox).sort((a,b)=>a.prox.localeCompare(b.prox));
+  const sem=DB.clientes.filter(c=>c.status!==CS[4]&&!c.prox);
+  const g=(ti,a)=>a.length?`<div class="sec">${ti} (${a.length})</div>`+a.map(c=>`<div class="row"><div class="t" onclick="det('clientes','${c.id}')"><b>${esc(c.nome)}</b><small class="${c.prox&&c.prox<t?'late':''}">${c.prox?fd(c.prox):'sem data'} · ${esc(c.status)}</small></div><div class="acts">${c.tel?`<a class="btn s" target="_blank" href="${wl(c.tel,TPL.Retorno(c))}">WhatsApp</a>`:''}<button class="btn s y" onclick="resched('${c.id}',3)">Feito +3d</button><button class="btn s n" onclick="resched('${c.id}',7)">+7d</button></div></div>`).join(''):'';
+  return `<div class="c" style="margin-top:0"><h2>Follow-up: ninguém fica sem retorno</h2><small>Organizado pela data de próximo contato. "Feito" registra no histórico e remarca o retorno.</small>
+  ${g('<span class="late">Atrasados</span>',L.filter(c=>c.prox<t))}${g('Hoje',L.filter(c=>c.prox===t))}${g('Próximos 7 dias',L.filter(c=>c.prox>t&&c.prox<=w))}${g('Mais adiante',L.filter(c=>c.prox>w))}${g('Sem data de retorno',sem)}
+  ${DB.clientes.some(c=>c.status!==CS[4])?'':'<div class="empty">Cadastre clientes com data de próximo contato para montar sua rotina.</div>'}</div>`;
+}
+function resched(id,n){const c=byId('clientes',id);log(c,'Follow-up','Contato feito, retorno em '+n+' dias');c.prox=addD(n);if(c.status===CS[0])c.status=CS[1];save();render()}
+
+/* ---------- Visitas ---------- */
+const msgVis=v=>`Olá, ${first(cn(v.cliente))}! Confirmando nossa visita em ${fd(v.data)} no imóvel ${im(v.imovel)}. Está tudo certo?`;
+const gcal=v=>{const s=(v.data||'').replace(/[-:]/g,'')+'00',e=new Date(v.data);e.setHours(e.getHours()+1);return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('Visita: '+cn(v.cliente)+' - '+im(v.imovel))+'&dates='+s+'/'+ymd(e).replace(/-/g,'')+'T'+pad(e.getHours())+pad(e.getMinutes())+'00&details='+encodeURIComponent(v.obs||'')};
+const vr=v=>{const c=byId('clientes',v.cliente),ag=v.status==='Agendada';return `<div class="row"><div class="t" onclick="edit('visitas','${v.id}')"><b>${esc(cn(v.cliente))}</b><small>${fd(v.data)} · ${esc(im(v.imovel))}</small>${v.obs?`<small>${esc(v.obs)}</small>`:''}</div>${ag?`<div class="acts"><a class="btn s" target="_blank" href="${wl(c&&c.tel,msgVis(v))}">Confirmar</a><a class="btn s n" target="_blank" href="${gcal(v)}">📆 Agenda</a><button class="btn s y" onclick="vDone('${v.id}')">Realizada</button></div>`:tag(v.status,VC[v.status])}</div>`};
+function vVis(){
+  const t=today(),all=DB.visitas.slice().sort((a,b)=>(a.data||'').localeCompare(b.data||'')),ag=all.filter(v=>v.status==='Agendada');
+  const d=v=>(v.data||'').slice(0,10),g=(ti,a)=>a.length?`<div class="sec">${ti} (${a.length})</div>`+a.map(vr).join(''):'';
+  return `<div class="c" style="margin-top:0"><div class="bar"><h2 style="flex:1;margin:0">Agenda de visitas</h2><button class="btn s n" onclick="csv('visitas')">⬇ Planilha</button><button class="btn" onclick="edit('visitas')">+ Visita</button></div>
+  ${g('<span class="late">Atrasadas</span>',ag.filter(v=>d(v)&&d(v)<t))}${g('Hoje',ag.filter(v=>d(v)===t))}${g('Próximas',ag.filter(v=>!d(v)||d(v)>t))}${g('Concluídas e canceladas',all.filter(v=>v.status!=='Agendada').reverse().slice(0,10))}
+  ${all.length?'':'<div class="empty">Nenhuma visita ainda. Toque em + Visita para agendar.</div>'}</div>`;
+}
+function vDone(id){
+  const v=byId('visitas',id),f=prompt('Como foi a visita? (opcional)');if(f===null)return;
+  v.status='Realizada';if(f)v.obs=(v.obs?v.obs+' | ':'')+f;
+  const c=byId('clientes',v.cliente),i=byId('imoveis',v.imovel);
+  if(c){log(c,'Visita',im(v.imovel)+(f?': '+f:''));if(c.status!==CS[4])c.prox=addD(1)}
+  if(i&&i.status===IS[0])i.status=IS[2];
+  save();render();
+}
+
+/* ---------- Negócios ---------- */
+function vNeg(){
+  const A=DB.negocios.filter(n=>n.etapa!=='Fechado'&&n.etapa!=='Perdido'),meta=+DB.meta||0,rec=recMes();
+  const et=n=>n.etapa==='Em andamento'?'Proposta':n.etapa;
+  const row=n=>{const k=ET.indexOf(et(n)),nx=k<3?ET[k+1]:'';return `<div class="row"><div class="t" onclick="edit('negocios','${n.id}')"><b>${esc(cn(n.cliente))}</b><small>${esc(im(n.imovel))} · ${brl(n.valor)||'sem valor'}${n.com?' · '+n.com+'% = '+brl(comis(n)):''}</small></div>${nx?`<button class="btn s y" onclick="adv('${n.id}')">${nx} ▶</button>`:tag(et(n),EC[et(n)])}</div>`};
+  const K=(l,v,c)=>`<div class="k" style="border-color:${c}"><span>${l}</span><b style="color:${c};font-size:22px">${v}</b></div>`;
+  return `<div class="kp" style="margin-top:0">${K('Em andamento',A.length,'#ffc82c')}${K('Valor em negociação',brl(sum(A,n=>+n.valor||0))||'R$ 0,00','#2f6bff')}${K('Comissão prevista',brl(sum(A,comis))||'R$ 0,00','#ff8a1f')}${K('Recebida no mês',brl(rec)||'R$ 0,00','#17b863')}</div>
+  <div class="c"><div class="bar"><h2 style="flex:1;margin:0">Funil de negócios</h2><button class="btn s n" onclick="setMeta()">Meta ${meta?brl(meta):''}</button><button class="btn s n" onclick="csv('negocios')">⬇ Planilha</button><button class="btn" onclick="edit('negocios')">+ Negócio</button></div>
+  ${ET.map(e=>{const l=DB.negocios.filter(n=>et(n)===e);return l.length?`<div class="sec">${e} (${l.length})</div>`+l.map(row).join(''):''}).join('')||'<div class="empty">Nenhum negócio ainda. Abra um cliente e toque em Negócio.</div>'}</div>`;
+}
+function fechar(n){n.etapa='Fechado';n.fech=n.fech||today();const c=byId('clientes',n.cliente),i=byId('imoveis',n.imovel);if(c){setStatus(c,CS[4]);c.prox=''}if(i)i.status=IS[4]}
+function adv(id){const n=byId('negocios',id),k=ET.indexOf(n.etapa==='Em andamento'?'Proposta':n.etapa);if(ET[k+1]==='Fechado')fechar(n);else n.etapa=ET[k+1];save();render()}
+
+/* ---------- Cadastro ---------- */
+function edit(c,id,pre){
+  const o=id?byId(c,id):{},sc=S[c];
+  if(!id){
+    if(c==='clientes')Object.assign(o,{status:CS[0],finalidade:'Comprar',tipo:'Qualquer',prox:addD(1)});
+    if(c==='imoveis')Object.assign(o,{tipo:'Apartamento',finalidade:'Venda',status:IS[0]});
+    if(c==='visitas')Object.assign(o,{status:'Agendada',data:addD(1)+'T10:00'});
+    if(c==='negocios')o.etapa='Proposta';
+    Object.assign(o,pre||{});
+  }
+  const f=sc.f.map(([k,l,t,x])=>{
+    const v=o[k]==null?'':o[k];let i;
+    if(t==='sel')i=`<select id="f_${k}">${opts(x,v)}</select>`;
+    else if(t==='ref')i=`<select id="f_${k}"><option value="">— escolher —</option>${DB[x].map(r=>`<option value="${r.id}" ${v===r.id?'selected':''}>${esc(x==='clientes'?r.nome:im(r.id))}</option>`).join('')}</select>`;
+    else if(t==='ta')i=`<textarea id="f_${k}" rows="3">${esc(v)}</textarea>`;
+    else i=`<input id="f_${k}" type="${t||'text'}" value="${esc(v)}" ${t==='number'?'step="any" inputmode="decimal"':''}>`;
+    return `<label>${l}</label>${i}`}).join('');
+  modal(`<div class="hd"><h3>${id?'Editar':'Novo'} ${sc.n.toLowerCase()}</h3><button class="x" onclick="cl()">✕</button></div>${f}<div class="act"><button class="btn" style="flex:1" onclick="sv('${c}','${id||''}')">Salvar</button>${id?`<button class="btn d" onclick="rm('${c}','${id}')">Excluir</button>`:''}</div>`);
+}
+function sv(c,id){
+  const o=id?byId(c,id):{id:uid()};
+  S[c].f.forEach(([k])=>{o[k]=$('f_'+k).value.trim()});
+  if(c==='clientes'&&!o.nome){alert('Informe o nome do cliente.');return}
+  if(c==='imoveis'&&!o.cod&&!o.bairro){alert('Informe o código ou o bairro.');return}
+  if((c==='visitas'||c==='negocios')&&!o.cliente){alert('Escolha o cliente.');return}
+  if(!id)DB[c].push(o);
+  if(c==='negocios'&&o.etapa==='Fechado')fechar(o);
+  if(c==='visitas'&&o.status==='Agendada'){const x=byId('clientes',o.cliente);if(x&&(x.status===CS[0]||x.status===CS[1]))setStatus(x,CS[2])}
+  save();cl();render();
+}
+function rm(c,id){
+  if(!confirm('Excluir este registro?'))return;
+  DB[c]=DB[c].filter(x=>x.id!==id);
+  if(c==='clientes'){DB.visitas=DB.visitas.filter(v=>v.cliente!==id);DB.negocios=DB.negocios.filter(n=>n.cliente!==id)}
+  save();cl();render();
+}
+
+/* ---------- Busca, planilhas e backup ---------- */
+function gs(v){
+  v=v.toLowerCase().trim();const r=$('gr');if(!v){r.style.display='none';return}
+  const a=[];
+  DB.clientes.forEach(c=>{if(((c.nome||'')+(c.tel||'')+(c.bairro||'')).toLowerCase().includes(v))a.push(['clientes',c.id,c.nome,c.tel||'Cliente'])});
+  DB.imoveis.forEach(i=>{if(((i.cod||'')+i.tipo+(i.bairro||'')+(i.dono||'')).toLowerCase().includes(v))a.push(['imoveis',i.id,(i.cod?i.cod+' · ':'')+i.tipo,i.bairro||'Imóvel'])});
+  r.innerHTML=a.slice(0,8).map(x=>`<div onclick="det('${x[0]}','${x[1]}');$('gr').style.display='none';$('gi').value=''"><b>${esc(x[2])}</b><small>${esc(x[3])}</small></div>`).join('')||'<div><small>Nada encontrado</small></div>';
+  r.style.display='block';
+}
+function csv(c){
+  const f=S[c].f,h=f.map(x=>x[1]);
+  const rows=DB[c].map(r=>f.map(([k,,t,x])=>{let v=r[k]||'';if(t==='ref')v=x==='clientes'?cn(v):im(v);return '"'+String(v).replace(/"/g,'""')+'"'}).join(';'));
+  dl('\ufeff'+[h.join(';')].concat(rows).join('\n'),'fcosta-'+c+'-'+today()+'.csv','text/csv');
+}
+function dl(txt,name,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;a.click()}
+function menu(){
+  modal(`<div class="hd"><h3>Dados e planilhas</h3><button class="x" onclick="cl()">✕</button></div><small>Tudo fica salvo neste aparelho. Faça backup de vez em quando.</small>
+  <div class="act" style="flex-direction:column"><button class="btn" onclick="dl(JSON.stringify(DB),'central-fcosta-backup-'+today()+'.json','application/json');cl()">Salvar backup</button><button class="btn y" onclick="$('fl').click()">Restaurar backup</button><button class="btn y" onclick="$('fi').click()">Importar clientes (CSV: nome;telefone)</button>
+  <div class="acts"><button class="btn s n" onclick="csv('clientes')">⬇ Clientes</button><button class="btn s n" onclick="csv('imoveis')">⬇ Imóveis</button><button class="btn s n" onclick="csv('visitas')">⬇ Visitas</button><button class="btn s n" onclick="csv('negocios')">⬇ Negócios</button></div>
+  <button class="btn n" onclick="demo()">Carregar exemplo</button><button class="btn d" onclick="zero()">Apagar tudo</button></div>`);
+}
+$('fl').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(!j.clientes)throw 0;DB=Object.assign({clientes:[],imoveis:[],visitas:[],negocios:[],meta:0},j);save();cl();render()}catch(x){alert('Arquivo de backup inválido.')}};r.readAsText(f);e.target.value=''};
+$('fi').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{let n=0;r.result.replace(/^\ufeff/,'').split(/\r?\n/).forEach((l,k)=>{const p=l.split(/[;,\t]/).map(x=>x.replace(/^"|"$/g,'').trim());if(!p[0]||(k===0&&/nome/i.test(p[0])))return;DB.clientes.push({id:uid(),nome:p[0],tel:p[1]||'',status:CS[0],prox:'',obs:''});n++});save();cl();render();alert(n+' cliente(s) importado(s).')};r.readAsText(f);e.target.value=''};
+function zero(){if(!confirm('Apagar todos os clientes, imóveis, visitas e negócios deste aparelho?'))return;DB={clientes:[],imoveis:[],visitas:[],negocios:[],meta:0};save();cl();render()}
+function demo(){
+  if((DB.clientes.length||DB.imoveis.length)&&!confirm('Adicionar dados de exemplo aos seus dados atuais?'))return;
+  const c=[['Carlos Silva','11987654321',1,-1,'Comprar','Apartamento','Itaim',300000],['Fernanda Oliveira','11976543210',2,0,'Comprar','Casa','Jardim',450000],['Marcos Santos','11988887766',3,2,'Alugar','Apartamento','Vila',1800],['Juliana Costa','11999112233',0,1,'Comprar','Qualquer','',200000],['Paulo Lima','11977665544',4,5,'Comprar','Terreno','',200000]].map(x=>({id:uid(),nome:x[0],tel:x[1],status:CS[x[2]],prox:addD(x[3]),finalidade:x[4],tipo:x[5],bairro:x[6],vmax:x[7],origem:'Instagram',obs:'',hist:[]}));
+  const i=[['AP001','Apartamento','Venda','Itaim Paulista',280000,0,2,52],['CA015','Casa','Venda','Jardim das Flores',420000,1,3,120],['AP022','Apartamento','Aluguel','Vila Nova',1500,2,2,48],['TE010','Terreno','Venda','Cidade Líder',180000,3,0,250]].map(x=>({id:uid(),cod:x[0],tipo:x[1],finalidade:x[2],bairro:x[3],valor:x[4],status:IS[x[5]],quartos:x[6],area:x[7],obs:''}));
+  DB.clientes.push(...c);DB.imoveis.push(...i);
+  DB.visitas.push({id:uid(),cliente:c[2].id,imovel:i[2].id,data:today()+'T15:00',status:'Agendada',obs:''},{id:uid(),cliente:c[1].id,imovel:i[1].id,data:addD(-2)+'T10:00',status:'Realizada',obs:'Gostou do quintal'});
+  DB.negocios.push({id:uid(),cliente:c[3].id,imovel:i[0].id,valor:280000,com:6,etapa:'Negociação',obs:''});
+  save();cl();render();
+}
+render();
+</script>
+</body>
+</html>
