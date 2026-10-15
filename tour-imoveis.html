@@ -460,6 +460,7 @@
             <select id="transition">
               <option value="fade">Esmaecer (fade)</option>
               <option value="cut">Corte seco</option>
+              <option value="cube">Cubo 3D (giro lateral)</option>
             </select>
           </div>
           <div class="field">
@@ -1291,6 +1292,8 @@ window.FCBand = (function(){
     const useKenBurns = kenburnsCheck.checked;
     const useFade = transitionSelect.value === 'fade';
     const fadeTime = useFade ? 0.6 : 0;
+    const useCube = transitionSelect.value === 'cube';
+    let cubeA = null, cubeB = null;
     const fps = leve ? 24 : 30;
     let totalDuration = perPhoto * photos.length;
 
@@ -1466,6 +1469,19 @@ window.FCBand = (function(){
           ctx.restore();
         }
 
+        // transição cubo 3D: a foto atual gira para a esquerda e a próxima entra pela direita
+        if(useCube && idx < photos.length-1){
+          const cubeT = Math.min(0.8, perPhoto * 0.4);
+          if(localT > perPhoto - cubeT){
+            const k = (localT - (perPhoto - cubeT)) / cubeT;
+            if(!cubeA){ cubeA = document.createElement('canvas'); cubeA.width = W; cubeA.height = H; cubeB = document.createElement('canvas'); cubeB.width = W; cubeB.height = H; }
+            cubeA.getContext('2d').drawImage(stage, 0, 0);      // foto atual (já desenhada)
+            drawSlideRaw(idx+1, 0);
+            cubeB.getContext('2d').drawImage(stage, 0, 0);      // próxima foto
+            drawCube(cubeA, cubeB, k*k*(3-2*k));
+          }
+        }
+
         // fora do efeito de transição das fotos: sempre visível, com opacidade cheia
         drawOverlay(ctx, elapsed);
 
@@ -1476,6 +1492,30 @@ window.FCBand = (function(){
         if(narrSrc){ try{ narrSrc.stop(); }catch(e){} }
         rejectFinished(err);
       }
+    }
+
+    function drawCube(A, B, p){
+      const th = p * Math.PI / 2, cs = Math.cos(th), sn = Math.sin(th);
+      const d = W / 2, F = W * 1.2, N = 240, sw = W / N;
+      ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      const face = (img, front) => {
+        for(let i = 0; i < N; i++){
+          const xa = (i * sw) - d, xb = ((i + 1) * sw) - d, xm = (xa + xb) / 2;
+          const pr = x => front
+            ? { X: x*cs - d*sn, Z: x*sn + d*cs }
+            : { X: d*cs + x*sn, Z: d*sn - x*cs };
+          const a = pr(xa), b = pr(xb), m = pr(xm);
+          const sa = F / (d + F - a.Z), sb = F / (d + F - b.Z), sm = F / (d + F - m.Z);
+          const x0 = W/2 + a.X*sa, x1 = W/2 + b.X*sb;
+          if(x1 <= x0) continue;
+          const dh = H * sm, dy = (H - dh) / 2;
+          ctx.drawImage(img, i * sw, 0, sw, H, x0, dy, (x1 - x0) + 1, dh);
+          const sh = Math.max(0, Math.min(0.6, (d*0.9 - m.Z) / (d*1.9) * 0.6));
+          if(sh > 0.01){ ctx.fillStyle = 'rgba(0,0,0,' + sh + ')'; ctx.fillRect(x0, dy, (x1 - x0) + 1, dh); }
+        }
+      };
+      face(A, true);
+      face(B, false);
     }
 
     function drawSlide(idx, localT){

@@ -53,6 +53,10 @@ label{font:600 12px system-ui;color:var(--mu);display:block;margin-bottom:4px}
 .mc{background:#fff;max-width:760px;margin:0 auto;border-radius:14px;padding:18px;position:relative}
 .mx{position:absolute;top:10px;right:10px;background:#fff;color:#333;border:1px solid var(--bd);padding:6px 11px}
 #mimg{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;background:#eee}
+.cubo{position:relative;width:100%;aspect-ratio:4/3;perspective:1100px;overflow:hidden;border-radius:10px;background:#111;touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:grab}
+.cubo-in{position:absolute;inset:0;transform-style:preserve-3d}
+.cubo-in img{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;object-fit:cover;border-radius:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;-webkit-user-drag:none;pointer-events:none}
+#mimg2{display:none}
 .mt{display:flex;gap:6px;overflow-x:auto;margin:8px 0}
 .mt img{width:80px;height:60px;object-fit:cover;border-radius:6px;cursor:pointer;flex:none}
 .mc p{white-space:pre-line;line-height:1.55}
@@ -207,7 +211,7 @@ function abrir(id){
   const msg=encodeURIComponent(`Olá! Tenho interesse no imóvel ${i.cod} — ${i.tit}.`);
   const w=(D.cfg.whats||'').replace(/\D/g,'');
   $('#modal').innerHTML=`<div class="mc"><button class="mx" onclick="fechar()">✕</button>
-    ${i.fotos.length?`<img id="mimg" src="${i.fotos[0]}"><div class="mt">${i.fotos.map(f=>`<img loading="lazy" src="${f}" onclick="$('#mimg').src=this.src">`).join('')}</div>`:''}
+    ${i.fotos.length?`<div class="cubo" id="cubo"><div class="cubo-in" id="cuboIn"><img id="mimg" src="${i.fotos[0]}" draggable="false"><img id="mimg2" draggable="false"></div></div><div class="mt">${i.fotos.map((f,k)=>`<img loading="lazy" src="${f}" onclick="cuboIr(${k})">`).join('')}</div>`:''}
     <h2 style="font-family:Georgia,serif;margin:10px 0 4px">${esc(i.tit)}</h2>
     <div class="loc">${esc(i.tipo)} · ${esc(i.bairro)}, ${esc(i.cid)} · Cód. ${esc(i.cod)}</div>
     <div class="pr">${i.preco?brl(i.preco)+(i.fin=='locacao'?'/mês':''):'Sob consulta'}</div>
@@ -215,7 +219,52 @@ function abrir(id){
     <p>${esc(i.desc)}</p>
     <div class="acts"><a class="btn wa" target="_blank" rel="noopener" href="https://wa.me/${w}?text=${msg}">Falar no WhatsApp</a>${i.video?`<a class="btn sec" target="_blank" rel="noopener" href="${esc(i.video)}">▶ Ver vídeo</a>`:''}
     <button class="sec" onclick="compartilhar('${i.id}')">Compartilhar</button></div></div>`;
-  $('#modal').classList.add('on');
+  $('#modal').classList.add('on');cuboIni(i.fotos);
+}
+
+/* ===== Galeria cubo 3D (arrastar) ===== */
+const CB={f:[],i:0,k:0,dir:0,w:0,p:0,x0:0,drag:false,busy:false};
+function cuboIni(f){
+  CB.f=f;CB.i=0;CB.dir=0;CB.drag=false;CB.busy=false;
+  const s=$('#cubo');if(!s||f.length<2)return;
+  s.onpointerdown=e=>{if(CB.busy)return;CB.drag=true;CB.x0=e.clientX;CB.dir=0;try{s.setPointerCapture(e.pointerId)}catch(_){}};
+  s.onpointermove=e=>{
+    if(!CB.drag)return;const dx=e.clientX-CB.x0;if(!dx)return;
+    const d=dx<0?1:-1;if(d!==CB.dir)cuboPrep(d);
+    CB.p=Math.min(1,Math.abs(dx)/CB.w);cuboSet(CB.p,false);
+  };
+  s.onpointerup=s.onpointercancel=()=>{
+    if(!CB.drag)return;CB.drag=false;if(!CB.dir)return;
+    cuboFim(CB.p>.25?1:0);
+  };
+}
+function cuboPrep(d,k){
+  const n=CB.f.length;CB.dir=d;CB.k=k!=null?k:(CB.i+d+n)%n;CB.w=$('#cubo').offsetWidth;
+  const a=$('#mimg'),b=$('#mimg2');
+  b.src=CB.f[CB.k];b.style.display='block';
+  a.style.transform=`rotateY(0deg) translateZ(${CB.w/2}px)`;
+  b.style.transform=`rotateY(${90*d}deg) translateZ(${CB.w/2}px)`;
+  cuboSet(0,false);
+}
+function cuboSet(p,anim){
+  const o=$('#cuboIn');
+  o.style.transition=anim?'transform .35s ease':'none';
+  o.style.transform=`translateZ(${-CB.w/2}px) rotateY(${-CB.dir*90*p}deg)`;
+}
+function cuboFim(c){
+  CB.busy=true;cuboSet(c,true);
+  setTimeout(()=>{
+    const a=$('#mimg'),b=$('#mimg2'),o=$('#cuboIn');if(!a||!o){CB.busy=false;return}
+    if(c){CB.i=CB.k;a.src=CB.f[CB.i]}
+    o.style.transition='none';o.style.transform='';a.style.transform='';b.style.transform='';b.style.display='none';
+    CB.dir=0;CB.busy=false;
+  },370);
+}
+function cuboIr(k){
+  if(!$('#cubo')||CB.busy||k===CB.i||!CB.f.length)return;
+  cuboPrep(k>CB.i?1:-1,k);
+  $('#cuboIn').offsetWidth;
+  cuboFim(1);
 }
 function fechar(){$('#modal').classList.remove('on')}
 function compartilhar(id){
