@@ -1,0 +1,681 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Ferramentas IA FCOSTA</title>
+<link rel="icon" type="image/png" href="ferramentas-ia-logo.png">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: cabeçalho da marca, filtro por etapa e cartões em grade (uma coluna no celular), agrupados na ordem de trabalho. */
+:root {
+  --bg: #F1F1EF;
+  --surface: #FFFFFF;
+  --ink: #16130E;
+  --muted: #5C5A55;
+  --line: #D9D7D1;
+  --accent: #C99A2E;
+  --accent-ink: #16130E;
+  --tint: #F4EAD0;
+  --field: #F8F8F6;
+  --focus: #8A6511;
+  --warn: #7A4B00;
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", "Segoe UI", sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0C0C0E;
+    --surface: #17171A;
+    --ink: #F1EEE6;
+    --muted: #A5A199;
+    --line: #2C2B2E;
+    --accent: #D4A93C;
+    --accent-ink: #14110A;
+    --tint: #2A2312;
+    --field: #111113;
+    --focus: #E6BE5A;
+    --warn: #E6BE5A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0C0C0E;
+  --surface: #17171A;
+  --ink: #F1EEE6;
+  --muted: #A5A199;
+  --line: #2C2B2E;
+  --accent: #D4A93C;
+  --accent-ink: #14110A;
+  --tint: #2A2312;
+  --field: #111113;
+  --focus: #E6BE5A;
+  --warn: #E6BE5A;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 18px;
+  line-height: 1.5;
+}
+.wrap {
+  max-width: 1180px;
+  margin-inline: auto;
+  padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(1.9rem, 4.5vw, 2.6rem); font-weight: 700; }
+h2 { font-size: 1.5rem; font-weight: 600; }
+h3 { font-size: 1.3rem; font-weight: 600; }
+p { margin: 0; }
+
+.brand { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.logo { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; flex: none; }
+.creci { margin: 0 0 6px; color: var(--muted); font-size: 0.95rem; font-weight: 600; letter-spacing: 0.02em; }
+.lead { color: var(--muted); max-width: 62ch; margin-top: 14px; }
+
+.notice {
+  margin-top: 18px;
+  background: var(--tint);
+  border-radius: 8px;
+  padding: 12px 16px;
+  max-width: 78ch;
+  font-size: 0.98rem;
+}
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+button, a.btn { font: inherit; }
+.chip {
+  cursor: pointer;
+  font-weight: 600;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 16px;
+  min-height: 44px;
+}
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.chip:focus-visible, a:focus-visible, summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+.stage { margin-top: 40px; }
+.stage-head { display: flex; align-items: center; gap: 14px; }
+.num {
+  flex: none;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  display: grid; place-items: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+.stage-desc { color: var(--muted); margin: 8px 0 0 52px; max-width: 62ch; }
+@media (max-width: 520px) { .stage-desc { margin-left: 0; } }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 18px;
+  margin-top: 18px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+.card-top { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; }
+.plan {
+  background: var(--tint);
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.does { font-size: 1.02rem; }
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+ul { margin: 0; padding-left: 1.15em; }
+li { margin-bottom: 6px; }
+li:last-child { margin-bottom: 0; }
+.alert { color: var(--warn); font-weight: 600; }
+.card-foot { margin-top: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding-top: 4px; }
+a.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 8px;
+  padding: 11px 18px;
+  min-height: 46px;
+  border: 1.5px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+a.btn:hover { filter: brightness(1.08); }
+a.btn.alt { background: var(--surface); color: var(--ink); border-color: var(--line); }
+a.btn.alt:hover { border-color: var(--accent); filter: none; }
+.domain { color: var(--muted); font-size: 0.88rem; overflow-wrap: anywhere; min-width: 0; flex: 1 1 140px; }
+
+.general { margin-top: 48px; }
+.general ul { margin-top: 14px; max-width: 72ch; }
+.sources { margin-top: 32px; color: var(--muted); font-size: 0.95rem; max-width: 78ch; }
+summary { cursor: pointer; font-weight: 600; color: var(--ink); min-height: 32px; }
+.sources ul { margin-top: 10px; }
+.sources a { color: var(--ink); overflow-wrap: anywhere; }
+.foot { margin-top: 36px; color: var(--muted); font-size: 0.9rem; text-align: center; }
+
+/* Gerador de Modelo: 3 passos, todos visíveis, cada um com campos e o texto pronto para copiar. */
+.gerador { margin-top: 22px; background: var(--tint); border-radius: 12px; padding: 22px; }
+.gerador > p { color: var(--ink); max-width: 70ch; margin-top: 8px; }
+.ger-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 18px; margin-top: 18px; }
+.ger { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.ger h4 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; margin: 0; display: flex; gap: 10px; align-items: center; }
+.ger h4 .num { width: 32px; height: 32px; font-size: 0.95rem; }
+.ger .hint { color: var(--muted); font-size: 0.95rem; }
+.flds { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); gap: 10px 12px; }
+.fld { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.fld.wide { grid-column: 1 / -1; }
+.fld label { font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+.fld input, .fld textarea, .out {
+  font: inherit; font-size: 1rem; color: var(--ink); background: var(--field);
+  border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 12px; width: 100%; min-height: 44px;
+}
+.fld textarea { resize: vertical; min-height: 84px; }
+.fld input:focus-visible, .fld textarea:focus-visible, .out:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.out { font-size: 0.92rem; line-height: 1.45; resize: vertical; min-height: 150px; }
+.ger-foot { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; }
+button.btn {
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 600;
+  border-radius: 8px; padding: 11px 18px; min-height: 46px; border: 1.5px solid var(--accent);
+  background: var(--accent); color: var(--accent-ink);
+}
+button.btn:hover { filter: brightness(1.08); }
+button.btn.alt { background: var(--surface); color: var(--ink); border-color: var(--line); }
+button.btn.alt:hover { border-color: var(--accent); filter: none; }
+button.btn:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.marca { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin-top: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; }
+.marca img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex: none; }
+.marca label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-weight: 600; flex: 1 1 260px; min-width: 0; }
+.marca input[type=checkbox] { width: 22px; height: 22px; accent-color: var(--accent); flex: none; }
+.marca small { display: block; font-weight: 400; color: var(--muted); }
+.marca a.btn { min-height: 44px; }
+.status { font-size: 0.92rem; color: var(--muted); flex: 1 1 160px; min-width: 0; }
+</style>
+
+<div class="wrap">
+  <header class="brand">
+    <img class="logo" src="ferramentas-ia-logo.png" alt="Logotipo FCOSTA Corretor de Imóveis" width="88" height="88">
+    <div>
+      <p class="creci">FCOSTA Corretor de Imóveis · CRECI-SP 294791-F · CNAI 52708</p>
+      <h1>Ferramentas de IA do vídeo</h1>
+    </div>
+  </header>
+  <p class="lead">Todos os links do vídeo num lugar só, na ordem em que você usa. Cada ferramenta mostra o que faz, o que dá para usar de graça e dicas para não gastar à toa.</p>
+  <p class="notice"><strong>Antes de gastar créditos:</strong> os planos grátis mudam com frequência. Os dados abaixo foram conferidos em 15/10/2026. Ao entrar em cada site, veja o seu saldo e os termos.</p>
+
+  <div class="chips" id="chips" role="group" aria-label="Filtrar por etapa"></div>
+  <main id="stages"></main>
+
+  <section class="gerador" id="gerador" aria-labelledby="h-ger">
+    <h3 id="h-ger">Gerador de Modelo</h3>
+    <p>Faça na ordem: <strong>1</strong> criar a personagem, <strong>2</strong> definir voz e personalidade, <strong>3</strong> gerar o book. Preencha os campos, toque em <em>Copiar texto</em> e cole no ChatGPT ou no Gemini. Troque as características para ter um resultado personalizado e único. O que você digitar fica salvo neste aparelho.</p>
+    <div class="marca">
+      <img src="ferramentas-ia-logo.png" alt="" width="56" height="56">
+      <label for="f-marca"><input type="checkbox" id="f-marca" checked><span>Incluir os dados da FCOSTA nos textos<small>FCOSTA Corretor de Imóveis · CRECI-SP 294791-F · CNAI 52708</small></span></label>
+      <a class="btn alt" href="ferramentas-ia-logo.png" download="logo-fcosta.png">Baixar a logo</a>
+    </div>
+    <p class="hint" style="margin-top:8px">Quer que o chat use a sua marca? Anexe a logo junto com o texto ao colar no ChatGPT ou no Gemini.</p>
+    <div class="ger-grid">
+
+      <article class="ger" aria-labelledby="h-g1">
+        <h4 id="h-g1"><span class="num">1</span>Criar a personagem</h4>
+        <p class="hint">A modelo vira a cara da marca nos comerciais, criativos e conteúdos da FCOSTA.</p>
+        <div class="flds">
+          <div class="fld"><label for="f-idade">Idade (anos)</label><input id="f-idade" data-k="idade" inputmode="numeric" autocomplete="off" placeholder="ex.: 28"></div>
+          <div class="fld"><label for="f-cabelo">Cabelo</label><input id="f-cabelo" data-k="cabelo" autocomplete="off" placeholder="ex.: castanho, ondulado"></div>
+          <div class="fld wide"><label for="f-como">Como quero ela</label><input id="f-como" data-k="como" autocomplete="off" placeholder="ex.: elegante, de blazer, sorriso aberto"></div>
+        </div>
+        <label class="label" for="o-1">Texto para colar no chat</label>
+        <textarea class="out" id="o-1" readonly rows="8"></textarea>
+        <div class="ger-foot"><button type="button" class="btn" data-copy="o-1">Copiar texto</button><span class="status" id="s-1" aria-live="polite"></span></div>
+        <p class="hint">Já deixa o aspecto real, com poros e expressões. Salve a imagem de que mais gostou.</p>
+      </article>
+
+      <article class="ger" aria-labelledby="h-g2">
+        <h4 id="h-g2"><span class="num">2</span>Voz e personalidade</h4>
+        <p class="hint">A ficha da modelo. Deixe em branco o que você quer que o chat invente; ele preenche o resto.</p>
+        <div class="flds">
+          <div class="fld"><label for="f-nome">Nome</label><input id="f-nome" data-k="nome" autocomplete="off"></div>
+          <div class="fld"><label for="f-idade2">Idade</label><input id="f-idade2" data-k="idade2" inputmode="numeric" autocomplete="off"></div>
+          <div class="fld wide"><label for="f-aparencia">Aparência</label><input id="f-aparencia" data-k="aparencia" autocomplete="off"></div>
+          <div class="fld"><label for="f-cabelo2">Cabelo</label><input id="f-cabelo2" data-k="cabelo2" autocomplete="off"></div>
+          <div class="fld"><label for="f-olhos">Olhos</label><input id="f-olhos" data-k="olhos" autocomplete="off"></div>
+          <div class="fld wide"><label for="f-pele">Tom de pele</label><input id="f-pele" data-k="pele" autocomplete="off"></div>
+          <div class="fld wide"><label for="f-personalidade">Personalidade</label><input id="f-personalidade" data-k="personalidade" autocomplete="off"></div>
+          <div class="fld wide"><label for="f-voz">Voz</label><input id="f-voz" data-k="voz" autocomplete="off"></div>
+          <div class="fld wide"><label for="f-fala">Forma de falar</label><input id="f-fala" data-k="fala" autocomplete="off"></div>
+          <div class="fld wide"><label for="f-estilo">Estilo</label><input id="f-estilo" data-k="estilo" autocomplete="off"></div>
+        </div>
+        <label class="label" for="o-2">Texto para colar no chat</label>
+        <textarea class="out" id="o-2" readonly rows="11"></textarea>
+        <div class="ger-foot"><button type="button" class="btn" data-copy="o-2">Copiar texto</button><span class="status" id="s-2" aria-live="polite"></span></div>
+        <p class="hint">Idade e cabelo repetem o passo 1 se você deixar em branco aqui. A voz descrita aqui é a que você procura na etapa 2 (Dar voz à modelo).</p>
+      </article>
+
+      <article class="ger" aria-labelledby="h-g3">
+        <h4 id="h-g3"><span class="num">3</span>Book da personagem</h4>
+        <p class="hint">Folha de referência com várias vistas (frente, lado, costas, close e de cima), em estilo fotográfico realista. Serve de base para manter o mesmo rosto em todas as cenas.</p>
+        <div class="fld"><label for="f-subject">Descrição da modelo (Subject)</label><textarea id="f-subject" data-k="subject" placeholder="Descreva a modelo ou use o botão abaixo para puxar os dados do passo 2."></textarea></div>
+        <button type="button" class="btn alt" id="usar-ficha">Preencher com os dados do passo 2</button>
+        <label class="label" for="o-3">Texto para colar no chat</label>
+        <textarea class="out" id="o-3" readonly rows="9"></textarea>
+        <div class="ger-foot"><button type="button" class="btn" data-copy="o-3">Copiar texto</button><span class="status" id="s-3" aria-live="polite"></span></div>
+        <p class="hint">Prompt em inglês, como na aula. Gere com a mesma conta onde criou a personagem e baixe o book na hora.</p>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="general" aria-labelledby="h-general">
+    <h2 id="h-general">Dicas gerais para usar de graça</h2>
+    <ul>
+      <li>Escreva o roteiro pronto antes de abrir a ferramenta e teste com uma frase curta. Erro de texto gasta crédito.</li>
+      <li>Gere o book da modelo uma vez só e use sempre a mesma imagem como base dos vídeos. Assim o rosto fica igual em todas as cenas.</li>
+      <li>Baixe cada arquivo logo depois de gerar. Créditos diários expiram e alguns sites apagam arquivos antigos.</li>
+      <li>Muitos planos grátis valem só para uso pessoal. Antes de usar em anúncio da FCOSTA, leia os termos de uso comercial de cada site.</li>
+      <li>Use só a sua voz, o seu rosto ou o da modelo criada por IA. Não clone voz nem troque rosto de outra pessoa sem permissão.</li>
+      <li>Nos vídeos finais, deixe o nome FCOSTA e o CRECI-SP 294791-F visíveis.</li>
+      <li>Se uma ferramenta acabar os créditos, passe para outra da mesma etapa e volte no dia seguinte.</li>
+    </ul>
+  </section>
+
+  <section class="sources">
+    <details>
+      <summary>De onde vieram os dados</summary>
+      <p style="margin-top:10px">Números de planos grátis vêm de páginas das próprias ferramentas e de sites de comparação, que podem estar desatualizados. Quando as fontes divergem, isso está avisado no cartão.</p>
+      <ul>
+        <li><a href="https://diyai.io/ai-tools/video-generation/google-veo-pricing/" target="_blank" rel="noopener noreferrer">DIY AI: créditos do Flow (20/09/2026)</a></li>
+        <li><a href="https://www.mindstudio.ai/blog/google-flow-pricing-credits-tiers-explained" target="_blank" rel="noopener noreferrer">MindStudio: planos do Flow (abril de 2026)</a></li>
+        <li><a href="https://costbench.com/software/ai-video-generators/google-veo/free-plan" target="_blank" rel="noopener noreferrer">CostBench: Veo grátis no Gemini</a></li>
+        <li><a href="https://engadget.com/2234173/chatgpt-free-features-2026" target="_blank" rel="noopener noreferrer">Engadget: ChatGPT grátis em 2026</a></li>
+        <li><a href="https://felloai.com/is-nano-banana-free/" target="_blank" rel="noopener noreferrer">Fello AI: imagens grátis no Gemini (07/10/2026)</a></li>
+        <li><a href="https://costbench.com/software/video-editing/capcut/free-plan/" target="_blank" rel="noopener noreferrer">CostBench: CapCut grátis</a></li>
+        <li><a href="https://costbench.com/software/ai-video-editing-saas/veed-io/free-plan/" target="_blank" rel="noopener noreferrer">CostBench: VEED grátis</a></li>
+        <li><a href="https://magichour.ai/blog/heygen-pricing" target="_blank" rel="noopener noreferrer">Magic Hour: preços do HeyGen (10/10/2026)</a></li>
+        <li><a href="https://www.costbench.com/software/voice-apis/fish-audio/free-plan/" target="_blank" rel="noopener noreferrer">CostBench: Fish Audio grátis</a></li>
+        <li><a href="https://www.stork.ai/en/vocloner" target="_blank" rel="noopener noreferrer">Stork: Vocloner</a></li>
+        <li>DreamFace, Lipsync.video, TalkingAvatar.ai e Google Flow: páginas oficiais de cada site.</li>
+      </ul>
+    </details>
+  </section>
+
+  <footer class="foot">FCOSTA Corretor de Imóveis · CRECI-SP 294791-F · CNAI 52708</footer>
+</div>
+
+<script>
+(function () {
+  var STAGES = [
+    { id: "imagem", n: 1, title: "Criar a modelo e as imagens", desc: "Aqui nasce a modelo da FCOSTA: o rosto, a roupa e o book. Use os 3 passos do Gerador de Modelo logo abaixo e depois escolha a ferramenta que gera a imagem." },
+    { id: "voz", n: 2, title: "Dar voz à modelo", desc: "Transforme o roteiro em áudio com a voz que você escolheu na ficha de voz e personalidade (passo 2 do Gerador de Modelo, na etapa 1)." },
+    { id: "video", n: 3, title: "Gerar vídeos", desc: "Leve a imagem da modelo para o movimento: cenas curtas para comerciais e conteúdos." },
+    { id: "avatar", n: 4, title: "Fazer a modelo falar", desc: "Junte a foto e o áudio para a modelo falar com os lábios sincronizados." },
+    { id: "edicao", n: 5, title: "Editar o vídeo final", desc: "Monte cenas, áudio, legendas e o nome da FCOSTA com o CRECI em um vídeo pronto." }
+  ];
+
+  var TOOLS = [
+    {
+      stage: "imagem", name: "ChatGPT", url: "https://chatgpt.com/", plan: "Grátis com limites",
+      does: "Assistente de conversa que escreve roteiros e legendas e cria imagens a partir de texto. É onde você cria a modelo.",
+      free: [
+        "Mensagens de texto sem limite fixo no plano grátis, segundo o Engadget (a partir de agosto de 2026).",
+        "Criação de imagens, envio de arquivos e voz têm limite e o número não é divulgado. Veja o que sobrou em Configurações, na parte de uso.",
+        "O plano grátis pode mostrar anúncios abaixo das respostas."
+      ],
+      tips: [
+        "Crie a modelo e o book aqui e salve as imagens na hora.",
+        "Quando o limite de imagens acabar, continue o texto aqui e gere a imagem no Gemini.",
+        "Peça o roteiro dos vídeos aqui antes de ir para as ferramentas de voz."
+      ]
+    },
+    {
+      stage: "imagem", name: "Gemini", url: "https://gemini.google.com/app?hl=pt-BR", plan: "Grátis com limite diário",
+      does: "Assistente do Google. Cria imagens com o Nano Banana e ajuda com texto e roteiro. Entra com a conta Google.",
+      free: [
+        "Imagens: existe uma cota diária no plano grátis. O Google divulgava até 20 por dia até maio de 2026 e não publicou número novo desde então.",
+        "Vídeo com Veo no app: um site de comparação cita clipes de 8 segundos em 720p, com limite por dia e marca SynthID. O Google não confirma os números, então teste no próprio app.",
+        "A cota diária renova no dia seguinte."
+      ],
+      tips: [
+        "Use a mesma conta Google que você usa no Flow.",
+        "Gere a imagem da modelo aqui quando o ChatGPT atingir o limite.",
+        "Salve a imagem de que mais gostou. Ela será a base dos vídeos."
+      ]
+    },
+    {
+      stage: "voz", name: "Fish Audio", url: "https://fish.audio/pt/", plan: "Créditos mensais grátis",
+      does: "Transforma texto em fala e clona voz a partir de uma amostra curta. Boa para dar voz à modelo.",
+      free: [
+        "8.000 créditos por mês, até 500 caracteres por geração e 3 vozes públicas, segundo o CostBench (julho de 2026). Não pede cartão de crédito.",
+        "Uso comercial no plano grátis: uma fonte diz que é permitido e outra não confirma. Leia os termos do Fish Audio antes de usar em anúncio."
+      ],
+      tips: [
+        "Divida o roteiro em frases de até 500 caracteres e junte os áudios no CapCut.",
+        "Escolha uma voz feminina parecida com a que você descreveu na ficha de voz.",
+        "Clone só a sua própria voz ou uma voz com permissão."
+      ]
+    },
+    {
+      stage: "voz", name: "MiniMax Audio", url: "https://www.minimax.io/audio", plan: "Uso grátis limitado",
+      does: "Voz por IA com texto para fala e clonagem de voz, em vários idiomas.",
+      free: [
+        "Há uso grátis limitado, mas as fontes que consultei não trazem os números. Veja o saldo ao entrar.",
+        "Termos de uso comercial: confirme no site antes de usar em anúncio."
+      ],
+      tips: [
+        "Gere o mesmo trecho aqui e no Fish Audio e fique com a voz mais natural em português.",
+        "Teste com uma frase antes de gerar o roteiro inteiro.",
+        "Baixe os áudios logo depois de gerar."
+      ]
+    },
+    {
+      stage: "voz", name: "Vocloner", url: "https://vocloner.com/models", plan: "Grátis só para uso pessoal",
+      does: "Clona uma voz a partir de 10 a 30 segundos de áudio e gera fala em mais de 13 idiomas.",
+      free: [
+        "Até 3 vozes clonadas salvas, 1.000 caracteres por dia e 200 por pedido.",
+        "<span class=\"alert\">O grátis é só para uso pessoal. Uso comercial exige plano pago.</span> Para anúncios da FCOSTA, não use o plano grátis."
+      ],
+      tips: [
+        "Grave a amostra sem ruído e sem música, com a sua própria voz.",
+        "Use para testar e treinar o roteiro. Para os vídeos da empresa, prefira uma ferramenta com uso comercial liberado."
+      ]
+    },
+    {
+      stage: "video", name: "Google Flow", url: "https://flow.google.com/", plan: "50 créditos grátis por dia",
+      does: "Estúdio de vídeo e imagem do Google com os modelos Veo. Transforma texto ou imagem, como a foto da modelo, em vídeo.",
+      free: [
+        "Sem assinatura: 50 créditos por dia, que renovam e não acumulam (fonte atualizada em 20/09/2026).",
+        "No Veo 3.1, o modo Lite custa 10 créditos e o Fast custa 20. Dá para fazer uns 5 vídeos Lite ou 2 Fast por dia. O modo Quality custa 100 e passa do que o grátis cobre.",
+        "Em horário de pico, o Google pode limitar vídeos para quem não assina. Uma fonte de abril de 2026 falava em poucos créditos por mês, então confira o seu saldo ao entrar."
+      ],
+      tips: [
+        "Teste o enquadramento no Lite e só gaste no Fast quando a cena estiver certa.",
+        "Comece pela imagem do book para manter o rosto igual em todas as cenas.",
+        "Gere fora do horário de pico se a fila estiver cheia."
+      ],
+      extra: { label: "Página do Labs", url: "https://labs.google/fx/pt/tools/flow" }
+    },
+    {
+      stage: "avatar", name: "HeyGen", url: "https://www.heygen.com/pt-br", plan: "Grátis: poucos vídeos",
+      does: "Avatar que fala: você escreve o texto e o avatar apresenta o vídeo, com voz e movimento dos lábios.",
+      free: [
+        "Plano grátis sem cartão, com até 3 vídeos de 1 minuto. A cota varia por região e pela data em que a conta foi criada (conferido em 10/10/2026).",
+        "A remoção da marca d'água é recurso pago, a partir do plano Creator."
+      ],
+      tips: [
+        "Planeje os 3 vídeos: apresentação da FCOSTA, um imóvel e uma dica de mercado.",
+        "Deixe o roteiro pronto antes de entrar. Um erro gasta um dos 3 vídeos.",
+        "Veja se a conta grátis aceita a foto da modelo. Se não, teste com um avatar da biblioteca."
+      ]
+    },
+    {
+      stage: "avatar", name: "DreamFace", url: "https://www.dreamfaceapp.com/pt/avatar", plan: "Teste grátis",
+      does: "Transforma uma foto em avatar falante, a partir de texto ou áudio, com sincronia labial. Tem também troca de rosto e aplicativo para celular.",
+      free: [
+        "O site anuncia teste grátis, mas não descreve créditos, duração nem marca d'água. Veja ao entrar."
+      ],
+      tips: [
+        "Use foto de frente, com o rosto bem iluminado e boca fechada.",
+        "Comece com um áudio de 5 a 10 segundos.",
+        "Use só fotos suas ou da modelo criada por IA. Não troque o rosto de outra pessoa sem permissão."
+      ],
+      extra: { label: "Página inicial", url: "https://www.dreamfaceapp.com/pt/home" }
+    },
+    {
+      stage: "avatar", name: "Lipsync.video", url: "https://lipsync.video/pt", plan: "Teste grátis, créditos por segundo",
+      does: "Faz um vídeo, foto ou avatar falar ou cantar a partir de texto ou áudio. Também gera clipes de IA de até 30 segundos.",
+      free: [
+        "O site diz que dá para testar o Lip Sync de graça e baixar sem marca d'água. A quantidade grátis não aparece na página.",
+        "Custo em créditos: o Lip Sync 1.0 usa 1 crédito por segundo (só retrato, até 90 s). O Lip Sync 2.0 usa 4 por segundo (até 30 s, vários personagens).",
+        "Roteiro de até 1.000 caracteres e áudio de até 90 segundos."
+      ],
+      tips: [
+        "Para uma pessoa só, use o 1.0: custa 4 vezes menos por segundo.",
+        "Pela tabela da página, um vídeo de 10 segundos no 1.0 usa cerca de 10 créditos.",
+        "Junte aqui a voz do Fish Audio com a foto da modelo."
+      ]
+    },
+    {
+      stage: "avatar", name: "TalkingAvatar.ai", url: "https://talkingavatar.ai/", plan: "Créditos grátis pelo Discord",
+      does: "Refaz e dubla vídeos com voz clonada, sincroniza os lábios e tem avatares prontos. Clona uma voz com uma única frase.",
+      free: [
+        "A página cita créditos grátis ao entrar no Discord oficial. Planos e limites não aparecem nas páginas que consultei."
+      ],
+      tips: [
+        "Entre no Discord oficial para pegar os créditos grátis.",
+        "Teste primeiro com um vídeo curto.",
+        "Confirme marca d'água e uso comercial antes de publicar."
+      ]
+    },
+    {
+      stage: "edicao", name: "CapCut", url: "https://www.capcut.com/pt-br/", plan: "Grátis, com recursos Pro pagos",
+      does: "Editor de vídeo: corta, junta áudio e vídeo e coloca legendas, trilha e transições. Aqui você monta o vídeo final.",
+      free: [
+        "Edição básica grátis: cortes, trilhas, filtros, transições e texto.",
+        "Exporta até 1080p e pode vir com marca d'água do CapCut, segundo o CostBench.",
+        "Legendas automáticas e locução por IA existem no grátis, com limites. O pacote completo de IA é do Pro (US$ 19,99 por mês)."
+      ],
+      tips: [
+        "Evite efeitos e modelos marcados como Pro para não travar a exportação.",
+        "Coloque o nome FCOSTA e o CRECI-SP 294791-F no começo ou no fim do vídeo.",
+        "Monte na mesma linha do tempo a voz do Fish Audio e os clipes do Flow."
+      ]
+    },
+    {
+      stage: "edicao", name: "VEED", url: "https://www.veed.io/", plan: "Grátis com marca d'água",
+      does: "Editor de vídeo no navegador, com legendas automáticas, cortes e ferramentas de IA. Não precisa instalar nada.",
+      free: [
+        "Exporta em 720p com marca d'água e tem 2 GB de armazenamento, segundo o CostBench.",
+        "Legendas automáticas ilimitadas e créditos de IA são só dos planos pagos."
+      ],
+      tips: [
+        "Use para legendar e cortar vídeos curtos. Para o vídeo final sem marca d'água, termine no CapCut.",
+        "Apague arquivos antigos para não encher os 2 GB."
+      ]
+    }
+  ];
+
+  /* ===== Gerador de Modelo: monta os 3 textos dos PDFs da aula ===== */
+  var G = {};
+  try { G = JSON.parse(localStorage.getItem("fcosta_gerador") || "{}") || {}; } catch (e) { G = {}; }
+  function gv(k) { return (G[k] || "").replace(/\s+/g, " ").trim(); }
+  function gsave() { try { localStorage.setItem("fcosta_gerador", JSON.stringify(G)); } catch (e) {} }
+  function blank(x, mark) { return x || mark; }
+  var MARCA = "FCOSTA Corretor de Imóveis, CRECI-SP 294791-F, CNAI 52708";
+  var marcaEl = document.getElementById("f-marca");
+  function usaMarca() { return G.marca !== "0"; }
+
+  function build1() {
+    var falta = [];
+    if (!gv("idade")) falta.push("idade");
+    if (!gv("como")) falta.push("como quero ela");
+    if (!gv("cabelo")) falta.push("cabelo");
+    return {
+      text: "chat, quero criar uma modelo, personagem com ia, vou usar ela pra fazer comerciais, criativos e conteúdos, pra minha empresa" + (usaMarca() ? ", a " + MARCA : "") + ", ela vai ser cara da minha marca, minha personagem tem " +
+        blank(gv("idade"), "___") + " anos, quero ela " + blank(gv("como"), "____") + ", cabelo " + blank(gv("cabelo"), "____") +
+        ", personalidade cativante e simpática, cara de brasileira, deixe com aspecto real, rosto com poros, e expressões, quero ela, bonita e atraente, gere pra mim",
+      msg: falta.length ? "Falta preencher: " + falta.join(", ") + "." : "Pronto para copiar."
+    };
+  }
+  function build2() {
+    var idade = gv("idade2") || gv("idade"), cabelo = gv("cabelo2") || gv("cabelo");
+    var linhas = [
+      ["Nome", gv("nome")], ["Idade", idade], ["Aparência", gv("aparencia")], ["Cabelo", cabelo],
+      ["Olhos", gv("olhos")], ["Tom de pele", gv("pele")], ["Personalidade", gv("personalidade")],
+      ["Voz", gv("voz")], ["Forma de falar", gv("fala")], ["Estilo", gv("estilo")]
+    ];
+    var vazios = linhas.filter(function (l) { return !l[1]; }).length;
+    return {
+      text: "chat, preencha com as características da minha modelo" + (usaMarca() ? ", que será a cara da marca " + MARCA : "") + ":\n" + linhas.map(function (l) { return l[0] + ": " + l[1]; }).join("\n"),
+      msg: vazios ? vazios + " campo(s) em branco: o chat preenche." : "Ficha completa."
+    };
+  }
+  function build3() {
+    var sub = gv("subject");
+    return {
+      text: "Character reference sheet, multiple views: front, side, back, front close-up, top-down view. Subject: " + (sub || "[descreva a modelo]") + (usaMarca() ? ", brand ambassador of " + MARCA : "") +
+        ". Realistic photographic style, not illustrated or 3D rendered. Clean light gray background. Views arranged in a grid layout like a professional character design sheet. Additional detail swatches at the bottom. Labels for each view. Ultra detailed, photorealistic, cinematic quality, 35mm film grain, natural lighting.",
+      msg: sub ? "Pronto para copiar." : "Falta a descrição da modelo (Subject)."
+    };
+  }
+  var BUILD = { "1": build1, "2": build2, "3": build3 };
+  function refresh() {
+    ["1", "2", "3"].forEach(function (n) {
+      var r = BUILD[n]();
+      document.getElementById("o-" + n).value = r.text;
+      document.getElementById("s-" + n).textContent = r.msg;
+    });
+  }
+  var ger = document.getElementById("gerador");
+  marcaEl.checked = usaMarca();
+  marcaEl.addEventListener("change", function () { G.marca = marcaEl.checked ? "1" : "0"; gsave(); refresh(); });
+  Array.prototype.forEach.call(ger.querySelectorAll("[data-k]"), function (inp) {
+    inp.value = G[inp.getAttribute("data-k")] || "";
+    inp.addEventListener("input", function () { G[inp.getAttribute("data-k")] = inp.value; gsave(); refresh(); });
+  });
+  function copiar(id, btn) {
+    var ta = document.getElementById(id), st = document.getElementById("s-" + id.slice(2)), txt = ta.value;
+    function ok() { var old = btn.textContent; btn.textContent = "Copiado!"; setTimeout(function () { btn.textContent = old; }, 2000); }
+    function fallback() {
+      ta.focus(); ta.select();
+      try { document.execCommand("copy") ? ok() : (st.textContent = "Não copiou. Selecione o texto e copie manualmente."); }
+      catch (e) { st.textContent = "Não copiou. Selecione o texto e copie manualmente."; }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, fallback); else fallback();
+  }
+  Array.prototype.forEach.call(ger.querySelectorAll("[data-copy]"), function (b) {
+    b.addEventListener("click", function () { copiar(b.getAttribute("data-copy"), b); });
+  });
+  document.getElementById("usar-ficha").addEventListener("click", function () {
+    var idade = gv("idade2") || gv("idade"), cabelo = gv("cabelo2") || gv("cabelo");
+    var partes = [
+      gv("nome"), idade ? idade + " anos" : "", gv("aparencia"), cabelo ? "cabelo " + cabelo : "",
+      gv("olhos") ? "olhos " + gv("olhos") : "", gv("pele") ? "pele " + gv("pele") : "", gv("estilo"), gv("personalidade")
+    ].filter(Boolean);
+    var box = document.getElementById("f-subject");
+    box.value = partes.length ? partes.join(", ") : gv("como");
+    G.subject = box.value; gsave(); refresh(); box.focus();
+  });
+  refresh();
+
+  var chipsEl = document.getElementById("chips");
+  var stagesEl = document.getElementById("stages");
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text) e.textContent = text;
+    return e;
+  }
+  function list(items, allowHtml) {
+    var ul = el("ul");
+    items.forEach(function (t) {
+      var li = el("li");
+      if (allowHtml && t.indexOf("<span") === 0) li.innerHTML = t; else li.textContent = t;
+      ul.appendChild(li);
+    });
+    return ul;
+  }
+  function link(url, label, alt) {
+    var a = el("a", "btn" + (alt ? " alt" : ""), label);
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    return a;
+  }
+  function domain(url) {
+    return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  }
+
+  function card(t) {
+    var c = el("article", "card");
+    var top = el("div", "card-top");
+    top.appendChild(el("h3", "", t.name));
+    top.appendChild(el("span", "plan", t.plan));
+    c.appendChild(top);
+    c.appendChild(el("p", "does", t.does));
+
+    var f = el("div");
+    f.appendChild(el("p", "label", "De graça"));
+    f.appendChild(list(t.free, true));
+    c.appendChild(f);
+
+    var d = el("div");
+    d.appendChild(el("p", "label", "Dicas"));
+    d.appendChild(list(t.tips, false));
+    c.appendChild(d);
+
+    var foot = el("div", "card-foot");
+    foot.appendChild(link(t.url, "Abrir " + t.name, false));
+    if (t.extra) foot.appendChild(link(t.extra.url, t.extra.label, true));
+    foot.appendChild(el("span", "domain", domain(t.url)));
+    c.appendChild(foot);
+    return c;
+  }
+
+  STAGES.forEach(function (s) {
+    var sec = el("section", "stage");
+    sec.setAttribute("data-stage", s.id);
+    var head = el("div", "stage-head");
+    head.appendChild(el("span", "num", String(s.n)));
+    head.appendChild(el("h2", "", s.title));
+    sec.appendChild(head);
+    sec.appendChild(el("p", "stage-desc", s.desc));
+    if (s.id === "imagem") sec.appendChild(ger);
+    var grid = el("div", "grid");
+    TOOLS.filter(function (t) { return t.stage === s.id; }).forEach(function (t) { grid.appendChild(card(t)); });
+    sec.appendChild(grid);
+    stagesEl.appendChild(sec);
+  });
+
+  var chips = [{ id: "todas", label: "Todas (" + TOOLS.length + ")" }].concat(STAGES.map(function (s) {
+    return { id: s.id, label: s.n + ". " + s.title.split(" ").slice(0, 3).join(" ") };
+  }));
+  var SHORT = { imagem: "Imagens", voz: "Voz", video: "Vídeo", avatar: "Avatar falando", edicao: "Edição" };
+  chips.forEach(function (c) {
+    var b = el("button", "chip", c.id === "todas" ? c.label : SHORT[c.id]);
+    b.type = "button";
+    b.setAttribute("data-chip", c.id);
+    b.setAttribute("aria-pressed", c.id === "todas" ? "true" : "false");
+    b.addEventListener("click", function () { show(c.id); });
+    chipsEl.appendChild(b);
+  });
+
+  function show(id) {
+    Array.prototype.forEach.call(chipsEl.children, function (b) {
+      b.setAttribute("aria-pressed", b.getAttribute("data-chip") === id ? "true" : "false");
+    });
+    Array.prototype.forEach.call(stagesEl.children, function (sec) {
+      sec.hidden = !(id === "todas" || sec.getAttribute("data-stage") === id);
+    });
+  }
+})();
+</script>
+
+</body></html>
