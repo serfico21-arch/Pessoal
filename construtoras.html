@@ -174,6 +174,18 @@ details.rg summary{cursor:pointer;font-weight:700;color:var(--acc-text);padding:
 .sitebar .addf input{max-width:560px}
 @media print{.etabs,.addbar,.sitebar,.fh .acts{display:none!important}}
 @media print{.top,.nav,#overlay,#status,.tools,.brand button,.foot,.keep{display:none!important}.panel{border:none}body{background:#fff}}
+.shm{position:fixed;inset:0;background:rgba(22,19,14,.7);z-index:60;display:flex;justify-content:center;padding:16px;overflow:auto}
+.shb{background:#fff;border-radius:12px;width:min(760px,100%);padding:18px;display:flex;flex-direction:column;gap:14px;margin:auto}
+.shb h2{font-size:22px}
+.shb .fld input[type=text]{width:100%;font-size:16px;padding:10px 12px;border:1.5px solid var(--line);border-radius:8px;background:#FAFAF8}
+.shb .fld select{width:100%;margin-top:8px;padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;background:#fff;min-height:42px}
+.shg{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px;max-height:44vh;overflow:auto;padding:2px;margin-top:8px}
+.sht{position:relative;display:block;border:1.5px solid var(--line);border-radius:8px;overflow:hidden;cursor:pointer;background:#fff}
+.sht img{display:block;width:100%;height:auto}
+.sht span{position:absolute;left:4px;bottom:4px;background:rgba(22,19,14,.78);color:#fff;font-size:12px;border-radius:999px;padding:0 7px}
+.sht input{position:absolute;right:4px;top:4px;width:22px;height:22px;accent-color:#8A6511}
+.shr{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media print{.shm{display:none!important}}
 </style>
 </head>
 <body>
@@ -204,6 +216,7 @@ details.rg summary{cursor:pointer;font-weight:700;color:var(--acc-text);padding:
 
 <script id="dados" type="application/json">null</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 /* Cópia fiel do código-fonte desta página, tirada antes de qualquer alteração. Serve para gravar os tabelões dentro do HTML. */
 const SRC='<!doctype html>\n'+document.documentElement.outerHTML;
@@ -302,7 +315,7 @@ function analyze(rows){
     const isHd=r.cells.some(c=>/^empreendimento$/i.test(c.t))||(prevHd&&!r.cells.some(c=>/\d/.test(c.t))&&r.cells.every(c=>c.t===c.t.toUpperCase())&&colIdx(r.cells[0],cols)>0);
     if(isHd){slots.forEach((s,i)=>{const t=s.map(c=>c.t).join(' ');if(t)head[i]+=(head[i]?' ':'')+t;});prevHd=true;return{r,slots,isHd};}
     prevHd=false;
-    let tab=null,dsc=null;const parts=[],plain=[];
+    let tab=null,dsc=null,addr='';const parts=[],plain=[];
     slots.forEach((s,i)=>s.forEach(c=>{
       const h=head[i].toUpperCase();
       const m=c.t.match(PRICE_RE);
@@ -312,13 +325,14 @@ function analyze(rows){
         if(/COM\s+DESCONTO|PROMOCIONAL/.test(h)){if(dsc==null)dsc=v;}else if(/PARTIR|TABELA/.test(h)){if(tab==null)tab=v;}else plain.push(v);
         return;
       }
+      if(/ENDERE/.test(h)&&i>0&&c.t.length>5){addr+=(addr?' ':'')+c.t;return;}
       if(i===0||c.url||/%/.test(c.t)||/ENDERE|MESES|COMISS/.test(h)||/^-?R\$-?$/.test(c.t)||c.t==='-'||/^(R\.|Rua|Av\.|Al\.)\s/i.test(c.t))return;
       parts.push(/^\d$/.test(c.t)?c.t+' dorm':(/^\d+,\d{1,2}$/.test(c.t)?c.t+' m²':c.t));
     }));
     // sem cabeçalho (tabela continua na página seguinte): maior valor = tabela, menor = com desconto
     if(plain.length){plain.sort((a,b)=>b-a);if(tab==null)tab=plain[0];if(dsc==null&&plain.length>1)dsc=plain[plain.length-1];}
     const k0=Math.min(...r.cells.map(c=>c.k0));
-    return{r,slots,isHd:false,tab,dsc,price:(dsc!=null?dsc:tab),desc:parts.join(' · ').slice(0,90),k0};
+    return{r,slots,isHd:false,tab,dsc,price:(dsc!=null?dsc:tab),desc:parts.join(' · ').slice(0,90),k0,addr};
   });
   // nomes: células da 1ª coluna, juntando linhas quebradas (índices consecutivos no PDF)
   const cand=[];
@@ -353,7 +367,7 @@ function extractUnits(pages){
     if(b.type==='title'){zona=b.text;return;}
     if(b.type!=='table')return;
     b.an=b.an||analyze(b.rows);
-    b.an.info.forEach(i=>{if(i.price!=null)out.push({nome:i.name,desc:i.desc,tab:i.tab,dsc:i.dsc,zona});});
+    b.an.info.forEach(i=>{if(i.price!=null)out.push({nome:i.name,desc:i.desc,tab:i.tab,dsc:i.dsc,zona,addr:i.addr});});
   }));
   return out;
 }
@@ -759,6 +773,7 @@ function renderCon(host){
     ttl.append(el('h2',{text:'Construtora mãe · tabelão geral'}),el('p',{class:'small',text:'Aqui fica o tabelão geral da construtora, com todos os empreendimentos juntos.'}));
   }
   const acts=el('div',{class:'acts'},el('label',{class:'btn pri',for:'fi',text:'Subir tabelão (PDF)'}),el('label',{class:'btn',for:'fb',text:'Subir e-book (PDF)'}));
+  if(empTab){const sh=el('button',{class:'pri',type:'button',text:'Compartilhar com o cliente'});const eN=empTab;sh.onclick=()=>shareEmp(key,eN);acts.append(sh);}
   if(empTab)acts.append(armBtn('Remover empreendimento','Toque de novo para remover',()=>removeEmp(key,empTab)));
   fh.append(ttl,acts);body.append(fh);
 
@@ -1133,6 +1148,259 @@ function renderSim(panel){
   q('s-wa').onclick=()=>{window.open('https://wa.me/?text='+encodeURIComponent(resumo(lastP,last)),'_blank','noopener');};
   q('s-copy').onclick=async()=>{const ok=await copyText(resumo(lastP,last));q('s-copied').textContent=ok?'Resumo copiado. É só colar no WhatsApp.':'Não consegui copiar. Selecione e copie manualmente.';setTimeout(()=>{q('s-copied').textContent='';},4000);};
   calc();
+}
+
+/* ---------- compartilhar o empreendimento com o cliente (PDF com fotos do e-book, mapa e preço total) ---------- */
+function empInfo(key,emp){const p=loadProfiles()[key]||{};return(p.info&&p.info[emp])||{};}
+function saveEmpInfo(key,emp,v){const p=loadProfiles();p[key]=Object.assign(p[key]||{},{pasta:true});p[key].info=Object.assign({},p[key].info||{});p[key].info[emp]=Object.assign({},p[key].info[emp]||{},v);saveProfiles(p);}
+function mapsUrl(q){return'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);}
+function parsePreco(t){const s=String(t||'').replace(/[^\d,.]/g,'');if(!s)return 0;const n=parseFloat(s.replace(/\./g,'').replace(',','.'));return isFinite(n)?n:0;}
+const sleep0=()=>new Promise(r=>setTimeout(r,0));
+async function pageJpeg(pdf,n,width,q){
+  const page=await pdf.getPage(n),v0=page.getViewport({scale:1}),vp=page.getViewport({scale:width/v0.width});
+  const cv=document.createElement('canvas');cv.width=Math.round(vp.width);cv.height=Math.round(vp.height);
+  const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
+  await page.render({canvasContext:ctx,viewport:vp}).promise;
+  const url=cv.toDataURL('image/jpeg',q),w=cv.width,h=cv.height;cv.width=cv.height=0;
+  return{url,w,h};
+}
+function mcmvInfo(preco){
+  const R=rules.mcmv,el_=R.filter(f=>f.teto>=preco);
+  if(!(preco>0))return null;
+  if(!el_.length)return{acima:true,tetoMax:Math.max(...R.map(f=>f.teto))};
+  const idx=R.indexOf(el_[0]);
+  return{faixas:el_,min:idx>0?R[idx-1].ate:0,max:el_[el_.length-1].ate};
+}
+function foneWa(t){let d=String(t||'').replace(/\D/g,'');if(d.length===10||d.length===11)d='55'+d;return d.length>=12?d:'';}
+function waLink(fone,emp,construtora){return'https://wa.me/'+fone+'?text='+encodeURIComponent('Olá! Tenho interesse no '+emp+(construtora?' ('+construtora+')':'')+'. Pode me passar mais informações?');}
+function mensagemCliente(o){
+  const L=['*'+o.emp+'*'+(o.construtora?' · '+o.construtora:'')];
+  if(o.preco>0)L.push('Preço total: *'+brl(o.preco).replace(/\u00a0/g,' ')+'*');
+  const m=o.mcmv?mcmvInfo(o.preco):null;
+  if(m&&!m.acima)L.push('Minha Casa Minha Vida: renda familiar '+(m.min>0?'acima de '+brl0(m.min)+' até ':'de até ')+brl0(m.max));
+  else if(m&&m.acima)L.push('Financiamento pelo SBPE (acima do teto do MCMV)');
+  if(o.endereco)L.push('Localização: '+o.endereco+'\n'+o.mapa);
+  if(o.fone)L.push('','Fale comigo: https://wa.me/'+o.fone);
+  L.push('',ASSINATURA);
+  return L.join('\n');
+}
+async function buildClientePdf(o){
+  if(!window.jspdf)throw new Error('semPdfLib');
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4',orientation:'p',compress:true});
+  const W=210,money=v=>brl(v).replace(/\u00a0/g,' '),GOLD=[201,154,46],INK=[22,19,14],MUTE=[92,90,85];
+  const col=c=>doc.setTextColor(c[0],c[1],c[2]);
+  let y=0,capa=1;
+  const need=h=>{if(y+h>276){doc.addPage();capa++;y=20;}};
+  const lab=(t,x,yy)=>{doc.setFont('helvetica','normal');doc.setFontSize(11);col(MUTE);doc.text(t,x,yy);};
+  // faixa preta com logo e título
+  doc.setFillColor(INK[0],INK[1],INK[2]);doc.rect(0,0,W,62,'F');
+  let tw=W-28;
+  if(o.logo){try{doc.addImage(o.logo,/image\/jpe?g/i.test(o.logo)?'JPEG':'PNG',W-14-36,13,36,36);tw=W-28-44;}catch(e){console.error(e);}}
+  doc.setFont('helvetica','bold');doc.setFontSize(11);col(GOLD);doc.text('FCOSTA Corretor de Imóveis',14,18);
+  doc.setFontSize(22);doc.setTextColor(255,255,255);
+  const tl=doc.splitTextToSize(o.emp,tw).slice(0,3);doc.text(tl,14,31);
+  doc.setFont('helvetica','normal');doc.setFontSize(12);doc.setTextColor(201,196,184);doc.text(o.construtora||'',14,31+(tl.length-1)*9.5+9);
+  y=78;
+  // preço total
+  if(o.preco>0){
+    lab('Preço total',14,y);
+    doc.setFont('helvetica','bold');doc.setFontSize(30);col(INK);doc.text(money(o.preco),14,y+13);
+    y+=32;
+  }
+  // Minha Casa Minha Vida + faixa de renda
+  const m=o.mcmv?mcmvInfo(o.preco):null;
+  if(m){
+    need(m.acima?40:70);
+    doc.setFillColor(244,234,208);doc.setDrawColor(228,211,165);
+    const h=m.acima?26:22+m.faixas.length*7+12;
+    doc.roundedRect(14,y-6,W-28,h,3,3,'FD');
+    doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(122,90,12);doc.text('Minha Casa Minha Vida',20,y+1);
+    col(INK);doc.setFontSize(14);
+    if(m.acima){
+      const t=doc.splitTextToSize('Este valor passa do teto do programa ('+brl0(m.tetoMax)+'). Financiamento pelo SBPE.',W-40);doc.text(t,20,y+10);
+    }else{
+      doc.text('Renda familiar '+(m.min>0?'acima de '+brl0(m.min)+' até '+brl0(m.max):'de até '+brl0(m.max)),20,y+10);
+      let yy=y+18;doc.setFontSize(9);col(MUTE);doc.setFont('helvetica','bold');
+      doc.text('FAIXA',20,yy);doc.text('RENDA FAMILIAR',46,yy);doc.text('JUROS (a.a.)',98,yy);doc.text('SUBSÍDIO',148,yy);
+      doc.setFont('helvetica','normal');doc.setFontSize(10.5);col(INK);
+      const f2=v=>v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+      m.faixas.forEach(f=>{
+        yy+=7;
+        const sub=Math.min(Math.max(f.sub,f.subFim),o.preco*rules.subPct/100);
+        doc.text(f.nome,20,yy);doc.text('até '+brl0(f.ate),46,yy);
+        doc.text(f.tmin===f.tmax?f2(f.tmin)+'%':f2(f.tmin)+'% a '+f2(f.tmax)+'%',98,yy);
+        doc.text(sub>0?'até '+brl0(sub):'—',148,yy);
+      });
+      doc.setFontSize(8.5);col(MUTE);
+      doc.text('Estimativa, sujeita à análise de crédito e às regras vigentes do programa.',20,yy+8);
+    }
+    y+=h+6;
+  }
+  // localização
+  if(o.endereco){
+    const al=doc.splitTextToSize(o.endereco,W-28).slice(0,3);
+    need(34+al.length*6.5);
+    lab('Localização',14,y);
+    doc.setFont('helvetica','normal');doc.setFontSize(14);col(INK);doc.text(al,14,y+8);
+    const by=y+8+al.length*6.5+3;
+    doc.setFillColor(GOLD[0],GOLD[1],GOLD[2]);doc.roundedRect(14,by,70,12,2,2,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(12);col(INK);doc.text('Abrir no mapa',49,by+7.7,{align:'center'});
+    doc.link(14,by,70,12,{url:o.mapa});
+    y=by+22;
+  }
+  // fale comigo
+  if(o.fone){
+    need(42);
+    doc.setFillColor(INK[0],INK[1],INK[2]);doc.roundedRect(14,y-4,W-28,36,3,3,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(15);col(GOLD);doc.text('Fale comigo',20,y+6);
+    doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(230,226,216);
+    doc.text('FCOSTA Corretor e Avaliador de Imóveis',20,y+13);doc.text('CRECI-SP 294791-F · CNAI 52708',20,y+18.5);
+    doc.setFillColor(GOLD[0],GOLD[1],GOLD[2]);doc.roundedRect(W-14-6-62,y+5,62,14,2,2,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(12);col(INK);doc.text('Chamar no WhatsApp',W-14-6-31,y+13.8,{align:'center'});
+    doc.link(W-14-6-62,y+5,62,14,{url:waLink(o.fone,o.emp,o.construtora)});
+    y+=44;
+  }
+  // rodapé nas páginas da capa
+  for(let p=1;p<=capa;p++){doc.setPage(p);doc.setFont('helvetica','normal');doc.setFontSize(9);col(MUTE);doc.text('FCOSTA Corretor de Imóveis · CRECI-SP 294791-F · CNAI 52708',14,287);}
+  // fotos do e-book
+  for(let i=0;i<o.pages.length;i++){
+    if(o.onProg)o.onProg(i+1,o.pages.length);
+    const im=await pageJpeg(o.pdf,o.pages[i],1100,.72);
+    const pw=im.w>im.h?297:210,ph=pw*im.h/im.w;
+    doc.addPage([pw,ph],pw>ph?'l':'p');
+    doc.addImage(im.url,'JPEG',0,0,pw,ph,undefined,'FAST');
+    await sleep0();
+  }
+  return doc;
+}
+async function shareEmp(key,emp){
+  document.querySelectorAll('.shm').forEach(x=>x.remove());
+  const br=brandOf(key),info=empInfo(key,emp);
+  const mine=x=>x.brand.key===key&&(x.emp||'')===emp;
+  const units=[];docs.filter(mine).forEach(d=>(d.units||[]).forEach(u=>units.push(u)));
+  const pr=u=>u.dsc!=null?u.dsc:u.tab;
+  units.sort((a,b)=>pr(a)-pr(b));
+  const myBooks=books.filter(mine).sort((a,b)=>(b.added||0)-(a.added||0));
+  const addr0=info.endereco||(units.find(u=>u.addr)||{}).addr||'';
+  let book=myBooks[0]||null,tk=0;const checks=[];
+  const ov=el('div',{class:'shm',role:'dialog','aria-modal':'true','aria-label':'Compartilhar com o cliente'});
+  const box=el('div',{class:'shb'});ov.append(box);
+  const onKey=e=>{if(e.key==='Escape')close();};
+  function close(){tk++;ov.remove();document.removeEventListener('keydown',onKey);}
+  document.addEventListener('keydown',onKey);
+  ov.addEventListener('click',e=>{if(e.target===ov)close();});
+  box.append(el('h2',{text:'Compartilhar com o cliente'}),el('p',{class:'small',text:br.nome+' › '+emp+'. O cliente recebe um PDF só com as fotos do e-book, o mapa de localização e o preço total.'}));
+
+  const pf=el('div',{class:'fld'},el('label',{for:'sh-preco',text:'Preço total (R$)'}));
+  const pi=el('input',{type:'text',id:'sh-preco',inputmode:'decimal',placeholder:'Ex.: 350.000,00',maxlength:'20'});
+  if(info.preco>0)pi.value=info.preco.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  pf.append(pi);
+  if(units.length){
+    const us=el('select',{'aria-label':'Escolher o preço da tabela'});
+    us.append(el('option',{value:'',text:'Ou escolha uma unidade da tabela…'}));
+    units.slice(0,200).forEach(u=>us.append(el('option',{value:String(pr(u)),text:(u.nome||'Unidade')+(u.desc?' · '+u.desc:'')+' · '+brl0(pr(u))})));
+    us.onchange=()=>{if(us.value)pi.value=Number(us.value).toLocaleString('pt-BR',{minimumFractionDigits:2});};
+    pf.append(us);
+  }
+  box.append(pf);
+
+  const af=el('div',{class:'fld'},el('label',{for:'sh-end',text:'Localização (endereço ou nome do lugar)'}));
+  const ai=el('input',{type:'text',id:'sh-end',placeholder:'Rua, número, bairro e cidade',maxlength:'200'});ai.value=addr0;
+  const al=el('a',{class:'lk',target:'_blank',rel:'noopener noreferrer',text:'Conferir no mapa'});
+  const updMap=()=>{const v=ai.value.trim();al.hidden=!v;if(v)al.href=mapsUrl(v);};
+  ai.oninput=updMap;updMap();
+  af.append(ai,el('p',{class:'small'},al));
+  box.append(af);
+
+  const mf=el('div',{class:'fld'});
+  const mcb=el('input',{type:'checkbox',id:'sh-mcmv'});mcb.checked=info.mcmv!==false;
+  mf.append(el('label',{class:'chk',for:'sh-mcmv'},mcb,' Mostrar Minha Casa Minha Vida e a faixa de renda do empreendimento'),el('p',{class:'small',text:'A faixa é calculada pelo preço total, com as regras da aba Simulador.'}));
+  box.append(mf);
+  let foneSalvo='';try{foneSalvo=localStorage.getItem('fcosta_whats')||'';}catch(e){}
+  const ff=el('div',{class:'fld'},el('label',{for:'sh-fone',text:'Seu WhatsApp para o botão “Fale comigo”'}));
+  const fi=el('input',{type:'text',id:'sh-fone',inputmode:'tel',placeholder:'(11) 99999-9999',maxlength:'20'});fi.value=foneSalvo;
+  ff.append(fi);box.append(ff);
+
+  const bh=el('div',{class:'fld'},el('label',{text:'Fotos do e-book (desmarque as páginas que não quer mandar)'}));
+  if(myBooks.length>1){
+    const bs=el('select',{'aria-label':'E-book'});
+    myBooks.forEach((b,i)=>bs.append(el('option',{value:String(i),text:b.fileName})));
+    bs.onchange=()=>{book=myBooks[Number(bs.value)];loadThumbs();};
+    bh.append(bs);
+  }
+  const cnt=el('span',{class:'small'});
+  const upd=()=>{cnt.textContent=checks.length?checks.filter(c=>c.cb.checked).length+' de '+checks.length+' fotos marcadas':'';};
+  const all=el('button',{type:'button',class:'sm',text:'Marcar todas'});all.onclick=()=>{checks.forEach(c=>{c.cb.checked=true;});upd();};
+  const none=el('button',{type:'button',class:'sm',text:'Desmarcar todas'});none.onclick=()=>{checks.forEach(c=>{c.cb.checked=false;});upd();};
+  const grid=el('div',{class:'shg'});
+  bh.append(el('div',{class:'shr'},all,none,cnt),grid);box.append(bh);
+  async function loadThumbs(){
+    const my=++tk;checks.length=0;grid.textContent='';upd();
+    if(!book){grid.append(el('div',{class:'empty s',text:'Este empreendimento não tem e-book. Suba o PDF em “Subir e-book (PDF)” para incluir as fotos.'}));return;}
+    grid.append(el('div',{class:'empty s',text:'Carregando as páginas do e-book…'}));
+    try{
+      const pdf=await getPdf(book);if(my!==tk)return;
+      grid.textContent='';
+      for(let n=1;n<=pdf.numPages;n++){
+        const im=await pageJpeg(pdf,n,180,.6);if(my!==tk)return;
+        const lab=el('label',{class:'sht'}),cb=el('input',{type:'checkbox','aria-label':'Página '+n});cb.checked=true;cb.onchange=upd;
+        lab.append(el('img',{src:im.url,alt:'Página '+n}),el('span',{text:String(n)}),cb);
+        grid.append(lab);checks.push({n,cb});upd();
+        if(n%4===0)await sleep0();
+      }
+    }catch(e){
+      if(my!==tk)return;console.error(e);grid.textContent='';
+      grid.append(el('div',{class:'empty s',text:e&&e.message==='semPdf'?'Este e-book foi salvo sem o arquivo. Suba o PDF de novo.':'Não consegui abrir o e-book. Ele precisa de internet para carregar o leitor de PDF.'}));
+    }
+  }
+
+  const st=el('p',{class:'small',role:'status','aria-live':'polite'});
+  const bShare=el('button',{type:'button',class:'pri',text:'Compartilhar PDF'});
+  const bSave=el('button',{type:'button',text:'Só baixar o PDF'});
+  const bTxt=el('button',{type:'button',text:'Só o texto no WhatsApp'});
+  bTxt.onclick=()=>{
+    const preco=parsePreco(pi.value),endereco=ai.value.trim(),fone=foneWa(fi.value);
+    if(!preco&&!endereco){say('Preencha o preço ou a localização.',true);return;}
+    saveEmpInfo(key,emp,{preco,endereco,mcmv:mcb.checked});
+    window.open('https://wa.me/?text='+encodeURIComponent(mensagemCliente({emp,construtora:br.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',mcmv:mcb.checked,fone})),'_blank','noopener');
+  };
+  const bClose=el('button',{type:'button',text:'Fechar'});bClose.onclick=close;
+  const say=(t,err)=>{st.textContent=t;st.style.color=err?'var(--bad)':'';};
+  async function run(share){
+    const preco=parsePreco(pi.value),endereco=ai.value.trim(),pages=checks.filter(c=>c.cb.checked).map(c=>c.n);
+    if(!preco&&!endereco&&!pages.length){say('Preencha o preço, a localização ou marque ao menos uma foto.',true);return;}
+    const fone=foneWa(fi.value),mcmv=mcb.checked;
+    if(fi.value.trim()&&!fone){say('O WhatsApp parece incompleto. Use DDD + número, como (11) 99999-9999.',true);return;}
+    saveEmpInfo(key,emp,{preco,endereco,mcmv});
+    try{localStorage.setItem('fcosta_whats',fi.value.trim());}catch(e){}
+    bShare.disabled=bSave.disabled=true;
+    try{
+      const pdf=pages.length&&book?await getPdf(book):null;
+      say('Montando o PDF…');
+      const d=await buildClientePdf({emp,construtora:br.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',pages,pdf,mcmv,fone,logo:(document.querySelector('.top .mark')||{}).src||'',onProg:(i,t)=>say('Montando o PDF… foto '+i+' de '+t)});
+      const blob=d.output('blob'),fname=(norm(br.nome+' '+emp).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'empreendimento')+'.pdf';
+      const file=new File([blob],fname,{type:'application/pdf'});
+      let done=false;
+      if(share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file],title:emp,text:mensagemCliente({emp,construtora:br.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',mcmv,fone})});done=true;say('PDF compartilhado.');}
+        catch(e){if(e&&e.name==='AbortError'){done=true;say('Compartilhamento cancelado.');}}
+      }
+      if(!done){
+        const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;
+        document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+        say('PDF baixado ('+(blob.size/1048576).toFixed(1).replace('.',',')+' MB). É só anexar no WhatsApp.');
+      }
+    }catch(e){
+      console.error(e);
+      say(e&&e.message==='semPdfLib'?'Não consegui carregar o gerador de PDF. Confira a internet e tente de novo.':'Não consegui montar o PDF: '+(e&&e.message||'erro'),true);
+    }
+    bShare.disabled=bSave.disabled=false;
+  }
+  bShare.onclick=()=>run(true);bSave.onclick=()=>run(false);
+  box.append(el('div',{class:'shr'},bShare,bSave,bTxt,bClose),st);
+  document.body.append(ov);
+  loadThumbs();
 }
 
 /* =====================  INÍCIO  ===================== */
