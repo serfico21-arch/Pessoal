@@ -831,7 +831,7 @@ function bookCard(b){
   const a=el('div',{class:'card-a'});
   const ob=el('button',{class:'pri',type:'button',text:'Abrir e-book'});ob.onclick=()=>openBook(b);
   const sv=el('button',{type:'button',text:'Baixar'});sv.onclick=()=>saveBook(b);
-  const sh=el('button',{class:'pri',type:'button',text:'Compartilhar'});sh.onclick=async()=>{setStatus('Preparando o book…');setStatus(await shareBook(b,[b.brand.nome,b.emp].filter(Boolean).join(' · ')));};
+  const sh=el('button',{class:'pri',type:'button',text:'Compartilhar com meus dados'});sh.title='Envia o book com a sua logo e o Fale comigo';sh.onclick=async()=>{setStatus('Preparando o book…');setStatus(await shareBook(b,[b.brand.nome,b.emp].filter(Boolean).join(' · '),m=>setStatus(m)));};
   a.append(ob,sh,sv,armBtn('Excluir book','Toque de novo para excluir',()=>removeBook(b)));c.append(a);
   return c;
 }
@@ -1286,6 +1286,20 @@ async function buildClientePdf(o){
     doc.addImage(im.url,'JPEG',0,0,pw,ph,undefined,'FAST');
     await sleep0();
   }
+  if(o.fim){
+    doc.addPage('a4','p');
+    doc.setFillColor(INK[0],INK[1],INK[2]);doc.rect(0,0,W,297,'F');
+    if(o.logo){try{doc.addImage(o.logo,/image\/jpe?g/i.test(o.logo)?'JPEG':'PNG',W/2-30,50,60,60);}catch(e){console.error(e);}}
+    doc.setFont('helvetica','bold');doc.setFontSize(26);col(GOLD);doc.text('Fale comigo',W/2,135,{align:'center'});
+    doc.setFont('helvetica','normal');doc.setFontSize(13);doc.setTextColor(230,226,216);
+    doc.text('FCOSTA Corretor e Avaliador de Imóveis',W/2,148,{align:'center'});
+    doc.text('CRECI-SP 294791-F · CNAI 52708',W/2,156,{align:'center'});
+    if(o.fone){
+      doc.setFillColor(GOLD[0],GOLD[1],GOLD[2]);doc.roundedRect(W/2-45,172,90,16,3,3,'F');
+      doc.setFont('helvetica','bold');doc.setFontSize(14);col(INK);doc.text('Chamar no WhatsApp',W/2,182.4,{align:'center'});
+      doc.link(W/2-45,172,90,16,{url:waLink(o.fone,o.emp,o.construtora)});
+    }
+  }
   return doc;
 }
 async function shareEmp(key,emp){
@@ -1381,7 +1395,7 @@ async function shareEmp(key,emp){
     window.open('https://wa.me/?text='+encodeURIComponent(mensagemCliente({emp,construtora:br.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',mcmv:mcb.checked,fone})),'_blank','noopener');
   };
   const bBook=el('button',{type:'button',text:'Enviar o book completo'});bBook.hidden=!book;
-  bBook.onclick=async()=>{say('Preparando o book…');say(await shareBook(book,emp+' · '+br.nome));};
+  bBook.onclick=async()=>{say('Preparando o book…');say(await shareBook(book,emp+' · '+br.nome,say));};
   const bClose=el('button',{type:'button',text:'Fechar'});bClose.onclick=close;
   const say=(t,err)=>{st.textContent=t;st.style.color=err?'var(--bad)':'';};
   async function run(share){
@@ -1422,16 +1436,32 @@ async function shareEmp(key,emp){
 
 
 /* ---------- book: compartilhar, caixas de envio separadas e correção de arquivo no lugar errado ---------- */
-async function shareBook(b,titulo){
+async function bookComDados(b,onMsg){
+  const pdf=await getPdf(b);
+  const info=empInfo(b.brand.key,b.emp||'');
+  let f='';try{f=localStorage.getItem('fcosta_whats')||'';}catch(e){}
+  const fone=foneWa(f||'(11) 99350-9109'),endereco=info.endereco||'',preco=info.preco||0;
+  const pages=[];for(let i=1;i<=pdf.numPages;i++)pages.push(i);
+  const d=await buildClientePdf({emp:b.emp||b.brand.nome,construtora:b.brand.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',pages,pdf,mcmv:info.mcmv!==false,fone,fim:true,
+    logo:(document.querySelector('.top .mark')||{}).src||'',onProg:(i,t)=>{if(onMsg)onMsg('Montando o book com os seus dados… página '+i+' de '+t);}});
+  return d.output('blob');
+}
+async function shareBook(b,titulo,onMsg){
   if(!b||!b.bytes)return'Este book foi salvo sem o arquivo. Suba o PDF de novo.';
-  const nome=(b.fileName||'book.pdf').replace(/[\\\/:*?"<>|]+/g,'-');
-  const file=new File([b.bytes],nome,{type:'application/pdf'});
+  let blob=null,comDados=true;
+  try{blob=await bookComDados(b,onMsg);}catch(e){console.error(e);blob=null;}
+  if(!blob){comDados=false;blob=new Blob([b.bytes],{type:'application/pdf'});}
+  const base=(b.fileName||'book.pdf').replace(/\.pdf$/i,'').replace(/[\\\/:*?"<>|]+/g,'-');
+  const nome=base+(comDados?' - FCOSTA':'')+'.pdf';
+  const file=new File([blob],nome,{type:'application/pdf'});
+  const aviso=comDados?'':' (sem os seus dados: precisei da internet para montar o PDF e não consegui)';
   if(navigator.canShare&&navigator.canShare({files:[file]})){
-    try{await navigator.share({files:[file],title:titulo||nome,text:titulo||nome});return'Book compartilhado.';}
+    try{await navigator.share({files:[file],title:titulo||nome,text:titulo||nome});return'Book compartilhado'+(comDados?' com a sua logo e o Fale comigo.':'.'+aviso);}
     catch(e){if(e&&e.name==='AbortError')return'Compartilhamento cancelado.';}
   }
-  saveBook(b);
-  return'Book baixado. É só anexar no WhatsApp.';
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;
+  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+  return'Book baixado ('+(blob.size/1048576).toFixed(1).replace('.',',')+' MB)'+(comDados?' com a sua logo e o Fale comigo.':'.'+aviso)+' É só anexar no WhatsApp.';
 }
 function upBox(id,titulo,desc,btn,fn){
   const b=el('div',{class:'upbox'},el('div',{},el('strong',{text:titulo}),el('p',{class:'small',text:desc})),el('label',{class:'btn pri',for:id,text:btn}));
