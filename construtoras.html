@@ -186,6 +186,10 @@ details.rg summary{cursor:pointer;font-weight:700;color:var(--acc-text);padding:
 .sht input{position:absolute;right:4px;top:4px;width:22px;height:22px;accent-color:#8A6511}
 .shr{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 @media print{.shm{display:none!important}}
+.upbox{display:flex;gap:12px 18px;flex-wrap:wrap;align-items:center;justify-content:space-between;border:2px dashed #BDB7A7;border-radius:12px;padding:14px 16px;background:#FAFAF8;margin-bottom:12px}
+.upbox.over{border-color:var(--acc);background:var(--acc-bg)}
+.del{border-color:#B3261E;color:#8A1C14}
+.upbox strong{font:700 17px "Bricolage Grotesque",sans-serif}
 </style>
 </head>
 <body>
@@ -551,14 +555,14 @@ async function removeDoc(d){
   try{await dbDel(d.id);}catch(e){}
   addRemoved(d.id);
   const i=docs.indexOf(d);if(i>=0)docs.splice(i,1);
-  setStatus('Tabelão removido.');
+  setStatus('Tabelão excluído.');
   go('con');
 }
 async function removeBook(b){
   try{await dbDel(b.id);}catch(e){}
   addRemoved(b.id);
   const i=books.indexOf(b);if(i>=0)books.splice(i,1);
-  setStatus('E-book removido.');
+  setStatus('Book excluído.');
   go('con');
 }
 async function renameEmp(key,old,nv){
@@ -580,7 +584,8 @@ async function removeBrand(key){
   for(let i=docs.length-1;i>=0;i--)if(docs[i].brand.key===key)docs.splice(i,1);
   for(let i=books.length-1;i>=0;i--)if(books[i].brand.key===key)books.splice(i,1);
   const p=loadProfiles();delete p[key];saveProfiles(p);
-  setStatus('Construtora removida.');go('lib');
+  try{const r=JSON.parse(localStorage.getItem('fcosta_brands_removidas')||'[]');r.push(key);localStorage.setItem('fcosta_brands_removidas',JSON.stringify([...new Set(r)]));}catch(e){}
+  setStatus('Construtora excluída.');go('lib');
 }
 function newBrand(nome){
   const key=slug(nome);if(!key)return;
@@ -609,6 +614,7 @@ function go(v,id){
   render();
 }
 function render(){
+  const hb=document.querySelector('header label[for="fi"]');if(hb)hb.hidden=(view==='con');
   document.querySelectorAll('[data-nav]').forEach(b=>{
     const cur=(view==='reader'||view==='con')?'lib':view;
     if(b.dataset.nav===cur)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
@@ -632,7 +638,7 @@ function ageInfo(ref){
 }
 const plural=(n,s,p)=>n+' '+(n===1?s:p);
 function armBtn(text,confirmText,fn){
-  const b=el('button',{type:'button',text});let armed=false,tm=null;
+  const b=el('button',{type:'button',class:'del',text});let armed=false,tm=null;
   b.onclick=()=>{
     if(!armed){armed=true;b.textContent=confirmText;b.classList.add('danger');tm=setTimeout(()=>{armed=false;b.textContent=text;b.classList.remove('danger');},4000);return;}
     clearTimeout(tm);fn();
@@ -686,7 +692,7 @@ function brandCard(key){
   c.append(meta);
   const a=el('div',{class:'card-a'});
   const ob=el('button',{class:'pri',type:'button',text:'Abrir construtora'});ob.onclick=()=>{editSite=null;conKey=key;empTab='';go('con');window.scrollTo({top:0});};
-  a.append(ob);const st=(loadProfiles()[key]||{}).site;if(st)a.append(el('a',{class:'btn',href:st,target:'_blank',rel:'noopener noreferrer',text:'Site'}));c.append(a);
+  a.append(ob,armBtn('Excluir','Toque de novo para excluir tudo',()=>removeBrand(key)));const st=(loadProfiles()[key]||{}).site;if(st)a.append(el('a',{class:'btn',href:st,target:'_blank',rel:'noopener noreferrer',text:'Site'}));c.append(a);
   return c;
 }
 function siteUrl(v){
@@ -728,7 +734,11 @@ function moveSel(x){
   empsOf(key).forEach(e=>s.append(el('option',{value:e,text:e})));
   s.value=x.emp||'';
   s.onchange=async()=>{x.emp=s.value;await persistItem(x);setStatus('Movido para '+(x.emp||'Construtora mãe')+'.');render();};
-  return el('label',{class:'mvl'},'Pasta:',s);
+  const cs=el('select',{'aria-label':'Mover para outra construtora'});
+  brandKeys().map(k=>brandOf(k)).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).forEach(b=>cs.append(el('option',{value:b.key,text:b.nome})));
+  cs.value=key;
+  cs.onchange=async()=>{x.brand=brandOf(cs.value);x.emp='';await persistItem(x);conKey=x.brand.key;empTab='';setStatus('Movido para '+x.brand.nome+'.');render();};
+  return el('div',{},el('label',{class:'mvl'},'Construtora:',cs),el('label',{class:'mvl'},'Pasta:',s));
 }
 function renderCon(host){
   const key=conKey;
@@ -747,7 +757,7 @@ function renderCon(host){
   const nT=docs.filter(d=>d.brand.key===key).length,nB=books.filter(b=>b.brand.key===key).length;
   const meta=el('div',{class:'meta',text:plural(em.length,'empreendimento','empreendimentos')+' · '+plural(nT,'tabelão','tabelões')+' · '+plural(nB,'e-book','e-books')});
   const rl=el('button',{type:'button',text:'Remover logo'});rl.onclick=()=>{setBrandLogo(key,null);render();};
-  const rb=armBtn('Remover construtora','Toque de novo para remover tudo',()=>removeBrand(key));
+  const rb=armBtn('Excluir construtora','Toque de novo para excluir tudo',()=>removeBrand(key));
   wrap.append(el('div',{class:'brand'},back,logo,el('div',{},nm,meta),el('span',{class:'sp'}),rl,rb));
   wrap.append(siteBar(key));
 
@@ -772,18 +782,20 @@ function renderCon(host){
   }else{
     ttl.append(el('h2',{text:'Construtora mãe · tabelão geral'}),el('p',{class:'small',text:'Aqui fica o tabelão geral da construtora, com todos os empreendimentos juntos.'}));
   }
-  const acts=el('div',{class:'acts'},el('label',{class:'btn pri',for:'fi',text:'Subir tabelão (PDF)'}),el('label',{class:'btn',for:'fb',text:'Subir e-book (PDF)'}));
+  const acts=el('div',{class:'acts'});
   if(empTab){const sh=el('button',{class:'pri',type:'button',text:'Compartilhar com o cliente'});const eN=empTab;sh.onclick=()=>shareEmp(key,eN);acts.append(sh);}
-  if(empTab)acts.append(armBtn('Remover empreendimento','Toque de novo para remover',()=>removeEmp(key,empTab)));
+  if(empTab)acts.append(armBtn('Excluir empreendimento','Toque de novo para excluir',()=>removeEmp(key,empTab)));
   fh.append(ttl,acts);body.append(fh);
 
   const ds=docs.filter(here).sort((a,b)=>(b.added||0)-(a.added||0)),bk=books.filter(here).sort((a,b)=>(b.added||0)-(a.added||0));
-  body.append(el('h3',{class:'sh',text:'Tabelões ('+ds.length+')'}));
+  body.append(el('h3',{class:'sh',text:'Tabelão: tabela de preços ('+ds.length+')'}));
+  body.append(upBox('fi','Tabelão (tabela de preços)','Suba ou solte aqui o PDF da tabela de valores.','Subir tabelão (PDF)',loadMany));
   if(ds.length){const g=el('div',{class:'cards'});ds.forEach(d=>g.append(card(d)));body.append(g);}
   else body.append(el('div',{class:'empty s',text:empTab?'Nenhum tabelão em '+empTab+' ainda. Use “Subir tabelão (PDF)”.':'Nenhum tabelão geral ainda. Use “Subir tabelão (PDF)”.'}));
-  body.append(el('h3',{class:'sh',text:'E-books ('+bk.length+')'}));
+  body.append(el('h3',{class:'sh',text:'Book: fotos e apresentação ('+bk.length+')'}));
+  body.append(upBox('fb','Book do empreendimento (fotos)','Suba ou solte aqui o PDF do book. É ele que pode ser compartilhado com o cliente.','Subir book (PDF)',loadBooks));
   if(bk.length){const g=el('div',{class:'cards'});bk.forEach(b=>g.append(bookCard(b)));body.append(g);}
-  else body.append(el('div',{class:'empty s',text:'Nenhum e-book ainda. Use “Subir e-book (PDF)”.'}));
+  else body.append(el('div',{class:'empty s',text:'Nenhum book ainda. Use “Subir book (PDF)”.'}));
   wrap.append(body);host.append(wrap);
 }
 function card(d){
@@ -798,7 +810,8 @@ function card(d){
   c.append(meta,moveSel(d));
   const a=el('div',{class:'card-a'});
   const ob=el('button',{class:'pri',type:'button',text:'Abrir tabelão'});ob.onclick=()=>{conKey=d.brand.key;empTab=d.emp||'';go('reader',d.id);window.scrollTo({top:0});};
-  a.append(ob,armBtn('Remover','Toque de novo para remover',()=>removeDoc(d)));c.append(a);
+  const bk2=el('button',{type:'button',text:'É um book'});bk2.title='Passar este arquivo para os books';bk2.onclick=()=>docToBook(d);
+  a.append(ob,bk2,armBtn('Excluir tabelão','Toque de novo para excluir',()=>removeDoc(d)));c.append(a);
   return c;
 }
 function openBook(b){
@@ -818,7 +831,8 @@ function bookCard(b){
   const a=el('div',{class:'card-a'});
   const ob=el('button',{class:'pri',type:'button',text:'Abrir e-book'});ob.onclick=()=>openBook(b);
   const sv=el('button',{type:'button',text:'Baixar'});sv.onclick=()=>saveBook(b);
-  a.append(ob,sv,armBtn('Remover','Toque de novo para remover',()=>removeBook(b)));c.append(a);
+  const sh=el('button',{class:'pri',type:'button',text:'Compartilhar'});sh.onclick=async()=>{setStatus('Preparando o book…');setStatus(await shareBook(b,[b.brand.nome,b.emp].filter(Boolean).join(' · ')));};
+  a.append(ob,sh,sv,armBtn('Excluir book','Toque de novo para excluir',()=>removeBook(b)));c.append(a);
   return c;
 }
 
@@ -843,7 +857,7 @@ function renderReader(host){
   const meta=el('div',{class:'meta',text:(d.emp||'Tabelão geral')+'  •  '+d.fileName+(d.ref?'  •  Data ref. '+d.ref:'')+'  •  '+d.pages.reduce((s,p)=>s+p.anns.length,0)+' links'});
   const rm=el('button',{type:'button',text:'Remover logo'});rm.onclick=()=>{setBrandLogo(key,null);render();};
   const pr=el('button',{type:'button',text:'Imprimir'});pr.onclick=()=>window.print();
-  wrap.append(el('div',{class:'brand'},back,logo,el('div',{},nm,meta),el('span',{class:'sp'}),rm,pr));
+  wrap.append(el('div',{class:'brand'},back,logo,el('div',{},nm,meta),el('span',{class:'sp'}),rm,pr,armBtn('Excluir tabelão','Toque de novo para excluir',()=>removeDoc(d))));
   const vt=el('div',{class:'vt'});
   [['tabela','Tabela'],['original','Original com links'],['links','Todos os links']].forEach(([k,t])=>{const b=el('button',{type:'button',text:t});if(d.view===k)b.className='on';b.onclick=()=>{d.view=k;render();};vt.append(b);});
   const s=el('input',{type:'search',placeholder:'Buscar empreendimento, bairro, estação…',value:query,'aria-label':'Buscar'});
@@ -899,9 +913,9 @@ function renderUnits(host){
 }
 
 /* ---------- arrastar e soltar ---------- */
-['dragenter','dragover'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();document.body.classList.add('drag');}));
+['dragenter','dragover'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();if(!(view==='con'&&conKey))document.body.classList.add('drag');}));
 document.addEventListener('dragleave',e=>{if(e.relatedTarget===null)document.body.classList.remove('drag');});
-document.addEventListener('drop',e=>{e.preventDefault();document.body.classList.remove('drag');loadMany(e.dataTransfer.files);});
+document.addEventListener('drop',e=>{e.preventDefault();document.body.classList.remove('drag');if(view==='con'&&conKey){setStatus('Solte o PDF dentro da caixa certa: Tabelão ou Book.',true);return;}loadMany(e.dataTransfer.files);});
 $('#fi').onchange=e=>{loadMany([...e.target.files]);e.target.value='';};
 $('#fb').onchange=e=>{loadBooks([...e.target.files]);e.target.value='';};
 
@@ -1318,6 +1332,7 @@ async function shareEmp(key,emp){
   mf.append(el('label',{class:'chk',for:'sh-mcmv'},mcb,' Mostrar Minha Casa Minha Vida e a faixa de renda do empreendimento'),el('p',{class:'small',text:'A faixa é calculada pelo preço total, com as regras da aba Simulador.'}));
   box.append(mf);
   let foneSalvo='';try{foneSalvo=localStorage.getItem('fcosta_whats')||'';}catch(e){}
+  if(!foneSalvo)foneSalvo='(11) 99350-9109';
   const ff=el('div',{class:'fld'},el('label',{for:'sh-fone',text:'Seu WhatsApp para o botão “Fale comigo”'}));
   const fi=el('input',{type:'text',id:'sh-fone',inputmode:'tel',placeholder:'(11) 99999-9999',maxlength:'20'});fi.value=foneSalvo;
   ff.append(fi);box.append(ff);
@@ -1337,7 +1352,7 @@ async function shareEmp(key,emp){
   bh.append(el('div',{class:'shr'},all,none,cnt),grid);box.append(bh);
   async function loadThumbs(){
     const my=++tk;checks.length=0;grid.textContent='';upd();
-    if(!book){grid.append(el('div',{class:'empty s',text:'Este empreendimento não tem e-book. Suba o PDF em “Subir e-book (PDF)” para incluir as fotos.'}));return;}
+    if(!book){grid.append(el('div',{class:'empty s',text:'Este empreendimento ainda não tem book. Suba o PDF na caixa “Book” para incluir as fotos.'}));return;}
     grid.append(el('div',{class:'empty s',text:'Carregando as páginas do e-book…'}));
     try{
       const pdf=await getPdf(book);if(my!==tk)return;
@@ -1365,6 +1380,8 @@ async function shareEmp(key,emp){
     saveEmpInfo(key,emp,{preco,endereco,mcmv:mcb.checked});
     window.open('https://wa.me/?text='+encodeURIComponent(mensagemCliente({emp,construtora:br.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',mcmv:mcb.checked,fone})),'_blank','noopener');
   };
+  const bBook=el('button',{type:'button',text:'Enviar o book completo'});bBook.hidden=!book;
+  bBook.onclick=async()=>{say('Preparando o book…');say(await shareBook(book,emp+' · '+br.nome));};
   const bClose=el('button',{type:'button',text:'Fechar'});bClose.onclick=close;
   const say=(t,err)=>{st.textContent=t;st.style.color=err?'var(--bad)':'';};
   async function run(share){
@@ -1398,9 +1415,38 @@ async function shareEmp(key,emp){
     bShare.disabled=bSave.disabled=false;
   }
   bShare.onclick=()=>run(true);bSave.onclick=()=>run(false);
-  box.append(el('div',{class:'shr'},bShare,bSave,bTxt,bClose),st);
+  box.append(el('div',{class:'shr'},bShare,bSave,bTxt,bBook,bClose),st);
   document.body.append(ov);
   loadThumbs();
+}
+
+
+/* ---------- book: compartilhar, caixas de envio separadas e correção de arquivo no lugar errado ---------- */
+async function shareBook(b,titulo){
+  if(!b||!b.bytes)return'Este book foi salvo sem o arquivo. Suba o PDF de novo.';
+  const nome=(b.fileName||'book.pdf').replace(/[\\\/:*?"<>|]+/g,'-');
+  const file=new File([b.bytes],nome,{type:'application/pdf'});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:titulo||nome,text:titulo||nome});return'Book compartilhado.';}
+    catch(e){if(e&&e.name==='AbortError')return'Compartilhamento cancelado.';}
+  }
+  saveBook(b);
+  return'Book baixado. É só anexar no WhatsApp.';
+}
+function upBox(id,titulo,desc,btn,fn){
+  const b=el('div',{class:'upbox'},el('div',{},el('strong',{text:titulo}),el('p',{class:'small',text:desc})),el('label',{class:'btn pri',for:id,text:btn}));
+  ['dragenter','dragover'].forEach(ev=>b.addEventListener(ev,e=>{e.preventDefault();e.stopPropagation();b.classList.add('over');}));
+  b.addEventListener('dragleave',()=>b.classList.remove('over'));
+  b.addEventListener('drop',e=>{e.preventDefault();e.stopPropagation();b.classList.remove('over');document.body.classList.remove('drag');fn([...e.dataTransfer.files]);});
+  return b;
+}
+async function docToBook(d){
+  if(!d.bytes){setStatus('Este arquivo foi salvo sem o PDF. Suba o book de novo na caixa do book.',true);return;}
+  const b={id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),kind:'ebook',fileName:d.fileName,added:d.added,emp:d.emp||'',bytes:d.bytes,brand:d.brand};
+  books.push(b);await persistItem(b);
+  try{await dbDel(d.id);}catch(e){}
+  addRemoved(d.id);const i=docs.indexOf(d);if(i>=0)docs.splice(i,1);
+  setStatus('Passei o arquivo para os books.');go('con');
 }
 
 /* =====================  INÍCIO  ===================== */
@@ -1408,7 +1454,7 @@ function b64ok(s){return typeof s==='string'&&s.length>0;}
 async function init(){
   let emb=null;
   try{emb=JSON.parse($('#dados').textContent||'null');}catch(e){emb=null;}
-  if(emb&&emb.perfis){const Lp=loadProfiles(),M=Object.assign({},emb.perfis);for(const k in Lp){const e0=M[k]||{};M[k]=Object.assign({},e0,Lp[k]);M[k].emps=[...new Set([...(e0.emps||[]),...(Lp[k].emps||[])])];}saveProfiles(M);}
+  if(emb&&emb.perfis){const Lp=loadProfiles(),M=Object.assign({},emb.perfis);try{JSON.parse(localStorage.getItem('fcosta_brands_removidas')||'[]').forEach(k=>{if(!Lp[k])delete M[k];});}catch(e){}for(const k in Lp){const e0=M[k]||{};M[k]=Object.assign({},e0,Lp[k]);M[k].emps=[...new Set([...(e0.emps||[]),...(Lp[k].emps||[])])];}saveProfiles(M);}
   if(emb&&emb.regras){let tem=false;try{tem=!!localStorage.getItem('tabelao_regras_v2');}catch(e){}if(!tem){rules=Object.assign(defRules(),emb.regras);saveRules();}}
   let recs=[];
   try{recs=await dbAll();}catch(e){persistOK=false;recs=[];}
