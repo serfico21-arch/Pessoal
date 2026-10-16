@@ -149,6 +149,26 @@ details.rg{border:1px solid var(--line);border-radius:10px;padding:6px 14px;marg
 details.rg summary{cursor:pointer;font-weight:700;color:var(--acc-text);padding:8px 0}
 .foot{max-width:1280px;margin:0 auto;padding:0 16px 30px;color:var(--mute);font-size:13px;text-align:center}
 
+/* construtoras, empreendimentos, e-books */
+.etabs{display:flex;gap:2px;overflow-x:auto;border-bottom:1px solid var(--line);padding:0 10px;background:#FAFAF8}
+.etabs button{border:none;border-bottom:3px solid transparent;border-radius:0;background:none;padding:10px 14px;color:var(--mute);white-space:nowrap;min-height:46px}
+.etabs button:hover{color:var(--ink)}
+.etabs button[aria-current="page"]{color:var(--ink);border-bottom-color:var(--acc);background:#fff}
+.etabs .n{background:var(--acc-bg);border-radius:999px;font-size:12px;padding:1px 8px;color:var(--acc-text);margin-left:4px}
+.addbar{padding:10px 18px;border-bottom:1px solid var(--line);background:#fff}
+.addf{display:flex;gap:8px;flex-wrap:wrap}
+.addf input{flex:1 1 240px;max-width:420px;padding:9px 12px;border:1.5px solid var(--line);border-radius:8px;min-height:42px;background:#fff}
+.fh{display:flex;gap:12px 18px;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;margin:16px 0 8px}
+.fh h2{font-size:22px}
+.fh input.nm{font:700 22px "Bricolage Grotesque",sans-serif;border:1px solid transparent;border-radius:6px;padding:2px 8px;margin-left:-8px;background:transparent;min-width:180px;width:min(420px,100%)}
+.fh input.nm:hover,.fh input.nm:focus{border-color:var(--line);background:#FAFAF8}
+.fh .acts{display:flex;gap:8px;flex-wrap:wrap}
+.sh{font-size:17px;margin:22px 0 10px;padding-left:10px;border-left:4px solid var(--acc)}
+.mvl{display:flex;gap:6px;align-items:center;font-size:13px;color:var(--mute)}
+.mvl select{flex:1;min-width:0;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.thumb.bk{font-size:15px;color:var(--ink);background:var(--acc-bg);border-color:var(--acc-line)}
+.empty.s{padding:16px;border:1px dashed var(--line);border-radius:8px;background:#FAFAF8}
+@media print{.etabs,.addbar,.fh .acts{display:none!important}}
 @media print{.top,.nav,#overlay,#status,.tools,.brand button,.foot,.keep{display:none!important}.panel{border:none}body{background:#fff}}
 </style>
 </head>
@@ -162,9 +182,10 @@ details.rg summary{cursor:pointer;font-weight:700;color:var(--acc-text);padding:
   <span class="sp"></span>
   <label class="btn pri" for="fi">Subir tabelão (PDF)</label>
   <input id="fi" type="file" accept="application/pdf" multiple hidden>
+  <input id="fb" type="file" accept="application/pdf" multiple hidden>
 </header>
 <nav class="nav" id="nav" aria-label="Seções">
-  <button type="button" data-nav="lib">Tabelões <span class="n" id="n-lib">0</span></button>
+  <button type="button" data-nav="lib">Construtoras <span class="n" id="n-lib">0</span></button>
   <button type="button" data-nav="units">Unidades <span class="n" id="n-units">0</span></button>
   <button type="button" data-nav="sim">Simulador</button>
 </nav>
@@ -191,10 +212,13 @@ function linkEl(url,text,cls){return el('a',{href:url,target:'_blank',rel:'noope
 
 /* ---------- perfis (nome + logo) ---------- */
 const KNOWN=['metrocasa','canopus','cyrela','mrv','tegra','plano&plano','vitacon','kazzas','tenda','direcional','even','living','eztec','cury','trisul','helbor','lavvi','vibra','vitta','today'];
-function loadProfiles(){try{return JSON.parse(localStorage.getItem('tabelao_perfis')||'{}');}catch(e){return{};}}
-function saveProfiles(p){try{localStorage.setItem('tabelao_perfis',JSON.stringify(p));}catch(e){setStatus('Não foi possível guardar o logo neste navegador.',true);}}
+let memProf=null;
+function loadProfiles(){try{return JSON.parse(localStorage.getItem('tabelao_perfis')||'{}');}catch(e){return memProf||{};}}
+function saveProfiles(p){memProf=p;try{localStorage.setItem('tabelao_perfis',JSON.stringify(p));}catch(e){setStatus('Não foi possível guardar o logo neste navegador.',true);}}
 function detect(fileName,text){
-  const f=fileName.toLowerCase();for(const k of KNOWN)if(f.includes(k))return k;
+  const f=fileName.toLowerCase(),P=loadProfiles();
+  const mine=Object.keys(P).filter(k=>P[k]&&P[k].pasta&&!KNOWN.includes(k)).sort((a,b)=>b.length-a.length);
+  for(const k of KNOWN.concat(mine))if(f.includes(k))return k;
   const t=text.slice(0,500).toLowerCase();for(const k of KNOWN)if(t.includes(k))return k;
   return fileName.replace(/\.pdf$/i,'').replace(/[_-]+/g,' ').trim().toLowerCase();
 }
@@ -358,7 +382,7 @@ function renderLinks(doc){
 }
 
 /* =====================  ESTADO, ARMAZENAMENTO E TELAS  ===================== */
-const docs=[];let view='lib',openId=null,query='',persistOK=true;
+const docs=[],books=[];let conKey=null,empTab='',logoKey=null;let view='lib',openId=null,query='',persistOK=true;
 const uf={q:'',c:'',max:''};
 const REMOVED_KEY='fcosta_tabeloes_removidos';
 function removedSet(){try{return new Set(JSON.parse(localStorage.getItem(REMOVED_KEY)||'[]'));}catch(e){return new Set();}}
@@ -375,12 +399,43 @@ async function dbDel(id){const db=await dbOpen();return new Promise((res,rej)=>{
 function bufToB64(buf){const u=new Uint8Array(buf);let s='';const C=0x8000;for(let i=0;i<u.length;i+=C)s+=String.fromCharCode.apply(null,u.subarray(i,i+C));return btoa(s);}
 function b64ToBuf(b){const s=atob(b),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u.buffer;}
 function cleanPages(pages){return pages.map(p=>({blocks:p.blocks.map(b=>b.type==='table'?{type:'table',rows:b.rows}:b),anns:p.anns.map(a=>({url:a.url,rect:a.rect,label:a.label}))}));}
-function record(d){return{id:d.id,key:d.brand.key,fileName:d.fileName,added:d.added,ref:d.ref,pages:cleanPages(d.pages),bytes:d.bytes||null};}
+function record(d){return{id:d.id,kind:'tabelao',key:d.brand.key,emp:d.emp||'',fileName:d.fileName,added:d.added,ref:d.ref,pages:cleanPages(d.pages),bytes:d.bytes||null};}
+function bookRecord(b){return{id:b.id,kind:'ebook',key:b.brand.key,emp:b.emp||'',fileName:b.fileName,added:b.added,bytes:b.bytes||null};}
 function hydrate(r){
-  const prof=loadProfiles()[r.key]||{};
-  const d={id:r.id,fileName:r.fileName,added:r.added||Date.now(),ref:r.ref||'',pages:r.pages,bytes:r.bytes||null,view:'tabela',brand:{key:r.key,nome:prof.nome||cap(r.key||''),logo:prof.logo||null}};
+  const d={id:r.id,fileName:r.fileName,added:r.added||Date.now(),ref:r.ref||'',pages:r.pages,bytes:r.bytes||null,view:'tabela',emp:r.emp||'',brand:brandOf(r.key)};
   try{d.units=extractUnits(d.pages);}catch(e){console.error(e);d.units=[];}
   return d;
+}
+function hydrateBook(r){return{id:r.id,kind:'ebook',fileName:r.fileName,added:r.added||Date.now(),emp:r.emp||'',bytes:r.bytes||null,brand:brandOf(r.key)};}
+
+/* ---------- construtoras e empreendimentos (pastas) ---------- */
+const slug=s=>(s||'').trim().replace(/\s+/g,' ').toLowerCase();
+const norm=s=>(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+function brandOf(key){const p=loadProfiles()[key]||{};return{key,nome:p.nome||cap(key||''),logo:p.logo||null};}
+function ensureBrand(key,nome){const p=loadProfiles();p[key]=Object.assign(p[key]||{},{pasta:true});if(nome&&!p[key].nome)p[key].nome=nome;saveProfiles(p);}
+function setBrandName(key,nome){docs.concat(books).forEach(x=>{if(x.brand.key===key)x.brand.nome=nome;});const p=loadProfiles();p[key]=Object.assign(p[key]||{},{nome});saveProfiles(p);}
+function setBrandLogo(key,logo){docs.concat(books).forEach(x=>{if(x.brand.key===key)x.brand.logo=logo;});const p=loadProfiles();p[key]=p[key]||{};if(logo)p[key].logo=logo;else delete p[key].logo;saveProfiles(p);}
+function brandKeys(){const s=new Set(),P=loadProfiles();Object.keys(P).forEach(k=>{if(P[k]&&P[k].pasta)s.add(k);});docs.concat(books).forEach(x=>s.add(x.brand.key));return[...s];}
+function empsOf(key){const P=loadProfiles()[key]||{},s=new Set(P.emps||[]);docs.concat(books).forEach(x=>{if(x.brand.key===key&&x.emp)s.add(x.emp);});return[...s].sort((a,b)=>a.localeCompare(b,'pt-BR'));}
+function addEmp(key,nome){
+  nome=(nome||'').trim();if(!nome)return null;
+  const ex=empsOf(key).find(e=>e.toLowerCase()===nome.toLowerCase());if(ex)return ex;
+  const p=loadProfiles();p[key]=Object.assign(p[key]||{},{pasta:true});p[key].emps=(p[key].emps||[]).concat(nome);saveProfiles(p);return nome;
+}
+function guessEmp(key,fileName){const f=norm(fileName);let best='';empsOf(key).forEach(e=>{if(norm(e).length>=3&&f.includes(norm(e))&&e.length>best.length)best=e;});return best;}
+async function persistItem(x){try{await dbPut(x.kind==='ebook'?bookRecord(x):record(x));}catch(e){console.error(e);persistOK=false;}}
+function allUnits(){
+  const seen=new Set(),out=[];
+  docs.slice().sort((a,b)=>(b.emp?1:0)-(a.emp?1:0)).forEach(d=>(d.units||[]).forEach(u=>{
+    const k=[d.brand.key,u.nome,u.desc,u.tab,u.dsc].join('|');if(seen.has(k))return;seen.add(k);
+    out.push({d,u,preco:u.dsc!=null?u.dsc:u.tab});
+  }));
+  return out;
+}
+function curCtx(){
+  if(view==='con'&&conKey)return{key:conKey,emp:empTab};
+  if(view==='reader'){const d=docs.find(x=>x.id===openId);if(d)return{key:d.brand.key,emp:d.emp||''};}
+  return null;
 }
 async function ensurePdfjs(){if(!window.pdfjsLib)return false;await ready;return true;}
 async function getPdf(doc){
@@ -420,7 +475,7 @@ async function renderOriginal(doc,host){
 }
 
 /* ---------- subir e salvar ---------- */
-async function loadFile(file){
+async function loadFile(file,ctx){
   setStatus('Lendo '+file.name+'…');
   try{
     if(!(await ensurePdfjs())){setStatus('Não consegui carregar o leitor de PDF. Confira a internet e tente de novo.',true);return false;}
@@ -428,45 +483,104 @@ async function loadFile(file){
     const pdf=await pdfjsLib.getDocument({data:new Uint8Array(bytes.slice(0))}).promise;
     const pages=[];let all='';
     for(let p=1;p<=pdf.numPages;p++){const pg=await parsePage(await pdf.getPage(p));pages.push(pg);all+=pg.text+'\n';}
-    const key=detect(file.name,all),prof=loadProfiles()[key]||{};
+    const key=ctx&&ctx.key?ctx.key:detect(file.name,all);
+    const emp=ctx&&ctx.key?(ctx.emp||''):guessEmp(key,file.name);
+    ensureBrand(key,cap(key));
     const m=all.match(/DATA\s*REF\.?:?\s*(\d{2}\/\d{2}\/\d{4})/i);
-    const d={id:'t'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),fileName:file.name,added:Date.now(),ref:m?m[1]:'',pages,bytes,pdf,view:'tabela',brand:{key,nome:prof.nome||cap(key),logo:prof.logo||null}};
+    const d={id:'t'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),fileName:file.name,added:Date.now(),ref:m?m[1]:'',pages,bytes,pdf,view:'tabela',emp,brand:brandOf(key)};
     d.units=extractUnits(d.pages);
-    const old=docs.findIndex(x=>x.fileName===file.name);let replaced=false;
+    const old=docs.findIndex(x=>x.fileName===file.name&&x.brand.key===key&&(x.emp||'')===emp);let replaced=false;
     if(old>=0){const o=docs[old];docs.splice(old,1);try{await dbDel(o.id);}catch(e){}addRemoved(o.id);replaced=true;}
     docs.push(d);
     let saved=true;
     try{await dbPut(record(d));}catch(e){console.error(e);saved=false;persistOK=false;}
-    let msg='Tabelão "'+d.brand.nome+'" '+(replaced?'atualizado':'adicionado')+(saved?' e salvo neste navegador.':'. Este navegador não deixou salvar: use "Baixar página com os tabelões dentro".');
+    const onde=d.brand.nome+' › '+(emp||'Construtora mãe');
+    let msg='Tabelão '+(replaced?'atualizado':'adicionado')+' em '+onde+(saved?' e salvo neste navegador.':'. Este navegador não deixou salvar: use "Baixar página com os tabelões dentro".');
     if(!d.units.length)msg+=' Não achei preços neste PDF. A aba Tabela mostra o que foi lido.';
     setStatus(msg,!saved);
-    return true;
+    return{key,emp};
   }catch(e){console.error(e);setStatus('Não consegui ler "'+file.name+'". Confira se é um PDF com texto (não imagem escaneada).',true);return false;}
 }
+async function loadBook(file,ctx){
+  try{
+    const bytes=await file.arrayBuffer();
+    const key=ctx.key,emp=ctx.emp||'';
+    ensureBrand(key,cap(key));
+    const old=books.findIndex(x=>x.fileName===file.name&&x.brand.key===key&&(x.emp||'')===emp);let replaced=false;
+    if(old>=0){const o=books[old];books.splice(old,1);try{await dbDel(o.id);}catch(e){}addRemoved(o.id);replaced=true;}
+    const b={id:'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),kind:'ebook',fileName:file.name,added:Date.now(),emp,bytes,brand:brandOf(key)};
+    books.push(b);
+    let saved=true;
+    try{await dbPut(bookRecord(b));}catch(e){console.error(e);saved=false;persistOK=false;}
+    setStatus('E-book '+(replaced?'atualizado':'adicionado')+' em '+b.brand.nome+' › '+(emp||'Construtora mãe')+(saved?' e salvo neste navegador.':'. Este navegador não deixou salvar: use "Baixar página com os tabelões dentro".'),!saved);
+    return true;
+  }catch(e){console.error(e);setStatus('Não consegui ler "'+file.name+'".',true);return false;}
+}
+const isPdf=f=>/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name);
 async function loadMany(files){
+  const ctx=curCtx();let last=null;
+  for(const f of files)if(isPdf(f)){const r=await loadFile(f,ctx);if(r)last=r;}
+  if(last){conKey=last.key;empTab=last.emp;go('con');}
+}
+async function loadBooks(files){
+  const ctx=curCtx();if(!ctx){setStatus('Abra uma construtora para subir o e-book.',true);return;}
   let any=false;
-  for(const f of files)if(/pdf$/i.test(f.type)||/\.pdf$/i.test(f.name)){if(await loadFile(f))any=true;}
-  if(any)go('lib');
+  for(const f of files)if(isPdf(f)){if(await loadBook(f,ctx))any=true;}
+  if(any){conKey=ctx.key;empTab=ctx.emp||'';go('con');}
 }
 async function removeDoc(d){
   try{await dbDel(d.id);}catch(e){}
   addRemoved(d.id);
   const i=docs.indexOf(d);if(i>=0)docs.splice(i,1);
   setStatus('Tabelão removido.');
-  go('lib');
+  go('con');
+}
+async function removeBook(b){
+  try{await dbDel(b.id);}catch(e){}
+  addRemoved(b.id);
+  const i=books.indexOf(b);if(i>=0)books.splice(i,1);
+  setStatus('E-book removido.');
+  go('con');
+}
+async function renameEmp(key,old,nv){
+  nv=(nv||'').trim();
+  if(!nv||nv===old){render();return;}
+  if(empsOf(key).some(e=>e!==old&&e.toLowerCase()===nv.toLowerCase())){setStatus('Já existe um empreendimento com esse nome.',true);render();return;}
+  const p=loadProfiles();p[key]=p[key]||{};p[key].emps=(p[key].emps||[]).filter(e=>e!==old).concat(nv);saveProfiles(p);
+  for(const x of docs.concat(books))if(x.brand.key===key&&(x.emp||'')===old){x.emp=nv;await persistItem(x);}
+  empTab=nv;setStatus('Empreendimento renomeado para "'+nv+'".');render();
+}
+async function removeEmp(key,emp){
+  const p=loadProfiles();if(p[key]){p[key].emps=(p[key].emps||[]).filter(e=>e!==emp);saveProfiles(p);}
+  let n=0;
+  for(const x of docs.concat(books))if(x.brand.key===key&&(x.emp||'')===emp){x.emp='';n++;await persistItem(x);}
+  empTab='';setStatus('Empreendimento "'+emp+'" removido.'+(n?' Os '+n+' arquivo(s) voltaram para a construtora mãe.':''));render();
+}
+async function removeBrand(key){
+  for(const x of docs.concat(books).filter(x=>x.brand.key===key)){try{await dbDel(x.id);}catch(e){}addRemoved(x.id);}
+  for(let i=docs.length-1;i>=0;i--)if(docs[i].brand.key===key)docs.splice(i,1);
+  for(let i=books.length-1;i>=0;i--)if(books[i].brand.key===key)books.splice(i,1);
+  const p=loadProfiles();delete p[key];saveProfiles(p);
+  setStatus('Construtora removida.');go('lib');
+}
+function newBrand(nome){
+  const key=slug(nome);if(!key)return;
+  ensureBrand(key,nome.trim());
+  conKey=key;empTab='';go('con');
 }
 
 /* ---------- gravar os tabelões dentro do HTML ---------- */
 async function exportHtml(includePdf){
   try{
-    const list=docs.map(d=>({id:d.id,key:d.brand.key,fileName:d.fileName,added:d.added,ref:d.ref,pages:cleanPages(d.pages),bytes:includePdf&&d.bytes?bufToB64(d.bytes):null}));
+    const list=docs.map(d=>({id:d.id,kind:'tabelao',key:d.brand.key,emp:d.emp||'',fileName:d.fileName,added:d.added,ref:d.ref,pages:cleanPages(d.pages),bytes:includePdf&&d.bytes?bufToB64(d.bytes):null}));
+    if(includePdf)books.forEach(b=>{if(b.bytes)list.push({id:b.id,kind:'ebook',key:b.brand.key,emp:b.emp||'',fileName:b.fileName,added:b.added,bytes:bufToB64(b.bytes)});});
     const payload={versao:1,gerado:new Date().toISOString(),docs:list,perfis:loadProfiles(),regras:rules};
     const json=JSON.stringify(payload).replace(/</g,'\\u003c');
     const html=SRC.replace(/(<script id="dados" type="application\/json">)[\s\S]*?(<\/script>)/,(m,a,b)=>a+json+b);
     const blob=new Blob([html],{type:'text/html'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Tabeloes-FCOSTA.html';
     document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
-    setStatus('Página baixada com '+list.length+' tabelão(ões) dentro ('+(blob.size/1048576).toFixed(1).replace('.',',')+' MB). Guarde esse arquivo: ao abri-lo, os tabelões já estão nele.');
+    setStatus('Página baixada com '+docs.length+' tabelão(ões)'+(includePdf?' e '+books.length+' e-book(s)':'')+' dentro ('+(blob.size/1048576).toFixed(1).replace('.',',')+' MB). Guarde esse arquivo: ao abri-lo, as construtoras, empreendimentos e tabelões já estão nele.');
   }catch(e){console.error(e);setStatus('Não consegui montar o arquivo: '+e.message,true);}
 }
 
@@ -477,15 +591,16 @@ function go(v,id){
 }
 function render(){
   document.querySelectorAll('[data-nav]').forEach(b=>{
-    const cur=view==='reader'?'lib':view;
+    const cur=(view==='reader'||view==='con')?'lib':view;
     if(b.dataset.nav===cur)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
   });
-  $('#n-lib').textContent=docs.length;
-  $('#n-units').textContent=docs.reduce((s,d)=>s+(d.units||[]).length,0);
+  $('#n-lib').textContent=brandKeys().length;
+  $('#n-units').textContent=allUnits().length;
   const main=$('#main');main.textContent='';
   if(view==='sim')renderSim(main);
   else if(view==='units')renderUnits(main);
   else if(view==='reader')renderReader(main);
+  else if(view==='con')renderCon(main);
   else renderLib(main);
 }
 document.querySelectorAll('[data-nav]').forEach(b=>{b.onclick=()=>{go(b.dataset.nav);window.scrollTo({top:0});};});
@@ -496,50 +611,164 @@ function ageInfo(ref){
   const days=Math.floor((Date.now()-t.getTime())/864e5);if(!isFinite(days))return null;
   return{days,old:days>30};
 }
+const plural=(n,s,p)=>n+' '+(n===1?s:p);
+function armBtn(text,confirmText,fn){
+  const b=el('button',{type:'button',text});let armed=false,tm=null;
+  b.onclick=()=>{
+    if(!armed){armed=true;b.textContent=confirmText;b.classList.add('danger');tm=setTimeout(()=>{armed=false;b.textContent=text;b.classList.remove('danger');},4000);return;}
+    clearTimeout(tm);fn();
+  };
+  return b;
+}
+function addForm(ph,btn,onAdd){
+  const f=el('form',{class:'addf'});
+  const i=el('input',{type:'text',placeholder:ph,'aria-label':ph,maxlength:'60'});
+  f.append(i,el('button',{type:'submit',text:btn}));
+  f.onsubmit=ev=>{ev.preventDefault();const v=i.value.trim();if(!v)return;onAdd(v);};
+  return f;
+}
 function renderLib(host){
-  if(!persistOK)host.append(el('div',{class:'warnbox',text:'Este navegador não está guardando os tabelões (modo privado ou armazenamento bloqueado). Use "Baixar página com os tabelões dentro" para não perder o trabalho.'}));
-  if(!docs.length){
-    host.append(el('div',{class:'drop'},el('strong',{text:'Suba o primeiro tabelão'}),
-      el('p',{text:'Escolha o PDF da construtora ou arraste para esta página. Ele fica salvo neste navegador e continua aqui da próxima vez que você abrir.'}),
+  if(!persistOK)host.append(el('div',{class:'warnbox',text:'Este navegador não está guardando os arquivos (modo privado ou armazenamento bloqueado). Use "Baixar página com os tabelões dentro" para não perder o trabalho.'}));
+  const keys=brandKeys();
+  if(docs.length||books.length){
+    const keep=el('div',{class:'keep'});
+    keep.append(el('div',{class:'tx'},el('h3',{text:'Tudo fica salvo, separado por construtora'}),
+      el('p',{class:'small',text:'Construtoras, empreendimentos, tabelões e e-books continuam aqui mesmo depois de fechar o navegador. Para guardar uma cópia, levar para outro aparelho ou enviar a alguém, baixe esta página com tudo dentro.'})));
+    const ac=el('div',{class:'ac'});
+    const bt=el('button',{class:'pri',type:'button',text:'Baixar página com os tabelões dentro'});
+    const cw=el('label',{class:'chk2'});const cb=el('input',{type:'checkbox',id:'inc-pdf'});cb.checked=true;
+    cw.append(cb,' Incluir os PDFs originais e os e-books (arquivo maior)');
+    bt.onclick=()=>exportHtml(cb.checked);
+    ac.append(bt,cw);keep.append(ac);host.append(keep);
+  }
+  if(!keys.length){
+    host.append(el('div',{class:'drop'},el('strong',{text:'Comece criando uma construtora'}),
+      el('p',{text:'Cada construtora tem a aba “Construtora mãe” (tabelão geral) e uma aba para cada empreendimento, com seus tabelões e e-books. Tudo fica salvo neste navegador.'}),
+      addForm('Nome da construtora (ex.: Metrocasa)','Criar construtora',newBrand),
+      el('p',{class:'small',text:'Ou suba direto o PDF de um tabelão: a construtora é reconhecida pelo nome do arquivo.'}),
       el('label',{class:'btn pri',for:'fi',text:'Subir tabelão (PDF)'})));
     return;
   }
-  const keep=el('div',{class:'keep'});
-  keep.append(el('div',{class:'tx'},el('h3',{text:'Seus tabelões ficam salvos'}),
-    el('p',{class:'small',text:'Eles continuam aqui mesmo depois de fechar o navegador. Para guardar no código, levar para outro aparelho ou enviar a alguém, baixe uma cópia desta página com os tabelões dentro.'})));
-  const ac=el('div',{class:'ac'});
-  const bt=el('button',{class:'pri',type:'button',text:'Baixar página com os tabelões dentro'});
-  const cw=el('label',{class:'chk2'});const cb=el('input',{type:'checkbox',id:'inc-pdf'});cb.checked=true;
-  cw.append(cb,' Incluir o PDF original (aba “Original com links”)');
-  bt.onclick=()=>exportHtml(cb.checked);
-  ac.append(bt,cw);keep.append(ac);host.append(keep);
-
-  const h=el('div',{class:'lib-h'},el('h2',{text:'Tabelões ('+docs.length+')'}),el('label',{class:'btn',for:'fi',text:'Subir outro tabelão'}));
-  host.append(h);
+  host.append(el('div',{class:'lib-h'},el('h2',{text:'Construtoras ('+keys.length+')'}),addForm('Nova construtora','Criar',newBrand),el('label',{class:'btn',for:'fi',text:'Subir tabelão'})));
   const grid=el('div',{class:'cards'});
-  docs.slice().sort((a,b)=>(a.brand.nome||'').localeCompare(b.brand.nome||'','pt-BR')||a.fileName.localeCompare(b.fileName)).forEach(d=>grid.append(card(d)));
+  keys.map(k=>brandOf(k)).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).forEach(b=>grid.append(brandCard(b.key)));
   host.append(grid);
+}
+function brandCard(key){
+  const br=brandOf(key),ds=docs.filter(d=>d.brand.key===key),bk=books.filter(b=>b.brand.key===key),em=empsOf(key);
+  const c=el('article',{class:'card'});
+  const th=el('div',{class:'thumb'});th.append(br.logo?el('img',{src:br.logo,alt:''}):((br.nome||'?').charAt(0).toUpperCase()));
+  c.append(el('div',{class:'card-h'},th,el('div',{class:'card-t'},el('h3',{text:br.nome}),el('p',{class:'small',text:plural(em.length,'empreendimento','empreendimentos')}))));
+  const meta=el('div',{class:'card-m'});
+  meta.append(el('span',{text:plural(ds.length,'tabelão','tabelões')+' · '+plural(bk.length,'e-book','e-books')}));
+  const ages=ds.map(d=>ageInfo(d.ref)).filter(Boolean);
+  if(ages.length){const ag=ages.reduce((m,x)=>x.days<m.days?x:m);meta.append(el('span',{class:'badge '+(ag.old?'old':'new'),text:ag.old?'Tabela mais recente: '+ag.days+' dias, confira se saiu nova':(ag.days<=0?'Atualizado hoje':'Atualizado há '+ag.days+' dias')}));}
+  if(em.length)meta.append(el('span',{class:'small',text:em.slice(0,6).join(', ')+(em.length>6?'…':'')}));
+  c.append(meta);
+  const a=el('div',{class:'card-a'});
+  const ob=el('button',{class:'pri',type:'button',text:'Abrir construtora'});ob.onclick=()=>{conKey=key;empTab='';go('con');window.scrollTo({top:0});};
+  a.append(ob);c.append(a);
+  return c;
+}
+function moveSel(x){
+  const key=x.brand.key;
+  const s=el('select',{'aria-label':'Mover para'});
+  s.append(el('option',{value:'',text:'Construtora mãe (tabelão geral)'}));
+  empsOf(key).forEach(e=>s.append(el('option',{value:e,text:e})));
+  s.value=x.emp||'';
+  s.onchange=async()=>{x.emp=s.value;await persistItem(x);setStatus('Movido para '+(x.emp||'Construtora mãe')+'.');render();};
+  return el('label',{class:'mvl'},'Pasta:',s);
+}
+function renderCon(host){
+  const key=conKey;
+  if(!key||!brandKeys().includes(key)){go('lib');return;}
+  const br=brandOf(key),em=empsOf(key);
+  if(empTab&&!em.includes(empTab))empTab='';
+  const here=x=>x.brand.key===key&&(x.emp||'')===empTab;
+  const cnt=e=>docs.concat(books).filter(x=>x.brand.key===key&&(x.emp||'')===e).length;
+  const wrap=el('div',{class:'panel'});
+  const back=el('button',{type:'button',text:'← Construtoras'});back.onclick=()=>go('lib');
+  const logo=el('div',{class:'logo',title:'Clique para trocar o logo'});
+  logo.append(br.logo?el('img',{src:br.logo,alt:'Logo '+br.nome}):'Clique para adicionar o logo');
+  logo.onclick=()=>{logoKey=key;$('#li').click();};
+  const nm=el('input',{class:'nm',value:br.nome,'aria-label':'Nome da construtora'});
+  nm.oninput=()=>setBrandName(key,nm.value);
+  const nT=docs.filter(d=>d.brand.key===key).length,nB=books.filter(b=>b.brand.key===key).length;
+  const meta=el('div',{class:'meta',text:plural(em.length,'empreendimento','empreendimentos')+' · '+plural(nT,'tabelão','tabelões')+' · '+plural(nB,'e-book','e-books')});
+  const rl=el('button',{type:'button',text:'Remover logo'});rl.onclick=()=>{setBrandLogo(key,null);render();};
+  const rb=armBtn('Remover construtora','Toque de novo para remover tudo',()=>removeBrand(key));
+  wrap.append(el('div',{class:'brand'},back,logo,el('div',{},nm,meta),el('span',{class:'sp'}),rl,rb));
+
+  const tabs=el('div',{class:'etabs',role:'tablist','aria-label':'Pastas da construtora'});
+  const mk=(label,val)=>{
+    const b=el('button',{type:'button',role:'tab',text:label});b.append(el('span',{class:'n',text:String(cnt(val))}));
+    if(empTab===val)b.setAttribute('aria-current','page');
+    b.onclick=()=>{empTab=val;render();};return b;
+  };
+  tabs.append(mk('Construtora mãe',''));
+  em.forEach(e=>tabs.append(mk(e,e)));
+  wrap.append(tabs);
+  wrap.append(el('div',{class:'addbar'},addForm('Novo empreendimento (ex.: Penha, Carrão, Mundo Novo)','Adicionar empreendimento',v=>{empTab=addEmp(key,v)||'';render();})));
+
+  const body=el('div',{class:'body'});
+  const fh=el('div',{class:'fh'});
+  const ttl=el('div',{});
+  if(empTab){
+    const inp=el('input',{class:'nm',value:empTab,'aria-label':'Nome do empreendimento'});
+    const cur=empTab;inp.onchange=()=>renameEmp(key,cur,inp.value);
+    ttl.append(inp,el('p',{class:'small',text:'Tabelões e e-books deste empreendimento.'}));
+  }else{
+    ttl.append(el('h2',{text:'Construtora mãe · tabelão geral'}),el('p',{class:'small',text:'Aqui fica o tabelão geral da construtora, com todos os empreendimentos juntos.'}));
+  }
+  const acts=el('div',{class:'acts'},el('label',{class:'btn pri',for:'fi',text:'Subir tabelão (PDF)'}),el('label',{class:'btn',for:'fb',text:'Subir e-book (PDF)'}));
+  if(empTab)acts.append(armBtn('Remover empreendimento','Toque de novo para remover',()=>removeEmp(key,empTab)));
+  fh.append(ttl,acts);body.append(fh);
+
+  const ds=docs.filter(here).sort((a,b)=>(b.added||0)-(a.added||0)),bk=books.filter(here).sort((a,b)=>(b.added||0)-(a.added||0));
+  body.append(el('h3',{class:'sh',text:'Tabelões ('+ds.length+')'}));
+  if(ds.length){const g=el('div',{class:'cards'});ds.forEach(d=>g.append(card(d)));body.append(g);}
+  else body.append(el('div',{class:'empty s',text:empTab?'Nenhum tabelão em '+empTab+' ainda. Use “Subir tabelão (PDF)”.':'Nenhum tabelão geral ainda. Use “Subir tabelão (PDF)”.'}));
+  body.append(el('h3',{class:'sh',text:'E-books ('+bk.length+')'}));
+  if(bk.length){const g=el('div',{class:'cards'});bk.forEach(b=>g.append(bookCard(b)));body.append(g);}
+  else body.append(el('div',{class:'empty s',text:'Nenhum e-book ainda. Use “Subir e-book (PDF)”.'}));
+  wrap.append(body);host.append(wrap);
 }
 function card(d){
   const c=el('article',{class:'card'});
   const th=el('div',{class:'thumb'});th.append(d.brand.logo?el('img',{src:d.brand.logo,alt:''}):((d.brand.nome||'?').charAt(0).toUpperCase()));
-  c.append(el('div',{class:'card-h'},th,el('div',{class:'card-t'},el('h3',{text:d.brand.nome||d.fileName}),el('p',{class:'small',text:d.fileName}))));
+  c.append(el('div',{class:'card-h'},th,el('div',{class:'card-t'},el('h3',{text:d.fileName}),el('p',{class:'small',text:'Tabelão'}))));
   const ag=ageInfo(d.ref),links=d.pages.reduce((s,p)=>s+p.anns.length,0);
   const meta=el('div',{class:'card-m'});
   meta.append(el('span',{text:d.ref?'Data de referência: '+d.ref:'Sem data de referência no PDF'}));
   if(ag)meta.append(el('span',{class:'badge '+(ag.old?'old':'new'),text:ag.old?ag.days+' dias: confira se saiu tabela nova':(ag.days<=0?'Atualizado hoje':'Atualizado há '+ag.days+' dias')}));
   meta.append(el('span',{class:'small',text:(d.units||[]).length+' unidades com preço · '+links+' links'}));
-  c.append(meta);
+  c.append(meta,moveSel(d));
   const a=el('div',{class:'card-a'});
-  const ob=el('button',{class:'pri',type:'button',text:'Abrir tabelão'});ob.onclick=()=>{go('reader',d.id);window.scrollTo({top:0});};
-  const rm=el('button',{type:'button',text:'Remover'});let armed=false,tm=null;
-  rm.onclick=()=>{
-    if(!armed){armed=true;rm.textContent='Toque de novo para remover';rm.classList.add('danger');tm=setTimeout(()=>{armed=false;rm.textContent='Remover';rm.classList.remove('danger');},4000);return;}
-    clearTimeout(tm);removeDoc(d);
-  };
-  a.append(ob,rm);c.append(a);
+  const ob=el('button',{class:'pri',type:'button',text:'Abrir tabelão'});ob.onclick=()=>{conKey=d.brand.key;empTab=d.emp||'';go('reader',d.id);window.scrollTo({top:0});};
+  a.append(ob,armBtn('Remover','Toque de novo para remover',()=>removeDoc(d)));c.append(a);
   return c;
 }
+function openBook(b){
+  if(!b.bytes){setStatus('Este e-book foi salvo sem o arquivo. Suba o PDF de novo.',true);return;}
+  const url=URL.createObjectURL(new Blob([b.bytes],{type:'application/pdf'}));
+  window.open(url,'_blank');setTimeout(()=>URL.revokeObjectURL(url),120000);
+}
+function saveBook(b){
+  if(!b.bytes){setStatus('Este e-book foi salvo sem o arquivo. Suba o PDF de novo.',true);return;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([b.bytes],{type:'application/pdf'}));a.download=b.fileName;
+  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+}
+function bookCard(b){
+  const c=el('article',{class:'card'});
+  c.append(el('div',{class:'card-h'},el('div',{class:'thumb bk',text:'PDF'}),el('div',{class:'card-t'},el('h3',{text:b.fileName}),el('p',{class:'small',text:'E-book'+(b.bytes?' · '+(b.bytes.byteLength/1048576).toFixed(1).replace('.',',')+' MB':'')}))));
+  c.append(moveSel(b));
+  const a=el('div',{class:'card-a'});
+  const ob=el('button',{class:'pri',type:'button',text:'Abrir e-book'});ob.onclick=()=>openBook(b);
+  const sv=el('button',{type:'button',text:'Baixar'});sv.onclick=()=>saveBook(b);
+  a.append(ob,sv,armBtn('Remover','Toque de novo para remover',()=>removeBook(b)));c.append(a);
+  return c;
+}
+
 
 /* ---------- tela: leitor de um tabelão ---------- */
 function applyFilter(){
@@ -549,16 +778,17 @@ function applyFilter(){
   root.querySelectorAll('section.sec').forEach(s=>{const rows=[...s.querySelectorAll('tbody tr')].filter(r=>!r.classList.contains('hd'));s.hidden=!!q&&rows.length>0&&rows.every(r=>r.hidden);});
 }
 function renderReader(host){
-  const d=docs.find(x=>x.id===openId);if(!d){go('lib');return;}
+  const d=docs.find(x=>x.id===openId);if(!d){go(conKey?'con':'lib');return;}
+  const key=d.brand.key;
   const wrap=el('div',{class:'panel'});
-  const back=el('button',{type:'button',text:'← Tabelões'});back.onclick=()=>go('lib');
+  const back=el('button',{type:'button',text:'← '+d.brand.nome+' › '+(d.emp||'Construtora mãe')});back.onclick=()=>{conKey=key;empTab=d.emp||'';go('con');};
   const logo=el('div',{class:'logo',title:'Clique para trocar o logo'});
   logo.append(d.brand.logo?el('img',{src:d.brand.logo,alt:'Logo '+d.brand.nome}):'Clique para adicionar o logo');
-  logo.onclick=()=>$('#li').click();
+  logo.onclick=()=>{logoKey=key;$('#li').click();};
   const nm=el('input',{class:'nm',value:d.brand.nome,'aria-label':'Nome da construtora'});
-  nm.oninput=()=>{docs.forEach(x=>{if(x.brand.key===d.brand.key)x.brand.nome=nm.value;});const p=loadProfiles();p[d.brand.key]=Object.assign(p[d.brand.key]||{},{nome:nm.value});saveProfiles(p);};
-  const meta=el('div',{class:'meta',text:d.fileName+(d.ref?'  •  Data ref. '+d.ref:'')+'  •  '+d.pages.reduce((s,p)=>s+p.anns.length,0)+' links'});
-  const rm=el('button',{type:'button',text:'Remover logo'});rm.onclick=()=>{docs.forEach(x=>{if(x.brand.key===d.brand.key)x.brand.logo=null;});const p=loadProfiles();if(p[d.brand.key])delete p[d.brand.key].logo;saveProfiles(p);render();};
+  nm.oninput=()=>setBrandName(key,nm.value);
+  const meta=el('div',{class:'meta',text:(d.emp||'Tabelão geral')+'  •  '+d.fileName+(d.ref?'  •  Data ref. '+d.ref:'')+'  •  '+d.pages.reduce((s,p)=>s+p.anns.length,0)+' links'});
+  const rm=el('button',{type:'button',text:'Remover logo'});rm.onclick=()=>{setBrandLogo(key,null);render();};
   const pr=el('button',{type:'button',text:'Imprimir'});pr.onclick=()=>window.print();
   wrap.append(el('div',{class:'brand'},back,logo,el('div',{},nm,meta),el('span',{class:'sp'}),rm,pr));
   const vt=el('div',{class:'vt'});
@@ -573,14 +803,15 @@ function renderReader(host){
   applyFilter();
 }
 $('#li').onchange=async e=>{
-  const f=e.target.files[0];e.target.value='';const d=docs.find(x=>x.id===openId);if(!f||!d)return;
-  try{const logo=await resizeLogo(f);docs.forEach(x=>{if(x.brand.key===d.brand.key)x.brand.logo=logo;});const p=loadProfiles();p[d.brand.key]=Object.assign(p[d.brand.key]||{},{nome:d.brand.nome,logo});saveProfiles(p);render();}
+  const f=e.target.files[0];e.target.value='';if(!f||!logoKey)return;
+  try{const logo=await resizeLogo(f);setBrandLogo(logoKey,logo);render();}
   catch(err){setStatus('Não consegui usar essa imagem como logo.',true);}
 };
 
+
 /* ---------- tela: todas as unidades de todos os tabelões ---------- */
 function renderUnits(host){
-  const all=[];docs.forEach(d=>(d.units||[]).forEach(u=>all.push({d,u,preco:u.dsc!=null?u.dsc:u.tab})));
+  const all=allUnits();
   all.sort((a,b)=>a.preco-b.preco);
   if(!all.length){host.append(el('div',{class:'panel'},el('div',{class:'empty',text:docs.length?'Não encontrei unidades com preço nos tabelões salvos.':'Suba um tabelão para ver todas as unidades aqui.'})));return;}
   const wrap=el('div',{class:'panel'});
@@ -593,14 +824,14 @@ function renderUnits(host){
   const body=el('div',{class:'body'});wrap.append(body);host.append(wrap);
   function fill(){
     const t=uf.q.trim().toLowerCase(),max=num(uf.max);
-    const rows=all.filter(x=>(!uf.c||x.d.brand.nome===uf.c)&&(!max||x.preco<=max)&&(!t||(x.d.brand.nome+' '+x.u.nome+' '+x.u.desc+' '+x.u.zona).toLowerCase().includes(t)));
+    const rows=all.filter(x=>(!uf.c||x.d.brand.nome===uf.c)&&(!max||x.preco<=max)&&(!t||(x.d.brand.nome+' '+(x.d.emp||'')+' '+x.u.nome+' '+x.u.desc+' '+x.u.zona).toLowerCase().includes(t)));
     cnt.textContent=rows.length+' de '+all.length+' unidades'+(rows.length>300?' (mostrando as 300 mais baratas)':'');
     body.textContent='';
     if(!rows.length){body.append(el('div',{class:'empty',text:'Nenhuma unidade com esses filtros.'}));return;}
     const tb=el('tbody');
     rows.slice(0,300).forEach(x=>{
       const tr=el('tr');
-      tr.append(el('td',{text:x.d.brand.nome}),el('td',{text:x.u.nome}),el('td',{text:x.u.desc}),el('td',{text:x.u.zona?cap(x.u.zona.toLowerCase()):''}),
+      tr.append(el('td',{text:x.d.brand.nome+(x.d.emp?' › '+x.d.emp:'')}),el('td',{text:x.u.nome}),el('td',{text:x.u.desc}),el('td',{text:x.u.zona?cap(x.u.zona.toLowerCase()):''}),
         el('td',{class:'r',text:brl0(x.u.tab)}),el('td',{class:'r',text:x.u.dsc!=null?brl0(x.u.dsc):'—'}));
       const bt=el('button',{class:'sm',type:'button',text:'Simular'});bt.onclick=()=>selectUnit(x.d,{name:x.u.nome,desc:x.u.desc,tab:x.u.tab,dsc:x.u.dsc});
       tr.append(el('td',{},bt));tb.append(tr);
@@ -618,7 +849,8 @@ function renderUnits(host){
 ['dragenter','dragover'].forEach(ev=>document.addEventListener(ev,e=>{e.preventDefault();document.body.classList.add('drag');}));
 document.addEventListener('dragleave',e=>{if(e.relatedTarget===null)document.body.classList.remove('drag');});
 document.addEventListener('drop',e=>{e.preventDefault();document.body.classList.remove('drag');loadMany(e.dataTransfer.files);});
-$('#fi').onchange=e=>{loadMany(e.target.files);e.target.value='';};
+$('#fi').onchange=e=>{loadMany([...e.target.files]);e.target.value='';};
+$('#fb').onchange=e=>{loadBooks([...e.target.files]);e.target.value='';};
 
 /* =====================  SIMULADOR  ===================== */
 const ASSINATURA='FCOSTA Corretor e Avaliador de Imóveis · CRECI-SP 294791-F · CNAI 52708';
@@ -812,20 +1044,20 @@ function renderSim(panel){
     return box;
   }
   function options(p){
-    const units=[];docs.forEach(d=>(d.units||[]).forEach(u=>units.push({d,u,preco:u.dsc!=null?u.dsc:u.tab})));
+    const units=allUnits();
     units.sort((a,b)=>a.preco-b.preco);
     const rows=[];let fit=0;
     units.forEach(x=>{const r=simular({...p,valor:x.preco});const ok=!!r.best;if(ok)fit++;if(!cli.soCabem||ok)rows.push({...x,r,ok});});
     const host=q('s-opt');host.textContent='';
     q('s-optn').textContent=units.length?fit+' de '+units.length+' unidades cabem':'';
-    if(!units.length){host.append(el('div',{class:'empty',text:'Suba um tabelão (PDF) para listar as unidades que cabem no perfil deste cliente. Eles ficam salvos na aba Tabelões.'}));return;}
+    if(!units.length){host.append(el('div',{class:'empty',text:'Suba um tabelão (PDF) para listar as unidades que cabem no perfil deste cliente. Eles ficam salvos na aba Construtoras.'}));return;}
     if(!(p.renda>0)){host.append(el('div',{class:'empty',text:'Informe a renda do cliente para filtrar as opções.'}));return;}
     if(!rows.length){host.append(el('div',{class:'empty',text:'Nenhuma unidade cabe com essa renda e entrada. Desmarque o filtro para ver todas.'}));return;}
     const tb=el('tbody');
     rows.slice(0,300).forEach(x=>{
       const r=x.r,pr=r.best==='MCMV'?r.m:r.s;
       const tr=el('tr',{class:x.ok?'ok':'no'});
-      tr.append(el('td',{text:x.d.brand.nome}),el('td',{text:x.u.nome}),el('td',{text:x.u.desc}),el('td',{class:'r',text:brl0(x.preco)+(x.u.dsc!=null?' *':'')}),
+      tr.append(el('td',{text:x.d.brand.nome+(x.d.emp?' › '+x.d.emp:'')}),el('td',{text:x.u.nome}),el('td',{text:x.u.desc}),el('td',{class:'r',text:brl0(x.preco)+(x.u.dsc!=null?' *':'')}),
         el('td',{},el('b',{text:r.best||'Não cabe'})),el('td',{class:'r',text:brl(pr.p1)}),el('td',{class:'r',text:pr.comp.toFixed(1)+'%'}));
       const bt=el('button',{class:'sm',type:'button',text:'Simular'});bt.onclick=()=>selectUnit(x.d,{name:x.u.nome,desc:x.u.desc,tab:x.u.tab,dsc:x.u.dsc});
       tr.append(el('td',{},bt));tb.append(tr);
@@ -870,7 +1102,7 @@ function b64ok(s){return typeof s==='string'&&s.length>0;}
 async function init(){
   let emb=null;
   try{emb=JSON.parse($('#dados').textContent||'null');}catch(e){emb=null;}
-  if(emb&&emb.perfis){saveProfiles(Object.assign({},emb.perfis,loadProfiles()));}
+  if(emb&&emb.perfis){const Lp=loadProfiles(),M=Object.assign({},emb.perfis);for(const k in Lp){const e0=M[k]||{};M[k]=Object.assign({},e0,Lp[k]);M[k].emps=[...new Set([...(e0.emps||[]),...(Lp[k].emps||[])])];}saveProfiles(M);}
   if(emb&&emb.regras){let tem=false;try{tem=!!localStorage.getItem('tabelao_regras_v2');}catch(e){}if(!tem){rules=Object.assign(defRules(),emb.regras);saveRules();}}
   let recs=[];
   try{recs=await dbAll();}catch(e){persistOK=false;recs=[];}
@@ -878,13 +1110,13 @@ async function init(){
   if(emb&&Array.isArray(emb.docs)){
     for(const e of emb.docs){
       if(have.has(e.id)||gone.has(e.id))continue;
-      const rec={id:e.id,key:e.key,fileName:e.fileName,added:e.added,ref:e.ref,pages:e.pages,bytes:b64ok(e.bytes)?b64ToBuf(e.bytes):null};
+      const rec={id:e.id,kind:e.kind||'tabelao',emp:e.emp||'',key:e.key,fileName:e.fileName,added:e.added,ref:e.ref,pages:e.pages,bytes:b64ok(e.bytes)?b64ToBuf(e.bytes):null};
       recs.push(rec);
       if(persistOK){try{await dbPut(rec);}catch(err){persistOK=false;}}
     }
   }
   recs.sort((a,b)=>(a.added||0)-(b.added||0));
-  recs.forEach(r=>{try{docs.push(hydrate(r));}catch(e){console.error(e);}});
+  recs.forEach(r=>{try{if(r.kind==='ebook')books.push(hydrateBook(r));else docs.push(hydrate(r));}catch(e){console.error(e);}});
   try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
   render();
 }
