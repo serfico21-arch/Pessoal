@@ -1353,7 +1353,16 @@ function mcmvInfo(preco){
   return{faixas:el_,min:idx>0?R[idx-1].ate:0,max:el_[el_.length-1].ate};
 }
 function foneWa(t){let d=String(t||'').replace(/\D/g,'');if(d.length===10||d.length===11)d='55'+d;return d.length>=12?d:'';}
-function waLink(fone,emp,construtora){return'https://wa.me/'+fone+'?text='+encodeURIComponent('Olá! Tenho interesse no '+emp+(construtora?' ('+construtora+')':'')+'. Pode me passar mais informações?');}
+function fixMoji(t){t=String(t||'');if(/[ÃÂ][\u0080-\u00BF]/.test(t)){try{return decodeURIComponent(escape(t));}catch(e){}}return t;}
+function nomeDoArquivo(fn){return fixMoji(fn).replace(/\.pdf$/i,'').replace(/\s*-\s*FCOSTA\s*$/i,'').replace(/\s*\(\d+\)\s*$/,'').replace(/^\s*(e-?book|book)\s+/i,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim();}
+function waLink(fone,emp,construtora,preco,endereco){
+  const mesmo=construtora&&emp&&construtora.trim().toLowerCase()===emp.trim().toLowerCase();
+  let t='Olá! Vi o book do empreendimento *'+emp+'*'+(construtora&&!mesmo?' ('+construtora+')':'')+' e tenho interesse.';
+  if(preco>0)t+=' Valor: '+brl(preco).replace(/\u00a0/g,' ')+'.';
+  if(endereco)t+=' Local: '+endereco+'.';
+  t+=' Pode me passar mais informações?';
+  return'https://wa.me/'+fone+'?text='+encodeURIComponent(t);
+}
 function mensagemCliente(o){
   const L=['*'+o.emp+'*'+(o.construtora?' · '+o.construtora:'')];
   if(o.preco>0)L.push('Preço total: *'+brl(o.preco).replace(/\u00a0/g,' ')+'*');
@@ -1457,7 +1466,7 @@ async function buildClientePdf(o){
     const bwid=Math.min(90,14+bw-6-tx);
     doc.setFillColor(GOLD[0],GOLD[1],GOLD[2]);doc.roundedRect(tx,by+36,bwid,14,2,2,'F');
     doc.setFont('helvetica','bold');doc.setFontSize(14);col(INK);doc.text('Chamar no WhatsApp',tx+bwid/2,by+45,{align:'center'});
-    doc.link(tx,by+36,bwid,14,{url:waLink(o.fone,o.emp,o.construtora)});
+    doc.link(tx,by+36,bwid,14,{url:waLink(o.fone,o.emp,o.construtora,o.preco,o.endereco)});
     y=by+bh+2;
   }
   for(let p=1;p<=capa;p++){doc.setPage(p);strip();}
@@ -1481,7 +1490,7 @@ async function buildClientePdf(o){
     if(o.fone){
       doc.setFillColor(GOLD[0],GOLD[1],GOLD[2]);doc.roundedRect(W/2-45,124,90,16,3,3,'F');
       doc.setFont('helvetica','bold');doc.setFontSize(14);col(INK);doc.text('Chamar no WhatsApp',W/2,134.4,{align:'center'});
-      doc.link(W/2-45,124,90,16,{url:waLink(o.fone,o.emp,o.construtora)});
+      doc.link(W/2-45,124,90,16,{url:waLink(o.fone,o.emp,o.construtora,o.preco,o.endereco)});
     }
     strip();
   }
@@ -1628,7 +1637,7 @@ async function bookComDados(b,onMsg,sel){
   const fone=foneWa(f||'(11) 99350-9109'),endereco=info.endereco||'',preco=info.preco||0;
   let pages=[];for(let i=1;i<=pdf.numPages;i++)pages.push(i);
   if(sel&&sel.length)pages=sel.filter(i=>i>=1&&i<=pdf.numPages);
-  const d=await buildClientePdf({emp:b.emp||b.brand.nome,construtora:b.brand.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',pages,pdf,mcmv:info.mcmv!==false,fone,fim:true,brandLogo:b.brand.logo||'',
+  const d=await buildClientePdf({emp:b.emp||nomeDoArquivo(b.fileName)||b.brand.nome,construtora:b.brand.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',pages,pdf,mcmv:info.mcmv!==false,fone,fim:true,brandLogo:b.brand.logo||'',
     logo:(document.querySelector('.top .mark')||{}).src||'',onProg:(i,t)=>{if(onMsg)onMsg('Montando o book com os seus dados… página '+i+' de '+t);}});
   return d.output('blob');
 }
@@ -1652,7 +1661,7 @@ async function shareBook(b,titulo,onMsg,sel){
   let blob=null,comDados=true;
   try{blob=await bookComDados(b,onMsg,sel);}catch(e){console.error(e);blob=null;}
   if(!blob){comDados=false;if(sel&&sel.length)return'Não consegui montar o PDF só com as páginas escolhidas (precisa de internet). Tente de novo com internet para não enviar o tabelão inteiro.';blob=new Blob([b.bytes],{type:'application/pdf'});}
-  const base=(b.fileName||'book.pdf').replace(/\.pdf$/i,'').replace(/[\\\/:*?"<>|]+/g,'-');
+  const base=fixMoji(b.fileName||'book.pdf').replace(/\.pdf$/i,'').replace(/[\\\/:*?"<>|]+/g,'-');
   const nome=base+(comDados?' - FCOSTA':'')+'.pdf';
   const file=new File([blob],nome,{type:'application/pdf'});
   const aviso=comDados?'':' (sem os seus dados: precisei da internet para montar o PDF e não consegui)';
