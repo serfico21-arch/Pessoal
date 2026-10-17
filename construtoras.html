@@ -173,7 +173,7 @@ details.rg summary{cursor:pointer;font-weight:700;color:var(--acc-text);padding:
 .sitebar .addf{flex:1 1 320px}
 .sitebar .addf input{max-width:560px}
 @media print{.etabs,.addbar,.sitebar,.fh .acts{display:none!important}}
-@media print{.top,.nav,#overlay,#status,.tools,.brand button,.foot,.keep{display:none!important}.panel{border:none}body{background:#fff}}
+@media print{.top,.nav,#overlay,#status,.tools,.brand button,.foot,.keep{display:none!important}.panel{border:none}body{background:#fff}}.vidbox{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:8px}.vidbox h3{font-size:18px}.vidrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--line)}.vidn{flex:1 1 180px;min-width:0;display:flex;flex-direction:column}.vidn strong{overflow-wrap:anywhere;font-size:15px}
 .shm{position:fixed;inset:0;background:rgba(22,19,14,.7);z-index:60;display:flex;justify-content:center;padding:16px;overflow:auto}
 .shb{background:#fff;border-radius:12px;width:min(760px,100%);padding:18px;display:flex;flex-direction:column;gap:14px;margin:auto}
 .shb h2{font-size:22px}
@@ -500,7 +500,7 @@ function setStatus(m,err){const s=$('#status');s.textContent=m||'';s.className=e
 
 /* ---------- banco de dados do navegador (IndexedDB): os tabelões ficam aqui ---------- */
 const DB_NAME='fcosta_tabeloes',STORE='docs';
-function dbOpen(){return new Promise((res,rej)=>{if(!window.indexedDB){rej(new Error('sem IndexedDB'));return;}const r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=()=>r.result.createObjectStore(STORE,{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+function dbOpen(){return new Promise((res,rej)=>{if(!window.indexedDB){rej(new Error('sem IndexedDB'));return;}const r=indexedDB.open(DB_NAME,2);r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains(STORE))d.createObjectStore(STORE,{keyPath:'id'});if(!d.objectStoreNames.contains('videos'))d.createObjectStore('videos',{keyPath:'id'});};r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
 async function dbAll(){const db=await dbOpen();return new Promise((res,rej)=>{const q=db.transaction(STORE).objectStore(STORE).getAll();q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});}
 async function dbPut(rec){const db=await dbOpen();return new Promise((res,rej)=>{const t=db.transaction(STORE,'readwrite');t.objectStore(STORE).put(rec);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error);});}
 async function dbDel(id){const db=await dbOpen();return new Promise((res,rej)=>{const t=db.transaction(STORE,'readwrite');t.objectStore(STORE).delete(id);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);});}
@@ -1623,7 +1623,7 @@ async function shareEmp(key,emp){
     bShare.disabled=bSave.disabled=false;
   }
   bShare.onclick=()=>run(true);bSave.onclick=()=>run(false);
-  box.append(el('div',{class:'shr'},bShare,bSave,bTxt,bBook,bClose),st);
+  box.append(el('div',{class:'shr'},bShare,bSave,bTxt,bBook),st,videoBox(key,emp,br,say),el('div',{class:'shr'},bClose));
   document.body.append(ov);
   loadThumbs();
 }
@@ -1655,6 +1655,64 @@ function pedirToque(data){
     bx.append(el('h2',{text:'PDF pronto'}),el('p',{class:'small',text:'Toque para abrir o compartilhamento (WhatsApp, e-mail…).'}),el('div',{class:'shr'},go,dl,cx));
     document.body.append(ov);
   });
+}
+
+/* ---------- vídeos do decorado (por empreendimento) ---------- */
+async function vidAll(){const db=await dbOpen();return new Promise((res,rej)=>{const q=db.transaction('videos').objectStore('videos').getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>rej(q.error);});}
+async function vidPut(rec){const db=await dbOpen();return new Promise((res,rej)=>{const t=db.transaction('videos','readwrite');t.objectStore('videos').put(rec);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error);});}
+async function vidDel(id){const db=await dbOpen();return new Promise((res,rej)=>{const t=db.transaction('videos','readwrite');t.objectStore('videos').delete(id);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);});}
+function fmtMB(n){return n>=1073741824?(n/1073741824).toFixed(2).replace('.',',')+' GB':(n/1048576).toFixed(1).replace('.',',')+' MB';}
+function videoBox(key,emp,br,say){
+  const wrap=el('div',{class:'vidbox'});
+  const h=el('h3',{text:'Vídeo do decorado'});
+  const nota=el('p',{class:'small',text:'Suba o vídeo uma vez e envie quando quiser. Fica salvo só neste aparelho.'});
+  const list=el('div',{class:'vidlist'});
+  const inp=el('input',{type:'file',accept:'video/*',hidden:'hidden'});
+  const add=el('button',{type:'button',text:'+ Adicionar vídeo'});
+  add.onclick=()=>inp.click();
+  wrap.append(h,nota,list,add,inp);
+  const msg=v=>'Olá! Segue o vídeo do decorado do *'+emp+'*'+(br.nome&&br.nome.toLowerCase()!==emp.toLowerCase()?' ('+br.nome+')':'')+'.';
+  async function enviar(v){
+    const file=new File([v.blob],v.fileName,{type:v.blob.type||'video/mp4'});
+    const data={files:[file],title:emp+' · decorado',text:msg(v)};
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share(data);say('Vídeo compartilhado.');return;}
+      catch(e){
+        if(e&&e.name==='AbortError'){say('Compartilhamento cancelado.');return;}
+        const r=await pedirToque(data);
+        if(r==='ok'){say('Vídeo compartilhado.');return;}
+        if(r==='cancel'){say('Compartilhamento cancelado.');return;}
+      }
+    }
+    const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=v.fileName;
+    document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),10000);
+    say('Vídeo baixado. É só anexar no WhatsApp.');
+  }
+  async function draw(){
+    list.textContent='';
+    let vs=[];try{vs=(await vidAll()).filter(v=>v.key===key&&(v.emp||'')===emp).sort((a,b)=>b.added-a.added);}
+    catch(e){console.error(e);list.append(el('p',{class:'small',text:'Este navegador não deixa guardar vídeos.'}));add.disabled=true;return;}
+    if(!vs.length)list.append(el('p',{class:'small',text:'Nenhum vídeo ainda.'}));
+    vs.forEach(v=>{
+      const b1=el('button',{type:'button',class:'pri',text:'Compartilhar vídeo'});b1.onclick=()=>enviar(v);
+      const b2=el('button',{type:'button',text:'Remover'});
+      let armed=false;b2.onclick=async()=>{if(!armed){armed=true;b2.textContent='Toque de novo';setTimeout(()=>{armed=false;b2.textContent='Remover';},3000);return;}await vidDel(v.id);say('Vídeo removido.');draw();};
+      list.append(el('div',{class:'vidrow'},el('div',{class:'vidn'},el('strong',{text:v.fileName}),el('span',{class:'small',text:fmtMB(v.blob.size)})),b1,b2));
+    });
+  }
+  inp.onchange=async()=>{
+    const f=inp.files[0];inp.value='';if(!f)return;
+    if(f.type&&!/^video\//.test(f.type)){say('Esse arquivo não é um vídeo.',true);return;}
+    add.disabled=true;say('Salvando o vídeo…');
+    try{
+      try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+      await vidPut({id:'v'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),key,emp,fileName:f.name,added:Date.now(),blob:f});
+      say('Vídeo salvo ('+fmtMB(f.size)+').');
+    }catch(e){console.error(e);say('Não consegui salvar o vídeo (falta espaço no aparelho?).',true);}
+    add.disabled=false;draw();
+  };
+  draw();
+  return wrap;
 }
 async function shareBook(b,titulo,onMsg,sel){
   if(!b||!b.bytes)return'Este book foi salvo sem o arquivo. Suba o PDF de novo.';
