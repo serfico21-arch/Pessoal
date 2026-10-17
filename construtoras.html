@@ -369,7 +369,88 @@ function renderTable(b,doc,zona){
   });
   return el('div',{class:'tw'},el('table',{},tb));
 }
+/* ---- tabela de financiamento da Caixa (não é tabela de imóveis) ---- */
+function isCaixaDoc(pages){
+  try{return pages.some(pg=>pg.blocks.some(b=>(b.type==='note'&&b.cell&&/SIMULA[ÇC][ÃA]O\s+CAIXA/i.test(b.cell.t))||(b.type==='table'&&b.rows.some(r=>/Tx\.?\s*Juros/i.test(r.cells.map(c=>c.t).join(' '))))));}catch(e){return false;}
+}
+const MONEY_RE=/R\$\s*(-|\d{1,3}(?:\.\d{3})*,\d{2})/g;
+function brlNum(t){return t==='-'?0:parseFloat(String(t).replace(/\./g,'').replace(',','.'));}
+function extractCaixa(pages){
+  const out={ref:'',mcmv:[],sbpe:[],notes:[]};let notas=false,buf=[];
+  pages.forEach(pg=>pg.blocks.forEach(b=>{
+    if(b.type!=='table')return;
+    b.rows.forEach(r=>{
+      const t=r.cells.map(c=>c.t).join(' ');
+      const ref=t.match(/Atualizado:\s*([A-Za-zçÇ]+\/\d{4})/i);if(ref&&!out.ref)out.ref=ref[1];
+      if(/^\s*I\.\s/.test(t))notas=true;
+      if(notas){buf.push(t);return;}
+      const tx=t.match(/(\d{1,2},\d{2})\s*%/);if(!tx)return;
+      const m=[...t.matchAll(MONEY_RE)].map(x=>brlNum(x[1]));
+      if(m.length<4)return;
+      const taxa=brlNum(tx[1]);
+      if(taxa>=11&&m.length>=5)out.sbpe.push({renda:m[0],taxa,price:m[1],pPrice:m[2],sac:m[3],pSac:m[4]});
+      else out.mcmv.push({renda:m[0],taxa,c:m[1],s:m[2],parcela:m[3],subSem:m[4]||0,subCom:m[5]||0});
+    });
+  }));
+  out.notes=buf.join(' ').split(/\s(?=(?:I{1,3}|IV|V)\.\s)/).map(x=>x.trim()).filter(Boolean);
+  return out;
+}
+function caixaData(){
+  const list=docs.filter(d=>isCaixaDoc(d.pages)).sort((a,b)=>(b.added||0)-(a.added||0));
+  for(const d of list){if(!d.cx)d.cx=extractCaixa(d.pages);if(d.cx.mcmv.length)return d.cx;}
+  return null;
+}
+/* ---- tabelão "oportunidades" (zona, projeto, endereço, tipologia, valores, renda mínima, entrega) ---- */
+function parsePrecos(txt){
+  const out=[];const re=/(STUDIO|\d\s*DORM(?:\s*[+_]\s*OFFICE)?|DUPLEX\s*\d?D?)?\s*R\$\s*([\d.,]+)\s*(MIL)?/gi;let m;
+  while((m=re.exec(txt))){
+    const lab=(m[1]||'').replace(/\s+/g,' ').replace('_','+').trim().toUpperCase();let raw=m[2].replace(/[.,]+$/,''),v;
+    if(m[3])v=parseFloat(raw.replace(/\./g,'').replace(',','.'))*1000;
+    else if(/^\d{3}\.\d{4}$/.test(raw))v=parseInt(raw.slice(0,3))*1000;
+    else if(/,\d{2}$/.test(raw))v=parseFloat(raw.replace(/\./g,'').replace(',','.'));
+    else v=parseFloat(raw.replace(/\./g,''));
+    if(isFinite(v)&&v>=1000)out.push({lab,v});
+  }
+  return out;
+}
+function extractOport(b){
+  const rows=b.rows;let head=null;
+  for(const r of rows){const t=r.cells.map(c=>c.t.toUpperCase());if(t.includes('PROJETO')&&t.includes('VALORES')){head=r.cells;break;}}
+  if(!head)return null;
+  const cc=c=>(c.x0+c.x1)/2,hd={};
+  head.forEach(c=>{hd[c.t.toUpperCase()]=cc(c);});
+  const cols=['ZONA','PROJETO','ENDEREÇO','STATUS','TIPOLOGIA','M²','VALORES','RENDA MÍNIMA'].filter(k=>hd[k]!=null);
+  const hx=cols.map(k=>[k,hd[k]]);
+  const entX=(rows.flatMap(r=>r.cells).find(c=>/^ENTREGA$/i.test(c.t))||{}).x0;
+  const colOf=c=>{const x=cc(c);if(entX&&Math.abs(c.x0-entX)<30&&/^[a-zç]{3}\/\d{2}$/i.test(c.t))return'ENTREGA';let best=null,d=1e9;hx.forEach(([k,h])=>{const dd=Math.abs(x-h);if(dd<d){d=dd;best=k;}});return best;};
+  const anchors=rows.filter(r=>r.cells.some(c=>/^ZONA\s/i.test(c.t)&&c.x0<head[0].x0+25));
+  if(!anchors.length)return null;
+  const ys=anchors.map(r=>r.cells[0].y0);
+  const units=[];
+  anchors.forEach((a,i)=>{
+    const y=ys[i],hi=i>0?(ys[i-1]+y)/2:y+10,lo=i<anchors.length-1?(y+ys[i+1])/2:-1e9;
+    const band=rows.filter(r=>{const yy=r.cells[0].y0;return yy<=hi&&yy>lo&&r!==undefined;});
+    const g={};
+    band.forEach(r=>r.cells.forEach(c=>{const k=colOf(c);if(!k)return;(g[k]=g[k]||[]).push(c);}));
+    const txt=k=>(g[k]||[]).sort((p,q)=>q.y0-p.y0||p.x0-q.x0).map(c=>c.t).join(' ').replace(/\s+/g,' ').trim();
+    const proj=txt('PROJETO');if(!proj)return;
+    const tip=txt('TIPOLOGIA'),m2=txt('M²'),val=txt('VALORES'),ren=txt('RENDA MÍNIMA'),ent=txt('ENTREGA'),zona=txt('ZONA'),end=txt('ENDEREÇO');
+    let pr=parsePrecos(val);if(!pr.length)return;
+    const rn=parsePrecos(ren.replace(/R\$\s*(\d{4})\b/g,'R$ $1,00')).map(x=>x.v);
+    const partes=tip.split(/\s+e\s+/i).map(x=>x.trim()).filter(Boolean);
+    pr.forEach((p,j)=>{
+      let rotulo=p.lab||(pr.length>1&&partes.length===pr.length?partes[j]:'');
+      let rmin=rn.length===pr.length?rn[j]:(rn.length?Math.min(...rn):null);
+      const ay=(ent.match(/\/(\d{2})$/)||[])[1];const susp=ay&&(2000+(+ay))<new Date().getFullYear();
+      const pedacos=[rotulo||tip,m2,ent?('entrega '+ent+(susp?' (data estranha: confira)':'')):'',rmin?('renda mín. R$ '+rmin.toLocaleString('pt-BR')):''].filter(Boolean);
+      units.push({nome:proj,desc:pedacos.join(' · ').slice(0,110),tab:p.v,dsc:null,zona,addr:end,rendaMin:rmin||null,entrega:ent});
+    });
+  });
+  return units.length?units:null;
+}
 function extractUnits(pages){
+  if(isCaixaDoc(pages))return[];
+  for(const pg of pages)for(const b of pg.blocks){if(b.type==='table'){const o=extractOport(b);if(o)return o;}}
   const out=[];let zona='';
   pages.forEach(pg=>pg.blocks.forEach(b=>{
     if(b.type==='title'){zona=b.text;return;}
@@ -377,7 +458,8 @@ function extractUnits(pages){
     b.an=b.an||analyze(b.rows);
     b.an.info.forEach(i=>{if(i.price!=null)out.push({nome:i.name,desc:i.desc,tab:i.tab,dsc:i.dsc,zona,addr:i.addr});});
   }));
-  return out;
+  // linha cujo "nome" é só um valor em reais (ex.: R$ 1.500,00) é renda de tabela de financiamento, não imóvel
+  return out.filter(u=>!/^R\$\s*[\d.]+(?:,\d{1,2})?$/i.test(String(u.nome||'').trim()));
 }
 function renderTables(doc){
   const host=el('div');
@@ -523,7 +605,8 @@ async function loadFile(file,ctx){
     try{await dbPut(record(d));}catch(e){console.error(e);saved=false;persistOK=false;}
     const onde=d.brand.nome+' › '+(emp||'Construtora mãe');
     let msg='Tabelão '+(replaced?'atualizado':'adicionado')+' em '+onde+(saved?' e salvo neste navegador.':'. Este navegador não deixou salvar: use "Baixar página com os tabelões dentro".');
-    if(!d.units.length)msg+=' Não achei preços neste PDF. A aba Tabela mostra o que foi lido.';
+    if(isCaixaDoc(d.pages))msg+=' Reconheci como TABELA DE FINANCIAMENTO DA CAIXA (renda × valor financiado): ela não lista imóveis. Veja os valores dela na aba Simulador.';
+    else if(!d.units.length)msg+=' Não achei preços neste PDF. A aba Tabela mostra o que foi lido.';
     setStatus(msg,!saved);
     return{key,emp};
   }catch(e){console.error(e);setStatus('Não consegui ler "'+file.name+'". Confira se é um PDF com texto (não imagem escaneada).',true);return false;}
@@ -608,6 +691,7 @@ async function exportHtml(includePdf){
     const blob=new Blob([html],{type:'text/html'});
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='construtoras.html';
     document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+    try{localStorage.setItem('fcosta_backup',String(Date.now()));}catch(_){}
     setStatus('Página baixada com '+docs.length+' tabelão(ões)'+(includePdf?' e '+books.length+' e-book(s)':'')+' dentro ('+(blob.size/1048576).toFixed(1).replace('.',',')+' MB). Guarde esse arquivo: ao abri-lo, as construtoras, empreendimentos e tabelões já estão nele.');
   }catch(e){console.error(e);setStatus('Não consegui montar o arquivo: '+e.message,true);}
 }
@@ -616,6 +700,20 @@ async function exportHtml(includePdf){
 function go(v,id){
   view=v;if(id!==undefined){openId=id;query='';}
   render();
+}
+function avisosTopo(host){
+  try{
+    if(typeof navigator!=='undefined'&&navigator.onLine===false)host.append(el('div',{class:'warnbox',text:'Sem internet agora: dá para consultar o que já está salvo, mas ler um PDF novo e montar o PDF com a sua logo precisam de internet.'}));
+    if(docs.length||books.length){
+      let t=0;try{t=Number(localStorage.getItem('fcosta_backup')||0);}catch(_){}
+      const dias=t?Math.floor((Date.now()-t)/864e5):null;
+      if(dias===null||dias>=7){
+        const w=el('div',{class:'warnbox'},el('span',{text:(dias===null?'Você ainda não fez cópia de segurança. ':'Faz '+dias+' dias da última cópia de segurança. ')+'Os dados ficam só neste navegador: se ele for limpo, tudo se perde. '}));
+        const bt=el('button',{type:'button',text:'Ir para Construtoras e baixar cópia'});bt.onclick=()=>{go('lib');window.scrollTo({top:0});};
+        w.append(bt);host.append(w);
+      }
+    }
+  }catch(e){console.error(e);}
 }
 function render(){
   const hb=document.querySelector('header label[for="fi"]');if(hb)hb.hidden=(view==='con');
@@ -626,6 +724,7 @@ function render(){
   $('#n-lib').textContent=brandKeys().length;
   $('#n-units').textContent=allUnits().length;
   const main=$('#main');main.textContent='';
+  avisosTopo(main);
   if(view==='sim')renderSim(main);
   else if(view==='units')renderUnits(main);
   else if(view==='reader')renderReader(main);
@@ -668,7 +767,9 @@ function renderLib(host){
     const cw=el('label',{class:'chk2'});const cb=el('input',{type:'checkbox',id:'inc-pdf'});cb.checked=true;
     cw.append(cb,' Incluir os PDFs originais e os e-books (arquivo maior)');
     bt.onclick=()=>exportHtml(cb.checked);
-    ac.append(bt,cw);keep.append(ac);host.append(keep);
+    ac.append(bt,cw);keep.append(ac);
+    keep.append(el('p',{class:'small',style:'flex-basis:100%;margin:6px 0 0',text:'Atenção: esta cópia leva dentro as tabelas das construtoras (mesmo sem os PDFs, os preços lidos vão junto) e os seus dados. Não suba essa cópia num GitHub público: use repositório privado, ou publique só o arquivo original, sem tabelões.'}));
+    host.append(keep);
   }
   if(!keys.length){
     host.append(el('div',{class:'drop'},el('strong',{text:'Comece criando uma construtora'}),
@@ -811,7 +912,8 @@ function card(d){
   const meta=el('div',{class:'card-m'});
   meta.append(el('span',{text:d.ref?'Data de referência: '+d.ref:'Sem data de referência no PDF'}));
   if(ag)meta.append(el('span',{class:'badge '+(ag.old?'old':'new'),text:ag.old?ag.days+' dias: confira se saiu tabela nova':(ag.days<=0?'Atualizado hoje':'Atualizado há '+ag.days+' dias')}));
-  meta.append(el('span',{class:'small',text:(d.units||[]).length+' unidades com preço · '+links+' links'}));
+  if(isCaixaDoc(d.pages)){const cx=extractCaixa(d.pages);meta.append(el('span',{class:'badge new',text:'Tabela de financiamento da Caixa'+(cx.ref?' · '+cx.ref:'')}),el('span',{class:'small',text:cx.mcmv.length+' faixas de renda · usada no Simulador'}));}
+  else meta.append(el('span',{class:'small',text:(d.units||[]).length+' unidades com preço · '+links+' links'}));
   c.append(meta,moveSel(d));
   const a=el('div',{class:'card-a'});
   const ob=el('button',{class:'pri',type:'button',text:'Abrir tabelão'});ob.onclick=()=>{conKey=d.brand.key;empTab=d.emp||'';go('reader',d.id);window.scrollTo({top:0});};
@@ -829,10 +931,27 @@ function saveBook(b){
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([b.bytes],{type:'application/pdf'}));a.download=b.fileName;
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
 }
+function parsePages(t){
+  const out=new Set();
+  String(t).split(/[,;\s]+/).forEach(p=>{
+    const m=p.match(/^(\d+)(?:-(\d+))?$/);if(!m)return;
+    let a=+m[1],z=m[2]?+m[2]:a;if(a>z)[a,z]=[z,a];
+    for(let i=a;i<=z&&i<=2000;i++)out.add(i);
+  });
+  return [...out].sort((x,y)=>x-y);
+}
 function btnMeusDados(b,label){
   const sh=el('button',{class:'pri',type:'button',text:label||'Compartilhar com meus dados'});
   sh.title='Envia o PDF com a sua logo e o Fale comigo';
-  sh.onclick=async()=>{setStatus('Preparando o PDF…');setStatus(await shareBook(b,[b.brand.nome,b.emp].filter(Boolean).join(' · '),m=>setStatus(m)));};
+  sh.onclick=async()=>{
+    let sel=null;
+    if(b.kind!=='ebook'){
+      const r=window.prompt('Este é o tabelão, com os preços de todas as páginas. Quais páginas enviar ao cliente?\nEx.: 1-3,5  (deixe vazio para enviar tudo)','');
+      if(r===null)return;
+      if(r.trim()){sel=parsePages(r);if(!sel.length){setStatus('Não entendi as páginas. Use assim: 1-3,5',true);return;}}
+    }
+    setStatus('Preparando o PDF…');setStatus(await shareBook(b,[b.brand.nome,b.emp].filter(Boolean).join(' · '),m=>setStatus(m),sel));
+  };
   return sh;
 }
 function bookCard(b){
@@ -1043,6 +1162,7 @@ const SIM_HTML=`<div class="sim">
  <div class="cap" id="s-cap"></div>
  <div class="cta"><button class="pri" type="button" id="s-copy">Copiar resumo</button><button type="button" id="s-wa">Abrir no WhatsApp</button><span class="small" id="s-copied" role="status"></span></div>
 </div>
+<div class="sc" id="s-cxbox" hidden></div>
 <div class="sc"><h3>Opções das tabelas para este cliente</h3>
  <div class="cta" style="margin:0 0 8px"><label class="small"><input type="checkbox" id="s-fit"> Mostrar só as que cabem na renda</label><span class="small" id="s-optn"></span></div>
  <div id="s-opt"></div>
@@ -1108,7 +1228,7 @@ function renderSim(panel){
       if(r.cap.m)c.append(lineEl('MCMV: financiamento até '+brl0(r.cap.m.L),'imóvel até '+brl0(r.cap.m.imovel)+(r.cap.m.imovel>=r.cap.m.teto?' (teto da faixa)':'')));
       c.append(lineEl('SBPE: financiamento até '+brl0(r.cap.s.L),'imóvel até '+brl0(r.cap.s.imovel)));
     }
-    options(p);
+    options(p);caixaBox(p);
   }
   function lineEl(k,v,warn){return el('div',{class:'ln'},el('span',{text:k}),el('b',{class:warn?'wr':'',text:v}));}
   function prog(titulo,cls,r,sis){
@@ -1121,11 +1241,33 @@ function renderSim(panel){
     box.append(lineEl('Taxa',pct(r.taxa)+' a.a.'),lineEl('Valor financiado',brl(r.fin)+(r.f?' ('+r.cota.toFixed(0)+'%)':'')),lineEl('Comprometimento da renda',r.comp.toFixed(1)+'%',r.comp>rules.comp),lineEl('Total pago ao final',brl(r.total)));
     return box;
   }
+  function caixaBox(p){
+    const host=q('s-cxbox');if(!host)return;const cx=caixaData();host.textContent='';
+    if(!cx||!(p.renda>0)){host.hidden=true;return;}
+    host.hidden=false;
+    host.append(el('h3',{text:'Conferência pela tabela da Caixa'+(cx.ref?' ('+cx.ref+')':'')}));
+    let row=null;cx.mcmv.forEach(r=>{if(r.renda<=p.renda)row=r;});if(!row)row=cx.mcmv[0];
+    const brl2=v=>v?brl(v):'sem subsídio';
+    const L=[];
+    if(p.renda>Math.max(...cx.mcmv.map(r=>r.renda))){
+      let s2=null;cx.sbpe.forEach(r=>{if(r.renda<=p.renda)s2=r;});
+      host.append(el('p',{class:'small',text:'Renda acima das faixas do MCMV na tabela. Referência SBPE (taxa '+(s2?s2.taxa.toFixed(2).replace('.',','):'11,50')+'% a.a.):'}));
+      if(s2){L.push(['Renda de referência',brl(s2.renda)],['Financiamento PRICE 360 meses',brl(s2.price)+' (parcela '+brl(s2.pPrice)+')'],['Financiamento SAC 420 meses',brl(s2.sac)+' (1ª parcela '+brl(s2.pSac)+')']);}
+    }else{
+      L.push(['Renda de referência na tabela',brl(row.renda)+(row.renda<p.renda?' (a linha logo abaixo da renda do cliente)':'')],['Taxa de juros',row.taxa.toFixed(2).replace('.',',')+'% a.a.'],
+        ['Valor máx. financiado (420 meses, com redutor)',brl(row.c)],['Valor máx. financiado (420 meses, sem redutor)',brl(row.s)],['Parcela (morando)',brl(row.parcela)],
+        ['Subsídio sem dependente',brl2(row.subSem)],['Subsídio com dependente',brl2(row.subCom)]);
+    }
+    const ul=el('div',{class:'cap'});L.forEach(([a,b2])=>ul.append(el('div',{class:'ln'},el('span',{text:a}),el('b',{text:b2}))));
+    host.append(ul);
+    host.append(el('p',{class:'small',text:'Valores da própria tabela de simulação da Caixa (pessoa de 30 anos). É a referência oficial: se diferir do cálculo do programa, vale a tabela. Confirme sempre com a Caixa.'}));
+    if(cx.notes.length){const dt=el('details',{class:'guia'},el('summary',{text:'Observações importantes da tabela da Caixa'}),el('ul',{},...cx.notes.map(n=>el('li',{text:n}))));host.append(dt);}
+  }
   function options(p){
     const units=allUnits();
     units.sort((a,b)=>a.preco-b.preco);
     const rows=[];let fit=0;
-    units.forEach(x=>{const r=simular({...p,valor:x.preco});const ok=!!r.best;if(ok)fit++;if(!cli.soCabem||ok)rows.push({...x,r,ok});});
+    units.forEach(x=>{const r=simular({...p,valor:x.preco});const baixa=!!(x.u.rendaMin&&p.renda>0&&p.renda<x.u.rendaMin);const ok=!!r.best&&!baixa;if(ok)fit++;if(!cli.soCabem||ok)rows.push({...x,r,ok,baixa});});
     const host=q('s-opt');host.textContent='';
     q('s-optn').textContent=units.length?fit+' de '+units.length+' unidades cabem':'';
     if(!units.length){host.append(el('div',{class:'empty',text:'Suba um tabelão (PDF) para listar as unidades que cabem no perfil deste cliente. Eles ficam salvos na aba Construtoras.'}));return;}
@@ -1136,16 +1278,16 @@ function renderSim(panel){
       const r=x.r,pr=r.best==='MCMV'?r.m:r.s;
       const tr=el('tr',{class:x.ok?'ok':'no'});
       tr.append(el('td',{text:x.d.brand.nome+(x.d.emp?' › '+x.d.emp:'')}),el('td',{text:x.u.nome}),el('td',{text:x.u.desc}),el('td',{class:'r',text:brl0(x.preco)+(x.u.dsc!=null?' *':'')}),
-        el('td',{},el('b',{text:r.best||'Não cabe'})),el('td',{class:'r',text:brl(pr.p1)}),el('td',{class:'r',text:pr.comp.toFixed(1)+'%'}));
+        el('td',{},el('b',{text:x.baixa?'Renda abaixo do mínimo':(r.best||'Não cabe')})),el('td',{class:'r',text:brl(pr.p1)}),el('td',{class:'r',text:pr.comp.toFixed(1)+'%'}));
       const bt=el('button',{class:'sm',type:'button',text:'Simular'});bt.onclick=()=>selectUnit(x.d,{name:x.u.nome,desc:x.u.desc,tab:x.u.tab,dsc:x.u.dsc});
       tr.append(el('td',{},bt));tb.append(tr);
     });
     const COLS=[
       ['Construtora','Empresa dona do imóvel (a pasta onde o tabelão foi guardado). Se o tabelão estiver dentro de um empreendimento, aparece depois do sinal ›.'],
-      ['Empreendimento','Identificação da linha, lida da 1ª coluna do tabelão (PDF). Normalmente é o nome do empreendimento ou da torre. Em alguns PDFs vem um número (ex.: R$ 1.500,00): é o que está na 1ª coluna daquele PDF, e o programa não consegue dizer o que é. Confira no PDF original.'],
-      ['Unidade','Descrição complementar da linha (apartamento, tipo, andar, metragem), lida do tabelão. Fica vazia quando o PDF não traz esse dado.'],
+      ['Empreendimento','Nome do empreendimento (projeto) lido do tabelão. Se aparecer um número no lugar do nome, o PDF subido provavelmente é uma tabela de financiamento (renda × valor) e não uma tabela de imóveis: confira no PDF original.'],
+      ['Unidade','Tipo do imóvel (studio, 1 dorm, 2 dorm...), metragem, previsão de entrega e renda mínima exigida pela construtora, quando o tabelão informa.'],
       ['Valor','Preço do imóvel segundo o tabelão. O asterisco (*) indica que é o valor com desconto.'],
-      ['Programa','Melhor financiamento para este cliente: MCMV (Minha Casa Minha Vida) ou SBPE (financiamento comum de banco). Só aparece se a parcela couber em '+rules.comp+'% da renda. Se não couber, aparece "Não cabe".'],
+      ['Programa','Melhor financiamento para este cliente (e a renda mínima exigida pela construtora, quando o tabelão informa): MCMV (Minha Casa Minha Vida) ou SBPE (financiamento comum de banco). Só aparece se a parcela couber em '+rules.comp+'% da renda. Se não couber, aparece "Não cabe".'],
       ['Parcela','Prestação mensal estimada (1ª parcela) pelo programa indicado, usando renda, entrada e prazo preenchidos acima.'],
       ['% da renda','Quanto a parcela pesa na renda familiar do cliente. O limite usado é '+rules.comp+'%. Quanto menor o número, mais folgado fica para o cliente.'],
       ['Simular','Botão que abre este imóvel na tela de simulação, com subsídio, taxa, valor financiado e total pago. De lá dá para copiar o resumo ou enviar pelo WhatsApp.']
@@ -1154,7 +1296,7 @@ function renderSim(panel){
     const guia=el('details',{class:'guia',open:''},el('summary',{text:'Como ler esta tabela (explicação de cada coluna)'}),
       el('ul',{},...COLS.map(c=>el('li',{},el('b',{text:c[0]+': '}),c[1]))),
       el('p',{class:'aviso',text:'Resumo: o programa testa cada imóvel dos tabelões com a renda, a entrada e o prazo deste cliente. A tabela mostra só os que cabem (parcela até '+rules.comp+'% da renda). Tire a marca de "Mostrar só as que cabem na renda" para ver todos.'}));
-    host.append(el('div',{class:'tw opt'},el('table',{},el('thead',{},head),tb)),guia,el('p',{class:'small',text:'* valor com desconto. Programa = melhor opção cuja parcela fica dentro de '+rules.comp+'% da renda. Estimativa: confirme disponibilidade e condições com a construtora e o banco.'}));
+    host.append(el('div',{class:'tw opt'},el('table',{},el('thead',{},head),tb)),guia,el('p',{class:'small',text:'* valor com desconto. Programa = melhor opção cuja parcela fica dentro de '+rules.comp+'% da renda. Estimativa: confirme disponibilidade e condições com a construtora e o banco. As faixas e taxas do MCMV e SBPE são editáveis em "Regras e referências" (mais abaixo): mantenha-as atualizadas.'}));
   }
 
   // regras editáveis
@@ -1460,21 +1602,22 @@ async function shareEmp(key,emp){
 
 
 /* ---------- book: compartilhar, caixas de envio separadas e correção de arquivo no lugar errado ---------- */
-async function bookComDados(b,onMsg){
+async function bookComDados(b,onMsg,sel){
   const pdf=await getPdf(b);
   const info=empInfo(b.brand.key,b.emp||'');
   let f='';try{f=localStorage.getItem('fcosta_whats')||'';}catch(e){}
   const fone=foneWa(f||'(11) 99350-9109'),endereco=info.endereco||'',preco=info.preco||0;
-  const pages=[];for(let i=1;i<=pdf.numPages;i++)pages.push(i);
+  let pages=[];for(let i=1;i<=pdf.numPages;i++)pages.push(i);
+  if(sel&&sel.length)pages=sel.filter(i=>i>=1&&i<=pdf.numPages);
   const d=await buildClientePdf({emp:b.emp||b.brand.nome,construtora:b.brand.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',pages,pdf,mcmv:info.mcmv!==false,fone,fim:true,
     logo:(document.querySelector('.top .mark')||{}).src||'',onProg:(i,t)=>{if(onMsg)onMsg('Montando o book com os seus dados… página '+i+' de '+t);}});
   return d.output('blob');
 }
-async function shareBook(b,titulo,onMsg){
+async function shareBook(b,titulo,onMsg,sel){
   if(!b||!b.bytes)return'Este book foi salvo sem o arquivo. Suba o PDF de novo.';
   let blob=null,comDados=true;
-  try{blob=await bookComDados(b,onMsg);}catch(e){console.error(e);blob=null;}
-  if(!blob){comDados=false;blob=new Blob([b.bytes],{type:'application/pdf'});}
+  try{blob=await bookComDados(b,onMsg,sel);}catch(e){console.error(e);blob=null;}
+  if(!blob){comDados=false;if(sel&&sel.length)return'Não consegui montar o PDF só com as páginas escolhidas (precisa de internet). Tente de novo com internet para não enviar o tabelão inteiro.';blob=new Blob([b.bytes],{type:'application/pdf'});}
   const base=(b.fileName||'book.pdf').replace(/\.pdf$/i,'').replace(/[\\\/:*?"<>|]+/g,'-');
   const nome=base+(comDados?' - FCOSTA':'')+'.pdf';
   const file=new File([blob],nome,{type:'application/pdf'});
