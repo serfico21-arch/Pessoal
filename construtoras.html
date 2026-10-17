@@ -957,7 +957,7 @@ function renderOverview(wrap,key,br,em){
       const pick=el('input',{type:'file',accept:'video/*',hidden:'hidden'});
       const vb=el('button',{type:'button',text:'Subir vídeo'});vb.onclick=()=>pick.click();
       pick.onchange=async()=>{const f=pick.files[0];pick.value='';if(!f)return;await saveVideoFile(key,e,f,setStatus);render();};
-      const sb=el('button',{type:'button',text:'Compartilhar'});sb.onclick=()=>shareEmp(key,e);
+      const sb=el('button',{type:'button',text:'Compartilhar com o cliente'});sb.onclick=()=>shareEmp(key,e);
       a.append(vb,sb,pick);
     }
     c.append(a);return c;
@@ -1001,7 +1001,7 @@ function renderCon(host){
   if(empTab){
     const inp=el('input',{class:'nm',value:empTab,'aria-label':'Nome do empreendimento'});
     const cur=empTab;inp.onchange=()=>renameEmp(key,cur,inp.value);
-    ttl.append(inp,el('p',{class:'small',text:'Neste empreendimento: 1. tabelão · 2. book · 3. vídeo do decorado.'}));
+    ttl.append(inp,el('p',{class:'small',text:'Neste empreendimento: 1. tabelão (só para você) · 2. book (vai para o cliente) · 3. vídeo do decorado (vai para o cliente).'}));
   }else{
     ttl.append(el('h2',{text:'Construtora mãe · tabelão geral'}),el('p',{class:'small',text:'Aqui fica o tabelão geral da construtora, com todos os empreendimentos juntos.'}));
   }
@@ -1011,12 +1011,11 @@ function renderCon(host){
   fh.append(ttl,acts);body.append(fh);
 
   const ds=docs.filter(here).sort((a,b)=>(b.added||0)-(a.added||0)),bk=books.filter(here).sort((a,b)=>(b.added||0)-(a.added||0));
-  if(bk.length)acts.prepend(btnMeusDados(bk[0],'Compartilhar book com meus dados'));else if(ds.length)acts.prepend(btnMeusDados(ds[0],'Compartilhar tabelão com meus dados'));
-  body.append(el('h3',{class:'sh',text:(empTab?'1. ':'')+'Tabelão: tabela de preços ('+ds.length+')'}));
+  body.append(el('h3',{class:'sh',text:(empTab?'1. ':'')+'Tabelão: tabela de preços, uso interno ('+ds.length+')'}));
   body.append(upBox('fi','Tabelão (tabela de preços)','Suba ou solte aqui o PDF da tabela de valores.','Subir tabelão (PDF)',loadMany));
   if(ds.length){const g=el('div',{class:'cards'});ds.forEach(d=>g.append(card(d)));body.append(g);}
   else body.append(el('div',{class:'empty s',text:empTab?'Nenhum tabelão em '+empTab+' ainda. Use “Subir tabelão (PDF)”.':'Nenhum tabelão geral ainda. Use “Subir tabelão (PDF)”.'}));
-  body.append(el('h3',{class:'sh',text:(empTab?'2. ':'')+'Book: fotos e apresentação ('+bk.length+')'}));
+  body.append(el('h3',{class:'sh',text:(empTab?'2. ':'')+'Book: fotos para o cliente ('+bk.length+')'}));
   body.append(upBox('fb','Book do empreendimento (fotos)','Suba ou solte aqui o PDF do book. É ele que pode ser compartilhado com o cliente.','Subir book (PDF)',loadBooks));
   if(bk.length){const g=el('div',{class:'cards'});bk.forEach(b=>g.append(bookCard(b)));body.append(g);}
   else body.append(el('div',{class:'empty s',text:'Nenhum book ainda. Use “Subir book (PDF)”.'}));
@@ -1042,7 +1041,7 @@ function card(d){
   const a=el('div',{class:'card-a'});
   const ob=el('button',{class:'pri',type:'button',text:'Abrir tabelão'});ob.onclick=()=>{conKey=d.brand.key;empTab=d.emp||'';conOv=false;go('reader',d.id);window.scrollTo({top:0});};
   const bk2=el('button',{type:'button',text:'É um book'});bk2.title='Passar este arquivo para os books';bk2.onclick=()=>docToBook(d);
-  a.append(ob,btnMeusDados(d),bk2,armBtn('Excluir tabelão','Toque de novo para excluir',()=>removeDoc(d)));c.append(a);
+  a.append(ob,bk2,armBtn('Excluir tabelão','Toque de novo para excluir',()=>removeDoc(d)));c.append(a);
   return c;
 }
 function openBook(b){
@@ -1066,15 +1065,15 @@ function parsePages(t){
 }
 function btnMeusDados(b,label){
   const sh=el('button',{class:'pri',type:'button',text:label||'Compartilhar com meus dados'});
-  sh.title='Envia o PDF com a sua logo e o Fale comigo';
+  sh.title='Envia o book com a sua logo e o Fale comigo do empreendimento';
   sh.onclick=async()=>{
-    let sel=null;
-    if(b.kind!=='ebook'){
-      const r=window.prompt('Este é o tabelão, com os preços de todas as páginas. Quais páginas enviar ao cliente?\nEx.: 1-3,5  (deixe vazio para enviar tudo)','');
-      if(r===null)return;
-      if(r.trim()){sel=parsePages(r);if(!sel.length){setStatus('Não entendi as páginas. Use assim: 1-3,5',true);return;}}
-    }
-    Prog.begin('Montando o book','Preparando…');let rr='';try{rr=await shareBook(b,[b.brand.nome,b.emp].filter(Boolean).join(' · '),m=>setStatus(m),sel);}finally{Prog.end();}setStatus(rr);
+    if(b.emp){shareEmp(b.brand.key,b.emp,b);return;}
+    // book sem pasta de empreendimento: pergunta o nome para a mensagem do cliente sair específica
+    const nome=window.prompt('Nome do empreendimento (aparece na mensagem do cliente):',nomeDoArquivo(b.fileName)||'');
+    if(nome===null)return;
+    Prog.begin('Montando o book','Preparando…');let rr='';
+    try{rr=await shareBook(b,[b.brand.nome,nome].filter(Boolean).join(' · '),m=>setStatus(m),null,{emp:nome.trim()||undefined});}finally{Prog.end();}
+    setStatus(rr);
   };
   return sh;
 }
@@ -1478,22 +1477,31 @@ function mcmvInfo(preco){
 function foneWa(t){let d=String(t||'').replace(/\D/g,'');if(d.length===10||d.length===11)d='55'+d;return d.length>=12?d:'';}
 function fixMoji(t){t=String(t||'');if(/[ÃÂ][\u0080-\u00BF]/.test(t)){try{return decodeURIComponent(escape(t));}catch(e){}}return t;}
 function nomeDoArquivo(fn){return fixMoji(fn).replace(/\.pdf$/i,'').replace(/\s*-\s*FCOSTA\s*$/i,'').replace(/\s*\(\d+\)\s*$/,'').replace(/^\s*(e-?book|book)\s+/i,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim();}
-function waLink(fone,emp,construtora,preco,endereco){
+function foneSalvo(){let f='';try{f=localStorage.getItem('fcosta_whats')||'';}catch(e){}return foneWa(f||'(11) 99350-9109');}
+function waTexto(emp,construtora,preco,endereco,tipo,curto){
+  const nome=String(emp||'').trim()||String(construtora||'').trim();
   const mesmo=construtora&&emp&&construtora.trim().toLowerCase()===emp.trim().toLowerCase();
-  let t='Olá! Vi o book do empreendimento *'+emp+'*'+(construtora&&!mesmo?' ('+construtora+')':'')+' e tenho interesse.';
-  if(preco>0)t+=' Valor: '+brl(preco).replace(/\u00a0/g,' ')+'.';
-  if(endereco)t+=' Local: '+endereco+'.';
-  t+=' Pode me passar mais informações?';
-  return'https://wa.me/'+fone+'?text='+encodeURIComponent(t);
+  const alvo=tipo==='video'?'o vídeo do decorado':'o book';
+  let t='Olá! Vi '+alvo+(nome?' do empreendimento *'+nome+'*':'')+(construtora&&emp&&!mesmo?' ('+construtora+')':'')+' e tenho interesse.';
+  if(!curto){
+    if(preco>0)t+=' Valor: '+brl(preco).replace(/\u00a0/g,' ')+'.';
+    if(endereco)t+=' Local: '+endereco+'.';
+  }
+  return t+' Pode me passar mais informações?';
+}
+function waLink(fone,emp,construtora,preco,endereco,tipo,curto){
+  return'https://wa.me/'+(fone||foneSalvo())+'?text='+encodeURIComponent(waTexto(emp,construtora,preco,endereco,tipo,curto));
 }
 function mensagemCliente(o){
-  const L=['*'+o.emp+'*'+(o.construtora?' · '+o.construtora:'')];
+  const nome=o.emp+(o.construtora&&o.construtora!==o.emp?' · '+o.construtora:'');
+  const L=[o.tipo==='video'?'Olá! Segue o vídeo do decorado do *'+nome+'*.':'*'+nome+'*'];
   if(o.preco>0)L.push('Preço total: *'+brl(o.preco).replace(/\u00a0/g,' ')+'*');
   const m=o.mcmv?mcmvInfo(o.preco):null;
   if(m&&!m.acima)L.push('Minha Casa Minha Vida: renda familiar '+(m.min>0?'acima de '+brl0(m.min)+' até ':'de até ')+brl0(m.max));
   else if(m&&m.acima)L.push('Financiamento pelo SBPE (acima do teto do MCMV)');
   if(o.endereco)L.push('Localização: '+o.endereco+'\n'+o.mapa);
-  if(o.fone)L.push('','Fale comigo: https://wa.me/'+o.fone);
+  // o link já leva escrito o nome do empreendimento
+  L.push('','Fale comigo: '+waLink(o.fone||foneSalvo(),o.emp,o.construtora,0,'',o.tipo,true));
   L.push('',ASSINATURA);
   return L.join('\n');
 }
@@ -1597,7 +1605,7 @@ async function buildClientePdf(o){
   // fotos do e-book: cada uma centralizada dentro da página paisagem, acima do rodapé
   for(let i=0;i<o.pages.length;i++){
     if(o.onProg)o.onProg(i+1,o.pages.length);
-    const im=await pageJpeg(o.pdf,o.pages[i],1100,.72);
+    const im=await pageJpeg(o.pdf,o.pages[i],o.larg||1100,o.q||.72);
     doc.addPage();bg();
     const aw=W,ah=H-FH,sc=Math.min(aw/im.w,ah/im.h),iw=im.w*sc,ih=im.h*sc;
     doc.addImage(im.url,'JPEG',(aw-iw)/2,(ah-ih)/2,iw,ih,undefined,'FAST');
@@ -1620,7 +1628,7 @@ async function buildClientePdf(o){
   }
   return doc;
 }
-async function shareEmp(key,emp){
+async function shareEmp(key,emp,pre){
   document.querySelectorAll('.shm').forEach(x=>x.remove());
   const br=brandOf(key),info=empInfo(key,emp);
   const mine=x=>x.brand.key===key&&(x.emp||'')===emp;
@@ -1629,15 +1637,17 @@ async function shareEmp(key,emp){
   units.sort((a,b)=>pr(a)-pr(b));
   const myBooks=books.filter(mine).sort((a,b)=>(b.added||0)-(a.added||0));
   const addr0=info.endereco||(units.find(u=>u.addr)||{}).addr||'';
-  let book=myBooks[0]||null,tk=0;const checks=[];
+  let book=(pre&&myBooks.includes(pre))?pre:(myBooks[0]||null),tk=0;const checks=[];
   const ov=el('div',{class:'shm',role:'dialog','aria-modal':'true','aria-label':'Compartilhar com o cliente'});
   const box=el('div',{class:'shb'});ov.append(box);
   const onKey=e=>{if(e.key==='Escape')close();};
   function close(){tk++;ov.remove();document.removeEventListener('keydown',onKey);}
   document.addEventListener('keydown',onKey);
   ov.addEventListener('click',e=>{if(e.target===ov)close();});
-  box.append(el('h2',{text:'Compartilhar com o cliente'}),el('p',{class:'small',text:br.nome+' › '+emp+'. O cliente recebe um PDF só com as fotos do e-book, o mapa de localização e o preço total.'}));
+  box.append(el('h2',{text:'Compartilhar com o cliente'}),el('p',{class:'small',text:br.nome+' › '+emp+'. O cliente recebe o book em PDF com a sua logo e o botão “Fale comigo” já com o nome do empreendimento. Preço, mapa e faixa do Minha Casa Minha Vida aparecem se você preencher. O tabelão nunca vai.'}));
 
+  /* 1. dados do empreendimento */
+  box.append(el('h3',{class:'sh',text:'1. Dados que o cliente vai ver'}));
   const pf=el('div',{class:'fld'},el('label',{for:'sh-preco',text:'Preço total (R$)'}));
   const pi=el('input',{type:'text',id:'sh-preco',inputmode:'decimal',placeholder:'Ex.: 350.000,00',maxlength:'20'});
   if(info.preco>0)pi.value=info.preco.toLocaleString('pt-BR',{minimumFractionDigits:2});
@@ -1646,33 +1656,46 @@ async function shareEmp(key,emp){
     const us=el('select',{'aria-label':'Escolher o preço da tabela'});
     us.append(el('option',{value:'',text:'Ou escolha uma unidade da tabela…'}));
     units.slice(0,200).forEach(u=>us.append(el('option',{value:String(pr(u)),text:(u.nome||'Unidade')+(u.desc?' · '+u.desc:'')+' · '+brl0(pr(u))})));
-    us.onchange=()=>{if(us.value)pi.value=Number(us.value).toLocaleString('pt-BR',{minimumFractionDigits:2});};
+    us.onchange=()=>{if(us.value){pi.value=Number(us.value).toLocaleString('pt-BR',{minimumFractionDigits:2});updPrev();}};
     pf.append(us);
   }
   box.append(pf);
-
   const af=el('div',{class:'fld'},el('label',{for:'sh-end',text:'Localização (endereço ou nome do lugar)'}));
   const ai=el('input',{type:'text',id:'sh-end',placeholder:'Rua, número, bairro e cidade',maxlength:'200'});ai.value=addr0;
   const al=el('a',{class:'lk',target:'_blank',rel:'noopener noreferrer',text:'Conferir no mapa'});
   const updMap=()=>{const v=ai.value.trim();al.hidden=!v;if(v)al.href=mapsUrl(v);};
-  ai.oninput=updMap;updMap();
   af.append(ai,el('p',{class:'small'},al));
   box.append(af);
-
   const mf=el('div',{class:'fld'});
   const mcb=el('input',{type:'checkbox',id:'sh-mcmv'});mcb.checked=info.mcmv!==false;
-  mf.append(el('label',{class:'chk',for:'sh-mcmv'},mcb,' Mostrar Minha Casa Minha Vida e a faixa de renda do empreendimento'),el('p',{class:'small',text:'A faixa é calculada pelo preço total, com as regras da aba Simulador.'}));
+  mf.append(el('label',{class:'chk',for:'sh-mcmv'},mcb,' Mostrar Minha Casa Minha Vida e a faixa de renda'),el('p',{class:'small',text:'A faixa é calculada pelo preço total, com as regras da aba Simulador.'}));
   box.append(mf);
-  let foneSalvo='';try{foneSalvo=localStorage.getItem('fcosta_whats')||'';}catch(e){}
-  if(!foneSalvo)foneSalvo='(11) 99350-9109';
-  const ff=el('div',{class:'fld'},el('label',{for:'sh-fone',text:'Seu WhatsApp para o botão “Fale comigo”'}));
-  const fi=el('input',{type:'text',id:'sh-fone',inputmode:'tel',placeholder:'(11) 99999-9999',maxlength:'20'});fi.value=foneSalvo;
-  ff.append(fi);box.append(ff);
 
-  const bh=el('div',{class:'fld'},el('label',{text:'Fotos do e-book (desmarque as páginas que não quer mandar)'}));
+  /* 2. contato */
+  box.append(el('h3',{class:'sh',text:'2. Seu contato (“Fale comigo”)'}));
+  let foneIni='';try{foneIni=localStorage.getItem('fcosta_whats')||'';}catch(e){}
+  if(!foneIni)foneIni='(11) 99350-9109';
+  const ff=el('div',{class:'fld'},el('label',{for:'sh-fone',text:'Seu WhatsApp'}));
+  const fi=el('input',{type:'text',id:'sh-fone',inputmode:'tel',placeholder:'(11) 99999-9999',maxlength:'20'});fi.value=foneIni;
+  const prev=el('p',{class:'small'}),tl=el('a',{class:'lk',target:'_blank',rel:'noopener noreferrer',text:'Testar o botão Fale comigo'});
+  ff.append(fi,el('p',{class:'small',text:'Mensagem que chega para você quando o cliente toca em “Fale comigo”:'}),prev,el('p',{class:'small'},tl));
+  box.append(ff);
+  const foneAtual=()=>foneWa(fi.value)||foneWa('(11) 99350-9109');
+  function updPrev(){
+    const preco=parsePreco(pi.value),endereco=ai.value.trim();
+    prev.textContent='“'+waTexto(emp,br.nome,preco,endereco,'book',false)+'”';
+    tl.href=waLink(foneAtual(),emp,br.nome,preco,endereco,'book',false);
+  }
+  pi.addEventListener('input',updPrev);ai.addEventListener('input',()=>{updMap();updPrev();});fi.addEventListener('input',updPrev);
+  updMap();updPrev();
+
+  /* 3. fotos do book */
+  box.append(el('h3',{class:'sh',text:'3. Fotos do book'}));
+  const bh=el('div',{class:'fld'},el('label',{text:'Desmarque as páginas que não quer mandar'}));
   if(myBooks.length>1){
     const bs=el('select',{'aria-label':'E-book'});
     myBooks.forEach((b,i)=>bs.append(el('option',{value:String(i),text:b.fileName})));
+    bs.value=String(Math.max(0,myBooks.indexOf(book)));
     bs.onchange=()=>{book=myBooks[Number(bs.value)];loadThumbs();};
     bh.append(bs);
   }
@@ -1702,45 +1725,72 @@ async function shareEmp(key,emp){
     }
   }
 
+  /* 4. enviar */
+  box.append(el('h3',{class:'sh',text:'4. Enviar'}));
   const st=el('p',{class:'small',role:'status','aria-live':'polite'});
-  const bShare=el('button',{type:'button',class:'pri',text:'Compartilhar PDF'});
+  const say=(t,err)=>{if(Prog.active)Prog.msg(t);st.textContent=t;st.style.color=err?'var(--bad)':'';};
+  const dados=()=>{
+    const preco=parsePreco(pi.value),endereco=ai.value.trim();
+    return{emp,construtora:br.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',mcmv:mcb.checked,fone:foneAtual()};
+  };
+  const guarda=()=>{const d=dados();saveEmpInfo(key,emp,{preco:d.preco,endereco:d.endereco,mcmv:d.mcmv});try{localStorage.setItem('fcosta_whats',fi.value.trim());}catch(e){}return d;};
+  const bShare=el('button',{type:'button',class:'pri',text:'Compartilhar book (PDF)'});
   const bSave=el('button',{type:'button',text:'Só baixar o PDF'});
   const bTxt=el('button',{type:'button',text:'Só o texto no WhatsApp'});
-  bTxt.onclick=()=>{
-    const preco=parsePreco(pi.value),endereco=ai.value.trim(),fone=foneWa(fi.value);
-    if(!preco&&!endereco){say('Preencha o preço ou a localização.',true);return;}
-    saveEmpInfo(key,emp,{preco,endereco,mcmv:mcb.checked});
-    window.open('https://wa.me/?text='+encodeURIComponent(mensagemCliente({emp,construtora:br.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',mcmv:mcb.checked,fone})),'_blank','noopener');
-  };
-  const bBook=el('button',{type:'button',text:'Enviar o book completo'});bBook.hidden=!book;
-  bBook.onclick=async()=>{Prog.begin('Montando o book','Preparando…');say('Preparando o book…');let r='';try{r=await shareBook(book,emp+' · '+br.nome,say);}finally{Prog.end();}say(r);};
+  const bVid=el('button',{type:'button',text:'Compartilhar vídeo'});bVid.hidden=true;
+  const vsel=el('select',{'aria-label':'Escolher o vídeo'});vsel.hidden=true;
   const bClose=el('button',{type:'button',text:'Fechar'});bClose.onclick=close;
-  const say=(t,err)=>{if(Prog.active)Prog.msg(t);st.textContent=t;st.style.color=err?'var(--bad)':'';};
+  let vids=[];
+  vidAll().then(vs=>{
+    vids=vs.filter(v=>v.key===key&&(v.emp||'')===emp).sort((a,b)=>b.added-a.added);
+    if(!vids.length){vnote.textContent='Este empreendimento ainda não tem vídeo. Suba na seção “Vídeo do decorado”.';return;}
+    vids.forEach((v,i)=>vsel.append(el('option',{value:String(i),text:v.fileName+' · '+fmtMB(v.blob.size)})));
+    vsel.hidden=vids.length<2;bVid.hidden=false;
+  }).catch(()=>{});
+  const vnote=el('p',{class:'small'});
+  bVid.onclick=async()=>{
+    const v=vids[Number(vsel.value)||0];if(!v)return;
+    const f=foneWa(fi.value);if(fi.value.trim()&&!f){say('O WhatsApp parece incompleto. Use DDD + número, como (11) 99999-9999.',true);return;}
+    guarda();bVid.disabled=true;try{await enviarVideo(v,emp,br,say);}finally{bVid.disabled=false;}
+  };
+  bTxt.onclick=()=>{
+    const d=dados();
+    if(!d.preco&&!d.endereco){say('Preencha o preço ou a localização.',true);return;}
+    guarda();
+    window.open('https://wa.me/?text='+encodeURIComponent(mensagemCliente(d)),'_blank','noopener');
+  };
   async function run(share){
-    const preco=parsePreco(pi.value),endereco=ai.value.trim(),pages=checks.filter(c=>c.cb.checked).map(c=>c.n);
-    if(!preco&&!endereco&&!pages.length){say('Preencha o preço, a localização ou marque ao menos uma foto.',true);return;}
-    const fone=foneWa(fi.value),mcmv=mcb.checked;
-    if(fi.value.trim()&&!fone){say('O WhatsApp parece incompleto. Use DDD + número, como (11) 99999-9999.',true);return;}
-    saveEmpInfo(key,emp,{preco,endereco,mcmv});
-    try{localStorage.setItem('fcosta_whats',fi.value.trim());}catch(e){}
+    const pages=checks.filter(c=>c.cb.checked).map(c=>c.n),d0=dados();
+    if(!d0.preco&&!d0.endereco&&!pages.length){say('Preencha o preço, a localização ou marque ao menos uma foto.',true);return;}
+    if(fi.value.trim()&&!foneWa(fi.value)){say('O WhatsApp parece incompleto. Use DDD + número, como (11) 99999-9999.',true);return;}
+    const d=guarda();
     bShare.disabled=bSave.disabled=true;
     Prog.begin('Montando o PDF','Preparando…');
     try{
       const pdf=pages.length&&book?await getPdf(book):null;
       say('Montando o PDF…');
-      const d=await buildClientePdf({emp,construtora:br.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',pages,pdf,mcmv,fone,brandLogo:br.logo||logoPadrao(key,br.nome,emp)||'',logo:(document.querySelector('.top .mark')||{}).src||'',onProg:(i,t)=>say('Montando o PDF… foto '+i+' de '+t)});
+      let doc=null,ult=null;
+      for(const leve of [false,true]){
+        try{
+          doc=await buildClientePdf(Object.assign({},d,{pages,pdf,fim:true,larg:leve?800:1100,q:leve?.6:.72,brandLogo:br.logo||logoPadrao(key,br.nome,emp)||'',logo:(document.querySelector('.top .mark')||{}).src||'',onProg:(i,t)=>say('Montando o PDF… foto '+i+' de '+t)}));
+          break;
+        }catch(e){console.error(e);ult=e;if(e&&e.message==='semPdfLib')break;if(!leve)say('Aparelho com pouca memória. Tentando de novo em qualidade menor…');}
+      }
+      if(!doc)throw ult||new Error('erro');
       Prog.end();
-      const blob=d.output('blob'),fname=(norm(br.nome+' '+emp).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'empreendimento')+'.pdf';
+      const blob=doc.output('blob'),fname=(norm(br.nome+' '+emp).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'empreendimento')+'.pdf';
       const file=new File([blob],fname,{type:'application/pdf'});
+      const data={files:[file],title:emp,text:mensagemCliente(d)};
       let done=false;
       if(share&&navigator.canShare&&navigator.canShare({files:[file]})){
-        try{await navigator.share({files:[file],title:emp,text:mensagemCliente({emp,construtora:br.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',mcmv,fone})});done=true;say('PDF compartilhado.');}
-        catch(e){if(e&&e.name==='AbortError'){done=true;say('Compartilhamento cancelado.');}else{const r=await pedirToque({files:[file],title:emp,text:mensagemCliente({emp,construtora:br.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',mcmv,fone})});if(r==='ok'){done=true;say('PDF compartilhado.');}else if(r==='cancel'){done=true;say('Compartilhamento cancelado.');}}}
+        try{await navigator.share(data);done=true;say('PDF compartilhado.');}
+        catch(e){if(e&&e.name==='AbortError'){done=true;say('Compartilhamento cancelado.');}else{const r=await pedirToque(data);if(r==='ok'){done=true;say('PDF compartilhado.');}else if(r==='cancel'){done=true;say('Compartilhamento cancelado.');}}}
       }
       if(!done){
         const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;
         document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
-        say('PDF baixado ('+(blob.size/1048576).toFixed(1).replace('.',',')+' MB). É só anexar no WhatsApp.');
+        copyText(mensagemCliente(d));
+        say('PDF baixado ('+(blob.size/1048576).toFixed(1).replace('.',',')+' MB). A mensagem com o Fale comigo foi copiada: anexe o PDF no WhatsApp e cole.');
       }
     }catch(e){
       console.error(e);
@@ -1749,22 +1799,25 @@ async function shareEmp(key,emp){
     Prog.end();bShare.disabled=bSave.disabled=false;
   }
   bShare.onclick=()=>run(true);bSave.onclick=()=>run(false);
-  box.append(el('div',{class:'shr'},bShare,bSave,bTxt,bBook,bClose),st);
+  box.append(el('div',{class:'shr'},bShare,bSave,bTxt,bClose),el('div',{class:'shr'},vsel,bVid),vnote,st);
   document.body.append(ov);
   loadThumbs();
 }
 
 
 /* ---------- book: compartilhar, caixas de envio separadas e correção de arquivo no lugar errado ---------- */
-async function bookComDados(b,onMsg,sel){
-  const pdf=await getPdf(b);
-  const info=empInfo(b.brand.key,b.emp||'');
-  let f='';try{f=localStorage.getItem('fcosta_whats')||'';}catch(e){}
-  const fone=foneWa(f||'(11) 99350-9109'),endereco=info.endereco||'',preco=info.preco||0;
+function dadosBook(b,over){
+  over=over||{};const info=empInfo(b.brand.key,b.emp||'');
+  const emp=over.emp||b.emp||nomeDoArquivo(b.fileName)||b.brand.nome;
+  const endereco=over.endereco!=null?over.endereco:(info.endereco||'');
+  return{emp,construtora:b.brand.nome,preco:over.preco!=null?over.preco:(info.preco||0),endereco,mapa:endereco?mapsUrl(endereco):'',mcmv:over.mcmv!=null?over.mcmv:info.mcmv!==false,fone:over.fone||foneSalvo()};
+}
+async function bookComDados(b,onMsg,sel,over,leve){
+  const pdf=await getPdf(b),D=dadosBook(b,over);
   let pages=[];for(let i=1;i<=pdf.numPages;i++)pages.push(i);
   if(sel&&sel.length)pages=sel.filter(i=>i>=1&&i<=pdf.numPages);
-  const d=await buildClientePdf({emp:b.emp||nomeDoArquivo(b.fileName)||b.brand.nome,construtora:b.brand.nome,preco,endereco,mapa:endereco?mapsUrl(endereco):'',pages,pdf,mcmv:info.mcmv!==false,fone,fim:true,brandLogo:b.brand.logo||logoPadrao(b.brand.key,b.brand.nome,b.emp)||'',
-    logo:(document.querySelector('.top .mark')||{}).src||'',onProg:(i,t)=>{if(onMsg)onMsg('Montando o book com os seus dados… página '+i+' de '+t);}});
+  const d=await buildClientePdf(Object.assign({},D,{pages,pdf,fim:true,larg:leve?800:1100,q:leve?.6:.72,brandLogo:b.brand.logo||logoPadrao(b.brand.key,b.brand.nome,b.emp)||'',
+    logo:(document.querySelector('.top .mark')||{}).src||'',onProg:(i,t)=>{if(onMsg)onMsg('Montando o book com os seus dados… página '+i+' de '+t);}}));
   return d.output('blob');
 }
 function pedirToque(data){
@@ -1799,6 +1852,25 @@ async function saveVideoFile(key,emp,f,say,quiet){
   }catch(e){console.error(e);say('Não consegui salvar o vídeo (falta espaço no aparelho?).',true);}
   if(!quiet)Prog.end();return ok;
 }
+function msgVideo(emp,br){return mensagemCliente({emp,construtora:br.nome,preco:0,endereco:'',mapa:'',mcmv:false,fone:foneSalvo(),tipo:'video'});}
+async function enviarVideo(v,emp,br,say){
+  const file=new File([v.blob],v.fileName,{type:v.blob.type||'video/mp4'});
+  const texto=msgVideo(emp,br),data={files:[file],title:emp+' · decorado',text:texto};
+  // alguns aparelhos ignoram o texto junto do vídeo: deixa a mensagem copiada para colar na legenda
+  try{copyText(texto);}catch(e){}
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share(data);say('Vídeo compartilhado. Se a mensagem do Fale comigo não aparecer, cole: ela já está copiada.');return;}
+    catch(e){
+      if(e&&e.name==='AbortError'){say('Compartilhamento cancelado.');return;}
+      const r=await pedirToque(data);
+      if(r==='ok'){say('Vídeo compartilhado. Se a mensagem do Fale comigo não aparecer, cole: ela já está copiada.');return;}
+      if(r==='cancel'){say('Compartilhamento cancelado.');return;}
+    }
+  }
+  const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=v.fileName;
+  document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),10000);
+  say('Vídeo baixado. A mensagem com o Fale comigo foi copiada: anexe o vídeo no WhatsApp e cole.');
+}
 function videoBox(key,emp,br,say){
   const wrap=el('div',{class:'vidwrap'});
   const list=el('div',{class:'vidlist'});
@@ -1807,23 +1879,7 @@ function videoBox(key,emp,br,say){
   add.onclick=()=>inp.click();
   const top=el('div',{class:'upbox'},el('div',{},el('strong',{text:'Vídeo do decorado'}),el('p',{class:'small',text:'Escolha o vídeo da galeria. Fica salvo só neste aparelho e você envia ao cliente quando quiser.'})),add);
   wrap.append(top,list,inp);
-  const msg=v=>'Olá! Segue o vídeo do decorado do *'+emp+'*'+(br.nome&&br.nome.toLowerCase()!==emp.toLowerCase()?' ('+br.nome+')':'')+'.';
-  async function enviar(v){
-    const file=new File([v.blob],v.fileName,{type:v.blob.type||'video/mp4'});
-    const data={files:[file],title:emp+' · decorado',text:msg(v)};
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      try{await navigator.share(data);say('Vídeo compartilhado.');return;}
-      catch(e){
-        if(e&&e.name==='AbortError'){say('Compartilhamento cancelado.');return;}
-        const r=await pedirToque(data);
-        if(r==='ok'){say('Vídeo compartilhado.');return;}
-        if(r==='cancel'){say('Compartilhamento cancelado.');return;}
-      }
-    }
-    const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=v.fileName;
-    document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),10000);
-    say('Vídeo baixado. É só anexar no WhatsApp.');
-  }
+  const enviar=v=>enviarVideo(v,emp,br,say);
   async function draw(){
     list.textContent='';
     let vs=[];try{vs=(await vidAll()).filter(v=>v.key===key&&(v.emp||'')===emp).sort((a,b)=>b.added-a.added);}
@@ -1845,26 +1901,38 @@ function videoBox(key,emp,br,say){
   draw();
   return wrap;
 }
-async function shareBook(b,titulo,onMsg,sel){
+async function shareBook(b,titulo,onMsg,sel,over){
   if(!b||!b.bytes)return'Este book foi salvo sem o arquivo. Suba o PDF de novo.';
-  let blob=null,comDados=true;
-  try{blob=await bookComDados(b,onMsg,sel);}catch(e){console.error(e);blob=null;}
-  if(!blob){comDados=false;if(sel&&sel.length)return'Não consegui montar o PDF só com as páginas escolhidas (precisa de internet). Tente de novo com internet para não enviar o tabelão inteiro.';blob=new Blob([b.bytes],{type:'application/pdf'});}
+  const D=dadosBook(b,over);
+  let blob=null,erro='';
+  for(const leve of [false,true]){
+    try{blob=await bookComDados(b,onMsg,sel,over,leve);break;}
+    catch(e){console.error(e);erro=(e&&e.message)||'erro';if(erro==='semPdfLib')break;if(onMsg&&!leve)onMsg('Aparelho com pouca memória. Tentando de novo em qualidade menor…');}
+  }
   Prog.end();
+  let comDados=true;
+  if(!blob){
+    const motivo=erro==='semPdfLib'?'o gerador de PDF não carregou (confira a internet)':'não consegui montar o PDF';
+    if(sel&&sel.length)return'Não consegui colocar os seus dados ('+motivo+'). Nada foi enviado.';
+    if(!window.confirm('Não consegui colocar a sua logo e o Fale comigo: '+motivo+'.\n\nEnviar o book original, SEM os seus dados?'))return'Nada foi enviado. Tente de novo com internet.';
+    comDados=false;blob=new Blob([b.bytes],{type:'application/pdf'});
+  }
   const base=fixMoji(b.fileName||'book.pdf').replace(/\.pdf$/i,'').replace(/[\\\/:*?"<>|]+/g,'-');
   const nome=base+(comDados?' - FCOSTA':'')+'.pdf';
   const file=new File([blob],nome,{type:'application/pdf'});
-  const aviso=comDados?'':' (sem os seus dados: precisei da internet para montar o PDF e não consegui)';
+  const texto=comDados?mensagemCliente(D):(titulo||nome);
+  const ok='Book compartilhado'+(comDados?' com a sua logo e o Fale comigo de '+D.emp+'.':' sem os seus dados.');
   if(navigator.canShare&&navigator.canShare({files:[file]})){
-    try{await navigator.share({files:[file],title:titulo||nome,text:titulo||nome});return'Book compartilhado'+(comDados?' com a sua logo e o Fale comigo.':'.'+aviso);}
+    try{await navigator.share({files:[file],title:D.emp,text:texto});return ok;}
     catch(e){if(e&&e.name==='AbortError')return'Compartilhamento cancelado.';
-      const r=await pedirToque({files:[file],title:titulo||nome,text:titulo||nome});
-      if(r==='ok')return'Book compartilhado'+(comDados?' com a sua logo e o Fale comigo.':'.'+aviso);
+      const r=await pedirToque({files:[file],title:D.emp,text:texto});
+      if(r==='ok')return ok;
       if(r==='cancel')return'Compartilhamento cancelado.';}
   }
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
-  return'Book baixado ('+(blob.size/1048576).toFixed(1).replace('.',',')+' MB)'+(comDados?' com a sua logo e o Fale comigo.':'.'+aviso)+' É só anexar no WhatsApp.';
+  if(comDados)copyText(texto);
+  return'Book baixado ('+(blob.size/1048576).toFixed(1).replace('.',',')+' MB)'+(comDados?' com a sua logo e o Fale comigo. A mensagem foi copiada: anexe o PDF no WhatsApp e cole.':' sem os seus dados.');
 }
 function upBox(id,titulo,desc,btn,fn){
   const b=el('div',{class:'upbox'},el('div',{},el('strong',{text:titulo}),el('p',{class:'small',text:desc})),el('label',{class:'btn pri',for:id,text:btn}));
