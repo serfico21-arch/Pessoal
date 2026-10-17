@@ -1476,7 +1476,14 @@ function mcmvInfo(preco){
 }
 function foneWa(t){let d=String(t||'').replace(/\D/g,'');if(d.length===10||d.length===11)d='55'+d;return d.length>=12?d:'';}
 function fixMoji(t){t=String(t||'');if(/[ÃÂ][\u0080-\u00BF]/.test(t)){try{return decodeURIComponent(escape(t));}catch(e){}}return t;}
-function nomeDoArquivo(fn){return fixMoji(fn).replace(/\.pdf$/i,'').replace(/\s*-\s*FCOSTA\s*$/i,'').replace(/\s*\(\d+\)\s*$/,'').replace(/^\s*(e-?book|book)\s+/i,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').trim();}
+function nomeDoArquivo(fn){return fixMoji(fn).replace(/\.pdf$/i,'').replace(/\s*-\s*FCOSTA\s*$/i,'').replace(/\s*\(\d+\)\s*$/,'').replace(/^\s*(e-?book|book)\s+/i,'').replace(/[_]+/g,' ').replace(/\s+/g,' ').replace(/\s*[-–]?\s*(compressed|comprimido)\s*$/i,'').trim();}
+function waCurto(fone,emp,construtora,tipo){
+  // link curto e legível: já chega para mim com o nome do empreendimento
+  const nome=(String(emp||'').trim()||String(construtora||'').trim()).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
+  const t=(tipo==='video'?'Vi o video do ':'Tenho interesse no ')+(nome||'empreendimento');
+  return'https://wa.me/'+fone+'?text='+t.replace(/ /g,'+');
+}
+function fmtFone(f){const d=String(f||'').replace(/\D/g,'').replace(/^55(?=\d{10,11}$)/,'');return d.length===11?'('+d.slice(0,2)+') '+d.slice(2,7)+'-'+d.slice(7):d.length===10?'('+d.slice(0,2)+') '+d.slice(2,6)+'-'+d.slice(6):d;}
 function foneSalvo(){let f='';try{f=localStorage.getItem('fcosta_whats')||'';}catch(e){}return foneWa(f||'(11) 99350-9109');}
 function waTexto(emp,construtora,preco,endereco,tipo,curto){
   const nome=String(emp||'').trim()||String(construtora||'').trim();
@@ -1501,7 +1508,7 @@ function mensagemCliente(o){
   else if(m&&m.acima)L.push('Financiamento pelo SBPE (acima do teto do MCMV)');
   if(o.endereco)L.push('Localização: '+o.endereco+'\n'+o.mapa);
   // o link já leva escrito o nome do empreendimento
-  L.push('','Fale comigo: '+waLink(o.fone||foneSalvo(),o.emp,o.construtora,0,'',o.tipo,true));
+  L.push('','Fale comigo no WhatsApp:',waCurto(o.fone||foneSalvo(),o.emp,o.construtora,o.tipo));
   L.push('',ASSINATURA);
   return L.join('\n');
 }
