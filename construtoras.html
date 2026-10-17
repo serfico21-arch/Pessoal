@@ -190,6 +190,10 @@ details.rg summary{cursor:pointer;font-weight:700;color:var(--acc-text);padding:
 .upbox.over{border-color:var(--acc);background:var(--acc-bg)}
 .del{border-color:#B3261E;color:#8A1C14}
 .upbox strong{font:700 17px "Bricolage Grotesque",sans-serif}
+.guia{margin:10px 0 6px;border:1px solid var(--acc-line);background:var(--acc-bg);border-radius:8px;padding:8px 12px}
+.guia summary{cursor:pointer;font-weight:700;color:var(--acc-text)}
+.guia ul{margin:8px 0 2px;padding-left:18px}.guia li{margin:5px 0;line-height:1.4}
+.guia .aviso{margin:8px 0 2px;font-size:.92em}
 </style>
 </head>
 <body>
@@ -788,6 +792,7 @@ function renderCon(host){
   fh.append(ttl,acts);body.append(fh);
 
   const ds=docs.filter(here).sort((a,b)=>(b.added||0)-(a.added||0)),bk=books.filter(here).sort((a,b)=>(b.added||0)-(a.added||0));
+  if(bk.length)acts.prepend(btnMeusDados(bk[0],'Compartilhar book com meus dados'));else if(ds.length)acts.prepend(btnMeusDados(ds[0],'Compartilhar tabelão com meus dados'));
   body.append(el('h3',{class:'sh',text:'Tabelão: tabela de preços ('+ds.length+')'}));
   body.append(upBox('fi','Tabelão (tabela de preços)','Suba ou solte aqui o PDF da tabela de valores.','Subir tabelão (PDF)',loadMany));
   if(ds.length){const g=el('div',{class:'cards'});ds.forEach(d=>g.append(card(d)));body.append(g);}
@@ -811,7 +816,7 @@ function card(d){
   const a=el('div',{class:'card-a'});
   const ob=el('button',{class:'pri',type:'button',text:'Abrir tabelão'});ob.onclick=()=>{conKey=d.brand.key;empTab=d.emp||'';go('reader',d.id);window.scrollTo({top:0});};
   const bk2=el('button',{type:'button',text:'É um book'});bk2.title='Passar este arquivo para os books';bk2.onclick=()=>docToBook(d);
-  a.append(ob,bk2,armBtn('Excluir tabelão','Toque de novo para excluir',()=>removeDoc(d)));c.append(a);
+  a.append(ob,btnMeusDados(d),bk2,armBtn('Excluir tabelão','Toque de novo para excluir',()=>removeDoc(d)));c.append(a);
   return c;
 }
 function openBook(b){
@@ -824,6 +829,12 @@ function saveBook(b){
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([b.bytes],{type:'application/pdf'}));a.download=b.fileName;
   document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
 }
+function btnMeusDados(b,label){
+  const sh=el('button',{class:'pri',type:'button',text:label||'Compartilhar com meus dados'});
+  sh.title='Envia o PDF com a sua logo e o Fale comigo';
+  sh.onclick=async()=>{setStatus('Preparando o PDF…');setStatus(await shareBook(b,[b.brand.nome,b.emp].filter(Boolean).join(' · '),m=>setStatus(m)));};
+  return sh;
+}
 function bookCard(b){
   const c=el('article',{class:'card'});
   c.append(el('div',{class:'card-h'},el('div',{class:'thumb bk',text:'PDF'}),el('div',{class:'card-t'},el('h3',{text:b.fileName}),el('p',{class:'small',text:'E-book'+(b.bytes?' · '+(b.bytes.byteLength/1048576).toFixed(1).replace('.',',')+' MB':'')}))));
@@ -831,7 +842,7 @@ function bookCard(b){
   const a=el('div',{class:'card-a'});
   const ob=el('button',{class:'pri',type:'button',text:'Abrir e-book'});ob.onclick=()=>openBook(b);
   const sv=el('button',{type:'button',text:'Baixar'});sv.onclick=()=>saveBook(b);
-  const sh=el('button',{class:'pri',type:'button',text:'Compartilhar com meus dados'});sh.title='Envia o book com a sua logo e o Fale comigo';sh.onclick=async()=>{setStatus('Preparando o book…');setStatus(await shareBook(b,[b.brand.nome,b.emp].filter(Boolean).join(' · '),m=>setStatus(m)));};
+  const sh=btnMeusDados(b);
   a.append(ob,sh,sv,armBtn('Excluir book','Toque de novo para excluir',()=>removeBook(b)));c.append(a);
   return c;
 }
@@ -857,7 +868,7 @@ function renderReader(host){
   const meta=el('div',{class:'meta',text:(d.emp||'Tabelão geral')+'  •  '+d.fileName+(d.ref?'  •  Data ref. '+d.ref:'')+'  •  '+d.pages.reduce((s,p)=>s+p.anns.length,0)+' links'});
   const rm=el('button',{type:'button',text:'Remover logo'});rm.onclick=()=>{setBrandLogo(key,null);render();};
   const pr=el('button',{type:'button',text:'Imprimir'});pr.onclick=()=>window.print();
-  wrap.append(el('div',{class:'brand'},back,logo,el('div',{},nm,meta),el('span',{class:'sp'}),rm,pr,armBtn('Excluir tabelão','Toque de novo para excluir',()=>removeDoc(d))));
+  wrap.append(el('div',{class:'brand'},back,logo,el('div',{},nm,meta),el('span',{class:'sp'}),rm,btnMeusDados(d),pr,armBtn('Excluir tabelão','Toque de novo para excluir',()=>removeDoc(d))));
   const vt=el('div',{class:'vt'});
   [['tabela','Tabela'],['original','Original com links'],['links','Todos os links']].forEach(([k,t])=>{const b=el('button',{type:'button',text:t});if(d.view===k)b.className='on';b.onclick=()=>{d.view=k;render();};vt.append(b);});
   const s=el('input',{type:'search',placeholder:'Buscar empreendimento, bairro, estação…',value:query,'aria-label':'Buscar'});
@@ -1129,8 +1140,21 @@ function renderSim(panel){
       const bt=el('button',{class:'sm',type:'button',text:'Simular'});bt.onclick=()=>selectUnit(x.d,{name:x.u.nome,desc:x.u.desc,tab:x.u.tab,dsc:x.u.dsc});
       tr.append(el('td',{},bt));tb.append(tr);
     });
-    const head=el('tr',{class:'hd'},...['Construtora','Empreendimento','Unidade','Valor','Programa','Parcela','% da renda',''].map((t,i)=>el('th',{class:i>=3&&i!==4?'r':'',text:t})));
-    host.append(el('div',{class:'tw opt'},el('table',{},el('thead',{},head),tb)),el('p',{class:'small',text:'* valor com desconto. Programa = melhor opção cuja parcela fica dentro de '+rules.comp+'% da renda. Estimativa: confirme disponibilidade e condições com a construtora e o banco.'}));
+    const COLS=[
+      ['Construtora','Empresa dona do imóvel (a pasta onde o tabelão foi guardado). Se o tabelão estiver dentro de um empreendimento, aparece depois do sinal ›.'],
+      ['Empreendimento','Identificação da linha, lida da 1ª coluna do tabelão (PDF). Normalmente é o nome do empreendimento ou da torre. Em alguns PDFs vem um número (ex.: R$ 1.500,00): é o que está na 1ª coluna daquele PDF, e o programa não consegue dizer o que é. Confira no PDF original.'],
+      ['Unidade','Descrição complementar da linha (apartamento, tipo, andar, metragem), lida do tabelão. Fica vazia quando o PDF não traz esse dado.'],
+      ['Valor','Preço do imóvel segundo o tabelão. O asterisco (*) indica que é o valor com desconto.'],
+      ['Programa','Melhor financiamento para este cliente: MCMV (Minha Casa Minha Vida) ou SBPE (financiamento comum de banco). Só aparece se a parcela couber em '+rules.comp+'% da renda. Se não couber, aparece "Não cabe".'],
+      ['Parcela','Prestação mensal estimada (1ª parcela) pelo programa indicado, usando renda, entrada e prazo preenchidos acima.'],
+      ['% da renda','Quanto a parcela pesa na renda familiar do cliente. O limite usado é '+rules.comp+'%. Quanto menor o número, mais folgado fica para o cliente.'],
+      ['Simular','Botão que abre este imóvel na tela de simulação, com subsídio, taxa, valor financiado e total pago. De lá dá para copiar o resumo ou enviar pelo WhatsApp.']
+    ];
+    const head=el('tr',{class:'hd'},...COLS.slice(0,7).concat([['','']]).map((c,i)=>{const t=el('th',{class:i>=3&&i!==4?'r':'',text:c[0]});if(c[1])t.title=c[1];return t;}));
+    const guia=el('details',{class:'guia',open:''},el('summary',{text:'Como ler esta tabela (explicação de cada coluna)'}),
+      el('ul',{},...COLS.map(c=>el('li',{},el('b',{text:c[0]+': '}),c[1]))),
+      el('p',{class:'aviso',text:'Resumo: o programa testa cada imóvel dos tabelões com a renda, a entrada e o prazo deste cliente. A tabela mostra só os que cabem (parcela até '+rules.comp+'% da renda). Tire a marca de "Mostrar só as que cabem na renda" para ver todos.'}));
+    host.append(el('div',{class:'tw opt'},el('table',{},el('thead',{},head),tb)),guia,el('p',{class:'small',text:'* valor com desconto. Programa = melhor opção cuja parcela fica dentro de '+rules.comp+'% da renda. Estimativa: confirme disponibilidade e condições com a construtora e o banco.'}));
   }
 
   // regras editáveis
