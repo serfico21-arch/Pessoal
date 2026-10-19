@@ -1527,25 +1527,28 @@ window.FCBand = (function(){
     }catch(e){ /* sem internet: usa fontes do sistema */ }
 
     // --- áudio (música e/ou narração) ---
+    const ex = window.__fcExtraAudio; window.__fcExtraAudio = null;
+    const useMusic = audioFile || (ex && ex.music) || null, useNarr = narrationBlob || (ex && ex.narr) || null;
+    const useVol = (audioFile || !ex || ex.vol == null) ? parseInt(musicVol.value,10) : ex.vol;
     let audioCtx = null, audioDest = null, audioEl = null, narrBuf = null, narrSrc = null;
-    if(audioFile || narrationBlob){
+    if(useMusic || useNarr){
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       try{ await audioCtx.resume(); }catch(e){}
       audioDest = audioCtx.createMediaStreamDestination();
-      if(audioFile){
-        audioEl = new Audio(URL.createObjectURL(audioFile));
+      if(useMusic){
+        audioEl = new Audio(URL.createObjectURL(useMusic));
         audioEl.loop = true;
         audioEl.crossOrigin = 'anonymous';
         const source = audioCtx.createMediaElementSource(audioEl);
         const musicGain = audioCtx.createGain();
         // com narração, a música fica baixa para a voz aparecer
-        musicGain.gain.value = narrationBlob ? (parseInt(musicVol.value,10) / 100) : 1;
+        musicGain.gain.value = useNarr ? (useVol / 100) : 1;
         source.connect(musicGain);
         musicGain.connect(audioDest);
       }
-      if(narrationBlob){
+      if(useNarr){
         try{
-          narrBuf = await audioCtx.decodeAudioData(await narrationBlob.arrayBuffer());
+          narrBuf = await audioCtx.decodeAudioData(await useNarr.arrayBuffer());
         }catch(e){
           throw new Error('não consegui ler o áudio da narração; tente gravar de novo ou enviar um MP3/M4A');
         }
@@ -2668,9 +2671,11 @@ window.FCBand = (function(){
   $('tvMp4').onclick = function(){
     if(!PH().length){ msg('Adicione as fotos no passo 1 primeiro.'); return; }
     const g = document.getElementById('generateBtn');
+    window.__fcExtraAudio = { music: tvMusicFile, narr: tvNarrBlob, vol: parseInt($('tvMusicVol').value,10) };
+    const vazio = !$('propertyInfo').value.trim() || !$('propertyDesc').value.trim();
     g.scrollIntoView({behavior:'smooth', block:'center'});
     g.click();
-    msg('Gerando o vídeo com as suas fotos. Ele aparece no passo 4 com o botão de baixar: sai em MP4 quando o navegador permite (Chrome atualizado), senão em WebM.');
+    msg('Gerando o vídeo com as suas fotos' + ((tvMusicFile || tvNarrBlob) ? ', com a música/narração do passo 6' : ' (sem som: escolha uma música ou narração acima)') + '. Ele aparece no passo 4 com o botão de baixar.' + (vazio ? ' Atenção: título ou descrição do imóvel estão vazios no passo 2; preencha para aparecerem no vídeo.' : ''));
   };
   $('tvBuild').onclick = async function(){
     const photos = window.__fcPhotos ? window.__fcPhotos() : [];
