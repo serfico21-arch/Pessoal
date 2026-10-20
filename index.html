@@ -157,6 +157,8 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
 #visor-frame{flex:1;width:100%;border:0;background:#fff}
 @media(max-width:480px){#visor-titulo{display:none}#visor-voltar{flex:1;justify-content:center}#visor-externo span{display:none}#visor-externo{padding:0 14px}}
 .gtit{display:flex;align-items:center;gap:8px;margin:20px 0 10px;font:700 14px 'Sora',sans-serif;color:var(--c)}.gtit em{font-style:normal;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--c) 16%,transparent)}
+.ed-tabs{display:flex;gap:8px}.ed-tabs .pill{flex:1;justify-content:center;cursor:pointer;padding:10px 8px}
+.ed-pane{display:flex;flex-direction:column;gap:15px}.ed-pane[hidden]{display:none}
 </style>
 </head>
 <body data-view="inicio">
@@ -246,28 +248,52 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
 </div></dialog>
 <dialog id="dlg-novo" class="sheet" aria-labelledby="dlg-titulo">
   <div class="dlg-corpo">
-    <h3 id="dlg-titulo"><i class="ti ti-plus"></i>Novo botão</h3>
-    <div class="campo"><label for="nv-titulo">Nome do botão</label><input type="text" id="nv-titulo" placeholder="Ex.: Calculadora de reforma" maxlength="60" /></div>
-    <div class="campo"><label for="nv-sub">Descrição curta (opcional)</label><input type="text" id="nv-sub" placeholder="Ex.: Estimar custo por m²" maxlength="90" /></div>
-    <div class="campo"><label for="nv-href">Link ou nome do arquivo</label><input type="text" id="nv-href" placeholder="https://... ou minha-ferramenta.html" autocapitalize="none" autocomplete="off" /></div>
-    <div class="linha-dois">
-      <div class="campo"><label for="nv-modo">Onde fica</label>
-        <select id="nv-modo"><option value="corretor">Corretor</option><option value="pessoal">Pessoal</option><option value="pastor">Pastor</option></select></div>
-      <div class="campo"><label for="nv-grupo">Grupo</label><select id="nv-grupo"></select></div>
+    <h3 id="dlg-titulo"><i class="ti ti-pencil"></i>Edição</h3>
+    <div class="ed-tabs" role="tablist" aria-label="Seções da edição">
+      <button type="button" class="pill on" role="tab" data-edtab="botoes"><i class="ti ti-layout-grid-add"></i>Botões</button>
+      <button type="button" class="pill" role="tab" data-edtab="ferramentas"><i class="ti ti-tools"></i>Ferramentas</button>
+      <button type="button" class="pill" role="tab" data-edtab="backup"><i class="ti ti-database-export"></i>Backup</button>
     </div>
-    <div class="campo" id="nv-grupo-novo-wrap" hidden><label for="nv-grupo-novo">Nome do novo grupo</label><input type="text" id="nv-grupo-novo" placeholder="Ex.: Obras e reformas" maxlength="40" /></div>
-    <div class="campo"><label>Ícone</label><div class="ic-grid" id="nv-icones"></div></div>
-    <div class="dlg-acoes">
-      <button type="button" class="btn-mini" id="nv-salvar"><i class="ti ti-device-floppy"></i>Salvar botão</button>
-      <button type="button" class="btn-sec" id="nv-fechar">Fechar</button>
+
+    <!-- ABA 1: BOTÕES DO PAINEL -->
+    <div class="ed-pane" data-pane="botoes">
+      <div class="dlg-sep">1 · Criar um botão novo</div>
+      <div class="campo"><label for="nv-titulo">Nome do botão</label><input type="text" id="nv-titulo" placeholder="Ex.: Calculadora de reforma" maxlength="60" /></div>
+      <div class="campo"><label for="nv-sub">Descrição curta (opcional)</label><input type="text" id="nv-sub" placeholder="Ex.: Estimar custo por m²" maxlength="90" /></div>
+      <div class="campo"><label for="nv-href">Link ou nome do arquivo</label><input type="text" id="nv-href" placeholder="https://... ou minha-ferramenta.html" autocapitalize="none" autocomplete="off" /></div>
+      <div class="linha-dois">
+        <div class="campo"><label for="nv-modo">Onde fica</label>
+          <select id="nv-modo"><option value="corretor">Corretor</option><option value="pessoal">Pessoal</option><option value="pastor">Pastor</option></select></div>
+        <div class="campo"><label for="nv-grupo">Grupo</label><select id="nv-grupo"></select></div>
+      </div>
+      <div class="campo" id="nv-grupo-novo-wrap" hidden><label for="nv-grupo-novo">Nome do novo grupo</label><input type="text" id="nv-grupo-novo" placeholder="Ex.: Obras e reformas" maxlength="40" /></div>
+      <div class="campo"><label>Ícone</label><div class="ic-grid" id="nv-icones"></div></div>
+      <div class="dlg-acoes">
+        <button type="button" class="btn-mini" id="nv-salvar"><i class="ti ti-device-floppy"></i>Salvar botão</button>
+      </div>
+      <p class="dlg-dica">O botão entra no grupo em ordem alfabética e fica salvo neste aparelho/navegador.</p>
+      <div class="dlg-sep">2 · Meus botões adicionados</div>
+      <div class="meus-lista" id="nv-meus"></div>
     </div>
-    <p class="dlg-dica">O botão entra no grupo na ordem alfabética. Os botões novos ficam salvos neste aparelho/navegador. Para levar para outro aparelho, use o backup abaixo.</p>
-    <div class="dlg-sep">Meus botões adicionados</div>
-    <div class="meus-lista" id="nv-meus"></div>
-    <div class="dlg-acoes">
-      <button type="button" class="btn-sec" id="nv-exportar"><i class="ti ti-copy"></i>Copiar backup</button>
-      <button type="button" class="btn-sec" id="nv-importar"><i class="ti ti-download"></i>Restaurar backup</button>
+
+    <!-- ABA 2: FERRAMENTAS DE EDIÇÃO -->
+    <div class="ed-pane" data-pane="ferramentas" hidden>
+      <div class="dlg-sep">Editar e produzir conteúdo</div>
+      <p class="dlg-dica">Todas as ferramentas do painel que servem para editar, preencher ou montar material.</p>
+      <div class="lista" id="ed-ferr"></div>
     </div>
+
+    <!-- ABA 3: BACKUP -->
+    <div class="ed-pane" data-pane="backup" hidden>
+      <div class="dlg-sep">Backup dos meus botões</div>
+      <p class="dlg-dica">Copie o backup para guardar ou levar os botões para outro aparelho. Depois, cole em "Restaurar backup".</p>
+      <div class="dlg-acoes">
+        <button type="button" class="btn-sec" id="nv-exportar"><i class="ti ti-copy"></i>Copiar backup</button>
+        <button type="button" class="btn-sec" id="nv-importar"><i class="ti ti-download"></i>Restaurar backup</button>
+      </div>
+    </div>
+
+    <div class="dlg-acoes"><button type="button" class="btn-sec" id="nv-fechar" style="flex:1"><i class="ti ti-x"></i>Fechar</button></div>
   </div>
 </dialog>
 
@@ -482,7 +508,7 @@ var FERRAMENTAS = [
     var data = d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
     data = data.charAt(0).toUpperCase() + data.slice(1);
     var acoes = [['comissao', 'ti-calculator', 'Comissão', '--em'], ['lead', 'ti-user-plus', 'Novo lead', '--sk'],
-      ['atalhos', 'ti-bolt', 'Atalhos', '--am'], ['novo', 'ti-plus', 'Novo botão', '--vi']];
+      ['atalhos', 'ti-bolt', 'Atalhos', '--am'], ['novo', 'ti-pencil', 'Edição', '--vi']];
     var html = '<section class="hero"><p class="eyebrow">' + esc(data) + '</p><h1>' + saud + ', <span class="grad">Sérgio</span></h1>' +
       '<button type="button" class="busca-pill" data-open="busca"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button></section>';
     html += '<div class="acoes">' + acoes.map(function (a) {
@@ -505,7 +531,10 @@ var FERRAMENTAS = [
       '<span class="mq">' + itens.length + ' botões <i class="ti ti-arrow-right"></i></span></button>' +
       '<a class="mundo" style="--c:var(--or)" href="repositorios-github.html"><i class="ti ti-brand-github big"></i>' +
       '<span class="mn">Repositórios</span><span class="md">Pessoal, IBBC, Apostilas CRECI, ADM e PTAM</span>' +
-      '<span class="mq">5 repositórios <i class="ti ti-arrow-right"></i></span></a></div>';
+      '<span class="mq">5 repositórios <i class="ti ti-arrow-right"></i></span></a>' +
+      '<button type="button" class="mundo" style="--c:var(--vi)" data-open="novo"><i class="ti ti-pencil big"></i>' +
+      '<span class="mn">Edição</span><span class="md">Novo botão, ferramentas de edição e backup, tudo num lugar só</span>' +
+      '<span class="mq">Abrir <i class="ti ti-arrow-right"></i></span></button></div>';
     var novos = itens.filter(function (i) { return i.b === 'Novo'; }).sort(porNome);
     if (novos.length) html += '<h2 class="sec">Novidades</h2><div class="lista">' + novos.map(item).join('') + '</div>';
     var rec = lerStorage('painel_recentes', []);
@@ -562,8 +591,8 @@ var FERRAMENTAS = [
       rap('ti-calculator', 'Comissão rápida', 'Calcular a comissão sem sair do painel', 'data-open="comissao"') +
       rap('ti-user-plus', 'Novo lead', 'Registrar um contato rapidamente', 'data-open="lead"') +
       rap('ti-bolt', 'Atalhos úteis', 'Janela com WhatsApp Web, Maps, CEP e CRECI-SP', 'data-open="atalhos"') +
-      rap('ti-plus', 'Novo botão', 'Adicionar uma ferramenta ao painel', 'data-open="novo"') +
-      rap('ti-copy', 'Backup dos botões', 'Copiar ou restaurar os botões que você criou', 'data-open="novo"') +
+      rap('ti-pencil', 'Edição', 'Novo botão, ferramentas de edição e backup, tudo num lugar só', 'data-open="novo"') +
+      rap('ti-copy', 'Backup dos botões', 'Copiar ou restaurar os botões que você criou', 'data-open="novo" data-tab="backup"') +
       rap('ti-sun-moon', 'Tema claro / escuro', 'Alternar a aparência do painel', 'id="map-tema"') +
       rap('ti-brand-whatsapp', 'WhatsApp Web', 'Atalho útil', '', 'https://web.whatsapp.com') +
       rap('ti-map-pin', 'Google Maps', 'Atalho útil', '', 'https://www.google.com/maps') +
@@ -577,7 +606,7 @@ var FERRAMENTAS = [
     var M = MUNDOS[m], itens = ligar(todosItens()), gs = gruposDoModo(m, itens);
     var lista = itens.filter(function (i) { return i.m === m; });
     var cab = '<section class="mhead" style="--c:var(' + M.c + ')"><span class="mh-ic"><i class="ti ' + M.i + '"></i></span><div><h1>' + M.n + '</h1><p>' + M.d + '</p></div>' +
-      '<button type="button" class="btn-sec" data-open="novo"><i class="ti ti-plus"></i><span>Novo botão</span></button></section>';
+      '<button type="button" class="btn-sec" data-open="novo"><i class="ti ti-pencil"></i><span>Edição</span></button></section>';
     var html = cab + '<button type="button" class="busca-pill" data-open="busca" style="margin-bottom:6px"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button>';
     gs.forEach(function (g) {
       var l = lista.filter(function (i) { return i._g === g; }).sort(porNome);
@@ -654,7 +683,7 @@ var FERRAMENTAS = [
       else if (t.hasAttribute('data-fechar')) fecharDlg(t.closest('dialog'));
       else {
         var id = t.getAttribute('data-open');
-        if (id === 'busca') abrirBusca(); else if (id === 'novo') { [].forEach.call(document.querySelectorAll('dialog[open]'), fecharDlg); abrirDialogo(); }
+        if (id === 'busca') abrirBusca(); else if (id === 'novo') { [].forEach.call(document.querySelectorAll('dialog[open]'), fecharDlg); abrirDialogo(t.getAttribute('data-tab')); }
         else abrirDlg(document.getElementById('dlg-' + id));
       }
       return;
@@ -738,7 +767,24 @@ var FERRAMENTAS = [
     listarMeus(); preencherGrupos(null); render();
   });
 
-  function abrirDialogo() {
+  var EDIT_FERR = ['Portfólio editor', 'Contratos CRECI', 'Logo nas Fotos', 'Banner de Imóvel', 'Descrição de Imóvel'];
+  function listarFerramentasEdicao() {
+    var itens = ligar(todosItens()), box = document.getElementById('ed-ferr');
+    box.innerHTML = EDIT_FERR.map(function (t) {
+      return itens.filter(function (i) { return i.m === 'corretor' && i.t === t; })[0];
+    }).filter(Boolean).map(item).join('');
+  }
+  function abrirAba(nome) {
+    [].forEach.call(dlg.querySelectorAll('.ed-pane'), function (p) { p.hidden = p.getAttribute('data-pane') !== nome; });
+    [].forEach.call(dlg.querySelectorAll('[data-edtab]'), function (b) { b.classList.toggle('on', b.getAttribute('data-edtab') === nome); });
+    if (nome === 'ferramentas') listarFerramentasEdicao();
+  }
+  dlg.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-edtab]');
+    if (b) abrirAba(b.getAttribute('data-edtab'));
+  });
+  function abrirDialogo(tab) {
+    abrirAba(tab || 'botoes');
     nvTitulo.value = ''; nvSub.value = ''; nvHref.value = ''; nvGrupoNovo.value = '';
     iconeEscolhido = 'ti-star';
     nvModo.value = (modo === 'inicio' || modo === 'favoritos' || modo === 'mapa') ? 'corretor' : modo;
