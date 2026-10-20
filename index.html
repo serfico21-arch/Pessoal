@@ -157,8 +157,9 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
 #visor-frame{flex:1;width:100%;border:0;background:#fff}
 @media(max-width:480px){#visor-titulo{display:none}#visor-voltar{flex:1;justify-content:center}#visor-externo span{display:none}#visor-externo{padding:0 14px}}
 .gtit{display:flex;align-items:center;gap:8px;margin:20px 0 10px;font:700 14px 'Sora',sans-serif;color:var(--c)}.gtit em{font-style:normal;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--c) 16%,transparent)}
-.ed-tabs{display:flex;gap:8px}.ed-tabs .pill{flex:1;justify-content:center;cursor:pointer;padding:10px 8px}
+.ed-tabs{display:flex;flex-wrap:wrap;gap:8px}.ed-tabs .pill{flex:1 1 auto;justify-content:center;cursor:pointer;padding:10px 12px}
 .ed-pane{display:flex;flex-direction:column;gap:15px}.ed-pane[hidden]{display:none}
+#dlg-novo .dlg-corpo,#dlg-novo .ed-pane,#dlg-novo .lista,#dlg-novo .item{min-width:0;max-width:100%}#dlg-novo .lista{grid-template-columns:minmax(0,1fr)}#dlg-novo .item-link .tx{min-width:0;flex:1}#dlg-novo .item-link .tag{flex:none}
 </style>
 </head>
 <body data-view="inicio">
@@ -248,15 +249,17 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
 </div></dialog>
 <dialog id="dlg-novo" class="sheet" aria-labelledby="dlg-titulo">
   <div class="dlg-corpo">
-    <h3 id="dlg-titulo"><i class="ti ti-pencil"></i>Edição</h3>
+    <h3 id="dlg-titulo"><i class="ti ti-pencil"></i>Edição <small style="font:600 11px 'JetBrains Mono',monospace;color:var(--texto-muted);margin-left:auto">v3 · site · vídeos · ferramentas</small></h3>
     <div class="ed-tabs" role="tablist" aria-label="Seções da edição">
-      <button type="button" class="pill on" role="tab" data-edtab="botoes"><i class="ti ti-layout-grid-add"></i>Botões</button>
+      <button type="button" class="pill on" role="tab" data-edtab="site"><i class="ti ti-world"></i>Site</button>
+      <button type="button" class="pill" role="tab" data-edtab="videos"><i class="ti ti-video"></i>Vídeos</button>
       <button type="button" class="pill" role="tab" data-edtab="ferramentas"><i class="ti ti-tools"></i>Ferramentas</button>
+      <button type="button" class="pill" role="tab" data-edtab="botoes"><i class="ti ti-layout-grid-add"></i>Novo botão</button>
       <button type="button" class="pill" role="tab" data-edtab="backup"><i class="ti ti-database-export"></i>Backup</button>
     </div>
 
     <!-- ABA 1: BOTÕES DO PAINEL -->
-    <div class="ed-pane" data-pane="botoes">
+    <div class="ed-pane" data-pane="botoes" hidden>
       <div class="dlg-sep">1 · Criar um botão novo</div>
       <div class="campo"><label for="nv-titulo">Nome do botão</label><input type="text" id="nv-titulo" placeholder="Ex.: Calculadora de reforma" maxlength="60" /></div>
       <div class="campo"><label for="nv-sub">Descrição curta (opcional)</label><input type="text" id="nv-sub" placeholder="Ex.: Estimar custo por m²" maxlength="90" /></div>
@@ -276,12 +279,12 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
       <div class="meus-lista" id="nv-meus"></div>
     </div>
 
-    <!-- ABA 2: FERRAMENTAS DE EDIÇÃO -->
-    <div class="ed-pane" data-pane="ferramentas" hidden>
-      <div class="dlg-sep">Editar e produzir conteúdo</div>
-      <p class="dlg-dica">Todas as ferramentas do painel que servem para editar, preencher ou montar material.</p>
-      <div class="lista" id="ed-ferr"></div>
-    </div>
+    <!-- EDIÇÃO DO SITE -->
+    <div class="ed-pane" data-pane="site"><div id="ed-site" class="ed-pane"></div></div>
+    <!-- EDIÇÃO DOS VÍDEOS -->
+    <div class="ed-pane" data-pane="videos" hidden><div id="ed-videos" class="ed-pane"></div></div>
+    <!-- FERRAMENTAS -->
+    <div class="ed-pane" data-pane="ferramentas" hidden><div id="ed-ferramentas" class="ed-pane"></div></div>
 
     <!-- ABA 3: BACKUP -->
     <div class="ed-pane" data-pane="backup" hidden>
@@ -377,6 +380,7 @@ var FERRAMENTAS = [
   {m:"corretor", g:"financas", t:"Controle de Aluguéis", s:"Locatários, recibos e vencimentos", i:"ti-key", h:"alugueis.html", k:"aluguéis locatários recibos contratos vencimento controle de aluguéis"},
   {m:"corretor", g:"ia", t:"Modelo I.A", s:"Crie a modelo: imagem, voz, vídeo e avatar falando", i:"ti-sparkles", h:"modelo-i-a.html", k:"modelo ia i.a inteligência artificial personagem imagem voz vídeo avatar book prompt fcosta chatgpt gemini flow", d:1, b:"Novo"},
   {m:"corretor", g:"ia", t:"Academy", s:"Dicas para corretores", i:"ti-school", h:"academy-corretor.html", k:"academy dicas corretores"},
+  {m:"corretor", g:"ia", t:"Tijolo.IA", s:"Automação no Facebook: grupos, posts e vitrine de imóveis (site externo)", i:"ti-bricks", h:"https://tijoloia.com.br/corretor/sergio-fernandes-da-costa", k:"tijolo ia tijoloia automação facebook grupos posts prospecção leads corretor", b:"Novo"},
   {m:"corretor", g:"ia", t:"Abrir CORRETOR.IA", s:"Painel completo (site externo, plano premium)", i:"ti-robot", h:"https://corretoriaferramentas.lovable.app/dashboard", k:"corretor ia painel completo premium"},
   {m:"corretor", g:"ia", t:"Vídeos Automáticos", s:"Geração de vídeos com IA (site externo)", i:"ti-video", h:"https://corretoriaferramentas.lovable.app/dashboard", k:"vídeos automáticos ia corretor.ia"},
   {m:"corretor", g:"ia", t:"Assistente Virtual", s:"Atendimento com IA (site externo)", i:"ti-message-chatbot", h:"https://corretoriaferramentas.lovable.app/dashboard", k:"assistente virtual atendimento ia corretor.ia"},
@@ -767,31 +771,62 @@ var FERRAMENTAS = [
     listarMeus(); preencherGrupos(null); render();
   });
 
-  var EDIT_FERR = ['Portfólio editor', 'Contratos CRECI', 'Logo nas Fotos', 'Banner de Imóvel', 'Descrição de Imóvel'];
+  var RE_EDITOR = /editor|editar|edição|edicao|-admin/i;
+  var EDIT_ABAS = {
+    site: [
+      ['Portfólios', ['Portfólio cliente', 'Portfólio editor']],
+      ['Site e anúncios', ['Site FCosta', 'Anunciar', 'Descrição de Imóvel', 'Contador de Caracteres', 'Gerador de QR Code']]
+    ],
+    videos: [
+      ['Tour virtual', ['Tour de Imóveis']],
+      ['Gravação e voz', ['Gravador com Teleprompter', 'Texto em Voz']],
+      ['Vídeos com IA', ['Vídeos Automáticos']]
+    ],
+    ferramentas: [
+      ['CORRETOR.IA', ['Abrir CORRETOR.IA', 'Assistente Virtual', 'Imagens 2.0', 'Imagens 1.0']],
+      ['Banner e imagens', ['Banner de Imóvel', 'Logo nas Fotos']],
+      ['Inteligência artificial', ['Tijolo.IA', 'Modelo I.A']],
+      ['Assinatura e documentos', ['Assinatura Profissional', 'Contratos CRECI', 'Autorização de Venda — Exclusiva', 'Autorização de Venda — Sem exclusividade']]
+    ]
+  };
   function listarFerramentasEdicao() {
-    var itens = ligar(todosItens()), box = document.getElementById('ed-ferr');
-    box.innerHTML = EDIT_FERR.map(function (t) {
-      return itens.filter(function (i) { return i.m === 'corretor' && i.t === t; })[0];
-    }).filter(Boolean).map(item).join('');
+    var itens = ligar(todosItens()), usados = [];
+    // busca geral: qualquer botão (inclusive os seus) com editor/editar/edição no nome, descrição, palavras ou link
+    var editores = itens.filter(function (i) { return RE_EDITOR.test([i.t, i.s, i.k, i.h].join(' ')); });
+    Object.keys(EDIT_ABAS).forEach(function (aba) {
+      var html = '';
+      EDIT_ABAS[aba].forEach(function (g) {
+        var lista = g[1].map(function (t) { return itens.filter(function (i) { return i.t === t; })[0]; })
+          .filter(function (i) { return i && usados.indexOf(chave(i)) < 0; });
+        if (!lista.length) return;
+        lista.forEach(function (i) { usados.push(chave(i)); });
+        html += '<div class="dlg-sep">' + esc(g[0]) + ' · ' + lista.length + '</div><div class="lista">' + lista.map(item).join('') + '</div>';
+      });
+      if (aba === 'ferramentas') {
+        var extras = editores.filter(function (i) { return usados.indexOf(chave(i)) < 0; }).sort(porNome);
+        if (extras.length) html += '<div class="dlg-sep">Outros editores · ' + extras.length + '</div><div class="lista">' + extras.map(item).join('') + '</div>';
+      }
+      document.getElementById('ed-' + aba).innerHTML = html;
+    });
   }
   function abrirAba(nome) {
-    [].forEach.call(dlg.querySelectorAll('.ed-pane'), function (p) { p.hidden = p.getAttribute('data-pane') !== nome; });
+    [].forEach.call(dlg.querySelectorAll('.ed-pane[data-pane]'), function (p) { p.hidden = p.getAttribute('data-pane') !== nome; });
     [].forEach.call(dlg.querySelectorAll('[data-edtab]'), function (b) { b.classList.toggle('on', b.getAttribute('data-edtab') === nome); });
-    if (nome === 'ferramentas') listarFerramentasEdicao();
+    listarFerramentasEdicao();
   }
   dlg.addEventListener('click', function (e) {
     var b = e.target.closest('[data-edtab]');
     if (b) abrirAba(b.getAttribute('data-edtab'));
   });
   function abrirDialogo(tab) {
-    abrirAba(tab || 'botoes');
+    abrirAba(tab || 'site');
     nvTitulo.value = ''; nvSub.value = ''; nvHref.value = ''; nvGrupoNovo.value = '';
     iconeEscolhido = 'ti-star';
     nvModo.value = (modo === 'inicio' || modo === 'favoritos' || modo === 'mapa') ? 'corretor' : modo;
     preencherGrupos(aba);
     desenharIcones(); listarMeus();
     if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
-    nvTitulo.focus();
+    if (!tab || tab === 'botoes') { /* só foca no campo se a aba Botões estiver aberta */ }
   }
   function fecharDialogo() { if (dlg.close) dlg.close(); else dlg.removeAttribute('open'); }
   document.getElementById('nv-fechar').addEventListener('click', fecharDialogo);
@@ -984,6 +1019,20 @@ var FERRAMENTAS = [
     var t = a.querySelector('.t');
     abrir(h, (t ? t.textContent : a.textContent).trim());
   }, true);
+})();
+</script>
+<script>
+/* ATUALIZAÇÃO: se o aparelho ainda guarda uma cópia antiga do painel, limpa e recarrega uma vez */
+(function () {
+  var V = 'edicao-v3';
+  try {
+    if (localStorage.getItem('painel_versao_arquivo') === V) return;
+    localStorage.setItem('painel_versao_arquivo', V);
+    var tarefas = [];
+    if ('serviceWorker' in navigator) tarefas.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
+    if (window.caches) tarefas.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+    Promise.all(tarefas).then(function () { if (/^https?:$/.test(location.protocol)) location.reload(); }, function () {});
+  } catch (e) {}
 })();
 </script>
 <script>
