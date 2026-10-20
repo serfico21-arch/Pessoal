@@ -54,6 +54,21 @@
   .base { margin-top:6px; font-size:12.5px; break-inside:avoid; }
   .rodape { text-align:center; margin-top:10px; }
   #saida { display:none; }
+  .form select { width:100%; padding:9px; font-size:15px; border:1px solid #999; border-radius:6px; background:#fff; font-family:inherit; }
+
+  /* versão limpa: só o esqueleto; detalhes aparecem se marcado */
+  .folha .det, .folha .det-i { display:none; }
+  .folha.mais .det { display:block; }
+  .folha.mais .det-i { display:inline; }
+  .gancho { border-left-width:3px; }
+  .top { border-bottom:1px solid #eee; padding:6px 0; }
+  .chave { background:none; border-bottom:3px solid #ffe94d; padding:0 2px; font-size:17px; }
+  .dir { font-weight:normal; }
+  .vers { font-weight:normal; font-size:13px; }
+  ol.subs { color:#333; margin-top:3px; }
+  .sref { font-weight:normal; }
+  .fecho { border:1px solid #999; }
+  .grupo { margin-top:8px; border-bottom:1px solid #ccc; padding-bottom:2px; }
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   @media print { .form, .rodape { display:none !important; } body { padding:0; } }
 </style>
@@ -67,6 +82,12 @@
     <input id="texto" type="text" placeholder="Ex.: Neemias 1:1-11">
     <label for="tema">Tema (opcional)</label>
     <input id="tema" type="text" placeholder="Ex.: A dor do outro chegou na minha casa">
+    <label for="tipo">Tipo de esboço</label>
+    <select id="tipo">
+      <option value="expositivo">Expositivo — segue o texto versículo por versículo</option>
+      <option value="tematico">Temático — parte do tema, com versículos de apoio</option>
+      <option value="textual">Textual — só as ideias principais do texto</option>
+    </select>
     <label for="passagem">Texto dos versículos (opcional, deixa o esboço mais fiel)</label>
     <textarea id="passagem" placeholder="Cole aqui os versículos da sua Bíblia, se quiser"></textarea>
     <div class="linha">
@@ -81,8 +102,8 @@
     </div>
     <div class="botoes">
       <button id="gerar">Gerar esboço</button>
-      <button id="exemplo" class="sec" type="button">Ver exemplo (Neemias)</button>
     </div>
+    <label style="font-weight:normal"><input id="detalhes" type="checkbox" style="width:auto"> Mostrar detalhes (ilustração, passos práticos, ligações, oração)</label>
     <div id="msg" class="msg" role="status"></div>
     <div class="peq">Sem tema, a IA cria um. Sempre confira os versículos de apoio na sua Bíblia antes de pregar. Chave grátis em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>.</div>
   </div>
@@ -153,7 +174,7 @@ const INSTRUCAO = `Você prepara esboços de pregação para um pastor evangéli
 
 PRINCÍPIOS OBRIGATÓRIOS
 
-1. FIDELIDADE AO TEXTO. Se o pastor colou o texto dos versículos, ele é a única fonte. Se não colou, use a tradução Almeida e só afirme o que você tem certeza que o texto diz. Não invente fatos, nomes, números ou detalhes que o texto não traz. Cubra a passagem do começo ao fim, na ordem em que aparece, juntando versículos vizinhos. Use de 5 a 8 tópicos (máximo 9). Nunca force uma aplicação que o texto não sustenta.
+1. FIDELIDADE AO TEXTO. Se o pastor colou o texto dos versículos, ele é a única fonte. Se não colou, use a tradução Almeida e só afirme o que você tem certeza que o texto diz. Não invente fatos, nomes, números ou detalhes que o texto não traz. Siga o TIPO DE ESBOÇO pedido (veja TIPOS abaixo). Nunca force uma aplicação que o texto não sustenta.
 
 2. TEMA E PALAVRA-CHAVE. Use o tema recebido, com as palavras do pastor (se o tema não combinar com o texto, ajuste o mínimo possível). Sem tema, crie um curto e forte, ligado à situação do texto. Crie uma PALAVRA-CHAVE: um verbo de ação no infinitivo, em maiúsculas, que RESPONDE ao tema (ex.: AVANÇAR), com um contraponto também verbo (ex.: recuar). O corpo todo se liga à palavra-chave e ela aponta de volta para o tema.
 
@@ -187,12 +208,17 @@ PRINCÍPIOS OBRIGATÓRIOS
 
 14. MARCAÇÃO: o sinal ** só pode aparecer no gancho e no fechamento, uma vez em cada, na palavra-chave. Em nenhum outro campo.
 
+TIPOS DE ESBOÇO (o pedido informa qual usar; o formato do JSON é o mesmo para todos):
+- EXPOSITIVO: cubra a passagem do começo ao fim, na ordem, juntando versículos vizinhos. 5 a 8 tópicos (máximo 9).
+- TEMÁTICO: parta do tema; o texto principal é a base e versículos de outros livros dão apoio. 3 a 5 tópicos; o ref de cada tópico pode ser de outro livro. 1 ou 2 partes bastam.
+- TEXTUAL: tire do texto só as ideias principais, na ordem. 3 a 4 tópicos. 1 ou 2 partes bastam.
+
 NÃO FAÇA: tese; apelo (o apelo é do pastor); transcrição de versículos; parágrafos longos; perguntas no gancho; quebra-gelo, piadas ou humor; jargão teológico; texto em markdown.
 
 SAÍDA: responda SOMENTE com JSON válido, sem explicações e sem marcas de código, exatamente com estes campos (os campos de texto sem conteúdo ficam como ""):
 {"tema":"","palavra_chave":"","contraponto":"","referencia":"","introducao":"","gancho":"","ilustracao_titulo":"","ilustracao":"","abertura_corpo":"","partes":[{"titulo":"","nota":"","topicos":[{"chave":"","direcao":"","ref":"","subs":[{"titulo":"","texto":"","ref":""},{"titulo":"","texto":"","ref":""}],"pratica":"","ligacao":""}]}],"fechamento":"","resumo_verbos":"","oracao_de":"","oracao":"","apoio":[{"ref":"","ideia":""}]}
 
-EXEMPLO DE FORMATO E NÍVEL (texto: Neemias 1:1-11; tema: A dor do outro chegou na minha casa). Imite o formato, o tamanho e a qualidade. NUNCA copie o conteúdo, a palavra-chave nem as chaves deste exemplo:
+EXEMPLO DE FORMATO E NÍVEL (tipo: expositivo; texto: Neemias 1:1-11; tema: A dor do outro chegou na minha casa). Imite o formato, o tamanho e a qualidade. NUNCA copie o conteúdo, a palavra-chave nem as chaves deste exemplo:
 ` + JSON.stringify(EXEMPLO);
 
 /* ---------- Utilidades ---------- */
@@ -205,6 +231,23 @@ let guardado = localStorage.getItem('esboco_modelo');
 if (!guardado || guardado === 'gemini-2.5-flash') guardado = MODELOS[0];
 $('chave').value = localStorage.getItem('esboco_api_key') || '';
 $('modelo').value = guardado;
+
+const TIPOS = {
+  expositivo: { nome: 'Expositivo', regra: 'EXPOSITIVO: cubra a passagem do começo ao fim, na ordem, juntando versículos vizinhos. 5 a 8 tópicos (máximo 9), cada um tirado de um trecho do texto.' },
+  tematico:   { nome: 'Temático',   regra: 'TEMÁTICO: parta do tema e use o texto principal como base, com versículos de outros lugares da Bíblia como apoio. 3 a 5 tópicos; o ref de cada tópico pode ser de outro livro. Não precisa cobrir a passagem toda. 1 ou 2 partes bastam.' },
+  textual:    { nome: 'Textual',    regra: 'TEXTUAL: tire do próprio texto as ideias principais, sem cobrir tudo. 3 a 4 tópicos, cada um com uma ideia central do texto, na ordem em que aparecem. 1 ou 2 partes bastam.' }
+};
+let tipoGuardado = localStorage.getItem('esboco_tipo');
+$('tipo').value = TIPOS[tipoGuardado] ? tipoGuardado : 'expositivo';
+$('tipo').addEventListener('change', () => localStorage.setItem('esboco_tipo', $('tipo').value));
+function aplicarDetalhes() {
+  document.querySelector('.folha').classList.toggle('mais', $('detalhes').checked);
+  localStorage.setItem('esboco_detalhes', $('detalhes').checked ? '1' : '');
+}
+const detGuardado = localStorage.getItem('esboco_detalhes');
+$('detalhes').checked = (detGuardado === null || detGuardado === '1');
+$('detalhes').addEventListener('change', aplicarDetalhes);
+aplicarDetalhes();
 
 function el(tag, cls, txt) {
   const e = document.createElement(tag);
@@ -282,10 +325,10 @@ function normalizar(d) {
 }
 
 /* ---------- Desenho do esboço ---------- */
-function render(d) {
+function render(d, rotulo) {
   const s = $('saida'); s.innerHTML = '';
   const kw = d.palavra_chave;
-  add(s, 'div', 'ref', d.referencia);
+  add(s, 'div', 'ref', d.referencia + (rotulo ? ' · Esboço ' + rotulo.toLowerCase() : ''));
   const f = add(s, 'div', 'fluxo');
   add(f, 'span', '', 'TEMA: ' + d.tema);
   add(f, 'b', '', '➜');
@@ -301,7 +344,7 @@ function render(d) {
     rico(g, d.gancho, kw, 'ultimo');
   }
   if (d.ilustracao) {
-    const il = add(s, 'div', 'bloco');
+    const il = add(s, 'div', 'bloco det');
     add(il, 'b', 't', 'Ilustração' + (d.ilustracao_titulo ? ': ' + d.ilustracao_titulo : ''));
     rico(il, d.ilustracao);
   }
@@ -324,12 +367,13 @@ function render(d) {
         t.subs.forEach(sb => {
           const li = add(ol, 'li');
           if (sb.titulo) add(li, 'b', '', sb.titulo);
-          if (sb.texto) { tx(li, (sb.titulo ? ' — ' : '')); rico(li, sb.texto); tx(li, ' '); }
+          if (sb.texto) { const sp = add(li, 'span', 'det-i'); tx(sp, sb.titulo ? ' — ' : ''); rico(sp, sb.texto); }
+          tx(li, ' ');
           if (sb.ref) add(li, 'span', 'sref', '(' + sb.ref + ')');
         });
       }
-      if (t.pratica) { passo++; add(c, 'div', 'aplic', '➜ ' + passo + 'º · ' + t.pratica); }
-      if (t.ligacao) add(c, 'div', 'ponte', '↓ ' + t.ligacao);
+      if (t.pratica) { passo++; add(c, 'div', 'aplic det', '➜ ' + passo + 'º · ' + t.pratica); }
+      if (t.ligacao) add(c, 'div', 'ponte det', '↓ ' + t.ligacao);
     });
   });
 
@@ -338,7 +382,7 @@ function render(d) {
   rico(fe, d.fechamento, kw, 'primeiro');
   if (d.resumo_verbos) { add(fe, 'br'); add(fe, 'b', '', d.resumo_verbos); }
   if (d.oracao) {
-    const o = add(fe, 'div', 'orac');
+    const o = add(fe, 'div', 'orac det');
     add(o, 'b', '', 'Momento de oração' + (d.oracao_de ? ' (como ' + d.oracao_de + ')' : '') + ': ');
     tx(o, d.oracao);
   }
@@ -405,12 +449,6 @@ async function chamar(chave, corpo, escolhido) {
   throw falha;
 }
 
-$('exemplo').addEventListener('click', () => {
-  render(normalizar(EXEMPLO));
-  $('msg').className = 'msg'; $('msg').textContent = 'Este é o exemplo de Neemias (não usa a IA).';
-  $('saida').scrollIntoView({ behavior: 'smooth' });
-});
-
 $('gerar').addEventListener('click', async () => {
   const tema = $('tema').value.trim();
   const texto = $('texto').value.trim();
@@ -428,7 +466,8 @@ $('gerar').addEventListener('click', async () => {
   try {
     const pedido = 'Texto bíblico: ' + texto +
       (passagem ? '\nTexto dos versículos (use como única fonte):\n' + passagem : '') +
-      '\nTema: ' + (tema || '(crie um tema curto e forte)');
+      '\nTema: ' + (tema || '(crie um tema curto e forte)') +
+      '\nTipo de esboço: ' + TIPOS[$('tipo').value].regra;
     const corpo = {
       systemInstruction: { parts: [{ text: INSTRUCAO }] },
       contents: [{ role: 'user', parts: [{ text: pedido }] }],
@@ -438,7 +477,7 @@ $('gerar').addEventListener('click', async () => {
     for (let tentativa = 0; tentativa < 2 && !pronto; tentativa++) {
       const j = await chamar(chave, corpo, modelo);
       try {
-        render(normalizar(lerJSON(textoDaResposta(j))));
+        render(normalizar(lerJSON(textoDaResposta(j))), TIPOS[$('tipo').value].nome);
         pronto = true;
       } catch (e) {
         if (!(e instanceof FormatoErro || e instanceof SyntaxError)) throw e;
