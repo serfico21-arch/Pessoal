@@ -241,7 +241,7 @@ const TIPOS = {
   tematico:   { nome: 'Temático',   regra: 'TEMÁTICO: parta do tema e use o texto principal como base, com versículos de outros lugares da Bíblia como apoio. 3 a 5 tópicos; o ref de cada tópico pode ser de outro livro. Não precisa cobrir a passagem toda. 1 ou 2 partes bastam.' },
   textual:    { nome: 'Textual',    regra: 'TEXTUAL: tire do próprio texto as ideias principais, sem cobrir tudo. 3 a 4 tópicos, cada um com uma ideia central do texto, na ordem em que aparecem. 1 ou 2 partes bastam.' },
   limpo:      { nome: 'Limpo e objetivo', modo: 'limpo', regra: 'LIMPO E OBJETIVO: esboço bem enxuto. Cubra a passagem na ordem, em 4 a 6 tópicos. Cada tópico com chave, direcao curta, ref e EXATAMENTE 2 subs; cada sub só com titulo curto (2 a 5 palavras) e ref. Deixe texto de sub, pratica e ligacao VAZIOS. Deixe ilustracao_titulo, ilustracao, oracao_de e oracao VAZIOS. Introdução em 1 frase, gancho em 2 frases curtas.' },
-  tonicas:    { nome: 'Palavras tônicas', modo: 'tonicas', regra: 'PALAVRAS TÔNICAS: um tópico para cada versículo do texto, na ordem. Em cada tópico: chave = a palavra tônica (a mais marcante) do versículo, em maiúsculas; ref = só o versículo (ex.: Ne 1:2); direcao, pratica e ligacao VAZIOS e subs = []. Uma única parte, com titulo vazio. Preencha apenas tema, referencia e partes; deixe palavra_chave, contraponto, introducao, gancho, ilustracao_titulo, ilustracao, abertura_corpo, fechamento, resumo_verbos, oracao_de, oracao e apoio VAZIOS (apoio = []).' }
+  tonicas:    { nome: 'Palavras tônicas', modo: 'tonicas', regra: 'PALAVRAS TÔNICAS: um tópico para cada versículo do texto, na ordem. Em cada tópico: chave = a palavra tônica (a mais marcante) do versículo, em maiúsculas; ref = só o versículo (ex.: Ne 1:2); direcao = 3 a 8 palavras, no formato "<Palavra-chave> é ...", ligando o versículo ao tema (cada direcao nasce da anterior); pratica e ligacao VAZIOS e subs = []. Uma única parte, com titulo vazio. Preencha tema, palavra_chave, contraponto, referencia, partes e fechamento (uma frase que responde ao tema, com a palavra-chave marcada com **). Deixe introducao, gancho, ilustracao_titulo, ilustracao, abertura_corpo, resumo_verbos, oracao_de, oracao e apoio VAZIOS (apoio = []).' }
 };
 let tipoGuardado = localStorage.getItem('esboco_tipo');
 $('tipo').value = TIPOS[tipoGuardado] ? tipoGuardado : 'expositivo';
@@ -337,7 +337,15 @@ function render(d, rotulo, modo) {
   document.querySelector('.folha').classList.toggle('limpo', modo === 'limpo');
   if (modo === 'tonicas') {
     add(s, 'div', 'ref', d.referencia + ' · ' + rotulo);
-    if (d.tema) add(s, 'div', 'quando', 'Tema: ' + d.tema);
+    if (d.tema) {
+      const f = add(s, 'div', 'fluxo');
+      add(f, 'span', '', 'TEMA: ' + d.tema);
+      if (kw) {
+        add(f, 'b', '', '➜');
+        const pc = add(f, 'span', 'pc', 'PALAVRA-CHAVE: ' + kw);
+        if (d.contraponto) { tx(pc, ' '); add(pc, 'small', '', '(ou ' + d.contraponto + ')'); }
+      }
+    }
     let k = 0;
     d.partes.forEach(p => p.topicos.forEach(t => {
       k++;
@@ -345,8 +353,14 @@ function render(d, rotulo, modo) {
       add(box, 'div', 'num', String(k));
       const l1 = add(box, 'div', 'linha1');
       add(l1, 'span', 'chave', t.chave);
+      if (t.direcao) add(l1, 'span', 'dir', t.direcao);
       add(l1, 'span', 'vers', t.ref);
     }));
+    if (d.fechamento) {
+      const fe = add(s, 'div', 'bloco fecho');
+      add(fe, 'b', 't', 'Fechamento · o tema respondido');
+      rico(fe, d.fechamento, kw, 'primeiro');
+    }
     s.style.display = 'block';
     $('rodape').style.display = 'block';
     return;
