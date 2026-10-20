@@ -5,398 +5,464 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Gerador de Esboço de Sermão</title>
 <style>
-  *{box-sizing:border-box}
-  body{background:#fff;color:#111;font-family:Arial,Helvetica,sans-serif;max-width:720px;margin:0 auto;padding:16px;line-height:1.35}
-  h1{font-size:24px;margin:0 0 4px}
-  .sub{color:#555;margin-bottom:14px}
-  label{display:block;font-weight:bold;margin:12px 0 4px}
-  input,textarea{width:100%;font-size:17px;padding:10px;border:2px solid #111;border-radius:6px;font-family:inherit}
-  textarea{min-height:90px}
-  .row{display:flex;gap:8px}
-  .row>*{flex:1}
-  button{font-size:17px;font-weight:bold;padding:12px 14px;border:2px solid #111;background:#111;color:#fff;border-radius:6px;cursor:pointer}
-  button.s{background:#fff;color:#111}
-  button:disabled{opacity:.5}
-  #gerar{width:100%;margin-top:14px;font-size:19px}
-  #msg{margin-top:10px;font-weight:bold}
-  .erro{color:#b00020}
-  details{margin-top:14px;border:1px solid #bbb;border-radius:6px;padding:8px 10px}
-  summary{cursor:pointer;font-weight:bold}
-  .small{font-size:14px;color:#555;margin-top:4px}
-  #saida{margin-top:22px;border-top:3px solid #111;padding-top:14px}
-  #saida h1{font-size:26px}
-  .tese{border:2px solid #111;padding:10px 12px;margin:14px 0 18px;font-size:18px;font-weight:bold}
-  .b{border:2px dashed #111;padding:10px 12px;margin:0 0 14px}
-  .b h2{font-size:15px;letter-spacing:1px;text-transform:uppercase;margin:0 0 6px;color:#555}
-  .b p{font-size:19px;margin:6px 0}
-  ol{padding-left:0;list-style:none;counter-reset:n}
-  li{counter-increment:n;border-bottom:1px solid #ccc;padding:14px 0}
-  li::before{content:counter(n) ".";font-size:24px;font-weight:bold;margin-right:8px}
-  .k{font-size:28px;font-weight:bold;text-transform:uppercase}
-  .d{font-size:20px;margin-left:34px;margin-top:4px}
-  .r{font-size:15px;color:#555;margin-left:34px}
-  .a{font-size:17px;margin-left:34px;margin-top:6px;padding-left:10px;border-left:3px solid #111}
-  .fim{margin-top:20px;border:2px solid #111;padding:10px 12px;font-size:18px}
-  .acoes{margin-top:18px}
-  .ed{outline:none;border-radius:3px}
-  .ed:focus{outline:2px solid #8a1c1c;background:#fffbe6}
-  .ln{display:flex;gap:6px;align-items:flex-start}
-  .ln p{flex:1}
-  .mini{font-size:14px;padding:3px 9px;border:1px solid #111;background:#fff;color:#111;border-radius:5px;font-weight:bold;cursor:pointer}
-  .mini.add{margin-top:6px}
-  .ctrl{margin:8px 0 0 34px;display:flex;gap:6px}
-  .dica{font-size:14px;color:#555;margin-top:10px}
-  #saida .sub{margin-bottom:0}
-  @page{size:A4;margin:10mm}
-  @media print{
-    .nao-imprimir{display:none!important}
-    html,body{height:auto}
-    body{padding:0;max-width:none;margin:0}
-    #saida{border-top:0;margin-top:0;padding-top:0}
-    #saida h1{font-size:22px;margin:0}
-    .tese{margin:8px 0 10px;padding:6px 10px;font-size:16px}
-    .b{margin:0 0 8px;padding:6px 10px}
-    .b p{font-size:16px;margin:3px 0}
-    li{padding:7px 0;break-inside:avoid}
-    .k{font-size:22px}
-    .d{font-size:17px;margin-top:2px}
-    .a{font-size:15px;margin-top:3px}
-    .fim{margin-top:10px;padding:6px 10px;font-size:16px}
-    .ed:focus{outline:none;background:none}
-  }
+  @page { size: A4; margin: 12mm; }
+  * { box-sizing: border-box; }
+  body { background:#fff; color:#111; font-family: Arial, Helvetica, sans-serif; margin:0; padding:16px; line-height:1.3; }
+  .folha { max-width: 780px; margin: 0 auto; }
+  h2 { margin:0 0 8px; font-size:20px; }
+  .form { border:1px solid #bbb; border-radius:8px; padding:12px; margin-bottom:14px; background:#fafafa; }
+  .form label { display:block; font-size:13px; font-weight:bold; margin:8px 0 3px; }
+  .form input, .form textarea { width:100%; padding:9px; font-size:15px; border:1px solid #999; border-radius:6px; font-family:inherit; }
+  .form textarea { min-height:64px; resize:vertical; }
+  .form .linha { display:flex; gap:8px; flex-wrap:wrap; }
+  .form .linha > div { flex:1; min-width:180px; }
+  .botoes { display:flex; gap:8px; flex-wrap:wrap; }
+  button { font-size:15px; padding:10px 18px; border:1px solid #111; background:#111; color:#fff; border-radius:6px; cursor:pointer; margin-top:10px; }
+  button.sec { background:#fff; color:#111; }
+  button:disabled { opacity:.5; cursor:wait; }
+  .msg { font-size:14px; margin-top:8px; min-height:18px; }
+  .erro { color:#b00020; font-weight:bold; }
+  .peq { font-size:12px; color:#555; margin-top:6px; }
+  .peq a { color:#1a4d8f; }
+
+  /* esboço */
+  .ref { font-size:13px; color:#444; margin-bottom:4px; }
+  .fluxo { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:13px; font-weight:bold; margin-bottom:6px; }
+  .fluxo .pc { background:#ffe94d; padding:1px 8px; font-size:15px; }
+  .fluxo .pc small { font-size:11px; }
+  .bloco { font-size:13px; margin-bottom:8px; }
+  .bloco b.t { text-transform:uppercase; font-size:11px; letter-spacing:.5px; display:block; border-bottom:1px solid #999; margin-bottom:2px; }
+  .gancho { margin-top:3px; border-left:4px solid #1a4d8f; padding-left:8px; }
+  .hl { background:#ffe94d; padding:0 4px; font-weight:bold; }
+  .quando { font-size:13px; font-weight:bold; margin:4px 0 0; }
+  .grupo { font-size:12px; font-weight:bold; letter-spacing:.5px; text-transform:uppercase; color:#1a4d8f; padding:6px 0 1px; break-after:avoid; }
+  .top { display:grid; grid-template-columns:24px 1fr; gap:6px; padding:4px 0; border-bottom:1px solid #ddd; break-inside:avoid; }
+  .num { font-weight:bold; font-size:16px; text-align:center; }
+  .linha1 { display:flex; flex-wrap:wrap; align-items:baseline; gap:8px; }
+  .chave { font-size:19px; font-weight:900; letter-spacing:.5px; background:#ffe94d; padding:0 6px; }
+  .dir { font-size:14px; font-weight:bold; }
+  .vers { font-size:14px; font-weight:bold; color:#1a4d8f; margin-left:auto; }
+  ol.subs { margin:2px 0 0; padding-left:22px; font-size:13px; list-style:lower-alpha; }
+  ol.subs li { margin:0 0 1px; }
+  .sref { color:#1a4d8f; font-weight:bold; font-size:12px; white-space:nowrap; }
+  .aplic { font-size:13px; font-weight:bold; background:#e8f1ff; border-left:4px solid #1a4d8f; padding:1px 6px; margin-top:2px; }
+  .aplic::before { content:"NA PRÁTICA  "; font-size:10px; letter-spacing:.5px; color:#1a4d8f; }
+  .ponte { font-size:12px; font-weight:bold; color:#1a4d8f; margin-top:2px; }
+  .ponte::before { content:"LIGAÇÃO  "; font-size:10px; letter-spacing:.5px; }
+  .fecho { border:2px solid #111; padding:6px 10px; font-size:14px; margin-top:8px; break-inside:avoid; }
+  .fecho .orac { margin-top:3px; }
+  .base { margin-top:6px; font-size:12.5px; break-inside:avoid; }
+  .rodape { text-align:center; margin-top:10px; }
+  #saida { display:none; }
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  @media print { .form, .rodape { display:none !important; } body { padding:0; } }
 </style>
 </head>
 <body>
+<div class="folha">
 
-<div class="nao-imprimir">
-  <h1>Gerador de Esboço de Sermão</h1>
-  <div class="sub">Informe o texto bíblico e/ou o tema, receba o esboço no seu formato e edite tudo na tela.</div>
-
-  <label for="texto">Texto bíblico (opcional)</label>
-  <input id="texto" placeholder="Ex.: Salmos 92:10-15 ou João 3">
-  <div id="ctx" class="small" hidden></div>
-
-  <label for="tema">Tema do esboço (opcional)</label>
-  <input id="tema" placeholder="Ex.: chamados para frutificar, fé na tempestade">
-  <div class="small">Preencha o texto, o tema ou os dois. Com os dois, o esboço percorre o texto defendendo o tema.</div>
-
-  <label for="publico">Para quem é o culto? (opcional)</label>
-  <input id="publico" placeholder="Ex.: seniors, jovens, famílias, culto de missões">
-
-  <div class="row">
-    <div>
-      <label for="qtd">Quantos tópicos?</label>
-      <input id="qtd" type="number" min="3" max="8" value="5">
+  <div class="form">
+    <h2>Gerador de Esboço de Sermão</h2>
+    <label for="texto">Texto bíblico</label>
+    <input id="texto" type="text" placeholder="Ex.: Neemias 1:1-11">
+    <label for="tema">Tema (opcional)</label>
+    <input id="tema" type="text" placeholder="Ex.: A dor do outro chegou na minha casa">
+    <label for="passagem">Texto dos versículos (opcional, deixa o esboço mais fiel)</label>
+    <textarea id="passagem" placeholder="Cole aqui os versículos da sua Bíblia, se quiser"></textarea>
+    <div class="linha">
+      <div>
+        <label for="chave">Chave da API (Google AI Studio)</label>
+        <input id="chave" type="password" placeholder="Cole sua chave aqui (fica salva neste aparelho)" autocomplete="off">
+      </div>
+      <div>
+        <label for="modelo">Modelo</label>
+        <input id="modelo" type="text">
+      </div>
     </div>
-    <div>
-      <label for="intro">Introdução?</label>
-      <input id="intro" list="op" value="Sim">
-      <datalist id="op"><option value="Sim"><option value="Não"></datalist>
+    <div class="botoes">
+      <button id="gerar">Gerar esboço</button>
+      <button id="exemplo" class="sec" type="button">Ver exemplo (Neemias)</button>
     </div>
-    <div>
-      <label for="ilus">Ilustração?</label>
-      <input id="ilus" list="op" value="Sim">
-    </div>
+    <div id="msg" class="msg" role="status"></div>
+    <div class="peq">Sem tema, a IA cria um. Sempre confira os versículos de apoio na sua Bíblia antes de pregar. Chave grátis em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>.</div>
   </div>
 
-  <details id="cfg">
-    <summary>Configuração da IA (uma vez só)</summary>
-    <label for="chave">Chave do Google AI Studio</label>
-    <input id="chave" type="password" placeholder="Cole sua chave aqui" autocomplete="off">
-    <div class="small">Fica salva só neste aparelho.</div>
-    <label for="modelo">Modelo</label>
-    <input id="modelo" placeholder="gemini-3.6-flash">
-    <div class="small">Se der erro de modelo, o sistema tenta outros sozinho.</div>
-  </details>
+  <div id="saida"></div>
 
-  <button id="gerar">Gerar esboço</button>
-  <div id="msg"></div>
+  <div class="rodape" id="rodape" style="display:none">
+    <button class="sec" onclick="window.print()">Imprimir / Salvar PDF</button>
+  </div>
 </div>
 
-<div id="saida" hidden></div>
-
 <script>
-(function(){
-  var $ = function(id){return document.getElementById(id)};
-  var temaAtual='', contextoBiblia='', textoDaBiblia='';
-  var MODELOS = ['gemini-3.6-flash','gemini-2.5-flash','gemini-2.0-flash','gemini-flash-latest'];
+/* ---------- Esboço de exemplo (também serve de modelo para a IA) ---------- */
+const EXEMPLO = {
+ tema: "a dor do outro chegou na minha casa",
+ palavra_chave: "AVANÇAR",
+ contraponto: "recuar",
+ referencia: "Neemias 1:1-11",
+ introducao: "Neemias, copeiro do rei em Susã: homem de confiança, vida estável, perto do trono. Nome: \"o Senhor consola\".",
+ gancho: "Neemias estava bem, no palácio. A dor era do outro, mas bateu na porta dele pedindo ajuda. Ele podia recuar. Ele **AVANÇOU**.",
+ ilustracao_titulo: "a águia e a tempestade",
+ ilustracao: "Diante da tempestade a águia não foge: abre as asas e deixa o vento levantá-la. Neemias fez igual: a dor do outro virou voo de oração, e o voo virou ação.",
+ abertura_corpo: "A partir do momento que a dor do outro bateu na sua porta, como um pedido de ajuda:",
+ partes: [
+  { titulo: "A dor bate na porta: quem recua fecha a porta, quem AVANÇA abre, escuta e sente", nota: "",
+    topicos: [
+     { chave:"PERGUNTEI", direcao:"Avançar é abrir a porta e perguntar para ajudar", ref:"Ne 1:1-2",
+       subs:[{titulo:"A dor veio até ele",texto:"Hanani trouxe o pedido de ajuda",ref:"Ne 1:2"},{titulo:"Pergunta para ajudar",texto:"não por curiosidade",ref:"Fp 2:4 · Gl 6:2"}],
+       pratica:"Procure detalhes da situação para ajudar, não para comentar.", ligacao:"Perguntou, e a resposta veio: miséria. Agora que sabe, não dá para ficar de fora." },
+     { chave:"MISÉRIA", direcao:"Avançar é sofrer com quem sofre", ref:"Ne 1:3",
+       subs:[{titulo:"Ele estava bem, mas soube",texto:"miséria e desprezo, muros derribados, portas queimadas",ref:"Ne 1:3"},{titulo:"A notícia vira dor real",texto:"se um sofre, todos sofrem",ref:"1 Co 12:26 · Hb 13:3"}],
+       pratica:"", ligacao:"Reconhecida a dor, ela desce do ouvido para o coração: chorou." },
+     { chave:"CHOREI", direcao:"Avançar é chorar com quem chora", ref:"Ne 1:4",
+       subs:[{titulo:"Sentir a mesma dor",texto:"com sinceridade",ref:"Rm 12:15"},{titulo:"O choro vira oração",texto:"não morre em lágrima",ref:"Ne 1:4"}],
+       pratica:"Sinta a dor com muita sinceridade.", ligacao:"Dor assim é pesada demais para carregar sozinho: ele a leva a Deus." }
+    ] },
+  { titulo: "A dor vai ao trono: quem recua se vira sozinho, quem AVANÇA olha para Deus", nota: "a ORAÇÃO de Neemias, Ne 1:5-11, “dia e noite”",
+    topicos: [
+     { chave:"GRANDE", direcao:"Avançar é confiar no Deus grande", ref:"Ne 1:5",
+       subs:[{titulo:"O quadro é feio",texto:"mas Deus é maior e pode mudá-lo",ref:"Jr 32:17"},{titulo:"Peça direção",texto:"antes de agir",ref:"Tg 1:5"}],
+       pratica:"Ore pedindo direção a Deus.", ligacao:"Diante do Deus grande, ele enxerga também as decisões fora da direção: confessa." },
+     { chave:"CONFESSO", direcao:"Avançar é admitir a desobediência", ref:"Ne 1:6-7",
+       subs:[{titulo:"O sofrimento tem causa",texto:"decisões fora da direção de Deus",ref:"Pv 28:13"},{titulo:"Não aponta o dedo",texto:"se inclui",ref:"Ne 1:6-7 · 1 Jo 1:9"}],
+       pratica:"", ligacao:"Confessado o erro, ele pede com base no que Deus prometeu." },
+     { chave:"LEMBRA-TE", direcao:"Avançar é lembrar: cair é nosso, levantar é de Deus", ref:"Ne 1:8-9",
+       subs:[{titulo:"Cair é nosso",texto:"nossas escolhas",ref:"Pv 24:16"},{titulo:"Levantar é de Deus",texto:"ele prometeu",ref:"Sl 37:24"}],
+       pratica:"", ligacao:"E o que garante que Deus levanta? Ele já nos resgatou." },
+     { chave:"RESGATASTE", direcao:"Avançar é lembrar de onde Deus nos tirou", ref:"Ne 1:10",
+       subs:[{titulo:"Resgatados da maior miséria",texto:"a vida de perdição",ref:"Ef 2:4-5"},{titulo:"Não ignore a miséria do outro",texto:"de graça recebemos, de graça damos",ref:"Mt 10:8"}],
+       pratica:"", ligacao:"Resgatado e com a graça de Deus ao lado, não há mais por que recuar: ele age." }
+    ] },
+  { titulo: "A casa vira ponte: quem recua se omite, quem AVANÇA age", nota: "",
+    topicos: [
+     { chave:"PROSPERAR", direcao:"Avançar é agir com a graça de Deus", ref:"Ne 1:11",
+       subs:[{titulo:"Orar não dispensa agir",texto:"é dever pôr-se em pé e ajudar",ref:"Tg 4:17"},{titulo:"Graça para agir",texto:"a oração termina em ação: pede para falar com o rei",ref:"Ne 1:11 · Gl 6:10"}],
+       pratica:"Ponha-se em pé e envolva-se: faça o que tem que ser feito para ajudar a dor do outro AVANÇAR.", ligacao:"" }
+    ] }
+ ],
+ fechamento: "Quando a dor do outro chegar na minha casa: **AVANÇAR**.",
+ resumo_verbos: "Perguntar · Sentir · Orar · Agir.",
+ oracao_de: "Neemias",
+ oracao: "Deus, tu és grande · confessamos · lembra-te da tua promessa · somos teu povo resgatado · dá-nos graça para agir.",
+ apoio: [{ref:"Mt 22:39",ideia:"amar o próximo"},{ref:"Gl 6:2",ideia:"levar as cargas"},{ref:"Rm 12:15",ideia:"chorar com quem chora"},{ref:"Tg 4:17",ideia:"saber o bem e não fazer"},{ref:"1 Jo 3:17-18",ideia:"amar de fato"},{ref:"Ne 2:18",ideia:"levantar-se e agir"}]
+};
 
-  function guardar(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-  function ler(k){try{return localStorage.getItem(k)||''}catch(e){return ''}}
+/* ---------- Instruções para a IA ---------- */
+const INSTRUCAO = `Você prepara esboços de pregação para um pastor evangélico brasileiro de 63 anos, que precisa de esboços SIMPLES e REDUZIDOS. Escreva em português do Brasil, direto, com palavras simples. Frases curtas, sem parágrafos: o pastor passa os olhos e prega. Na dúvida entre dizer mais ou dizer menos, diga menos. Meta: o esboço inteiro com cerca de 500 a 700 palavras.
 
-  $('chave').value = ler('esb_chave') || ler('ak');
-  $('modelo').value = ler('esb_modelo');
-  if(!$('chave').value) $('cfg').open = true;
+PRINCÍPIOS OBRIGATÓRIOS
 
-  // Recebe o texto vindo da Bíblia Explicada (?ref=...&resumo=...) ou salvo no navegador
-  (function(){
-    var ref='',res='';
-    try{
-      var p=new URLSearchParams(location.search);
-      ref=p.get('ref')||'';res=p.get('resumo')||'';
-      if(!ref){var pre=JSON.parse(ler('esboco_pre')||'{}');if(pre.ref&&Date.now()-(pre.t||0)<120000){ref=pre.ref;res=pre.resumo||''}}
-    }catch(e){}
-    if(!ref)return;
-    $('texto').value=ref;textoDaBiblia=ref;contextoBiblia=res;
-    if(res){$('ctx').textContent='Da Bíblia Explicada: '+res;$('ctx').hidden=false}
-    try{localStorage.removeItem('esboco_pre')}catch(e){}
-    setTimeout(function(){$('tema').focus()},300);
-  })();
+1. FIDELIDADE AO TEXTO. Se o pastor colou o texto dos versículos, ele é a única fonte. Se não colou, use a tradução Almeida e só afirme o que você tem certeza que o texto diz. Não invente fatos, nomes, números ou detalhes que o texto não traz. Cubra a passagem do começo ao fim, na ordem em que aparece, juntando versículos vizinhos. Use de 5 a 8 tópicos (máximo 9). Nunca force uma aplicação que o texto não sustenta.
 
-  // Ajusta o esboço para caber em UMA folha A4 na impressão
-  function ajustar(){
-    var s=$('saida');
-    if(s.hidden||!s.innerHTML)return;
-    s.style.zoom='';
-    s.style.width='190mm';
-    var ocultos=[].slice.call(s.querySelectorAll('.nao-imprimir'));
-    ocultos.forEach(function(e){e.style.display='none'});
-    var h=s.scrollHeight;
-    var max=277/25.4*96; // 297mm - margens de 10mm, em px
-    var f=Math.min(1,(max/h)*0.96);
-    if(f<1){
-      s.style.zoom=f;
-      s.style.width=(190/f)+'mm';
-    }
-    ocultos.forEach(function(e){e.style.display=''});
-  }
-  function restaurar(){var s=$('saida');s.style.zoom='';s.style.width=''}
-  window.addEventListener('beforeprint',ajustar);
-  window.addEventListener('afterprint',restaurar);
+2. TEMA E PALAVRA-CHAVE. Use o tema recebido, com as palavras do pastor (se o tema não combinar com o texto, ajuste o mínimo possível). Sem tema, crie um curto e forte, ligado à situação do texto. Crie uma PALAVRA-CHAVE: um verbo de ação no infinitivo, em maiúsculas, que RESPONDE ao tema (ex.: AVANÇAR), com um contraponto também verbo (ex.: recuar). O corpo todo se liga à palavra-chave e ela aponta de volta para o tema.
 
-  function esc(t){
-    return String(t==null?'':t).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]});
-  }
-  function msg(t,erro){var m=$('msg');m.textContent=t||'';m.className=erro?'erro':''}
+3. INTRODUÇÃO: 1 ou 2 frases: quem é a pessoa, onde está, qual a situação do texto. Sem quebra-gelo, sem humor.
 
-  function montarPrompt(texto,tema,publico,qtd,comIntro,comIlus,contexto){
-    return 'Você é um assistente de pastor evangélico brasileiro. Monte um esboço de sermão em português do Brasil, no estilo de prédica rápida: o pregador quase não lê, só passa os olhos. Tudo curto, em linhas soltas, sem parágrafos.\n\n'+
-    (texto?'TEXTO BÍBLICO: '+texto+'\n':'')+
-    (tema?'TEMA: '+tema+'\n':'')+
-    (contexto?'CONTEXTO DO TEXTO (resumo de apoio): '+contexto+'\n':'')+
-    (publico?'PÚBLICO: '+publico+'\n':'')+
-    '\nREGRAS:\n'+
-    '- Técnica: uma ÚNICA palavra-chave tirada de cada versículo ou trecho, para defender a tese.\n'+
-    '- Se houver TEXTO BÍBLICO, siga a ordem dos versículos e use só o que o texto realmente diz. Se o texto for curto (até uns 20 versículos), cubra do primeiro ao último versículo, agrupando versículos vizinhos em cada tópico. Se for um capítulo longo, escolha os versículos centrais, em ordem.\n'+
-    '- Se houver TEXTO e TEMA juntos, a "tese" e o "titulo" expressam o TEMA, e cada palavra-chave vem do texto e sustenta esse tema, sem forçar o que o texto não diz.\n'+
-    '- Se houver só TEMA, escolha os textos bíblicos de apoio.\n'+
-    '- Cite a referência de cada tópico (somente referências que existem de verdade).\n'+
-    '- VERACIDADE: use somente fatos que você tem certeza. NÃO invente números, ditados, provérbios, datas, citações nem estatísticas. Se não tiver certeza de um dado, deixe de fora ou use "cerca de" ou "mais de". Prefira poucos fatos certos a muitos duvidosos.\n'+
-    '- Exatamente '+qtd+' tópicos.\n'+
-    '- "palavra": UMA palavra só.\n'+
-    '- "direcao": 3 a 4 palavras, sem parágrafo.\n'+
-    '- "argumento": no máximo 2 frases curtas, linguagem simples, com 1 ou 2 expressões-chave entre <b> e </b>. Se usar exemplo bíblico, que seja real e correto.\n'+
-    '- "tese": uma frase forte e curta.\n'+
-    (comIntro?'- "intro": 3 a 4 linhas curtas de CURIOSIDADES DO TEXTO OU DO TEMA (para que serve o salmo ou o livro, significado de uma palavra no original, lugares, personagens, costumes). A última linha anuncia o que vamos ver. Não use o formato "o mundo diz / Deus diz". Uma ideia por linha.\n':'- "intro": lista vazia.\n')+
-    (comIlus?'- "ilustracao": "titulo" curto com o nome da figura usada (uma planta, um animal, um objeto) e 3 a 4 "linhas" curtas com dados verdadeiros sobre essa figura. A última linha liga a figura ao versículo. A ilustração é separada da introdução e não repete as curiosidades dela.\n':'- "ilustracao": titulo vazio e linhas vazias.\n')+
-    '- "apelo": lista de 3 a 4 linhas curtas de apelo e oração (o que pedir, o que decidir), cada uma com 1 expressão-chave entre <b> e </b>.\n'+
-    '\nResponda SOMENTE com JSON neste formato, sem markdown:\n'+
-    '{"titulo":"","texto_base":"","tese":"","intro":[""],"ilustracao":{"titulo":"","linhas":[""]},"topicos":[{"palavra":"","direcao":"","ref":"","argumento":""}],"apelo":[""]}';
-  }
+4. GANCHO: 3 a 4 frases curtas, em afirmações, SEM perguntas, ligado ao tema, terminando na palavra-chave conjugada (ex.: "Ele AVANÇOU."). Marque essa palavra com ** assim: **AVANÇOU**.
 
-  function limparJSON(t){
-    t = String(t||'').replace(/```json|```/g,'').trim();
-    var a=t.indexOf('{'), b=t.lastIndexOf('}');
-    if(a>=0 && b>a) t=t.slice(a,b+1);
-    return JSON.parse(t);
-  }
+5. ILUSTRAÇÃO (opcional): ilustracao_titulo curto (ex.: "a águia e a tempestade") e ilustracao com 2 linhas ligadas à palavra-chave. Use só imagem simples e verdadeira (natureza, cena do dia a dia). Não invente histórias "reais", estatísticas nem citações de pessoas. Se não encaixar bem, deixe os dois campos vazios.
 
-  async function chamar(modelo,chave,prompt){
-    var url='https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(modelo)+':generateContent';
-    var r = await fetch(url,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-goog-api-key':chave},
-      body:JSON.stringify({
-        contents:[{role:'user',parts:[{text:prompt}]}],
-        generationConfig:{temperature:0.6,responseMimeType:'application/json'}
-      })
+6. ABERTURA_CORPO: uma frase que começa com "A partir do momento que..." ou "Quando...", põe o ouvinte na situação do tema e termina com dois pontos.
+
+7. PARTES: 2 ou 3 partes. O titulo de cada parte contrasta os dois caminhos, usando o contraponto e a palavra-chave em maiúsculas (ex.: "quem recua se omite, quem AVANÇA age"). NÃO escreva "Parte 1" no título. O campo nota só se preenche quando a parte corresponde a uma oração, salmo ou discurso do próprio texto (ex.: "a ORAÇÃO de Neemias, Ne 1:5-11"); senão fica vazio.
+
+8. CADA TÓPICO:
+ (a) chave: UMA palavra tirada do próprio versículo, a mais marcante, em maiúsculas. Nenhuma chave se repete.
+ (b) direcao: 3 a 9 palavras, no formato "<Palavra-chave> é ..." (ex.: "Avançar é sofrer com quem sofre").
+ (c) ref: só a referência abreviada. NUNCA transcreva o versículo.
+ (d) subs: exatamente 2. Cada um com titulo (2 a 6 palavras), texto (até 8 palavras) e ref de apoio.
+ (e) pratica: um passo de aplicação em uma linha, no imperativo, só nos tópicos que pedem. Sem numeração, sem "1º" (o sistema numera).
+ (f) ligacao: uma frase curta que termina apontando para a chave do próximo tópico. No último tópico fica vazia. Aqui pode haver pergunta. Cada tópico precisa nascer do anterior.
+
+9. REFERÊNCIAS: use abreviaturas assim: Gn, Êx, Lv, Nm, Dt, Js, Jz, Rt, 1 Sm, 2 Sm, 1 Rs, 2 Rs, 1 Cr, 2 Cr, Ed, Ne, Et, Jó, Sl, Pv, Ec, Ct, Is, Jr, Lm, Ez, Dn, Os, Jl, Am, Ob, Jn, Mq, Na, Hc, Sf, Ag, Zc, Ml, Mt, Mc, Lc, Jo, At, Rm, 1 Co, 2 Co, Gl, Ef, Fp, Cl, 1 Ts, 2 Ts, 1 Tm, 2 Tm, Tt, Fm, Hb, Tg, 1 Pe, 2 Pe, 1 Jo, 2 Jo, 3 Jo, Jd, Ap. Só use referência que você conhece bem e que realmente diz o que o sub-tópico afirma. Se não tiver certeza, troque por outra que conheça. Nunca invente.
+
+10. PRÁTICAS: no total 3 ou 4 passos, em sequência lógica, espalhados nos tópicos certos. Seus verbos formam o resumo_verbos.
+
+11. ORAÇÃO: se o texto traz uma oração, preencha oracao com os pedidos em sequência, na ordem da oração do texto, separados por " · ", em linguagem de "nós". Preencha oracao_de com o nome de quem orou. Se não há oração no texto, deixe os dois vazios.
+
+12. FECHAMENTO: fechamento é uma frase que RESPONDE ao tema com a palavra-chave marcada com ** (ex.: "Quando a dor do outro chegar na minha casa: **AVANÇAR**."). resumo_verbos: 3 ou 4 verbos no infinitivo, separados por " · ", terminando com ponto.
+
+13. APOIO: de 4 a 6 referências para o sermão inteiro, cada uma com ideia de 2 a 4 palavras.
+
+14. MARCAÇÃO: o sinal ** só pode aparecer no gancho e no fechamento, uma vez em cada, na palavra-chave. Em nenhum outro campo.
+
+NÃO FAÇA: tese; apelo (o apelo é do pastor); transcrição de versículos; parágrafos longos; perguntas no gancho; quebra-gelo, piadas ou humor; jargão teológico; texto em markdown.
+
+SAÍDA: responda SOMENTE com JSON válido, sem explicações e sem marcas de código, exatamente com estes campos (os campos de texto sem conteúdo ficam como ""):
+{"tema":"","palavra_chave":"","contraponto":"","referencia":"","introducao":"","gancho":"","ilustracao_titulo":"","ilustracao":"","abertura_corpo":"","partes":[{"titulo":"","nota":"","topicos":[{"chave":"","direcao":"","ref":"","subs":[{"titulo":"","texto":"","ref":""},{"titulo":"","texto":"","ref":""}],"pratica":"","ligacao":""}]}],"fechamento":"","resumo_verbos":"","oracao_de":"","oracao":"","apoio":[{"ref":"","ideia":""}]}
+
+EXEMPLO DE FORMATO E NÍVEL (texto: Neemias 1:1-11; tema: A dor do outro chegou na minha casa). Imite o formato, o tamanho e a qualidade. NUNCA copie o conteúdo, a palavra-chave nem as chaves deste exemplo:
+` + JSON.stringify(EXEMPLO);
+
+/* ---------- Utilidades ---------- */
+const $ = id => document.getElementById(id);
+const MODELOS = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-2.5-flash'];
+const esperar = ms => new Promise(r => setTimeout(r, ms));
+class FormatoErro extends Error {}
+
+let guardado = localStorage.getItem('esboco_modelo');
+if (!guardado || guardado === 'gemini-2.5-flash') guardado = MODELOS[0];
+$('chave').value = localStorage.getItem('esboco_api_key') || '';
+$('modelo').value = guardado;
+
+function el(tag, cls, txt) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (txt !== undefined && txt !== null) e.textContent = txt;
+  return e;
+}
+function add(pai, tag, cls, txt) { const e = el(tag, cls, txt); pai.appendChild(e); return e; }
+function tx(pai, t) { pai.appendChild(document.createTextNode(t)); }
+
+/* Escreve texto; trechos entre ** viram destaque amarelo. Se a IA esquecer o **,
+   destaca sozinho a palavra parecida com a palavra-chave (qual: 'primeiro' ou 'ultimo'). */
+function rico(pai, txt, kw, qual) {
+  txt = txt || '';
+  if (txt.indexOf('**') >= 0) {
+    txt.split(/\*\*(.+?)\*\*/).forEach((p, i) => {
+      p = p.replace(/\*\*/g, '');
+      if (!p) return;
+      if (i % 2) add(pai, 'span', 'hl', p); else tx(pai, p);
     });
-    var dados = await r.json().catch(function(){return {}});
-    if(!r.ok){
-      var e = new Error((dados.error&&dados.error.message)||('Erro '+r.status));
-      e.status = r.status; e.texto = e.message;
+    return;
+  }
+  if (kw && qual) {
+    const radical = kw.trim().toUpperCase().slice(0, Math.max(4, kw.trim().length - 3));
+    const ms = [...txt.matchAll(/[\p{L}]+/gu)].filter(m => radical.length >= 4 && m[0].toUpperCase().startsWith(radical));
+    if (ms.length) {
+      const m = qual === 'ultimo' ? ms[ms.length - 1] : ms[0];
+      tx(pai, txt.slice(0, m.index));
+      add(pai, 'span', 'hl', m[0]);
+      tx(pai, txt.slice(m.index + m[0].length));
+      return;
+    }
+  }
+  tx(pai, txt);
+}
+
+/* ---------- Limpeza e validação do que a IA devolve ---------- */
+function normalizar(d) {
+  if (!d || typeof d !== 'object') throw new FormatoErro('vazio');
+  const s = v => (v === undefined || v === null) ? '' : String(v).trim();
+  const semMarca = v => s(v).replace(/^[➜↓→•\-–\s]+/, '').replace(/^\d+\s*[º°]\s*[·.:\-–]?\s*/, '');
+  const r = {
+    tema: s(d.tema), palavra_chave: s(d.palavra_chave).toUpperCase(), contraponto: s(d.contraponto).toLowerCase(),
+    referencia: s(d.referencia), introducao: s(d.introducao), gancho: s(d.gancho),
+    ilustracao_titulo: s(d.ilustracao_titulo), ilustracao: s(d.ilustracao), abertura_corpo: s(d.abertura_corpo),
+    fechamento: s(d.fechamento), resumo_verbos: s(d.resumo_verbos), oracao_de: s(d.oracao_de), oracao: s(d.oracao),
+    partes: [], apoio: []
+  };
+  if (!r.ilustracao) r.ilustracao_titulo = '';
+  if (!r.oracao) r.oracao_de = '';
+  (Array.isArray(d.partes) ? d.partes : []).forEach(p => {
+    const topicos = [];
+    (Array.isArray(p && p.topicos) ? p.topicos : []).forEach(t => {
+      if (!t || !s(t.chave)) return;
+      const subs = (Array.isArray(t.subs) ? t.subs : []).slice(0, 2)
+        .map(b => ({ titulo: s(b && b.titulo), texto: s(b && b.texto), ref: s(b && b.ref) }))
+        .filter(b => b.titulo || b.texto);
+      topicos.push({
+        chave: s(t.chave).toUpperCase(), direcao: s(t.direcao), ref: s(t.ref), subs,
+        pratica: semMarca(t.pratica), ligacao: semMarca(t.ligacao)
+      });
+    });
+    if (topicos.length) {
+      r.partes.push({
+        titulo: s(p.titulo).replace(/^parte\s*\d+\s*[·:.\-–]?\s*/i, ''),
+        nota: s(p.nota).replace(/^\(|\)$/g, ''), topicos
+      });
+    }
+  });
+  if (!r.partes.length) throw new FormatoErro('sem tópicos');
+  const ult = r.partes[r.partes.length - 1].topicos;
+  ult[ult.length - 1].ligacao = '';
+  (Array.isArray(d.apoio) ? d.apoio : []).forEach(a => { if (a && s(a.ref)) r.apoio.push({ ref: s(a.ref), ideia: s(a.ideia) }); });
+  return r;
+}
+
+/* ---------- Desenho do esboço ---------- */
+function render(d) {
+  const s = $('saida'); s.innerHTML = '';
+  const kw = d.palavra_chave;
+  add(s, 'div', 'ref', d.referencia);
+  const f = add(s, 'div', 'fluxo');
+  add(f, 'span', '', 'TEMA: ' + d.tema);
+  add(f, 'b', '', '➜');
+  const pc = add(f, 'span', 'pc', 'PALAVRA-CHAVE: ' + kw);
+  if (d.contraponto) { tx(pc, ' '); add(pc, 'small', '', '(ou ' + d.contraponto + ')'); }
+
+  const intro = add(s, 'div', 'bloco');
+  add(intro, 'b', 't', 'Introdução');
+  rico(intro, d.introducao);
+  if (d.gancho) {
+    const g = add(intro, 'div', 'gancho');
+    add(g, 'b', '', 'GANCHO: ');
+    rico(g, d.gancho, kw, 'ultimo');
+  }
+  if (d.ilustracao) {
+    const il = add(s, 'div', 'bloco');
+    add(il, 'b', 't', 'Ilustração' + (d.ilustracao_titulo ? ': ' + d.ilustracao_titulo : ''));
+    rico(il, d.ilustracao);
+  }
+  if (d.abertura_corpo) add(s, 'div', 'quando', d.abertura_corpo);
+
+  let n = 0, passo = 0;
+  d.partes.forEach((p, i) => {
+    add(s, 'div', 'grupo', 'Parte ' + (i + 1) + ' · ' + p.titulo + (p.nota ? ' (' + p.nota + ')' : ''));
+    p.topicos.forEach(t => {
+      n++;
+      const box = add(s, 'div', 'top');
+      add(box, 'div', 'num', String(n));
+      const c = add(box, 'div');
+      const l1 = add(c, 'div', 'linha1');
+      add(l1, 'span', 'chave', t.chave);
+      add(l1, 'span', 'dir', t.direcao);
+      add(l1, 'span', 'vers', t.ref);
+      if (t.subs.length) {
+        const ol = add(c, 'ol', 'subs');
+        t.subs.forEach(sb => {
+          const li = add(ol, 'li');
+          if (sb.titulo) add(li, 'b', '', sb.titulo);
+          if (sb.texto) { tx(li, (sb.titulo ? ' — ' : '')); rico(li, sb.texto); tx(li, ' '); }
+          if (sb.ref) add(li, 'span', 'sref', '(' + sb.ref + ')');
+        });
+      }
+      if (t.pratica) { passo++; add(c, 'div', 'aplic', '➜ ' + passo + 'º · ' + t.pratica); }
+      if (t.ligacao) add(c, 'div', 'ponte', '↓ ' + t.ligacao);
+    });
+  });
+
+  const fe = add(s, 'div', 'bloco fecho');
+  add(fe, 'b', 't', 'Fechamento · o tema respondido');
+  rico(fe, d.fechamento, kw, 'primeiro');
+  if (d.resumo_verbos) { add(fe, 'br'); add(fe, 'b', '', d.resumo_verbos); }
+  if (d.oracao) {
+    const o = add(fe, 'div', 'orac');
+    add(o, 'b', '', 'Momento de oração' + (d.oracao_de ? ' (como ' + d.oracao_de + ')' : '') + ': ');
+    tx(o, d.oracao);
+  }
+  if (d.apoio.length) {
+    const b = add(s, 'div', 'bloco base');
+    add(b, 'b', 't', 'Apoio bíblico');
+    d.apoio.forEach((a, i) => {
+      if (i) tx(b, ' · ');
+      add(b, 'b', '', a.ref);
+      tx(b, ' ' + a.ideia);
+    });
+  }
+  s.style.display = 'block';
+  $('rodape').style.display = 'block';
+}
+
+/* ---------- Conversa com a IA ---------- */
+function lerJSON(txt) {
+  let t = (txt || '').trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if (a >= 0 && b > a) t = t.slice(a, b + 1);
+  try { return JSON.parse(t); }
+  catch (e) { return JSON.parse(t.replace(/,\s*([}\]])/g, '$1')); }
+}
+
+function textoDaResposta(j) {
+  if (j.promptFeedback && j.promptFeedback.blockReason) throw new FormatoErro('bloqueado');
+  const cand = (j.candidates || [])[0] || {};
+  const txt = (((cand.content || {}).parts) || []).map(p => p.text || '').join('');
+  if (!txt) throw new FormatoErro('sem texto');
+  if (cand.finishReason === 'MAX_TOKENS') throw new FormatoErro('cortado');
+  return txt;
+}
+
+async function pedir(modelo, chave, corpo) {
+  const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(modelo) + ':generateContent';
+  let ultimo;
+  for (let t = 0; t < 3; t++) {
+    let r, j;
+    try {
+      r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': chave }, body: JSON.stringify(corpo) });
+      j = await r.json().catch(() => ({}));
+    } catch (e) { ultimo = new Error('REDE'); await esperar(1500 * (t + 1)); continue; }
+    if (r.ok) return j;
+    const err = new Error((j.error && j.error.message) || ('Erro ' + r.status));
+    err.status = r.status;
+    if ([500, 502, 503, 504].includes(r.status)) { ultimo = err; await esperar(2000 * (t + 1)); continue; }
+    throw err;
+  }
+  throw ultimo;
+}
+
+/* tenta o modelo escolhido e, se ele não existir ou estourar o limite, os próximos */
+async function chamar(chave, corpo, escolhido) {
+  const lista = [escolhido, ...MODELOS].filter((m, i, a) => m && a.indexOf(m) === i);
+  let falha;
+  for (const m of lista) {
+    try { return await pedir(m, chave, corpo); }
+    catch (e) {
+      if (e.status === 404 || e.status === 429 || /no longer available|new users|not found|not supported/i.test(e.message || '')) { falha = e; continue; }
       throw e;
     }
-    var parts = dados.candidates&&dados.candidates[0]&&dados.candidates[0].content&&dados.candidates[0].content.parts;
-    var txt = (parts||[]).map(function(p){return p.text||''}).join('');
-    if(!txt) throw new Error('A IA não devolveu texto. Tente de novo.');
-    return limparJSON(txt);
   }
+  throw falha;
+}
 
-  function modeloIndisponivel(e){
-    var t=(e.texto||'').toLowerCase();
-    return e.status===503 || e.status===500 || e.status===502 || e.status===504 || t.indexOf('high demand')>=0 || t.indexOf('overloaded')>=0 || t.indexOf('unavailable')>=0 || e.status===404 || (e.status===400 && t.indexOf('model')>=0) || t.indexOf('no longer available')>=0 || t.indexOf('not found')>=0 || t.indexOf('new users')>=0;
-  }
+$('exemplo').addEventListener('click', () => {
+  render(normalizar(EXEMPLO));
+  $('msg').className = 'msg'; $('msg').textContent = 'Este é o exemplo de Neemias (não usa a IA).';
+  $('saida').scrollIntoView({ behavior: 'smooth' });
+});
 
-  function rico(t){
-    // libera só a tag <b> dentro do texto
-    return esc(t).replace(/&lt;b&gt;/g,'<b>').replace(/&lt;\/b&gt;/g,'</b>');
-  }
-  function lin(i){
-    if(i&&typeof i==='object') return (i.rotulo?'<b>'+esc(i.rotulo)+':</b> ':'')+rico(i.texto);
-    return rico(i);
-  }
-  function ed(tag,cls,html){
-    return '<'+tag+' class="ed'+(cls?' '+cls:'')+'" contenteditable="true" spellcheck="false">'+html+'</'+tag+'>';
-  }
-  function linhaHTML(html){
-    return '<div class="ln">'+ed('p','',html)+'<button class="mini nao-imprimir" data-a="delln" title="Apagar linha">×</button></div>';
-  }
-  function caixa(tituloHTML,linhas){
-    var h='<div class="b"><h2>'+tituloHTML+'</h2><div class="linhas">';
-    linhas.forEach(function(l){h+=linhaHTML(lin(l))});
-    h+='</div><div class="nao-imprimir"><button class="mini add" data-a="addln">+ linha</button> <button class="mini add" data-a="delbox">Apagar bloco</button></div></div>';
-    return h;
-  }
-  function topicoHTML(t){
-    return '<li>'+ed('span','k',esc(t.palavra))+
-      ed('div','d',esc(t.direcao))+
-      ed('div','r',esc(t.ref))+
-      ed('div','a',rico(t.argumento))+
-      '<div class="ctrl nao-imprimir"><button class="mini" data-a="up">↑</button><button class="mini" data-a="down">↓</button><button class="mini" data-a="deltop">Apagar tópico</button></div></li>';
-  }
+$('gerar').addEventListener('click', async () => {
+  const tema = $('tema').value.trim();
+  const texto = $('texto').value.trim();
+  const passagem = $('passagem').value.trim();
+  const chave = $('chave').value.trim();
+  const modelo = $('modelo').value.trim() || MODELOS[0];
+  const msg = $('msg');
+  msg.className = 'msg'; msg.textContent = '';
+  if (!texto) { msg.className = 'msg erro'; msg.textContent = 'Informe o texto bíblico.'; return; }
+  if (!chave) { msg.className = 'msg erro'; msg.textContent = 'Cole a chave da API do Google AI Studio.'; return; }
+  localStorage.setItem('esboco_api_key', chave);
+  localStorage.setItem('esboco_modelo', modelo);
 
-  function desenhar(d){
-    var h=ed('h1','',esc(d.titulo||'Esboço'));
-    h+='<div class="sub">'+ed('span','',esc(d.texto_base||''))+(temaAtual?' · Tema: '+ed('span','',esc(temaAtual)):'')+'</div>';
-    h+='<div class="tese"><span>TESE: </span>'+ed('span','',esc(d.tese))+'</div>';
-    var intro=d.intro||[];
-    if(intro.length) h+=caixa('Introdução',intro);
-    var il=d.ilustracao;
-    if(il&&il.linhas&&il.linhas.length) h+=caixa('Ilustração: '+ed('span','',esc(il.titulo||'')),il.linhas);
-    h+='<ol id="lista">';
-    (d.topicos||[]).forEach(function(t){h+=topicoHTML(t)});
-    h+='</ol><div class="nao-imprimir"><button class="mini add" data-a="addtop">+ tópico</button></div>';
-    var ap=d.apelo;
-    if(typeof ap==='string') ap=[ap];
-    ap=(ap&&ap.length)?ap:[''];
-    h+=caixa('Apelo e oração',ap);
-    h+='<div class="dica nao-imprimir">Toque em qualquer texto para editar. Enter cria uma linha nova nas listas.</div>';
-    h+='<div class="acoes nao-imprimir"><div class="row">'+
-       '<button class="s" data-a="imprimir">Imprimir / PDF</button>'+
-       '<button class="s" data-a="copiar">Copiar texto</button></div></div>';
-    $('saida').innerHTML=h;
-    $('saida').hidden=false;
-    $('saida').scrollIntoView({behavior:'smooth'});
-  }
-
-  // Texto puro do esboço como está na tela (já com as suas edições)
-  function coletar(){
-    var s=$('saida');
-    var L=[s.querySelector('h1').textContent.trim(),s.querySelector('.sub').textContent.trim(),'',s.querySelector('.tese').textContent.trim(),''];
-    [].forEach.call(s.children,function(el){
-      if(el.classList.contains('b')){
-        L.push(el.querySelector('h2').textContent.trim().toUpperCase());
-        [].forEach.call(el.querySelectorAll('p.ed'),function(p){var x=p.textContent.trim();if(x)L.push('- '+x)});
-        L.push('');
-      }else if(el.tagName==='OL'){
-        [].forEach.call(el.children,function(li,n){
-          var g=function(c){return li.querySelector('.'+c).textContent.trim()};
-          L.push((n+1)+'. '+g('k').toUpperCase()+' - '+g('d')+' ('+g('r')+')');
-          L.push('   '+g('a'));
-        });
-        L.push('');
-      }
-    });
-    return L.join('\n').replace(/\n{3,}/g,'\n\n').trim();
-  }
-
-  $('saida').addEventListener('click',function(ev){
-    var b=ev.target.closest?ev.target.closest('[data-a]'):null;
-    if(!b)return;
-    var a=b.getAttribute('data-a');
-    var li=b.closest('li'), box=b.closest('.b'), ln=b.closest('.ln');
-    if(a==='delln'){ln.parentNode.removeChild(ln)}
-    else if(a==='addln'){
-      var c=box.querySelector('.linhas');
-      c.insertAdjacentHTML('beforeend',linhaHTML(''));
-      var ps=c.querySelectorAll('p.ed');ps[ps.length-1].focus();
-    }
-    else if(a==='delbox'){box.parentNode.removeChild(box)}
-    else if(a==='deltop'){li.parentNode.removeChild(li)}
-    else if(a==='up'){if(li.previousElementSibling)li.parentNode.insertBefore(li,li.previousElementSibling)}
-    else if(a==='down'){if(li.nextElementSibling)li.parentNode.insertBefore(li.nextElementSibling,li)}
-    else if(a==='addtop'){
-      $('lista').insertAdjacentHTML('beforeend',topicoHTML({palavra:'Palavra',direcao:'direção curta',ref:'Livro 0:0',argumento:'Argumento curto.'}));
-      var ks=$('lista').querySelectorAll('.k');ks[ks.length-1].focus();
-    }
-    else if(a==='imprimir'){ajustar();window.print()}
-    else if(a==='copiar'){
-      var txt=coletar();
-      var ok=function(){b.textContent='Copiado!'};
-      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(ok)}
-      else{var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(e){}document.body.removeChild(ta)}
-    }
-  });
-
-  // Enter: nas listas cria linha nova; nos outros campos não quebra linha
-  $('saida').addEventListener('keydown',function(ev){
-    if(ev.key!=='Enter')return;
-    var e=ev.target;
-    if(!e.classList||!e.classList.contains('ed'))return;
-    ev.preventDefault();
-    var ln=e.closest('.ln');
-    if(ln){ln.insertAdjacentHTML('afterend',linhaHTML(''));ln.nextElementSibling.querySelector('p.ed').focus()}
-  });
-  // Colar sempre como texto simples
-  $('saida').addEventListener('paste',function(ev){
-    var e=ev.target;
-    if(!e.classList||!e.classList.contains('ed'))return;
-    ev.preventDefault();
-    var t=((ev.clipboardData||window.clipboardData).getData('text')||'').replace(/\s*\n\s*/g,' ');
-    document.execCommand('insertText',false,t);
-  });
-
-  $('gerar').onclick=async function(){
-    var texto=$('texto').value.trim();
-    var tema=$('tema').value.trim();
-    var chave=$('chave').value.trim();
-    if(!tema&&!texto){msg('Digite o texto bíblico e/ou o tema.',true);return}
-    if(!chave){msg('Cole a chave do Google AI Studio na configuração.',true);$('cfg').open=true;return}
-    guardar('esb_chave',chave);
-    var escolhido=$('modelo').value.trim();
-    guardar('esb_modelo',escolhido);
-
-    var qtd=Math.max(3,Math.min(8,parseInt($('qtd').value,10)||5));
-    var comIntro=$('intro').value.trim().toLowerCase().indexOf('n')!==0;
-    var comIlus=$('ilus').value.trim().toLowerCase().indexOf('n')!==0;
-    temaAtual=tema;
-    var prompt=montarPrompt(texto,tema,$('publico').value.trim(),qtd,comIntro,comIlus,texto&&texto===textoDaBiblia?contextoBiblia:'');
-
-    var lista=(escolhido?[escolhido]:[]).concat(MODELOS.filter(function(m){return m!==escolhido}));
-    $('gerar').disabled=true;
-    var ultimoErro=null;
-    for(var i=0;i<lista.length;i++){
-      msg('Montando o esboço...'+(i>0?' (tentando '+lista[i]+')':''));
-      try{
-        var d=await chamar(lista[i],chave,prompt);
-        if(!d.topicos||!d.topicos.length) throw new Error('Esboço veio incompleto. Tente de novo.');
-        desenhar(d);
-        msg('');
-        if(lista[i]!==escolhido){$('modelo').value=lista[i];guardar('esb_modelo',lista[i])}
-        $('gerar').disabled=false;
-        return;
-      }catch(e){
-        ultimoErro=e;
-        if(!modeloIndisponivel(e)) break;
-        if(e.status===503||(e.texto||'').toLowerCase().indexOf('high demand')>=0){
-          await new Promise(function(r){setTimeout(r,1500)});
-        }
+  const btn = $('gerar'); btn.disabled = true; msg.textContent = 'Gerando o esboço... (pode levar até 1 minuto)';
+  try {
+    const pedido = 'Texto bíblico: ' + texto +
+      (passagem ? '\nTexto dos versículos (use como única fonte):\n' + passagem : '') +
+      '\nTema: ' + (tema || '(crie um tema curto e forte)');
+    const corpo = {
+      systemInstruction: { parts: [{ text: INSTRUCAO }] },
+      contents: [{ role: 'user', parts: [{ text: pedido }] }],
+      generationConfig: { temperature: 0.7, responseMimeType: 'application/json', maxOutputTokens: 16384 }
+    };
+    let pronto = false;
+    for (let tentativa = 0; tentativa < 2 && !pronto; tentativa++) {
+      const j = await chamar(chave, corpo, modelo);
+      try {
+        render(normalizar(lerJSON(textoDaResposta(j))));
+        pronto = true;
+      } catch (e) {
+        if (!(e instanceof FormatoErro || e instanceof SyntaxError)) throw e;
+        if (tentativa === 1) throw e;
+        msg.textContent = 'Ajustando o formato, tentando de novo...';
       }
     }
-    var t=(ultimoErro&&ultimoErro.texto)||(ultimoErro&&ultimoErro.message)||'Erro desconhecido';
-    if(ultimoErro&&(ultimoErro.status===503||(ultimoErro.texto||'').toLowerCase().indexOf('high demand')>=0)) t='Os servidores do Google estão lotados agora. Espere 1 ou 2 minutos e clique em Gerar de novo.';
-    else if(ultimoErro&&ultimoErro.status===429) t='Limite de uso da chave atingido. Espere um pouco e tente de novo.';
-    else if(ultimoErro&&(ultimoErro.status===401||ultimoErro.status===403)) t='A chave não foi aceita. Confira se colou inteira. Resposta do Google: '+((ultimoErro.texto||'').slice(0,220));
-    msg(t,true);
-    $('gerar').disabled=false;
-  };
-})();
+    msg.textContent = 'Esboço pronto. Confira os versículos de apoio na sua Bíblia.';
+    $('saida').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) {
+    msg.className = 'msg erro';
+    let m = e.message || String(e);
+    if (m === 'REDE') m = 'Sem conexão com a internet. Confira o sinal e tente de novo.';
+    else if (e instanceof FormatoErro && e.message === 'bloqueado') m = 'A IA recusou esse pedido. Tente reescrever o tema.';
+    else if (e instanceof FormatoErro || e instanceof SyntaxError) m = 'A IA devolveu um formato inesperado. Clique em Gerar de novo.';
+    else if (/API key not valid|API_KEY_INVALID|API key expired/i.test(m)) m = 'Chave da API inválida. Crie ou copie outra no Google AI Studio.';
+    else if (e.status === 429 || /quota|RESOURCE_EXHAUSTED/i.test(m)) m = 'Limite de uso da chave atingido. Espere um pouco e tente de novo.';
+    else if (e.status === 404 || /no longer available|new users|not found/i.test(m)) m = 'Esse modelo não está disponível. Troque o campo Modelo por gemini-3.8-flash.';
+    else if ([500, 502, 503, 504].includes(e.status)) m = 'O servidor do Google está sobrecarregado. Tente de novo em um minuto.';
+    msg.textContent = m;
+  } finally {
+    btn.disabled = false;
+  }
+});
 </script>
-<!-- fc-voltar-painel -->
-<style>#fc-voltar-painel{position:fixed!important;left:12px!important;bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;z-index:2147483000!important;display:inline-flex!important;align-items:center!important;gap:8px!important;min-height:46px!important;padding:0 20px!important;border-radius:999px!important;background:#22d3ee!important;color:#06101c!important;border:2px solid #06101c!important;font:800 16px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif!important;text-decoration:none!important;box-shadow:0 6px 20px rgba(0,0,0,.45)!important;-webkit-tap-highlight-color:transparent}#fc-voltar-painel:active{transform:scale(.96)}@media print{#fc-voltar-painel{display:none!important}}</style>
-<a id="fc-voltar-painel" href="index.html" aria-label="Voltar para o painel">&#8592; Voltar ao painel</a>
-<script>try{if(window.self!==window.top)document.getElementById('fc-voltar-painel').style.display='none'}catch(e){}</script>
-<!-- /fc-voltar-painel -->
 </body>
 </html>
