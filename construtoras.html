@@ -144,7 +144,7 @@ button.sm:hover{background:var(--acc);color:var(--acc-ink);border-color:var(--ac
 .cta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
 .opt tr.ok td:nth-child(5) b{color:var(--ok)}.opt tr.no td{color:#8B97A3}
 .ru input{width:92px;padding:5px 7px;border:1.5px solid var(--line);border-radius:6px}
-.ru input.w{width:112px}
+.ru input.w{width:140px}
 details.rg{border:1px solid var(--line);border-radius:10px;padding:6px 14px;margin:10px 0;background:#fff}
 details.rg summary{cursor:pointer;font-weight:700;color:var(--acc-text);padding:8px 0}
 .foot{max-width:1280px;margin:0 auto;padding:0 16px 30px;color:var(--mute);font-size:13px;text-align:center}
@@ -1181,6 +1181,30 @@ const brl0=v=>'R$ '+Math.round(isFinite(v)?v:0).toLocaleString('pt-BR');
 const pct=v=>(isFinite(v)?v:0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+'%';
 const clamp=(x,a,b)=>Math.min(Math.max(x,a),b);
 const num=v=>{const x=parseFloat(v);return isFinite(x)?x:0;};
+/* ===== Campos em reais (R$ 1.234,56) ===== */
+const fmtBRLInput=v=>(isFinite(v)&&v>0)?'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'';
+function parseBRL(s){s=String(s==null?'':s).replace(/[^\d,]/g,'');if(!s)return 0;const p=s.split(',');const x=parseFloat((p[0]||'0')+'.'+((p[1]||'').slice(0,2)||'0'));return isFinite(x)?x:0;}
+function maskBRL(raw){
+  let t=String(raw).replace(/[^\d,]/g,'');const i=t.indexOf(',');
+  let ent=i<0?t:t.slice(0,i),dec=i<0?null:t.slice(i+1).replace(/,/g,'').slice(0,2);
+  ent=ent.replace(/^0+(?=\d)/,'').replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  if(dec!==null&&ent==='')ent='0';
+  return dec===null?ent:ent+','+dec;
+}
+function moneyField(inp,onChange){
+  inp.type='text';inp.setAttribute('inputmode','decimal');inp.setAttribute('autocomplete','off');
+  inp.addEventListener('input',()=>{
+    const pos=inp.selectionStart,before=inp.value.slice(0,pos).replace(/[^\d,]/g,'').length;
+    const m=maskBRL(inp.value);inp.value=m;
+    let n=0,np=m.length;if(before===0)np=0;else for(let k=0;k<m.length;k++){if(/[\d,]/.test(m[k]))n++;if(n===before){np=k+1;break;}}
+    try{inp.setSelectionRange(np,np);}catch(e){}
+    onChange(parseBRL(m));
+  });
+  inp.addEventListener('focus',()=>{const v=parseBRL(inp.value);if(v>0){inp.value=maskBRL(v.toFixed(2).replace('.',','));}});
+  inp.addEventListener('blur',()=>{inp.value=fmtBRLInput(parseBRL(inp.value));});
+  return inp;
+}
+const setMoney=(inp,v)=>{inp.value=fmtBRLInput(v);};
 
 function defRules(){return{
   // Base: Portaria MCID nº 333/2026 (renda até R$ 13 mil; tetos 275/400/600 mil). Taxas e subsídio = referência editável.
@@ -1269,8 +1293,8 @@ const SIM_HTML=`<div class="sim">
 <div class="sc"><h3>Dados do cliente</h3>
  <div class="g3">
   <div class="fld"><label for="s-nome">Nome do cliente (opcional)</label><input id="s-nome" type="text" autocomplete="off"></div>
-  <div class="fld"><label for="s-renda">Renda familiar bruta (R$/mês)</label><input id="s-renda" type="number" inputmode="decimal" min="0" step="100"></div>
-  <div class="fld"><label for="s-ent">Entrada + FGTS (R$)</label><input id="s-ent" type="number" inputmode="decimal" min="0" step="1000"></div>
+  <div class="fld"><label for="s-renda">Renda familiar bruta (R$/mês)</label><input id="s-renda" type="text" inputmode="decimal" autocomplete="off" placeholder="R$ 0,00"></div>
+  <div class="fld"><label for="s-ent">Entrada + FGTS (R$)</label><input id="s-ent" type="text" inputmode="decimal" autocomplete="off" placeholder="R$ 0,00"></div>
   <div class="fld"><label for="s-anos">Prazo (anos, de 5 a 35)</label><input id="s-anos" type="number" inputmode="numeric" min="5" max="35" step="1"></div>
   <div class="fld"><label>Sistema de amortização</label><div class="seg"><button type="button" id="s-price">PRICE</button><button type="button" id="s-sac">SAC</button></div></div>
   <div class="fld"><label>FGTS</label><label class="chk"><input id="s-cot" type="checkbox"> Tem 3+ anos de FGTS (cotista)</label></div>
@@ -1279,7 +1303,7 @@ const SIM_HTML=`<div class="sim">
 </div>
 <div class="sc"><h3>Imóvel</h3>
  <div class="unitbox" id="s-unitbox"><span class="lbl" id="s-unit"></span><span id="s-pv"></span><button type="button" id="s-clear">Limpar seleção</button></div>
- <div class="fld" style="max-width:320px"><label for="s-valor">Valor do imóvel (R$)</label><input id="s-valor" type="number" inputmode="decimal" min="0" step="1000"></div>
+ <div class="fld" style="max-width:320px"><label for="s-valor">Valor do imóvel (R$)</label><input id="s-valor" type="text" inputmode="decimal" autocomplete="off" placeholder="R$ 0,00"></div>
 </div>
 <div class="sc"><h3>Resultado</h3>
  <div class="g2" id="s-res"></div>
@@ -1313,7 +1337,7 @@ const SIM_HTML=`<div class="sim">
 function renderSim(panel){
   const wrap=el('div',{class:'panel'});wrap.innerHTML=SIM_HTML;panel.append(wrap);
   const q=id=>wrap.querySelector('#'+id);
-  q('s-nome').value=cli.nome;q('s-renda').value=cli.renda||'';q('s-ent').value=cli.entrada||'';q('s-anos').value=cli.anos;q('s-cot').checked=cli.cot;q('s-valor').value=cli.valor||'';q('s-fit').checked=cli.soCabem;
+  q('s-nome').value=cli.nome;setMoney(q('s-renda'),cli.renda);setMoney(q('s-ent'),cli.entrada);q('s-anos').value=cli.anos;q('s-cot').checked=cli.cot;setMoney(q('s-valor'),cli.valor);q('s-fit').checked=cli.soCabem;
   let last=null,lastP=null;
 
   function calc(){saveCli();
@@ -1330,7 +1354,7 @@ function renderSim(panel){
     if(u&&u.tab!=null&&u.dsc!=null){
       [['tab','Tabela '+brl0(u.tab)],['dsc','Com desconto '+brl0(u.dsc)]].forEach(([k,t])=>{
         const l=el('label'),i=el('input',{type:'radio',name:'s-pvr',value:k});i.checked=cli.pv===k;
-        i.onchange=()=>{cli.pv=k;cli.valor=k==='tab'?u.tab:u.dsc;q('s-valor').value=cli.valor;calc();};
+        i.onchange=()=>{cli.pv=k;cli.valor=k==='tab'?u.tab:u.dsc;setMoney(q('s-valor'),cli.valor);calc();};
         l.append(i,' '+t);pv.append(l);
       });
     }
@@ -1426,24 +1450,25 @@ function renderSim(panel){
 
   // regras editáveis
   function ruleInput(obj,key,cls,step){const i=el('input',{type:'number',step:step||'any',value:obj[key],class:cls||''});i.onchange=()=>{obj[key]=num(i.value);saveRules();calc();};return i;}
+  function ruleMoney(obj,key,cls){const i=el('input',{type:'text',class:cls||''});i.value=obj[key]>0?fmtBRLInput(obj[key]):'R$ 0,00';moneyField(i,v=>{obj[key]=v;saveRules();calc();});i.addEventListener('blur',()=>{if(!(obj[key]>0))i.value='R$ 0,00';});return i;}
   function buildRules(){
     const rm=q('s-rm');rm.textContent='';
     rules.mcmv.forEach(f=>{const tr=el('tr');const n=el('input',{type:'text',value:f.nome,class:'w'});n.onchange=()=>{f.nome=n.value;saveRules();calc();};
-      tr.append(el('td',{},n));['ate','teto','sub','subFim'].forEach(k=>tr.append(el('td',{},ruleInput(f,k,'w'))));['tmin','tmax','nao'].forEach(k=>tr.append(el('td',{},ruleInput(f,k,'',0.01))));rm.append(tr);});
+      tr.append(el('td',{},n));['ate','teto','sub','subFim'].forEach(k=>tr.append(el('td',{},ruleMoney(f,k,'w'))));['tmin','tmax','nao'].forEach(k=>tr.append(el('td',{},ruleInput(f,k,'',0.01))));rm.append(tr);});
     const rs=q('s-rs');rs.textContent='';
     rules.sbpe.forEach(f=>{const tr=el('tr');tr.append(el('td',{},ruleInput(f,'cotaAte')),el('td',{},ruleInput(f,'taxa','',0.01)));rs.append(tr);});
     const rg=q('s-rg');rg.textContent='';
     [['subPct','Subsídio limitado a (% do imóvel)'],['extra','Seguros + tarifa (R$/mês, 0 = desligado)'],['cotaMax','Cota máxima financiada (%)'],['comp','Parcela máxima (% da renda)']].forEach(([k,t])=>{
-      const d=el('div',{class:'fld'},el('label',{text:t}));const i=ruleInput(rules,k);i.style.cssText='width:100%;font-size:15px;padding:8px 10px';d.append(i);rg.append(d);});
+      const d=el('div',{class:'fld'},el('label',{text:t}));const i=k==='extra'?ruleMoney(rules,k):ruleInput(rules,k);i.style.cssText='width:100%;font-size:15px;padding:8px 10px';d.append(i);rg.append(d);});
   }
   buildRules();
 
   q('s-nome').oninput=e=>{cli.nome=e.target.value;};
-  q('s-renda').oninput=e=>{cli.renda=num(e.target.value);calc();};
-  q('s-ent').oninput=e=>{cli.entrada=num(e.target.value);calc();};
+  moneyField(q('s-renda'),v=>{cli.renda=v;calc();});
+  moneyField(q('s-ent'),v=>{cli.entrada=v;calc();});
   q('s-anos').oninput=e=>{cli.anos=num(e.target.value)||30;calc();};
   q('s-anos').onchange=e=>{cli.anos=clamp(Math.round(num(e.target.value))||30,5,35);e.target.value=cli.anos;calc();};
-  q('s-valor').oninput=e=>{cli.valor=num(e.target.value);cli.unit=null;calc();};
+  moneyField(q('s-valor'),v=>{cli.valor=v;cli.unit=null;calc();});
   q('s-cot').onchange=e=>{cli.cot=e.target.checked;calc();};
   q('s-price').onclick=()=>{cli.sis='PRICE';calc();};
   q('s-sac').onclick=()=>{cli.sis='SAC';calc();};
