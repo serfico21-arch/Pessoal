@@ -11,20 +11,25 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --verde: #10b981;
-  --verde-claro: #059669;
-  --verde-escuro: #047857;
-  --escuro: #0f2922;
-  --escuro2: #f4f8f6;
+  --verde: #059669;
+  --verde-claro: #047857;
+  --verde-escuro: #065f46;
+  --escuro: #ffffff;
+  --escuro2: #eef5f2;
   --branco: #ffffff;
+  --ink: #17332b;
   --card-bg: #ffffff;
-  --card-border: rgba(16,185,129,0.18);
-  --card-hover-border: rgba(16,185,129,0.45);
-  --text-muted: #6b7c76;
-  --divider: rgba(16,185,129,0.16);
+  --card-border: rgba(16,185,129,0.28);
+  --card-hover-bg: #f1faf6;
+  --card-hover-border: rgba(16,185,129,0.6);
+  --text-muted: #5a6e67;
+  --divider: rgba(16,185,129,0.22);
+  --group-bg: #ffffff;
+  --group-border: rgba(16,185,129,0.24);
+  --danger: #dc2626;
 }
 html { scroll-behavior: smooth; }
-body { font-family: 'DM Sans', sans-serif; background: var(--escuro2); min-height: 100vh; color: var(--escuro); }
+body { font-family: 'DM Sans', sans-serif; background: var(--escuro2); min-height: 100vh; color:var(--ink); }
 a { color: inherit; }
 :focus-visible { outline: 2px solid var(--verde-escuro); outline-offset: 2px; border-radius: 4px; }
 
@@ -40,7 +45,7 @@ header {
   transition: border-color 0.15s, background 0.15s;
 }
 .voltar:hover { border-color: var(--card-hover-border); background: rgba(16,185,129,0.06); }
-.header-info h1 { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600; color: var(--escuro); line-height: 1.2; }
+.header-info h1 { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 600; color:var(--ink); line-height: 1.2; }
 .header-info p { font-size: 12px; color: var(--text-muted); margin-top: 3px; text-transform: capitalize; }
 .header-acao { margin-left: auto; }
 .reiniciar {
@@ -78,11 +83,11 @@ main { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
 .meta-topo { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
 .meta-nome { display: flex; align-items: center; gap: 10px; }
 .meta-nome i { font-size: 18px; color: var(--verde); }
-.meta-nome span { font-family: 'Sora', sans-serif; font-size: 14.5px; font-weight: 600; color: var(--escuro); }
+.meta-nome span { font-family: 'Sora', sans-serif; font-size: 14.5px; font-weight: 600; color:var(--ink); }
 .meta-alvo { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-muted); }
 .meta-alvo input {
   width: 46px; background: var(--branco); border: 1px solid var(--card-border);
-  border-radius: 6px; color: var(--escuro); font-family: 'DM Sans', sans-serif; font-size: 12px;
+  border-radius: 6px; color:var(--ink); font-family: 'DM Sans', sans-serif; font-size: 12px;
   text-align: center; padding: 4px 2px;
 }
 
@@ -95,7 +100,7 @@ main { max-width: 760px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
 .meta-botoes { display: flex; gap: 6px; }
 .meta-botoes button {
   width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--card-border);
-  background: var(--branco); color: var(--escuro); font-size: 16px; font-weight: 600; cursor: pointer;
+  background: var(--branco); color:var(--ink); font-size: 16px; font-weight: 600; cursor: pointer;
   display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s;
 }
 .meta-botoes button:hover { background: var(--verde); color: #fff; border-color: var(--verde); }
@@ -111,10 +116,21 @@ footer .selo-mini {
 }
 footer strong { color: var(--verde-claro); font-weight: 600; }
 </style>
+<style id="padrao-fcosta">
+/* padrão FCOSTA — tema suave (claro) */
+body{color:var(--ink)}
+header{box-shadow:0 2px 14px -8px rgba(23,51,43,.25)}
+.logo{background:#000!important;padding:0;overflow:hidden;box-shadow:0 0 0 2px var(--verde)}
+.logo img{width:100%;height:100%;object-fit:cover;display:block}
+.btn,.seg-toggle button.ativo,.thumb .marca,.tag-btn.selecionada,.meta-botoes button:hover{background:#047857}.btn:hover{background:#065f46}
+.btn.secundario{background:#e4efea;color:var(--ink)}.btn.secundario:hover{background:#d6e6df}
+.btn.perigo{background:#fde8e8;color:var(--danger)}
+</style>
 </head>
 <body>
 
 <header>
+  <div class="logo" style="width:44px;height:44px;border-radius:50%;flex:none"><img src="sen_fundo_logo.png" alt="FCOSTA"></div>
   <a class="voltar" href="index.html"><i class="ti ti-arrow-left"></i>Painel</a>
   <div class="header-info">
     <h1>Metas do Mês</h1>
