@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kit do Corretor – FCosta</title>
+<style>
+:root{--bg:#f3f1ec;--card:#fff;--ink:#1b2430;--mut:#667085;--navy:#16324f;--gold:#b8892f;--line:#e2ded4;--ok:#1f7a4d;--warn:#b7791f;--bad:#b42318}
+@media (prefers-color-scheme:dark){:root{--bg:#10161d;--card:#18212b;--ink:#eaeef2;--mut:#98a2b3;--navy:#8fb4d9;--gold:#d9a94a;--line:#2a3643;--ok:#4cc38a;--warn:#e0a83c;--bad:#f07167}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,'Times New Roman',serif;line-height:1.5}
+header{padding:18px 16px 10px;max-width:760px;margin:auto}
+h1{margin:0;font-size:1.5rem;color:var(--navy)}
+header p{margin:2px 0 0;color:var(--mut);font:.85rem system-ui,sans-serif}
+nav{position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:1px solid var(--line)}
+nav div{display:flex;gap:6px;overflow-x:auto;padding:8px 16px;max-width:760px;margin:auto}
+nav button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:20px;font:600 .85rem system-ui,sans-serif;cursor:pointer}
+nav button.on{background:var(--navy);color:var(--bg);border-color:var(--navy)}
+main{max-width:760px;margin:auto;padding:14px 16px 60px}
+section{display:none;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+section.on{display:block}
+h2{margin:0 0 12px;font-size:1.2rem;color:var(--navy)}
+h3{margin:18px 0 8px;font-size:1rem;color:var(--navy)}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font:600 .78rem system-ui,sans-serif;color:var(--mut)}
+input,select,textarea{width:100%;margin-top:3px;padding:10px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink);font:1rem system-ui,sans-serif}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.out{margin-top:14px;border-top:2px solid var(--gold);padding-top:8px}
+.r{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font:.95rem system-ui,sans-serif}
+.r b{text-align:right}
+.r.big b{font-size:1.2rem;color:var(--navy)}
+.tag{display:inline-block;padding:3px 10px;border-radius:12px;font:700 .8rem system-ui,sans-serif;color:#fff}
+.ok{background:var(--ok)}.warn{background:var(--warn)}.bad{background:var(--bad)}
+.btn{margin-top:10px;padding:10px 16px;border:0;border-radius:7px;background:var(--navy);color:var(--bg);font:700 .9rem system-ui,sans-serif;cursor:pointer}
+.btn.alt{background:transparent;color:var(--navy);border:1px solid var(--navy)}
+.it{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font:.92rem system-ui,sans-serif}
+.it small{display:block;color:var(--mut)}
+.it select{width:auto;padding:5px;font-size:.8rem}
+.x{background:none;border:0;color:var(--bad);font-size:1.2rem;cursor:pointer}
+.bar{height:10px;background:var(--line);border-radius:5px;overflow:hidden;margin:4px 0 10px}
+.bar i{display:block;height:100%;background:var(--gold)}
+.empty{color:var(--mut);font:.9rem system-ui,sans-serif;padding:10px 0}
+a.wa{color:var(--ok);font-weight:700;text-decoration:none}
+@media(max-width:480px){.g{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><h1>Kit do Corretor</h1><p>FCosta Corretor · seus dados ficam só neste navegador</p></header>
+<nav><div id="tabs"></div></nav>
+<main>
+
+<section id="s-fin"><h2>Financiamento</h2>
+<div class="g">
+<label>Valor do imóvel (R$)<input id="f-v" type="number" value="400000" oninput="calc()"></label>
+<label>Entrada (R$)<input id="f-e" type="number" value="80000" oninput="calc()"></label>
+<label>FGTS disponível (R$)<input id="f-g" type="number" value="0" oninput="calc()"></label>
+<label>Renda do cliente (R$/mês)<input id="f-r" type="number" value="8000" oninput="calc()"></label>
+<label>Prazo (meses)<input id="f-m" type="number" value="360" oninput="calc()"></label>
+<label>Taxa (% ao ano)<input id="f-t" type="number" step="0.01" value="11" oninput="calc()"></label>
+</div>
+<label style="margin-top:10px">Sistema<select id="f-s" onchange="calc()"><option value="price">Price (parcela fixa)</option><option value="sac">SAC (parcela decrescente)</option></select></label>
+<div class="out" id="o-fin"></div></section>
+
+<section id="s-cus"><h2>Custas de compra</h2>
+<div class="g">
+<label>Valor do imóvel (R$)<input id="c-v" type="number" value="400000" oninput="calc()"></label>
+<label>ITBI (%)<input id="c-i" type="number" step="0.01" value="3" oninput="calc()"></label>
+<label>Registro (%)<input id="c-r" type="number" step="0.01" value="1" oninput="calc()"></label>
+<label>Escritura (%)<input id="c-e" type="number" step="0.01" value="1" oninput="calc()"></label>
+</div>
+<label style="margin-top:10px">Outros custos em R$ (lavratura, banco, certidões)<input id="c-o" type="number" value="0" oninput="calc()"></label>
+<div class="out" id="o-cus"></div></section>
+
+<section id="s-com"><h2>Comissão</h2>
+<div class="g">
+<label>Valor da venda (R$)<input id="m-v" type="number" value="400000" oninput="calc()"></label>
+<label>Comissão (%)<input id="m-p" type="number" step="0.1" value="6" oninput="calc()"></label>
+<label>Parte do corretor (%)<input id="m-s" type="number" value="100" oninput="calc()"></label>
+<label>Imposto (%)<input id="m-i" type="number" step="0.1" value="0" oninput="calc()"></label>
+</div>
+<div class="out" id="o-com"></div></section>
+
+<section id="s-loc"><h2>Locação</h2>
+<h3>Reajuste do aluguel</h3>
+<div class="g">
+<label>Aluguel atual (R$)<input id="l-a" type="number" value="2000" oninput="calc()"></label>
+<label>Índice acumulado 12 meses (%)<input id="l-i" type="number" step="0.01" value="4.5" oninput="calc()"></label>
+</div>
+<p class="empty" style="margin:6px 0 0">Informe o acumulado do IGP-M, IPCA ou outro índice do contrato.</p>
+<div class="out" id="o-rea"></div>
+<h3>Rentabilidade do imóvel</h3>
+<div class="g">
+<label>Valor do imóvel (R$)<input id="l-v" type="number" value="400000" oninput="calc()"></label>
+<label>Aluguel mensal (R$)<input id="l-b" type="number" value="2000" oninput="calc()"></label>
+<label>Custos mensais (R$)<input id="l-c" type="number" value="200" oninput="calc()"></label>
+</div>
+<div class="out" id="o-ren"></div></section>
+
+<section id="s-cli"><h2>Clientes</h2><div id="f-cli"></div><div id="l-cli"></div></section>
+<section id="s-imo"><h2>Imóveis captados</h2><div id="f-imo"></div><div id="l-imo"></div></section>
+<section id="s-vis"><h2>Visitas</h2><div id="f-vis"></div><div id="l-vis"></div></section>
+
+<section id="s-met"><h2>Meta do mês</h2>
+<div class="g">
+<label>Meta de comissão (R$)<input id="g-m" type="number" oninput="saveMeta()"></label>
+<label>Já realizado (R$)<input id="g-r" type="number" oninput="saveMeta()"></label>
+</div>
+<div class="out" id="o-met"></div></section>
+
+<section id="s-gan"><h2>Ganho de capital na venda</h2>
+<div class="g">
+<label>Valor da venda (R$)<input id="ga-v" type="number" value="600000" oninput="calc()"></label>
+<label>Custo de aquisição (R$)<input id="ga-c" type="number" value="350000" oninput="calc()"></label>
+<label>Benfeitorias comprovadas (R$)<input id="ga-b" type="number" value="0" oninput="calc()"></label>
+<label>Corretagem e despesas da venda (R$)<input id="ga-d" type="number" value="0" oninput="calc()"></label>
+</div>
+<label style="margin-top:10px">Isenção<select id="ga-x" onchange="calc()"><option value="n">Nenhuma</option><option value="u">Único imóvel, venda até R$ 440 mil</option><option value="r">Vai comprar outro imóvel em até 180 dias</option></select></label>
+<div class="out" id="o-gan"></div>
+<p class="empty">Estimativa simples. Confirme regras e prazos com o contador antes de orientar o cliente.</p></section>
+
+<section id="s-con"><h2>Consórcio ou financiamento</h2>
+<div class="g">
+<label>Valor do crédito (R$)<input id="k-c" type="number" value="300000" oninput="calc()"></label>
+<label>Prazo (meses)<input id="k-p" type="number" value="180" oninput="calc()"></label>
+<label>Taxa de administração total (%)<input id="k-a" type="number" step="0.1" value="18" oninput="calc()"></label>
+<label>Fundo de reserva (%)<input id="k-f" type="number" step="0.1" value="2" oninput="calc()"></label>
+<label>Taxa do financiamento (% ao ano)<input id="k-t" type="number" step="0.01" value="11" oninput="calc()"></label>
+</div>
+<div class="out" id="o-con"></div>
+<p class="empty">O consórcio não tem juros, mas depende de sorteio ou lance para ser contemplado. O financiamento libera o imóvel na hora.</p></section>
+
+<section id="s-m2"><h2>Preço do metro quadrado</h2>
+<div class="g">
+<label>Valor pedido (R$)<input id="p-v" type="number" value="450000" oninput="calc()"></label>
+<label>Área (m²)<input id="p-a" type="number" value="60" oninput="calc()"></label>
+<label>Preço do m² na região (R$)<input id="p-r" type="number" value="8000" oninput="calc()"></label>
+</div>
+<div class="out" id="o-m2"></div></section>
+
+<section id="s-pro"><h2>Aluguel proporcional e multa</h2>
+<h3>Aluguel proporcional</h3>
+<div class="g">
+<label>Aluguel (R$)<input id="q-a" type="number" value="2000" oninput="calc()"></label>
+<label>Dias de uso<input id="q-d" type="number" value="15" oninput="calc()"></label>
+<label>Dias do mês<input id="q-n" type="number" value="30" oninput="calc()"></label>
+</div>
+<div class="out" id="o-pro"></div>
+<h3>Multa por rescisão antecipada</h3>
+<div class="g">
+<label>Multa em nº de aluguéis<input id="q-m" type="number" value="3" oninput="calc()"></label>
+<label>Prazo do contrato (meses)<input id="q-p" type="number" value="30" oninput="calc()"></label>
+<label>Meses já cumpridos<input id="q-c" type="number" value="12" oninput="calc()"></label>
+</div>
+<div class="out" id="o-mul"></div>
+<p class="empty">A multa é reduzida na proporção do tempo cumprido do contrato.</p></section>
+
+<section id="s-chk"><h2>Checklist de vistoria</h2>
+<div id="l-chk"></div>
+<label style="margin-top:12px">Observações da visita<textarea id="chk-o" rows="3" oninput="saveObs()"></textarea></label>
+<button class="btn alt" onclick="chkLimpar()">Limpar checklist</button></section>
+
+<section id="s-wpp"><h2>Mensagens para WhatsApp</h2>
+<div class="g">
+<label>Modelo<select id="w-t" onchange="wpp()"><option value="apr">Apresentar imóvel</option><option value="loc">Proposta de locação</option><option value="ven">Proposta de compra</option></select></label>
+<label>Nome do cliente<input id="w-n" oninput="wpp()"></label>
+<label>WhatsApp do cliente (DDD)<input id="w-tel" inputmode="tel"></label>
+<label>Imóvel<input id="w-i" placeholder="Ex.: apto 2 dorm., Jardim São Fernando" oninput="wpp()"></label>
+<label>Valor (R$)<input id="w-v" type="number" oninput="wpp()"></label>
+<label>Condições extras<input id="w-x" placeholder="Ex.: aceita financiamento, entrada de 20%" oninput="wpp()"></label>
+</div>
+<label style="margin-top:10px">Assinatura<input id="w-s" value="Sergio Fernandes da Costa - CRECI-SP 294791-F" oninput="wpp()"></label>
+<label style="margin-top:10px">Mensagem pronta (pode editar)<textarea id="w-o" rows="8"></textarea></label>
+<button class="btn" onclick="wppAbrir()">Abrir no WhatsApp</button>
+<button class="btn alt" onclick="wppCopiar()">Copiar texto</button>
+<div id="w-msg" class="empty"></div></section>
+
+<section id="s-tar"><h2>Tarefas do dia</h2><div id="f-tar"></div><div id="l-tar"></div></section>
+<section id="s-ret"><h2>Retornos de clientes</h2><div id="f-ret"></div><div id="l-ret"></div></section>
+<section id="s-des"><h2>Despesas do corretor</h2><div id="f-des"></div><div id="l-des"></div></section>
+
+<section id="s-neg"><h2>Negociação</h2>
+<div class="g">
+<label>Valor pedido (R$)<input id="ng-p" type="number" value="450000" oninput="calc()"></label>
+<label>Oferta do cliente (R$)<input id="ng-o" type="number" value="410000" oninput="calc()"></label>
+<label>Comissão (%)<input id="ng-c" type="number" step="0.1" value="6" oninput="calc()"></label>
+</div>
+<div class="out" id="o-neg"></div></section>
+
+<section id="s-cmp"><h2>Comparador de imóveis</h2>
+<div id="l-cmp"></div><div class="out" id="o-cmp"></div></section>
+
+<section id="s-rec"><h2>Recibo de sinal</h2>
+<div class="g">
+<label>Quem pagou (comprador)<input id="r-c" oninput="rec()"></label>
+<label>Quem recebeu<input id="r-v" oninput="rec()"></label>
+<label>Imóvel<input id="r-i" oninput="rec()"></label>
+<label>Valor do sinal (R$)<input id="r-s" type="number" oninput="rec()"></label>
+<label>Valor total do imóvel (R$)<input id="r-t" type="number" oninput="rec()"></label>
+<label>Data<input id="r-d" type="date" oninput="rec()"></label>
+</div>
+<label style="margin-top:10px">Forma de pagamento<input id="r-f" value="PIX" oninput="rec()"></label>
+<label style="margin-top:10px">Recibo pronto (pode editar)<textarea id="r-o" rows="10"></textarea></label>
+<button class="btn" onclick="copiar('r-o','r-msg')">Copiar texto</button>
+<button class="btn alt" onclick="window.print()">Imprimir</button>
+<div id="r-msg" class="empty"></div>
+<p class="empty">Modelo simples. Para valores altos, formalize com contrato de compra e venda.</p></section>
+
+<section id="s-res"><h2>Resumo e backup</h2>
+<div id="o-res"></div>
+<h3>Backup</h3>
+<button class="btn" onclick="exportar()">Baixar backup</button>
+<label style="margin-top:14px">Restaurar: cole aqui o conteúdo do backup<textarea id="imp" rows="4"></textarea></label>
+<button class="btn alt" onclick="importar()">Restaurar backup</button>
+<div id="imp-msg" class="empty"></div></section>
+
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const n=id=>parseFloat($(id).value)||0;
+const brl=v=>isFinite(v)?v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}):'—';
+const pc=v=>isFinite(v)?v.toFixed(2).replace('.',',')+'%':'—';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const row=(a,b,c)=>'<div class="r'+(c?' '+c:'')+'"><span>'+a+'</span><b>'+b+'</b></div>';
+const ST=['Novo','Em contato','Visita','Proposta','Fechado','Perdido'];
+const L={
+ cli:{f:[{k:'nome',p:'Nome'},{k:'tel',p:'WhatsApp com DDD'},{k:'st',s:ST}]},
+ imo:{f:[{k:'end',p:'Endereço ou nome do imóvel'},{k:'val',p:'Valor (R$)',t:'number'},{k:'st',s:['Captado','Anunciado','Vendido','Alugado']}]},
+ vis:{f:[{k:'data',p:'Data',t:'date'},{k:'cli',p:'Cliente'},{k:'imo',p:'Imóvel'}]},
+ tar:{f:[{k:'txt',p:'O que fazer'},{k:'data',p:'Para quando',t:'date'},{k:'st',s:['A fazer','Feito']}]},
+ ret:{f:[{k:'cli',p:'Cliente'},{k:'mot',p:'Motivo do retorno'},{k:'data',p:'Retornar em',t:'date'},{k:'st',s:['Pendente','Feito']}]},
+ des:{f:[{k:'desc',p:'Descrição'},{k:'val',p:'Valor (R$)',t:'number'},{k:'data',p:'Data',t:'date'},{k:'st',l:'Categoria',s:['Combustível','Anúncios','Marketing','Taxas','Outros']}]}
+};
+let db={cli:[],imo:[],vis:[],meta:{m:0,r:0},chk:{},obs:'',tar:[],ret:[],des:[]};
+try{const s=JSON.parse(localStorage.getItem('kitcorretor')||'null');if(s)db=Object.assign(db,s)}catch(e){}
+function save(){try{localStorage.setItem('kitcorretor',JSON.stringify(db))}catch(e){}}
+
+const TABS=[['fin','Financiamento'],['cus','Custas'],['com','Comissão'],['loc','Locação'],['cli','Clientes'],['imo','Imóveis'],['vis','Visitas'],['tar','Tarefas'],['ret','Retornos'],['des','Despesas'],['met','Meta'],['gan','Ganho de capital'],['con','Consórcio'],['m2','Preço m²'],['pro','Proporcional e multa'],['chk','Vistoria'],['neg','Negociação'],['cmp','Comparador'],['rec','Recibo de sinal'],['wpp','WhatsApp'],['res','Resumo']];
+function show(id){
+ TABS.forEach(t=>{$('s-'+t[0]).classList.toggle('on',t[0]===id);$('b-'+t[0]).classList.toggle('on',t[0]===id)});
+ if(id==='res')resumo();
+ try{location.hash=id}catch(e){}
+}
+$('tabs').innerHTML=TABS.map(t=>'<button id="b-'+t[0]+'" onclick="show(\''+t[0]+'\')">'+t[1]+'</button>').join('');
+
+const C={
+ fin(){
+  const v=n('f-v'),e=n('f-e'),g=n('f-g'),r=n('f-r'),m=n('f-m'),t=n('f-t'),s=$('f-s').value;
+  const P=Math.max(v-e-g,0);
+  if(m<=0){$('o-fin').innerHTML='<p class="empty">Informe um prazo maior que zero.</p>';return}
+  const i=Math.pow(1+t/100,1/12)-1;
+  let p1,pl,tot;
+  if(s==='price'){p1=pl=i?P*i/(1-Math.pow(1+i,-m)):P/m;tot=p1*m}
+  else{p1=P/m+P*i;pl=P/m*(1+i);tot=(p1+pl)/2*m}
+  let h=row('Valor financiado',brl(P))+row(s==='price'?'Parcela mensal':'Primeira parcela',brl(p1),'big');
+  if(s==='sac')h+=row('Última parcela',brl(pl));
+  h+=row('Total pago no financiamento',brl(tot))+row('Total de juros',brl(tot-P));
+  if(r>0){
+   const q=p1/r*100,c=q<=30?['ok','Cabe na renda']:q<=35?['warn','Atenção']:['bad','Acima de 30%'];
+   h+=row('Comprometimento da renda',pc(q)+' <span class="tag '+c[0]+'">'+c[1]+'</span>')+row('Renda mínima pela regra dos 30%',brl(p1/0.3));
+  }
+  $('o-fin').innerHTML=h;
+ },
+ cus(){
+  const v=n('c-v'),a=v*n('c-i')/100,b=v*n('c-r')/100,c=v*n('c-e')/100,o=n('c-o'),t=a+b+c+o;
+  $('o-cus').innerHTML=row('ITBI',brl(a))+row('Registro',brl(b))+row('Escritura',brl(c))+row('Outros custos',brl(o))+row('Total de custas',brl(t),'big')+row('% do valor do imóvel',pc(v?t/v*100:0));
+ },
+ com(){
+  const b=n('m-v')*n('m-p')/100,p=b*n('m-s')/100,i=p*n('m-i')/100;
+  $('o-com').innerHTML=row('Comissão total',brl(b))+row('Sua parte',brl(p))+row('Imposto',brl(i))+row('Líquido para você',brl(p-i),'big');
+ },
+ loc(){
+  const a=n('l-a'),i=n('l-i'),nv=a*(1+i/100);
+  $('o-rea').innerHTML=row('Novo aluguel',brl(nv),'big')+row('Aumento mensal',brl(nv-a))+row('Aumento no ano',brl((nv-a)*12));
+  const v=n('l-v'),b=n('l-b'),c=n('l-c'),liq=(b-c)*12;
+  $('o-ren').innerHTML=row('Renda líquida anual',brl(liq))+row('Rentabilidade bruta',pc(v?b*12/v*100:0))+row('Rentabilidade líquida',pc(v?liq/v*100:0),'big')+row('Retorno do investimento (payback)',liq>0?(v/liq).toFixed(1).replace('.',',')+' anos':'—')+row('Renda mínima do inquilino (30%)',brl(b/0.3));
+ },
+ gan(){
+  const v=n('ga-v'),g=Math.max(v-n('ga-c')-n('ga-b')-n('ga-d'),0),x=$('ga-x').value;
+  const fx=[[5e6,.15],[1e7,.175],[3e7,.2],[Infinity,.225]];
+  let imp=0,ant=0;for(const f of fx){if(g>ant)imp+=(Math.min(g,f[0])-ant)*f[1];ant=f[0]}
+  const iso=(x==='u'&&v<=440000)||x==='r';
+  let h=row('Ganho de capital',brl(g));
+  if(x==='u'&&v>440000)h+='<p class="empty">A isenção do único imóvel vale só para venda até R$ 440 mil.</p>';
+  h+=row('Imposto estimado',iso?'Isento':brl(imp),'big')+row('Alíquota efetiva',iso?'0,00%':pc(g?imp/g*100:0))+row('Sobra da venda após despesas e imposto',brl(v-n('ga-d')-(iso?0:imp)));
+  $('o-gan').innerHTML=h;
+ },
+ con(){
+  const c=n('k-c'),m=n('k-p');
+  if(m<=0){$('o-con').innerHTML='<p class="empty">Informe um prazo maior que zero.</p>';return}
+  const pcon=c*(1+(n('k-a')+n('k-f'))/100)/m,i=Math.pow(1+n('k-t')/100,1/12)-1,pf=i?c*i/(1-Math.pow(1+i,-m)):c/m;
+  const d=pf*m-pcon*m;
+  $('o-con').innerHTML=row('Consórcio: parcela',brl(pcon))+row('Consórcio: total pago',brl(pcon*m))+row('Financiamento: parcela',brl(pf))+row('Financiamento: total pago',brl(pf*m))+row(d>=0?'Consórcio sai mais barato em':'Financiamento sai mais barato em',brl(Math.abs(d)),'big');
+ },
+ m2(){
+  const v=n('p-v'),a=n('p-a'),r=n('p-r'),pm=a?v/a:0,est=r*a;
+  $('o-m2').innerHTML=row('Preço do m² do imóvel',brl(pm),'big')+row('Valor estimado pela região',brl(est))+row('Diferença para a região',est?pc((v-est)/est*100):'—')+row('Veredito',!est?'—':v<=est*0.95?'<span class="tag ok">Abaixo da região</span>':v<=est*1.05?'<span class="tag warn">Na média</span>':'<span class="tag bad">Acima da região</span>');
+ },
+ pro(){
+  const a=n('q-a'),dn=n('q-n')||30,d=n('q-d');
+  $('o-pro').innerHTML=row('Valor por dia',brl(a/dn))+row('Aluguel proporcional',brl(a/dn*d),'big');
+  const al=a*n('q-m'),p=n('q-p'),c=n('q-c'),rest=p>0?Math.max(p-c,0)/p:0;
+  $('o-mul').innerHTML=row('Multa cheia do contrato',brl(al))+row('Multa proporcional ao que falta',brl(al*rest),'big');
+ },
+ neg(){
+  const p=n('ng-p'),o=n('ng-o'),c=n('ng-c')/100;
+  $('o-neg').innerHTML=row('Desconto pedido pelo cliente',pc(p?(p-o)/p*100:0),'big')+row('Diferença em reais',brl(p-o))+row('Meio do caminho (contraproposta)',brl((p+o)/2))+row('Sua comissão sobre a oferta',brl(o*c))+row('Sua comissão sobre o valor pedido',brl(p*c))+row('Diferença na comissão',brl((p-o)*c));
+ },
+ cmp(){
+  const L=[];
+  for(let j=0;j<3;j++){const v=n('cm'+j+'v'),a=n('cm'+j+'a');if(v&&a)L.push({j,pm:v/a,v})}
+  if(!L.length){$('o-cmp').innerHTML='<p class="empty">Preencha valor e área de pelo menos um imóvel.</p>';return}
+  const min=Math.min(...L.map(x=>x.pm));let h='';
+  L.forEach(x=>{
+   const j=x.j,nm=esc($('cm'+j+'n').value.trim()||'Imóvel '+(j+1)),cond=n('cm'+j+'c');
+   h+=row(nm,brl(x.pm)+'/m²'+(L.length>1&&x.pm===min?' <span class="tag ok">Melhor preço</span>':''))+row('Valor · quartos · vagas',brl(x.v)+' · '+n('cm'+j+'q')+' · '+n('cm'+j+'g'))+row('Condomínio mensal',brl(cond));
+  });
+  $('o-cmp').innerHTML=h;
+ }
+};
+function hoje(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function despMes(){const m=hoje().slice(0,7);return db.des.filter(x=>!x.data||x.data.startsWith(m)).reduce((a,x)=>a+(parseFloat(x.val)||0),0)}
+function cmpInit(){
+ const F=[['n','Nome do imóvel','text'],['v','Valor (R$)','number'],['a','Área (m²)','number'],['q','Quartos','number'],['g','Vagas','number'],['c','Condomínio (R$)','number']];
+ let h='';
+ for(let j=0;j<3;j++)h+='<h3>Imóvel '+(j+1)+'</h3><div class="g">'+F.map(f=>'<label>'+f[1]+'<input id="cm'+j+f[0]+'" type="'+f[2]+'" oninput="calc()"></label>').join('')+'</div>';
+ $('l-cmp').innerHTML=h;
+}
+function ext(n){
+ n=Math.floor(n);if(n<=0)return 'zero';
+ const u=['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'],d=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'],c=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
+ const t=x=>{if(x===100)return 'cem';const r=[];if(x>=100){r.push(c[Math.floor(x/100)]);x%=100}if(x>0){if(x<20)r.push(u[x]);else r.push(d[Math.floor(x/10)]+(x%10?' e '+u[x%10]:''))}return r.join(' e ')};
+ const mi=Math.floor(n/1e6),mil=Math.floor(n%1e6/1e3),re=n%1e3,p=[];
+ if(mi)p.push(t(mi)+(mi>1?' milhões':' milhão'));
+ if(mil)p.push(mil===1?'mil':t(mil)+' mil');
+ if(re)p.push(t(re));
+ return p.join(' e ');
+}
+function rec(){
+ const s=n('r-s'),t=n('r-t'),dt=$('r-d').value?$('r-d').value.split('-').reverse().join('/'):'___/___/______';
+ const nm=x=>x.trim()||'______________________';
+ let m='RECIBO DE SINAL E PRINCÍPIO DE PAGAMENTO\n\nRecebi de '+nm($('r-c').value)+' a quantia de '+brl(s)+' ('+ext(s)+' reais), a título de sinal e princípio de pagamento referente à compra do imóvel: '+nm($('r-i').value)+'.\n\n';
+ if(t)m+='Valor total do imóvel: '+brl(t)+'. Saldo restante: '+brl(Math.max(t-s,0))+'.\n';
+ m+='Forma de pagamento: '+($('r-f').value.trim()||'a combinar')+'.\n\nData: '+dt+'\n\n\n________________________________\n'+nm($('r-v').value)+'\nRecebedor';
+ $('r-o').value=m;
+}
+function copiar(i,m){
+ const t=$(i);t.select();
+ try{navigator.clipboard.writeText(t.value).then(()=>{$(m).textContent='Texto copiado.'},()=>{document.execCommand('copy');$(m).textContent='Texto copiado.'})}
+ catch(e){try{document.execCommand('copy');$(m).textContent='Texto copiado.'}catch(e2){$(m).textContent='Não consegui copiar. Segure o texto e copie manualmente.'}}
+}
+function wppTxt(){
+ const t=$('w-t').value,nm=$('w-n').value.trim()||'tudo bem',im=$('w-i').value.trim()||'imóvel',v=n('w-v'),vs=v?brl(v):'a combinar',x=$('w-x').value.trim(),s=$('w-s').value.trim();
+ let m;
+ if(t==='loc')m='Olá, '+nm+'! Segue a proposta de locação do imóvel: '+im+'.\n\nValor do aluguel: '+vs+(x?'\n'+x:'')+'\n\nFico à disposição para agendar a visita ou receber a documentação.';
+ else if(t==='ven')m='Olá, '+nm+'! Segue a proposta de compra do imóvel: '+im+'.\n\nValor: '+vs+(x?'\n'+x:'')+'\n\nSe estiver de acordo, seguimos com a documentação.';
+ else m='Olá, '+nm+'! Separei um imóvel que combina com o que você procura: '+im+', por '+vs+'.'+(x?'\n'+x:'')+'\n\nPosso agendar uma visita?';
+ return m+(s?'\n\n'+s:'');
+}
+function wpp(){$('w-o').value=wppTxt()}
+function wppAbrir(){
+ const tel=$('w-tel').value.replace(/\D/g,'');
+ window.open('https://wa.me/'+(tel?'55'+tel:'')+'?text='+encodeURIComponent($('w-o').value),'_blank');
+}
+function wppCopiar(){
+ const t=$('w-o');t.select();
+ try{navigator.clipboard.writeText(t.value).then(()=>{$('w-msg').textContent='Texto copiado.'},()=>{document.execCommand('copy');$('w-msg').textContent='Texto copiado.'})}
+ catch(e){try{document.execCommand('copy');$('w-msg').textContent='Texto copiado.'}catch(e2){$('w-msg').textContent='Não consegui copiar. Segure o texto e copie manualmente.'}}
+}
+const CHK=['Matrícula atualizada e sem ônus','IPTU e condomínio em dia','Documentos do proprietário conferidos','Pintura de paredes e teto','Infiltrações, mofo ou manchas','Instalação elétrica e tomadas','Hidráulica, torneiras e descargas','Pressão da água e aquecimento','Janelas, portas e fechaduras','Pisos e revestimentos','Telhado, laje e vazamentos','Vaga de garagem e metragem','Armários e itens que ficam','Vizinhança, barulho e segurança','Fotos e vídeo feitos','Medidas conferidas'];
+function chkInit(){
+ $('l-chk').innerHTML=CHK.map((t,i)=>'<label class="it" style="color:var(--ink);font-size:.95rem"><span>'+t+'</span><input type="checkbox" style="width:auto" '+(db.chk[i]?'checked':'')+' onchange="chkSet('+i+',this.checked)"></label>').join('');
+ $('chk-o').value=db.obs||'';
+}
+function chkSet(i,v){if(v)db.chk[i]=1;else delete db.chk[i];save()}
+function saveObs(){db.obs=$('chk-o').value;save()}
+function chkLimpar(){db.chk={};db.obs='';save();chkInit()}
+function calc(){for(const k in C)C[k]()}
+
+function form(k){
+ $('f-'+k).innerHTML='<div class="g">'+L[k].f.map(f=>f.s?
+  '<label>'+(f.l||'Situação')+'<select id="n-'+k+'-'+f.k+'">'+f.s.map(o=>'<option>'+o+'</option>').join('')+'</select></label>':
+  '<label>'+f.p+'<input id="n-'+k+'-'+f.k+'" type="'+(f.t||'text')+'"></label>').join('')+'</div><button class="btn" onclick="add(\''+k+'\')">Adicionar</button>';
+}
+function add(k){
+ const o={};let any=false;
+ L[k].f.forEach(f=>{const v=$('n-'+k+'-'+f.k).value.trim();o[f.k]=v;if(v&&!f.s)any=true});
+ if(!any)return;
+ db[k].push(o);save();L[k].f.forEach(f=>{if(!f.s)$('n-'+k+'-'+f.k).value=''});render(k);
+}
+function del(k,i){db[k].splice(i,1);save();render(k)}
+function setSt(k,i,v){db[k][i].st=v;save()}
+function render(k){
+ const d=db[k];
+ if(!d.length){$('l-'+k).innerHTML='<p class="empty">Nada por aqui ainda. Preencha os campos e toque em Adicionar.</p>';return}
+ $('l-'+k).innerHTML=d.map((x,i)=>{
+  let t,s;
+  if(k==='cli'){const tel=String(x.tel||'').replace(/\D/g,'');t=esc(x.nome||'Sem nome');s=tel?'<a class="wa" target="_blank" rel="noopener" href="https://wa.me/55'+tel+'">WhatsApp '+esc(x.tel)+'</a>':'Sem telefone'}
+  else if(k==='imo'){t=esc(x.end||'Sem endereço');s=x.val?brl(parseFloat(x.val)):'Sem valor'}
+  else if(k==='vis'){t=esc(x.cli||'Sem cliente')+' · '+esc(x.imo||'Sem imóvel');s=x.data?x.data.split('-').reverse().join('/'):'Sem data'}
+  else{
+   const dd=x.data?x.data.split('-').reverse().join('/'):'Sem data',at=x.data&&x.data<hoje()&&x.st!=='Feito'&&k!=='des';
+   if(k==='des'){t=esc(x.desc||'Sem descrição');s=(x.val?brl(parseFloat(x.val)):'Sem valor')+' · '+dd}
+   else{t=k==='tar'?esc(x.txt||'Sem texto'):esc(x.cli||'Sem cliente')+(x.mot?' · '+esc(x.mot):'');s=at?'<span style="color:var(--bad)">Atrasado · '+dd+'</span>':dd}
+  }
+  const sel=x.st!==undefined?'<select onchange="setSt(\''+k+'\','+i+',this.value)">'+L[k].f.find(f=>f.s).s.map(o=>'<option'+(o===x.st?' selected':'')+'>'+o+'</option>').join('')+'</select>':'';
+  return '<div class="it"><div>'+t+'<small>'+s+'</small></div><div>'+sel+'<button class="x" aria-label="Remover" onclick="del(\''+k+'\','+i+')">×</button></div></div>';
+ }).join('');
+}
+
+function saveMeta(){db.meta={m:n('g-m'),r:n('g-r')};save();metaOut()}
+function metaOut(){
+ const m=db.meta.m,r=db.meta.r,p=m?Math.min(r/m*100,100):0;
+ $('o-met').innerHTML=row('Atingido',pc(m?r/m*100:0),'big')+'<div class="bar"><i style="width:'+p+'%"></i></div>'+row('Falta para a meta',brl(Math.max(m-r,0)));
+}
+
+function resumo(){
+ const c=db.cli,tot=c.length,fe=c.filter(x=>x.st==='Fechado').length;
+ let h=row('Clientes no funil',tot)+row('Taxa de conversão',tot?pc(fe/tot*100)+' ('+fe+' fechados)':'—','big');
+ ST.forEach(s=>{const q=c.filter(x=>x.st===s).length;h+='<div class="r"><span>'+s+'</span><b>'+q+'</b></div><div class="bar"><i style="width:'+(tot?q/tot*100:0)+'%"></i></div>'});
+ h+=row('Imóveis captados',db.imo.length)+row('Visitas agendadas',db.vis.length)+row('Tarefas a fazer',db.tar.filter(x=>x.st!=='Feito').length)+row('Retornos pendentes',db.ret.filter(x=>x.st!=='Feito').length)+row('Despesas do mês',brl(despMes()))+row('Itens da vistoria marcados',Object.keys(db.chk).length+' de '+CHK.length)+row('Meta do mês',pc(db.meta.m?db.meta.r/db.meta.m*100:0));
+ $('o-res').innerHTML=h;
+}
+function exportar(){
+ const b=new Blob([JSON.stringify(db,null,1)],{type:'application/json'}),a=document.createElement('a');
+ a.href=URL.createObjectURL(b);a.download='backup-kit-corretor-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+ $('imp').value=JSON.stringify(db);
+ $('imp-msg').textContent='Backup baixado. Uma cópia também foi colocada no campo abaixo.';
+}
+function importar(){
+ try{
+  const o=JSON.parse($('imp').value);
+  if(!o||typeof o!=='object'||!Array.isArray(o.cli)||!Array.isArray(o.imo)||!Array.isArray(o.vis))throw 0;
+  db={cli:o.cli,imo:o.imo,vis:o.vis,meta:o.meta||{m:0,r:0},chk:o.chk||{},obs:o.obs||'',tar:o.tar||[],ret:o.ret||[],des:o.des||[]};save();init();resumo();
+  $('imp-msg').textContent='Backup restaurado com sucesso.';
+ }catch(e){$('imp-msg').textContent='Conteúdo inválido. Cole o backup completo, do primeiro ao último caractere.'}
+}
+function init(){
+ ['cli','imo','vis','tar','ret','des'].forEach(k=>{form(k);render(k)});cmpInit();$('r-d').value=hoje();rec();
+ $('g-m').value=db.meta.m||'';$('g-r').value=db.meta.r||'';metaOut();chkInit();calc();wpp();
+}
+init();
+let h='fin';try{h=location.hash.slice(1)}catch(e){}
+show(TABS.some(t=>t[0]===h)?h:'fin');
+</script>
+</body>
+</html>
