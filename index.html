@@ -160,6 +160,60 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
 .ed-tabs{display:flex;flex-wrap:wrap;gap:8px}.ed-tabs .pill{flex:1 1 auto;justify-content:center;cursor:pointer;padding:10px 12px}
 .ed-pane{display:flex;flex-direction:column;gap:15px}.ed-pane[hidden]{display:none}
 #dlg-novo .dlg-corpo,#dlg-novo .ed-pane,#dlg-novo .lista,#dlg-novo .item{min-width:0;max-width:100%}#dlg-novo .lista{grid-template-columns:minmax(0,1fr)}#dlg-novo .item-link .tx{min-width:0;flex:1}#dlg-novo .item-link .tag{flex:none}
+/* ═══ CENTRAL DE CONTROLE ═══ */
+body[data-view=controle]{--ac:var(--cy)}
+.mh-ic.logo{background:#000;padding:0;overflow:hidden;border-radius:50%;box-shadow:0 0 0 2px var(--c)}
+.mh-ic.logo img{width:100%;height:100%;object-fit:cover;display:block}
+.ct-kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px;margin:6px 0 4px}
+.kpi{display:flex;flex-direction:column;gap:2px;padding:14px;border-radius:16px;border:1px solid var(--line);background:var(--card);text-align:left;color:inherit;cursor:pointer;transition:.15s}
+.kpi:hover{border-color:var(--c,var(--ac));transform:translateY(-2px)}
+.kpi b{font:700 26px 'JetBrains Mono',monospace;color:var(--c,var(--ac));line-height:1.15}
+.kpi span{font-size:12px;color:var(--texto-muted)}
+.kpi.warn{border-color:color-mix(in srgb,var(--am) 55%,var(--line))}
+.alertas{display:flex;flex-direction:column;gap:8px;margin:16px 0 0}
+.alerta{display:flex;align-items:center;gap:12px;width:100%;padding:11px 14px;border-radius:14px;text-align:left;border:1px solid color-mix(in srgb,var(--c) 40%,var(--line));background:color-mix(in srgb,var(--c) 9%,var(--card));cursor:pointer}
+.alerta>i:first-child{font-size:22px;color:var(--c)}
+.alerta>span{flex:1;min-width:0}.alerta b{display:block;font:600 14px 'Sora',sans-serif}.alerta small{font-size:12px;color:var(--texto-muted)}
+.ct-bar{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 12px}
+.ct-bar input,.ct-bar select,.ct-form input{min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--tx);font:500 15px 'DM Sans',sans-serif;outline:0}
+.ct-bar input,.ct-form input{flex:1 1 200px;min-width:0}
+.ct-bar input:focus,.ct-bar select:focus,.ct-form input:focus{border-color:var(--ac)}
+.ct-bar .btn-mini{width:auto;padding:0 18px}
+.ct-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.ct-form .btn-mini{width:auto;padding:0 18px}
+.ct-row{display:flex;align-items:center;gap:10px;padding:8px 8px 8px 10px;margin-bottom:8px;border:1px solid var(--line);border-radius:14px;background:var(--card)}
+.ct-row.off{opacity:.55}
+.ct-row .ic{width:38px;height:38px;font-size:19px}
+.ct-row .tx{flex:1;min-width:0}
+.ct-row .tx b{display:flex;align-items:center;gap:8px;white-space:normal}
+.ct-row .tx small{white-space:normal;word-break:break-all}
+.ct-btns{display:flex;gap:4px;flex:none;align-items:center}
+.ct-btns button,.ct-btns a{width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--line);border-radius:10px;background:none;font-size:17px;color:var(--texto-muted)}
+.ct-btns button:hover,.ct-btns a:hover{color:var(--ac);border-color:var(--ac)}
+.ct-btns .on{color:var(--am);border-color:color-mix(in srgb,var(--am) 50%,var(--line))}
+.ct-btns .danger:hover{color:var(--ro);border-color:var(--ro)}
+.ct-row select{min-height:36px;padding:0 8px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--tx);font:600 12.5px 'DM Sans',sans-serif}
+.st{font:600 11px 'DM Sans',sans-serif;padding:3px 9px;border-radius:99px;white-space:nowrap;background:color-mix(in srgb,var(--texto-muted) 16%,transparent);color:var(--texto-muted)}
+.st.ok{background:color-mix(in srgb,var(--em) 18%,transparent);color:var(--em)}
+.st.bad{background:color-mix(in srgb,var(--ro) 18%,transparent);color:var(--ro)}
+.st.wait{background:color-mix(in srgb,var(--am) 18%,transparent);color:var(--am)}
+.dot{width:11px;height:11px;border-radius:50%;flex:none;background:var(--texto-muted)}
+.dot.ok{background:var(--em)}.dot.bad{background:var(--ro)}.dot.wait{background:var(--am)}
+.ct-grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px}
+.ct-card{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:18px;border:1px solid var(--line);background:var(--card)}
+.ct-card h3{display:flex;align-items:center;gap:9px;font:700 15px 'Sora',sans-serif}
+.ct-card h3 i{color:var(--ac);font-size:20px}
+.ct-card .btn-mini,.ct-card .btn-sec{width:100%}
+.barra{height:8px;border-radius:9px;overflow:hidden;background:color-mix(in srgb,var(--tx) 10%,transparent)}
+.barra i{display:block;height:100%;border-radius:9px;background:var(--c,var(--ac))}
+.ct-linha-barra{display:flex;align-items:center;gap:12px;font-size:13.5px;font-weight:600;margin-bottom:8px}
+.ct-linha-barra>span:first-child{width:84px;flex:none}.ct-linha-barra .barra{flex:1}.ct-linha-barra em{font:600 12px 'JetBrains Mono',monospace;font-style:normal;color:var(--texto-muted);width:32px;text-align:right}
+.ct-chips{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 12px}
+.ct-chips .pill.on{border-color:var(--c,var(--ac))}
+.ct-tar{display:flex;align-items:center;gap:10px}
+.ct-tar input[type=checkbox]{width:22px;height:22px;accent-color:var(--em);flex:none}
+.ct-tar.ok .tx b{text-decoration:line-through;color:var(--texto-muted)}
+@media(max-width:899px){.ct-row{flex-wrap:wrap}.ct-btns{width:100%;justify-content:flex-end}}
 </style>
 </head>
 <body data-view="inicio">
@@ -172,6 +226,7 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
 </header>
 <nav class="dock" aria-label="Áreas do painel">
   <button type="button" data-go="inicio" style="--c:var(--cy)"><i class="ti ti-layout-dashboard"></i>Início</button>
+  <button type="button" data-go="controle" style="--c:var(--cy)"><i class="ti ti-adjustments-horizontal"></i>Controle</button>
   <button type="button" data-go="corretor" style="--c:var(--em)"><i class="ti ti-building-skyscraper"></i>Corretor</button>
   <button type="button" data-go="pessoal" style="--c:var(--sk)"><i class="ti ti-user"></i>Pessoal</button>
   <button type="button" data-go="pastor" style="--c:var(--vi)"><i class="ti ti-book-2"></i>Pastor</button>
@@ -180,7 +235,7 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
   <button type="button" data-go="mapa" style="--c:var(--or)"><i class="ti ti-sitemap"></i>Mapa</button>
 </nav>
 <main id="vista"></main>
-<footer><strong>FCosta</strong> · Sérgio Fernandes da Costa · CRECI-SP 294791-F · CNAI 52708<small>Leads, favoritos e botões novos ficam salvos apenas neste navegador, em nenhum servidor.</small></footer>
+<footer><strong>FCosta</strong> · Sérgio Fernandes da Costa · CRECI-SP 294791-F · CNAI 52708<small>Leads, favoritos e botões ficam salvos apenas neste navegador, em nenhum servidor. Faça o backup na aba Controle.</small></footer>
 
 <dialog id="dlg-busca" class="sheet"><div class="sh"><div class="busca-bar"><i class="ti ti-search"></i><input id="busca-in" type="text" placeholder="Buscar em tudo…" autocomplete="off" aria-label="Buscar" /><button type="button" class="icon-btn" data-fechar aria-label="Fechar"><i class="ti ti-x"></i></button></div><div class="res" id="busca-res"></div></div></dialog>
 <dialog id="dlg-comissao" class="sheet"><div class="sh"><button type="button" class="icon-btn x" data-fechar aria-label="Fechar"><i class="ti ti-x"></i></button><!-- Calculadora de comissão -->
@@ -300,6 +355,29 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
   </div>
 </dialog>
 
+<dialog id="dlg-edit" class="sheet" aria-labelledby="ed-tit">
+  <div class="dlg-corpo">
+    <h3 id="ed-tit"><i class="ti ti-pencil"></i>Editar botão</h3>
+    <div class="campo"><label for="ed-t">Nome do botão</label><input type="text" id="ed-t" maxlength="60" /></div>
+    <div class="campo"><label for="ed-s">Descrição curta</label><input type="text" id="ed-s" maxlength="120" /></div>
+    <div class="campo"><label for="ed-h">Link ou nome do arquivo</label><input type="text" id="ed-h" autocapitalize="none" autocomplete="off" placeholder="https://… ou minha-pagina.html" /></div>
+    <div class="linha-dois">
+      <div class="campo"><label for="ed-m">Área</label><select id="ed-m"></select></div>
+      <div class="campo"><label for="ed-g">Grupo</label><input type="text" id="ed-g" list="ed-grupos" maxlength="40" autocomplete="off" /><datalist id="ed-grupos"></datalist></div>
+    </div>
+    <div class="linha-dois">
+      <div class="campo"><label for="ed-b">Selo</label><select id="ed-b"><option value="">Nenhum</option><option>Novo</option><option>Principal</option></select></div>
+      <div class="campo"><label for="ed-d">Posição no grupo</label><select id="ed-d"><option value="0">Ordem alfabética</option><option value="1">Destaque (no topo)</option></select></div>
+    </div>
+    <div class="campo"><label>Ícone</label><div class="ic-grid" id="ed-icones"></div></div>
+    <div class="campo"><label for="ed-i">Ou escreva o nome do ícone</label><input type="text" id="ed-i" placeholder="ti-star" autocapitalize="none" autocomplete="off" /></div>
+    <div class="dlg-acoes">
+      <button type="button" class="btn-mini" id="ed-salvar"><i class="ti ti-device-floppy"></i>Salvar</button>
+      <button type="button" class="btn-sec" id="ed-cancelar"><i class="ti ti-x"></i>Cancelar</button>
+    </div>
+  </div>
+</dialog>
+
 <script>
 /* ═══════════════════════════════════════════════════════════════════
    CATÁLOGO DO PAINEL — AQUI ESTÃO TODOS OS BOTÕES
@@ -337,6 +415,7 @@ var GRUPOS = {
 
 var FERRAMENTAS = [
   {m:"corretor", g:"anuncios", t:"Anunciar", s:"Meus sites, redes sociais e portais", i:"ti-speakerphone", h:"anunciar.html", k:"anunciar divulgar anúncio sites redes sociais instagram tiktok facebook youtube", d:1, b:"Novo"},
+  {m:"corretor", g:"anuncios", t:"Painel de Publicação", s:"Plano do dia, textos por rede, imóveis e grupos", i:"ti-send", h:"publicacao.html", k:"publicação publicar postagem posts redes sociais grupos facebook imóveis plano do dia texto", b:"Novo"},
   {m:"corretor", g:"anuncios", t:"Gerador de QR Code", s:"Para anúncios de imóveis", i:"ti-qrcode", h:"gerador-qrcode.html", k:"gerador qr code anúncio imóveis"},
   {m:"corretor", g:"anuncios", t:"Descrição de Imóvel", s:"Gerar texto de anúncio", i:"ti-file-text", h:"descricao-imovel.html", k:"descrição de imóvel gerar texto anúncio"},
   {m:"corretor", g:"anuncios", t:"Banner de Imóvel", s:"Anúncio com foto e preço", i:"ti-photo", h:"banner-imovel.html", k:"banner de imóvel anúncio foto preço stories"},
@@ -452,12 +531,21 @@ var FERRAMENTAS = [
   }
   function lerExtras() { var l = lerStorage('painel_extras', []); return Array.isArray(l) ? l : []; }
 
-  function todosItens() {
-    var lista = FERRAMENTAS.map(function (x) { var c = {}; for (var k in x) c[k] = x[k]; return c; });
-    lerExtras().forEach(function (x, n) {
-      var c = {}; for (var k in x) c[k] = x[k]; c._extra = n; lista.push(c);
+  function lerAjustes() { var o = lerStorage('painel_ajustes', {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
+  // devolve todos os botões (originais + seus), já com as edições aplicadas; os ocultos só aparecem se pedir (Central de Controle)
+  function todosItens(comOcultos) {
+    var aj = lerAjustes();
+    var lista = FERRAMENTAS.map(function (x) {
+      var c = {}; for (var k in x) c[k] = x[k];
+      c._orig = x.m + '|' + x.t;
+      var a = aj[c._orig];
+      if (a) { for (var k2 in a) c[k2] = a[k2]; c._edit = 1; }
+      return c;
     });
-    return lista;
+    lerExtras().forEach(function (x, n) {
+      var c = {}; for (var k in x) c[k] = x[k]; c._extra = n; c._orig = 'x' + n; lista.push(c);
+    });
+    return comOcultos ? lista : lista.filter(function (i) { return !i.oculto; });
   }
 
   // devolve os grupos do modo (fixos + criados por você) e liga cada botão ao seu grupo
@@ -486,7 +574,7 @@ var FERRAMENTAS = [
   };
   var vistaEl = document.getElementById('vista');
   var modo = lerStorage('painel_vista', 'inicio');
-  if (modo !== 'inicio' && modo !== 'favoritos' && modo !== 'mapa' && !MUNDOS[modo]) modo = 'inicio';
+  if (modo !== 'inicio' && modo !== 'favoritos' && modo !== 'mapa' && modo !== 'controle' && !MUNDOS[modo]) modo = 'inicio';
   var aba = null;
   var favs = lerStorage('painel_favs', null);
   if (!Array.isArray(favs)) {
@@ -519,12 +607,13 @@ var FERRAMENTAS = [
     html += '<div class="acoes">' + acoes.map(function (a) {
       return '<button type="button" class="acao" style="--c:var(' + a[3] + ')" data-open="' + a[0] + '"><i class="ti ' + a[1] + '"></i>' + a[2] + '</button>';
     }).join('') + '</div>';
+    html += ctAlertasHtml();
     html += '<h2 class="sec">Seus mundos</h2><div class="mundos">' + ORDEM.map(function (m) {
       var M = MUNDOS[m], q = itens.filter(function (i) { return i.m === m; }).length;
       return '<button type="button" class="mundo" style="--c:var(' + M.c + ')" data-go="' + m + '"><i class="ti ' + M.i + ' big"></i>' +
         '<span class="mn">' + M.n + '</span><span class="md">' + M.d + '</span>' +
         '<span class="mq">' + q + (q === 1 ? ' ferramenta' : ' ferramentas') + ' <i class="ti ti-arrow-right"></i></span></button>';
-    }).join('') + '<a class="mundo" style="--c:var(--ro)" href="construtoras.html"><i class="ti ti-building-factory-2 big"></i>' +
+    }).join('') + cardControle() + '<a class="mundo" style="--c:var(--ro)" href="construtoras.html"><i class="ti ti-building-factory-2 big"></i>' +
       '<span class="mn">Construtoras</span><span class="md">Tabelões, empreendimentos e e-books de cada construtora</span>' +
       '<span class="mq">Abrir <i class="ti ti-arrow-right"></i></span></a>' + (function () {
       var n = favs.map(function (k) { return itens.filter(function (i) { return chave(i) === k; })[0]; }).filter(Boolean).length;
@@ -583,8 +672,9 @@ var FERRAMENTAS = [
       return href ? '<a class="item-link" style="--c:var(--or)" href="' + href + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' + inner + '</a>'
         : '<button type="button" class="item-link" style="--c:var(--or);width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer" ' + attr + '>' + inner + '</button>';
     };
-    html += '<h2 class="sec">Áreas do painel · 7</h2><div class="lista">' +
+    html += '<h2 class="sec">Áreas do painel · 8</h2><div class="lista">' +
       rap('ti-layout-dashboard', 'Início', 'Saudação, atalhos rápidos e novidades', 'data-go="inicio"') +
+      rap('ti-adjustments-horizontal', 'Controle', 'Botões, links, sites, leads, pendências e backup', 'data-go="controle"') +
       rap('ti-building-skyscraper', 'Corretor', MUNDOS.corretor.d, 'data-go="corretor"') +
       rap('ti-user', 'Pessoal', MUNDOS.pessoal.d, 'data-go="pessoal"') +
       rap('ti-book-2', 'Pastor', MUNDOS.pastor.d, 'data-go="pastor"') +
@@ -610,7 +700,7 @@ var FERRAMENTAS = [
   function htmlMundo(m) {
     var M = MUNDOS[m], itens = ligar(todosItens()), gs = gruposDoModo(m, itens);
     var lista = itens.filter(function (i) { return i.m === m; });
-    var cab = '<section class="mhead" style="--c:var(' + M.c + ')"><span class="mh-ic"><i class="ti ' + M.i + '"></i></span><div><h1>' + M.n + '</h1><p>' + M.d + '</p></div>' +
+    var cab = '<section class="mhead" style="--c:var(' + M.c + ')"><span class="mh-ic' + (m === 'corretor' ? ' logo' : '') + '">' + (m === 'corretor' ? '<img src="' + logoSrc() + '" alt="FCosta" />' : '<i class="ti ' + M.i + '"></i>') + '</span><div><h1>' + M.n + '</h1><p>' + M.d + '</p></div>' +
       '<button type="button" class="btn-sec" data-open="novo"><i class="ti ti-pencil"></i><span>Edição</span></button></section>';
     var html = cab + '<button type="button" class="busca-pill" data-open="busca" style="margin-bottom:6px"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button>';
     gs.forEach(function (g) {
@@ -623,7 +713,8 @@ var FERRAMENTAS = [
   function render() {
     document.body.setAttribute('data-view', modo);
     [].forEach.call(document.querySelectorAll('.dock [data-go]'), function (b) { b.classList.toggle('on', b.getAttribute('data-go') === modo); });
-    vistaEl.innerHTML = modo === 'inicio' ? htmlInicio() : modo === 'favoritos' ? htmlFavoritos() : modo === 'mapa' ? htmlMapa() : htmlMundo(modo);
+    vistaEl.innerHTML = modo === 'inicio' ? htmlInicio() : modo === 'controle' ? htmlControle() : modo === 'favoritos' ? htmlFavoritos() : modo === 'mapa' ? htmlMapa() : htmlMundo(modo);
+    if (modo === 'controle' && ctAba === 'sites') setTimeout(function () { ctTestarSites(); }, 60);
   }
   function aplicarModo(m) {
     modo = m; gravarStorage('painel_vista', m);
@@ -650,7 +741,7 @@ var FERRAMENTAS = [
     var t = l.querySelector('.t'), href = l.getAttribute('href');
     var h = lerStorage('painel_recentes', []).filter(function (x) { return x.href !== href; });
     h.unshift({ href: href, titulo: t ? t.textContent : href });
-    gravarStorage('painel_recentes', h.slice(0, 4));
+    gravarStorage('painel_recentes', h.slice(0, 6));
   }
 
   /* ── JANELAS (comissão, lead, atalhos, busca) ── */
@@ -880,6 +971,508 @@ var FERRAMENTAS = [
     } catch (err) { alert('Não consegui ler esse backup. Confira se copiou o texto inteiro.'); }
   });
 
+  /* ══════════════════════════════════════════════════════════════
+     CENTRAL DE CONTROLE — botões, links, sites, leads, pendências, backup
+     ══════════════════════════════════════════════════════════════ */
+  var CT_ABAS = [['resumo', 'ti-layout-dashboard', 'Resumo'], ['botoes', 'ti-layout-grid', 'Botões'], ['links', 'ti-link', 'Links'],
+    ['sites', 'ti-world', 'Sites'], ['leads', 'ti-users', 'Leads'], ['tarefas', 'ti-checklist', 'Pendências'], ['backup', 'ti-database-export', 'Backup']];
+  var STATUS_LEAD = ['Novo', 'Contatado', 'Visita', 'Proposta', 'Fechado', 'Perdido'];
+  var SITES_PADRAO = [
+    { n: 'FCosta Corretor', u: 'https://fcostacorretor.com' },
+    { n: 'OBPC São Fernando', u: 'https://obpcsaofernando199-sudo.github.io/Obpc/' },
+    { n: 'Pessoal', u: 'https://serfico21-arch.github.io/Pessoal/' },
+    { n: 'PTAM FCosta', u: 'https://serfico21-arch.github.io/PTAM_FCOSTA/' },
+    { n: 'IBBC', u: 'https://serfico21-arch.github.io/ibbc/' },
+    { n: 'Apostilas CRECI', u: 'https://serfico21-arch.github.io/Apostilas-creci/' },
+    { n: 'CORRETOR.IA', u: 'https://corretoriaferramentas.lovable.app/dashboard' }
+  ];
+  var ctAba = lerStorage('painel_ct_aba', 'resumo');
+  if (!CT_ABAS.some(function (a) { return a[0] === ctAba; })) ctAba = 'resumo';
+  var ctFiltro = { q: '', f: 'todos' }, ctLeadF = 'Todos', ctVerificando = false;
+  var siteEstado = {}, siteTestando = false, siteUltimo = 0;
+
+  function logoSrc() { var i = document.querySelector('.selo img'); return i ? i.getAttribute('src') : ''; }
+  function diasDesde(ts) { return Math.floor((Date.now() - ts) / 864e5); }
+  function dataBR(ts) { return new Date(ts).toLocaleDateString('pt-BR'); }
+  function ehExtra(o) { return /^x\d+$/.test(o); }
+  function achar(o) { return todosItens(true).filter(function (i) { return i._orig === o; })[0]; }
+  function lerLista(k) { var l = lerStorage(k, []); return Array.isArray(l) ? l : []; }
+  function ruinsDe(ch) {
+    return ch && ch.r ? Object.keys(ch.r).filter(function (h) { return ch.r[h].s === '404' || ch.r[h].s === 'off' || ch.r[h].s === 'erro'; }).length : 0;
+  }
+
+  /* dados do Painel de Publicação (mesmo navegador) */
+  function pubResumo() {
+    var p = lerStorage('painel_corretor_v1', null);
+    if (!p || typeof p !== 'object') return null;
+    var im = Array.isArray(p.imoveis) ? p.imoveis : [], d = new Date();
+    var k = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+    return {
+      total: im.length,
+      disp: im.filter(function (i) { return !i.vendido && (!i.lockedUntil || i.lockedUntil < Date.now()); }).length,
+      hoje: (p.dias && p.dias[k]) || 0, lim: (p.cfg && p.cfg.limite) || 20
+    };
+  }
+
+  /* avisos que merecem atenção */
+  function ctAlertas() {
+    var a = [], bk = lerStorage('painel_ultimo_backup', 0);
+    if (!bk) a.push({ c: '--am', i: 'ti-database-export', t: 'Nenhum backup feito ainda', s: 'Seus dados ficam só neste navegador. Baixe uma cópia.', go: 'backup' });
+    else if (diasDesde(bk) >= 7) a.push({ c: '--am', i: 'ti-database-export', t: 'Último backup há ' + diasDesde(bk) + ' dias', s: 'Vale fazer uma cópia nova.', go: 'backup' });
+    var r = ruinsDe(lerStorage('painel_checagem', null));
+    if (r) a.push({ c: '--ro', i: 'ti-link-off', t: r + (r === 1 ? ' link com problema' : ' links com problema'), s: 'Veja quais botões estão quebrados e corrija.', go: 'links' });
+    var ln = lerLista('painel_leads').filter(function (l) { return (l.status || 'Novo') === 'Novo'; }).length;
+    if (ln) a.push({ c: '--sk', i: 'ti-user-plus', t: ln + (ln === 1 ? ' lead novo esperando contato' : ' leads novos esperando contato'), s: 'Chame no WhatsApp e mude a etapa.', go: 'leads' });
+    var tp = lerLista('painel_tarefas').filter(function (x) { return !x.ok; }).length;
+    if (tp) a.push({ c: '--or', i: 'ti-checklist', t: tp + (tp === 1 ? ' pendência aberta' : ' pendências abertas'), s: 'Sua lista de coisas a fazer.', go: 'tarefas' });
+    return a;
+  }
+  function ctAlertasHtml() {
+    var a = ctAlertas().slice(0, 3);
+    if (!a.length) return '';
+    return '<div class="alertas">' + a.map(function (x) {
+      return '<button type="button" class="alerta" style="--c:var(' + x.c + ')" data-ct="ir:' + x.go + '"><i class="ti ' + x.i + '"></i><span><b>' + esc(x.t) + '</b><small>' + esc(x.s) + '</small></span><i class="ti ti-chevron-right"></i></button>';
+    }).join('') + '</div>';
+  }
+  function cardControle() {
+    var n = ctAlertas().length;
+    return '<button type="button" class="mundo" style="--c:var(--cy)" data-go="controle"><i class="ti ti-adjustments-horizontal big"></i>' +
+      '<span class="mn">Controle</span><span class="md">Botões, links, sites, leads e backup num só lugar</span>' +
+      '<span class="mq">' + (n ? n + (n === 1 ? ' aviso' : ' avisos') : 'Tudo em dia') + ' <i class="ti ti-arrow-right"></i></span></button>';
+  }
+
+  /* ── estrutura da tela ───────────────────── */
+  function htmlControle() {
+    var cab = '<section class="mhead" style="--c:var(--cy)"><span class="mh-ic logo"><img src="' + esc(logoSrc()) + '" alt="FCosta" /></span><div><h1>Central de Controle</h1><p>Gerencie botões, links, sites, leads e backup do painel</p></div></section>';
+    var pills = '<div class="pills">' + CT_ABAS.map(function (a) {
+      return '<button type="button" class="pill' + (a[0] === ctAba ? ' on' : '') + '" style="--c:var(--cy)" data-ct="aba:' + a[0] + '"><i class="ti ' + a[1] + '"></i>' + a[2] + '</button>';
+    }).join('') + '</div>';
+    return cab + pills + '<div id="ct-pane">' + ctPane() + '</div>';
+  }
+  function ctPane() {
+    return ctAba === 'botoes' ? ctBotoes() : ctAba === 'links' ? ctLinks() : ctAba === 'sites' ? ctSites() :
+      ctAba === 'leads' ? ctLeads() : ctAba === 'tarefas' ? ctTarefas() : ctAba === 'backup' ? ctBackup() : ctResumo();
+  }
+  function ctRepintar() { var p = document.getElementById('ct-pane'); if (p) p.innerHTML = ctPane(); }
+  function ctRepintarSe(a) { if (modo === 'controle' && ctAba === a) ctRepintar(); }
+  function ctIr(a) {
+    ctAba = a; gravarStorage('painel_ct_aba', a);
+    if (modo !== 'controle') aplicarModo('controle'); else render();
+  }
+
+  /* ── RESUMO ──────────────────────────────── */
+  function ctResumo() {
+    var todos = todosItens(true), ativos = todos.filter(function (i) { return !i.oculto; }).length, ocultos = todos.length - ativos;
+    var custom = todos.filter(function (i) { return i._extra != null || i._edit; }).length;
+    var leads = lerLista('painel_leads'), novos = leads.filter(function (l) { return (l.status || 'Novo') === 'Novo'; }).length;
+    var tar = lerLista('painel_tarefas').filter(function (x) { return !x.ok; }).length;
+    var bk = lerStorage('painel_ultimo_backup', 0), ch = lerStorage('painel_checagem', null), ruins = ruinsDe(ch), pub = pubResumo();
+    var bkTxt = bk ? (diasDesde(bk) === 0 ? 'hoje' : diasDesde(bk) + ' d') : 'nunca', bkRuim = !bk || diasDesde(bk) >= 7;
+    function k(c, n, t, a, w) { return '<button type="button" class="kpi' + (w ? ' warn' : '') + '" style="--c:var(' + c + ')" data-ct="aba:' + a + '"><b>' + n + '</b><span>' + t + '</span></button>'; }
+    var h = '<div class="ct-kpis">' + k('--em', ativos, 'botões ativos', 'botoes') + k('--am', ocultos, 'botões ocultos', 'botoes') +
+      k('--vi', custom, 'criados ou editados', 'botoes') + k('--sk', leads.length, 'leads · ' + novos + ' novos', 'leads', novos > 0) +
+      k('--or', tar, 'pendências abertas', 'tarefas') + k(ruins ? '--ro' : '--cy', ch ? ruins : '—', ch ? 'links com problema' : 'links não verificados', 'links', ruins > 0) +
+      k(bkRuim ? '--am' : '--em', bkTxt, 'último backup', 'backup', bkRuim) +
+      (pub ? '<a class="kpi" style="--c:var(--cy)" href="publicacao.html"><b>' + pub.hoje + '/' + pub.lim + '</b><span>postagens hoje · ' + pub.disp + ' imóveis livres</span></a>' : '') + '</div>';
+    var al = ctAlertas();
+    h += '<h2 class="sec">Precisa de atenção</h2>' + (al.length ? '<div class="alertas" style="margin:0">' + al.map(function (x) {
+      return '<button type="button" class="alerta" style="--c:var(' + x.c + ')" data-ct="aba:' + x.go + '"><i class="ti ' + x.i + '"></i><span><b>' + esc(x.t) + '</b><small>' + esc(x.s) + '</small></span><i class="ti ti-chevron-right"></i></button>';
+    }).join('') + '</div>' : '<p class="vazio">Nada pendente. Tudo em dia. 👏</p>');
+    h += '<h2 class="sec">Ações rápidas</h2><div class="acoes" style="margin-top:0">' +
+      '<button type="button" class="acao" style="--c:var(--cy)" data-ct="verificar"><i class="ti ti-radar"></i>Verificar links</button>' +
+      '<button type="button" class="acao" style="--c:var(--em)" data-ct="bk-baixar"><i class="ti ti-download"></i>Fazer backup</button>' +
+      '<button type="button" class="acao" style="--c:var(--sk)" data-open="lead"><i class="ti ti-user-plus"></i>Novo lead</button>' +
+      '<button type="button" class="acao" style="--c:var(--vi)" data-ct="novo"><i class="ti ti-plus"></i>Novo botão</button>' +
+      '<a class="acao" style="--c:var(--am)" href="publicacao.html"><i class="ti ti-send"></i>Publicação</a>' +
+      '<a class="acao" style="--c:var(--or)" href="repositorios-github.html"><i class="ti ti-brand-github"></i>Repositórios</a>' +
+      '<a class="acao" style="--c:var(--ro)" href="construtoras.html"><i class="ti ti-building-factory-2"></i>Construtoras</a>' +
+      '<button type="button" class="acao" style="--c:var(--cy)" data-ct="aba:sites"><i class="ti ti-world"></i>Sites no ar</button></div>';
+    h += '<h2 class="sec">Botões por área</h2><div class="ct-card">' + ORDEM.map(function (m) {
+      var n = todos.filter(function (i) { return i.m === m && !i.oculto; }).length, pc = ativos ? Math.round(n / ativos * 100) : 0;
+      return '<div class="ct-linha-barra" style="--c:var(' + MUNDOS[m].c + ')"><span>' + MUNDOS[m].n + '</span><div class="barra"><i style="width:' + pc + '%"></i></div><em>' + n + '</em></div>';
+    }).join('') + '</div>';
+    return h;
+  }
+
+  /* ── BOTÕES (gerenciar todo o catálogo) ──── */
+  function ctLinha(i) {
+    var ext = /^https?:\/\//i.test(i.h), k = chave(i), fav = favs.indexOf(k) > -1, ex = i._extra != null;
+    var tags = (i.b ? '<em class="tag">' + esc(i.b) + '</em>' : '') + (i.oculto ? '<em class="tag" style="--c:var(--am)">Oculto</em>' : '') +
+      (ex ? '<em class="tag" style="--c:var(--vi)">Seu</em>' : (i._edit ? '<em class="tag" style="--c:var(--vi)">Editado</em>' : ''));
+    return '<div class="ct-row' + (i.oculto ? ' off' : '') + '" style="--c:var(' + i._g.c + ')"><span class="ic"><i class="ti ' + esc(i.i || 'ti-link') + '"></i></span>' +
+      '<span class="tx"><b>' + esc(i.t) + tags + '</b><small>' + esc(MUNDOS[i.m].n) + ' · ' + esc(i._g.n) + ' · ' + esc(i.h) + '</small></span>' +
+      '<div class="ct-btns"><a href="' + esc(i.h) + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + ' title="Abrir" aria-label="Abrir ' + esc(i.t) + '"><i class="ti ti-external-link"></i></a>' +
+      '<button type="button" class="' + (fav ? 'on' : '') + '" data-ct="fav:' + esc(k) + '" title="Favorito" aria-label="Favoritar"><i class="ti ti-star' + (fav ? '-filled' : '') + '"></i></button>' +
+      '<button type="button" data-ct="ocultar:' + esc(i._orig) + '" title="' + (i.oculto ? 'Mostrar' : 'Ocultar') + '" aria-label="' + (i.oculto ? 'Mostrar' : 'Ocultar') + '"><i class="ti ti-eye' + (i.oculto ? '' : '-off') + '"></i></button>' +
+      '<button type="button" data-ct="editar:' + esc(i._orig) + '" title="Editar" aria-label="Editar ' + esc(i.t) + '"><i class="ti ti-pencil"></i></button>' +
+      (ex ? '<button type="button" class="danger" data-ct="excluir:' + esc(i._orig) + '" title="Excluir" aria-label="Excluir"><i class="ti ti-trash"></i></button>'
+        : (i._edit ? '<button type="button" data-ct="restaurar:' + esc(i._orig) + '" title="Voltar ao original" aria-label="Voltar ao original"><i class="ti ti-arrow-back-up"></i></button>' : '')) +
+      '</div></div>';
+  }
+  function ctListaHtml() {
+    var itens = ligar(todosItens(true)), q = norm(ctFiltro.q.trim()), f = ctFiltro.f;
+    var l = itens.filter(function (i) {
+      if (f === 'ocultos' && !i.oculto) return false;
+      if (f === 'custom' && !(i._extra != null || i._edit)) return false;
+      if (ORDEM.indexOf(f) > -1 && i.m !== f) return false;
+      return !q || norm([i.t, i.s, i.k, i.h, i._g.n].join(' ')).indexOf(q) > -1;
+    }).sort(function (a, b) {
+      return ORDEM.indexOf(a.m) - ORDEM.indexOf(b.m) || a._g.n.localeCompare(b._g.n, 'pt-BR') || porNome(a, b);
+    });
+    return '<p class="gdesc">' + l.length + (l.length === 1 ? ' botão' : ' botões') + ' · toque no olho para ocultar sem apagar, no lápis para editar.</p>' +
+      (l.length ? l.map(ctLinha).join('') : '<p class="vazio">Nenhum botão encontrado.</p>');
+  }
+  function ctBotoes() {
+    var op = [['todos', 'Todas as áreas'], ['corretor', 'Corretor'], ['pessoal', 'Pessoal'], ['pastor', 'Pastor'], ['ocultos', 'Ocultos'], ['custom', 'Criados ou editados']];
+    return '<div class="ct-bar"><input id="ct-q" type="search" placeholder="Buscar botão, grupo ou link…" value="' + esc(ctFiltro.q) + '" autocomplete="off" aria-label="Buscar botão" />' +
+      '<select id="ct-f" aria-label="Filtrar">' + op.map(function (o) { return '<option value="' + o[0] + '"' + (o[0] === ctFiltro.f ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>' +
+      '<button type="button" class="btn-mini" data-ct="novo"><i class="ti ti-plus"></i>Novo botão</button></div><div id="ct-lista">' + ctListaHtml() + '</div>';
+  }
+  function ctListaRepintar() { var e = document.getElementById('ct-lista'); if (e) e.innerHTML = ctListaHtml(); }
+
+  /* ── JANELA DE EDIÇÃO DE BOTÃO ───────────── */
+  var dlgEd = document.getElementById('dlg-edit'), edT = document.getElementById('ed-t'), edS = document.getElementById('ed-s'),
+    edH = document.getElementById('ed-h'), edM = document.getElementById('ed-m'), edG = document.getElementById('ed-g'),
+    edB = document.getElementById('ed-b'), edD = document.getElementById('ed-d'), edI = document.getElementById('ed-i'), edAlvo = null;
+  edM.innerHTML = ORDEM.map(function (m) { return '<option value="' + m + '">' + MUNDOS[m].n + '</option>'; }).join('');
+  function edGrupos() {
+    document.getElementById('ed-grupos').innerHTML = gruposDoModo(edM.value, todosItens(true)).map(function (g) { return '<option value="' + esc(g.n) + '"></option>'; }).join('');
+  }
+  function edIcones() {
+    document.getElementById('ed-icones').innerHTML = ICONES.map(function (ic) {
+      return '<button type="button" data-edic="' + ic + '" aria-label="' + ic + '"' + (ic === edI.value ? ' class="sel"' : '') + '><i class="ti ' + ic + '"></i></button>';
+    }).join('');
+  }
+  edM.addEventListener('change', edGrupos);
+  edI.addEventListener('input', edIcones);
+  document.getElementById('ed-icones').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-edic]'); if (!b) return;
+    edI.value = b.getAttribute('data-edic'); edIcones();
+  });
+  function abrirEdicao(orig) {
+    var itens = ligar(todosItens(true)), it = orig ? itens.filter(function (i) { return i._orig === orig; })[0] : null;
+    edAlvo = it ? it._orig : null;
+    document.getElementById('ed-tit').innerHTML = '<i class="ti ti-pencil"></i>' + (it ? 'Editar botão' : 'Novo botão');
+    edT.value = it ? it.t : ''; edS.value = it ? (it.s || '') : ''; edH.value = it ? it.h : '';
+    edM.value = it ? it.m : (ORDEM.indexOf(modo) > -1 ? modo : 'corretor');
+    edG.value = it ? it._g.n : ''; edB.value = it && it.b ? it.b : ''; edD.value = it && it.d ? '1' : '0';
+    edI.value = it ? (it.i || 'ti-link') : 'ti-star';
+    edGrupos(); edIcones(); abrirDlg(dlgEd);
+  }
+  function migrarFav(de, para) {
+    if (de === para) return;
+    var p = favs.indexOf(de); if (p < 0) return;
+    if (favs.indexOf(para) > -1) favs.splice(p, 1); else favs[p] = para;
+    gravarStorage('painel_favs', favs);
+  }
+  function aposMudarBotoes() { if (modo === 'controle') ctRepintar(); else render(); }
+  document.getElementById('ed-cancelar').addEventListener('click', function () { fecharDlg(dlgEd); });
+  document.getElementById('ed-salvar').addEventListener('click', function () {
+    var t = edT.value.trim(), h = ajustarLink(edH.value);
+    if (!t) { edT.focus(); return; }
+    if (!h) { edH.focus(); return; }
+    var m = edM.value, gtxt = edG.value.trim() || 'Outros';
+    var gm = gruposDoModo(m, todosItens(true)).filter(function (g) { return norm(g.n) === norm(gtxt) || g.id === gtxt || g.id === slug(gtxt); })[0];
+    var rec = { m: m, g: gm ? gm.id : gtxt, t: t, s: edS.value.trim(), i: edI.value.trim() || 'ti-link', h: h, b: edB.value, d: parseInt(edD.value, 10) || 0 };
+    if (edAlvo === null) {
+      var ex0 = lerExtras(); ex0.push(rec); gravarStorage('painel_extras', ex0);
+    } else {
+      var atual = achar(edAlvo); if (!atual) { fecharDlg(dlgEd); return; }
+      if (atual.oculto) rec.oculto = 1;
+      var chaveAntiga = chave(atual);
+      if (ehExtra(edAlvo)) { var ex = lerExtras(); ex[parseInt(edAlvo.slice(1), 10)] = rec; gravarStorage('painel_extras', ex); }
+      else { var aj = lerAjustes(); aj[edAlvo] = rec; gravarStorage('painel_ajustes', aj); }
+      migrarFav(chaveAntiga, chave(rec));
+    }
+    fecharDlg(dlgEd); aposMudarBotoes();
+  });
+  function ctOcultar(orig) {
+    var it = achar(orig); if (!it) return;
+    var novo = it.oculto ? 0 : 1;
+    if (ehExtra(orig)) { var ex = lerExtras(), n = parseInt(orig.slice(1), 10); if (ex[n]) { ex[n].oculto = novo; gravarStorage('painel_extras', ex); } }
+    else { var aj = lerAjustes(); aj[orig] = Object.assign({}, aj[orig] || {}, { oculto: novo }); gravarStorage('painel_ajustes', aj); }
+    ctListaRepintar();
+  }
+  function ctExcluir(orig) {
+    var ex = lerExtras(), n = parseInt(orig.slice(1), 10);
+    if (!ex[n] || !confirm('Excluir o botão "' + ex[n].t + '" de vez?')) return;
+    var k = chave(ex[n]), p = favs.indexOf(k);
+    ex.splice(n, 1); gravarStorage('painel_extras', ex);
+    if (p > -1) { favs.splice(p, 1); gravarStorage('painel_favs', favs); }
+    ctListaRepintar();
+  }
+  function ctRestaurar(orig) {
+    var it = achar(orig), aj = lerAjustes(); if (!it) return;
+    if (!confirm('Voltar "' + it.t + '" ao original (nome, link, grupo e visibilidade)?')) return;
+    var antiga = chave(it); delete aj[orig]; gravarStorage('painel_ajustes', aj);
+    migrarFav(antiga, orig); ctListaRepintar();
+  }
+  function ctFav(k) {
+    var p = favs.indexOf(k); if (p < 0) favs.push(k); else favs.splice(p, 1);
+    gravarStorage('painel_favs', favs); ctListaRepintar();
+  }
+
+  /* ── LINKS (verificador) ─────────────────── */
+  var ST_TXT = { ok: 'Funcionando', '404': 'Não encontrada', off: 'Sem resposta', erro: 'Erro no servidor' };
+  function ctLinks() {
+    var ch = lerStorage('painel_checagem', null), r = ch && ch.r ? ch.r : {}, itens = ligar(todosItens(true)), mapa = {}, ordem = [];
+    itens.forEach(function (i) { if (!mapa[i.h]) { mapa[i.h] = []; ordem.push(i.h); } mapa[i.h].push(i); });
+    ordem = ordem.filter(function (h) { return !/^(mailto|tel|whatsapp|sms|javascript):/i.test(h); });
+    var ruim = [], pend = [], bom = [];
+    ordem.forEach(function (h) { var s = r[h] && r[h].s; if (!s) pend.push(h); else if (s === 'ok') bom.push(h); else ruim.push(h); });
+    function linha(h) {
+      var l = mapa[h], s = r[h] && r[h].s, cl = !s ? 'wait' : s === 'ok' ? 'ok' : 'bad', ext = /^https?:\/\//i.test(h);
+      var nomes = l.slice(0, 2).map(function (x) { return esc(x.t); }).join(', ') + (l.length > 2 ? ' +' + (l.length - 2) : '');
+      return '<div class="ct-row"><span class="dot ' + cl + '"></span><span class="tx"><b>' + nomes + '</b><small>' + esc(h) + '</small></span>' +
+        '<span class="st ' + cl + '">' + (s ? (ST_TXT[s] || s) + (r[h].ms ? ' · ' + r[h].ms + ' ms' : '') : 'Não verificado') + '</span>' +
+        '<div class="ct-btns"><a href="' + esc(h) + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + ' title="Abrir" aria-label="Abrir"><i class="ti ti-external-link"></i></a>' +
+        '<button type="button" data-ct="editar:' + esc(l[0]._orig) + '" title="Corrigir link" aria-label="Corrigir link"><i class="ti ti-pencil"></i></button></div></div>';
+    }
+    var h = '<div class="ct-card"><h3><i class="ti ti-radar"></i>Verificador de links</h3>' +
+      '<p class="gdesc" style="margin:0">Testa cada botão do painel. Nas suas páginas, mostra se o arquivo existe. Em sites de fora, mostra só se estão respondendo.' +
+      (ch ? ' Última verificação: <strong>' + dataBR(ch.t) + ' às ' + new Date(ch.t).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '</strong>.' : ' Ainda não foi feita nenhuma verificação.') + '</p>' +
+      '<button type="button" class="btn-mini" data-ct="verificar"' + (ctVerificando ? ' disabled' : '') + '><i class="ti ti-refresh"></i>' + (ctVerificando ? 'Verificando…' : 'Verificar todos os links') + '</button>' +
+      '<div id="ct-prog" class="gdesc" style="margin:0"></div></div>';
+    if (ruim.length) h += '<h3 class="gtit" style="--c:var(--ro)"><i class="ti ti-alert-triangle"></i>Com problema<em>' + ruim.length + '</em></h3>' + ruim.map(linha).join('');
+    if (pend.length) h += '<h3 class="gtit" style="--c:var(--am)"><i class="ti ti-clock"></i>Ainda não verificados<em>' + pend.length + '</em></h3>' + pend.map(linha).join('');
+    if (bom.length) h += '<h3 class="gtit" style="--c:var(--em)"><i class="ti ti-circle-check"></i>Funcionando<em>' + bom.length + '</em></h3>' + bom.map(linha).join('');
+    var rep = ordem.filter(function (x) { return mapa[x].length > 1; });
+    if (rep.length) h += '<h3 class="gtit" style="--c:var(--cy)"><i class="ti ti-copy"></i>Mesmo link em vários botões<em>' + rep.length + '</em></h3>' + rep.map(function (x) {
+      return '<div class="ct-row"><span class="tx"><b>' + mapa[x].length + ' botões</b><small>' + esc(mapa[x].map(function (y) { return y.t; }).join(' · ')) + '</small><small>' + esc(x) + '</small></span></div>';
+    }).join('');
+    return h;
+  }
+  function ctVerificar() {
+    if (ctVerificando) return;
+    if (location.protocol === 'file:') { alert('A verificação só funciona com o painel publicado na internet (https), não aberto direto do arquivo.'); return; }
+    var hrefs = [];
+    todosItens(true).forEach(function (i) { if (hrefs.indexOf(i.h) < 0 && !/^(mailto|tel|whatsapp|sms|javascript):/i.test(i.h)) hrefs.push(i.h); });
+    var res = {}, fila = hrefs.slice(), feito = 0, total = hrefs.length;
+    ctVerificando = true; ctRepintarSe('links');
+    function prog() {
+      var p = document.getElementById('ct-prog');
+      if (p) p.innerHTML = 'Verificando ' + feito + ' de ' + total + '…<div class="barra" style="margin-top:6px"><i style="width:' + Math.round(feito / total * 100) + '%"></i></div>';
+    }
+    function um(h) {
+      var ext = /^https?:\/\//i.test(h), t0 = Date.now(), ctl = window.AbortController ? new AbortController() : null;
+      var to = setTimeout(function () { if (ctl) ctl.abort(); }, 9000);
+      var op = ext ? { mode: 'no-cors', cache: 'no-store' } : { method: 'HEAD', cache: 'no-store' };
+      if (ctl) op.signal = ctl.signal;
+      return fetch(h, op).then(function (r) { return ext ? 'ok' : (r.ok ? 'ok' : (r.status === 404 ? '404' : 'erro')); })
+        .catch(function () { return 'off'; })
+        .then(function (s) { clearTimeout(to); res[h] = { s: s, ms: Date.now() - t0 }; });
+    }
+    function trabalhador() {
+      if (!fila.length) return Promise.resolve();
+      return um(fila.shift()).then(function () { feito++; prog(); return trabalhador(); });
+    }
+    var ws = []; for (var n = 0; n < 6; n++) ws.push(trabalhador());
+    prog();
+    Promise.all(ws).then(function () {
+      ctVerificando = false; gravarStorage('painel_checagem', { t: Date.now(), r: res });
+      if (modo === 'controle') ctRepintar();
+    });
+  }
+
+  /* ── SITES NO AR ─────────────────────────── */
+  function lerSites() { var s = lerStorage('painel_sites', null); return Array.isArray(s) && s.length ? s : SITES_PADRAO.slice(); }
+  function ctSites() {
+    var sites = lerSites();
+    var h = '<div class="ct-card"><h3><i class="ti ti-world-check"></i>Seus sites</h3><p class="gdesc" style="margin:0">Mostra se cada site está respondendo e em quantos milissegundos. O teste roda sozinho ao abrir esta aba.</p>' +
+      '<button type="button" class="btn-mini" data-ct="testar-sites"' + (siteTestando ? ' disabled' : '') + '><i class="ti ti-refresh"></i>' + (siteTestando ? 'Testando…' : 'Testar agora') + '</button></div><div style="height:12px"></div>';
+    h += sites.map(function (s, n) {
+      var e = siteEstado[s.u], cl = !e ? 'wait' : e.s === 'ok' ? 'ok' : 'bad';
+      return '<div class="ct-row"><span class="dot ' + cl + '"></span><span class="tx"><b>' + esc(s.n) + '</b><small>' + esc(s.u) + '</small></span>' +
+        '<span class="st ' + cl + '">' + (!e ? (siteTestando ? 'Testando…' : 'Não testado') : e.s === 'ok' ? 'No ar · ' + e.ms + ' ms' : 'Sem resposta') + '</span>' +
+        '<div class="ct-btns"><a href="' + esc(s.u) + '" target="_blank" rel="noopener" title="Abrir" aria-label="Abrir ' + esc(s.n) + '"><i class="ti ti-external-link"></i></a>' +
+        '<button type="button" class="danger" data-ct="site-del:' + n + '" title="Remover" aria-label="Remover"><i class="ti ti-trash"></i></button></div></div>';
+    }).join('');
+    h += '<h3 class="gtit" style="--c:var(--cy)"><i class="ti ti-plus"></i>Adicionar site</h3><div class="ct-form"><input id="ct-site-n" type="text" placeholder="Nome (ex.: Blog)" maxlength="40" /><input id="ct-site-u" type="text" placeholder="endereço do site" autocapitalize="none" /><button type="button" class="btn-mini" data-ct="site-add"><i class="ti ti-plus"></i>Adicionar</button></div>';
+    return h;
+  }
+  function ctTestarSites(forcar) {
+    if (siteTestando) return;
+    if (!forcar && Date.now() - siteUltimo < 60000) return;
+    var sites = lerSites(), feitos = 0;
+    siteTestando = true; siteUltimo = Date.now(); siteEstado = {}; ctRepintarSe('sites');
+    sites.forEach(function (s) {
+      var t0 = Date.now(), ctl = window.AbortController ? new AbortController() : null;
+      var to = setTimeout(function () { if (ctl) ctl.abort(); }, 9000);
+      fetch(s.u, { mode: 'no-cors', cache: 'no-store', signal: ctl ? ctl.signal : undefined })
+        .then(function () { siteEstado[s.u] = { s: 'ok', ms: Date.now() - t0 }; })
+        .catch(function () { siteEstado[s.u] = { s: 'off' }; })
+        .then(function () { clearTimeout(to); feitos++; if (feitos === sites.length) siteTestando = false; ctRepintarSe('sites'); });
+    });
+  }
+
+  /* ── LEADS ───────────────────────────────── */
+  function ctLeads() {
+    var leads = lerLista('painel_leads'), cont = {};
+    leads.forEach(function (l) { var s = l.status || 'Novo'; cont[s] = (cont[s] || 0) + 1; });
+    var chips = '<div class="ct-chips">' + ['Todos'].concat(STATUS_LEAD).map(function (s) {
+      var n = s === 'Todos' ? leads.length : (cont[s] || 0);
+      return '<button type="button" class="pill' + (s === ctLeadF ? ' on' : '') + '" style="--c:var(--sk)" data-ct="lf:' + s + '">' + s + ' <em>' + n + '</em></button>';
+    }).join('') + '</div>';
+    var h = '<div class="ct-bar"><button type="button" class="btn-mini" data-open="lead"><i class="ti ti-user-plus"></i>Novo lead</button>' +
+      '<button type="button" class="btn-sec" data-ct="lead-csv"><i class="ti ti-file-spreadsheet"></i><span>Exportar planilha</span></button></div>' + chips;
+    var vis = leads.map(function (l, n) { return { l: l, n: n }; }).filter(function (x) { return ctLeadF === 'Todos' || (x.l.status || 'Novo') === ctLeadF; });
+    if (!vis.length) return h + '<p class="vazio">Nenhum lead nesta etapa.</p>';
+    return h + vis.map(function (x) {
+      var l = x.l, dig = telParaWhatsapp(l.tel || ''), st = l.status || 'Novo';
+      var msg = encodeURIComponent('Olá ' + l.nome + ', tudo bem? Aqui é o Sérgio Costa, corretor de imóveis. Vi seu interesse em ' + String(l.interesse || '').toLowerCase() + '.');
+      return '<div class="ct-row" style="--c:var(--sk)"><span class="tx"><b>' + esc(l.nome) + '</b><small>' + esc(l.interesse || '') + (l.tel ? ' · ' + esc(l.tel) : '') + (l.em ? ' · ' + dataBR(l.em) : '') + (l.obs ? ' · ' + esc(l.obs) : '') + '</small></span>' +
+        '<select data-ctst="' + x.n + '" aria-label="Etapa do lead">' + STATUS_LEAD.map(function (s) { return '<option' + (s === st ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select>' +
+        '<div class="ct-btns">' + (l.tel ? '<a href="https://wa.me/' + dig + '?text=' + msg + '" target="_blank" rel="noopener" title="WhatsApp" aria-label="Chamar no WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>' : '') +
+        '<button type="button" data-ct="lead-obs:' + x.n + '" title="Anotação" aria-label="Anotação"><i class="ti ti-note"></i></button>' +
+        '<button type="button" class="danger" data-ct="lead-del:' + x.n + '" title="Remover" aria-label="Remover"><i class="ti ti-trash"></i></button></div></div>';
+    }).join('');
+  }
+  function ctLeadsCsv() {
+    var leads = lerLista('painel_leads');
+    if (!leads.length) { alert('Nenhum lead para exportar.'); return; }
+    function c(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
+    var linhas = ['Nome;Telefone;Interesse;Etapa;Anotação;Data'].concat(leads.map(function (l) {
+      return [c(l.nome), c(l.tel), c(l.interesse), c(l.status || 'Novo'), c(l.obs), c(l.em ? dataBR(l.em) : '')].join(';');
+    }));
+    baixarArquivo('leads-fcosta-' + new Date().toISOString().slice(0, 10) + '.csv', '\ufeff' + linhas.join('\r\n'), 'text/csv;charset=utf-8');
+  }
+
+  /* ── PENDÊNCIAS ──────────────────────────── */
+  function ctTarefas() {
+    var l = lerLista('painel_tarefas'), abertas = l.filter(function (x) { return !x.ok; }).length;
+    var h = '<div class="ct-form" style="margin-top:0;margin-bottom:12px"><input id="ct-tar-in" type="text" placeholder="O que precisa ser feito?" maxlength="120" autocomplete="off" /><button type="button" class="btn-mini" data-ct="tar-add"><i class="ti ti-plus"></i>Adicionar</button></div>';
+    if (!l.length) return h + '<p class="vazio">Nenhuma pendência. Anote aqui o que não pode esquecer.</p>';
+    h += '<p class="gdesc">' + abertas + (abertas === 1 ? ' aberta' : ' abertas') + ' de ' + l.length + '</p>' + l.map(function (x, n) {
+      return '<div class="ct-row ct-tar' + (x.ok ? ' ok' : '') + '"><input type="checkbox" data-ct="tar-ok:' + n + '"' + (x.ok ? ' checked' : '') + ' aria-label="Concluir" /><span class="tx"><b>' + esc(x.t) + '</b><small>' + (x.em ? dataBR(x.em) : '') + '</small></span>' +
+        '<div class="ct-btns"><button type="button" class="danger" data-ct="tar-del:' + n + '" title="Remover" aria-label="Remover"><i class="ti ti-trash"></i></button></div></div>';
+    }).join('');
+    if (l.some(function (x) { return x.ok; })) h += '<button type="button" class="btn-sec" style="margin-top:6px" data-ct="tar-limpar"><i class="ti ti-eraser"></i>Limpar concluídas</button>';
+    return h;
+  }
+  function ctTarefaAdd() {
+    var i = document.getElementById('ct-tar-in'); if (!i) return;
+    var t = i.value.trim(); if (!t) { i.focus(); return; }
+    var l = lerLista('painel_tarefas'); l.unshift({ t: t, ok: 0, em: Date.now() });
+    gravarStorage('painel_tarefas', l.slice(0, 200)); ctRepintar();
+    var n = document.getElementById('ct-tar-in'); if (n) n.focus();
+  }
+
+  /* ── BACKUP E MANUTENÇÃO ─────────────────── */
+  function todoStorage() {
+    var o = {};
+    try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k !== 'painel_versao_arquivo') o[k] = localStorage.getItem(k); } } catch (e) { }
+    return o;
+  }
+  function baixarArquivo(nome, txt, tipo) {
+    var b = new Blob([txt], { type: tipo }), a = document.createElement('a');
+    a.href = URL.createObjectURL(b); a.download = nome; document.body.appendChild(a); a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+  }
+  function backupTexto() {
+    gravarStorage('painel_ultimo_backup', Date.now());
+    return JSON.stringify({ app: 'painel-fcosta', versao: 4, em: new Date().toISOString(), dados: todoStorage() });
+  }
+  function ctBaixar() {
+    baixarArquivo('backup-painel-fcosta-' + new Date().toISOString().slice(0, 10) + '.json', backupTexto(), 'application/json');
+    if (modo === 'controle') ctRepintar(); else render();
+  }
+  function ctCopiar() {
+    var txt = backupTexto();
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { alert('Backup copiado. Cole num lugar seguro (e-mail ou WhatsApp para você mesmo).'); }, function () { window.prompt('Copie o backup:', txt); });
+    else window.prompt('Copie o backup:', txt);
+    if (modo === 'controle') ctRepintar();
+  }
+  function ctRestaurarTexto(txt) {
+    try {
+      var o = JSON.parse(txt);
+      if (Array.isArray(o)) { /* formato antigo: só os botões criados */
+        var ex = lerExtras();
+        o.forEach(function (x) { if (x && x.t && x.h && x.m && x.g && !ex.some(function (y) { return y.t === x.t && y.h === x.h && y.m === x.m; })) ex.push(x); });
+        gravarStorage('painel_extras', ex); alert('Botões restaurados.'); render(); return;
+      }
+      var d = o && o.dados; if (!d || typeof d !== 'object') throw new Error('formato');
+      var ks = Object.keys(d); if (!ks.length) throw new Error('vazio');
+      if (!confirm('Restaurar ' + ks.length + ' itens do backup? Os dados atuais com o mesmo nome serão substituídos.')) return;
+      ks.forEach(function (k) { try { localStorage.setItem(k, d[k]); } catch (e) { } });
+      alert('Backup restaurado. O painel vai recarregar.'); location.reload();
+    } catch (err) { alert('Não consegui ler esse backup. Confira se é o arquivo certo, completo.'); }
+  }
+  function ctLimparCache() {
+    var tf = [];
+    if ('serviceWorker' in navigator) tf.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
+    if (window.caches) tf.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+    Promise.all(tf).then(function () { location.reload(); }, function () { location.reload(); });
+  }
+  function ctBackup() {
+    var d = todoStorage(), n = Object.keys(d).length, kb = 0;
+    Object.keys(d).forEach(function (k) { kb += (k.length + String(d[k]).length) * 2; });
+    kb = Math.max(1, Math.round(kb / 1024));
+    var bk = lerStorage('painel_ultimo_backup', 0), aj = Object.keys(lerAjustes()).length;
+    return '<div class="ct-card" style="margin-bottom:12px"><h3><i class="ti ti-database"></i>O que está guardado neste navegador</h3><p class="gdesc" style="margin:0"><strong>' + n + '</strong> itens · cerca de <strong>' + kb + ' KB</strong> (botões, favoritos, leads, pendências, imóveis da Publicação e dados das outras ferramentas). Último backup: <strong>' +
+      (bk ? dataBR(bk) + ' (há ' + diasDesde(bk) + (diasDesde(bk) === 1 ? ' dia' : ' dias') + ')' : 'nunca') + '</strong>.</p></div>' +
+      '<div class="ct-grid2"><div class="ct-card"><h3><i class="ti ti-download"></i>Fazer backup</h3><p class="gdesc" style="margin:0">Guarda tudo num arquivo. Faça toda semana e envie para o seu e-mail ou Google Drive.</p>' +
+      '<button type="button" class="btn-mini" data-ct="bk-baixar"><i class="ti ti-download"></i>Baixar arquivo de backup</button>' +
+      '<button type="button" class="btn-sec" data-ct="bk-copiar"><i class="ti ti-copy"></i>Copiar como texto</button></div>' +
+      '<div class="ct-card"><h3><i class="ti ti-upload"></i>Restaurar</h3><p class="gdesc" style="margin:0">Use ao trocar de celular ou computador. Aceita o arquivo novo e também o texto do backup antigo.</p>' +
+      '<button type="button" class="btn-mini" data-ct="bk-arquivo"><i class="ti ti-file-upload"></i>Escolher arquivo</button>' +
+      '<button type="button" class="btn-sec" data-ct="bk-colar"><i class="ti ti-clipboard"></i>Colar texto do backup</button><input type="file" id="ct-arq" accept=".json,application/json,text/plain" hidden /></div>' +
+      '<div class="ct-card"><h3><i class="ti ti-tool"></i>Manutenção</h3><p class="gdesc" style="margin:0">Se o painel parecer desatualizado, limpe a cópia guardada. Seus dados não são apagados.</p>' +
+      '<button type="button" class="btn-sec" data-ct="bk-cache"><i class="ti ti-refresh"></i>Atualizar painel (limpar cache)</button>' +
+      '<button type="button" class="btn-sec" data-ct="bk-zerar"' + (aj ? '' : ' disabled') + '><i class="ti ti-arrow-back-up"></i>Voltar todos os botões ao original' + (aj ? ' (' + aj + ')' : '') + '</button></div></div>';
+  }
+
+  /* ── EVENTOS DA CENTRAL ──────────────────── */
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-ct]'); if (!t || t.type === 'checkbox') return;
+    var s = t.getAttribute('data-ct'), p = s.indexOf(':'), a = p < 0 ? s : s.slice(0, p), g = p < 0 ? '' : s.slice(p + 1);
+    if (a === 'aba' || a === 'ir') { ctIr(g); if (a === 'ir') window.scrollTo(0, 0); }
+    else if (a === 'verificar') { ctIr('links'); ctVerificar(); }
+    else if (a === 'novo') abrirEdicao(null);
+    else if (a === 'editar') abrirEdicao(g);
+    else if (a === 'ocultar') ctOcultar(g);
+    else if (a === 'excluir') ctExcluir(g);
+    else if (a === 'restaurar') ctRestaurar(g);
+    else if (a === 'fav') ctFav(g);
+    else if (a === 'testar-sites') ctTestarSites(true);
+    else if (a === 'site-add') {
+      var n = document.getElementById('ct-site-n'), u = document.getElementById('ct-site-u'), url = ajustarLink(u.value);
+      if (!/^https?:\/\//i.test(url)) { u.focus(); return; }
+      var ss = lerSites(); ss.push({ n: n.value.trim() || url.replace(/^https?:\/\//, ''), u: url });
+      gravarStorage('painel_sites', ss); ctRepintar(); ctTestarSites(true);
+    }
+    else if (a === 'site-del') { var sl = lerSites(); if (sl[g] && confirm('Remover "' + sl[g].n + '" da lista?')) { sl.splice(+g, 1); gravarStorage('painel_sites', sl); ctRepintar(); } }
+    else if (a === 'lf') { ctLeadF = g; ctRepintar(); }
+    else if (a === 'lead-csv') ctLeadsCsv();
+    else if (a === 'lead-del') { var ll = lerLista('painel_leads'); if (ll[g] && confirm('Remover o lead "' + ll[g].nome + '"?')) { ll.splice(+g, 1); gravarStorage('painel_leads', ll); renderLeads(); ctRepintar(); } }
+    else if (a === 'lead-obs') { var lo = lerLista('painel_leads'); if (lo[g]) { var tx = window.prompt('Anotação sobre ' + lo[g].nome + ':', lo[g].obs || ''); if (tx !== null) { lo[g].obs = tx.trim(); gravarStorage('painel_leads', lo); renderLeads(); ctRepintar(); } } }
+    else if (a === 'tar-add') ctTarefaAdd();
+    else if (a === 'tar-del') { var td = lerLista('painel_tarefas'); td.splice(+g, 1); gravarStorage('painel_tarefas', td); ctRepintar(); }
+    else if (a === 'tar-limpar') { gravarStorage('painel_tarefas', lerLista('painel_tarefas').filter(function (x) { return !x.ok; })); ctRepintar(); }
+    else if (a === 'bk-baixar') ctBaixar();
+    else if (a === 'bk-copiar') ctCopiar();
+    else if (a === 'bk-arquivo') { var f = document.getElementById('ct-arq'); if (f) f.click(); }
+    else if (a === 'bk-colar') { var txt = window.prompt('Cole aqui o texto do backup:'); if (txt) ctRestaurarTexto(txt); }
+    else if (a === 'bk-cache') { if (confirm('Limpar a cópia guardada do painel e recarregar? Seus dados ficam.')) ctLimparCache(); }
+    else if (a === 'bk-zerar') { if (confirm('Desfazer todas as edições e ocultações dos botões originais? Os botões criados por você continuam.')) { localStorage.removeItem('painel_ajustes'); ctRepintar(); } }
+  });
+  document.addEventListener('change', function (e) {
+    var el = e.target;
+    if (el.id === 'ct-f') { ctFiltro.f = el.value; ctListaRepintar(); }
+    else if (el.hasAttribute && el.hasAttribute('data-ctst')) {
+      var l = lerLista('painel_leads'), n = parseInt(el.getAttribute('data-ctst'), 10);
+      if (l[n]) { l[n].status = el.value; gravarStorage('painel_leads', l); renderLeads(); ctRepintar(); }
+    }
+    else if (el.hasAttribute && el.getAttribute('type') === 'checkbox' && /^tar-ok:/.test(el.getAttribute('data-ct') || '')) {
+      var ts = lerLista('painel_tarefas'), i = parseInt(el.getAttribute('data-ct').slice(7), 10);
+      if (ts[i]) { ts[i].ok = el.checked ? 1 : 0; gravarStorage('painel_tarefas', ts); ctRepintar(); }
+    }
+    else if (el.id === 'ct-arq' && el.files && el.files[0]) {
+      var fr = new FileReader(); fr.onload = function () { ctRestaurarTexto(String(fr.result)); }; fr.readAsText(el.files[0]); el.value = '';
+    }
+  });
+  document.addEventListener('input', function (e) { if (e.target.id === 'ct-q') { ctFiltro.q = e.target.value; ctListaRepintar(); } });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'ct-tar-in') ctTarefaAdd(); });
+
   aplicarModo(modo);
 
   /* ── CALCULADORA DE COMISSÃO ─────────────── */
@@ -937,7 +1530,7 @@ var FERRAMENTAS = [
       var mensagem = encodeURIComponent('Olá ' + lead.nome + ', tudo bem? Aqui é o Sérgio Costa, corretor de imóveis. Vi seu interesse em ' + String(lead.interesse || '').toLowerCase() + '.');
       item.innerHTML =
         '<div class="lead-info"><div class="lead-nome">' + esc(lead.nome) + '</div>' +
-        '<div class="lead-detalhe">' + esc(lead.interesse) + (lead.tel ? ' · ' + esc(lead.tel) : '') + '</div></div>' +
+        '<div class="lead-detalhe">' + esc(lead.interesse) + (lead.tel ? ' · ' + esc(lead.tel) : '') + ' · ' + esc(lead.status || 'Novo') + '</div></div>' +
         (lead.tel ? '<a href="https://wa.me/' + digitos + '?text=' + mensagem + '" target="_blank" rel="noopener" aria-label="Chamar no WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>' : '') +
         '<button type="button" aria-label="Remover lead" data-indice="' + indice + '"><i class="ti ti-trash"></i></button>';
       leadLista.appendChild(item);
@@ -957,11 +1550,12 @@ var FERRAMENTAS = [
     var nome = leadNome.value.trim();
     if (!nome) { leadNome.focus(); return; }
     var leads = lerStorage('painel_leads', []);
-    leads.unshift({ nome: nome, tel: leadTel.value.trim(), interesse: leadInteresse.value });
-    gravarStorage('painel_leads', leads.slice(0, 20));
+    leads.unshift({ nome: nome, tel: leadTel.value.trim(), interesse: leadInteresse.value, status: 'Novo', em: Date.now() });
+    gravarStorage('painel_leads', leads.slice(0, 500));
     leadNome.value = '';
     leadTel.value = '';
     renderLeads();
+    if (modo === 'controle') ctRepintar();
   });
   renderLeads();
 
@@ -1025,7 +1619,7 @@ var FERRAMENTAS = [
 <script>
 /* ATUALIZAÇÃO: se o aparelho ainda guarda uma cópia antiga do painel, limpa e recarrega uma vez */
 (function () {
-  var V = 'edicao-v3';
+  var V = 'controle-v4';
   try {
     if (localStorage.getItem('painel_versao_arquivo') === V) return;
     localStorage.setItem('painel_versao_arquivo', V);
