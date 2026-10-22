@@ -64,6 +64,34 @@ body{padding-left:0;padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 main{padding:4px 16px 24px}footer{margin:0 16px}.mhead h1{font-size:24px}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.pf{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.pc{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
+.pc .ph{position:relative;aspect-ratio:4/3;background:linear-gradient(135deg,color-mix(in srgb,var(--cy) 30%,var(--card)),color-mix(in srgb,var(--vi) 30%,var(--card)));display:grid;place-items:center;font-size:48px;overflow:hidden}
+.pc .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pc .ph .tag{position:absolute;left:10px;top:10px;z-index:1}
+.pc .bd{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.pc .pr{font:800 20px 'Sora',sans-serif;color:var(--ac)}
+.pc .acs{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:8px}
+.pc .acs .b,.pc .acs .g{min-height:40px;padding:0 12px;font-size:13px}
+.pth{width:54px;height:54px;border-radius:12px;object-fit:cover;float:left;margin-right:10px}
+
+.b.bo{background:#ff6a00;color:#fff;box-shadow:0 8px 22px -8px rgba(255,106,0,.7)}
+.b.bz{background:#12b886;color:#fff;box-shadow:0 8px 22px -8px rgba(18,184,134,.6)}
+.lk{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.lk b{font:700 17px 'Sora',sans-serif;word-break:break-all}
+.qt{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.qt div{border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--card);font:600 12px 'DM Sans',sans-serif}
+.qt div b{float:right;font:600 12px 'JetBrains Mono',monospace}
+.qt i{display:block;height:6px;border-radius:9px;background:var(--line);margin-top:8px;overflow:hidden}.qt i s{display:block;height:100%}
+.chip{display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border-radius:99px;border:1px solid var(--line);background:none;font:600 12.5px 'DM Sans',sans-serif;color:var(--mut)}
+.chip.on{color:var(--tx);border-color:#ff6a00;background:color-mix(in srgb,#ff6a00 14%,transparent)}
+.pc .pb{position:absolute;left:0;right:0;bottom:0;padding:30px 14px 10px;background:linear-gradient(to top,rgba(37,99,235,.96),rgba(37,99,235,0));color:#fff;text-align:left;z-index:1}
+.pc .pb b{font:800 24px 'Sora',sans-serif;display:block;line-height:1.1}.pc .pb span{font:600 12px 'DM Sans',sans-serif;opacity:.95}
+.pc.on{outline:2px solid #ff6a00}
+.pc h3{font:800 14px 'Sora',sans-serif;text-transform:uppercase;line-height:1.25}
+.pc .mt{display:flex;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--mut)}
+.pc .cd{font:600 12px 'JetBrains Mono',monospace;color:var(--mut)}
 </style></head>
 <body>
 <div class="glow"></div>
@@ -72,7 +100,7 @@ main{padding:4px 16px 24px}footer{margin:0 16px}.mhead h1{font-size:24px}
 <main id="app"></main>
 <footer>FCosta Corretor · CRECI-SP 294791-F · CNAI 52708</footer>
 <script>
-var KEY="painel_corretor_v1",TABS=[["hoje","Hoje","📅"],["redes","Redes","📣"],["imoveis","Imóveis","🏠"],["grupos","Grupos","👥"],["contato","Contato","💬"],["config","Ajustes","⚙️"]],TITLES={hoje:["📅","Hoje","Plano de publicação do dia"],redes:["📣","Redes","Um texto para cada rede social"],imoveis:["🏠","Imóveis","Cadastro, edição e status"],grupos:["👥","Grupos","Sua lista de grupos e contatos recebidos"],contato:["💬","Contato","WhatsApp, Messenger e respostas rápidas"],config:["⚙️","Ajustes","Limites, contatos e backup"]};
+var KEY="painel_corretor_v1",TABS=[["hoje","Hoje","📅"],["redes","Redes","📣"],["portfolio","Portfólio","🖼️"],["imoveis","Imóveis","🏠"],["grupos","Grupos","👥"],["contato","Contato","💬"],["config","Ajustes","⚙️"]],TITLES={portfolio:["🖼️","Portfólio","Vitrine para compartilhar"],hoje:["📅","Hoje","Plano de publicação do dia"],redes:["📣","Redes","Um texto para cada rede social"],imoveis:["🏠","Imóveis","Cadastro, edição e status"],grupos:["👥","Grupos","Sua lista de grupos e contatos recebidos"],contato:["💬","Contato","WhatsApp, Messenger e respostas rápidas"],config:["⚙️","Ajustes","Limites, contatos e backup"]};
 var S={imoveis:[],grupos:[],plan:[],cfg:{whats:"",limite:20,intervalo:3,porImovel:6},dias:{},lastPost:0},tab="hoje",sel={},edit="";
 function safeUrl(u){u=(u||"").trim();if(!u)return"";if(!/^https?:\/\//i.test(u)){if(/^[\w.-]+\.[a-z]{2,}(\/|$)/i.test(u))u="https://"+u;else return""}return u}
 function merge(o){if(!o||typeof o!=="object")return false;["imoveis","grupos","plan"].forEach(function(k){if(Array.isArray(o[k]))S[k]=o[k]});if(o.cfg&&typeof o.cfg==="object")S.cfg=Object.assign({},S.cfg,o.cfg);if(o.dias&&typeof o.dias==="object")S.dias=o.dias;if(typeof o.lastPost==="number")S.lastPost=o.lastPost;if(typeof o.bk==="number")S.bk=o.bk;return true}
@@ -168,6 +196,94 @@ function vHoje(){
   return h;
 }
 
+function msgImovel(i){
+  var w=S.cfg.whats||"(11) 99350-9109",l=[];
+  l.push("🏡 *"+i.titulo+"*");
+  if(i.preco)l.push("💰 "+brl(i.preco));
+  if(i.bairro)l.push("📍 "+i.bairro+(i.cidade?" – "+i.cidade:""));
+  if(i.quartos)l.push("🛏️ "+i.quartos+" quarto(s)"+(i.banheiros?" · 🛁 "+i.banheiros+" banheiro(s)":""));
+  if(i.codigo)l.push("🔖 Cód. "+i.codigo);
+  if(i.descricao)l.push("\n"+i.descricao);
+  if(safeUrl(i.fotos))l.push("\n📸 Fotos: "+safeUrl(i.fotos));
+  l.push("\n📲 Fale comigo: "+wl(w));l.push("🌐 "+siteU());
+  return l.join("\n");
+}
+function listaPf(){return S.imoveis.filter(function(i){return !i.vendido})}
+function msgPortfolio(L,cli){
+  var w=S.cfg.whats||"(11) 99350-9109",o=[cli?"Olá, "+cli+"! Separei estes imóveis para você:":"🏠 *Portfólio de imóveis*","Sérgio Costa – Corretor | CRECI-SP 294791-F\n"];
+  L.forEach(function(i,k){
+    var l=[(k+1)+". *"+i.titulo+"*"];
+    if(i.preco)l.push("💰 "+brl(i.preco));
+    if(i.bairro)l.push("📍 "+i.bairro+(i.cidade?" – "+i.cidade:""));
+    var q=[];if(i.quartos)q.push("🛏️ "+i.quartos);if(i.banheiros)q.push("🛁 "+i.banheiros);if(q.length)l.push(q.join("  "));
+    if(i.codigo)l.push("🔖 Cód. "+i.codigo);
+    if(safeUrl(i.fotos))l.push("📸 "+safeUrl(i.fotos));
+    o.push(l.join("\n")+"\n");
+  });
+  o.push("🏠 Veja todos os meus imóveis: "+plink());
+  o.push("📲 WhatsApp: "+wl(w));o.push("🌐 "+siteU());
+  return o.join("\n");
+}
+var pq="",pfil={baixo:1,medio:1,alto:1},psel={};
+function plink(){return safeUrl(S.cfg.tijolo)||"https://tijoloia.com.br/corretor/sergio-fernandes-da-costa"}
+function pvis(){var q=pq.toLowerCase();return listaPf().filter(function(i){return pfil[i.padrao]&&(!q||(i.titulo||"").toLowerCase().indexOf(q)>=0||String(i.codigo||"").toLowerCase().indexOf(q)>=0)})}
+function pselL(){return S.imoveis.filter(function(i){return psel[i.id]})}
+function pcard(i){
+  var f=safeUrl(i.foto),fo=safeUrl(i.fotos),d=(i.descricao||"").trim();if(d.length>95)d=d.slice(0,92)+"...";
+  var mt=[];if(i.quartos)mt.push("🛏️ "+esc(i.quartos)+" quarto(s)");if(i.banheiros)mt.push("🛁 "+esc(i.banheiros)+" banheiro(s)");if(i.bairro)mt.push("📍 "+esc(i.bairro));
+  var on=!!psel[i.id];
+  return '<div class="pc'+(on?" on":"")+'"><div class="ph">🏠'+(f?'<img src="'+esc(f)+'" alt="'+esc(i.titulo)+'" loading="lazy" onerror="this.remove()">':'')
+  +'<span class="tag '+esc(i.padrao)+'">'+esc(i.finalidade||"Venda")+' · '+esc(i.padrao)+'</span>'
+  +(i.preco?'<div class="pb"><span>'+esc(i.tipo||"Imóvel")+'</span><b>'+brl(i.preco)+'</b></div>':'')+'</div>'
+  +'<div class="bd"><h3>'+esc(i.titulo)+'</h3>'+(d?'<span class="mut">'+esc(d)+'</span>':'')
+  +(mt.length?'<div class="mt">'+mt.join("<span>·</span>")+'</div>':'')
+  +(i.codigo?'<span class="cd">Cód. '+esc(i.codigo)+'</span>':'')
+  +'<div class="acs"><button class="b bz" data-act="pfum" data-id="'+i.id+'">WhatsApp</button><button class="g" data-act="pfcp" data-id="'+i.id+'">Copiar</button>'
+  +(fo?'<a class="g" href="'+esc(fo)+'" target="_blank" rel="noopener">Fotos</a>':'')
+  +'<button class="g" data-act="psel" data-id="'+i.id+'">'+(on?"✓ Na seleção":"+ Seleção")+'</button></div></div></div>';
+}
+function pagina(L){
+  var w=S.cfg.whats||"(11) 99350-9109",cards=L.map(function(i){
+    var f=safeUrl(i.foto),fo=safeUrl(i.fotos);
+    return '<article><div class="ph">'+(f?'<img src="'+esc(f)+'" alt="'+esc(i.titulo)+'" loading="lazy" onerror="this.remove()">':'🏠')+'</div><div class="bd"><small>'+esc(i.tipo||"Imóvel")+(i.bairro?" · "+esc(i.bairro):"")+(i.cidade?" – "+esc(i.cidade):"")+'</small><h2>'+esc(i.titulo)+'</h2>'
+    +(i.preco?'<p class="pr">'+brl(i.preco)+'</p>':'')+(i.quartos?'<p>🛏️ '+esc(i.quartos)+' quarto(s)</p>':'')+(i.descricao?'<p class="d">'+esc(i.descricao)+'</p>':'')
+    +'<div class="ac"><a class="z" href="https://wa.me/'+wl(w).replace("https://wa.me/","")+'?text='+encodeURIComponent("Olá! Tenho interesse no imóvel: "+i.titulo)+'">Tenho interesse</a>'+(fo?'<a class="o" href="'+esc(fo)+'">Ver fotos</a>':'')+'</div></div></article>';
+  }).join("");
+  return '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Portfólio de imóveis – Sérgio Costa</title><style>'
+  +'*{box-sizing:border-box;margin:0}body{font:16px/1.45 system-ui,sans-serif;background:#f3f6fb;color:#0f172a}header{background:#070b16;color:#fff;padding:28px 18px;text-align:center}header h1{font-size:24px}header p{opacity:.8;font-size:14px;margin-top:4px}'
+  +'main{max-width:1100px;margin:0 auto;padding:18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}article{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 6px 24px -10px rgba(0,0,0,.25);display:flex;flex-direction:column}'
+  +'.ph{position:relative;aspect-ratio:4/3;background:linear-gradient(135deg,#bfe9f2,#d9ccff);display:grid;place-items:center;font-size:52px;overflow:hidden}.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}'
+  +'.bd{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}small{color:#5b6784}h2{font-size:17px}.pr{font-weight:800;font-size:21px;color:#059669}.d{color:#475569;font-size:14px}'
+  +'.ac{display:flex;gap:8px;margin-top:auto;padding-top:8px}.ac a{flex:1;text-align:center;padding:11px;border-radius:12px;font-weight:700;text-decoration:none;font-size:14px}.z{background:#25d366;color:#04231b}.o{border:1px solid #cbd5e1;color:#0f172a}'
+  +'footer{text-align:center;padding:24px 18px;font-size:13px;color:#5b6784}footer a{color:#059669;font-weight:700}</style></head><body><header><h1>Portfólio de imóveis</h1><p>Sérgio Costa – Corretor de Imóveis · CRECI-SP 294791-F · CNAI 52708</p></header><main>'
+  +cards+'</main><footer><a href="'+wl(w)+'">WhatsApp '+esc(w)+'</a> · <a href="https://'+esc(siteU())+'">'+esc(siteU())+'</a></footer></body></html>';
+}
+function baixar(nome,txt){
+  var b=new Blob([txt],{type:"text/html;charset=utf-8"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(b);a.download=nome;document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500);
+}
+function vPortfolio(){
+  var all=listaPf(),L=pvis(),sn=pselL(),off=all.length?"":" disabled",
+  LIM={baixo:20,medio:20,alto:10},NM={baixo:"Baixo",medio:"Médio",alto:"Alto"},COR={baixo:"#12b886",medio:"#f59f00",alto:"#7c3aed"};
+  var h='<div class="card"><span class="mut" style="font:500 10.5px \'JetBrains Mono\',monospace;letter-spacing:.08em">SEU LINK</span><div class="lk"><b>'+esc(plink().replace(/^https?:\/\//,""))+'</b><div style="display:flex;gap:6px;flex-wrap:wrap">'
+  +'<button class="g" data-act="plcp">Copiar</button><button class="b bz" data-act="plzap">Enviar no WhatsApp</button><button class="b bo" data-act="plver">Ver portfólio</button></div></div>'
+  +'<p class="mut" style="margin:10px 0 0">Coloque na bio do Instagram, no status do WhatsApp e nos seus anúncios. O endereço pode ser trocado em Ajustes.</p></div>';
+  h+='<div class="qt">'+["baixo","medio","alto"].map(function(p){var n=all.filter(function(i){return i.padrao===p}).length;return '<div><span>'+NM[p]+' padrão</span><b>'+n+'/'+LIM[p]+'</b><i><s style="width:'+Math.min(100,n/LIM[p]*100)+'%;background:'+COR[p]+'"></s></i></div>'}).join("")+'</div>';
+  h+='<div class="card"><div class="grid" style="margin-bottom:10px"><div><label>Título ou código Tijolo.IA</label><input data-pq="" value="'+esc(pq)+'" placeholder="Filtrar e tecle Enter"></div></div>'
+  +'<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'+["baixo","medio","alto"].map(function(p){return '<button class="chip'+(pfil[p]?" on":"")+'" data-act="pfil" data-p="'+p+'">'+NM[p]+' padrão</button>'}).join("")
+  +'<span style="flex:1"></span><button class="g" data-act="pfzap"'+off+'>Enviar todos no WhatsApp</button><button class="g" data-act="pfcopy"'+off+'>Copiar texto</button><button class="g" data-act="pfhtml"'+off+'>Baixar página (HTML)</button></div></div>';
+  if(sn.length){
+    h+='<div class="card" style="border-color:#ff6a00"><h2>Seleção para cliente · '+sn.length+' imóvel(is)</h2><div class="grid"><div><label>Nome do cliente (opcional)</label><input id="pcli" placeholder="Ex.: Maria"></div></div>'
+    +'<p style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0"><button class="b bz" data-act="psz">Enviar seleção no WhatsApp</button><button class="g" data-act="pscp">Copiar texto</button><button class="g" data-act="pshtml">Baixar página da seleção</button><button class="g" data-act="pslimpa">Limpar seleção</button></p></div>';
+  }
+  if(!all.length){
+    return h+'<div class="card"><h2>Nenhum imóvel cadastrado</h2><p class="mut">Cadastre na aba Imóveis (foto de capa, código Tijolo.IA, quartos, banheiros) ou carregue exemplos para ver a vitrine.</p><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="b bo" data-tab="imoveis">Cadastrar imóvel</button><button class="g" data-act="exemplos">Carregar 3 exemplos</button></div></div>';
+  }
+  if(!L.length)return h+'<div class="card"><p class="mut">Nenhum imóvel com esse filtro.</p></div>';
+  return h+'<div class="pf">'+L.map(pcard).join("")+'</div>';
+}
+
 function vImoveis(){
   var h='<div class="card"><h2>Novo imóvel</h2><form id="fi" class="grid">'
   +'<div><label>Título</label><input name="titulo" required></div>'
@@ -176,15 +292,19 @@ function vImoveis(){
   +'<div><label>Bairro</label><input name="bairro"></div>'
   +'<div><label>Cidade</label><input name="cidade"></div>'
   +'<div><label>Quartos</label><input name="quartos" type="number" min="0"></div>'
+  +'<div><label>Banheiros</label><input name="banheiros" type="number" min="0"></div>'
+  +'<div><label>Código Tijolo.IA</label><input name="codigo" placeholder="Ex.: 805"></div>'
+  +'<div><label>Finalidade</label><select name="finalidade"><option>Venda</option><option>Aluguel</option></select></div>'
   +'<div><label>Padrão</label><select name="padrao"><option value="baixo">Baixo</option><option value="medio">Médio</option><option value="alto">Alto</option></select></div>'
+  +'<div style="grid-column:1/-1"><label>Foto de capa (link direto da imagem) - opcional</label><input name="foto" placeholder="https://.../foto.jpg"></div>'
   +'<div style="grid-column:1/-1"><label>Link das fotos (Drive, site ou álbum) - opcional</label><input name="fotos"></div>'
   +'<div style="grid-column:1/-1"><label>Descrição</label><textarea name="descricao"></textarea></div>'
   +'<div><button class="b" type="submit">Adicionar</button></div></form></div>';
-  h+='<div class="card"><h2>Importar vários imóveis</h2><p class="mut">Um por linha: <b>título | preço | bairro | cidade | quartos | padrão | tipo | descrição</b>. Só o título é obrigatório. Se o padrão ficar vazio, ele é definido pelo preço (até R$ 300 mil baixo, até R$ 700 mil médio, acima disso alto).</p><textarea id="bulkim" placeholder="Kitnet mobiliada na Praia Grande | 150000 | Vila Real | Praia Grande | 1 | baixo | Kitnet | Pronta para morar"></textarea><p><button class="b" data-act="impim">Importar</button></p></div>';
+  h+='<div class="card"><h2>Importar vários imóveis</h2><p class="mut">Um por linha: <b>título | preço | bairro | cidade | quartos | padrão | tipo | descrição | foto (link)</b>. Só o título é obrigatório. Se o padrão ficar vazio, ele é definido pelo preço (até R$ 300 mil baixo, até R$ 700 mil médio, acima disso alto).</p><textarea id="bulkim" placeholder="Kitnet mobiliada na Praia Grande | 150000 | Vila Real | Praia Grande | 1 | baixo | Kitnet | Pronta para morar"></textarea><p><button class="b" data-act="impim">Importar</button></p></div>';
   h+='<div class="card"><h2>Meus imóveis ('+S.imoveis.length+')</h2>';
   if(!S.imoveis.length)h+='<p class="mut">Nenhum imóvel ainda.</p>';
   S.imoveis.forEach(function(i){
-    h+='<div class="item row'+(i.vendido?" done":"")+'"><div><b>'+esc(i.titulo)+'</b>'+(i.vendido?' <span class="tag">vendido</span>':'')+' <span class="tag '+i.padrao+'">'+i.padrao+'</span><br><span class="mut">'+brl(i.preco)+' · '+esc(i.bairro)+(livre(i)?"":" · bloqueado "+horas(i)+"h")+'</span></div><div>'
+    h+='<div class="item row'+(i.vendido?" done":"")+'"><div>'+(safeUrl(i.foto)?'<img class="pth" src="'+esc(safeUrl(i.foto))+'" alt="" loading="lazy" onerror="this.remove()">':'')+'<b>'+esc(i.titulo)+'</b>'+(i.vendido?' <span class="tag">vendido</span>':'')+' <span class="tag '+i.padrao+'">'+i.padrao+'</span><br><span class="mut">'+brl(i.preco)+' · '+esc(i.bairro)+(livre(i)?"":" · bloqueado "+horas(i)+"h")+'</span></div><div>'
     +(livre(i)?"":'<button class="g" data-act="liberar" data-id="'+i.id+'">Liberar</button> ')
     +'<button class="g" data-act="edimovel" data-id="'+i.id+'">Editar</button> <button class="g" data-act="vendido" data-id="'+i.id+'">'+(i.vendido?"Reativar":"Vendido")+'</button> <button class="g" data-act="delimovel" data-id="'+i.id+'">Excluir</button></div></div>';
   });
@@ -208,7 +328,7 @@ function vConfig(){
   +'<div><label>Seu WhatsApp (aparece nos textos)</label><input id="c_whats" value="'+esc(c.whats)+'" placeholder="(11) 99999-9999"></div>'
   +'<div><label>Limite de postagens por dia</label><input id="c_limite" type="number" min="1" value="'+c.limite+'"></div>'
   +'<div><label>Intervalo mínimo entre postagens (min)</label><input id="c_intervalo" type="number" min="0" value="'+c.intervalo+'"></div>'
-  +'<div><label>Grupos por imóvel</label><input id="c_por" type="number" min="1" max="20" value="'+c.porImovel+'"></div><div><label>Usuário do Facebook</label><input id="c_fb" value="'+esc(fbUser())+'"></div><div><label>Seu site</label><input id="c_site" value="'+esc(siteU())+'"></div></div>'
+  +'<div><label>Grupos por imóvel</label><input id="c_por" type="number" min="1" max="20" value="'+c.porImovel+'"></div><div><label>Usuário do Facebook</label><input id="c_fb" value="'+esc(fbUser())+'"></div><div><label>Seu site</label><input id="c_site" value="'+esc(siteU())+'"></div><div><label>Link do seu portfólio Tijolo.IA</label><input id="c_tijolo" value="'+esc(c.tijolo||"")+'" placeholder="https://tijoloia.com.br/corretor/seu-nome"></div></div>'
   +'<p><button class="b" data-act="cfg">Salvar ajustes</button></p></div>'
   +'<div class="card"><h2>Backup</h2><p class="mut">Seus dados ficam só neste navegador. Exporte de vez em quando para não perder.</p>'
   +'<button class="g" data-act="exp">Copiar backup</button> <button class="g" data-act="imp">Restaurar backup</button>'
@@ -258,7 +378,7 @@ function vContato(){
 }
 function render(){
   document.getElementById("nav").innerHTML=TABS.map(function(t){return '<button data-tab="'+t[0]+'" class="'+(t[0]===tab?"on":"")+'"><i>'+t[2]+'</i>'+t[1]+'</button>'}).join("");
-  var m=TITLES[tab]||["","",""],v='<div class="mhead"><div class="mh-ic">'+m[0]+'</div><div><h1>'+m[1]+'</h1><p>'+m[2]+'</p></div></div>'+{hoje:vHoje,redes:vRedes,imoveis:vImoveis,grupos:vGrupos,contato:vContato,config:vConfig}[tab]();
+  var m=TITLES[tab]||["","",""],v='<div class="mhead"><div class="mh-ic">'+m[0]+'</div><div><h1>'+m[1]+'</h1><p>'+m[2]+'</p></div></div>'+{hoje:vHoje,redes:vRedes,portfolio:vPortfolio,imoveis:vImoveis,grupos:vGrupos,contato:vContato,config:vConfig}[tab]();
   document.getElementById("app").innerHTML=v;tick();
   if(tab==="imoveis"&&edit){var ei=byId(S.imoveis,edit),fm=document.getElementById("fi");if(ei&&fm){for(var k in ei)if(fm.elements[k]&&typeof ei[k]!=="object")fm.elements[k].value=ei[k];fm.querySelector("button[type=submit]").textContent="Salvar alterações";window.scrollTo(0,0)}}
 }
@@ -286,6 +406,26 @@ document.addEventListener("click",function(ev){
     if(g)g.last=Date.now();if(im)im.lockedUntil=Date.now()+48*36e5;
     save();render();
   }
+  else if(a==="pfzap"){window.open("https://wa.me/?text="+encodeURIComponent(msgPortfolio(listaPf())),"_blank")}
+  else if(a==="pfcopy"){copiar(msgPortfolio(listaPf()),t)}
+  else if(a==="pfhtml"){baixar("portfolio-fcosta.html",pagina(listaPf()))}
+  else if(a==="pfshare"){var tx=msgPortfolio(listaPf());if(navigator.share)navigator.share({title:"Portfólio de imóveis",text:tx}).catch(function(){});else copiar(tx,t)}
+  else if(a==="pfum"){var i1=byId(S.imoveis,id);if(i1)window.open("https://wa.me/?text="+encodeURIComponent(msgImovel(i1)),"_blank")}
+  else if(a==="pfcp"){var i2=byId(S.imoveis,id);if(i2)copiar(msgImovel(i2),t)}
+  else if(a==="plcp"){copiar(plink(),t)}
+  else if(a==="plzap"){window.open("https://wa.me/?text="+encodeURIComponent("Olá! Veja meu portfólio de imóveis: "+plink()),"_blank")}
+  else if(a==="plver"){window.open(plink(),"_blank")}
+  else if(a==="pfil"){pfil[t.dataset.p]=!pfil[t.dataset.p];render()}
+  else if(a==="psel"){psel[id]=!psel[id];render()}
+  else if(a==="pslimpa"){psel={};render()}
+  else if(a==="psz"){window.open("https://wa.me/?text="+encodeURIComponent(msgPortfolio(pselL(),document.getElementById("pcli").value.trim())),"_blank")}
+  else if(a==="pscp"){copiar(msgPortfolio(pselL(),document.getElementById("pcli").value.trim()),t)}
+  else if(a==="pshtml"){baixar("selecao-fcosta.html",pagina(pselL()))}
+  else if(a==="exemplos"){
+    [["Casa 2 quartos no Itaim Paulista",320000,"Itaim Paulista","São Paulo","2","medio","Casa","Quintal, 1 vaga, perto do comércio e do transporte."],["Apartamento 2 quartos na Penha",280000,"Penha","São Paulo","2","baixo","Apartamento","Reformado, perto do metrô, pronto para morar."],["Sobrado 3 quartos em Guaianases",520000,"Guaianases","São Paulo","3","medio","Casa","Sobrado com 2 vagas, churrasqueira e ótimo acabamento."]].forEach(function(e){
+      S.imoveis.push({id:uid(),lockedUntil:0,titulo:"(Exemplo) "+e[0],preco:e[1],bairro:e[2],cidade:e[3],quartos:e[4],padrao:e[5],tipo:e[6],descricao:e[7],foto:"",fotos:"",finalidade:"Venda",banheiros:"1",codigo:String(100+S.imoveis.length)});
+    });save();render();
+  }
   else if(a==="edimovel"){edit=id;render()}
   else if(a==="vendido"){var vi=byId(S.imoveis,id);vi.vendido=!vi.vendido;delete sel[id];S.plan=S.plan.filter(function(x){return x.done||x.imovel!==id});save();render()}
   else if(a==="lead"){var gg=byId(S.grupos,id);gg.leads=(gg.leads||0)+1;save();render()}
@@ -298,7 +438,7 @@ document.addEventListener("click",function(ev){
       var pr=parseFloat((q[1]||"").replace(/[^\d,]/g,"").replace(",","."))||0,pd=(q[5]||"").toLowerCase();
       if(pd==="médio")pd="medio";
       if(["baixo","medio","alto"].indexOf(pd)<0)pd=pr>=700000?"alto":pr>=300000?"medio":"baixo";
-      S.imoveis.push({id:uid(),lockedUntil:0,titulo:q[0],preco:pr||"",bairro:q[2]||"",cidade:q[3]||"São Paulo",quartos:q[4]||"",padrao:pd,tipo:q[6]||"Casa",descricao:q[7]||""});
+      S.imoveis.push({id:uid(),lockedUntil:0,titulo:q[0],preco:pr||"",bairro:q[2]||"",cidade:q[3]||"São Paulo",quartos:q[4]||"",padrao:pd,tipo:q[6]||"Casa",descricao:q[7]||"",foto:q[8]||""});
     });save();render();
   }
   else if(a==="addgr"){
@@ -311,7 +451,7 @@ document.addEventListener("click",function(ev){
     var c=S.cfg;c.whats=document.getElementById("c_whats").value.trim();
     c.limite=Math.max(1,+document.getElementById("c_limite").value||20);
     c.intervalo=Math.max(0,+document.getElementById("c_intervalo").value||0);
-    c.porImovel=Math.min(20,Math.max(1,+document.getElementById("c_por").value||6));c.fb=document.getElementById("c_fb").value.trim();c.site=document.getElementById("c_site").value.trim();
+    c.porImovel=Math.min(20,Math.max(1,+document.getElementById("c_por").value||6));c.fb=document.getElementById("c_fb").value.trim();c.site=document.getElementById("c_site").value.trim();c.tijolo=document.getElementById("c_tijolo").value.trim();
     save();t.textContent="Salvo ✓";
   }
   else if(a==="exp"){S.bk=Date.now();save();copiar(JSON.stringify(S),t)}
@@ -322,6 +462,7 @@ document.addEventListener("click",function(ev){
 });
 document.addEventListener("change",function(ev){
   if(ev.target.dataset.rsel!==undefined){rsel=ev.target.value;render();return}
+  if(ev.target.dataset.pq!==undefined){pq=ev.target.value;render();return}
   var i=ev.target.dataset.sel;if(i){sel[i]=ev.target.checked;render()}
 });
 document.addEventListener("submit",function(ev){
