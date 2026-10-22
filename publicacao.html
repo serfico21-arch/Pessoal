@@ -278,10 +278,40 @@ function vPortfolio(){
     +'<p style="display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 0"><button class="b bz" data-act="psz">Enviar seleção no WhatsApp</button><button class="g" data-act="pscp">Copiar texto</button><button class="g" data-act="pshtml">Baixar página da seleção</button><button class="g" data-act="pslimpa">Limpar seleção</button></p></div>';
   }
   if(!all.length){
-    return h+'<div class="card"><h2>Nenhum imóvel cadastrado</h2><p class="mut">Cadastre na aba Imóveis (foto de capa, código Tijolo.IA, quartos, banheiros) ou carregue exemplos para ver a vitrine.</p><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="b bo" data-tab="imoveis">Cadastrar imóvel</button><button class="g" data-act="exemplos">Carregar 3 exemplos</button></div></div>';
+    return h+'<div class="card"><h2>Nenhum imóvel cadastrado</h2><p class="mut">Cadastre na aba Imóveis (foto de capa, código Tijolo.IA, quartos, banheiros) ou carregue exemplos para ver a vitrine.</p><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="b bz" data-act="impsite">Importar do meu site</button><button class="b bo" data-tab="imoveis">Cadastrar imóvel</button><button class="g" data-act="exemplos">Carregar 3 exemplos</button></div></div>';
   }
   if(!L.length)return h+'<div class="card"><p class="mut">Nenhum imóvel com esse filtro.</p></div>';
   return h+'<div class="pf">'+L.map(pcard).join("")+'</div>';
+}
+
+function numPreco(v){
+  if(!v)return"";if(typeof v==="number")return v;var s=String(v).trim(),n;
+  if(/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(s))n=parseFloat(s.replace(/\./g,"").replace(",","."));
+  else if(/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(s))n=parseFloat(s.replace(/,/g,""));
+  else n=parseFloat(s.replace(",",".").replace(/[^\d.]/g,""));
+  return isNaN(n)?"":n;
+}
+function capi(t){t=String(t||"").trim();return t?t.charAt(0).toUpperCase()+t.slice(1).toLowerCase():""}
+function fotoSite(u){if(!u||typeof u!=="string")return"";return(u.indexOf("res.cloudinary.com")>-1&&u.indexOf("/upload/")>-1)?u.replace("/upload/","/upload/f_auto,q_auto,w_700/"):u}
+function importarSite(btn){
+  var o=btn.textContent;btn.disabled=true;btn.textContent="Buscando…";
+  function fim(m){btn.disabled=false;btn.textContent=o;alert(m)}
+  fetch("https://fcosta2026-847c3-default-rtdb.firebaseio.com/fcosta_imoveis.json").then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+    d=d||{};var add=0,upd=0;
+    S.imoveis=S.imoveis.filter(function(x){return !/^\(Exemplo\) /.test(x.titulo||"")});
+    Object.keys(d).forEach(function(id){
+      var i=d[id];if(!i||typeof i!=="object"||i.publicado===false||i.status==="panfleto")return;
+      var fs=i.fotos?(Array.isArray(i.fotos)?i.fotos:Object.keys(i.fotos).map(function(k){return i.fotos[k]})).filter(Boolean):[];
+      var pr=numPreco(i.preco),pd=pr>=700000?"alto":pr>=300000?"medio":"baixo";
+      var sg={venda:"FCV",aluguel:"FCA",lancamento:"FCL",vendido:"FCV"}[i.status]||"FCV";
+      var cod=i.codigo||(sg+(i.numeroCodigo?String(i.numeroCodigo).padStart(3,"0"):(String(id).slice(-3).replace(/[^0-9]/g,"").padStart(3,"0")||"001")));
+      var dados={siteId:id,titulo:i.titulo||"Imóvel FCosta",tipo:capi(i.tipo)||"Casa",preco:pr,bairro:i.bairro||"",cidade:i.cidade||"São Paulo",quartos:i.quartos||"",banheiros:i.banheiros||"",padrao:pd,finalidade:i.status==="aluguel"?"Aluguel":"Venda",codigo:cod,descricao:(i.descricao||"").trim(),foto:fotoSite(fs[0]),fotos:"https://"+siteU()+"/imovel?id="+encodeURIComponent(id)};
+      if(i.status==="vendido")dados.vendido=true;
+      var ex=S.imoveis.filter(function(x){return x.siteId===id})[0];
+      if(ex){Object.assign(ex,dados);upd++}else{dados.id=uid();dados.lockedUntil=0;S.imoveis.push(dados);add++}
+    });
+    save();render();fim(add+" imóvel(is) novo(s) e "+upd+" atualizado(s) a partir do site.");
+  }).catch(function(){fim("Não consegui ler o site agora. Verifique a internet e tente de novo.")});
 }
 
 function vImoveis(){
@@ -300,6 +330,7 @@ function vImoveis(){
   +'<div style="grid-column:1/-1"><label>Link das fotos (Drive, site ou álbum) - opcional</label><input name="fotos"></div>'
   +'<div style="grid-column:1/-1"><label>Descrição</label><textarea name="descricao"></textarea></div>'
   +'<div><button class="b" type="submit">Adicionar</button></div></form></div>';
+  h+='<div class="card"><h2>Importar do meu site</h2><p class="mut">Traz seus imóveis publicados no fcostacorretor.com (título, preço, bairro, quartos, banheiros, código, foto de capa e link das fotos). Pode repetir quando quiser: os já importados são atualizados, sem duplicar.</p><button class="b bz" data-act="impsite">Importar do meu site</button></div>';
   h+='<div class="card"><h2>Importar vários imóveis</h2><p class="mut">Um por linha: <b>título | preço | bairro | cidade | quartos | padrão | tipo | descrição | foto (link)</b>. Só o título é obrigatório. Se o padrão ficar vazio, ele é definido pelo preço (até R$ 300 mil baixo, até R$ 700 mil médio, acima disso alto).</p><textarea id="bulkim" placeholder="Kitnet mobiliada na Praia Grande | 150000 | Vila Real | Praia Grande | 1 | baixo | Kitnet | Pronta para morar"></textarea><p><button class="b" data-act="impim">Importar</button></p></div>';
   h+='<div class="card"><h2>Meus imóveis ('+S.imoveis.length+')</h2>';
   if(!S.imoveis.length)h+='<p class="mut">Nenhum imóvel ainda.</p>';
@@ -421,6 +452,7 @@ document.addEventListener("click",function(ev){
   else if(a==="psz"){window.open("https://wa.me/?text="+encodeURIComponent(msgPortfolio(pselL(),document.getElementById("pcli").value.trim())),"_blank")}
   else if(a==="pscp"){copiar(msgPortfolio(pselL(),document.getElementById("pcli").value.trim()),t)}
   else if(a==="pshtml"){baixar("selecao-fcosta.html",pagina(pselL()))}
+  else if(a==="impsite"){importarSite(t)}
   else if(a==="exemplos"){
     [["Casa 2 quartos no Itaim Paulista",320000,"Itaim Paulista","São Paulo","2","medio","Casa","Quintal, 1 vaga, perto do comércio e do transporte."],["Apartamento 2 quartos na Penha",280000,"Penha","São Paulo","2","baixo","Apartamento","Reformado, perto do metrô, pronto para morar."],["Sobrado 3 quartos em Guaianases",520000,"Guaianases","São Paulo","3","medio","Casa","Sobrado com 2 vagas, churrasqueira e ótimo acabamento."]].forEach(function(e){
       S.imoveis.push({id:uid(),lockedUntil:0,titulo:"(Exemplo) "+e[0],preco:e[1],bairro:e[2],cidade:e[3],quartos:e[4],padrao:e[5],tipo:e[6],descricao:e[7],foto:"",fotos:"",finalidade:"Venda",banheiros:"1",codigo:String(100+S.imoveis.length)});
