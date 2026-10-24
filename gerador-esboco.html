@@ -71,6 +71,14 @@
   .fecho { border:1px solid #999; }
   .grupo { margin-top:8px; border-bottom:1px solid #ccc; padding-bottom:2px; }
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* palavras tônicas colorido */
+  .t-tema { color:#007340; font-weight:bold; }
+  .fluxo .pc.t-pc { background:none; border:2px solid #cc0000; color:#cc0000; padding:1px 8px; }
+  .dir.t-tema { font-weight:bold; font-size:14px; }
+  .t-cur { font-size:12px; font-style:italic; color:#731a99; margin-top:2px; }
+  .t-apoio { font-size:12px; color:#222; margin-top:2px; }
+  .t-azul { font-size:10px; font-style:italic; color:#1a40cc; }
+  .t-lig { font-size:13px; font-weight:bold; color:#cc0000; margin-top:3px; }
   @media print { .form, .rodape { display:none !important; } body { padding:0; } }
 </style>
 </head>
@@ -211,6 +219,8 @@ PRINCÍPIOS OBRIGATÓRIOS
 
 14. MARCAÇÃO: o sinal ** só pode aparecer no gancho e no fechamento, uma vez em cada, na palavra-chave. Em nenhum outro campo.
 
+15. CAMPOS EXTRAS (só no tipo PALAVRAS TÔNICAS; nos outros tipos ficam vazios): curiosidade = um fato curto (até 12 palavras) sobre o versículo ou o cenário, ligado ao tema; só use fato que você sabe ter certeza (lugar, nome, significado, época, costume do texto); na dúvida, deixe vazio. apoio_ref = um versículo de apoio de outro trecho da Bíblia, que você conhece bem e que realmente reforça a ideia do tópico. apoio_palavras = de 3 a 6 palavras que aparecem nesse versículo de apoio, na tradução Almeida, só para lembrar o versículo, sem aspas; na dúvida, deixe vazio.
+
 TIPOS DE ESBOÇO (o pedido informa qual usar; o formato do JSON é o mesmo para todos):
 - EXPOSITIVO: cubra a passagem do começo ao fim, na ordem, juntando versículos vizinhos. 5 a 8 tópicos (máximo 9).
 - TEMÁTICO: parta do tema; o texto principal é a base e versículos de outros livros dão apoio. 3 a 5 tópicos; o ref de cada tópico pode ser de outro livro. 1 ou 2 partes bastam.
@@ -220,7 +230,7 @@ TIPOS DE ESBOÇO (o pedido informa qual usar; o formato do JSON é o mesmo para 
 NÃO FAÇA: tese; apelo (o apelo é do pastor); transcrição de versículos; parágrafos longos; perguntas no gancho; quebra-gelo, piadas ou humor; jargão teológico; texto em markdown.
 
 SAÍDA: responda SOMENTE com JSON válido, sem explicações e sem marcas de código, exatamente com estes campos (os campos de texto sem conteúdo ficam como ""):
-{"tema":"","palavra_chave":"","contraponto":"","referencia":"","introducao":"","gancho":"","ilustracao_titulo":"","ilustracao":"","abertura_corpo":"","partes":[{"titulo":"","nota":"","topicos":[{"chave":"","direcao":"","ref":"","subs":[{"titulo":"","texto":"","ref":""},{"titulo":"","texto":"","ref":""}],"pratica":"","ligacao":""}]}],"fechamento":"","resumo_verbos":"","oracao_de":"","oracao":"","apoio":[{"ref":"","ideia":""}]}
+{"tema":"","palavra_chave":"","contraponto":"","referencia":"","introducao":"","gancho":"","ilustracao_titulo":"","ilustracao":"","abertura_corpo":"","partes":[{"titulo":"","nota":"","topicos":[{"chave":"","direcao":"","ref":"","subs":[{"titulo":"","texto":"","ref":""},{"titulo":"","texto":"","ref":""}],"pratica":"","ligacao":"","curiosidade":"","apoio_ref":"","apoio_palavras":""}]}],"fechamento":"","resumo_verbos":"","oracao_de":"","oracao":"","apoio":[{"ref":"","ideia":""}]}
 
 EXEMPLO DE FORMATO E NÍVEL (tipo: expositivo; texto: Neemias 1:1-11; tema: A dor do outro chegou na minha casa). Imite o formato, o tamanho e a qualidade. NUNCA copie o conteúdo, a palavra-chave nem as chaves deste exemplo:
 ` + JSON.stringify(EXEMPLO);
@@ -241,7 +251,7 @@ const TIPOS = {
   tematico:   { nome: 'Temático',   regra: 'TEMÁTICO: parta do tema e use o texto principal como base, com versículos de outros lugares da Bíblia como apoio. 3 a 5 tópicos; o ref de cada tópico pode ser de outro livro. Não precisa cobrir a passagem toda. 1 ou 2 partes bastam.' },
   textual:    { nome: 'Textual',    regra: 'TEXTUAL: tire do próprio texto as ideias principais, sem cobrir tudo. 3 a 4 tópicos, cada um com uma ideia central do texto, na ordem em que aparecem. 1 ou 2 partes bastam.' },
   limpo:      { nome: 'Limpo e objetivo', modo: 'limpo', regra: 'LIMPO E OBJETIVO: esboço bem enxuto. Cubra a passagem na ordem, em 4 a 6 tópicos. Cada tópico com chave, direcao curta, ref e EXATAMENTE 2 subs; cada sub só com titulo curto (2 a 5 palavras) e ref. Deixe texto de sub, pratica e ligacao VAZIOS. Deixe ilustracao_titulo, ilustracao, oracao_de e oracao VAZIOS. Introdução em 1 frase, gancho em 2 frases curtas.' },
-  tonicas:    { nome: 'Palavras tônicas', modo: 'tonicas', regra: 'PALAVRAS TÔNICAS: um tópico para cada versículo do texto, na ordem. Em cada tópico: chave = a palavra tônica (a mais marcante) do versículo, em maiúsculas; ref = só o versículo (ex.: Ne 1:2); direcao = 3 a 8 palavras, no formato "<Palavra-chave> é ...", ligando o versículo ao tema (cada direcao nasce da anterior); pratica e ligacao VAZIOS e subs = []. Uma única parte, com titulo vazio. Preencha tema, palavra_chave, contraponto, referencia, partes e fechamento (uma frase que responde ao tema, com a palavra-chave marcada com **). Deixe introducao, gancho, ilustracao_titulo, ilustracao, abertura_corpo, resumo_verbos, oracao_de, oracao e apoio VAZIOS (apoio = []).' }
+  tonicas:    { nome: 'Palavras tônicas', modo: 'tonicas', regra: 'PALAVRAS TÔNICAS: um tópico para cada versículo do texto, na ordem. Em cada tópico: chave = a palavra tônica (a mais marcante) do versículo, em maiúsculas; ref = só o versículo (ex.: Ne 1:2); direcao = 3 a 9 palavras, no formato \"<Palavra-chave> é ...\", é a FRASE QUE LIGA O VERSÍCULO AO TEMA; ligacao = a FRASE QUE INTERLIGA OS TÓPICOS: uma frase curta no formato \"Quem <faz a chave deste tópico>... <CHAVE DO PRÓXIMO>\", terminando apontando para a chave do próximo tópico (o último tópico fica com ligacao VAZIA); curiosidade = fato curto, só se tiver certeza; apoio_ref = um versículo de apoio; apoio_palavras = poucas palavras desse versículo para lembrar. pratica VAZIO e subs = []. Uma única parte, com titulo vazio. Preencha tema, palavra_chave, contraponto, referencia, partes e fechamento (uma frase que responde ao tema, com a palavra-chave marcada com **). Deixe introducao, gancho, ilustracao_titulo, ilustracao, abertura_corpo, resumo_verbos, oracao_de, oracao e apoio VAZIOS (apoio = []).' }
 };
 let tipoGuardado = localStorage.getItem('esboco_tipo');
 $('tipo').value = TIPOS[tipoGuardado] ? tipoGuardado : 'expositivo';
@@ -313,7 +323,8 @@ function normalizar(d) {
         .filter(b => b.titulo || b.texto);
       topicos.push({
         chave: s(t.chave).toUpperCase(), direcao: s(t.direcao), ref: s(t.ref), subs,
-        pratica: semMarca(t.pratica), ligacao: semMarca(t.ligacao)
+        pratica: semMarca(t.pratica), ligacao: semMarca(t.ligacao),
+        curiosidade: s(t.curiosidade), apoio_ref: s(t.apoio_ref), apoio_palavras: s(t.apoio_palavras).replace(/^["“”]+|["“”]+$/g, '')
       });
     });
     if (topicos.length) {
@@ -339,10 +350,10 @@ function render(d, rotulo, modo) {
     add(s, 'div', 'ref', d.referencia + ' · ' + rotulo);
     if (d.tema) {
       const f = add(s, 'div', 'fluxo');
-      add(f, 'span', '', 'TEMA: ' + d.tema);
+      add(f, 'span', 't-tema', 'TEMA: ' + d.tema);
       if (kw) {
         add(f, 'b', '', '➜');
-        const pc = add(f, 'span', 'pc', 'PALAVRA-CHAVE: ' + kw);
+        const pc = add(f, 'span', 'pc t-pc', 'PALAVRA-CHAVE: ' + kw);
         if (d.contraponto) { tx(pc, ' '); add(pc, 'small', '', '(ou ' + d.contraponto + ')'); }
       }
     }
@@ -351,10 +362,18 @@ function render(d, rotulo, modo) {
       k++;
       const box = add(s, 'div', 'top');
       add(box, 'div', 'num', String(k));
-      const l1 = add(box, 'div', 'linha1');
+      const c = add(box, 'div');
+      const l1 = add(c, 'div', 'linha1');
       add(l1, 'span', 'chave', t.chave);
-      if (t.direcao) add(l1, 'span', 'dir', t.direcao);
+      if (t.direcao) add(l1, 'span', 'dir t-tema', t.direcao);
       add(l1, 'span', 'vers', t.ref);
+      if (t.curiosidade) add(c, 'div', 't-cur', 'Curiosidade: ' + t.curiosidade);
+      if (t.apoio_ref) {
+        const ap = add(c, 'div', 't-apoio');
+        tx(ap, 'Apoio: ' + t.apoio_ref + ' ');
+        if (t.apoio_palavras) add(ap, 'span', 't-azul', t.apoio_palavras);
+      }
+      if (t.ligacao) add(c, 'div', 't-lig', '↓ ' + t.ligacao);
     }));
     if (d.fechamento) {
       const fe = add(s, 'div', 'bloco fecho');
