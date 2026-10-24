@@ -79,6 +79,57 @@
   .t-apoio { font-size:12px; color:#222; margin-top:2px; }
   .t-azul { font-size:10px; font-style:italic; color:#1a40cc; }
   .t-lig { font-size:13px; font-weight:bold; color:#cc0000; margin-top:3px; }
+
+  /* ===== Editor manual (1 folha) ===== */
+  #saida.ed { display:block; }
+  .ed-barra { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:8px; }
+  .ed-barra button { margin-top:0; padding:9px 12px; font-size:14px; background:#fff; color:#111; border:2px solid #111; border-radius:8px; }
+  .ed-barra button.ed-prin { background:#111; color:#fff; font-weight:bold; }
+  .ed-barra button:active { background:#ccc; color:#111; }
+  .ed-dica { text-align:center; font-size:12px; color:#444; margin-bottom:10px; }
+  .ed-folha { border:1px solid #999; background:#fff; max-width:14cm; margin:0 auto 24px; padding:20px 18px 26px;
+    font-family: Verdana, "DejaVu Sans", Arial, sans-serif; font-size: var(--edfss, 16px); line-height:1.3; color:#000; }
+  .ed-titulo { font-size:1.4em; font-weight:bold; text-align:center; }
+  .ed-ref { text-align:center; font-size:.85em; margin:4px 0 6px; }
+  .ed-tema { text-align:center; font-weight:bold; margin:0 0 8px; }
+  .ed-hr { border:0; border-top:2px solid #000; margin:10px 0 16px; }
+  .ed-folha [contenteditable] { outline:none; border-radius:3px; min-width:1ch; }
+  .ed-folha [contenteditable]:hover { background:#f2f2f2; }
+  .ed-folha [contenteditable]:focus { background:#fff6bf; }
+  .ed-folha [contenteditable]:empty::before { content:attr(data-ph); color:#999; font-weight:normal; }
+  .ed-item { position:relative; margin-bottom:14px; padding-right:96px; break-inside:avoid; }
+  .ed-linha { display:flex; align-items:baseline; flex-wrap:wrap; gap:6px; }
+  .ed-n { font-weight:bold; }
+  .ed-verbo { font-weight:bold; font-size:.85em; }
+  .ed-palavra { font-weight:bold; font-size:1.1em; }
+  .ed-traco { display:inline-block; width:26px; border-top:2px solid #000; align-self:center; }
+  .ed-lig { font-size:.82em; margin:3px 0 0 22px; }
+  .ed-apoio { font-size:.68em; margin:2px 0 0 22px; }
+  .ed-vref { font-weight:bold; }
+  .ed-ctl { position:absolute; right:0; top:0; display:flex; gap:4px; }
+  .ed-ctl button { margin:0; padding:0; width:28px; height:28px; font-size:16px; line-height:1; background:#fff; color:#111; border:1.5px solid #111; border-radius:6px; }
+  .ed-ctl button:active { background:#ccc; }
+  .ed-rodape p { margin:8px 0; }
+  .ed-apelo { display:flex; gap:8px; align-items:flex-end; font-weight:bold; }
+  .ed-apelo .ed-linha-apelo { flex:1; border-bottom:2px solid #000; height:1.2em; }
+  @media (max-width:520px) { .ed-item { padding-right:0; padding-top:34px; } }
+#saida.ed.imp .ed-barra, #saida.ed.imp .ed-dica, #saida.ed.imp .ed-ctl { display:none !important; }
+#saida.ed.imp .ed-folha { box-shadow:none; border:0; margin:0; padding:0; max-width:none; background:#fff; }
+#saida.ed.imp .ed-item { padding:0; margin-bottom:6pt; }
+#saida.ed.imp .ed-hr { margin:5pt 0 8pt; }
+#saida.ed.imp [contenteditable]:hover, #saida.ed.imp [contenteditable]:focus { background:none; }
+#saida.ed.imp [contenteditable]:empty::before { content:''; }
+#saida.ed.imp .ed-vazio { display:none; }
+  @media print {
+    #saida.ed .ed-folha { font-size: var(--edpt, 10pt); }
+    #saida.ed .ed-barra, #saida.ed .ed-dica, #saida.ed .ed-ctl { display:none !important; }
+    #saida.ed .ed-folha { box-shadow:none; border:0; margin:0; padding:0; max-width:none; background:#fff; }
+    #saida.ed .ed-item { padding:0; margin-bottom:6pt; }
+    #saida.ed .ed-hr { margin:5pt 0 8pt; }
+    #saida.ed [contenteditable]:hover, #saida.ed [contenteditable]:focus { background:none; }
+    #saida.ed [contenteditable]:empty::before { content:''; }
+    #saida.ed .ed-vazio { display:none; }
+  }
   @media print { .form, .rodape { display:none !important; } body { padding:0; } .folha { max-width:none; margin:0; } #saida { break-inside:avoid; page-break-inside:avoid; } }
 </style>
 </head>
@@ -98,6 +149,7 @@
       <option value="textual">Textual — só as ideias principais do texto</option>
       <option value="limpo">Limpo e objetivo — 2 subtópicos por ponto</option>
       <option value="tonicas">Palavras tônicas — uma palavra por versículo</option>
+      <option value="folha">Palavras tônicas em 1 folha — verbo + palavra forte (14 x 22 cm)</option>
     </select>
     <label for="passagem">Texto dos versículos (opcional, deixa o esboço mais fiel)</label>
     <textarea id="passagem" placeholder="Cole aqui os versículos da sua Bíblia, se quiser"></textarea>
@@ -219,18 +271,18 @@ PRINCÍPIOS OBRIGATÓRIOS
 
 14. MARCAÇÃO: o sinal ** só pode aparecer no gancho e no fechamento, uma vez em cada, na palavra-chave. Em nenhum outro campo.
 
-15. CAMPOS EXTRAS (só no tipo PALAVRAS TÔNICAS; nos outros tipos ficam vazios): curiosidade = um fato curto (até 12 palavras) sobre o versículo ou o cenário, ligado ao tema; só use fato que você sabe ter certeza (lugar, nome, significado, época, costume do texto); na dúvida, deixe vazio. apoio_ref = um versículo de apoio de outro trecho da Bíblia, que você conhece bem e que realmente reforça a ideia do tópico. apoio_palavras = de 3 a 6 palavras que aparecem nesse versículo de apoio, na tradução Almeida, só para lembrar o versículo, sem aspas; na dúvida, deixe vazio.
+15. CAMPOS EXTRAS (só nos tipos PALAVRAS TÔNICAS e 1 FOLHA; nos outros tipos ficam vazios; o campo verbo só existe no tipo 1 FOLHA): curiosidade = um fato curto (até 12 palavras) sobre o versículo ou o cenário, ligado ao tema; só use fato que você sabe ter certeza (lugar, nome, significado, época, costume do texto); na dúvida, deixe vazio. apoio_ref = um versículo de apoio de outro trecho da Bíblia, que você conhece bem e que realmente reforça a ideia do tópico. apoio_palavras = de 3 a 6 palavras que aparecem nesse versículo de apoio, na tradução Almeida, só para lembrar o versículo, sem aspas; na dúvida, deixe vazio.
 
 TIPOS DE ESBOÇO (o pedido informa qual usar; o formato do JSON é o mesmo para todos):
 - EXPOSITIVO: cubra a passagem do começo ao fim, na ordem, juntando versículos vizinhos. 5 a 8 tópicos (máximo 9).
 - TEMÁTICO: parta do tema; o texto principal é a base e versículos de outros livros dão apoio. 3 a 5 tópicos; o ref de cada tópico pode ser de outro livro. 1 ou 2 partes bastam.
 - TEXTUAL: tire do texto só as ideias principais, na ordem. 3 a 4 tópicos. 1 ou 2 partes bastam.
-- LIMPO E OBJETIVO e PALAVRAS TÔNICAS: seguem exatamente o que o pedido descrever e SUBSTITUEM as regras acima onde forem diferentes (por exemplo, campos que o pedido manda deixar vazios ficam vazios).
+- LIMPO E OBJETIVO, PALAVRAS TÔNICAS e 1 FOLHA: seguem exatamente o que o pedido descrever e SUBSTITUEM as regras acima onde forem diferentes (por exemplo, campos que o pedido manda deixar vazios ficam vazios).
 
 NÃO FAÇA: tese; apelo (o apelo é do pastor); transcrição de versículos; parágrafos longos; perguntas no gancho; quebra-gelo, piadas ou humor; jargão teológico; texto em markdown.
 
 SAÍDA: responda SOMENTE com JSON válido, sem explicações e sem marcas de código, exatamente com estes campos (os campos de texto sem conteúdo ficam como ""):
-{"tema":"","palavra_chave":"","contraponto":"","referencia":"","introducao":"","gancho":"","ilustracao_titulo":"","ilustracao":"","abertura_corpo":"","partes":[{"titulo":"","nota":"","topicos":[{"chave":"","direcao":"","ref":"","subs":[{"titulo":"","texto":"","ref":""},{"titulo":"","texto":"","ref":""}],"pratica":"","ligacao":"","curiosidade":"","apoio_ref":"","apoio_palavras":""}]}],"fechamento":"","resumo_verbos":"","oracao_de":"","oracao":"","apoio":[{"ref":"","ideia":""}]}
+{"tema":"","palavra_chave":"","contraponto":"","referencia":"","introducao":"","gancho":"","ilustracao_titulo":"","ilustracao":"","abertura_corpo":"","partes":[{"titulo":"","nota":"","topicos":[{"chave":"","verbo":"","direcao":"","ref":"","subs":[{"titulo":"","texto":"","ref":""},{"titulo":"","texto":"","ref":""}],"pratica":"","ligacao":"","curiosidade":"","apoio_ref":"","apoio_palavras":""}]}],"fechamento":"","resumo_verbos":"","oracao_de":"","oracao":"","apoio":[{"ref":"","ideia":""}]}
 
 EXEMPLO DE FORMATO E NÍVEL (tipo: expositivo; texto: Neemias 1:1-11; tema: A dor do outro chegou na minha casa). Imite o formato, o tamanho e a qualidade. NUNCA copie o conteúdo, a palavra-chave nem as chaves deste exemplo:
 ` + JSON.stringify(EXEMPLO);
@@ -253,6 +305,7 @@ const TIPOS = {
   limpo:      { nome: 'Limpo e objetivo', modo: 'limpo', regra: 'LIMPO E OBJETIVO: esboço bem enxuto. Cubra a passagem na ordem, em 4 a 6 tópicos. Cada tópico com chave, direcao curta, ref e EXATAMENTE 2 subs; cada sub só com titulo curto (2 a 5 palavras) e ref. Deixe texto de sub, pratica e ligacao VAZIOS. Deixe ilustracao_titulo, ilustracao, oracao_de e oracao VAZIOS. Introdução em 1 frase, gancho em 2 frases curtas.' },
   tonicas:    { nome: 'Palavras tônicas', modo: 'tonicas', regra: 'PALAVRAS TÔNICAS: um tópico para cada versículo do texto, na ordem. Em cada tópico: chave = a palavra tônica (a mais marcante) do versículo, em maiúsculas; ref = só o versículo (ex.: Ne 1:2); direcao = 3 a 9 palavras, no formato \"<Palavra-chave> é ...\", é a FRASE QUE LIGA O VERSÍCULO AO TEMA; ligacao = a FRASE QUE INTERLIGA OS TÓPICOS: uma frase curta no formato \"Quem <faz a chave deste tópico>... <CHAVE DO PRÓXIMO>\", terminando apontando para a chave do próximo tópico (o último tópico fica com ligacao VAZIA); curiosidade = fato curto, só se tiver certeza; apoio_ref = um versículo de apoio; apoio_palavras = poucas palavras desse versículo para lembrar. pratica VAZIO e subs = []. Uma única parte, com titulo vazio. Preencha tema, palavra_chave, contraponto, referencia, partes e fechamento (uma frase que responde ao tema, com a palavra-chave marcada com **). Deixe introducao, gancho, ilustracao_titulo, ilustracao, abertura_corpo, resumo_verbos, oracao_de, oracao e apoio VAZIOS (apoio = []).' }
 };
+TIPOS.folha = { nome: '1 folha', modo: 'folha', regra: '1 FOLHA (PALAVRAS TÔNICAS COM VERBO): um tópico para cada versículo do texto, na ordem, em uma única parte com titulo vazio. Em cada tópico: chave = a palavra tônica do versículo, em maiúsculas, a mais marcante E a mais ligada ao tema (a palavra deve vir do próprio versículo); verbo = UM verbo curto no presente, em maiúsculas, que diz o que a pessoa do texto FAZ naquele ponto; os verbos, lidos em sequência, contam a história de ação do texto (ex.: SAI, PERGUNTA, VÊ, CHORA, ORA, ORA, AGE; pode repetir o verbo quando vários versículos são a mesma ação, como numa oração); ref = só o versículo (ex.: Ne 1:2); direcao = frase curtíssima (3 a 8 palavras) no formato \"<Palavra-chave do tema> é ...\", que liga o versículo ao tema; ligacao = frase curta no formato \"Quem <faz a ação deste tópico>... <CHAVE DO PRÓXIMO>\", apontando para a chave do próximo tópico (o último tópico fica com ligacao VAZIA); apoio_ref = um versículo de apoio de OUTRO trecho da Bíblia, que você conhece bem e que reforça a ideia do tópico; apoio_palavras = o trecho CURTO desse versículo de apoio (de 4 a 9 palavras, tradução Almeida), sem aspas, só se tiver certeza do texto; na dúvida, deixe vazio. curiosidade, pratica VAZIOS e subs = []. Preencha tema, palavra_chave, contraponto (a atitude oposta, em poucas palavras), referencia, partes e fechamento (uma frase que responde ao tema, com a palavra-chave marcada com **). Deixe introducao, gancho, ilustracao_titulo, ilustracao, abertura_corpo, resumo_verbos, oracao_de, oracao e apoio VAZIOS (apoio = []).' };
 let tipoGuardado = localStorage.getItem('esboco_tipo');
 $('tipo').value = TIPOS[tipoGuardado] ? tipoGuardado : 'expositivo';
 $('tipo').addEventListener('change', () => localStorage.setItem('esboco_tipo', $('tipo').value));
@@ -267,6 +320,7 @@ aplicarDetalhes();
 
 /* Folha para a Bíblia: 14 cm x 22 cm (área útil 13 x 21 cm). Ao imprimir, ajusta o tamanho para caber em UMA folha. */
 function caberNaFolha() {
+  if (modoEditor) { caberEditor(); return; }
   const sd = $('saida');
   if (!sd || sd.style.display === 'none') return;
   const ref = document.createElement('div');
@@ -282,7 +336,7 @@ function caberNaFolha() {
     if (sd.getBoundingClientRect().height <= A * pxmm) break;
   }
 }
-function soltarFolha() { const sd = $('saida'); if (sd) { sd.style.zoom = ''; sd.style.width = ''; } }
+function soltarFolha() { if (modoEditor) { soltarEditor(); return; } const sd = $('saida'); if (sd) { sd.style.zoom = ''; sd.style.width = ''; } }
 window.addEventListener('beforeprint', caberNaFolha);
 window.addEventListener('afterprint', soltarFolha);
 
@@ -344,7 +398,7 @@ function normalizar(d) {
         .filter(b => b.titulo || b.texto);
       topicos.push({
         chave: s(t.chave).toUpperCase(), direcao: s(t.direcao), ref: s(t.ref), subs,
-        pratica: semMarca(t.pratica), ligacao: semMarca(t.ligacao),
+        pratica: semMarca(t.pratica), ligacao: semMarca(t.ligacao), verbo: s(t.verbo).toUpperCase(),
         curiosidade: s(t.curiosidade), apoio_ref: s(t.apoio_ref), apoio_palavras: s(t.apoio_palavras).replace(/^["“”]+|["“”]+$/g, '')
       });
     });
@@ -364,7 +418,8 @@ function normalizar(d) {
 
 /* ---------- Desenho do esboço ---------- */
 function render(d, rotulo, modo) {
-  const s = $('saida'); s.innerHTML = '';
+  if (modo === 'folha') { montarFolha(d); return; }
+  const s = $('saida'); s.innerHTML = ''; sairEditor();
   const kw = d.palavra_chave;
   document.querySelector('.folha').classList.toggle('limpo', modo === 'limpo');
   if (modo === 'tonicas') {
@@ -476,6 +531,234 @@ function render(d, rotulo, modo) {
   $('rodape').style.display = 'block';
 }
 
+/* ---------- Editor manual: escrever e editar à mão (1 folha, 14 x 22 cm) ---------- */
+let modoEditor = false, ED = null;
+const ED_CHAVE = 'esboco_editor_v1';
+const ED_EXEMPLO = {
+  fs: 10,
+  titulo: 'A Dor do Outro Chegou na Minha Casa',
+  ref: 'Neemias 1:1-11',
+  tema: 'ACOLHER ou FECHAR A PORTA',
+  fech: 'A dor do outro chegou na minha casa: eu escolho ACOLHER.',
+  apelo: '',
+  itens: [
+    {verbo:'SAI', palavra:'FORTALEZA', frase:'é sair do conforto', lig:'Quem sai do conforto... PERGUNTA', vref:'Tg 4:17', vtxt:'sabe fazer o bem e não o faz'},
+    {verbo:'PERGUNTA', palavra:'PERGUNTEI', frase:'é perguntar para ajudar', lig:'Quem pergunta com amor... ENXERGA', vref:'Fp 2:4', vtxt:'cada qual também o que é dos outros'},
+    {verbo:'VÊ', palavra:'MISÉRIA', frase:'é cobrir a vergonha do outro', lig:'Quem enxerga com respeito... CHORA', vref:'Lc 10:33', vtxt:'vendo-o, compadeceu-se dele'},
+    {verbo:'CHORA', palavra:'CHOREI', frase:'é chorar com quem chora', lig:'Quem chora com o outro... levanta os olhos ao GRANDE', vref:'Rm 12:15', vtxt:'chorai com os que choram'},
+    {verbo:'ORA', palavra:'GRANDE', frase:'é levar a dor a Deus', lig:'Quem vê a grandeza de Deus... CONFESSA', vref:'Jr 32:17', vtxt:'nada há demasiadamente difícil para ti'},
+    {verbo:'ORA', palavra:'CONFESSO', frase:'é ficar ao lado, nunca acima', lig:'Quem se põe ao lado... confessa: CORRUPTAMENTE', vref:'Sl 32:5', vtxt:'confessei-te o meu pecado'},
+    {verbo:'ORA', palavra:'CORRUPTAMENTE', frase:'é admitir o erro sem desculpa', lig:'Quem admite o erro... LEMBRA-TE', vref:'Pv 28:13', vtxt:'o que as confessa e deixa alcançará misericórdia'},
+    {verbo:'ORA', palavra:'LEMBRA-TE', frase:'é oferecer esperança na promessa', lig:'Quem agarra a promessa... CONVERTE', vref:'Dt 30:3', vtxt:'o Senhor teu Deus mudará a tua sorte'},
+    {verbo:'ORA', palavra:'CONVERTERDES', frase:'é abrir o caminho de volta', lig:'Quem volta a Deus... lembra o RESGATASTE', vref:'2Cr 7:14', vtxt:'se o meu povo se humilhar e orar'},
+    {verbo:'ORA', palavra:'RESGATASTE', frase:'é lembrar de onde Deus me tirou', lig:'Quem lembra o resgate... serve como COPEIRO', vref:'1Pe 2:10', vtxt:'agora sois povo de Deus'},
+    {verbo:'AGE', palavra:'COPEIRO', frase:'é pôr o que Deus me deu a serviço', lig:'', vref:'Is 6:8', vtxt:'eis-me aqui, envia-me a mim'}
+  ]
+};
+function edVazio() { return {verbo:'', palavra:'', frase:'', lig:'', vref:'', vtxt:''}; }
+function edCopia(o) { return JSON.parse(JSON.stringify(o)); }
+function edSalvar() { try { localStorage.setItem(ED_CHAVE, JSON.stringify(ED)); } catch (e) {} }
+function edCarregar() {
+  try {
+    const t = localStorage.getItem(ED_CHAVE);
+    if (t) { const o = JSON.parse(t); if (o && Array.isArray(o.itens) && o.itens.length) return o; }
+  } catch (e) {}
+  return edCopia(ED_EXEMPLO);
+}
+function paginaAjustar(on) {
+  let st = $('pgstyle');
+  if (!st) { st = document.createElement('style'); st.id = 'pgstyle'; document.head.appendChild(st); }
+  st.textContent = on ? '@page { size: 14cm 22cm; margin: 5mm; }' : '';
+}
+function sairEditor() {
+  modoEditor = false;
+  const s = $('saida'); s.classList.remove('ed'); s.classList.remove('imp');
+  paginaAjustar(false);
+}
+function edCampo(cls, ph, valor, aoMudar, tag) {
+  const e = el(tag || 'span', cls, valor || '');
+  e.setAttribute('contenteditable', 'true'); e.setAttribute('data-ph', ph);
+  e.addEventListener('input', () => { aoMudar(e.textContent); edSalvar(); edMarcar(); });
+  e.addEventListener('keydown', ev => { if (ev.key === 'Enter') { ev.preventDefault(); e.blur(); } });
+  e.addEventListener('paste', ev => {
+    ev.preventDefault();
+    const t = (ev.clipboardData || window.clipboardData).getData('text').replace(/\s+/g, ' ');
+    document.execCommand('insertText', false, t);
+  });
+  return e;
+}
+function edBtn(pai, txt, titulo, fn, cls) {
+  const b = add(pai, 'button', cls || '', txt); b.type = 'button'; b.title = titulo; b.onclick = fn; return b;
+}
+function edAplicarTam() {
+  const fs = ED.fs || 10, s = $('saida');
+  s.style.setProperty('--edfss', (fs * 1.6) + 'px');
+  s.style.setProperty('--edpt', fs + 'pt');
+}
+function edTam(d) { ED.fs = Math.max(6, Math.min(16, (ED.fs || 10) + d)); edSalvar(); edAplicarTam(); }
+
+/* Converte o esboço gerado pela IA para a folha de 1 página (verbo + palavra forte) */
+function montarFolha(d) {
+  const kw = d.palavra_chave || '';
+  const topicos = [];
+  d.partes.forEach(p => p.topicos.forEach(t => topicos.push(t)));
+  const titulo = (d.tema || '').replace(/^./, c => c.toUpperCase());
+  const tema = kw ? (kw + (d.contraponto ? ' ou ' + d.contraponto.toUpperCase() : '')) : '';
+  ED = {
+    fs: 10,
+    titulo: titulo,
+    ref: d.referencia || '',
+    tema: tema,
+    fech: (d.fechamento || '').replace(/\*\*/g, ''),
+    apelo: '',
+    itens: topicos.map(t => ({
+      verbo: t.verbo || '',
+      palavra: t.chave,
+      frase: (t.direcao || '').replace(/^[^\s]+\s+(?=é\s)/i, ''),
+      lig: t.ligacao || '',
+      vref: t.apoio_ref || '',
+      vtxt: t.apoio_palavras || ''
+    }))
+  };
+  edSalvar();
+  abrirEditor(ED);
+}
+
+function abrirEditor(estado) {
+  modoEditor = true;
+  ED = estado || edCarregar();
+  const s = $('saida'); s.innerHTML = ''; s.classList.add('ed');
+  paginaAjustar(true);
+  $('msg').className = 'msg'; $('msg').textContent = '';
+
+  const barra = add(s, 'div', 'ed-barra');
+  edBtn(barra, '🖨 Imprimir', 'Imprimir ou salvar em PDF', () => window.print(), 'ed-prin');
+  edBtn(barra, '＋ Tópico', 'Acrescentar tópico', edAdd);
+  edBtn(barra, 'A −', 'Letra menor', () => edTam(-0.5));
+  edBtn(barra, 'A ＋', 'Letra maior', () => edTam(0.5));
+  edBtn(barra, '💾 Salvar arquivo', 'Baixar o esboço como arquivo', edBaixar);
+  edBtn(barra, '📂 Abrir arquivo', 'Abrir um esboço salvo', () => $('edabrir').click());
+  edBtn(barra, '📄 Novo em branco', 'Começar outro tema', edNovo);
+  const inp = add(s, 'input'); inp.type = 'file'; inp.id = 'edabrir'; inp.accept = '.json,application/json'; inp.style.display = 'none';
+  inp.addEventListener('change', edAbrirArquivo);
+  add(s, 'div', 'ed-dica', 'Toque em qualquer texto da folha para escrever. Tudo é salvo sozinho neste aparelho. Ao imprimir, o papel é 14 x 22 cm: escolha tamanho real (100%), sem ajustar à página.');
+
+  const f = add(s, 'div', 'ed-folha'); f.id = 'edfolha';
+  [['ed-titulo', 'Título do sermão', 'titulo', 'div'], ['ed-ref', 'Texto bíblico', 'ref', 'div'], ['ed-tema', 'Tema / ideia central', 'tema', 'div']].forEach(c => {
+    f.appendChild(edCampo(c[0], c[1], ED[c[2]], v => { ED[c[2]] = v; }, c[3]));
+  });
+  add(f, 'div', 'ed-hr');
+  const lista = add(f, 'div'); lista.id = 'edlista';
+  add(f, 'div', 'ed-hr');
+  const rod = add(f, 'div', 'ed-rodape');
+  const p = add(rod, 'p'); add(p, 'b', '', 'FECHAMENTO: ');
+  p.appendChild(edCampo('', 'Frase de fechamento', ED.fech, v => { ED.fech = v; }));
+  const ap = add(rod, 'div', 'ed-apelo'); add(ap, 'span', '', 'APELO:');
+  ap.appendChild(edCampo('ed-linha-apelo', '', ED.apelo, v => { ED.apelo = v; }));
+
+  edRender(); edAplicarTam();
+  s.style.display = 'block'; $('rodape').style.display = 'block';
+}
+
+function edRender() {
+  const lista = $('edlista'); lista.innerHTML = '';
+  ED.itens.forEach((it, i) => {
+    const d = add(lista, 'div', 'ed-item');
+    const ctl = add(d, 'div', 'ed-ctl');
+    edBtn(ctl, '↑', 'Subir', () => edMover(i, -1));
+    edBtn(ctl, '↓', 'Descer', () => edMover(i, 1));
+    edBtn(ctl, '✕', 'Apagar tópico', () => edApagar(i));
+    const l1 = add(d, 'div', 'ed-linha');
+    add(l1, 'span', 'ed-n', String(i + 1));
+    l1.appendChild(edCampo('ed-verbo', 'verbo', it.verbo, v => { it.verbo = v; }));
+    l1.appendChild(edCampo('ed-palavra', 'PALAVRA', it.palavra, v => { it.palavra = v; }));
+    add(l1, 'span', 'ed-traco');
+    l1.appendChild(edCampo('', 'frase do ponto', it.frase, v => { it.frase = v; }));
+    const l2 = add(d, 'div', 'ed-lig'); l2.setAttribute('data-v', 'lig');
+    tx(l2, '↓ ');
+    l2.appendChild(edCampo('', 'ligação com o próximo ponto', it.lig, v => { it.lig = v; }));
+    const l3 = add(d, 'div', 'ed-apoio'); l3.setAttribute('data-v', 'apoio');
+    l3.appendChild(edCampo('ed-vref', 'Livro 0:0', it.vref, v => { it.vref = v; }));
+    tx(l3, ' – ');
+    l3.appendChild(edCampo('', 'texto do versículo de apoio', it.vtxt, v => { it.vtxt = v; }));
+  });
+  edMarcar();
+}
+function edMarcar() {
+  const itens = document.querySelectorAll('#edlista .ed-item');
+  itens.forEach((d, i) => {
+    const it = ED.itens[i]; if (!it) return;
+    d.querySelector('[data-v="lig"]').classList.toggle('ed-vazio', !it.lig.trim());
+    d.querySelector('[data-v="apoio"]').classList.toggle('ed-vazio', !(it.vref.trim() || it.vtxt.trim()));
+  });
+}
+function edAdd() {
+  ED.itens.push(edVazio()); edSalvar(); edRender();
+  const cs = document.querySelectorAll('#edlista .ed-item'); const u = cs[cs.length - 1];
+  if (u.scrollIntoView) u.scrollIntoView({ block: 'center' });
+  const p = u.querySelector('.ed-verbo'); if (p) p.focus();
+}
+function edMover(i, d) {
+  const j = i + d; if (j < 0 || j >= ED.itens.length) return;
+  const t = ED.itens[i]; ED.itens[i] = ED.itens[j]; ED.itens[j] = t; edSalvar(); edRender();
+}
+function edApagar(i) {
+  if (!confirm('Apagar o tópico ' + (i + 1) + '?')) return;
+  ED.itens.splice(i, 1); if (!ED.itens.length) ED.itens.push(edVazio());
+  edSalvar(); edRender();
+}
+function edNovo() {
+  if (!confirm('Começar um esboço em branco? O que está na tela será apagado (salve o arquivo antes, se quiser guardar).')) return;
+  ED = { fs: ED.fs || 10, titulo: '', ref: '', tema: '', fech: '', apelo: '', itens: [edVazio()] };
+  edSalvar(); abrirEditor(ED);
+}
+function edExemplo() {
+  if (!confirm('Voltar ao exemplo (Neemias)? O que está na tela será substituído.')) return;
+  ED = edCopia(ED_EXEMPLO); edSalvar(); abrirEditor(ED);
+}
+function edBaixar() {
+  const nome = (ED.titulo || 'esboco').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '') || 'esboco';
+  const b = new Blob([JSON.stringify(ED, null, 1)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = nome + '.json';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function edAbrirArquivo(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const o = JSON.parse(r.result);
+      if (!o || !Array.isArray(o.itens)) throw 0;
+      o.itens = o.itens.map(x => { const v = edVazio(); for (const k in v) v[k] = String((x && x[k]) || ''); return v; });
+      if (!o.itens.length) o.itens.push(edVazio());
+      ['titulo', 'ref', 'tema', 'fech', 'apelo'].forEach(k => { o[k] = String(o[k] || ''); });
+      o.fs = Number(o.fs) || 10;
+      ED = o; edSalvar(); abrirEditor(ED);
+    } catch (err) { alert('Este arquivo não é um esboço válido.'); }
+  };
+  r.readAsText(f); e.target.value = '';
+}
+/* Impressão: reduz a letra, se precisar, para caber em UMA folha de 14 x 22 cm */
+function caberEditor() {
+  const f = $('edfolha'), s = $('saida'); if (!f) return;
+  s.classList.add('imp');
+  const ref = document.createElement('div');
+  ref.style.cssText = 'position:absolute;visibility:hidden;height:0;width:100mm';
+  document.body.appendChild(ref);
+  const pxmm = ref.getBoundingClientRect().width / 100; ref.remove();
+  f.style.width = '130mm';
+  let fs = ED.fs || 10;
+  for (; fs >= 6; fs -= 0.25) {
+    f.style.fontSize = fs + 'pt';
+    if (f.getBoundingClientRect().height <= 208 * pxmm) break;
+  }
+}
+function soltarEditor() {
+  const f = $('edfolha'), s = $('saida');
+  s.classList.remove('imp');
+  if (f) { f.style.width = ''; f.style.fontSize = ''; }
+}
+
 /* ---------- Conversa com a IA ---------- */
 function lerJSON(txt) {
   let t = (txt || '').trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
@@ -579,6 +862,7 @@ $('gerar').addEventListener('click', async () => {
     btn.disabled = false;
   }
 });
+
 </script>
 </body>
 </html>
