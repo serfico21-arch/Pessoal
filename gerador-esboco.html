@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Gerador de Esboço de Sermão</title>
 <style>
-  @page { size: A4; margin: 12mm; }
+  @page { size: 140mm 220mm; margin: 5mm; }
   * { box-sizing: border-box; }
   body { background:#fff; color:#111; font-family: Arial, Helvetica, sans-serif; margin:0; padding:16px; line-height:1.3; }
   .folha { max-width: 780px; margin: 0 auto; }
@@ -79,7 +79,7 @@
   .t-apoio { font-size:12px; color:#222; margin-top:2px; }
   .t-azul { font-size:10px; font-style:italic; color:#1a40cc; }
   .t-lig { font-size:13px; font-weight:bold; color:#cc0000; margin-top:3px; }
-  @media print { .form, .rodape { display:none !important; } body { padding:0; } }
+  @media print { .form, .rodape { display:none !important; } body { padding:0; } .folha { max-width:none; margin:0; } #saida { break-inside:avoid; page-break-inside:avoid; } }
 </style>
 </head>
 <body>
@@ -116,7 +116,7 @@
     </div>
     <label style="font-weight:normal"><input id="detalhes" type="checkbox" style="width:auto"> Mostrar detalhes (ilustração, passos práticos, ligações, oração)</label>
     <div id="msg" class="msg" role="status"></div>
-    <div class="peq">Sem tema, a IA cria um. Sempre confira os versículos de apoio na sua Bíblia antes de pregar. Chave grátis em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>.</div>
+    <div class="peq">Sem tema, a IA cria um. Sempre confira os versículos de apoio na sua Bíblia antes de pregar. Ao imprimir, o esboço sai em uma folha de 14 x 22 cm (escolha tamanho real, sem ajustar à página). Chave grátis em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>.</div>
   </div>
 
   <div id="saida"></div>
@@ -264,6 +264,27 @@ const detGuardado = localStorage.getItem('esboco_detalhes');
 $('detalhes').checked = (detGuardado === null || detGuardado === '1');
 $('detalhes').addEventListener('change', aplicarDetalhes);
 aplicarDetalhes();
+
+/* Folha para a Bíblia: 14 cm x 22 cm (área útil 13 x 21 cm). Ao imprimir, ajusta o tamanho para caber em UMA folha. */
+function caberNaFolha() {
+  const sd = $('saida');
+  if (!sd || sd.style.display === 'none') return;
+  const ref = document.createElement('div');
+  ref.style.cssText = 'position:absolute;visibility:hidden;height:0;width:100mm';
+  document.body.appendChild(ref);
+  const pxmm = ref.getBoundingClientRect().width / 100;
+  ref.remove();
+  const L = 130, A = 210;
+  let z = 1.4;
+  for (; z >= 0.35; z -= 0.02) {
+    sd.style.zoom = z;
+    sd.style.width = (L / z) + 'mm';
+    if (sd.getBoundingClientRect().height <= A * pxmm) break;
+  }
+}
+function soltarFolha() { const sd = $('saida'); if (sd) { sd.style.zoom = ''; sd.style.width = ''; } }
+window.addEventListener('beforeprint', caberNaFolha);
+window.addEventListener('afterprint', soltarFolha);
 
 function el(tag, cls, txt) {
   const e = document.createElement(tag);
