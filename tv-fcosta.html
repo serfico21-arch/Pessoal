@@ -207,7 +207,7 @@ html,body{max-width:100%;overflow-x:hidden}
   <label for="fi">Foto de capa (opcional)</label><input type="file" id="fi" accept="image/*">
   <div class="hint">Se não escolher, a capa é um quadro do próprio vídeo MP4. Aparece no WhatsApp quando você compartilha o link, após “Publicar p/ todos”.</div>
   <label for="ff">Vídeo MP4 (do computador ou celular)</label><input type="file" id="ff" accept="video/mp4,.mp4">
-  <div class="hint" id="fh">Tamanho máximo: 100 MB por vídeo (cerca de 6 min em 720p comprimido). Depois de salvar, toque em “Publicar p/ todos” e suba os arquivos no GitHub. Acima de 25 MB use o GitHub Desktop.</div>
+  <div class="hint" id="fh">Tamanho máximo: 60 MB por vídeo (cerca de 3 min em 720p comprimido). Depois de salvar, toque em “Publicar p/ todos”: o vídeo vai direto para o site e depois abrem as redes para enviar. Na primeira vez o navegador pede o token do GitHub.</div>
   <label class="chk"><input type="checkbox" id="fv"> Vídeo vertical (gravado em pé no celular)</label>
   <div class="acts"><button class="b p" id="save">Salvar vídeo</button><button class="b" id="cancel">Cancelar</button></div>
 </div>
@@ -404,7 +404,7 @@ function show(){
   btn(a,'📤 Compartilhar vídeo','p',function(){openShare(L,cur.t,cur.p.k==='local');});
   btn(a,'⤢ Ajustar tela','mo',function(){FIT=!FIT;sc.classList.toggle('fit',FIT);});
   var o=document.createElement('a');o.className='b';o.textContent={yt:'▶ Assistir no YouTube',vm:'▶ Assistir no Vimeo'}[cur.p.k]||'Abrir no site de origem';o.href=cur.p.open;o.target='_blank';o.rel='noopener';if(cur.p.k!=='local'&&cur.p.k!=='file')a.appendChild(o);
-  if(cur.p.k==='local'){var nt=document.createElement('div');nt.style.cssText='flex:1 1 100%;grid-column:1/-1;font-size:.72rem;color:#c9b77f;line-height:1.5';nt.textContent='📁 Vídeo salvo só neste aparelho por enquanto. Para os clientes assistirem, toque em Publicar p/ todos e suba o ZIP no GitHub.';a.appendChild(nt);}
+  if(cur.p.k==='local'){var nt=document.createElement('div');nt.style.cssText='flex:1 1 100%;grid-column:1/-1;font-size:.72rem;color:#c9b77f;line-height:1.5';nt.textContent='📁 Vídeo salvo só neste aparelho por enquanto. Para os clientes assistirem, toque em Publicar p/ todos: o vídeo vai direto para o site.';a.appendChild(nt);}
   if(ED&&!cur.sh&&cur.p.k!=='local'){var pid=cur.p.id;btn(a,'🖼 Foto da prévia','',function(){var i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=function(){var f=i.files[0];if(!f)return;savePhoto(f,pid,function(ok){toast(ok?'Foto guardada! Toque em Publicar p/ todos.':'Não foi possível guardar a foto.');if(ok)show();});};i.click();});}
   if(ED&&!cur.sh)btn(a,'✏️ Editar dados','',function(){openEdit(cur);});
   if(ED&&!cur.sh)btn(a,'🗑 Remover','r',function(){
@@ -412,6 +412,13 @@ function show(){
     if(!cur.loc){var dl=loadDel();dl.push(cur.p.id);saveDel(dl);}if(cur.p.k==='local')idbDel(cur.p.lid);saveLocal(loadLocal().filter(function(x){return parse(x.u).id!==cur.p.id;}));history.replaceState(null,'',location.pathname+location.search);render();toast('Vídeo removido.');
   });
 }
+function videoBlob(v,cb){
+  if(v.p.k==='local')return idbGet(v.p.lid,cb);
+  if(v.p.k==='file'){fetch(v.p.emb).then(function(r){return r.ok?r.blob():null;}).then(cb,function(){cb(null);});return;}
+  cb(null);
+}
+function canFiles(){try{return !!(navigator.canShare&&navigator.share&&navigator.canShare({files:[new File(['x'],'a.mp4',{type:'video/mp4'})]}));}catch(e){return false;}}
+function fileOf(bl,t){var ext=/webm/.test(bl.type)?'webm':'mp4',nm=(t||'video').replace(/[^\wÀ-ÿ\- ]+/g,'').trim().slice(0,40)||'video';return new File([bl],nm+'.'+ext,{type:bl.type||'video/mp4'});}
 function openShare(L,t,loc){
   var tx=(cur?shareTx(cur):t+' — TV FCosta Corretor'),e=encodeURIComponent,n=$('net');n.innerHTML='';
   $('shT').textContent=t;
@@ -424,6 +431,19 @@ function openShare(L,t,loc){
     n.appendChild(el);
   }
   var un=cur&&!cur.sh&&(cur.loc||cur.p.k==='local');
+  if(cur&&(cur.p.k==='local'||cur.p.k==='file')){
+    var vv=cur,pre=null,cf=canFiles();
+    videoBlob(vv,function(b){pre=b;});
+    it(cf?'Enviar o vídeo':'Baixar o vídeo','linear-gradient(135deg,#1e9e55,#46d27f)','📲',{fn:function(){
+      function go(bl){
+        if(!bl){toast('Não consegui abrir o vídeo neste aparelho.');return;}
+        var f=fileOf(bl,vv.t);
+        if(cf){navigator.share({files:[f],title:vv.t,text:shareTx(vv)}).catch(function(e){if(e&&e.name!=='AbortError')toast('Não foi possível abrir o compartilhar.');});closeShare();}
+        else{var a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();toast('Vídeo baixado: envie o arquivo pelo WhatsApp ou outra rede.');closeShare();}
+      }
+      if(pre)go(pre);else{toast('Preparando o vídeo…');videoBlob(vv,go);}
+    }});
+  }
   if(!un){
   if(navigator.share)it('Mais apps','linear-gradient(135deg,#8a6420,#e6c45f)','⋯',{fn:function(){navigator.share({title:t,text:tx,url:L}).catch(function(){});closeShare();}});
   it('WhatsApp','#25D366','✆',{href:'https://wa.me/?text='+e(tx+'\n'+L)});
@@ -474,7 +494,7 @@ $('ff').onchange=function(){var f=this.files[0];if(f&&!$('ft').value.trim())$('f
 $('save').onclick=function(){
   if(EDIT){saveEdit();return;}var f=$('ff').files[0],cv=$('fc').value.trim(),t=$('ft').value.trim(),u=$('fu').value.trim(),vert=$('fv').checked,sv=$('save');
   if(f){
-    if(f.size>100e6){toast('Vídeo com '+Math.round(f.size/1e6)+' MB: o limite é 100 MB (o GitHub não aceita mais que isso). Comprima o vídeo e tente de novo.');return;}
+    if(f.size>60e6){toast('Vídeo com '+Math.round(f.size/1e6)+' MB: o limite é 60 MB para publicar direto no site. Comprima o vídeo e tente de novo.');return;}
     if(!t)t=f.name.replace(/\.[^.]+$/,'');
     var lid=Date.now().toString(36);sv.disabled=true;sv.textContent='Salvando…';
     idbPut(lid,f,function(ok){
@@ -643,15 +663,128 @@ function landingHtml(o,p,img,w,h,pimg,self,main){
   var R={INFO:ea(inf),TITLEH:ea(o.t),META:m,VERT:o.v?' v':'',IMG:ea(pimg),TITLE:ea(o.t),CFG:cfg,MAIN:ea(main),OPEN:ea(p.open),WA:'https://wa.me/5511993509109?text='+encodeURIComponent('Olá! Vi o vídeo "'+o.t+'" na TV FCosta e quero saber mais.')};
   return t.replace(/%%(\w+)%%/g,function(_,k){return R[k]!==undefined?R[k]:'';});
 }
-function pubWarn(c){if(!cur||cur.sh)return;var v=cur;idbGet('img:'+v.p.id,function(bl){var pend=v.loc||(bl&&!/^v-/.test(v.c||''));if(!pend)return;var d=document.createElement('div');d.className='w3';d.innerHTML='Antes de enviar, publique o vídeo para o cliente conseguir abrir.<button class="b p" style="margin-top:8px;width:100%" id="pubNow">📦 Publicar agora</button>';c.insertBefore(d,c.firstChild);$('pubNow').onclick=function(){closeShare();pubFile();};});}
+function pubWarn(c){if(!cur||cur.sh)return;var v=cur;idbGet('img:'+v.p.id,function(bl){var pend=v.loc||(bl&&!/^v-/.test(v.c||''));if(!pend)return;var d=document.createElement('div');d.className='w3';d.innerHTML='Para mandar o <b>link</b> do vídeo, publique primeiro. Ou toque em <b>Enviar o vídeo</b> acima para mandar o arquivo direto.<button class="b p" style="margin-top:8px;width:100%" id="pubNow">📦 Publicar agora</button>';c.insertBefore(d,c.firstChild);$('pubNow').onclick=function(){closeShare();pubFile();};});}
+function toastP(m,ms){var e=$('msg');e.textContent=m;e.classList.add('on');clearTimeout(e._t);if(ms)e._t=setTimeout(function(){e.classList.remove('on');},ms);}
+function ghTarget(){
+  var u=new URL(SHARE_BASE),p=u.pathname.split('/').filter(Boolean),owner=u.hostname.split('.')[0];
+  if(p.length<=1)return{owner:owner,repo:owner+'.github.io',dir:''};
+  return{owner:owner,repo:p[0],dir:p.slice(1,-1).join('/')};
+}
+function ghTokenSaved(){var t='';try{t=localStorage.getItem('tvfc_gh')||'';}catch(e){}return t;}
+function ghToken(){
+  var t=ghTokenSaved();if(t)return t;
+  t=(prompt('Para publicar direto no site (sem ZIP), cole aqui o seu token do GitHub. Só na primeira vez.\n\nComo criar: github.com/settings/personal-access-tokens/new\n• Repository access: só o repositório Pessoal\n• Permissions → Contents: Read and write')||'').trim();
+  if(t){try{localStorage.setItem('tvfc_gh',t);}catch(e){}}
+  return t;
+}
+function ghUrl(path){var T=ghTarget();return 'https://api.github.com/repos/'+T.owner+'/'+T.repo+'/contents/'+((T.dir?T.dir+'/':'')+path).split('/').map(encodeURIComponent).join('/');}
+function ghHead(tok,json){var h={'Authorization':'Bearer '+tok,'Accept':'application/vnd.github+json'};if(json)h['Content-Type']='application/json';return h;}
+function ghStatus(r,t,cb){
+  if(r.status===401)return cb('auth');
+  if(r.status===429||(r.status===403&&(/rate limit|abuse|secondary/i.test(t||'')||r.headers.get('retry-after')||r.headers.get('x-ratelimit-remaining')==='0')))return cb('limite');
+  if(r.status===403)return cb('permissao');
+  cb(null);
+}
+function ghGet(tok,path,cb){
+  fetch(ghUrl(path),{headers:ghHead(tok),cache:'no-store'}).then(function(r){
+    if(r.status===404)return cb(null,'','');
+    if(r.status===401||r.status===403||r.status===429)return r.text().then(function(t){ghStatus(r,t,function(e){cb(e||('get '+r.status));});});
+    if(!r.ok)return cb('get '+r.status);
+    r.json().then(function(j){var t='';try{t=decodeURIComponent(escape(atob((j.content||'').replace(/\s/g,''))));}catch(e){}cb(null,j.sha,t);});
+  }).catch(function(){cb('rede');});
+}
+// SHA-1 no formato do Git ("blob <tamanho>\0<bytes>"): permite pular arquivo que já está igual no GitHub
+function gitSha(d,cb){
+  try{
+    var h=new TextEncoder().encode('blob '+d.length+'\0'),b=new Uint8Array(h.length+d.length);b.set(h,0);b.set(d,h.length);
+    crypto.subtle.digest('SHA-1',b).then(function(x){cb([].map.call(new Uint8Array(x),function(v){return('0'+v.toString(16)).slice(-2);}).join(''));},function(){cb('');});
+  }catch(e){cb('');}
+}
+// converte em base64 aos pedaços (3 MB por vez) para não encher a memória do celular com vídeo grande
+function b64Parts(u8,cb){
+  var parts=[],i=0,CH=3*1024*1024;
+  (function nx(){
+    if(i>=u8.length)return cb(parts);
+    var fr=new FileReader();
+    fr.onerror=function(){cb(null);};
+    fr.onload=function(){var s=String(fr.result);parts.push(s.slice(s.indexOf(',')+1));i+=CH;nx();};
+    fr.readAsDataURL(new Blob([u8.subarray(i,Math.min(i+CH,u8.length))]));
+  })();
+}
+function ghPut(tok,f,sha,cb){
+  b64Parts(f.d,function(parts){
+    if(!parts)return cb('leitura');
+    var body=new Blob(['{"message":'+JSON.stringify('TV FCosta: '+f.n)+(sha?',"sha":"'+sha+'"':'')+',"content":"'].concat(parts,['"}']));
+    parts=null;
+    fetch(ghUrl(f.n),{method:'PUT',headers:ghHead(tok,1),body:body}).then(function(r){
+      if(r.status===200||r.status===201)return cb(null);
+      r.text().then(function(t){
+        if(r.status===409||r.status===422)return cb('conflito');
+        if(r.status===404)return cb('semacesso');
+        ghStatus(r,t,function(e){cb(e||('put '+r.status+' '+String(t).slice(0,100)));});
+      });
+    }).catch(function(){cb('rede');});
+  });
+}
+function ghSend(tok,files,prog,cb){
+  var i=0,pul=0;
+  (function next(){
+    if(i>=files.length)return cb(null,pul);
+    var f=files[i];prog(i+1,files.length,f.n);
+    function enviar(tent){
+      ghGet(tok,f.n,function(err,sha){
+        if(err)return cb(err);
+        function put(){ghPut(tok,f,sha,function(e2){
+          if(e2==='conflito'&&tent<1)return enviar(tent+1);
+          if(e2)return cb(e2);
+          f.d=null;i++;next();
+        });}
+        if(!sha)return put();
+        gitSha(f.d,function(h){if(h&&h===sha){pul++;i++;return next();}put();});
+      });
+    }
+    enviar(0);
+  })();
+}
+function waitLive(url,needle,cb){
+  var t0=Date.now();
+  (function tick(){
+    function again(){if(Date.now()-t0>150000)return cb(false);setTimeout(tick,5000);}
+    fetch(url+(url.indexOf('?')<0?'?':'&')+'x='+Date.now(),{cache:'no-store'}).then(function(r){
+      if(!r.ok)return again();
+      if(!needle)return cb(true);
+      r.text().then(function(t){if(t.indexOf(needle)>=0)cb(true);else again();});
+    }).catch(again);
+  })();
+}
+function pubFail(err){
+  window._pubBusy=false;
+  var m={
+    auth:'O GitHub não aceitou o token (inválido ou vencido). Toque em Publicar e cole um token novo.',
+    permissao:'O token não tem permissão de escrita. Crie outro com Contents: Read and write e toque em Publicar.',
+    semacesso:'O token não tem acesso ao repositório Pessoal. Crie outro token dando acesso a esse repositório.',
+    limite:'O GitHub pediu uma pausa (muitos envios seguidos). Espere 2 minutos e toque em Publicar de novo.',
+    rede:'Sem conexão com a internet. Confira o sinal e toque em Publicar de novo.',
+    naoachei:'Não achei o arquivo tv-fcosta.html no GitHub. Confira se o token tem acesso ao repositório Pessoal.',
+    leitura:'Não consegui ler um dos arquivos neste aparelho. Tente de novo.'
+  };
+  if(err==='auth'||err==='permissao'||err==='semacesso'||err==='naoachei'){try{localStorage.removeItem('tvfc_gh');}catch(e){}}
+  toastP((m[err]||('Não consegui publicar ('+err+').'))+' Nada foi perdido.',9000);
+}
 function pubFile(){
+  if(window._pubBusy){toast('Já estou publicando. Aguarde terminar.');return;}
+  var tok=ghToken(),useZip=false;
+  if(!tok){useZip=confirm('Sem o token do GitHub não dá para publicar direto no site.\n\nOK = baixar o ZIP (envio manual)\nCancelar = parar agora');if(!useZip)return;}
+  window._pubBusy=true;
   var del=loadDel(),fx=VIDEOS.filter(function(v){var p=parse(v.u);return p&&del.indexOf(p.id)<0;}),ids={};
   fx.forEach(function(v){ids[parse(v.u).id]=1;});
   var ad=loadLocal().filter(function(v){var p=parse(v.u);return p&&!ids[p.id];});
   var big=[],conv={},sk=loadLocal().filter(function(v){return /^local:/.test(v.u);}).length;
   var all=fx.concat(ad).map(function(v){var e=loadEds()[parse(v.u).id]||{},o={t:e.t||v.t,u:v.u,v:e.v!==undefined?!!e.v:!!v.v},L=e.l!==undefined?e.l:v.l,PR=e.pr!==undefined?e.pr:v.pr;if(v.c)o.c=v.c;if(v.pc)o.pc=v.pc;if(v.og)o.og=v.og;if(L)o.l=L;if(PR)o.pr=PR;return o;});
   var VS=Date.now().toString(36),main=baseUrl(),B=main.replace(/[^\/]*$/,''),enc=new TextEncoder(),files=[];
-  function push(n,b,cb){var fr=new FileReader();fr.onload=function(){files.push({n:n,d:new Uint8Array(fr.result)});cb();};fr.onerror=function(){cb();};fr.readAsArrayBuffer(b);}
+  function hb(d){var h=2166136261;for(var i=0;i<d.length;i++){h^=d[i];h=Math.imul(h,16777619);}return (h>>>0).toString(36);}
+  function push(n,b,cb){var fr=new FileReader();fr.onload=function(){var d=new Uint8Array(fr.result);files.push({n:n,d:d,h:/\.jpg$/.test(n)?hb(d):''});cb();};fr.onerror=function(){cb();};fr.readAsArrayBuffer(b);}
+  function lh(){var f=files[files.length-1];return (f&&f.h)||VS;}
   function nextImg(i,done){
     if(i>=all.length)return done();
     var o=all[i],p=parse(o.u);if(!p)return nextImg(i+1,done);
@@ -660,9 +793,9 @@ function pubFile(){
       var fn='v-'+hash36(p.lid)+'.'+(/webm/.test(vb.type)?'webm':'mp4');o.oid='l'+p.lid;conv[o.oid]=1;o.u=fn;if(vb.size>25e6)big.push(Math.round(vb.size/1e6));
       push(fn,vb,function(){nextImg(i,done);});});}
     var key=o.oid||p.id,sn='v-'+sid(p);
-    function og(src){bakeOG(src,o,function(b){if(!b)return nextImg(i+1,done);push(sn+'-og.jpg',b,function(){o.og=sn+'-og.jpg?v='+VS;nextImg(i+1,done);});});}
+    function og(src){bakeOG(src,o,function(b){if(!b)return nextImg(i+1,done);push(sn+'-og.jpg',b,function(){o.og=sn+'-og.jpg?v='+lh();nextImg(i+1,done);});});}
     idbGet('img:'+key,function(bl){
-      if(bl){push(sn+'.jpg',bl,function(){o.c=sn+'.jpg?v='+VS;idbGet('pst:'+key,function(pb){if(!pb)return og(bl);push(sn+'-p.jpg',pb,function(){o.pc=sn+'-p.jpg?v='+VS;og(bl);});});});}
+      if(bl){push(sn+'.jpg',bl,function(){o.c=sn+'.jpg?v='+lh();idbGet('pst:'+key,function(pb){if(!pb)return og(bl);push(sn+'-p.jpg',pb,function(){o.pc=sn+'-p.jpg?v='+lh();og(bl);});});});}
       else if(o.c)og(/^https?:\/\//i.test(o.c)?o.c:B+o.c);
       else if(p.k==='yt')og('https://i.ytimg.com/vi/'+p.id+'/maxresdefault.jpg');
       else nextImg(i+1,done);
@@ -690,18 +823,63 @@ function pubFile(){
   function dl(){
     var a=document.createElement('a');a.href=URL.createObjectURL(zipFiles(files));a.download='tv-fcosta-publicar.zip';document.body.appendChild(a);a.click();a.remove();
   }
+  var CFGRE=/\/\*CFG_START\*\/[\s\S]*?\/\*CFG_END\*\//,OGRE=/<!--OG_START-->[\s\S]*?<!--OG_END-->/,KASP=/<script[^>]*kaspersky-labs\.com[^>]*><\/script>\s*/gi,tgt=null;
+  // modo manual (só se a pessoa recusar o token): baixa o ZIP como antes
+  function zipOut(og,cfg){
+    fetch(location.href.split('#')[0].split('?')[0]).then(function(r){return r.text();}).then(function(t){
+      t=t.replace(KASP,'').replace(CFGRE,function(){return cfg;});
+      t=t.replace(OGRE,function(){return og;});
+      files.unshift({n:'tv-fcosta.html',d:enc.encode(t)});dl();
+      saveDel([]);saveEds({});saveLocal(loadLocal().filter(function(v){var q=parse(v.u);return !(q&&conv[q.id]);}));window._pubBusy=false;toast('Zip gerado: suba TODOS os arquivos no GitHub, trocando os antigos.'+(big.length?' ⚠ Vídeo de '+big.join(', ')+' MB: pelo navegador o GitHub aceita até 25 MB por arquivo; acima disso use o GitHub Desktop ou o YouTube.':''));
+    }).catch(function(){dl();copy(cfg);window._pubBusy=false;toast('Baixei só as páginas de prévia (v-….html). Bloco copiado: cole no lugar do bloco CFG do arquivo.');});
+  }
+  // modo direto: envia tudo ao GitHub, sem ZIP, e abre as redes no fim
+  function direto(og){
+    toastP('Preparando a publicação…');
+    ghGet(tok,'tv-fcosta.html',function(err,shaH,remote){
+      if(err)return pubFail(err);
+      if(!remote)return pubFail('naoachei');
+      var have={},pre=[],mm=remote.match(/\/\*CFG_START\*\/\s*var VIDEOS=([\s\S]*?);\s*var EDITOR_HASH/);
+      // junta os vídeos que já estão publicados (talvez enviados de outro aparelho) para não apagar nenhum
+      try{if(!mm)throw 0;var rem=JSON.parse(mm[1]);if(!Array.isArray(rem))throw 0;
+        all.forEach(function(o){var q=parse(o.u);if(q)have[q.id]=1;});
+        rem.forEach(function(o){var q=parse(o.u);if(q&&!have[q.id]&&del.indexOf(q.id)<0){pre.push(o);have[q.id]=1;}});
+      }catch(e){return pubFail('O arquivo tv-fcosta.html do GitHub está fora do formato esperado; por segurança não alterei nada');}
+      all=pre.concat(all);
+      var cfg2='/*CFG_START*/\nvar VIDEOS='+JSON.stringify(all,null,1).replace(/</g,'\\u003c')+';\nvar EDITOR_HASH=\''+EDITOR_HASH+'\';\nvar SHARE_BASE=\''+SHARE_BASE+'\';\n/*CFG_END*/';
+      function montar(tpl){
+        var t=tpl.replace(KASP,'').replace(CFGRE,function(){return cfg2;}).replace(OGRE,function(){return og;});
+        files.push({n:'tv-fcosta.html',d:enc.encode(t)});
+        ghSend(tok,files,function(a,b,n){toastP('Enviando '+a+' de '+b+': '+n+' …');},function(e2){
+          if(e2)return pubFail(e2);
+          saveDel([]);saveEds({});saveLocal(loadLocal().filter(function(v){var q=parse(v.u);return !(q&&conv[q.id]);}));
+          VIDEOS=all;
+          var tp=tgt||all[all.length-1],np=tp?parse(tp.u):null;
+          if(!np){window._pubBusy=false;render();toastP('Publicado!',5000);return;}
+          toastP('Enviado! Aguardando o site atualizar (até 2 min)…');
+          waitLive(SHARE_BASE,tp.u,function(ok){
+            render();location.hash='v-'+np.id;
+            setTimeout(function(){
+              show();window._pubBusy=false;
+              if(cur)openShare(linkOf(cur),cur.t,false);
+              toastP(ok?'Publicado! Escolha a rede para enviar.':'Publicado, mas o site ainda está atualizando: espere 1 minuto antes de enviar.',6000);
+            },150);
+          });
+        });
+      }
+      // se o GitHub ainda tem a versão antiga desta página (sem envio direto), leva a versão nova junto
+      if(remote.indexOf('function ghSend')<0&&/^https?:$/.test(location.protocol)){
+        fetch(location.href.split('#')[0].split('?')[0],{cache:'no-store'}).then(function(r){return r.text();}).then(function(own){montar(own.indexOf('function ghSend')>=0&&CFGRE.test(own)?own:remote);}).catch(function(){montar(remote);});
+      }else montar(remote);
+    });
+  }
   nextImg(0,function(){
-    all=all.filter(function(o){return !o.skip;});all.forEach(function(o){delete o.oid;});
+    all=all.filter(function(o){return !o.skip;});
+    var wantO=cur&&cur.p.k==='local'?'l'+cur.p.lid:'',wantId=cur&&cur.p.k!=='local'?cur.p.id:'';
+    all.forEach(function(o){if(wantO&&o.oid===wantO)tgt=o;else if(!tgt&&wantId){var q=parse(o.u);if(q&&q.id===wantId)tgt=o;}delete o.oid;});
     var cfg='/*CFG_START*/\nvar VIDEOS='+JSON.stringify(all,null,1).replace(/</g,'\\u003c')+';\nvar EDITOR_HASH=\''+EDITOR_HASH+'\';\nvar SHARE_BASE=\''+SHARE_BASE+'\';\n/*CFG_END*/';
     pages(0,function(){
-      ogPick(all,function(og){
-        fetch(location.href.split('#')[0].split('?')[0]).then(function(r){return r.text();}).then(function(t){
-          t=t.replace(/\/\*CFG_START\*\/[\s\S]*?\/\*CFG_END\*\//,function(){return cfg;});
-          t=t.replace(/<!--OG_START-->[\s\S]*?<!--OG_END-->/,function(){return og;});
-          files.unshift({n:'tv-fcosta.html',d:enc.encode(t)});dl();
-          saveDel([]);saveEds({});saveLocal(loadLocal().filter(function(v){var q=parse(v.u);return !(q&&conv[q.id]);}));toast('Zip gerado: suba TODOS os arquivos no GitHub, trocando os antigos.'+(big.length?' ⚠ Vídeo de '+big.join(', ')+' MB: pelo navegador o GitHub aceita até 25 MB por arquivo; acima disso use o GitHub Desktop ou o YouTube.':''));
-        }).catch(function(){dl();copy(cfg);toast('Baixei só as páginas de prévia (v-….html). Bloco copiado: cole no lugar do bloco CFG do arquivo.');});
-      });
+      ogPick(all,function(og){if(useZip)zipOut(og,cfg);else direto(og);});
     });
   });
 }
