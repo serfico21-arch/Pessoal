@@ -118,8 +118,13 @@
   .ed-status.erro { color:#b00020; font-weight:bold; }
   .ed-tradl { text-align:center; font-size:.8em; color:#333; margin-top:2px; }
   .ed-vr { font-size:.75em; color:#444; }
+  .t-verso { font-size:12px; font-style:italic; color:#333; margin-top:2px; }
+  .folha.sem-verso .t-verso { display:none; }
+  .ed-verso { font-size:.8em; font-style:italic; color:#333; margin:1px 0 2px 1.6em; }
+  .ed-verso:empty { display:none; }
+  .ed-verso .hl { font-style:normal; padding:0 2px; }
   @media (max-width:520px) { .ed-item { padding-right:0; padding-top:34px; } }
-#saida.ed.imp .ed-barra, #saida.ed.imp .ed-dica, #saida.ed.imp .ed-ctl, #saida.ed.imp .ed-trad { display:none !important; }
+#saida.ed.imp .ed-barra, #saida.ed.imp .ed-dica, #saida.ed.imp .ed-ctl, #saida.ed.imp .ed-trad, #saida.ed.imp .ed-verso { display:none !important; }
 #saida.ed.imp .ed-folha { box-shadow:none; border:0; margin:0; padding:0; max-width:none; background:#fff; }
 #saida.ed.imp .ed-item { padding:0; margin-bottom:6pt; }
 #saida.ed.imp .ed-hr { margin:5pt 0 8pt; }
@@ -128,7 +133,7 @@
 #saida.ed.imp .ed-vazio { display:none; }
   @media print {
     #saida.ed .ed-folha { font-size: var(--edpt, 10pt); }
-    #saida.ed .ed-barra, #saida.ed .ed-dica, #saida.ed .ed-ctl, #saida.ed .ed-trad { display:none !important; }
+    #saida.ed .ed-barra, #saida.ed .ed-dica, #saida.ed .ed-ctl, #saida.ed .ed-trad, #saida.ed .ed-verso { display:none !important; }
     #saida.ed .ed-folha { box-shadow:none; border:0; margin:0; padding:0; max-width:none; background:#fff; }
     #saida.ed .ed-item { padding:0; margin-bottom:6pt; }
     #saida.ed .ed-hr { margin:5pt 0 8pt; }
@@ -174,6 +179,7 @@
     <div class="botoes">
       <button id="gerar">Gerar esboço</button>
     </div>
+    <label style="font-weight:normal"><input id="vers" type="checkbox" style="width:auto"> Mostrar o versículo (na tradução escolhida) com a palavra tônica destacada</label>
     <label style="font-weight:normal"><input id="detalhes" type="checkbox" style="width:auto"> Mostrar detalhes (ilustração, passos práticos, ligações, oração)</label>
     <div id="msg" class="msg" role="status"></div>
     <div class="peq">Sem tema, a IA cria um. Sempre confira os versículos de apoio na sua Bíblia antes de pregar. Ao imprimir, o esboço sai em uma folha de 14 x 22 cm (escolha tamanho real, sem ajustar à página). Chave grátis em <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>.</div>
@@ -330,7 +336,7 @@ $('tipo').value = TIPOS[tipoGuardado] ? tipoGuardado : 'expositivo';
 $('tipo').addEventListener('change', () => localStorage.setItem('esboco_tipo', $('tipo').value));
 TRADUCOES.forEach(t => { const o = document.createElement('option'); o.value = t[0]; o.textContent = t[1]; $('traducao').appendChild(o); });
 $('traducao').value = tradValida(localStorage.getItem('esboco_traducao'));
-$('traducao').addEventListener('change', () => localStorage.setItem('esboco_traducao', $('traducao').value));
+$('traducao').addEventListener('change', () => { localStorage.setItem('esboco_traducao', $('traducao').value); sugerirRefazer(); });
 function aplicarDetalhes() {
   document.querySelector('.folha').classList.toggle('mais', $('detalhes').checked);
   localStorage.setItem('esboco_detalhes', $('detalhes').checked ? '1' : '');
@@ -339,6 +345,13 @@ const detGuardado = localStorage.getItem('esboco_detalhes');
 $('detalhes').checked = (detGuardado === null || detGuardado === '1');
 $('detalhes').addEventListener('change', aplicarDetalhes);
 aplicarDetalhes();
+function aplicarVers() {
+  document.querySelector('.folha').classList.toggle('sem-verso', !$('vers').checked);
+  localStorage.setItem('esboco_vers', $('vers').checked ? '1' : '0');
+}
+$('vers').checked = localStorage.getItem('esboco_vers') !== '0';
+$('vers').addEventListener('change', aplicarVers);
+aplicarVers();
 
 /* Folha para a Bíblia: 14 cm x 22 cm (área útil 13 x 21 cm). Ao imprimir, ajusta o tamanho para caber em UMA folha. */
 function caberNaFolha() {
@@ -465,6 +478,7 @@ function render(d, rotulo, modo) {
       add(l1, 'span', 'chave', t.chave);
       if (t.direcao) add(l1, 'span', 'dir t-tema', t.direcao);
       add(l1, 'span', 'vers', t.ref);
+      if (t.verso) destacar(add(c, 'div', 't-verso'), t.verso, t.chave);
       if (t.curiosidade) add(c, 'div', 't-cur', 'Curiosidade: ' + t.curiosidade);
       if (t.apoio_ref) {
         const ap = add(c, 'div', 't-apoio');
@@ -554,7 +568,7 @@ function render(d, rotulo, modo) {
 }
 
 /* ---------- Editor manual: escrever e editar à mão (1 folha, 14 x 22 cm) ---------- */
-let modoEditor = false, ED = null;
+let modoEditor = false, ED = null, edVerMostrar = false;
 const ED_CHAVE = 'esboco_editor_v1';
 const ED_EXEMPLO = {
   fs: 10,
@@ -663,6 +677,7 @@ function abrirEditor(estado) {
   edBtn(barra, '＋ Tópico', 'Acrescentar tópico', edAdd);
   edBtn(barra, 'A −', 'Letra menor', () => edTam(-0.5));
   edBtn(barra, 'A ＋', 'Letra maior', () => edTam(0.5));
+  edBtn(barra, '📖 Versículos', 'Mostrar (ou esconder) o versículo de cada ponto na tradução escolhida', () => { edVerMostrar = !edVerMostrar; edRender(); });
   edBtn(barra, '💾 Salvar arquivo', 'Baixar o esboço como arquivo', edBaixar);
   edBtn(barra, '📂 Abrir arquivo', 'Abrir um esboço salvo', () => $('edabrir').click());
   edBtn(barra, '📄 Novo em branco', 'Começar outro tema', edNovo);
@@ -718,8 +733,18 @@ function edRender() {
     l3.appendChild(edCampo('ed-vref', 'Livro 0:0', it.vref, v => { it.vref = v; }));
     tx(l3, ' – ');
     l3.appendChild(edCampo('', 'texto do versículo de apoio', it.vtxt, v => { it.vtxt = v; }));
+    const lv = add(d, 'div', 'ed-verso');
+    if (edVerMostrar && (it.ref || '').trim()) edPreencherVerso(lv, it);
   });
   edMarcar();
+}
+async function edPreencherVerso(lv, it) {
+  lv.textContent = '…';
+  try {
+    const v = await bibVersos(ED.traducao, it.ref);
+    lv.textContent = '';
+    if (v) destacar(lv, v.map(x => x.texto).join(' '), it.palavra);
+  } catch (e) { lv.textContent = '(sem internet para mostrar o versículo)'; }
 }
 function edEtiqueta() {
   const e = $('edtradl'); if (e) e.textContent = 'Tradução: ' + nomeTrad(ED.traducao);
@@ -737,7 +762,7 @@ async function edMudarTraducao(sel) {
   const temTexto = ED.itens.some(it => it.palavra.trim() || it.vtxt.trim());
   const soEtiqueta = () => { ED.traducao = nova; edSalvar(); edEtiqueta(); edStatus(''); };
   if (!temTexto) { soEtiqueta(); return; }
-  if (!confirm('Trocar para a tradução ' + nome + '?\n\nBusco o texto dos versículos na ' + nova + ' e confiro cada palavra tônica e cada versículo de apoio: o que não existir nessa tradução é trocado. As frases e as ligações são mantidas.' + (chave ? '' : '\n\n(Sem a chave da API, os versículos de apoio são trocados, mas as palavras que não existirem na nova tradução só são avisadas.)') + '\n\nSalve o arquivo antes, se quiser guardar a versão atual.')) { sel.value = antiga; return; }
+  if (!confirm('Trocar para a tradução ' + nome + '?\n\nBusco o texto dos versículos na ' + nova + ' e escolho de novo cada palavra tônica nesse texto (as que você editou à mão também mudam), e confiro os versículos de apoio. As frases e as ligações são mantidas.' + (chave ? '' : '\n\n(Sem a chave da API, os versículos de apoio são trocados, mas as palavras que não existirem na nova tradução só são avisadas.)') + '\n\nSalve o arquivo antes, se quiser guardar a versão atual.')) { sel.value = antiga; return; }
   sel.disabled = true; edStatus('Buscando o texto da ' + nova + ' e conferindo as palavras...');
   try {
     const r = await edTrocarPalavras(nova);
@@ -754,9 +779,25 @@ async function edMudarTraducao(sel) {
 async function edTrocarPalavras(sigla) {
   const chave = $('chave').value.trim();
   const modelo = ($('modelo').value || '').trim() || MODELOS[0];
+  /* 1) texto real de cada ponto na tradução nova */
+  const textos = await Promise.all(ED.itens.map(async it => {
+    if (!(it.ref || '').trim()) return null;
+    try { const v = await bibVersos(sigla, it.ref); return v ? v.map(x => x.texto).join(' ') : null; } catch (e) { return null; }
+  }));
+  const idx = []; textos.forEach((t, i) => { if (t && ED.itens[i].palavra.trim()) idx.push(i); });
+  const antigas = ED.itens.map(it => it.palavra);
+  let escolhidas = 0;
+  /* 2) a palavra tônica é escolhida DE NOVO no texto da nova tradução */
+  if (idx.length) {
+    const picks = await escolherTonicas(idx.map(i => ({ ref: ED.itens[i].ref, texto: textos[i] })), sigla, ED.tema || '', chave, modelo);
+    idx.forEach((i, k) => { if (picks[k]) { if (normPal(picks[k]) !== normPal(ED.itens[i].palavra)) escolhidas++; ED.itens[i].palavra = picks[k]; } });
+    ajustarLigacoes(ED.itens, antigas, 'lig', 'palavra');
+  }
+  /* 3) versículos de apoio conferidos com o texto da nova tradução */
   const r = await bibConferir(ED.itens, sigla, chave, modelo);
-  if (!r.algumTexto) throw new Error('SEMBIBLIA');
-  bibAcompanharLig(r.trocas, ED.itens);
+  if (!r.algumTexto && !idx.length) throw new Error('SEMBIBLIA');
+  r.escolhidas = escolhidas;
+  if (idx.length) { r.ok = 0; r.corrigidas = escolhidas; }
   return r;
 }
 function edMarcar() {
@@ -892,6 +933,7 @@ function bibParse(ref) {
   if (!cod) return null;
   let r = String(m[4] || '').replace(/[–—−]/g, '-').replace(/\s+/g, '').replace(/(\d)[a-z]+/gi, '$1');
   if (!r) return null;
+  if (['OBA', 'PHM', '2JN', '3JN', 'JUD'].indexOf(cod) >= 0 && r.indexOf(':') < 0 && r.indexOf(';') < 0) r = '1:' + r;
   if (r.indexOf(':') < 0 && /^\d+[.,]\d/.test(r)) r = r.replace(/^(\d+)[.,]/, '$1:');
   const trechos = [];
   for (const seg of r.split(';')) {
@@ -1050,15 +1092,129 @@ function bibAcompanharLig(trocas, listaLig) {
     listaLig.forEach(o => { if (o.lig) o.lig = o.lig.split(velha).join(nova); });
   });
 }
-/* Confere o esboço gerado pela IA (todas as palavras tônicas e apoios) */
-async function conferirEsboco(d, sigla, chave, modelo) {
+/* ---------- Palavra tônica escolhida NO TEXTO da tradução ---------- */
+const STOP = new Set(('a o as os um uma uns umas de do da dos das em no na nos nas por pelo pela pelos pelas para pra com sem sob sobre entre ate e ou mas que se nao nem como quando entao pois porque ja mais muito tambem ainda eu tu ele ela vos eles elas me te lhe lhes meu minha meus minhas teu tua teus tuas seu sua seus suas nosso nossa vosso vossa este esta estes estas esse essa esses essas isto isso aquele aquela aquilo ser sao foi era eram sera seja sejam estar estao estava estavam tem tinha tinham ter haver ha havia ao aos dele dela deles delas nele nela neles nelas ali aqui la ca so toda todo todos todas cada qual quem onde quanto quanta mesmo mesma outro outra outros outras tao assim ai alguns algumas algum alguma').split(' '));
+const normPal = p => semAcento(String(p).toLowerCase()).replace(/[^a-z0-9]/g, '');
+/* plano B (sem IA): a palavra mais "cheia" do versículo que ainda não foi usada */
+function tonicaLocal(texto, usadas) {
+  const ps = String(texto).match(/[\p{L}]+(?:-[\p{L}]+)*/gu) || [];
+  let melhor = '', pm = -99;
+  ps.forEach((p, i) => {
+    const n = normPal(p);
+    if (n.length < 4 || STOP.has(n) || usadas.has(n)) return;
+    let pt = n.length;
+    if (i > 0 && p[0] !== p[0].toLowerCase()) pt -= 3;
+    if (p.indexOf('-') >= 0) pt -= 4;
+    if (pt > pm) { pm = pt; melhor = p; }
+  });
+  return melhor.toUpperCase();
+}
+/* uma palavra tônica por versículo, tirada do texto REAL da tradução escolhida */
+async function escolherTonicas(vs, sigla, tema, chave, modelo) {
+  const out = new Array(vs.length).fill(''), usadas = new Set();
+  let arr = [];
+  if (chave) {
+    try {
+      const sistema = 'Você escolhe a PALAVRA TÔNICA de cada versículo para um esboço de pregação, em português do Brasil. Recebe a tradução, o tema (pode vir vazio) e os versículos com o texto REAL dessa tradução. Responda SOMENTE com JSON válido, sem explicações.\n' +
+        'Regras:\n' +
+        '1. Para cada versículo devolva UMA palavra COPIADA do texto do próprio versículo, escrita exatamente como está lá (mesma forma: se está "chorei", devolva CHOREI), em MAIÚSCULAS.\n' +
+        '2. Escolha a palavra mais marcante: a que carrega a ideia, a ação ou a emoção principal do versículo e que mais se liga ao tema. Prefira verbo de ação, substantivo forte ou adjetivo forte. Nunca escolha artigo, preposição, conjunção, pronome nem os verbos ser, estar, ter e haver.\n' +
+        '3. Nenhuma palavra pode se repetir entre os versículos.\n' +
+        '4. Escolha pelo texto recebido, nunca pela memória de outra tradução: cada tradução escreve de um jeito, e a palavra tônica tem de ser a que aparece NESTA tradução.\n' +
+        'Formato: {"itens":[{"n":1,"palavra":""}]}';
+      const lista = vs.slice(0, 80).map((v, i) => ({ n: i + 1, ref: v.ref, texto: v.texto }));
+      const corpo = {
+        systemInstruction: { parts: [{ text: sistema }] },
+        contents: [{ role: 'user', parts: [{ text: 'Tradução: ' + nomeTrad(sigla) + '\nTema: ' + (tema || '(sem tema)') + '\nVersículos:\n' + JSON.stringify(lista) }] }],
+        generationConfig: { temperature: 0.2, responseMimeType: 'application/json', maxOutputTokens: 8192 }
+      };
+      const j = await chamar(chave, corpo, modelo);
+      const dados = lerJSON(textoDaResposta(j));
+      arr = Array.isArray(dados.itens) ? dados.itens : (Array.isArray(dados) ? dados : []);
+    } catch (e) { arr = []; }
+  }
+  vs.forEach((v, i) => {
+    let pal = '';
+    const x = arr.find(y => Number(y && y.n) === i + 1);
+    if (x) {
+      const c = String(x.palavra == null ? '' : x.palavra).trim().replace(/^["“”'‘’]+|["“”'‘’]+$/g, '').toUpperCase();
+      if (c && !/\s/.test(c) && achaPalavra(c, v.texto) && !STOP.has(normPal(c)) && !usadas.has(normPal(c))) pal = c;
+    }
+    if (!pal) pal = tonicaLocal(v.texto, usadas);
+    if (pal) usadas.add(normPal(pal));
+    out[i] = pal;
+  });
+  return out;
+}
+/* quando uma palavra tônica muda, a ligação do ponto anterior (que aponta para ela) acompanha.
+   campo = nome do campo da ligação ('ligacao' no esboço, 'lig' no editor); chv = campo da palavra */
+function ajustarLigacoes(tops, antigas, campo, chv) {
+  campo = campo || 'ligacao'; chv = chv || 'chave';
+  tops.forEach((t, i) => {
+    if (i === tops.length - 1 || !t[campo]) return;
+    const ant = antigas[i + 1], novo = tops[i + 1][chv];
+    if (!ant || !novo || ant === novo) return;
+    let lig = t[campo].split(ant).join(novo);
+    if (lig === t[campo]) {
+      const ms = [...lig.matchAll(/[A-ZÀ-Ý]{3,}(?:-[A-ZÀ-Ý]{2,})*/g)], m = ms[ms.length - 1];
+      if (m) lig = lig.slice(0, m.index) + novo + lig.slice(m.index + m[0].length);
+    }
+    t[campo] = lig;
+  });
+}
+/* escreve o texto e destaca a palavra tônica (a primeira vez que aparece) */
+function destacar(pai, texto, palavra) {
+  texto = String(texto || '');
+  const alvo = normPal(palavra || '');
+  let ult = 0;
+  if (alvo) {
+    for (const m of texto.matchAll(/[\p{L}\p{N}]+(?:-[\p{L}\p{N}]+)*/gu)) {
+      if (normPal(m[0]) === alvo) {
+        tx(pai, texto.slice(0, m.index)); add(pai, 'span', 'hl', m[0]); ult = m.index + m[0].length; break;
+      }
+    }
+  }
+  tx(pai, texto.slice(ult));
+}
+/* Confere o esboço gerado pela IA com o texto real da tradução.
+   o = { vs: versículos reais, picks: palavras tônicas já escolhidas (modos "um tópico por versículo") } */
+async function conferirEsboco(d, sigla, chave, modelo, o) {
+  o = o || {};
   const tops = []; d.partes.forEach(p => p.topicos.forEach(t => tops.push(t)));
+  const antigas = tops.map(t => t.chave);
+  const vs = o.vs && o.vs.length ? o.vs : null;
+  if (vs) {
+    const base = vs[0].ref.slice(0, vs[0].ref.lastIndexOf(' '));
+    tops.forEach(t => {
+      if (t.ref && !bibParse(t.ref)) {
+        const m = String(t.ref).match(/(\d+)\s*(?:-\s*(\d+))?\s*$/);
+        if (m) t.ref = base + ' ' + vs[0].c + ':' + m[1] + (m[2] ? '-' + m[2] : '');
+      }
+    });
+  }
+  let forcado = false;
+  if (o.picks && vs) {
+    tops.forEach((t, i) => {
+      let k = -1;
+      if (tops.length === vs.length) k = i;
+      else {
+        const p = bibParse(t.ref);
+        if (p) { const a = p.trechos[0]; k = vs.findIndex(v => v.c === a.c1 && (a.v1 == null || v.v === a.v1)); }
+      }
+      if (k >= 0 && o.picks[k]) { t.chave = o.picks[k]; if (tops.length === vs.length) t.ref = vs[k].ref; forcado = true; }
+    });
+  }
   const itens = tops.map(t => ({ ref: t.ref, palavra: t.chave, vref: t.apoio_ref, vtxt: t.apoio_palavras }));
   let r;
   try { r = await bibConferir(itens, sigla, chave, modelo); }
-  catch (e) { return { ok: 0, corrigidas: 0, apoios: 0, semTexto: tops.length, pendentes: [], rede: true, trocas: [], algumTexto: false }; }
+  catch (e) { return { ok: 0, corrigidas: 0, apoios: 0, semTexto: tops.length, pendentes: [], rede: true, trocas: [], algumTexto: false, forcado }; }
   tops.forEach((t, i) => { t.chave = itens[i].palavra; t.apoio_palavras = itens[i].vtxt; });
-  bibAcompanharLig(r.trocas, tops.map(t => ({ get lig() { return t.ligacao; }, set lig(v) { t.ligacao = v; } })));
+  ajustarLigacoes(tops, antigas);
+  await Promise.all(tops.map(async t => {
+    try { const v = await bibVersos(sigla, t.ref); t.verso = v ? v.map(x => x.texto).join(' ') : ''; } catch (e) { t.verso = ''; }
+  }));
+  if (forcado) { r.ok = 0; r.corrigidas = 0; }
+  r.forcado = forcado;
   return r;
 }
 
@@ -1112,8 +1268,19 @@ async function chamar(chave, corpo, escolhido) {
   throw falha;
 }
 
+let ULTIMO = null, TEMA_FIXO = '';
+/* depois de gerar, trocar a tradução oferece refazer o esboço nela */
+function sugerirRefazer() {
+  if (!ULTIMO || modoEditor || $('gerar').disabled || $('saida').style.display === 'none') return;
+  const sig = tradValida($('traducao').value);
+  if (sig === ULTIMO.sigla || ULTIMO.texto !== $('texto').value.trim() || ULTIMO.tipo !== $('tipo').value) return;
+  if (confirm('Refazer o esboço agora na tradução ' + nomeTrad(sig) + '?\n\nAs palavras tônicas e os versículos serão escolhidos de novo no texto da ' + sig + '.' + (ULTIMO.tema ? '\nO tema "' + ULTIMO.tema + '" é mantido.' : ''))) {
+    TEMA_FIXO = $('tema').value.trim() ? '' : ULTIMO.tema;
+    $('gerar').click();
+  }
+}
 $('gerar').addEventListener('click', async () => {
-  const tema = $('tema').value.trim();
+  const tema = $('tema').value.trim() || TEMA_FIXO; TEMA_FIXO = '';
   const texto = $('texto').value.trim();
   const passagem = $('passagem').value.trim();
   const chave = $('chave').value.trim();
@@ -1127,39 +1294,47 @@ $('gerar').addEventListener('click', async () => {
 
   const btn = $('gerar'); btn.disabled = true;
   const sigla = tradValida($('traducao').value);
+  const tipoSel = $('tipo').value, modo = TIPOS[tipoSel].modo;
+  const porVersiculo = modo === 'tonicas' || modo === 'folha';
   try {
-    let fonte = '', aviso = '';
+    let fonte = '', aviso = '', vs = null, picks = null;
     if (passagem) {
       fonte = 'Texto dos versículos colado pelo pastor (use como única fonte):\n' + passagem;
     } else {
       msg.textContent = 'Buscando o texto na ' + sigla + '...';
       try {
-        const vs = await bibVersos(sigla, texto);
+        vs = await bibVersos(sigla, texto);
         if (vs) fonte = 'Texto dos versículos na ' + nomeTrad(sigla) + ' (texto oficial desta tradução; use como única fonte e copie dele as palavras tônicas, letra por letra):\n' + vs.slice(0, 200).map(v => '[' + v.ref + '] ' + v.texto).join('\n');
         else aviso = ' Não entendi a referência "' + texto + '" para buscar o texto da Bíblia; a IA escreveu de memória, então confira os versículos.';
       } catch (e) { aviso = ' Não consegui buscar o texto da ' + sigla + ' (sem internet ou serviço fora do ar); a IA escreveu de memória, então confira os versículos.'; }
     }
+    if (porVersiculo && vs) {
+      msg.textContent = 'Escolhendo as palavras tônicas no texto da ' + sigla + '...';
+      picks = await escolherTonicas(vs, sigla, tema, chave, modelo);
+    }
     msg.textContent = 'Gerando o esboço... (pode levar até 1 minuto)';
     const pedido = 'Texto bíblico: ' + texto +
       (fonte ? '\n' + fonte : '') +
+      (picks ? '\nPALAVRAS TÔNICAS JÁ ESCOLHIDAS NO TEXTO DA ' + sigla + ' (obrigatório: use exatamente estas como chave de cada versículo, na ordem, um tópico por versículo; a ligacao de cada tópico termina apontando para a chave do próximo tópico):\n' + vs.map((v, i) => v.ref + ' → ' + picks[i]).join('\n') : '') +
       '\nTema: ' + (tema || '(crie um tema curto e forte)') +
-      '\nTradução bíblica: ' + nomeTrad($('traducao').value) + '. As palavras tônicas (chave) e os trechos de versículos devem ser exatamente desta tradução; se o texto dos versículos veio acima, ele manda.' +
-      '\nTipo de esboço: ' + TIPOS[$('tipo').value].regra;
+      '\nTradução bíblica: ' + nomeTrad(sigla) + '. As palavras tônicas (chave) e os trechos de versículos devem ser exatamente desta tradução; se o texto dos versículos veio acima, ele manda. O exemplo do sistema serve só de formato (foi escrito em Neemias e em outra tradução): não reaproveite palavras dele.' +
+      '\nTipo de esboço: ' + TIPOS[tipoSel].regra;
     const corpo = {
       systemInstruction: { parts: [{ text: INSTRUCAO }] },
       contents: [{ role: 'user', parts: [{ text: pedido }] }],
       generationConfig: { temperature: 0.7, responseMimeType: 'application/json', maxOutputTokens: 16384 }
     };
-    let pronto = false, conf = null;
+    let pronto = false, conf = null, temaFinal = '';
     for (let tentativa = 0; tentativa < 2 && !pronto; tentativa++) {
       const j = await chamar(chave, corpo, modelo);
       try {
         const dn = normalizar(lerJSON(textoDaResposta(j)));
         if (!passagem) {
           msg.textContent = 'Conferindo as palavras com o texto da ' + sigla + '...';
-          conf = await conferirEsboco(dn, sigla, chave, modelo);
+          conf = await conferirEsboco(dn, sigla, chave, modelo, { vs: porVersiculo ? vs : null, picks });
         }
-        render(dn, TIPOS[$('tipo').value].nome, TIPOS[$('tipo').value].modo);
+        temaFinal = dn.tema;
+        render(dn, TIPOS[tipoSel].nome, modo);
         pronto = true;
       } catch (e) {
         if (!(e instanceof FormatoErro || e instanceof SyntaxError)) throw e;
@@ -1167,7 +1342,8 @@ $('gerar').addEventListener('click', async () => {
         msg.textContent = 'Ajustando o formato, tentando de novo...';
       }
     }
-    const resumo = passagem ? ' Usei o texto que você colou.' : (conf ? ' ' + bibResumo(conf, sigla) : '');
+    ULTIMO = { texto, tema: temaFinal, tipo: tipoSel, sigla };
+    const resumo = passagem ? ' Usei o texto que você colou.' : ((conf && conf.forcado) ? ' Palavras tônicas escolhidas no texto da ' + sigla + '.' : '') + (conf ? ' ' + bibResumo(conf, sigla) : '');
     msg.textContent = ('Esboço pronto (' + sigla + ').' + resumo + aviso + ' Confira os versículos de apoio na sua Bíblia.').replace(/\s+/g, ' ');
     if (aviso || (conf && (conf.pendentes.length || conf.rede))) msg.className = 'msg erro';
     $('saida').scrollIntoView({ behavior: 'smooth' });
