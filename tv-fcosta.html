@@ -103,6 +103,7 @@ main{padding:22px 0 8px}
 .cfg{margin-top:18px;border-top:1px solid #2c2618;padding-top:12px;font-size:.7rem;color:#b9ab80;line-height:1.5}
 .cfg input{width:100%;font-size:16px;min-height:46px;margin-top:6px;padding:8px 10px;border-radius:8px;border:1px solid #4a3b17;background:#13233d;color:#f4eedd}
 .cfg .w2{color:#f5b7a8;font-weight:600;margin-bottom:8px}
+.cfg .w3{color:#e6d9b0;font-weight:500;font-size:.78rem;margin-bottom:8px}
 .msg{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#13233d;color:#f1e6c4;border:1px solid #b8892a;padding:10px 18px;border-radius:24px;font-size:.78rem;opacity:0;transition:.25s;pointer-events:none;z-index:9}
 .msg.on{opacity:1}
 footer{margin-top:30px;background:#13233d;border-top:3px solid transparent;border-image:var(--gold) 1;color:#a79f8b;text-align:center;padding:22px 16px;font-size:.68rem;line-height:1.8}
@@ -203,10 +204,10 @@ html,body{max-width:100%;overflow-x:hidden}
   <label for="fp">Preço</label><input id="fp" placeholder="Ex.: R$ 650.000">
   <label for="fu" class="hide">Link</label><input id="fu" class="hide" placeholder="">
   <label for="fc" class="hide">Capa</label><input id="fc" class="hide" placeholder="">
-  <label for="fi">Foto de capa do imóvel (da galeria)</label><input type="file" id="fi" accept="image/*">
-  <div class="hint">Obrigatória para a prévia: o MP4 não gera foto sozinho. Aparece no WhatsApp quando você compartilha o link, após “Publicar p/ todos”.</div>
+  <label for="fi">Foto de capa (opcional)</label><input type="file" id="fi" accept="image/*">
+  <div class="hint">Se não escolher, a capa é um quadro do próprio vídeo MP4. Aparece no WhatsApp quando você compartilha o link, após “Publicar p/ todos”.</div>
   <label for="ff">Vídeo MP4 (do computador ou celular)</label><input type="file" id="ff" accept="video/mp4,.mp4">
-  <div class="hint" id="fh">Depois de salvar, toque em “Publicar p/ todos” e suba o ZIP no GitHub: só assim o cliente consegue assistir. Pelo navegador o GitHub aceita até 25 MB por arquivo.</div>
+  <div class="hint" id="fh">Tamanho máximo: 100 MB por vídeo (cerca de 6 min em 720p comprimido). Depois de salvar, toque em “Publicar p/ todos” e suba os arquivos no GitHub. Acima de 25 MB use o GitHub Desktop.</div>
   <label class="chk"><input type="checkbox" id="fv"> Vídeo vertical (gravado em pé no celular)</label>
   <div class="acts"><button class="b p" id="save">Salvar vídeo</button><button class="b" id="cancel">Cancelar</button></div>
 </div>
@@ -216,7 +217,7 @@ html,body{max-width:100%;overflow-x:hidden}
     <h2>Bem-vindo à TV FCosta</h2>
     <p>Apresente seus imóveis em vídeo e compartilhe com seus clientes com um toque.</p>
     <button class="b p ed-only" id="add0">＋ Adicionar meu primeiro vídeo</button>
-    <div class="steps ed-only"><div><b>1</b>Escolha o vídeo MP4 do computador ou celular</div><div><b>2</b>Dê um título ao imóvel</div><div><b>3</b>Compartilhe o banner nas redes sociais</div></div>
+    <div class="steps ed-only"><div><b>1</b>Escolha o vídeo MP4 do computador ou celular</div><div><b>2</b>Dê um título ao imóvel</div><div><b>3</b>Compartilhe o vídeo: o link sai com a foto do imóvel</div></div>
   </div>
 </div>
 <div class="stage hide" id="stage">
@@ -227,7 +228,7 @@ html,body{max-width:100%;overflow-x:hidden}
   <aside class="side"><div class="hd"><h3>Imóveis em vídeo</h3><button class="b p ed-only" id="add">＋ Adicionar</button></div><div class="list" id="grid"></div></aside>
 </div>
 </div></main>
-<footer><b>FCOSTA · CORRETOR DE IMÓVEIS</b><br>CRECI-SP 294791-F · CNAI 52708<br><span style="opacity:.55;font-size:.6rem">versão 25/10 · banner sem play · só MP4 · só banner</span></footer>
+<footer><b>FCOSTA · CORRETOR DE IMÓVEIS</b><br>CRECI-SP 294791-F · CNAI 52708<br><span style="opacity:.55;font-size:.6rem">versão 25/10 · cartão com foto, sem play · só MP4</span></footer>
 <div class="ov" id="ov"><div class="sh" role="dialog" aria-label="Compartilhar">
   <div class="hh"><h4>Compartilhar</h4><button class="x" id="xs" aria-label="Fechar">✕</button></div>
   <p id="shT"></p>
@@ -400,9 +401,9 @@ function show(){
     sc.appendChild(ps);}
   else{sc.textContent='Este link abre no site de origem.';}
   var L=linkOf(cur);
-  btn(a,'📤 Compartilhar banner','p',function(){openShare(L,cur.t,cur.p.k==='local');});
+  btn(a,'📤 Compartilhar vídeo','p',function(){openShare(L,cur.t,cur.p.k==='local');});
   btn(a,'⤢ Ajustar tela','mo',function(){FIT=!FIT;sc.classList.toggle('fit',FIT);});
-  var o=document.createElement('a');o.className='b';o.textContent={yt:'▶ Assistir no YouTube',vm:'▶ Assistir no Vimeo'}[cur.p.k]||'Abrir no site de origem';o.href=cur.p.open;o.target='_blank';o.rel='noopener';if(cur.p.k!=='local')a.appendChild(o);
+  var o=document.createElement('a');o.className='b';o.textContent={yt:'▶ Assistir no YouTube',vm:'▶ Assistir no Vimeo'}[cur.p.k]||'Abrir no site de origem';o.href=cur.p.open;o.target='_blank';o.rel='noopener';if(cur.p.k!=='local'&&cur.p.k!=='file')a.appendChild(o);
   if(cur.p.k==='local'){var nt=document.createElement('div');nt.style.cssText='flex:1 1 100%;grid-column:1/-1;font-size:.72rem;color:#c9b77f;line-height:1.5';nt.textContent='📁 Vídeo salvo só neste aparelho por enquanto. Para os clientes assistirem, toque em Publicar p/ todos e suba o ZIP no GitHub.';a.appendChild(nt);}
   if(ED&&!cur.sh&&cur.p.k!=='local'){var pid=cur.p.id;btn(a,'🖼 Foto da prévia','',function(){var i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=function(){var f=i.files[0];if(!f)return;savePhoto(f,pid,function(ok){toast(ok?'Foto guardada! Toque em Publicar p/ todos.':'Não foi possível guardar a foto.');if(ok)show();});};i.click();});}
   if(ED&&!cur.sh)btn(a,'✏️ Editar dados','',function(){openEdit(cur);});
@@ -413,7 +414,7 @@ function show(){
 }
 function openShare(L,t,loc){
   var tx=(cur?shareTx(cur):t+' — TV FCosta Corretor'),e=encodeURIComponent,n=$('net');n.innerHTML='';
-  $('shT').textContent=t+(loc?' — ⚠ Este vídeo está só neste aparelho: quem receber o link não conseguirá assisti-lo.':'');
+  $('shT').textContent=t;
   function it(lbl,bg,ic,o){
     var el=document.createElement(o.href?'a':'button');
     if(o.href){el.href=o.href;if(o.href.indexOf('http')===0){el.target='_blank';el.rel='noopener';}}
@@ -422,13 +423,26 @@ function openShare(L,t,loc){
     else el.addEventListener('click',function(){setTimeout(closeShare,300);});
     n.appendChild(el);
   }
-  it('Compartilhar banner','linear-gradient(135deg,#8a6420,#e6c45f)','🖼',{fn:function(){closeShare();shareBanner(cur,L);}});
+  var un=cur&&!cur.sh&&(cur.loc||cur.p.k==='local');
+  if(!un){
+  if(navigator.share)it('Mais apps','linear-gradient(135deg,#8a6420,#e6c45f)','⋯',{fn:function(){navigator.share({title:t,text:tx,url:L}).catch(function(){});closeShare();}});
+  it('WhatsApp','#25D366','✆',{href:'https://wa.me/?text='+e(tx+'\n'+L)});
+  it('Instagram','linear-gradient(45deg,#f9a03f,#e1306c,#833ab4)','◎',{fn:function(){copy(L);toast('Link copiado! Cole no Instagram (stories, direct ou bio).');setTimeout(function(){window.open('https://www.instagram.com/','_blank');},900);closeShare();}});
+  it('Facebook','#1877F2','f',{href:'https://www.facebook.com/sharer/sharer.php?u='+e(L)});
+  it('TikTok','#111;border:1px solid #444','♪',{fn:function(){copy(L);toast('Link copiado! Cole no TikTok (bio ou mensagem).');setTimeout(function(){window.open('https://www.tiktok.com/','_blank');},900);closeShare();}});
+  it('X (Twitter)','#000;border:1px solid #444','𝕏',{href:'https://twitter.com/intent/tweet?text='+e(tx)+'&url='+e(L)});
+  it('Telegram','#2AABEE','➤',{href:'https://t.me/share/url?url='+e(L)+'&text='+e(tx)});
+  it('LinkedIn','#0A66C2','in',{href:'https://www.linkedin.com/sharing/share-offsite/?url='+e(L)});
+  it('E-mail','#6b7280','✉',{href:'mailto:?subject='+e(tx)+'&body='+e(tx+'\n'+L)});
+  it('SMS','#34c759','💬',{href:'sms:?&body='+e(tx+' '+L)});
+  it('Copiar link','linear-gradient(135deg,#8a6420,#e6c45f)','🔗',{fn:function(){copy(L);closeShare();}});
+  }
   shPreview(L);
   if(!ED){$('cfg').innerHTML='';$('ov').classList.add('on');return;}
   var c=$('cfg'),b=baseUrl(),bad=/^(file|blob|about|data):/i.test(b);
-  c.innerHTML=(bad?'<div class="w2">⚠ O link desta página é do seu computador e NÃO abre no WhatsApp de outras pessoas. Publique o arquivo num site (Netlify, GitHub Pages ou o seu domínio) e cole o endereço abaixo.</div>':'')+'⚙ Endereço público desta página<input id="cfgi" type="url" inputmode="url" placeholder="https://seusite.com.br/tv-fcosta.html">';
-  var ci=$('cfgi');ci.value=bad?'':b;pubWarn(c);
-  ci.onchange=function(){var v=ci.value.trim();try{if(v)localStorage.setItem('tvfc_base',v);else localStorage.removeItem('tvfc_base');}catch(e){}toast('Endereço salvo!');show();openShare(linkOf(cur),t,loc);};
+  c.innerHTML=(bad?'<div class="w2">⚠ O link desta página é do seu computador e NÃO abre no WhatsApp de outras pessoas. Publique o arquivo num site (Netlify, GitHub Pages ou o seu domínio) e cole o endereço abaixo.</div>':'')+(bad?'⚙ Endereço público desta página<input id="cfgi" type="url" inputmode="url" placeholder="https://seusite.com.br/tv-fcosta.html">':'');
+  var ci=$('cfgi');pubWarn(c);if(ci)ci.value='';
+  if(ci)ci.onchange=function(){var v=ci.value.trim();try{if(v)localStorage.setItem('tvfc_base',v);else localStorage.removeItem('tvfc_base');}catch(e){}toast('Endereço salvo!');show();openShare(linkOf(cur),t,loc);};
   $('ov').classList.add('on');
 }
 function shPreview(L){
@@ -436,11 +450,6 @@ function shPreview(L){
   var d=document.createElement('div');d.className='shp';d.innerHTML='<span class="tt"></span>';
   d.querySelector('.tt').textContent=v.t+(infoOf(v)?'\n'+infoOf(v):'');box.appendChild(d);
   bannerSrc(v,function(src){if(!src)return;d.style.backgroundImage='url("'+(typeof src==='string'?src:URL.createObjectURL(src))+'")';});
-  if(!ED)return;
-  var pub=!v.loc&&!v.sh&&v.p.k!=='local'&&!!v.og&&!loadEds()[v.p.id],st=document.createElement('div');
-  st.className='shst '+(pub?'ok':'no');
-  st.textContent=pub?'✅ Link pronto: no WhatsApp o cartão sai assim, com a foto e os dados.':'⚠ Este link ainda sai com a imagem padrão da TV no WhatsApp. Para o cliente ver o banner agora, toque em “Compartilhar banner”. Para o cartão do link ficar assim, toque em Publicar e suba os arquivos no GitHub.';
-  box.appendChild(st);
 }
 function closeShare(){$('ov').classList.remove('on');}
 $('xs').onclick=closeShare;$('ov').onclick=function(ev){if(ev.target===this)closeShare();};
@@ -465,14 +474,16 @@ $('ff').onchange=function(){var f=this.files[0];if(f&&!$('ft').value.trim())$('f
 $('save').onclick=function(){
   if(EDIT){saveEdit();return;}var f=$('ff').files[0],cv=$('fc').value.trim(),t=$('ft').value.trim(),u=$('fu').value.trim(),vert=$('fv').checked,sv=$('save');
   if(f){
+    if(f.size>100e6){toast('Vídeo com '+Math.round(f.size/1e6)+' MB: o limite é 100 MB (o GitHub não aceita mais que isso). Comprima o vídeo e tente de novo.');return;}
     if(!t)t=f.name.replace(/\.[^.]+$/,'');
     var lid=Date.now().toString(36);sv.disabled=true;sv.textContent='Salvando…';
     idbPut(lid,f,function(ok){
       sv.disabled=false;sv.textContent='Salvar vídeo';
       if(!ok){toast('Não foi possível guardar o arquivo neste aparelho.');return;}
       var fi0=$('fi').files[0],tl=t,vl=$('fl').value.trim(),vp=$('fp').value.trim();
-      function fin2(){var a=loadLocal();a.push({t:tl,u:'local:'+lid,v:vert,c:cv,l:vl,pr:vp});saveLocal(a);resetForm();location.hash='v-l'+lid;render();toast('Vídeo salvo!'+(fi0?'':' Sem foto de capa: o link sairá com a imagem padrão da TV.'));}
-      if(fi0)savePhoto(fi0,'l'+lid,function(ok2){if(!ok2)toast('Não foi possível guardar a foto.');fin2();});else fin2();
+      function fin2(){sv.disabled=false;sv.textContent='Salvar vídeo';var a=loadLocal();a.push({t:tl,u:'local:'+lid,v:vert,c:cv,l:vl,pr:vp});saveLocal(a);resetForm();location.hash='v-l'+lid;render();toast('Vídeo salvo!');}
+      if(fi0)savePhoto(fi0,'l'+lid,function(ok2){if(!ok2)toast('Não foi possível guardar a foto.');fin2();});
+      else{sv.disabled=true;sv.textContent='Gerando capa…';frameOf(f,function(fb){if(fb)savePhoto(fb,'l'+lid,function(){fin2();});else fin2();});}
     });
     return;
   }
@@ -541,6 +552,17 @@ function zipFiles(files){
 }
 function ea(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function savePhoto(file,pid,cb){prepImg(file,function(b){if(!b)return cb(false);idbPut('img:'+pid,b,function(ok){if(!ok)return cb(false);prepPoster(file,function(p){if(!p)return cb(true);idbPut('pst:'+pid,p,function(){cb(true);});});});});}
+function frameOf(file,cb){
+  var url=URL.createObjectURL(file),v=document.createElement('video'),done=false;
+  function fin(b){if(done)return;done=true;try{URL.revokeObjectURL(url);}catch(e){}cb(b);}
+  v.muted=true;v.playsInline=true;v.preload='auto';v.setAttribute('playsinline','');
+  v.onloadedmetadata=function(){var d=v.duration||0;try{v.currentTime=d>2?Math.min(1.5,d*.2):0.1;}catch(e){fin(null);}};
+  v.onseeked=function(){try{
+    var m=1280,k=Math.min(1,m/Math.max(v.videoWidth,v.videoHeight)),c=document.createElement('canvas');c.width=Math.round(v.videoWidth*k);c.height=Math.round(v.videoHeight*k);
+    c.getContext('2d').drawImage(v,0,0,c.width,c.height);c.toBlob(function(b){fin(b);},'image/jpeg',0.85);
+  }catch(e){fin(null);}};
+  v.onerror=function(){fin(null);};setTimeout(function(){fin(null);},8000);v.src=url;
+}
 function prepPoster(file,cb){var im=new Image(),url=URL.createObjectURL(file);im.onload=function(){var m=1280,k=Math.min(1,m/Math.max(im.naturalWidth,im.naturalHeight)),w=Math.round(im.naturalWidth*k),h=Math.round(im.naturalHeight*k),c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);c.toBlob(function(b){URL.revokeObjectURL(url);cb(b);},'image/jpeg',0.82);};im.onerror=function(){URL.revokeObjectURL(url);cb(null);};im.src=url;}
 function prepImg(file,cb){
   var im=new Image(),url=URL.createObjectURL(file);
@@ -621,7 +643,7 @@ function landingHtml(o,p,img,w,h,pimg,self,main){
   var R={INFO:ea(inf),TITLEH:ea(o.t),META:m,VERT:o.v?' v':'',IMG:ea(pimg),TITLE:ea(o.t),CFG:cfg,MAIN:ea(main),OPEN:ea(p.open),WA:'https://wa.me/5511993509109?text='+encodeURIComponent('Olá! Vi o vídeo "'+o.t+'" na TV FCosta e quero saber mais.')};
   return t.replace(/%%(\w+)%%/g,function(_,k){return R[k]!==undefined?R[k]:'';});
 }
-function pubWarn(c){if(!cur||cur.sh)return;var v=cur;idbGet('img:'+v.p.id,function(bl){var pend=v.loc||(bl&&!/^v-/.test(v.c||''));if(!pend)return;var d=document.createElement('div');d.className='w2';d.innerHTML='⚠ '+(v.p.k==='local'?'Este vídeo está só neste aparelho: o cliente não consegue abrir.':v.loc?'Este vídeo ainda não foi publicado.':'A foto editada ainda não foi publicada.')+' Para o link curto mostrar a foto do imóvel com o play e os dados, toque em Publicar e suba os arquivos no GitHub.<button class="b p" style="margin-top:8px;width:100%" id="pubNow">📦 Publicar agora</button>';c.insertBefore(d,c.firstChild);$('pubNow').onclick=function(){closeShare();pubFile();};});}
+function pubWarn(c){if(!cur||cur.sh)return;var v=cur;idbGet('img:'+v.p.id,function(bl){var pend=v.loc||(bl&&!/^v-/.test(v.c||''));if(!pend)return;var d=document.createElement('div');d.className='w3';d.innerHTML='Antes de enviar, publique o vídeo para o cliente conseguir abrir.<button class="b p" style="margin-top:8px;width:100%" id="pubNow">📦 Publicar agora</button>';c.insertBefore(d,c.firstChild);$('pubNow').onclick=function(){closeShare();pubFile();};});}
 function pubFile(){
   var del=loadDel(),fx=VIDEOS.filter(function(v){var p=parse(v.u);return p&&del.indexOf(p.id)<0;}),ids={};
   fx.forEach(function(v){ids[parse(v.u).id]=1;});
