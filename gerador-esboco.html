@@ -157,9 +157,9 @@
       <option value="tonicas">Palavras tônicas — uma palavra por versículo</option>
       <option value="folha">Palavras tônicas em 1 folha — verbo + palavra forte (14 x 22 cm)</option>
     </select>
-    <label for="traducao">Tradução bíblica (muda as palavras tônicas e os versículos)</label>
+    <label for="traducao">Tradução bíblica (o texto dos versículos é buscado nela)</label>
     <select id="traducao"></select>
-    <label for="passagem">Texto dos versículos (opcional, deixa o esboço mais fiel)</label>
+    <label for="passagem">Texto dos versículos (opcional: se ficar vazio, busco sozinho na tradução escolhida)</label>
     <textarea id="passagem" placeholder="Cole aqui os versículos da sua Bíblia, se quiser"></textarea>
     <div class="linha">
       <div>
@@ -245,7 +245,7 @@ const INSTRUCAO = `Você prepara esboços de pregação para um pastor evangéli
 
 PRINCÍPIOS OBRIGATÓRIOS
 
-1. FIDELIDADE AO TEXTO. Se o pastor colou o texto dos versículos, ele é a única fonte. Se não colou, use a TRADUÇÃO BÍBLICA indicada no pedido (se não houver, Almeida Revista e Atualizada): as palavras tônicas (chave), os trechos de versículos e as palavras citadas devem ser exatamente as dessa tradução, pois as palavras mudam de uma tradução para outra. Só afirme o que você tem certeza que o texto diz nessa tradução. Não invente fatos, nomes, números ou detalhes que o texto não traz. Siga o TIPO DE ESBOÇO pedido (veja TIPOS abaixo). Nunca force uma aplicação que o texto não sustenta.
+1. FIDELIDADE AO TEXTO. Se o pastor colou o texto dos versículos, ele é a única fonte. Se não colou, use a TRADUÇÃO BÍBLICA indicada no pedido (se não houver, Almeida Revista e Atualizada): as palavras tônicas (chave), os trechos de versículos e as palavras citadas devem ser exatamente as dessa tradução, pois as palavras mudam de uma tradução para outra. Só afirme o que você tem certeza que o texto diz nessa tradução. Quando o pedido trouxer o texto dos versículos, copie a palavra tônica (chave) exatamente como está escrita nele. Não invente fatos, nomes, números ou detalhes que o texto não traz. Siga o TIPO DE ESBOÇO pedido (veja TIPOS abaixo). Nunca force uma aplicação que o texto não sustenta.
 
 2. TEMA E PALAVRA-CHAVE. Use o tema recebido, com as palavras do pastor (se o tema não combinar com o texto, ajuste o mínimo possível). Sem tema, crie um curto e forte, ligado à situação do texto. Crie uma PALAVRA-CHAVE: um verbo de ação no infinitivo, em maiúsculas, que RESPONDE ao tema (ex.: AVANÇAR), com um contraponto também verbo (ex.: recuar). O corpo todo se liga à palavra-chave e ela aponta de volta para o tema.
 
@@ -279,7 +279,7 @@ PRINCÍPIOS OBRIGATÓRIOS
 
 14. MARCAÇÃO: o sinal ** só pode aparecer no gancho e no fechamento, uma vez em cada, na palavra-chave. Em nenhum outro campo.
 
-15. CAMPOS EXTRAS (só nos tipos PALAVRAS TÔNICAS e 1 FOLHA; nos outros tipos ficam vazios; o campo verbo só existe no tipo 1 FOLHA): curiosidade = um fato curto (até 12 palavras) sobre o versículo ou o cenário, ligado ao tema; só use fato que você sabe ter certeza (lugar, nome, significado, época, costume do texto); na dúvida, deixe vazio. apoio_ref = um versículo de apoio de outro trecho da Bíblia, que você conhece bem e que realmente reforça a ideia do tópico. apoio_palavras = de 3 a 6 palavras que aparecem nesse versículo de apoio, na tradução Almeida, só para lembrar o versículo, sem aspas; na dúvida, deixe vazio.
+15. CAMPOS EXTRAS (só nos tipos PALAVRAS TÔNICAS e 1 FOLHA; nos outros tipos ficam vazios; o campo verbo só existe no tipo 1 FOLHA): curiosidade = um fato curto (até 12 palavras) sobre o versículo ou o cenário, ligado ao tema; só use fato que você sabe ter certeza (lugar, nome, significado, época, costume do texto); na dúvida, deixe vazio. apoio_ref = um versículo de apoio de outro trecho da Bíblia, que você conhece bem e que realmente reforça a ideia do tópico. apoio_palavras = um trecho CONTÍNUO de 3 a 6 palavras desse versículo de apoio, copiado exatamente como está na tradução indicada no pedido, só para lembrar o versículo, sem aspas; na dúvida, deixe vazio.
 
 TIPOS DE ESBOÇO (o pedido informa qual usar; o formato do JSON é o mesmo para todos):
 - EXPOSITIVO: cubra a passagem do começo ao fim, na ordem, juntando versículos vizinhos. 5 a 8 tópicos (máximo 9).
@@ -322,9 +322,9 @@ const TIPOS = {
   tematico:   { nome: 'Temático',   regra: 'TEMÁTICO: parta do tema e use o texto principal como base, com versículos de outros lugares da Bíblia como apoio. 3 a 5 tópicos; o ref de cada tópico pode ser de outro livro. Não precisa cobrir a passagem toda. 1 ou 2 partes bastam.' },
   textual:    { nome: 'Textual',    regra: 'TEXTUAL: tire do próprio texto as ideias principais, sem cobrir tudo. 3 a 4 tópicos, cada um com uma ideia central do texto, na ordem em que aparecem. 1 ou 2 partes bastam.' },
   limpo:      { nome: 'Limpo e objetivo', modo: 'limpo', regra: 'LIMPO E OBJETIVO: esboço bem enxuto. Cubra a passagem na ordem, em 4 a 6 tópicos. Cada tópico com chave, direcao curta, ref e EXATAMENTE 2 subs; cada sub só com titulo curto (2 a 5 palavras) e ref. Deixe texto de sub, pratica e ligacao VAZIOS. Deixe ilustracao_titulo, ilustracao, oracao_de e oracao VAZIOS. Introdução em 1 frase, gancho em 2 frases curtas.' },
-  tonicas:    { nome: 'Palavras tônicas', modo: 'tonicas', regra: 'PALAVRAS TÔNICAS: um tópico para cada versículo do texto, na ordem. Em cada tópico: chave = a palavra tônica (a mais marcante) do versículo, em maiúsculas; ref = só o versículo (ex.: Ne 1:2); direcao = 3 a 9 palavras, no formato \"<Palavra-chave> é ...\", é a FRASE QUE LIGA O VERSÍCULO AO TEMA; ligacao = a FRASE QUE INTERLIGA OS TÓPICOS: uma frase curta no formato \"Quem <faz a chave deste tópico>... <CHAVE DO PRÓXIMO>\", terminando apontando para a chave do próximo tópico (o último tópico fica com ligacao VAZIA); curiosidade = fato curto, só se tiver certeza; apoio_ref = um versículo de apoio; apoio_palavras = poucas palavras desse versículo para lembrar. pratica VAZIO e subs = []. Uma única parte, com titulo vazio. Preencha tema, palavra_chave, contraponto, referencia, partes e fechamento (uma frase que responde ao tema, com a palavra-chave marcada com **). Deixe introducao, gancho, ilustracao_titulo, ilustracao, abertura_corpo, resumo_verbos, oracao_de, oracao e apoio VAZIOS (apoio = []).' }
+  tonicas:    { nome: 'Palavras tônicas', modo: 'tonicas', regra: 'PALAVRAS TÔNICAS: um tópico para cada versículo do texto, na ordem. Em cada tópico: chave = a palavra tônica (a mais marcante) do versículo, em maiúsculas; ref = só o versículo (ex.: Ne 1:2); direcao = 3 a 9 palavras, no formato \"<Palavra-chave> é ...\", é a FRASE QUE LIGA O VERSÍCULO AO TEMA; ligacao = a FRASE QUE INTERLIGA OS TÓPICOS: uma frase curta no formato \"Quem <faz a chave deste tópico>... <CHAVE DO PRÓXIMO>\", terminando apontando para a chave do próximo tópico (o último tópico fica com ligacao VAZIA); curiosidade = fato curto, só se tiver certeza; apoio_ref = um versículo de apoio; apoio_palavras = um trecho CONTÍNUO de poucas palavras desse versículo, copiado exatamente da tradução indicada no pedido. pratica VAZIO e subs = []. Uma única parte, com titulo vazio. Preencha tema, palavra_chave, contraponto, referencia, partes e fechamento (uma frase que responde ao tema, com a palavra-chave marcada com **). Deixe introducao, gancho, ilustracao_titulo, ilustracao, abertura_corpo, resumo_verbos, oracao_de, oracao e apoio VAZIOS (apoio = []).' }
 };
-TIPOS.folha = { nome: '1 folha', modo: 'folha', regra: '1 FOLHA (PALAVRAS TÔNICAS COM VERBO): um tópico para cada versículo do texto, na ordem, em uma única parte com titulo vazio. Em cada tópico: chave = a palavra tônica do versículo, em maiúsculas, a mais marcante E a mais ligada ao tema (a palavra deve vir do próprio versículo); verbo = UM verbo curto no presente, em maiúsculas, que diz o que a pessoa do texto FAZ naquele ponto; os verbos, lidos em sequência, contam a história de ação do texto (ex.: SAI, PERGUNTA, VÊ, CHORA, ORA, ORA, AGE; pode repetir o verbo quando vários versículos são a mesma ação, como numa oração); ref = só o versículo (ex.: Ne 1:2); direcao = frase curtíssima (3 a 8 palavras) no formato \"<Palavra-chave do tema> é ...\", que liga o versículo ao tema; ligacao = frase curta no formato \"Quem <faz a ação deste tópico>... <CHAVE DO PRÓXIMO>\", apontando para a chave do próximo tópico (o último tópico fica com ligacao VAZIA); apoio_ref = um versículo de apoio de OUTRO trecho da Bíblia, que você conhece bem e que reforça a ideia do tópico; apoio_palavras = o trecho CURTO desse versículo de apoio (de 4 a 9 palavras, tradução Almeida), sem aspas, só se tiver certeza do texto; na dúvida, deixe vazio. curiosidade, pratica VAZIOS e subs = []. Preencha tema, palavra_chave, contraponto (a atitude oposta, em poucas palavras), referencia, partes e fechamento (uma frase que responde ao tema, com a palavra-chave marcada com **). Deixe introducao, gancho, ilustracao_titulo, ilustracao, abertura_corpo, resumo_verbos, oracao_de, oracao e apoio VAZIOS (apoio = []).' };
+TIPOS.folha = { nome: '1 folha', modo: 'folha', regra: '1 FOLHA (PALAVRAS TÔNICAS COM VERBO): um tópico para cada versículo do texto, na ordem, em uma única parte com titulo vazio. Em cada tópico: chave = a palavra tônica do versículo, em maiúsculas, a mais marcante E a mais ligada ao tema (a palavra deve vir do próprio versículo); verbo = UM verbo curto no presente, em maiúsculas, que diz o que a pessoa do texto FAZ naquele ponto; os verbos, lidos em sequência, contam a história de ação do texto (ex.: SAI, PERGUNTA, VÊ, CHORA, ORA, ORA, AGE; pode repetir o verbo quando vários versículos são a mesma ação, como numa oração); ref = só o versículo (ex.: Ne 1:2); direcao = frase curtíssima (3 a 8 palavras) no formato \"<Palavra-chave do tema> é ...\", que liga o versículo ao tema; ligacao = frase curta no formato \"Quem <faz a ação deste tópico>... <CHAVE DO PRÓXIMO>\", apontando para a chave do próximo tópico (o último tópico fica com ligacao VAZIA); apoio_ref = um versículo de apoio de OUTRO trecho da Bíblia, que você conhece bem e que reforça a ideia do tópico; apoio_palavras = o trecho CURTO e CONTÍNUO desse versículo de apoio (de 4 a 9 palavras, copiado exatamente como está na tradução indicada no pedido), sem aspas, só se tiver certeza do texto; na dúvida, deixe vazio. curiosidade, pratica VAZIOS e subs = []. Preencha tema, palavra_chave, contraponto (a atitude oposta, em poucas palavras), referencia, partes e fechamento (uma frase que responde ao tema, com a palavra-chave marcada com **). Deixe introducao, gancho, ilustracao_titulo, ilustracao, abertura_corpo, resumo_verbos, oracao_de, oracao e apoio VAZIOS (apoio = []).' };
 let tipoGuardado = localStorage.getItem('esboco_tipo');
 $('tipo').value = TIPOS[tipoGuardado] ? tipoGuardado : 'expositivo';
 $('tipo').addEventListener('change', () => localStorage.setItem('esboco_tipo', $('tipo').value));
@@ -565,12 +565,12 @@ const ED_EXEMPLO = {
   fech: 'A dor do outro chegou na minha casa: eu escolho ACOLHER.',
   apelo: '',
   itens: [
-    {verbo:'SAI', palavra:'FORTALEZA', ref:'Ne 1:1', frase:'é sair do conforto', lig:'Quem sai do conforto... PERGUNTA', vref:'Tg 4:17', vtxt:'sabe fazer o bem e não o faz'},
+    {verbo:'SAI', palavra:'CIDADELA', ref:'Ne 1:1', frase:'é sair do conforto', lig:'Quem sai do conforto... PERGUNTA', vref:'Tg 4:17', vtxt:'sabe fazer o bem e não o faz'},
     {verbo:'PERGUNTA', palavra:'PERGUNTEI', ref:'Ne 1:2', frase:'é perguntar para ajudar', lig:'Quem pergunta com amor... ENXERGA', vref:'Fp 2:4', vtxt:'cada qual também o que é dos outros'},
     {verbo:'VÊ', palavra:'MISÉRIA', ref:'Ne 1:3', frase:'é cobrir a vergonha do outro', lig:'Quem enxerga com respeito... CHORA', vref:'Lc 10:33', vtxt:'vendo-o, compadeceu-se dele'},
     {verbo:'CHORA', palavra:'CHOREI', ref:'Ne 1:4', frase:'é chorar com quem chora', lig:'Quem chora com o outro... levanta os olhos ao GRANDE', vref:'Rm 12:15', vtxt:'chorai com os que choram'},
     {verbo:'ORA', palavra:'GRANDE', ref:'Ne 1:5', frase:'é levar a dor a Deus', lig:'Quem vê a grandeza de Deus... CONFESSA', vref:'Jr 32:17', vtxt:'nada há demasiadamente difícil para ti'},
-    {verbo:'ORA', palavra:'CONFESSO', ref:'Ne 1:6', frase:'é ficar ao lado, nunca acima', lig:'Quem se põe ao lado... confessa: CORRUPTAMENTE', vref:'Sl 32:5', vtxt:'confessei-te o meu pecado'},
+    {verbo:'ORA', palavra:'CONFISSÃO', ref:'Ne 1:6', frase:'é ficar ao lado, nunca acima', lig:'Quem se põe ao lado... confessa: CORRUPTAMENTE', vref:'Sl 32:5', vtxt:'confessei-te o meu pecado'},
     {verbo:'ORA', palavra:'CORRUPTAMENTE', ref:'Ne 1:7', frase:'é admitir o erro sem desculpa', lig:'Quem admite o erro... LEMBRA-TE', vref:'Pv 28:13', vtxt:'o que as confessa e deixa alcançará misericórdia'},
     {verbo:'ORA', palavra:'LEMBRA-TE', ref:'Ne 1:8', frase:'é oferecer esperança na promessa', lig:'Quem agarra a promessa... CONVERTE', vref:'Dt 30:3', vtxt:'o Senhor teu Deus mudará a tua sorte'},
     {verbo:'ORA', palavra:'CONVERTERDES', ref:'Ne 1:9', frase:'é abrir o caminho de volta', lig:'Quem volta a Deus... lembra o RESGATASTE', vref:'2Cr 7:14', vtxt:'se o meu povo se humilhar e orar'},
@@ -737,60 +737,27 @@ async function edMudarTraducao(sel) {
   const temTexto = ED.itens.some(it => it.palavra.trim() || it.vtxt.trim());
   const soEtiqueta = () => { ED.traducao = nova; edSalvar(); edEtiqueta(); edStatus(''); };
   if (!temTexto) { soEtiqueta(); return; }
-  if (!chave) {
-    if (!confirm('Sem a chave da API (preencha no alto da página) não dá para trocar as palavras sozinho.\n\nMudar só o nome da tradução para ' + nome + ' e ajustar as palavras à mão?')) { sel.value = antiga; return; }
-    soEtiqueta(); return;
-  }
-  if (!confirm('Trocar as palavras tônicas e os versículos de apoio para a tradução ' + nome + '?\n\nAs frases e as ligações são mantidas. As palavras e os versículos de apoio atuais serão substituídos (salve o arquivo antes, se quiser guardar).')) { sel.value = antiga; return; }
-  sel.disabled = true; edStatus('Trocando as palavras para ' + nova + '... (até 1 minuto)');
+  if (!confirm('Trocar para a tradução ' + nome + '?\n\nBusco o texto dos versículos na ' + nova + ' e confiro cada palavra tônica e cada versículo de apoio: o que não existir nessa tradução é trocado. As frases e as ligações são mantidas.' + (chave ? '' : '\n\n(Sem a chave da API, os versículos de apoio são trocados, mas as palavras que não existirem na nova tradução só são avisadas.)') + '\n\nSalve o arquivo antes, se quiser guardar a versão atual.')) { sel.value = antiga; return; }
+  sel.disabled = true; edStatus('Buscando o texto da ' + nova + ' e conferindo as palavras...');
   try {
-    await edTrocarPalavras(nova);
+    const r = await edTrocarPalavras(nova);
     ED.traducao = nova; edSalvar(); edRender(); edEtiqueta();
-    edStatus('Pronto. Confira as palavras e os versículos na sua Bíblia (' + nova + ').');
+    const sufixo = r.ia ? ' (A IA não respondeu, então só o que dava para trocar sem ela foi trocado.)' : '';
+    edStatus((bibResumo(r, nova) || 'Nada precisou mudar.') + sufixo + ' Confira na sua Bíblia (' + nova + ').', r.pendentes.length > 0);
   } catch (e) {
     sel.value = antiga;
     let m = e.message || String(e);
-    if (m === 'REDE') m = 'Sem conexão com a internet. Nada foi alterado.';
-    else if (e instanceof FormatoErro || e instanceof SyntaxError) m = 'A IA devolveu um formato inesperado. Nada foi alterado; tente de novo.';
-    else if (/API key not valid|API_KEY_INVALID|API key expired/i.test(m)) m = 'Chave da API inválida. Nada foi alterado.';
-    else if (e.status === 429 || /quota|RESOURCE_EXHAUSTED/i.test(m)) m = 'Limite de uso da chave atingido. Nada foi alterado; tente em instantes.';
+    if (m === 'SEMBIBLIA') m = 'Não consegui buscar o texto da Bíblia agora (sem internet ou serviço fora do ar), ou os pontos estão sem o versículo (campo pequeno, ex.: Ne 1:2). Nada foi alterado.';
     edStatus(m, true);
   } finally { sel.disabled = false; }
 }
 async function edTrocarPalavras(sigla) {
   const chave = $('chave').value.trim();
   const modelo = ($('modelo').value || '').trim() || MODELOS[0];
-  const lista = ED.itens.map((it, i) => ({ n: i + 1, ref: it.ref, palavra: it.palavra, apoio_ref: it.vref, apoio_texto: it.vtxt }));
-  const sistema = 'Você é revisor bíblico brasileiro. Recebe uma lista de pontos de um esboço de sermão e deve reescrever, na TRADUÇÃO pedida, a palavra tônica de cada ponto e o trecho do versículo de apoio. Responda SOMENTE com JSON válido, sem explicações.\n' +
-    'Regras:\n' +
-    '1. palavra: UMA só palavra (pode ter hífen), em MAIÚSCULAS, tirada do versículo \"ref\" exatamente como ele aparece na tradução pedida. Se a palavra atual continua aparecendo nesse versículo na nova tradução, MANTENHA-A igual. Se não aparece, escolha a palavra da nova tradução que tem o mesmo sentido. Se \"ref\" estiver vazio, devolva a palavra atual sem mudar.\n' +
-    '2. apoio_texto: trecho curto (até 10 palavras) do versículo \"apoio_ref\", com as palavras exatas da nova tradução, sem aspas. Se \"apoio_ref\" estiver vazio, devolva vazio. Se você não tem certeza do texto nessa tradução, devolva o apoio_texto atual sem mudar. Nunca invente.\n' +
-    '3. Mantenha a ordem e o número \"n\" de cada ponto.\n' +
-    'Formato: {\"itens\":[{\"n\":1,\"palavra\":\"\",\"apoio_texto\":\"\"}]}';
-  const pedido = 'Tradução: ' + nomeTrad(sigla) + '\nTexto bíblico do esboço: ' + (ED.ref || '') + '\nPontos:\n' + JSON.stringify(lista);
-  const corpo = {
-    systemInstruction: { parts: [{ text: sistema }] },
-    contents: [{ role: 'user', parts: [{ text: pedido }] }],
-    generationConfig: { temperature: 0.2, responseMimeType: 'application/json', maxOutputTokens: 8192 }
-  };
-  const j = await chamar(chave, corpo, modelo);
-  const dados = lerJSON(textoDaResposta(j));
-  const arr = Array.isArray(dados.itens) ? dados.itens : (Array.isArray(dados) ? dados : []);
-  if (!arr.length) throw new FormatoErro('sem itens');
-  const limpo = v => String(v == null ? '' : v).trim().replace(/^["“”']+|["“”']+$/g, '');
-  const trocas = [];
-  arr.forEach(x => {
-    const it = ED.itens[Number(x && x.n) - 1]; if (!it) return;
-    const pal = limpo(x.palavra).toUpperCase();
-    if (it.ref.trim() && pal && !/\s/.test(pal) && pal.length <= 30 && pal !== it.palavra) { trocas.push([it.palavra, pal]); it.palavra = pal; }
-    const ap = limpo(x.apoio_texto);
-    if (it.vref.trim() && ap) it.vtxt = ap;
-  });
-  /* as ligações citam a palavra do próximo ponto em maiúsculas: acompanha a troca */
-  trocas.forEach(([velha, nova]) => {
-    if (!velha) return;
-    ED.itens.forEach(it => { if (it.lig) it.lig = it.lig.split(velha).join(nova); });
-  });
+  const r = await bibConferir(ED.itens, sigla, chave, modelo);
+  if (!r.algumTexto) throw new Error('SEMBIBLIA');
+  bibAcompanharLig(r.trocas, ED.itens);
+  return r;
 }
 function edMarcar() {
   const itens = document.querySelectorAll('#edlista .ed-item');
@@ -868,6 +835,233 @@ function soltarEditor() {
   if (f) { f.style.width = ''; f.style.fontSize = ''; }
 }
 
+/* ---------- Texto bíblico real (arquivos abertos no GitHub: damarals/biblias) ---------- */
+const BIB_BASES = [
+  'https://raw.githubusercontent.com/damarals/biblias/main/data/canonical/',
+  'https://cdn.jsdelivr.net/gh/damarals/biblias@main/data/canonical/'
+];
+const BIB_COD = { ARA: 'ARA', ARC: 'ARC', NAA: 'NAA', A21: 'AS21', NVI: 'NVI', NVT: 'NVT', NTLH: 'NTLH' };
+const BIB_LIVROS = [
+  ['GEN', ['gênesis', 'gn', 'gen']], ['EXO', ['êxodo', 'êx', 'ex', 'exo']], ['LEV', ['levítico', 'lv', 'lev']],
+  ['NUM', ['números', 'nm', 'num']], ['DEU', ['deuteronômio', 'dt', 'deut']], ['JOS', ['josué', 'js', 'jos']],
+  ['JDG', ['juízes', 'jz', 'jui']], ['RUT', ['rute', 'rt']], ['1SA', ['1samuel', '1sm', '1sa']],
+  ['2SA', ['2samuel', '2sm', '2sa']], ['1KI', ['1reis', '1rs']], ['2KI', ['2reis', '2rs']],
+  ['1CH', ['1crônicas', '1cr']], ['2CH', ['2crônicas', '2cr']], ['EZR', ['esdras', 'ed', 'esd']],
+  ['NEH', ['neemias', 'ne', 'nee']], ['EST', ['ester', 'et', 'est']], ['JOB', ['jó', 'jb', 'job']],
+  ['PSA', ['salmos', 'salmo', 'sl', 'sal']], ['PRO', ['provérbios', 'pv', 'pro', 'prov']],
+  ['ECC', ['eclesiastes', 'ec', 'ecl']], ['SNG', ['cantares', 'cantaresdesalomão', 'cânticos', 'ct', 'cant']],
+  ['ISA', ['isaías', 'is', 'isa']], ['JER', ['jeremias', 'jr', 'jer']], ['LAM', ['lamentações', 'lm', 'lam']],
+  ['EZK', ['ezequiel', 'ez', 'eze']], ['DAN', ['daniel', 'dn', 'dan']], ['HOS', ['oseias', 'oséias', 'os']],
+  ['JOL', ['joel', 'jl']], ['AMO', ['amós', 'am']], ['OBA', ['obadias', 'ob']], ['JON', ['jonas', 'jn']],
+  ['MIC', ['miqueias', 'miquéias', 'mq']], ['NAM', ['naum', 'na']], ['HAB', ['habacuque', 'hc']],
+  ['ZEP', ['sofonias', 'sf']], ['HAG', ['ageu', 'ag']], ['ZEC', ['zacarias', 'zc']], ['MAL', ['malaquias', 'ml']],
+  ['MAT', ['mateus', 'mt']], ['MRK', ['marcos', 'mc']], ['LUK', ['lucas', 'lc']], ['JHN', ['joão', 'jo']],
+  ['ACT', ['atos', 'at']], ['ROM', ['romanos', 'rm', 'rom']], ['1CO', ['1coríntios', '1co']],
+  ['2CO', ['2coríntios', '2co']], ['GAL', ['gálatas', 'gl', 'gal']], ['EPH', ['efésios', 'ef']],
+  ['PHP', ['filipenses', 'fp', 'fl']], ['COL', ['colossenses', 'cl']], ['1TH', ['1tessalonicenses', '1ts']],
+  ['2TH', ['2tessalonicenses', '2ts']], ['1TI', ['1timóteo', '1tm']], ['2TI', ['2timóteo', '2tm']],
+  ['TIT', ['tito', 'tt']], ['PHM', ['filemom', 'filemon', 'fm']], ['HEB', ['hebreus', 'hb']],
+  ['JAS', ['tiago', 'tg']], ['1PE', ['1pedro', '1pe']], ['2PE', ['2pedro', '2pe']],
+  ['1JN', ['1joão', '1jo']], ['2JN', ['2joão', '2jo']], ['3JN', ['3joão', '3jo']],
+  ['JUD', ['judas', 'jd']], ['REV', ['apocalipse', 'ap']]
+];
+const semAcento = t => String(t == null ? '' : t).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+function chaveLivro(t) {
+  t = String(t).toLowerCase().trim();
+  t = t.replace(/^primeir[oa]\s+/, '1 ').replace(/^segund[oa]\s+/, '2 ').replace(/^terceir[oa]\s+/, '3 ');
+  t = t.replace(/^(iii|ii|i)\s+/, (m, r) => ({ i: '1 ', ii: '2 ', iii: '3 ' })[r]);
+  t = t.replace(/^([123])\s*[ºª°]\.?/, '$1');
+  return t.replace(/[\s.]/g, '');
+}
+const BIB_MAPA_AC = {}, BIB_MAPA = {};
+BIB_LIVROS.forEach(([cod, nomes]) => nomes.forEach(n => {
+  const k = chaveLivro(n);
+  BIB_MAPA_AC[k] = cod;
+  if (!BIB_MAPA[semAcento(k)]) BIB_MAPA[semAcento(k)] = cod;
+}));
+BIB_MAPA['jo'] = 'JHN'; /* "Jo" é João; "Jó" com acento é Jó */
+const achaLivro = t => { const k = chaveLivro(t); return BIB_MAPA_AC[k] || BIB_MAPA[semAcento(k)] || null; };
+
+/* "Ne 1:1-11", "Neemias 1.1-11", "Jo 3:16", "Salmo 23", "1 Co 13:4-7,13", "Fp 2:5-11; 3:1" */
+function bibParse(ref) {
+  const s = String(ref || '').trim();
+  const m = s.match(/^((?:[123]\s*[ºª°]?\.?\s*|(?:iii|ii|i)\s+|(?:primeir|segund|terceir)[oa]\s+)?)([A-Za-zÀ-ÿ]+)\.?\s*(?:(d[eao]s?\s+[A-Za-zÀ-ÿ]+)\s*)?(.*)$/i);
+  if (!m) return null;
+  let cod = achaLivro(m[1] + m[2] + (m[3] ? ' ' + m[3] : ''));
+  if (!cod && m[3]) cod = achaLivro(m[1] + m[2]);
+  if (!cod) return null;
+  let r = String(m[4] || '').replace(/[–—−]/g, '-').replace(/\s+/g, '').replace(/(\d)[a-z]+/gi, '$1');
+  if (!r) return null;
+  if (r.indexOf(':') < 0 && /^\d+[.,]\d/.test(r)) r = r.replace(/^(\d+)[.,]/, '$1:');
+  const trechos = [];
+  for (const seg of r.split(';')) {
+    let mm;
+    if ((mm = seg.match(/^(\d+):(\d+)-(\d+):(\d+)$/))) {
+      trechos.push({ c1: +mm[1], v1: +mm[2], c2: +mm[3], v2: +mm[4] });
+    } else if ((mm = seg.match(/^(\d+):(.+)$/))) {
+      const cap = +mm[1];
+      for (const p of mm[2].split(',')) {
+        const q = p.match(/^(\d+)(?:-(\d+))?$/);
+        if (!q) return null;
+        trechos.push({ c1: cap, v1: +q[1], c2: cap, v2: +(q[2] || q[1]) });
+      }
+    } else if ((mm = seg.match(/^(\d+)(?:-(\d+))?$/))) {
+      trechos.push({ c1: +mm[1], v1: null, c2: +(mm[2] || mm[1]), v2: null });
+    } else return null;
+  }
+  return trechos.length ? { cod, trechos } : null;
+}
+function bibExtrair(livro, t) {
+  const out = [], ab = livro.abbrev || livro.name || livro.code;
+  for (let c = t.c1; c <= t.c2; c++) {
+    const cap = livro.chapters.find(x => x.number === c);
+    if (!cap) continue;
+    const ult = cap.verses.reduce((mx, v) => Math.max(mx, v.number), 0);
+    const ini = (c === t.c1 && t.v1 != null) ? t.v1 : 1;
+    const fim = (c === t.c2 && t.v2 != null) ? t.v2 : ult;
+    cap.verses.forEach(v => {
+      if (v.number >= ini && v.number <= fim && v.text) out.push({ ref: ab + ' ' + c + ':' + v.number, c, v: v.number, texto: String(v.text).trim() });
+    });
+  }
+  return out;
+}
+const BIB_CACHE = {};
+async function bibLivro(sigla, cod) {
+  const k = (BIB_COD[sigla] || 'ARA') + '/' + cod;
+  if (!BIB_CACHE[k]) BIB_CACHE[k] = (async () => {
+    let falha = new Error('REDE');
+    for (const base of BIB_BASES) {
+      const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 20000);
+      try {
+        const r = await fetch(base + k + '.json', { signal: ctl.signal });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const j = await r.json();
+        if (!j || !Array.isArray(j.chapters)) throw new Error('formato');
+        return j;
+      } catch (e) { falha = e; } finally { clearTimeout(to); }
+    }
+    throw falha;
+  })();
+  try { return await BIB_CACHE[k]; } catch (e) { delete BIB_CACHE[k]; throw e; }
+}
+/* devolve a lista de versículos reais, ou null se a referência não for entendida / não existir; lança erro se faltar internet */
+async function bibVersos(sigla, ref) {
+  const p = bibParse(ref); if (!p) return null;
+  const livro = await bibLivro(sigla, p.cod);
+  const lista = [];
+  p.trechos.forEach(t => lista.push(...bibExtrair(livro, t)));
+  return lista.length ? lista : null;
+}
+
+/* comparação de palavras, sem acento e sem maiúsculas */
+const bibToks = t => semAcento(String(t || '').toLowerCase()).match(/[a-z0-9]+(?:-[a-z0-9]+)*/g) || [];
+function achaPalavra(pal, texto) {
+  const p = bibToks(pal).join('-').replace(/-/g, ''); if (!p) return false;
+  return bibToks(texto).some(t => t.replace(/-/g, '') === p);
+}
+function apoioConfere(trecho, texto) {
+  const a = bibToks(trecho); if (!a.length) return true;
+  const set = new Set(); bibToks(texto).forEach(t => { set.add(t); t.split('-').forEach(x => set.add(x)); });
+  return a.every(w => set.has(w) || w.split('-').every(x => set.has(x)));
+}
+function trechoContinuo(trecho, texto) {
+  const a = bibToks(trecho).join(' '); if (!a) return false;
+  return (' ' + bibToks(texto).join(' ') + ' ').indexOf(' ' + a + ' ') >= 0;
+}
+const primeirasPalavras = (texto, n) => String(texto).trim().split(/\s+/).slice(0, n).join(' ').replace(/[,;:.!?…]+$/, '');
+
+/* Confere (e corrige) as palavras tônicas e os versículos de apoio de uma lista de itens
+   com o TEXTO REAL da tradução. itens: [{ref, palavra, vref, vtxt}], alterados no lugar. */
+async function bibConferir(itens, sigla, chave, modelo) {
+  const res = { ok: 0, corrigidas: 0, apoios: 0, semTexto: 0, pendentes: [], rede: false, ia: null, trocas: [], algumTexto: false };
+  const busca = async ref => {
+    if (!ref || !String(ref).trim()) return null;
+    try { const v = await bibVersos(sigla, ref); return v ? v.map(x => x.texto).join(' ') : null; }
+    catch (e) { res.rede = true; return null; }
+  };
+  const prep = await Promise.all(itens.map(async it => ({ it, tr: await busca(it.ref), tv: await busca(it.vref) })));
+  prep.forEach(p => {
+    const it = p.it;
+    if (p.tr || p.tv) res.algumTexto = true;
+    if (!p.tr && it.palavra) res.semTexto++;
+    p.precisaP = !!(p.tr && it.palavra && !achaPalavra(it.palavra, p.tr));
+    if (p.tr && it.palavra && !p.precisaP) res.ok++;
+    p.precisaV = !!(p.tv && (it.vtxt ? !trechoContinuo(it.vtxt, p.tv) : true));
+  });
+  const fazer = prep.map((p, i) => ({ p, n: i + 1 })).filter(x => x.p.precisaP || x.p.precisaV);
+  if (fazer.length && chave) {
+    try {
+      const lista = fazer.map(x => ({
+        n: x.n,
+        palavra_antiga: x.p.precisaP ? x.p.it.palavra : '',
+        texto: x.p.precisaP ? x.p.tr : '',
+        apoio_ref: x.p.precisaV ? x.p.it.vref : '',
+        apoio: x.p.precisaV ? x.p.tv : ''
+      }));
+      const sistema = 'Você escolhe palavras de versículos bíblicos em português. Responda SOMENTE com JSON válido, sem explicações.\n' +
+        'Regras:\n' +
+        '1. palavra: UMA palavra COPIADA do campo "texto", exatamente como está escrita lá, em MAIÚSCULAS. Escolha a mais marcante e, se der, a que tem o mesmo sentido da palavra_antiga. Se "texto" vier vazio, devolva "".\n' +
+        '2. apoio_texto: um trecho CONTÍNUO de 3 a 8 palavras, COPIADO letra por letra do campo "apoio", o mais marcante. Se "apoio" vier vazio, devolva "".\n' +
+        '3. Nunca invente, não troque palavras, não corrija: só copie do texto recebido.\n' +
+        'Formato: {"itens":[{"n":1,"palavra":"","apoio_texto":""}]}';
+      const corpo = {
+        systemInstruction: { parts: [{ text: sistema }] },
+        contents: [{ role: 'user', parts: [{ text: 'Tradução: ' + nomeTrad(sigla) + '\nPontos:\n' + JSON.stringify(lista) }] }],
+        generationConfig: { temperature: 0.1, responseMimeType: 'application/json', maxOutputTokens: 8192 }
+      };
+      const j = await chamar(chave, corpo, modelo);
+      const dados = lerJSON(textoDaResposta(j));
+      const arr = Array.isArray(dados.itens) ? dados.itens : (Array.isArray(dados) ? dados : []);
+      const limpo = v => String(v == null ? '' : v).trim().replace(/^["“”'‘’]+|["“”'‘’]+$/g, '');
+      arr.forEach(x => {
+        const f = fazer.find(y => y.n === Number(x && x.n)); if (!f) return;
+        const p = f.p, it = p.it;
+        const pal = limpo(x.palavra).toUpperCase();
+        if (p.precisaP && pal && !/\s/.test(pal) && achaPalavra(pal, p.tr)) {
+          res.trocas.push([it.palavra, pal]); it.palavra = pal; res.corrigidas++; p.precisaP = false;
+        }
+        const ap = limpo(x.apoio_texto);
+        if (p.precisaV && ap && trechoContinuo(ap, p.tv)) { it.vtxt = ap; res.apoios++; p.precisaV = false; }
+      });
+    } catch (e) { res.ia = e; }
+  }
+  prep.forEach(p => {
+    if (p.precisaV) { p.it.vtxt = primeirasPalavras(p.tv, 8); res.apoios++; }   /* texto literal do versículo */
+    if (p.precisaP) res.pendentes.push(p.it.palavra);
+  });
+  /* as ligações citam a palavra do próximo ponto em maiúsculas: quem usa a lista aplica as trocas */
+  return res;
+}
+function bibResumo(r, sigla) {
+  const p = [];
+  if (r.ok) p.push(r.ok + ' palavra(s) já certa(s)');
+  if (r.corrigidas) p.push(r.corrigidas + ' palavra(s) trocada(s)');
+  if (r.apoios) p.push(r.apoios + ' versículo(s) de apoio ajustado(s)');
+  let t = p.length ? 'Conferido com o texto da ' + sigla + ': ' + p.join(', ') + '.' : '';
+  if (r.pendentes.length) t += ' Não achei no versículo da ' + sigla + ': ' + r.pendentes.join(', ') + ' (troque à mão ou confira na sua Bíblia).';
+  if (r.semTexto) t += ' ' + r.semTexto + ' ponto(s) sem versículo para conferir.';
+  if (r.rede) t += ' Alguns versículos não puderam ser buscados (sem internet?).';
+  return t.trim();
+}
+/* acompanha as palavras trocadas nas ligações (que citam a palavra do próximo ponto) */
+function bibAcompanharLig(trocas, listaLig) {
+  trocas.forEach(([velha, nova]) => {
+    if (!velha || velha === nova) return;
+    listaLig.forEach(o => { if (o.lig) o.lig = o.lig.split(velha).join(nova); });
+  });
+}
+/* Confere o esboço gerado pela IA (todas as palavras tônicas e apoios) */
+async function conferirEsboco(d, sigla, chave, modelo) {
+  const tops = []; d.partes.forEach(p => p.topicos.forEach(t => tops.push(t)));
+  const itens = tops.map(t => ({ ref: t.ref, palavra: t.chave, vref: t.apoio_ref, vtxt: t.apoio_palavras }));
+  let r;
+  try { r = await bibConferir(itens, sigla, chave, modelo); }
+  catch (e) { return { ok: 0, corrigidas: 0, apoios: 0, semTexto: tops.length, pendentes: [], rede: true, trocas: [], algumTexto: false }; }
+  tops.forEach((t, i) => { t.chave = itens[i].palavra; t.apoio_palavras = itens[i].vtxt; });
+  bibAcompanharLig(r.trocas, tops.map(t => ({ get lig() { return t.ligacao; }, set lig(v) { t.ligacao = v; } })));
+  return r;
+}
+
 /* ---------- Conversa com a IA ---------- */
 function lerJSON(txt) {
   let t = (txt || '').trim().replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
@@ -931,23 +1125,41 @@ $('gerar').addEventListener('click', async () => {
   localStorage.setItem('esboco_api_key', chave);
   localStorage.setItem('esboco_modelo', modelo);
 
-  const btn = $('gerar'); btn.disabled = true; msg.textContent = 'Gerando o esboço... (pode levar até 1 minuto)';
+  const btn = $('gerar'); btn.disabled = true;
+  const sigla = tradValida($('traducao').value);
   try {
+    let fonte = '', aviso = '';
+    if (passagem) {
+      fonte = 'Texto dos versículos colado pelo pastor (use como única fonte):\n' + passagem;
+    } else {
+      msg.textContent = 'Buscando o texto na ' + sigla + '...';
+      try {
+        const vs = await bibVersos(sigla, texto);
+        if (vs) fonte = 'Texto dos versículos na ' + nomeTrad(sigla) + ' (texto oficial desta tradução; use como única fonte e copie dele as palavras tônicas, letra por letra):\n' + vs.slice(0, 200).map(v => '[' + v.ref + '] ' + v.texto).join('\n');
+        else aviso = ' Não entendi a referência "' + texto + '" para buscar o texto da Bíblia; a IA escreveu de memória, então confira os versículos.';
+      } catch (e) { aviso = ' Não consegui buscar o texto da ' + sigla + ' (sem internet ou serviço fora do ar); a IA escreveu de memória, então confira os versículos.'; }
+    }
+    msg.textContent = 'Gerando o esboço... (pode levar até 1 minuto)';
     const pedido = 'Texto bíblico: ' + texto +
-      (passagem ? '\nTexto dos versículos (use como única fonte):\n' + passagem : '') +
+      (fonte ? '\n' + fonte : '') +
       '\nTema: ' + (tema || '(crie um tema curto e forte)') +
-      '\nTradução bíblica: ' + nomeTrad($('traducao').value) + '. As palavras tônicas (chave) e os trechos de versículos devem ser exatamente desta tradução (se o pastor colou o texto dos versículos, vale o texto colado).' +
+      '\nTradução bíblica: ' + nomeTrad($('traducao').value) + '. As palavras tônicas (chave) e os trechos de versículos devem ser exatamente desta tradução; se o texto dos versículos veio acima, ele manda.' +
       '\nTipo de esboço: ' + TIPOS[$('tipo').value].regra;
     const corpo = {
       systemInstruction: { parts: [{ text: INSTRUCAO }] },
       contents: [{ role: 'user', parts: [{ text: pedido }] }],
       generationConfig: { temperature: 0.7, responseMimeType: 'application/json', maxOutputTokens: 16384 }
     };
-    let pronto = false;
+    let pronto = false, conf = null;
     for (let tentativa = 0; tentativa < 2 && !pronto; tentativa++) {
       const j = await chamar(chave, corpo, modelo);
       try {
-        render(normalizar(lerJSON(textoDaResposta(j))), TIPOS[$('tipo').value].nome, TIPOS[$('tipo').value].modo);
+        const dn = normalizar(lerJSON(textoDaResposta(j)));
+        if (!passagem) {
+          msg.textContent = 'Conferindo as palavras com o texto da ' + sigla + '...';
+          conf = await conferirEsboco(dn, sigla, chave, modelo);
+        }
+        render(dn, TIPOS[$('tipo').value].nome, TIPOS[$('tipo').value].modo);
         pronto = true;
       } catch (e) {
         if (!(e instanceof FormatoErro || e instanceof SyntaxError)) throw e;
@@ -955,7 +1167,9 @@ $('gerar').addEventListener('click', async () => {
         msg.textContent = 'Ajustando o formato, tentando de novo...';
       }
     }
-    msg.textContent = 'Esboço pronto. Confira os versículos de apoio na sua Bíblia.';
+    const resumo = passagem ? ' Usei o texto que você colou.' : (conf ? ' ' + bibResumo(conf, sigla) : '');
+    msg.textContent = ('Esboço pronto (' + sigla + ').' + resumo + aviso + ' Confira os versículos de apoio na sua Bíblia.').replace(/\s+/g, ' ');
+    if (aviso || (conf && (conf.pendentes.length || conf.rede))) msg.className = 'msg erro';
     $('saida').scrollIntoView({ behavior: 'smooth' });
   } catch (e) {
     msg.className = 'msg erro';
