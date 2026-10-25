@@ -175,6 +175,8 @@ body:not(.ed) .ed-only{display:none!important}
   <label for="fu">Link (YouTube, Vimeo ou arquivo .mp4)</label><input id="fu" placeholder="https://www.youtube.com/watch?v=…">
   <label for="fc">Foto de capa (opcional)</label><input id="fc" placeholder="https://… link da foto do imóvel">
   <div class="hint">Vídeos do YouTube já usam a foto automática. Use este campo para Vimeo ou .mp4.</div>
+  <label for="fi">Foto do imóvel para a prévia do link (da galeria)</label><input type="file" id="fi" accept="image/*">
+  <div class="hint">Aparece no WhatsApp/Facebook quando você compartilha o link. Vale após “Publicar p/ todos”.</div>
   <label for="ff">Ou suba um vídeo do computador</label><input type="file" id="ff" accept="video/*">
   <div class="hint" id="fh">O arquivo fica guardado neste aparelho. Para outras pessoas assistirem, publique no YouTube ou Vimeo e use o link.</div>
   <label class="chk"><input type="checkbox" id="fv"> Vídeo vertical (gravado em pé no celular)</label>
@@ -250,7 +252,7 @@ function thumb(v,big){var p=v.p;if(p.k==='yt')return 'https://i.ytimg.com/vi/'+p
 function mkImg(src,cls,alt,fb){var im=document.createElement('img');im.src=src;im.alt=alt||'';im.loading='lazy';im.decoding='async';if(cls)im.className=cls;im.onerror=function(){if(fb&&im.src.indexOf(fb)<0){im.src=fb;}else im.remove();};im.onload=function(){if(im.naturalWidth&&im.naturalWidth<=120)im.onerror();};return im;}
 function token(v){return 'v-'+v.p.id;}
 function baseUrl(){var b='';try{b=localStorage.getItem('tvfc_base')||'';}catch(e){}return (b||SHARE_BASE||location.href).split('#')[0].split('?')[0];}
-function linkOf(v){var b=baseUrl();if(v.p.k==='local')return b+'#'+token(v);return b+'?u='+encodeURIComponent(v.u)+'&t='+encodeURIComponent(v.t)+(v.v?'&f=v':'')+'#'+token(v);}
+function linkOf(v){var b=baseUrl();if(v.p.k==='local')return b+'#'+token(v);if(!v.loc&&!v.sh)return b.replace(/[^\/]*$/,'')+'v/'+v.p.id+'.html';return b+'?u='+encodeURIComponent(v.u)+'&t='+encodeURIComponent(v.t)+(v.v?'&f=v':'')+'#'+token(v);}
 function render(){
   build();
   var vazio=!list.length;
@@ -297,6 +299,7 @@ function show(){
   btn(a,'⤢ Ajustar tela','mo',function(){FIT=!FIT;sc.classList.toggle('fit',FIT);});
   var o=document.createElement('a');o.className='b';o.textContent={yt:'▶ Assistir no YouTube',vm:'▶ Assistir no Vimeo'}[cur.p.k]||'Abrir no site de origem';o.href=cur.p.open;o.target='_blank';o.rel='noopener';if(cur.p.k!=='local')a.appendChild(o);
   if(cur.p.k==='local'){var nt=document.createElement('div');nt.style.cssText='flex:1 1 100%;grid-column:1/-1;font-size:.72rem;color:#c9b77f;line-height:1.5';nt.textContent='📁 Vídeo salvo só neste aparelho. Para outras pessoas assistirem, publique no YouTube ou Vimeo e adicione pelo link.';a.appendChild(nt);}
+  if(ED&&!cur.sh&&cur.p.k!=='local'){var pid=cur.p.id;btn(a,'🖼 Foto da prévia','',function(){var i=document.createElement('input');i.type='file';i.accept='image/*';i.onchange=function(){var f=i.files[0];if(!f)return;prepImg(f,function(b){if(!b){toast('Não foi possível ler a foto.');return;}idbPut('img:'+pid,b,function(ok){toast(ok?'Foto guardada! Toque em Publicar p/ todos.':'Não foi possível guardar a foto.');});});};i.click();});}
   if(ED&&!cur.sh)btn(a,'🗑 Remover','r',function(){
     if(!confirm('Remover este vídeo?'))return;
     if(!cur.loc){var dl=loadDel();dl.push(cur.p.id);saveDel(dl);}if(cur.p.k==='local')idbDel(cur.p.lid);saveLocal(loadLocal().filter(function(x){return parse(x.u).id!==cur.p.id;}));history.replaceState(null,'',location.pathname+location.search);render();toast('Vídeo removido.');
@@ -346,7 +349,7 @@ function idb(cb){try{var r=indexedDB.open('tvfc',1);r.onupgradeneeded=function()
 function idbPut(id,blob,cb){idb(function(d){if(!d)return cb(false);var tx=d.transaction('vid','readwrite');tx.objectStore('vid').put(blob,id);tx.oncomplete=function(){cb(true);};tx.onerror=tx.onabort=function(){cb(false);};});}
 function idbGet(id,cb){idb(function(d){if(!d)return cb(null);var q=d.transaction('vid').objectStore('vid').get(id);q.onsuccess=function(){cb(q.result||null);};q.onerror=function(){cb(null);};});}
 function idbDel(id){idb(function(d){if(d)d.transaction('vid','readwrite').objectStore('vid').delete(id);});}
-function resetForm(){$('fc').value='';$('ft').value='';$('fu').value='';$('ff').value='';$('fv').checked=false;$('form').classList.remove('on');}
+function resetForm(){$('fi').value='';$('fc').value='';$('ft').value='';$('fu').value='';$('ff').value='';$('fv').checked=false;$('form').classList.remove('on');}
 $('ff').onchange=function(){var f=this.files[0];if(f&&!$('ft').value.trim())$('ft').value=f.name.replace(/\.[^.]+$/,'');};
 $('save').onclick=function(){
   var f=$('ff').files[0],cv=$('fc').value.trim(),t=$('ft').value.trim(),u=$('fu').value.trim(),vert=$('fv').checked,sv=$('save');
@@ -363,8 +366,9 @@ $('save').onclick=function(){
   var p=parse(u);
   if(!p){toast('Cole um link válido ou escolha um arquivo do computador.');return;}
   if(!t)t='Vídeo '+(list.length+1);
-  var a=loadLocal();a.push({t:t,u:u,v:vert,c:cv});saveLocal(a);resetForm();
-  location.hash='v-'+p.id;render();toast('Vídeo adicionado!');
+  var fi=$('fi').files[0];
+  function fin(){var a=loadLocal();a.push({t:t,u:u,v:vert,c:cv});saveLocal(a);resetForm();location.hash='v-'+p.id;render();toast(fi?'Vídeo adicionado! Publique p/ todos para a foto aparecer na prévia.':'Vídeo adicionado!');}
+  if(fi){prepImg(fi,function(b){if(!b){toast('Não foi possível ler a foto.');return;}idbPut('img:'+p.id,b,function(ok){if(!ok){toast('Não foi possível guardar a foto.');return;}fin();});});}else fin();
 };
 function playEmbed(sc){
   var k=cur.p.k,mob=matchMedia('(max-width:900px)').matches&&!cur.v,f=document.createElement('iframe'),q='autoplay=1&playsinline=1&rel=0';
@@ -401,20 +405,98 @@ document.addEventListener('click',function(e){
   if(knock&&d<350)return;
   if(knock&&d<=2500){knock=0;openGate();}else knock=n;
 });
+function crcT(){var t=[],c,n,k;for(n=0;n<256;n++){c=n;for(k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;}
+function zipFiles(files){
+  var T=crcT(),enc=new TextEncoder(),parts=[],cd=[],off=0;
+  files.forEach(function(f){
+    var nm=enc.encode(f.n),d=f.d,crc=0xFFFFFFFF,i;
+    for(i=0;i<d.length;i++)crc=T[(crc^d[i])&255]^(crc>>>8);
+    crc=(crc^0xFFFFFFFF)>>>0;
+    var h=new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint16(10,0,true);h.setUint16(12,0x21,true);
+    h.setUint32(14,crc,true);h.setUint32(18,d.length,true);h.setUint32(22,d.length,true);h.setUint16(26,nm.length,true);h.setUint16(28,0,true);
+    var c=new DataView(new ArrayBuffer(46));
+    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);c.setUint16(12,0,true);c.setUint16(14,0x21,true);
+    c.setUint32(16,crc,true);c.setUint32(20,d.length,true);c.setUint32(24,d.length,true);c.setUint16(28,nm.length,true);c.setUint16(30,0,true);c.setUint16(32,0,true);c.setUint16(34,0,true);c.setUint16(36,0,true);c.setUint32(38,0,true);c.setUint32(42,off,true);
+    parts.push(new Uint8Array(h.buffer),nm,d);cd.push(new Uint8Array(c.buffer),nm);
+    off+=30+nm.length+d.length;
+  });
+  var cs=0;cd.forEach(function(x){cs+=x.length;});
+  var e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true);e.setUint16(4,0,true);e.setUint16(6,0,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cs,true);e.setUint32(16,off,true);e.setUint16(20,0,true);
+  return new Blob(parts.concat(cd,[new Uint8Array(e.buffer)]),{type:'application/zip'});
+}
+function ea(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function prepImg(file,cb){
+  var im=new Image(),url=URL.createObjectURL(file);
+  im.onload=function(){
+    var c=document.createElement('canvas');c.width=1200;c.height=630;var x=c.getContext('2d');
+    x.fillStyle='#13233d';x.fillRect(0,0,1200,630);
+    var s=Math.max(1200/im.naturalWidth,630/im.naturalHeight),w=im.naturalWidth*s,h=im.naturalHeight*s;
+    x.drawImage(im,(1200-w)/2,(630-h)/2,w,h);
+    c.toBlob(function(b){URL.revokeObjectURL(url);cb(b);},'image/jpeg',0.85);
+  };
+  im.onerror=function(){URL.revokeObjectURL(url);cb(null);};im.src=url;
+}
 function pubFile(){
   var del=loadDel(),fx=VIDEOS.filter(function(v){var p=parse(v.u);return p&&del.indexOf(p.id)<0;}),ids={};
   fx.forEach(function(v){ids[parse(v.u).id]=1;});
   var ad=loadLocal().filter(function(v){var p=parse(v.u);return p&&p.k!=='local'&&!ids[p.id];});
   var sk=loadLocal().filter(function(v){return /^local:/.test(v.u);}).length;
   var all=fx.concat(ad).map(function(v){var o={t:v.t,u:v.u,v:!!v.v};if(v.c)o.c=v.c;return o;});
-  var cfg='/*CFG_START*/\nvar VIDEOS='+JSON.stringify(all,null,1).replace(/</g,'\\u003c')+';\nvar EDITOR_HASH=\''+EDITOR_HASH+'\';\nvar SHARE_BASE=\''+SHARE_BASE+'\';\n/*CFG_END*/';
-  ogPick(all,function(og){
-  fetch(location.href.split('#')[0].split('?')[0]).then(function(r){return r.text();}).then(function(t){
-    t=t.replace(/\/\*CFG_START\*\/[\s\S]*?\/\*CFG_END\*\//,function(){return cfg;});
-    t=t.replace(/<!--OG_START-->[\s\S]*?<!--OG_END-->/,function(){return og;});
-    var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/html'}));a.download='tv-fcosta.html';document.body.appendChild(a);a.click();a.remove();
-    saveDel([]);toast('Arquivo gerado: suba o tv-fcosta.html no GitHub.'+(sk?' ('+sk+' vídeo(s) de arquivo ficam de fora.)':''));
-  }).catch(function(){copy(cfg);toast('Não foi possível baixar aqui. Bloco copiado: cole no lugar do bloco CFG do arquivo.');});
+  var main=baseUrl(),B=main.replace(/[^\/]*$/,''),enc=new TextEncoder(),files=[];
+  function nextImg(i,done){
+    if(i>=all.length)return done();
+    var p=parse(all[i].u);if(!p||p.k==='local')return nextImg(i+1,done);
+    idbGet('img:'+p.id,function(bl){
+      if(!bl)return nextImg(i+1,done);
+      var fr=new FileReader();
+      fr.onload=function(){files.push({n:'v/'+p.id+'.jpg',d:new Uint8Array(fr.result)});all[i].c='v/'+p.id+'.jpg';nextImg(i+1,done);};
+      fr.onerror=function(){nextImg(i+1,done);};
+      fr.readAsArrayBuffer(bl);
+    });
+  }
+  function shareImg(o,p,cb){
+    if(o.c){return cb(/^https?:\/\//i.test(o.c)?o.c:B+o.c,1200,630);}
+    if(p.k==='yt'){
+      var u='https://i.ytimg.com/vi/'+p.id+'/maxresdefault.jpg',im=new Image(),d=false;
+      function f(ok){if(d)return;d=true;cb(ok?u:'https://i.ytimg.com/vi/'+p.id+'/hqdefault.jpg',ok?1280:480,ok?720:360);}
+      im.onload=function(){f(im.naturalWidth>320);};im.onerror=function(){f(false);};setTimeout(function(){f(false);},4000);im.src=u;return;
+    }
+    cb(B+'banner-tv-fcosta-v2.png',1200,630);
+  }
+  function sharePage(o,p,img,w,h){
+    var self=B+'v/'+p.id+'.html',tgt=main+'?u='+encodeURIComponent(o.u)+'&t='+encodeURIComponent(o.t)+(o.v?'&f=v':'')+'#v-'+p.id;
+    var ds='Imóveis em vídeo com FCosta Corretor de Imóveis · CRECI-SP 294791-F';
+    return '<!DOCTYPE html>\n<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+ea(o.t)+' · TV FCosta</title><meta name="theme-color" content="#13233d">'
+    +'<meta property="og:type" content="website"><meta property="og:locale" content="pt_BR"><meta property="og:site_name" content="TV FCosta Corretor">'
+    +'<meta property="og:title" content="'+ea(o.t)+'"><meta property="og:description" content="'+ea(ds)+'"><meta property="og:url" content="'+ea(self)+'">'
+    +'<meta property="og:image" content="'+ea(img)+'"><meta property="og:image:width" content="'+w+'"><meta property="og:image:height" content="'+h+'">'
+    +'<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="'+ea(o.t)+'"><meta name="twitter:image" content="'+ea(img)+'">'
+    +'<noscript><meta http-equiv="refresh" content="0;url='+ea(tgt)+'"></noscript></head>'
+    +'<body style="margin:0;background:#13233d;color:#e6c45f;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center"><p>Abrindo o vídeo…<br><br><a style="color:#e6c45f" href="'+ea(tgt)+'">Toque aqui se não abrir</a></p>'
+    +'<script>location.replace('+JSON.stringify(tgt).replace(/</g,'\\u003c')+');<\/script></body></html>';
+  }
+  function pages(i,done){
+    if(i>=all.length)return done();
+    var o=all[i],p=parse(o.u);if(!p||p.k==='local')return pages(i+1,done);
+    shareImg(o,p,function(img,w,h){files.push({n:'v/'+p.id+'.html',d:enc.encode(sharePage(o,p,img,w,h))});pages(i+1,done);});
+  }
+  function dl(){
+    var a=document.createElement('a');a.href=URL.createObjectURL(zipFiles(files));a.download='tv-fcosta-publicar.zip';document.body.appendChild(a);a.click();a.remove();
+  }
+  nextImg(0,function(){
+    var cfg='/*CFG_START*/\nvar VIDEOS='+JSON.stringify(all,null,1).replace(/</g,'\\u003c')+';\nvar EDITOR_HASH=\''+EDITOR_HASH+'\';\nvar SHARE_BASE=\''+SHARE_BASE+'\';\n/*CFG_END*/';
+    pages(0,function(){
+      ogPick(all,function(og){
+        fetch(location.href.split('#')[0].split('?')[0]).then(function(r){return r.text();}).then(function(t){
+          t=t.replace(/\/\*CFG_START\*\/[\s\S]*?\/\*CFG_END\*\//,function(){return cfg;});
+          t=t.replace(/<!--OG_START-->[\s\S]*?<!--OG_END-->/,function(){return og;});
+          files.unshift({n:'tv-fcosta.html',d:enc.encode(t)});dl();
+          saveDel([]);toast('Zip gerado: extraia e suba TUDO no GitHub (tv-fcosta.html e a pasta v).'+(sk?' ('+sk+' vídeo(s) de arquivo ficam de fora.)':''));
+        }).catch(function(){dl();copy(cfg);toast('Baixei só as páginas de prévia. Bloco copiado: cole no lugar do bloco CFG do arquivo.');});
+      });
+    });
   });
 }
 function ogPick(all,cb){
