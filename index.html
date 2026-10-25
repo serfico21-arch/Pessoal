@@ -247,6 +247,21 @@ body.arrastando{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .ab-n small{font-weight:500;font-size:11.5px;color:var(--texto-muted)}
 .ab-linha select{flex:0 1 150px;min-width:0;max-width:44%}
 .ab-linha button{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:10px;border:1px solid var(--line);background:none;color:var(--texto-muted);cursor:pointer}
+#vista.edmode .item-link{pointer-events:none}
+.item-ed{display:flex;flex-direction:column;gap:4px;min-width:0}
+.item-ed .ib{display:flex;gap:6px;align-items:center;padding:0 2px}
+.item-ed .ib button{display:flex;align-items:center;gap:5px;flex:none;padding:7px 11px;border-radius:10px;border:1px solid var(--line);background:none;color:var(--tx);font:600 12.5px 'DM Sans',sans-serif;cursor:pointer}
+.item-ed .ib select{flex:1;min-width:0;font-size:12.5px;padding:7px 8px}
+.ed-topo{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 4px;padding:12px;border-radius:16px;border:1px solid color-mix(in srgb,var(--c) 40%,var(--line));background:color-mix(in srgb,var(--c) 8%,transparent)}
+.ed-topo .et{flex:1 1 100%;font-size:13px}
+.ed-topo button,.cat-ed button{display:inline-flex;align-items:center;gap:6px;padding:9px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--tx);font:600 13px 'DM Sans',sans-serif;cursor:pointer}
+.ed-topo button.danger{color:#e5484d;border-color:rgba(229,72,77,.4)}
+.cat-ed{display:flex;align-items:center;gap:8px;margin:20px 0 10px;padding:8px;border-radius:14px;border:1px dashed color-mix(in srgb,var(--c) 55%,transparent);background:color-mix(in srgb,var(--c) 7%,transparent);min-width:0}
+.cat-ed .cat-n{flex:1;min-width:0;flex-direction:column;align-items:flex-start;gap:0;background:none;border:0;padding:4px 6px;color:var(--c);font:700 14px 'Sora',sans-serif;text-align:left}
+.cat-ed .cat-n small{font:500 11px 'DM Sans',sans-serif;color:var(--texto-muted)}
+.cat-ed .cat-ic{width:38px;height:38px;justify-content:center;padding:0;color:var(--c)}
+.cat-ed select{flex:0 1 130px;min-width:0;font-size:12.5px;padding:7px 6px}
+.cat-ed.off{opacity:.55}
 #ab-status{min-height:18px;font-size:12.5px;font-weight:600;color:var(--brand)}
 </style>
 </head>
@@ -377,31 +392,15 @@ body.arrastando{user-select:none;-webkit-user-select:none;cursor:grabbing}
     <!-- FERRAMENTAS -->
     <div class="ed-pane" data-pane="ferramentas" hidden><div id="ed-ferramentas" class="ed-pane"></div></div>
 
-    <!-- ABAS: mover aba interna, criar aba principal e aba interna -->
+    <!-- ABAS: simples. A edição de verdade é feita direto na página de cada aba -->
     <div class="ed-pane" data-pane="abas" hidden>
-      <div class="dlg-sep">1 · Mover aba interna para outra aba principal</div>
-      <p class="dlg-dica">Escolha em qual aba principal cada aba interna deve ficar. Também dá para arrastar: dentro de uma aba principal, segure o ícone ⠿ ao lado do nome da aba interna e solte sobre outra aba principal (menu lateral ou barra que aparece).</p>
+      <div class="dlg-sep">Como mudar categorias e botões</div>
+      <p class="dlg-dica">Abra qualquer aba (Corretor, Pessoal, Pastor…) e toque em <b>✏ Editar</b>. Na própria página você muda nome, ícone, lugar, esconde ou exclui as <b>categorias</b>, e edita ou muda cada botão de categoria.</p>
+      <div class="dlg-acoes"><button type="button" class="btn-mini" data-ed="editar-agora"><i class="ti ti-edit"></i>Editar a aba atual</button><button type="button" class="btn-mini" data-ed="nova-aba"><i class="ti ti-plus"></i>Nova aba principal</button></div>
+      <div class="dlg-sep">Nomes das abas e do menu</div>
       <div id="ab-status" role="status" aria-live="polite"></div>
-      <div id="ab-mover"></div>
-      <div class="dlg-sep">2 · Criar aba principal (já com abas internas)</div>
-      <div class="campo"><label for="ab-p-nome">Nome da aba principal</label><input type="text" id="ab-p-nome" placeholder="Ex.: Obras" maxlength="24" autocomplete="off" /></div>
-      <div class="campo"><label for="ab-p-desc">Descrição curta (opcional)</label><input type="text" id="ab-p-desc" placeholder="Ex.: Reformas, fornecedores e orçamentos" maxlength="80" autocomplete="off" /></div>
-      <div class="campo"><label for="ab-p-int">Abas internas já prontas (uma por linha)</label><textarea id="ab-p-int" rows="4" placeholder="Orçamentos&#10;Fornecedores&#10;Cronograma | ti-calendar" style="width:100%;resize:vertical"></textarea></div>
-      <p class="dlg-dica">Em cada linha, o ícone é opcional: escreva <b>Nome | ti-icone</b>. Sem ícone, usa uma pasta.</p>
-      <div class="linha-dois">
-        <div class="campo"><label for="ab-p-cor">Cor</label><select id="ab-p-cor"><option value="--em">Verde</option><option value="--sk">Azul</option><option value="--vi">Violeta</option><option value="--ro">Rosa</option><option value="--or">Laranja</option><option value="--am">Amarelo</option><option value="--cy">Ciano</option></select></div>
-      </div>
-      <div class="campo"><label>Ícone da aba principal</label><div class="ic-grid" id="ab-icones"></div></div>
-      <div class="dlg-acoes"><button type="button" class="btn-mini" id="ab-p-criar"><i class="ti ti-plus"></i>Criar aba principal</button></div>
-      <div class="dlg-sep">3 · Criar uma aba interna</div>
-      <div class="linha-dois">
-        <div class="campo"><label for="ab-i-nome">Nome da aba interna</label><input type="text" id="ab-i-nome" placeholder="Ex.: Fornecedores" maxlength="40" autocomplete="off" /></div>
-        <div class="campo"><label for="ab-i-onde">Em qual aba principal</label><select id="ab-i-onde"></select></div>
-      </div>
-      <div class="dlg-acoes"><button type="button" class="btn-mini" id="ab-i-criar"><i class="ti ti-plus"></i>Criar aba interna</button></div>
-      <div class="dlg-sep">4 · Nomes das abas principais e do menu</div>
       <div class="meus-lista" id="ab-minhas"></div>
-      <div class="dlg-acoes"><button type="button" class="btn-sec" id="ab-zerar"><i class="ti ti-arrow-back-up"></i>Voltar as abas internas aos lugares originais</button></div>
+      <div class="dlg-acoes"><button type="button" class="btn-sec" id="ab-zerar"><i class="ti ti-arrow-back-up"></i>Voltar nomes, ícones e lugares ao original</button></div>
     </div>
 
     <!-- ABA 3: BACKUP -->
@@ -618,10 +617,10 @@ var FERRAMENTAS = [
   function lerGMove() { var o = lerStorage('painel_gmove', {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
   function lerGruposExtra() { var l = lerStorage('painel_grupos', []); return Array.isArray(l) ? l.filter(function (x) { return x && x.id && x.n && x.m; }) : []; }
   function resolverGrupos(itens) {
-    var mv = lerGMove(), g = [], nomes = lerNomes();
+    var mv = lerGMove(), g = [], nomes = lerNomes(), ocultos = lerStorage('painel_goculto', []); if (!Array.isArray(ocultos)) ocultos = [];
     function dest(mo, id) { var d = mv[mo + '|' + id]; return d && MUNDOS[d] ? d : (MUNDOS[mo] ? mo : 'corretor'); }
     function novo(mo, o, custom) {
-      var x = { id: o.id, on: o.n, n: nomes['g:' + mo + '|' + o.id] || o.n, i: o.i || 'ti-folder', c: o.c || '--sk', s: o.s || '', mo: mo, m: dest(mo, o.id), custom: !!custom };
+      var x = { id: o.id, on: o.n, n: nomes['g:' + mo + '|' + o.id] || o.n, i: nomes['gi:' + mo + '|' + o.id] || o.i || 'ti-folder', c: o.c || '--sk', s: o.s || '', mo: mo, m: dest(mo, o.id), custom: !!custom, oculta: ocultos.indexOf(mo + '|' + o.id) > -1 };
       g.push(x); return x;
     }
     ORDEM.forEach(function (m) { (GRUPOS[m] || []).forEach(function (o) { novo(m, o, false); }); });
@@ -652,8 +651,8 @@ var FERRAMENTAS = [
     var mv = lerGMove(), g = GRP.filter(function (x) { return x.mo + '|' + x.id === k; })[0];
     if (destino === p[0]) delete mv[k]; else mv[k] = destino;
     gravarStorage('painel_gmove', mv);
-    avisar('Aba "' + (g ? g.n : p[1]) + '" agora está em ' + MUNDOS[destino].n + '.');
-    render(); if (typeof abDesenhar === 'function' && document.getElementById('dlg-novo').open) abDesenhar();
+    avisar('Categoria "' + (g ? g.n : p[1]) + '" agora está em ' + MUNDOS[destino].n + '.');
+    render(); if (document.getElementById('dlg-novo').open) abDesenhar();
   }
 
   /* ── NAVEGAÇÃO: INÍCIO + 3 ÁREAS ─────────── */
@@ -666,7 +665,7 @@ var FERRAMENTAS = [
   };
   /* abas principais criadas por você (guardadas no navegador) */
   function lerMundosExtra() { var l = lerStorage('painel_mundos', []); return Array.isArray(l) ? l.filter(function (x) { return x && x.id && x.n; }) : []; }
-  var MUNDOS_ORIG = {}; Object.keys(MUNDOS).forEach(function (k) { MUNDOS_ORIG[k] = MUNDOS[k].n; });
+  var MUNDOS_ORIG = {}; Object.keys(MUNDOS).forEach(function (k) { MUNDOS_ORIG[k] = { n: MUNDOS[k].n, i: MUNDOS[k].i }; });
   var DOCK_ABAS = [['inicio', 'Início'], ['controle', 'Controle'], ['favoritos', 'Favoritos'], ['mapa', 'Mapa'], ['construtoras', 'Construtoras']];
   /* nomes que você mudou: {"m:corretor":"…", "g:origem|id":"…", "d:mapa":"…"} */
   function lerNomes() { var o = lerStorage('painel_nomes', {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
@@ -677,16 +676,18 @@ var FERRAMENTAS = [
     lerMundosExtra().forEach(function (x) {
       if (MUNDOS[x.id]) return;
       MUNDOS[x.id] = { n: x.n, i: x.i || 'ti-folder', c: x.c || '--sk', d: x.d || 'Aba criada por você', custom: 1 };
+      MUNDOS_ORIG[x.id] = { n: x.n, i: x.i || 'ti-folder' };
       ORDEM.push(x.id);
     });
     var nm = lerNomes();
-    ORDEM_BASE.forEach(function (k) { MUNDOS[k].n = nm['m:' + k] || MUNDOS_ORIG[k]; });
+    ORDEM.forEach(function (k) { MUNDOS[k].n = nm['m:' + k] || MUNDOS_ORIG[k].n; MUNDOS[k].i = nm['mi:' + k] || MUNDOS_ORIG[k].i; });
   }
   function montarDock() {
     var s = document.getElementById('dock-extra'); if (!s) return;
     [].forEach.call(document.querySelectorAll('.dock [data-go], .dock a'), function (b) {
-      var k = b.getAttribute('data-go') || 'construtoras', t = MUNDOS[k] && MUNDOS[k].n || nomeDock(k), n = b.lastChild;
+      var k = b.getAttribute('data-go') || 'construtoras', t = MUNDOS[k] && MUNDOS[k].n || nomeDock(k), n = b.lastChild, ic = b.querySelector('i');
       if (n && n.nodeType === 3) n.nodeValue = t;
+      if (MUNDOS[k] && ic) ic.className = 'ti ' + MUNDOS[k].i;
     });
     s.innerHTML = ORDEM.slice(ORDEM_BASE.length).map(function (m) {
       return '<button type="button" data-go="' + esc(m) + '" style="--c:var(' + MUNDOS[m].c + ')"><i class="ti ' + esc(MUNDOS[m].i) + '"></i>' + esc(MUNDOS[m].n) + '</button>';
@@ -784,6 +785,7 @@ var FERRAMENTAS = [
       html += '<h2 class="sec">' + esc(M.n) + ' · ' + lista.length + '</h2>';
       gruposDoModo(m, itens).forEach(function (g) {
         var l = lista.filter(function (i) { return i._g === g; }).sort(porNome);
+        if (g.oculta) return;
         if (l.length) html += '<h3 class="gtit" style="--c:var(' + g.c + ')"><i class="ti ' + esc(g.i) + '"></i>' + esc(g.n) + '<em>' + l.length + '</em></h3><div class="lista">' + l.map(item).join('') + '</div>';
       });
     });
@@ -819,31 +821,60 @@ var FERRAMENTAS = [
     return html;
   }
 
-  function gtitHtml(g, n, grip) {
-    return '<h3 class="gtit" style="--c:var(' + g.c + ')">' +
-      (grip ? '<button type="button" class="grip" data-grip="' + esc(g.mo + '|' + g.id) + '" data-gname="' + esc(g.n) + '" title="Arraste para outra aba principal" aria-label="Arrastar a aba ' + esc(g.n) + ' para outra aba principal"><i class="ti ti-grip-vertical"></i></button>' : '') +
-      '<i class="ti ' + esc(g.i) + '"></i>' + esc(g.n) + '<em>' + n + '</em></h3>';
+  var edicao = false;
+  function gtitHtml(g, n) {
+    return '<h3 class="gtit" style="--c:var(' + g.c + ')"><i class="ti ' + esc(g.i) + '"></i>' + esc(g.n) + '<em>' + n + '</em></h3>';
+  }
+  function opcoesMundos(sel) { return ORDEM.map(function (m) { return '<option value="' + esc(m) + '"' + (m === sel ? ' selected' : '') + '>' + esc(MUNDOS[m].n) + '</option>'; }).join(''); }
+  function opcoesCats(sel) {
+    return ORDEM.map(function (m) {
+      var gs = GRP.filter(function (g) { return g.m === m; });
+      return gs.length ? '<optgroup label="' + esc(MUNDOS[m].n) + '">' + gs.map(function (g) { return '<option value="' + esc(g.mo + '|' + g.id) + '"' + (g === sel ? ' selected' : '') + '>' + esc(g.n) + '</option>'; }).join('') + '</optgroup>' : '';
+    }).join('');
+  }
+  function itemEd(it) {
+    return '<div class="item-ed">' + item(it) + '<div class="ib"><button type="button" data-ed="botao:' + esc(it._orig) + '"><i class="ti ti-pencil"></i>Editar</button>' +
+      '<select data-edmv="' + esc(it._orig) + '" aria-label="Mudar este botão de categoria">' + opcoesCats(it._g) + '</select></div></div>';
+  }
+  function catEdHtml(g, n) {
+    var k = g.mo + '|' + g.id;
+    return '<div class="cat-ed' + (g.oculta ? ' off' : '') + '" style="--c:var(' + g.c + ')">' +
+      '<button type="button" class="grip" data-grip="' + esc(k) + '" data-gname="' + esc(g.n) + '" title="Segure e arraste para outra aba" aria-label="Arrastar a categoria ' + esc(g.n) + ' para outra aba"><i class="ti ti-grip-vertical"></i></button>' +
+      '<button type="button" class="cat-ic" data-ed="icone-g:' + esc(k) + '" title="Mudar o ícone" aria-label="Mudar o ícone"><i class="ti ' + esc(g.i) + '"></i></button>' +
+      '<button type="button" class="cat-n" data-ed="nome-g:' + esc(k) + '" title="Mudar o nome">' + esc(g.n) + '<small>' + n + (n === 1 ? ' botão' : ' botões') + (g.oculta ? ' · escondida' : '') + ' · toque para renomear</small></button>' +
+      '<select data-abmv="' + esc(k) + '" aria-label="Levar esta categoria para a aba">' + opcoesMundos(g.m) + '</select>' +
+      '<button type="button" data-ed="ocultar-g:' + esc(k) + '" title="' + (g.oculta ? 'Mostrar' : 'Esconder') + '" aria-label="' + (g.oculta ? 'Mostrar' : 'Esconder') + '"><i class="ti ti-eye' + (g.oculta ? '' : '-off') + '"></i></button>' +
+      (g.custom ? '<button type="button" data-ed="excluir-g:' + esc(k) + '" title="Excluir" aria-label="Excluir"><i class="ti ti-trash"></i></button>' : '') + '</div>';
   }
   function htmlMundo(m) {
     var M = MUNDOS[m], itens = ligar(todosItens()), gs = gruposDoModo(m, itens);
     var lista = itens.filter(function (i) { return i.m === m; });
-    var cab = '<section class="mhead" style="--c:var(' + M.c + ')"><span class="mh-ic' + (m === 'corretor' ? ' logo' : '') + '">' + (m === 'corretor' ? '<img src="' + logoSrc() + '" alt="FCosta" />' : '<i class="ti ' + M.i + '"></i>') + '</span><div><h1>' + esc(M.n) + '</h1><p>' + esc(M.d) + '</p></div>' +
-      '<button type="button" class="btn-sec" data-open="novo" data-tab="abas"><i class="ti ti-layout-columns"></i><span>Abas</span></button>' +
-      '<button type="button" class="btn-sec" data-open="novo"><i class="ti ti-pencil"></i><span>Edição</span></button></section>';
-    var html = cab + '<button type="button" class="busca-pill" data-open="busca" style="margin-bottom:6px"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button>' +
-      (gs.length ? '<p class="gdica"><i class="ti ti-grip-vertical"></i> Para trocar uma aba interna de lugar, segure o ⠿ ao lado do nome e solte sobre outra aba principal.</p>' : '');
+    var cab = '<section class="mhead" style="--c:var(' + M.c + ')"><span class="mh-ic' + (m === 'corretor' ? ' logo' : '') + '">' + (m === 'corretor' ? '<img src="' + logoSrc() + '" alt="FCosta" />' : '<i class="ti ' + esc(M.i) + '"></i>') + '</span><div><h1>' + esc(M.n) + '</h1><p>' + esc(M.d) + '</p></div>' +
+      '<button type="button" class="btn-mini" data-ed="toggle"><i class="ti ti-' + (edicao ? 'check' : 'edit') + '"></i>' + (edicao ? 'Pronto' : 'Editar') + '</button></section>';
+    var html = cab + (edicao ? '' : '<button type="button" class="busca-pill" data-open="busca" style="margin-bottom:6px"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button>');
+    if (edicao) {
+      html += '<div class="ed-topo" style="--c:var(' + M.c + ')"><span class="et">Modo editar: <b>' + esc(M.n) + '</b>. Toque no que quiser mudar. Quando terminar, toque em <b>Pronto</b>.</span>' +
+        '<button type="button" data-ed="nome-m:' + esc(m) + '"><i class="ti ti-pencil"></i>Nome da aba</button>' +
+        '<button type="button" data-ed="icone-m:' + esc(m) + '"><i class="ti ' + esc(M.i) + '"></i>Ícone da aba</button>' +
+        '<button type="button" data-ed="nova-cat:' + esc(m) + '"><i class="ti ti-plus"></i>Nova categoria</button>' +
+        '<button type="button" data-ed="nova-aba"><i class="ti ti-plus"></i>Nova aba</button>' +
+        (M.custom ? '<button type="button" class="danger" data-ed="excluir-m:' + esc(m) + '"><i class="ti ti-trash"></i>Excluir esta aba</button>' : '') + '</div>';
+    }
     gs.forEach(function (g) {
       var l = lista.filter(function (i) { return i._g === g; }).sort(porNome);
-      if (l.length) html += gtitHtml(g, l.length, true) + '<div class="lista">' + l.map(item).join('') + '</div>';
-      else if (g.custom) html += gtitHtml(g, 0, true) + '<p class="gvazio">Aba interna pronta, ainda sem botões. Use <b>Edição › Novo botão</b> e escolha esta aba, ou arraste-a para outra aba principal.</p>';
+      if (edicao) {
+        html += catEdHtml(g, l.length) + (l.length ? '<div class="lista">' + l.map(itemEd).join('') + '</div>' : '<p class="gvazio">Categoria vazia.</p>') +
+          '<button type="button" class="btn-sec" style="margin-top:8px" data-ed="novobotao:' + esc(g.mo + '|' + g.id) + '"><i class="ti ti-plus"></i>Novo botão aqui</button>';
+      } else if (!g.oculta && l.length) html += gtitHtml(g, l.length) + '<div class="lista">' + l.map(item).join('') + '</div>';
     });
-    if (!gs.length) html += '<p class="vazio">Esta aba principal ainda não tem abas internas. Abra <b>Edição › Abas</b> para criar ou mover.</p>';
+    if (!gs.length) html += '<p class="vazio">Esta aba ainda não tem categorias. Toque em <b>Editar › Nova categoria</b>.</p>';
     return html;
   }
 
   function render() {
     document.body.setAttribute('data-view', modo);
     [].forEach.call(document.querySelectorAll('.dock [data-go]'), function (b) { b.classList.toggle('on', b.getAttribute('data-go') === modo); });
+    vistaEl.classList.toggle('edmode', !!edicao && !!MUNDOS[modo]);
     vistaEl.innerHTML = modo === 'inicio' ? htmlInicio() : modo === 'controle' ? htmlControle() : modo === 'favoritos' ? htmlFavoritos() : modo === 'mapa' ? htmlMapa() : htmlMundo(modo);
     if (modo === 'controle' && ctAba === 'sites') setTimeout(function () { ctTestarSites(); }, 60);
   }
@@ -1288,144 +1319,136 @@ var FERRAMENTAS = [
   }
   function ctListaRepintar() { var e = document.getElementById('ct-lista'); if (e) e.innerHTML = ctListaHtml(); }
 
-  /* ── ABAS: mover, criar, renomear, excluir e ARRASTAR ───────── */
-  var abIcone = 'ti-folder';
-  function abOpsMundos(sel) { return ORDEM.map(function (m) { return '<option value="' + esc(m) + '"' + (m === sel ? ' selected' : '') + '>' + esc(MUNDOS[m].n) + '</option>'; }).join(''); }
-  function abIcones() {
-    var lista = ['ti-folder'].concat(ICONES.filter(function (x) { return x !== 'ti-folder'; }));
-    document.getElementById('ab-icones').innerHTML = lista.map(function (ic) {
-      return '<button type="button" data-abic="' + ic + '" aria-label="' + ic + '"' + (ic === abIcone ? ' class="sel"' : '') + '><i class="ti ' + ic + '"></i></button>';
-    }).join('');
-  }
+  /* ── CATEGORIAS E ABAS: editar direto na página ───────── */
+  var ICONES_MAIS = ICONES.concat(['ti-folder', 'ti-home-2', 'ti-hammer', 'ti-paint', 'ti-truck', 'ti-shopping-cart', 'ti-coin', 'ti-briefcase', 'ti-camera', 'ti-settings', 'ti-flag', 'ti-bulb', 'ti-map', 'ti-building-store', 'ti-ruler', 'ti-brush', 'ti-leaf', 'ti-sun', 'ti-gift']);
+  function abRefresh() { carregarMundos(); montarDock(); atualizarSelectsArea(); render(); if (document.getElementById('dlg-novo').open) abDesenhar(); }
   function abDesenhar() {
-    var itens = ligar(todosItens(true)), h = '', cheio = 0;
-    ORDEM.forEach(function (m) {
-      var gs = GRP.filter(function (g) { return g.m === m; }), linhas = '';
-      gs.forEach(function (g) {
-        var n = itens.filter(function (i) { return i._g === g; }).length, k = g.mo + '|' + g.id;
-        if (!n && !g.custom) return;
-        cheio++;
-        linhas += '<div class="ab-linha"><i class="ti ' + esc(g.i) + '" style="color:var(--c)"></i><span class="ab-n">' + esc(g.n) +
-          '<small>' + n + (n === 1 ? ' botão' : ' botões') + (g.mo !== g.m ? ' · veio de ' + esc(MUNDOS[g.mo] ? MUNDOS[g.mo].n : g.mo) : '') + (g.custom ? ' · criada por você' : '') + (g.n !== g.on && !g.custom ? ' · nome original: ' + esc(g.on) : '') + '</small></span>' +
-          '<select data-abmv="' + esc(k) + '" aria-label="Mover ' + esc(g.n) + ' para">' + abOpsMundos(g.m) + '</select>' +
-          '<button type="button" data-abren="' + esc(k) + '" title="Renomear" aria-label="Renomear ' + esc(g.n) + '"><i class="ti ti-pencil"></i></button>' + (g.custom ? '<button type="button" data-abdel="' + esc(k) + '" aria-label="Excluir ' + esc(g.n) + '"><i class="ti ti-trash"></i></button>' : '') + '</div>';
-      });
-      h += '<div class="ab-mundo" style="--c:var(' + MUNDOS[m].c + ')"><b><i class="ti ' + esc(MUNDOS[m].i) + '"></i>' + esc(MUNDOS[m].n) + ' · ' + gs.length + (gs.length === 1 ? ' aba interna' : ' abas internas') + '</b>' +
-        (linhas || '<small style="color:var(--texto-muted)">Nenhuma aba interna aqui ainda.</small>') + '</div>';
-    });
-    document.getElementById('ab-mover').innerHTML = h;
-    var ms = lerMundosExtra();
+    var sub = function (t, o) { return '<small>' + t + (o ? ' · nome original: ' + esc(o) : '') + '</small>'; };
     document.getElementById('ab-minhas').innerHTML = ORDEM.map(function (m) {
-      var custom = ORDEM_BASE.indexOf(m) < 0;
-      return '<div class="meu-item"><i class="ti ' + esc(MUNDOS[m].i) + '"></i><div class="mi-txt">' + esc(MUNDOS[m].n) + '<small>' + (custom ? 'Criada por você' : (MUNDOS[m].n !== MUNDOS_ORIG[m] ? 'Nome original: ' + esc(MUNDOS_ORIG[m]) : 'Aba principal original')) + '</small></div>' +
-        '<button type="button" data-abmren="' + esc(m) + '" aria-label="Renomear ' + esc(MUNDOS[m].n) + '"><i class="ti ti-pencil"></i></button>' +
-        (custom ? '<button type="button" data-abmdel="' + esc(m) + '" aria-label="Excluir ' + esc(MUNDOS[m].n) + '"><i class="ti ti-trash"></i></button>' : '') + '</div>';
+      return '<div class="meu-item"><i class="ti ' + esc(MUNDOS[m].i) + '"></i><div class="mi-txt">' + esc(MUNDOS[m].n) + sub(MUNDOS[m].custom ? 'Aba criada por você' : 'Aba', MUNDOS[m].n !== MUNDOS_ORIG[m].n ? MUNDOS_ORIG[m].n : '') + '</div>' +
+        '<button type="button" data-ed="nome-m:' + esc(m) + '" aria-label="Renomear ' + esc(MUNDOS[m].n) + '"><i class="ti ti-pencil"></i></button></div>';
     }).join('') + DOCK_ABAS.map(function (p) {
-      return '<div class="meu-item"><i class="ti ti-layout-sidebar"></i><div class="mi-txt">' + esc(nomeDock(p[0])) + '<small>Menu' + (nomeDock(p[0]) !== p[1] ? ' · nome original: ' + esc(p[1]) : '') + '</small></div>' +
-        '<button type="button" data-abdren="' + esc(p[0]) + '" aria-label="Renomear ' + esc(p[1]) + '"><i class="ti ti-pencil"></i></button></div>';
+      return '<div class="meu-item"><i class="ti ti-layout-sidebar"></i><div class="mi-txt">' + esc(nomeDock(p[0])) + sub('Menu', nomeDock(p[0]) !== p[1] ? p[1] : '') + '</div>' +
+        '<button type="button" data-ed="nome-d:' + esc(p[0]) + '" aria-label="Renomear ' + esc(p[1]) + '"><i class="ti ti-pencil"></i></button></div>';
     }).join('');
-    var on = document.getElementById('ab-i-onde'), v = on.value || (ORDEM.indexOf(modo) > -1 ? modo : 'corretor');
-    on.innerHTML = abOpsMundos(MUNDOS[v] ? v : 'corretor');
-    abIcones();
   }
-  function abAtualizar() { carregarMundos(); montarDock(); atualizarSelectsArea(); render(); abDesenhar(); }
+  function grupoDe(k) { return GRP.filter(function (x) { return x.mo + '|' + x.id === k; })[0]; }
   function idLivreGrupo(mo, base) {
     var id = slug(base), usados = (GRUPOS[mo] || []).map(function (g) { return g.id; }).concat(lerGruposExtra().filter(function (g) { return g.m === mo; }).map(function (g) { return g.id; })), n = 2, f = id;
     while (usados.indexOf(f) > -1) f = id + '-' + (n++);
     return f;
   }
-  function abCriarGrupo(mo, texto, cor) {
-    var p = String(texto).split('|'), nome = p[0].trim(); if (!nome) return null;
-    var ic = (p[1] || '').trim(); if (!/^ti-[a-z0-9-]+$/.test(ic)) ic = 'ti-folder';
+  function abCriarGrupo(mo, nome, cor) {
+    nome = String(nome).trim(); if (!nome) return null;
     var ex = lerGruposExtra();
     if (ex.some(function (g) { return g.m === mo && norm(g.n) === norm(nome); })) return null;
-    var g = { id: idLivreGrupo(mo, nome), n: nome, i: ic, c: cor || CORES[(ex.length + GRP.length) % CORES.length], m: mo };
+    var g = { id: idLivreGrupo(mo, nome), n: nome, i: 'ti-folder', c: cor || CORES[(ex.length + GRP.length) % CORES.length], m: mo };
     ex.push(g); gravarStorage('painel_grupos', ex); return g;
   }
-  document.getElementById('ab-icones').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-abic]'); if (!b) return; abIcone = b.getAttribute('data-abic'); abIcones();
+  function pedirIcone(atual, cb) {
+    var d = document.getElementById('dlg-ic');
+    if (!d) {
+      d = document.createElement('dialog'); d.id = 'dlg-ic'; d.className = 'sheet';
+      d.innerHTML = '<div class="dlg-corpo"><h3><i class="ti ti-icons"></i>Escolher ícone</h3><div class="ic-grid" id="ic-grid"></div>' +
+        '<div class="campo"><label for="ic-txt">Ou escreva o nome do ícone</label><input type="text" id="ic-txt" placeholder="ti-star" autocapitalize="none" autocomplete="off" /></div>' +
+        '<div class="dlg-acoes"><button type="button" class="btn-mini" id="ic-ok"><i class="ti ti-check"></i>Usar</button><button type="button" class="btn-sec" data-fechar><i class="ti ti-x"></i>Cancelar</button></div></div>';
+      document.body.appendChild(d);
+      d.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-pic]'); if (b) { document.getElementById('ic-txt').value = b.getAttribute('data-pic'); pintarIc(); }
+      });
+    }
+    function pintarIc() {
+      var v = document.getElementById('ic-txt').value.trim();
+      document.getElementById('ic-grid').innerHTML = ICONES_MAIS.map(function (ic) { return '<button type="button" data-pic="' + ic + '" aria-label="' + ic + '"' + (ic === v ? ' class="sel"' : '') + '><i class="ti ' + ic + '"></i></button>'; }).join('');
+    }
+    document.getElementById('ic-txt').value = atual || 'ti-folder'; pintarIc();
+    document.getElementById('ic-ok').onclick = function () {
+      var v = document.getElementById('ic-txt').value.trim();
+      if (!/^ti-[a-z0-9-]+$/.test(v)) v = 'ti-folder';
+      fecharDlg(d); cb(v);
+    };
+    abrirDlg(d);
+  }
+  function guardarNome(chave, valor, original) {
+    var nm = lerNomes(); valor = (valor || '').trim();
+    if (!valor || norm(valor) === norm(original)) delete nm[chave]; else nm[chave] = valor;
+    gravarStorage('painel_nomes', nm);
+  }
+  function abNovaAba() {
+    var nome = window.prompt('Nome da nova aba (aparece no menu):'); if (!nome || !nome.trim()) return; nome = nome.trim();
+    if (ORDEM.some(function (m) { return norm(MUNDOS[m].n) === norm(nome); })) { avisar('Já existe uma aba com esse nome.'); return; }
+    var cats = window.prompt('Categorias já prontas dentro dela (separe por vírgula). Pode deixar vazio:', '') || '';
+    var id = 'u-' + slug(nome), f = id, n = 2; while (MUNDOS[f]) f = id + '-' + (n++);
+    var cor = CORES[lerMundosExtra().length % CORES.length];
+    var ms = lerMundosExtra(); ms.push({ id: f, n: nome, d: 'Aba criada por você', i: 'ti-folder', c: cor }); gravarStorage('painel_mundos', ms);
+    var vistos = [];
+    cats.split(/[,;\n]/).forEach(function (t, j) { var nm = t.trim(); if (!nm || vistos.indexOf(norm(nm)) > -1) return; vistos.push(norm(nm)); abCriarGrupo(f, nm, CORES[(j + 1) % CORES.length]); });
+    carregarMundos(); montarDock(); atualizarSelectsArea();
+    if (document.getElementById('dlg-novo').open) fecharDialogo();
+    edicao = true; aplicarModo(f);
+  }
+  function abExcluirMundo(k) {
+    var itens = ligar(todosItens(true)), mnome = MUNDOS[k] ? MUNDOS[k].n : k;
+    var nascidas = GRP.filter(function (x) { return x.mo === k; });
+    var presas = nascidas.filter(function (x) { return x.m === k && itens.some(function (it) { return it._g === x; }); });
+    if (presas.length) { avisar('Há botões em "' + presas[0].n + '". Leve essa categoria para outra aba antes de excluir "' + mnome + '".'); return; }
+    if (!confirm('Excluir a aba "' + mnome + '"? As categorias que vieram de outras abas voltam para o lugar delas.')) return;
+    var mv = lerGMove();
+    Object.keys(mv).forEach(function (kk) { if (mv[kk] === k) delete mv[kk]; });
+    nascidas.forEach(function (x) { delete mv[x.mo + '|' + x.id]; });
+    gravarStorage('painel_gmove', mv);
+    gravarStorage('painel_grupos', lerGruposExtra().filter(function (x) { return x.m !== k; }));
+    gravarStorage('painel_mundos', lerMundosExtra().filter(function (x) { return x.id !== k; }));
+    if (modo === k) { modo = 'inicio'; gravarStorage('painel_vista', modo); }
+    abRefresh();
+  }
+  function moverBotao(orig, key) {
+    var g = grupoDe(key), at = achar(orig); if (!g || !at) return;
+    var antiga = chave(at);
+    if (ehExtra(orig)) { var ex = lerExtras(), n = parseInt(orig.slice(1), 10); if (ex[n]) { ex[n].m = g.mo; ex[n].g = g.id; gravarStorage('painel_extras', ex); } }
+    else { var aj = lerAjustes(); aj[orig] = Object.assign({}, aj[orig] || {}, { m: g.mo, g: g.id }); gravarStorage('painel_ajustes', aj); }
+    migrarFav(antiga, g.mo + '|' + at.t);
+    avisar('"' + at.t + '" agora está em ' + g.n + '.'); render();
+  }
+  document.addEventListener('change', function (e) {
+    var s = e.target.closest && e.target.closest('[data-abmv]'); if (s) { moverGrupo(s.getAttribute('data-abmv'), s.value); return; }
+    var b = e.target.closest && e.target.closest('[data-edmv]'); if (b) moverBotao(b.getAttribute('data-edmv'), b.value);
   });
-  document.querySelector('[data-pane="abas"]').addEventListener('change', function (e) {
-    var s = e.target.closest('[data-abmv]'); if (s) moverGrupo(s.getAttribute('data-abmv'), s.value);
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-ed]'); if (!b) return;
+    var v = b.getAttribute('data-ed'), i = v.indexOf(':'), a = i < 0 ? v : v.slice(0, i), k = i < 0 ? '' : v.slice(i + 1), g;
+    if (a === 'toggle') { edicao = !edicao; render(); window.scrollTo(0, 0); }
+    else if (a === 'editar-agora') { fecharDialogo(); if (!MUNDOS[modo]) aplicarModo('corretor'); edicao = true; render(); window.scrollTo(0, 0); }
+    else if (a === 'nova-aba') abNovaAba();
+    else if (a === 'nome-g') { g = grupoDe(k); if (!g) return; var nv = window.prompt('Nome da categoria (deixe vazio para voltar a "' + g.on + '"):', g.n); if (nv === null) return; guardarNome('g:' + k, nv, g.on); abRefresh(); }
+    else if (a === 'icone-g') { g = grupoDe(k); if (!g) return; pedirIcone(g.i, function (ic) { var nm = lerNomes(); nm['gi:' + k] = ic; gravarStorage('painel_nomes', nm); abRefresh(); }); }
+    else if (a === 'ocultar-g') {
+      g = grupoDe(k); if (!g) return; var oc = lerStorage('painel_goculto', []); if (!Array.isArray(oc)) oc = [];
+      var p = oc.indexOf(k); if (p < 0) oc.push(k); else oc.splice(p, 1); gravarStorage('painel_goculto', oc);
+      avisar(p < 0 ? 'Categoria "' + g.n + '" escondida. Toque no olho para mostrar de novo.' : 'Categoria "' + g.n + '" visível de novo.'); abRefresh();
+    }
+    else if (a === 'excluir-g') {
+      g = grupoDe(k); if (!g) return;
+      if (ligar(todosItens(true)).some(function (it) { return it._g === g; })) { avisar('Essa categoria tem botões. Mude os botões de categoria antes, ou use o olho para esconder.'); return; }
+      if (!confirm('Excluir a categoria "' + g.n + '"?')) return;
+      gravarStorage('painel_grupos', lerGruposExtra().filter(function (x) { return !(x.m === g.mo && x.id === g.id); }));
+      var mv = lerGMove(); delete mv[k]; gravarStorage('painel_gmove', mv); abRefresh();
+    }
+    else if (a === 'nova-cat') { var nc = window.prompt('Nome da nova categoria:'); if (!nc || !nc.trim()) return; if (!abCriarGrupo(k, nc)) { avisar('Já existe uma categoria com esse nome nesta aba.'); return; } abRefresh(); }
+    else if (a === 'nome-m') { var no = window.prompt('Nome da aba (deixe vazio para voltar a "' + MUNDOS_ORIG[k].n + '"):', MUNDOS[k].n); if (no === null) return; guardarNome('m:' + k, no, MUNDOS_ORIG[k].n); abRefresh(); }
+    else if (a === 'icone-m') pedirIcone(MUNDOS[k].i, function (ic) { var nm = lerNomes(); nm['mi:' + k] = ic; gravarStorage('painel_nomes', nm); abRefresh(); });
+    else if (a === 'excluir-m') abExcluirMundo(k);
+    else if (a === 'nome-d') { var nd = window.prompt('Novo nome desta aba do menu (deixe vazio para voltar ao original):', nomeDock(k)); if (nd === null) return; var po = DOCK_ABAS.filter(function (x) { return x[0] === k; })[0]; guardarNome('d:' + k, nd, po ? po[1] : k); abRefresh(); }
+    else if (a === 'botao') abrirEdicao(k);
+    else if (a === 'novobotao') { g = grupoDe(k); if (!g) return; abrirEdicao(null); edM.value = g.m; edGrupos(); edG.value = g.n; }
   });
   document.querySelector('[data-pane="abas"]').addEventListener('click', function (e) {
-    var b = e.target.closest('button'); if (!b) return;
-    var k, ex, i;
-    if (b.id === 'ab-p-criar') {
-      var nome = document.getElementById('ab-p-nome').value.trim();
-      if (!nome) { document.getElementById('ab-p-nome').focus(); return; }
-      if (ORDEM.some(function (m) { return norm(MUNDOS[m].n) === norm(nome); })) { avisar('Já existe uma aba principal com esse nome.'); return; }
-      var id = 'u-' + slug(nome), f = id, n = 2; while (MUNDOS[f]) f = id + '-' + (n++);
-      var cor = document.getElementById('ab-p-cor').value;
-      var ms = lerMundosExtra(); ms.push({ id: f, n: nome, d: document.getElementById('ab-p-desc').value.trim(), i: abIcone, c: cor });
-      gravarStorage('painel_mundos', ms);
-      carregarMundos();
-      var vistos = [], q = 0;
-      document.getElementById('ab-p-int').value.split(/\n/).forEach(function (ln, j) {
-        var nm = ln.split('|')[0].trim(); if (!nm || vistos.indexOf(norm(nm)) > -1) return; vistos.push(norm(nm));
-        if (abCriarGrupo(f, ln, CORES[(j + CORES.indexOf(cor) + 1) % CORES.length])) q++;
-      });
-      document.getElementById('ab-p-nome').value = ''; document.getElementById('ab-p-desc').value = ''; document.getElementById('ab-p-int').value = '';
-      abAtualizar();
-      avisar('Aba principal "' + nome + '" criada com ' + q + (q === 1 ? ' aba interna.' : ' abas internas.'));
-    } else if (b.id === 'ab-i-criar') {
-      var nm2 = document.getElementById('ab-i-nome').value.trim(), onde = document.getElementById('ab-i-onde').value;
-      if (!nm2) { document.getElementById('ab-i-nome').focus(); return; }
-      if (!abCriarGrupo(onde, nm2)) { avisar('Já existe uma aba interna com esse nome em ' + MUNDOS[onde].n + '.'); return; }
-      document.getElementById('ab-i-nome').value = ''; abAtualizar(); avisar('Aba interna "' + nm2 + '" criada em ' + MUNDOS[onde].n + '.');
-    } else if (b.id === 'ab-zerar') {
-      if (!confirm('Voltar todas as abas internas aos lugares originais? As abas criadas por você continuam onde nasceram.')) return;
-      localStorage.removeItem('painel_gmove'); abAtualizar(); avisar('Abas internas de volta aos lugares originais.');
-    } else if ((k = b.getAttribute('data-abren'))) {
-      var g = GRP.filter(function (x) { return x.mo + '|' + x.id === k; })[0]; if (!g) return;
-      var novo = window.prompt('Novo nome da aba interna' + (g.custom ? ':' : ' (deixe vazio para voltar ao nome original):'), g.n); if (novo === null) return; novo = novo.trim();
-      if (g.custom) {
-        if (!novo) return;
-        ex = lerGruposExtra(); ex.forEach(function (x) { if (x.m === g.mo && x.id === g.id) x.n = novo; });
-        gravarStorage('painel_grupos', ex);
-      } else {
-        var nm = lerNomes(); if (!novo || norm(novo) === norm(g.on)) delete nm['g:' + k]; else nm['g:' + k] = novo;
-        gravarStorage('painel_nomes', nm);
-      }
-      abAtualizar();
-    } else if ((k = b.getAttribute('data-abdel'))) {
-      var g2 = GRP.filter(function (x) { return x.mo + '|' + x.id === k; })[0]; if (!g2) return;
-      if (ligar(todosItens(true)).some(function (it) { return it._g === g2; })) { avisar('Essa aba tem botões. Mova ou exclua os botões antes de excluir a aba.'); return; }
-      if (!confirm('Excluir a aba interna "' + g2.n + '"?')) return;
-      gravarStorage('painel_grupos', lerGruposExtra().filter(function (x) { return !(x.m === g2.mo && x.id === g2.id); }));
-      var mv = lerGMove(); delete mv[k]; gravarStorage('painel_gmove', mv); abAtualizar();
-    } else if ((k = b.getAttribute('data-abmren'))) {
-      if (ORDEM_BASE.indexOf(k) > -1) {
-        var nn0 = window.prompt('Novo nome da aba principal (deixe vazio para voltar a "' + MUNDOS_ORIG[k] + '"):', MUNDOS[k].n); if (nn0 === null) return; nn0 = nn0.trim();
-        var nmb = lerNomes(); if (!nn0 || nn0 === MUNDOS_ORIG[k]) delete nmb['m:' + k]; else nmb['m:' + k] = nn0;
-        gravarStorage('painel_nomes', nmb); abAtualizar(); return;
-      }
-      var ms2 = lerMundosExtra(), x2 = ms2.filter(function (x) { return x.id === k; })[0]; if (!x2) return;
-      var nn = window.prompt('Novo nome da aba principal:', x2.n); if (!nn || !nn.trim()) return;
-      x2.n = nn.trim(); gravarStorage('painel_mundos', ms2); abAtualizar();
-    } else if ((k = b.getAttribute('data-abdren'))) {
-      var pd = DOCK_ABAS.filter(function (x) { return x[0] === k; })[0]; if (!pd) return;
-      var nd = window.prompt('Novo nome desta aba do menu (deixe vazio para voltar a "' + pd[1] + '"):', nomeDock(k)); if (nd === null) return; nd = nd.trim();
-      var nmd = lerNomes(); if (!nd || nd === pd[1]) delete nmd['d:' + k]; else nmd['d:' + k] = nd;
-      gravarStorage('painel_nomes', nmd); abAtualizar();
-    } else if ((k = b.getAttribute('data-abmdel'))) {
-      var itens = ligar(todosItens(true)), mnome = MUNDOS[k] ? MUNDOS[k].n : k;
-      var nascidas = GRP.filter(function (x) { return x.mo === k; });
-      var presas = nascidas.filter(function (x) { return x.m === k && itens.some(function (it) { return it._g === x; }); });
-      if (presas.length) { avisar('Há botões em "' + presas[0].n + '". Mova essa aba interna para outra aba principal antes de excluir "' + mnome + '".'); return; }
-      if (!confirm('Excluir a aba principal "' + mnome + '"? As abas internas que vieram de outras abas principais voltam para o lugar delas.')) return;
-      var mv2 = lerGMove();
-      Object.keys(mv2).forEach(function (kk) { if (mv2[kk] === k) delete mv2[kk]; });
-      nascidas.forEach(function (x) { if (x.m === k) delete mv2[x.mo + '|' + x.id]; });
-      gravarStorage('painel_gmove', mv2);
-      gravarStorage('painel_grupos', lerGruposExtra().filter(function (x) { return !(x.m === k && nascidas.some(function (y) { return y.id === x.id && y.m === k; })); }));
-      gravarStorage('painel_mundos', lerMundosExtra().filter(function (x) { return x.id !== k; }));
-      if (modo === k) { modo = 'inicio'; gravarStorage('painel_vista', modo); }
-      abAtualizar();
-    }
+    var b = e.target.closest('#ab-zerar'); if (!b) return;
+    if (!confirm('Voltar nomes, ícones, lugares e categorias escondidas ao original? O que você criou continua.')) return;
+    ['painel_nomes', 'painel_gmove', 'painel_goculto'].forEach(function (c) { localStorage.removeItem(c); }); abRefresh();
   });
 
-  /* arrastar a aba interna (mouse ou dedo) e soltar sobre outra aba principal */
+  /* arrastar a categoria (mouse ou dedo) e soltar sobre outra aba */
   document.addEventListener('pointerdown', function (e) {
     var gp = e.target.closest('[data-grip]'); if (!gp || (e.button != null && e.button > 0)) return;
     e.preventDefault();
@@ -1958,7 +1981,7 @@ var FERRAMENTAS = [
 <script>
 /* ATUALIZAÇÃO: se o aparelho ainda guarda uma cópia antiga do painel, limpa e recarrega uma vez */
 (function () {
-  var V = 'controle-v6';
+  var V = 'controle-v7';
   try {
     if (localStorage.getItem('painel_versao_arquivo') === V) return;
     localStorage.setItem('painel_versao_arquivo', V);
