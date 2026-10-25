@@ -112,8 +112,14 @@
   .ed-rodape p { margin:8px 0; }
   .ed-apelo { display:flex; gap:8px; align-items:flex-end; font-weight:bold; }
   .ed-apelo .ed-linha-apelo { flex:1; border-bottom:2px solid #000; height:1.2em; }
+  .ed-trad { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; align-items:center; margin-bottom:8px; font-size:14px; }
+  .ed-trad select { width:auto; max-width:100%; padding:8px; font-size:14px; border:2px solid #111; border-radius:8px; background:#fff; font-family:inherit; }
+  .ed-status { font-size:12px; color:#444; flex-basis:100%; text-align:center; min-height:15px; }
+  .ed-status.erro { color:#b00020; font-weight:bold; }
+  .ed-tradl { text-align:center; font-size:.8em; color:#333; margin-top:2px; }
+  .ed-vr { font-size:.75em; color:#444; }
   @media (max-width:520px) { .ed-item { padding-right:0; padding-top:34px; } }
-#saida.ed.imp .ed-barra, #saida.ed.imp .ed-dica, #saida.ed.imp .ed-ctl { display:none !important; }
+#saida.ed.imp .ed-barra, #saida.ed.imp .ed-dica, #saida.ed.imp .ed-ctl, #saida.ed.imp .ed-trad { display:none !important; }
 #saida.ed.imp .ed-folha { box-shadow:none; border:0; margin:0; padding:0; max-width:none; background:#fff; }
 #saida.ed.imp .ed-item { padding:0; margin-bottom:6pt; }
 #saida.ed.imp .ed-hr { margin:5pt 0 8pt; }
@@ -122,7 +128,7 @@
 #saida.ed.imp .ed-vazio { display:none; }
   @media print {
     #saida.ed .ed-folha { font-size: var(--edpt, 10pt); }
-    #saida.ed .ed-barra, #saida.ed .ed-dica, #saida.ed .ed-ctl { display:none !important; }
+    #saida.ed .ed-barra, #saida.ed .ed-dica, #saida.ed .ed-ctl, #saida.ed .ed-trad { display:none !important; }
     #saida.ed .ed-folha { box-shadow:none; border:0; margin:0; padding:0; max-width:none; background:#fff; }
     #saida.ed .ed-item { padding:0; margin-bottom:6pt; }
     #saida.ed .ed-hr { margin:5pt 0 8pt; }
@@ -151,6 +157,8 @@
       <option value="tonicas">Palavras tônicas — uma palavra por versículo</option>
       <option value="folha">Palavras tônicas em 1 folha — verbo + palavra forte (14 x 22 cm)</option>
     </select>
+    <label for="traducao">Tradução bíblica (muda as palavras tônicas e os versículos)</label>
+    <select id="traducao"></select>
     <label for="passagem">Texto dos versículos (opcional, deixa o esboço mais fiel)</label>
     <textarea id="passagem" placeholder="Cole aqui os versículos da sua Bíblia, se quiser"></textarea>
     <div class="linha">
@@ -237,7 +245,7 @@ const INSTRUCAO = `Você prepara esboços de pregação para um pastor evangéli
 
 PRINCÍPIOS OBRIGATÓRIOS
 
-1. FIDELIDADE AO TEXTO. Se o pastor colou o texto dos versículos, ele é a única fonte. Se não colou, use a tradução Almeida e só afirme o que você tem certeza que o texto diz. Não invente fatos, nomes, números ou detalhes que o texto não traz. Siga o TIPO DE ESBOÇO pedido (veja TIPOS abaixo). Nunca force uma aplicação que o texto não sustenta.
+1. FIDELIDADE AO TEXTO. Se o pastor colou o texto dos versículos, ele é a única fonte. Se não colou, use a TRADUÇÃO BÍBLICA indicada no pedido (se não houver, Almeida Revista e Atualizada): as palavras tônicas (chave), os trechos de versículos e as palavras citadas devem ser exatamente as dessa tradução, pois as palavras mudam de uma tradução para outra. Só afirme o que você tem certeza que o texto diz nessa tradução. Não invente fatos, nomes, números ou detalhes que o texto não traz. Siga o TIPO DE ESBOÇO pedido (veja TIPOS abaixo). Nunca force uma aplicação que o texto não sustenta.
 
 2. TEMA E PALAVRA-CHAVE. Use o tema recebido, com as palavras do pastor (se o tema não combinar com o texto, ajuste o mínimo possível). Sem tema, crie um curto e forte, ligado à situação do texto. Crie uma PALAVRA-CHAVE: um verbo de ação no infinitivo, em maiúsculas, que RESPONDE ao tema (ex.: AVANÇAR), com um contraponto também verbo (ex.: recuar). O corpo todo se liga à palavra-chave e ela aponta de volta para o tema.
 
@@ -290,6 +298,17 @@ EXEMPLO DE FORMATO E NÍVEL (tipo: expositivo; texto: Neemias 1:1-11; tema: A do
 /* ---------- Utilidades ---------- */
 const $ = id => document.getElementById(id);
 const MODELOS = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-2.5-flash'];
+const TRADUCOES = [
+  ['ARA', 'Almeida Revista e Atualizada (ARA)'],
+  ['ARC', 'Almeida Revista e Corrigida (ARC)'],
+  ['NAA', 'Nova Almeida Atualizada (NAA)'],
+  ['A21', 'Almeida Século 21 (A21)'],
+  ['NVI', 'Nova Versão Internacional (NVI)'],
+  ['NVT', 'Nova Versão Transformadora (NVT)'],
+  ['NTLH', 'Nova Tradução na Linguagem de Hoje (NTLH)']
+];
+const nomeTrad = sig => (TRADUCOES.find(t => t[0] === sig) || TRADUCOES[0])[1];
+const tradValida = sig => TRADUCOES.some(t => t[0] === sig) ? sig : 'ARA';
 const esperar = ms => new Promise(r => setTimeout(r, ms));
 class FormatoErro extends Error {}
 
@@ -309,6 +328,9 @@ TIPOS.folha = { nome: '1 folha', modo: 'folha', regra: '1 FOLHA (PALAVRAS TÔNIC
 let tipoGuardado = localStorage.getItem('esboco_tipo');
 $('tipo').value = TIPOS[tipoGuardado] ? tipoGuardado : 'expositivo';
 $('tipo').addEventListener('change', () => localStorage.setItem('esboco_tipo', $('tipo').value));
+TRADUCOES.forEach(t => { const o = document.createElement('option'); o.value = t[0]; o.textContent = t[1]; $('traducao').appendChild(o); });
+$('traducao').value = tradValida(localStorage.getItem('esboco_traducao'));
+$('traducao').addEventListener('change', () => localStorage.setItem('esboco_traducao', $('traducao').value));
 function aplicarDetalhes() {
   document.querySelector('.folha').classList.toggle('mais', $('detalhes').checked);
   localStorage.setItem('esboco_detalhes', $('detalhes').checked ? '1' : '');
@@ -423,7 +445,7 @@ function render(d, rotulo, modo) {
   const kw = d.palavra_chave;
   document.querySelector('.folha').classList.toggle('limpo', modo === 'limpo');
   if (modo === 'tonicas') {
-    add(s, 'div', 'ref', d.referencia + ' · ' + rotulo);
+    add(s, 'div', 'ref', d.referencia + ' (' + $('traducao').value + ') · ' + rotulo);
     if (d.tema) {
       const f = add(s, 'div', 'fluxo');
       add(f, 'span', 't-tema', 'TEMA: ' + d.tema);
@@ -460,7 +482,7 @@ function render(d, rotulo, modo) {
     $('rodape').style.display = 'block';
     return;
   }
-  add(s, 'div', 'ref', d.referencia + (rotulo ? ' · Esboço ' + rotulo.toLowerCase() : ''));
+  add(s, 'div', 'ref', d.referencia + ' (' + $('traducao').value + ')' + (rotulo ? ' · Esboço ' + rotulo.toLowerCase() : ''));
   const f = add(s, 'div', 'fluxo');
   add(f, 'span', '', 'TEMA: ' + d.tema);
   add(f, 'b', '', '➜');
@@ -536,26 +558,27 @@ let modoEditor = false, ED = null;
 const ED_CHAVE = 'esboco_editor_v1';
 const ED_EXEMPLO = {
   fs: 10,
+  traducao: 'ARA',
   titulo: 'A Dor do Outro Chegou na Minha Casa',
   ref: 'Neemias 1:1-11',
   tema: 'ACOLHER ou FECHAR A PORTA',
   fech: 'A dor do outro chegou na minha casa: eu escolho ACOLHER.',
   apelo: '',
   itens: [
-    {verbo:'SAI', palavra:'FORTALEZA', frase:'é sair do conforto', lig:'Quem sai do conforto... PERGUNTA', vref:'Tg 4:17', vtxt:'sabe fazer o bem e não o faz'},
-    {verbo:'PERGUNTA', palavra:'PERGUNTEI', frase:'é perguntar para ajudar', lig:'Quem pergunta com amor... ENXERGA', vref:'Fp 2:4', vtxt:'cada qual também o que é dos outros'},
-    {verbo:'VÊ', palavra:'MISÉRIA', frase:'é cobrir a vergonha do outro', lig:'Quem enxerga com respeito... CHORA', vref:'Lc 10:33', vtxt:'vendo-o, compadeceu-se dele'},
-    {verbo:'CHORA', palavra:'CHOREI', frase:'é chorar com quem chora', lig:'Quem chora com o outro... levanta os olhos ao GRANDE', vref:'Rm 12:15', vtxt:'chorai com os que choram'},
-    {verbo:'ORA', palavra:'GRANDE', frase:'é levar a dor a Deus', lig:'Quem vê a grandeza de Deus... CONFESSA', vref:'Jr 32:17', vtxt:'nada há demasiadamente difícil para ti'},
-    {verbo:'ORA', palavra:'CONFESSO', frase:'é ficar ao lado, nunca acima', lig:'Quem se põe ao lado... confessa: CORRUPTAMENTE', vref:'Sl 32:5', vtxt:'confessei-te o meu pecado'},
-    {verbo:'ORA', palavra:'CORRUPTAMENTE', frase:'é admitir o erro sem desculpa', lig:'Quem admite o erro... LEMBRA-TE', vref:'Pv 28:13', vtxt:'o que as confessa e deixa alcançará misericórdia'},
-    {verbo:'ORA', palavra:'LEMBRA-TE', frase:'é oferecer esperança na promessa', lig:'Quem agarra a promessa... CONVERTE', vref:'Dt 30:3', vtxt:'o Senhor teu Deus mudará a tua sorte'},
-    {verbo:'ORA', palavra:'CONVERTERDES', frase:'é abrir o caminho de volta', lig:'Quem volta a Deus... lembra o RESGATASTE', vref:'2Cr 7:14', vtxt:'se o meu povo se humilhar e orar'},
-    {verbo:'ORA', palavra:'RESGATASTE', frase:'é lembrar de onde Deus me tirou', lig:'Quem lembra o resgate... serve como COPEIRO', vref:'1Pe 2:10', vtxt:'agora sois povo de Deus'},
-    {verbo:'AGE', palavra:'COPEIRO', frase:'é pôr o que Deus me deu a serviço', lig:'', vref:'Is 6:8', vtxt:'eis-me aqui, envia-me a mim'}
+    {verbo:'SAI', palavra:'FORTALEZA', ref:'Ne 1:1', frase:'é sair do conforto', lig:'Quem sai do conforto... PERGUNTA', vref:'Tg 4:17', vtxt:'sabe fazer o bem e não o faz'},
+    {verbo:'PERGUNTA', palavra:'PERGUNTEI', ref:'Ne 1:2', frase:'é perguntar para ajudar', lig:'Quem pergunta com amor... ENXERGA', vref:'Fp 2:4', vtxt:'cada qual também o que é dos outros'},
+    {verbo:'VÊ', palavra:'MISÉRIA', ref:'Ne 1:3', frase:'é cobrir a vergonha do outro', lig:'Quem enxerga com respeito... CHORA', vref:'Lc 10:33', vtxt:'vendo-o, compadeceu-se dele'},
+    {verbo:'CHORA', palavra:'CHOREI', ref:'Ne 1:4', frase:'é chorar com quem chora', lig:'Quem chora com o outro... levanta os olhos ao GRANDE', vref:'Rm 12:15', vtxt:'chorai com os que choram'},
+    {verbo:'ORA', palavra:'GRANDE', ref:'Ne 1:5', frase:'é levar a dor a Deus', lig:'Quem vê a grandeza de Deus... CONFESSA', vref:'Jr 32:17', vtxt:'nada há demasiadamente difícil para ti'},
+    {verbo:'ORA', palavra:'CONFESSO', ref:'Ne 1:6', frase:'é ficar ao lado, nunca acima', lig:'Quem se põe ao lado... confessa: CORRUPTAMENTE', vref:'Sl 32:5', vtxt:'confessei-te o meu pecado'},
+    {verbo:'ORA', palavra:'CORRUPTAMENTE', ref:'Ne 1:7', frase:'é admitir o erro sem desculpa', lig:'Quem admite o erro... LEMBRA-TE', vref:'Pv 28:13', vtxt:'o que as confessa e deixa alcançará misericórdia'},
+    {verbo:'ORA', palavra:'LEMBRA-TE', ref:'Ne 1:8', frase:'é oferecer esperança na promessa', lig:'Quem agarra a promessa... CONVERTE', vref:'Dt 30:3', vtxt:'o Senhor teu Deus mudará a tua sorte'},
+    {verbo:'ORA', palavra:'CONVERTERDES', ref:'Ne 1:9', frase:'é abrir o caminho de volta', lig:'Quem volta a Deus... lembra o RESGATASTE', vref:'2Cr 7:14', vtxt:'se o meu povo se humilhar e orar'},
+    {verbo:'ORA', palavra:'RESGATASTE', ref:'Ne 1:10', frase:'é lembrar de onde Deus me tirou', lig:'Quem lembra o resgate... serve como COPEIRO', vref:'1Pe 2:10', vtxt:'agora sois povo de Deus'},
+    {verbo:'AGE', palavra:'COPEIRO', ref:'Ne 1:11', frase:'é pôr o que Deus me deu a serviço', lig:'', vref:'Is 6:8', vtxt:'eis-me aqui, envia-me a mim'}
   ]
 };
-function edVazio() { return {verbo:'', palavra:'', frase:'', lig:'', vref:'', vtxt:''}; }
+function edVazio() { return {verbo:'', palavra:'', ref:'', frase:'', lig:'', vref:'', vtxt:''}; }
 function edCopia(o) { return JSON.parse(JSON.stringify(o)); }
 function edSalvar() { try { localStorage.setItem(ED_CHAVE, JSON.stringify(ED)); } catch (e) {} }
 function edCarregar() {
@@ -606,6 +629,7 @@ function montarFolha(d) {
   const tema = kw ? (kw + (d.contraponto ? ' ou ' + d.contraponto.toUpperCase() : '')) : '';
   ED = {
     fs: 10,
+    traducao: tradValida($('traducao').value),
     titulo: titulo,
     ref: d.referencia || '',
     tema: tema,
@@ -614,6 +638,7 @@ function montarFolha(d) {
     itens: topicos.map(t => ({
       verbo: t.verbo || '',
       palavra: t.chave,
+      ref: t.ref || '',
       frase: (t.direcao || '').replace(/^[^\s]+\s+(?=é\s)/i, ''),
       lig: t.ligacao || '',
       vref: t.apoio_ref || '',
@@ -627,6 +652,8 @@ function montarFolha(d) {
 function abrirEditor(estado) {
   modoEditor = true;
   ED = estado || edCarregar();
+  ED.traducao = tradValida(ED.traducao || $('traducao').value);
+  ED.itens.forEach(it => { if (it.ref === undefined) it.ref = ''; });
   const s = $('saida'); s.innerHTML = ''; s.classList.add('ed');
   paginaAjustar(true);
   $('msg').className = 'msg'; $('msg').textContent = '';
@@ -639,6 +666,13 @@ function abrirEditor(estado) {
   edBtn(barra, '💾 Salvar arquivo', 'Baixar o esboço como arquivo', edBaixar);
   edBtn(barra, '📂 Abrir arquivo', 'Abrir um esboço salvo', () => $('edabrir').click());
   edBtn(barra, '📄 Novo em branco', 'Começar outro tema', edNovo);
+  const tr = add(s, 'div', 'ed-trad');
+  add(tr, 'b', '', 'Tradução bíblica:');
+  const sel = add(tr, 'select'); sel.id = 'edtrad';
+  TRADUCOES.forEach(t => { const o = add(sel, 'option', '', t[1]); o.value = t[0]; });
+  sel.value = ED.traducao;
+  sel.addEventListener('change', () => edMudarTraducao(sel));
+  add(tr, 'div', 'ed-status').id = 'edstatus';
   const inp = add(s, 'input'); inp.type = 'file'; inp.id = 'edabrir'; inp.accept = '.json,application/json'; inp.style.display = 'none';
   inp.addEventListener('change', edAbrirArquivo);
   add(s, 'div', 'ed-dica', 'Toque em qualquer texto da folha para escrever. Tudo é salvo sozinho neste aparelho. Ao imprimir, o papel é 14 x 22 cm: escolha tamanho real (100%), sem ajustar à página.');
@@ -646,7 +680,9 @@ function abrirEditor(estado) {
   const f = add(s, 'div', 'ed-folha'); f.id = 'edfolha';
   [['ed-titulo', 'Título do sermão', 'titulo', 'div'], ['ed-ref', 'Texto bíblico', 'ref', 'div'], ['ed-tema', 'Tema / ideia central', 'tema', 'div']].forEach(c => {
     f.appendChild(edCampo(c[0], c[1], ED[c[2]], v => { ED[c[2]] = v; }, c[3]));
+    if (c[2] === 'ref') add(f, 'div', 'ed-tradl').id = 'edtradl';
   });
+  edEtiqueta();
   add(f, 'div', 'ed-hr');
   const lista = add(f, 'div'); lista.id = 'edlista';
   add(f, 'div', 'ed-hr');
@@ -674,6 +710,7 @@ function edRender() {
     l1.appendChild(edCampo('ed-palavra', 'PALAVRA', it.palavra, v => { it.palavra = v; }));
     add(l1, 'span', 'ed-traco');
     l1.appendChild(edCampo('', 'frase do ponto', it.frase, v => { it.frase = v; }));
+    l1.appendChild(edCampo('ed-vr', 'Ne 1:2', it.ref, v => { it.ref = v; }));
     const l2 = add(d, 'div', 'ed-lig'); l2.setAttribute('data-v', 'lig');
     tx(l2, '↓ ');
     l2.appendChild(edCampo('', 'ligação com o próximo ponto', it.lig, v => { it.lig = v; }));
@@ -683,6 +720,77 @@ function edRender() {
     l3.appendChild(edCampo('', 'texto do versículo de apoio', it.vtxt, v => { it.vtxt = v; }));
   });
   edMarcar();
+}
+function edEtiqueta() {
+  const e = $('edtradl'); if (e) e.textContent = 'Tradução: ' + nomeTrad(ED.traducao);
+}
+function edStatus(txt, erro) {
+  const e = $('edstatus'); if (!e) return;
+  e.textContent = txt || ''; e.className = 'ed-status' + (erro ? ' erro' : '');
+}
+/* Troca a tradução: a IA reescreve as palavras tônicas e os versículos de apoio; frases e ligações ficam */
+async function edMudarTraducao(sel) {
+  const nova = sel.value, antiga = ED.traducao;
+  if (nova === antiga) return;
+  const nome = nomeTrad(nova);
+  const chave = ($('chave').value || '').trim();
+  const temTexto = ED.itens.some(it => it.palavra.trim() || it.vtxt.trim());
+  const soEtiqueta = () => { ED.traducao = nova; edSalvar(); edEtiqueta(); edStatus(''); };
+  if (!temTexto) { soEtiqueta(); return; }
+  if (!chave) {
+    if (!confirm('Sem a chave da API (preencha no alto da página) não dá para trocar as palavras sozinho.\n\nMudar só o nome da tradução para ' + nome + ' e ajustar as palavras à mão?')) { sel.value = antiga; return; }
+    soEtiqueta(); return;
+  }
+  if (!confirm('Trocar as palavras tônicas e os versículos de apoio para a tradução ' + nome + '?\n\nAs frases e as ligações são mantidas. As palavras e os versículos de apoio atuais serão substituídos (salve o arquivo antes, se quiser guardar).')) { sel.value = antiga; return; }
+  sel.disabled = true; edStatus('Trocando as palavras para ' + nova + '... (até 1 minuto)');
+  try {
+    await edTrocarPalavras(nova);
+    ED.traducao = nova; edSalvar(); edRender(); edEtiqueta();
+    edStatus('Pronto. Confira as palavras e os versículos na sua Bíblia (' + nova + ').');
+  } catch (e) {
+    sel.value = antiga;
+    let m = e.message || String(e);
+    if (m === 'REDE') m = 'Sem conexão com a internet. Nada foi alterado.';
+    else if (e instanceof FormatoErro || e instanceof SyntaxError) m = 'A IA devolveu um formato inesperado. Nada foi alterado; tente de novo.';
+    else if (/API key not valid|API_KEY_INVALID|API key expired/i.test(m)) m = 'Chave da API inválida. Nada foi alterado.';
+    else if (e.status === 429 || /quota|RESOURCE_EXHAUSTED/i.test(m)) m = 'Limite de uso da chave atingido. Nada foi alterado; tente em instantes.';
+    edStatus(m, true);
+  } finally { sel.disabled = false; }
+}
+async function edTrocarPalavras(sigla) {
+  const chave = $('chave').value.trim();
+  const modelo = ($('modelo').value || '').trim() || MODELOS[0];
+  const lista = ED.itens.map((it, i) => ({ n: i + 1, ref: it.ref, palavra: it.palavra, apoio_ref: it.vref, apoio_texto: it.vtxt }));
+  const sistema = 'Você é revisor bíblico brasileiro. Recebe uma lista de pontos de um esboço de sermão e deve reescrever, na TRADUÇÃO pedida, a palavra tônica de cada ponto e o trecho do versículo de apoio. Responda SOMENTE com JSON válido, sem explicações.\n' +
+    'Regras:\n' +
+    '1. palavra: UMA só palavra (pode ter hífen), em MAIÚSCULAS, tirada do versículo \"ref\" exatamente como ele aparece na tradução pedida. Se a palavra atual continua aparecendo nesse versículo na nova tradução, MANTENHA-A igual. Se não aparece, escolha a palavra da nova tradução que tem o mesmo sentido. Se \"ref\" estiver vazio, devolva a palavra atual sem mudar.\n' +
+    '2. apoio_texto: trecho curto (até 10 palavras) do versículo \"apoio_ref\", com as palavras exatas da nova tradução, sem aspas. Se \"apoio_ref\" estiver vazio, devolva vazio. Se você não tem certeza do texto nessa tradução, devolva o apoio_texto atual sem mudar. Nunca invente.\n' +
+    '3. Mantenha a ordem e o número \"n\" de cada ponto.\n' +
+    'Formato: {\"itens\":[{\"n\":1,\"palavra\":\"\",\"apoio_texto\":\"\"}]}';
+  const pedido = 'Tradução: ' + nomeTrad(sigla) + '\nTexto bíblico do esboço: ' + (ED.ref || '') + '\nPontos:\n' + JSON.stringify(lista);
+  const corpo = {
+    systemInstruction: { parts: [{ text: sistema }] },
+    contents: [{ role: 'user', parts: [{ text: pedido }] }],
+    generationConfig: { temperature: 0.2, responseMimeType: 'application/json', maxOutputTokens: 8192 }
+  };
+  const j = await chamar(chave, corpo, modelo);
+  const dados = lerJSON(textoDaResposta(j));
+  const arr = Array.isArray(dados.itens) ? dados.itens : (Array.isArray(dados) ? dados : []);
+  if (!arr.length) throw new FormatoErro('sem itens');
+  const limpo = v => String(v == null ? '' : v).trim().replace(/^["“”']+|["“”']+$/g, '');
+  const trocas = [];
+  arr.forEach(x => {
+    const it = ED.itens[Number(x && x.n) - 1]; if (!it) return;
+    const pal = limpo(x.palavra).toUpperCase();
+    if (it.ref.trim() && pal && !/\s/.test(pal) && pal.length <= 30 && pal !== it.palavra) { trocas.push([it.palavra, pal]); it.palavra = pal; }
+    const ap = limpo(x.apoio_texto);
+    if (it.vref.trim() && ap) it.vtxt = ap;
+  });
+  /* as ligações citam a palavra do próximo ponto em maiúsculas: acompanha a troca */
+  trocas.forEach(([velha, nova]) => {
+    if (!velha) return;
+    ED.itens.forEach(it => { if (it.lig) it.lig = it.lig.split(velha).join(nova); });
+  });
 }
 function edMarcar() {
   const itens = document.querySelectorAll('#edlista .ed-item');
@@ -709,7 +817,7 @@ function edApagar(i) {
 }
 function edNovo() {
   if (!confirm('Começar um esboço em branco? O que está na tela será apagado (salve o arquivo antes, se quiser guardar).')) return;
-  ED = { fs: ED.fs || 10, titulo: '', ref: '', tema: '', fech: '', apelo: '', itens: [edVazio()] };
+  ED = { fs: ED.fs || 10, traducao: ED.traducao, titulo: '', ref: '', tema: '', fech: '', apelo: '', itens: [edVazio()] };
   edSalvar(); abrirEditor(ED);
 }
 function edExemplo() {
@@ -733,6 +841,7 @@ function edAbrirArquivo(e) {
       if (!o.itens.length) o.itens.push(edVazio());
       ['titulo', 'ref', 'tema', 'fech', 'apelo'].forEach(k => { o[k] = String(o[k] || ''); });
       o.fs = Number(o.fs) || 10;
+      o.traducao = tradValida(o.traducao);
       ED = o; edSalvar(); abrirEditor(ED);
     } catch (err) { alert('Este arquivo não é um esboço válido.'); }
   };
@@ -827,6 +936,7 @@ $('gerar').addEventListener('click', async () => {
     const pedido = 'Texto bíblico: ' + texto +
       (passagem ? '\nTexto dos versículos (use como única fonte):\n' + passagem : '') +
       '\nTema: ' + (tema || '(crie um tema curto e forte)') +
+      '\nTradução bíblica: ' + nomeTrad($('traducao').value) + '. As palavras tônicas (chave) e os trechos de versículos devem ser exatamente desta tradução (se o pastor colou o texto dos versículos, vale o texto colado).' +
       '\nTipo de esboço: ' + TIPOS[$('tipo').value].regra;
     const corpo = {
       systemInstruction: { parts: [{ text: INSTRUCAO }] },
