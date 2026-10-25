@@ -443,6 +443,17 @@ function openShare(L,t,loc){
       }
       if(pre)go(pre);else{toast('Preparando o vídeo…');videoBlob(vv,go);}
     }});
+    if(cf)it('Salvar na galeria','linear-gradient(135deg,#3b82f6,#6aa8ff)','💾',{fn:function(){
+      function sv(bl){
+        if(!bl){toast('Não consegui abrir o vídeo neste aparelho.');return;}
+        var f=fileOf(bl,vv.t),a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();
+        toast('Vídeo salvo no aparelho. Agora abra o Facebook, Instagram ou TikTok e escolha este vídeo na galeria.');closeShare();
+      }
+      if(pre)sv(pre);else videoBlob(vv,sv);
+    }});
+    var gd=document.createElement('div');gd.style.cssText='flex:1 1 100%;grid-column:1/-1;font-size:.74rem;color:#c9b77f;line-height:1.55;margin-top:2px';
+    gd.textContent='WhatsApp recebe o vídeo direto. Facebook, Instagram e TikTok quase nunca aceitam vídeo vindo daqui: toque em Salvar na galeria, abra o app e escolha o vídeo.'+(ED?' Ou publique e mande o link.':'');
+    n.appendChild(gd);
   }
   if(!un){
   if(navigator.share)it('Mais apps','linear-gradient(135deg,#8a6420,#e6c45f)','⋯',{fn:function(){navigator.share({title:t,text:tx,url:L}).catch(function(){});closeShare();}});
