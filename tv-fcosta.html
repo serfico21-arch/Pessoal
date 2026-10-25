@@ -252,7 +252,7 @@ function thumb(v,big){var p=v.p;if(p.k==='yt')return 'https://i.ytimg.com/vi/'+p
 function mkImg(src,cls,alt,fb){var im=document.createElement('img');im.src=src;im.alt=alt||'';im.loading='lazy';im.decoding='async';if(cls)im.className=cls;im.onerror=function(){if(fb&&im.src.indexOf(fb)<0){im.src=fb;}else im.remove();};im.onload=function(){if(im.naturalWidth&&im.naturalWidth<=120)im.onerror();};return im;}
 function token(v){return 'v-'+v.p.id;}
 function baseUrl(){var b='';try{b=localStorage.getItem('tvfc_base')||'';}catch(e){}return (b||SHARE_BASE||location.href).split('#')[0].split('?')[0];}
-function linkOf(v){var b=baseUrl();if(v.p.k==='local')return b+'#'+token(v);if(!v.loc&&!v.sh)return b.replace(/[^\/]*$/,'')+'v/'+v.p.id+'.html';return b+'?u='+encodeURIComponent(v.u)+'&t='+encodeURIComponent(v.t)+(v.v?'&f=v':'')+'#'+token(v);}
+function linkOf(v){var b=baseUrl();if(v.p.k==='local')return b+'#'+token(v);if(!v.loc&&!v.sh)return b.replace(/[^\/]*$/,'')+'v-'+v.p.id+'.html';return b+'?u='+encodeURIComponent(v.u)+'&t='+encodeURIComponent(v.t)+(v.v?'&f=v':'')+'#'+token(v);}
 function render(){
   build();
   var vazio=!list.length;
@@ -451,7 +451,7 @@ function pubFile(){
     idbGet('img:'+p.id,function(bl){
       if(!bl)return nextImg(i+1,done);
       var fr=new FileReader();
-      fr.onload=function(){files.push({n:'v/'+p.id+'.jpg',d:new Uint8Array(fr.result)});all[i].c='v/'+p.id+'.jpg';nextImg(i+1,done);};
+      fr.onload=function(){files.push({n:'v-'+p.id+'.jpg',d:new Uint8Array(fr.result)});all[i].c='v-'+p.id+'.jpg';nextImg(i+1,done);};
       fr.onerror=function(){nextImg(i+1,done);};
       fr.readAsArrayBuffer(bl);
     });
@@ -466,7 +466,7 @@ function pubFile(){
     cb(B+'banner-tv-fcosta-v2.png',1200,630);
   }
   function sharePage(o,p,img,w,h){
-    var self=B+'v/'+p.id+'.html',tgt=main+'?u='+encodeURIComponent(o.u)+'&t='+encodeURIComponent(o.t)+(o.v?'&f=v':'')+'#v-'+p.id;
+    var self=B+'v-'+p.id+'.html',tgt=main+'?u='+encodeURIComponent(o.u)+'&t='+encodeURIComponent(o.t)+(o.v?'&f=v':'')+'#v-'+p.id;
     var ds='Imóveis em vídeo com FCosta Corretor de Imóveis · CRECI-SP 294791-F';
     return '<!DOCTYPE html>\n<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+ea(o.t)+' · TV FCosta</title><meta name="theme-color" content="#13233d">'
     +'<meta property="og:type" content="website"><meta property="og:locale" content="pt_BR"><meta property="og:site_name" content="TV FCosta Corretor">'
@@ -480,7 +480,7 @@ function pubFile(){
   function pages(i,done){
     if(i>=all.length)return done();
     var o=all[i],p=parse(o.u);if(!p||p.k==='local')return pages(i+1,done);
-    shareImg(o,p,function(img,w,h){files.push({n:'v/'+p.id+'.html',d:enc.encode(sharePage(o,p,img,w,h))});pages(i+1,done);});
+    shareImg(o,p,function(img,w,h){files.push({n:'v-'+p.id+'.html',d:enc.encode(sharePage(o,p,img,w,h))});pages(i+1,done);});
   }
   function dl(){
     var a=document.createElement('a');a.href=URL.createObjectURL(zipFiles(files));a.download='tv-fcosta-publicar.zip';document.body.appendChild(a);a.click();a.remove();
@@ -493,8 +493,8 @@ function pubFile(){
           t=t.replace(/\/\*CFG_START\*\/[\s\S]*?\/\*CFG_END\*\//,function(){return cfg;});
           t=t.replace(/<!--OG_START-->[\s\S]*?<!--OG_END-->/,function(){return og;});
           files.unshift({n:'tv-fcosta.html',d:enc.encode(t)});dl();
-          saveDel([]);toast('Zip gerado: extraia e suba TUDO no GitHub (tv-fcosta.html e a pasta v).'+(sk?' ('+sk+' vídeo(s) de arquivo ficam de fora.)':''));
-        }).catch(function(){dl();copy(cfg);toast('Baixei só as páginas de prévia. Bloco copiado: cole no lugar do bloco CFG do arquivo.');});
+          saveDel([]);toast('Zip gerado: extraia e suba TODOS os arquivos no GitHub (tv-fcosta.html e os v-….html/jpg).'+(sk?' ('+sk+' vídeo(s) de arquivo ficam de fora.)':''));
+        }).catch(function(){dl();copy(cfg);toast('Baixei só as páginas de prévia (v-….html). Bloco copiado: cole no lugar do bloco CFG do arquivo.');});
       });
     });
   });
