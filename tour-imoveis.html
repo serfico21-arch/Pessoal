@@ -643,7 +643,8 @@
         </div>
         <canvas id="stage" style="display:none;"></canvas>
         <div class="result" id="result" style="display:none;">
-          <video id="resultVideo" controls></video>
+          <video id="resultVideo" controls playsinline></video>
+          <button type="button" class="btn-secondary fc-fs-btn" data-fc-for="resultVideo">&#9974; Ver em tela cheia</button>
           <a class="download" id="downloadLink" download="tour-imovel.mp4">Baixar vídeo</a>
         </div>
       </div>
@@ -890,7 +891,7 @@
           <button class="btn-secondary" id="tvFull" style="display:none;">Abrir em tela cheia</button>
         </div>
         <div id="tvMsg" style="font-size:13px;color:var(--ink-soft);margin-top:10px;"></div>
-        <iframe id="tvFrame" allow="fullscreen" style="display:none;width:100%;height:560px;border:1px solid var(--rule);border-radius:var(--radius);margin-top:14px;background:#000;"></iframe>
+        <iframe id="tvFrame" allow="fullscreen" style="display:none;width:100%;height:min(88vh,88dvh);min-height:560px;border:1px solid var(--rule);border-radius:var(--radius);margin-top:14px;background:#000;"></iframe>
       </div>
     </div>
   </div>
@@ -2752,6 +2753,56 @@ window.FCBand = (function(){
     sl.addEventListener('input', lab); lab();
   }
   wire('infoGlass','infoOpacity'); wire('adpInfoGlass','adpInfoOpacity');
+})();
+</script>
+
+<style>
+  .result video{max-height:80vh;max-height:80dvh;background:#000;}
+  .adp-play{max-width:min(100%,340px)!important;max-height:72vh!important;max-height:72dvh!important;}
+  .fc-fs-btn{display:inline-block;margin:14px 10px 0 0;padding:11px 20px;font-size:14px;}
+  body.fc-lock{overflow:hidden;}
+  #fcFull{position:fixed;inset:0;z-index:2147483001;background:#000;display:flex;align-items:center;justify-content:center;}
+  #fcFull video{width:100vw!important;height:100vh!important;height:100dvh!important;max-width:none!important;max-height:none!important;object-fit:contain;border-radius:0!important;background:#000;display:block;}
+  #fcFullX{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:2;width:46px;height:46px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:24px;line-height:1;cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);}
+</style>
+<script>
+/* Tela cheia estilo TikTok/Reels: o vídeo do tour ocupa a tela toda */
+(function(){
+  var ov=null, vid=null, ph=null;
+  function openFull(v){
+    if(ov||!v) return;
+    vid=v; ph=document.createComment('fc-ph'); v.parentNode.insertBefore(ph,v);
+    ov=document.createElement('div'); ov.id='fcFull';
+    var x=document.createElement('button'); x.id='fcFullX'; x.type='button'; x.setAttribute('aria-label','Fechar'); x.innerHTML='&#10005;';
+    x.onclick=closeFull;
+    ov.appendChild(v); ov.appendChild(x); document.body.appendChild(ov);
+    document.body.classList.add('fc-lock');
+    try{ if(ov.requestFullscreen) ov.requestFullscreen(); else if(ov.webkitRequestFullscreen) ov.webkitRequestFullscreen(); }catch(e){}
+    try{ var pr=v.play(); if(pr&&pr.catch) pr.catch(function(){}); }catch(e){}
+  }
+  function closeFull(){
+    if(!ov) return;
+    var o=ov; ov=null;
+    try{ if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); }catch(e){}
+    if(ph&&ph.parentNode){ ph.parentNode.insertBefore(vid,ph); ph.parentNode.removeChild(ph); }
+    o.remove(); document.body.classList.remove('fc-lock'); vid=ph=null;
+  }
+  document.addEventListener('fullscreenchange',function(){ if(ov && !document.fullscreenElement) closeFull(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeFull(); });
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('.fc-fs-btn'); if(!b) return;
+    var v=b.dataset.fcFor?document.getElementById(b.dataset.fcFor):b.previousElementSibling;
+    openFull(v);
+  });
+  function addBtn(v){
+    if(v.dataset.fcBtn) return; v.dataset.fcBtn='1';
+    var b=document.createElement('button'); b.type='button'; b.className='adp-redo fc-fs-btn'; b.style.cssText='margin:0 10px 0 0;padding:0;';
+    b.innerHTML='&#9974; Tela cheia';
+    v.insertAdjacentElement('afterend',b);
+  }
+  function scan(root){ (root.querySelectorAll?root.querySelectorAll('video.adp-play'):[]).forEach(addBtn); }
+  new MutationObserver(function(ms){ ms.forEach(function(m){ m.addedNodes.forEach(function(n){ if(n.nodeType===1){ if(n.matches&&n.matches('video.adp-play')) addBtn(n); else scan(n); } }); }); }).observe(document.body,{childList:true,subtree:true});
+  scan(document);
 })();
 </script>
 </body>
