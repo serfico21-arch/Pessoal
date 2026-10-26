@@ -551,7 +551,7 @@
           <div class="time-box" style="flex:1 1 100%;margin-top:0;">
             <div class="time-head">
               <strong>Ajustar a faixa</strong>
-              <button type="button" class="file-btn" id="infoReset">Restaurar</button>
+              <span style="display:inline-flex;gap:8px;flex-wrap:wrap;"><button type="button" class="file-btn" id="infoGlass">Faixa transparente</button><button type="button" class="file-btn" id="infoReset">Restaurar</button></span>
             </div>
             <label class="sl" for="infoPos">Subir a faixa</label>
             <input type="range" id="infoPos" min="0" max="100" step="1" value="0">
@@ -750,7 +750,7 @@
             <div class="time-box" style="flex:1 1 100%;margin-top:0;">
               <div class="time-head">
                 <strong>Ajustar a faixa</strong>
-                <button type="button" class="file-btn" id="adpInfoReset">Restaurar</button>
+                <span style="display:inline-flex;gap:8px;flex-wrap:wrap;"><button type="button" class="file-btn" id="adpInfoGlass">Faixa transparente</button><button type="button" class="file-btn" id="adpInfoReset">Restaurar</button></span>
               </div>
               <label class="sl" for="adpInfoPos">Subir a faixa</label>
               <input type="range" id="adpInfoPos" min="0" max="100" step="1" value="0">
@@ -1034,8 +1034,8 @@ window.FCBand = (function(){
     g.globalAlpha = window.__fcBandOp ? window.__fcBandOp() : 1;
     g.fillStyle = T.fill(); g.fillRect(0, 0, maxW, h);
     if(!T.light){ const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(255,255,255,.10)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, maxW, h); }
-    g.fillStyle = T.dot; g.fillRect(0, 0, maxW, topLine);
     g.globalAlpha = 1;
+    g.fillStyle = T.dot; g.fillRect(0, 0, maxW, topLine);
     g.restore();
     g.save(); rr(g, 1, 1, maxW-2, h-2, radius); g.strokeStyle = T.line; g.lineWidth = hair; g.stroke(); g.restore();
     g.textBaseline = 'top';
@@ -1901,7 +1901,7 @@ window.FCBand = (function(){
       W, H, u, mode: infoMode,
       scale: (+infoScaleInput.value || 100) * (landscape ? 0.82 : 1), pos: +infoPosInput.value || 0,
       topY: (infoMode === 'under' && portrait) ? Math.round(H*0.09) : 0,
-      bottomLimit: portrait ? Math.round(H*0.823) : (landscape ? H - Math.round(H*0.05) : H - Math.round(H*0.035)),
+      bottomLimit: portrait ? Math.round(H*0.99) : (landscape ? H - Math.round(H*0.02) : H - Math.round(H*0.012)),
       maxW: maxWI,
       bandX: landscape ? (infoMode === 'over' ? mxI : Math.round((W - maxWI)/2)) : mxI,
       maxFrac: landscape ? 0.30 : 0.42,
@@ -2271,7 +2271,7 @@ window.FCBand = (function(){
     const L = B.place({
       W, H, u, mode, scale: (+$('adpInfoScale').value || 100) * (land ? 0.82 : 1), pos: +$('adpInfoPos').value || 0,
       topY: (mode === 'under' && portrait) ? Math.round(H * 0.09) : 0,
-      bottomLimit: portrait ? Math.round(H * 0.823) : (land ? H - Math.round(H * 0.05) : H - Math.round(H * 0.035)),
+      bottomLimit: portrait ? Math.round(H * 0.99) : (land ? H - Math.round(H * 0.02) : H - Math.round(H * 0.012)),
       maxW, bandX: land ? (mode === 'over' ? mx : Math.round((W - maxW) / 2)) : mx,
       maxFrac: land ? 0.30 : 0.42, opts
     });
@@ -2740,5 +2740,19 @@ window.FCBand = (function(){
 <a id="fc-voltar-painel" href="index.html" aria-label="Voltar para o painel">&#8592; Voltar ao painel</a>
 <script>try{if(window.self!==window.top)document.getElementById('fc-voltar-painel').style.display='none'}catch(e){}</script>
 <!-- /fc-voltar-painel -->
+<script>
+/* Botão "Faixa transparente": liga/desliga a opacidade só no FUNDO da faixa (textos, preço, descrição e WhatsApp ficam 100% nítidos) */
+(function(){
+  var GLASS = 55;
+  function wire(btnId, sliderId){
+    var b = document.getElementById(btnId), sl = document.getElementById(sliderId);
+    if(!b || !sl) return;
+    function lab(){ var on = +sl.value < 100; b.textContent = on ? 'Faixa transparente: ligada' : 'Faixa transparente'; b.style.fontWeight = on ? '700' : ''; }
+    b.addEventListener('click', function(){ sl.value = (+sl.value < 100) ? 100 : GLASS; sl.dispatchEvent(new Event('input')); lab(); });
+    sl.addEventListener('input', lab); lab();
+  }
+  wire('infoGlass','infoOpacity'); wire('adpInfoGlass','adpInfoOpacity');
+})();
+</script>
 </body>
 </html>
