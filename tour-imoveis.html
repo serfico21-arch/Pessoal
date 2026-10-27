@@ -4007,14 +4007,14 @@ window.FCLogo = (function(){
     var swk = swayK(), latK = Math.max(1, swk);
     var shX = lx * 0.02 * W * latK, shY = ly * 0.02 * H * latK;
     var roll = 0, sweep = swayOn();
-    var s0 = 1 - 0.6 * R + R * zc + (sweep ? 0.32 * Math.min(swk, 1.4) * v : 0), c = 0.6 * R * zc;
-    var fx = pl.fx, fy = pl.fy, hx = Math.max(fx, 1 - fx), hy = Math.max(fy, 1 - fy);
+    var s0 = sweep ? (1.2 + 0.3 * swk + 0.35 * R * v) : (1 - 0.6 * R + R * zc), c = 0.6 * R * zc;
+    var fx = sweep ? 0.5 : pl.fx, fy = pl.fy, hx = Math.max(fx, 1 - fx), hy = Math.max(fy, 1 - fy);
     var xs = [], ys = [], i, j, e;
     for(i = 0; i <= NX; i++){ e = (i / NX - fx) / hx; xs.push((fx + hx * (e * s0 + c * e * Math.abs(e))) * W); }
     for(j = 0; j <= NY; j++){ e = (j / NY - fy) / hy; ys.push((fy + hy * (e * s0 + c * e * Math.abs(e))) * H); }
     if(sweep){
       // giro de ponta a ponta pelo cômodo (como virar o corpo ~180°): varre a foto toda, sem subir nem descer
-      var room = Math.max(0, Math.min(-xs[0], xs[NX] - W)) / 1.35;
+      var room = Math.max(0, Math.min(-xs[0], xs[NX] - W)) * 0.95 / 1.3;
       shX = (idx % 2 ? -1 : 1) * (2 * smooth(u) - 1) * room;
       shY = 0; by = 0;
     }
@@ -4099,7 +4099,14 @@ window.FCLogo = (function(){
         }
         var f = null;
         try{ f = renderFrame(list[idx], idx, tt, perPhoto(), fade); }catch(e){ f = null; }
-        if(f){ var a = Array.prototype.slice.call(arguments); a[0] = f; return origDraw.apply(this, a); }
+        if(f){
+          var a = Array.prototype.slice.call(arguments); a[0] = f;
+          if(a.length >= 9 && src.width && src.height){   // recorte da foto (transições 3D/fatias): ajusta ao tamanho do quadro do passeio
+            var kx = f.width / src.width, ky = f.height / src.height;
+            a[1] *= kx; a[2] *= ky; a[3] *= kx; a[4] *= ky;
+          }
+          return origDraw.apply(this, a);
+        }
       }
     }
     return origDraw.apply(this, arguments);
