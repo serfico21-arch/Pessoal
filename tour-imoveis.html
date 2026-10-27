@@ -4006,18 +4006,18 @@ window.FCLogo = (function(){
     var by = bob ? Math.sin(TAU * 1.9 * tt) * 0.0016 * H : 0;
     var swk = swayK(), latK = Math.max(1, swk);
     var shX = lx * 0.02 * W * latK, shY = ly * 0.02 * H * latK;
-    var roll = 0;
-    if(swayOn()){
-      var ph = idx * 1.7;
-      shX += Math.sin(TAU * u + ph) * 0.045 * W * swk;
-      shY += Math.sin(TAU * u * 1.5 + ph * 0.7) * 0.034 * H * swk;
-      roll = Math.sin(TAU * u * 0.75 + ph * 1.3) * 0.018 * swk;
-    }
-    var s0 = 1 - 0.6 * R + R * zc, c = 0.6 * R * zc;
+    var roll = 0, sweep = swayOn();
+    var s0 = 1 - 0.6 * R + R * zc + (sweep ? 0.32 * Math.min(swk, 1.4) * v : 0), c = 0.6 * R * zc;
     var fx = pl.fx, fy = pl.fy, hx = Math.max(fx, 1 - fx), hy = Math.max(fy, 1 - fy);
     var xs = [], ys = [], i, j, e;
     for(i = 0; i <= NX; i++){ e = (i / NX - fx) / hx; xs.push((fx + hx * (e * s0 + c * e * Math.abs(e))) * W); }
     for(j = 0; j <= NY; j++){ e = (j / NY - fy) / hy; ys.push((fy + hy * (e * s0 + c * e * Math.abs(e))) * H); }
+    if(sweep){
+      // giro de ponta a ponta pelo cômodo (como virar o corpo ~180°): varre a foto toda, sem subir nem descer
+      var room = Math.max(0, Math.min(-xs[0], xs[NX] - W)) / 1.35;
+      shX = (idx % 2 ? -1 : 1) * (2 * smooth(u) - 1) * room;
+      shY = 0; by = 0;
+    }
     g.globalAlpha = 1;
     g.drawImage(bgOf(src, iw, ih), 0, 0, W, H);
     g.fillStyle = 'rgba(0,0,0,0.25)'; g.fillRect(0, 0, W, H);
@@ -4119,7 +4119,7 @@ window.FCLogo = (function(){
     '<div class="ia-row" style="margin-top:0;"><label style="font-size:13px;">Velocidade do passeio ' +
     '<select id="vpInt" style="margin-left:6px;padding:8px;border:1px solid var(--rule);border-radius:8px;font:inherit;font-size:13px;background:var(--surface);color:inherit;"><option value="suave">Suave</option><option value="medio" selected>Médio</option><option value="forte">Rápido</option></select></label>' +
     '<label style="font-size:13px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="vpBob" checked> Balanço de passos</label>' +
-    '<label style="font-size:13px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="vpSway" checked> Giros e inclinações da câmera</label></div>' +
+    '<label style="font-size:13px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="vpSway" checked> Giro da câmera pelo cômodo (tipo 180°)</label></div>' +
     '<div class="ia-row"><label style="font-size:13px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="vpWide" checked> Câmera afastada: mostrar a foto inteira (sem cortar nem ampliar)</label></div>' +
     '<div class="ia-row"><button type="button" class="file-btn" id="vpPrevBtn">▶ Ver prévia com as minhas fotos</button><button type="button" class="file-btn" id="vpPrevStop" style="display:none;">&#9632; Parar prévia</button></div>' +
     '<canvas id="vpPrev" width="270" height="480" style="display:none;width:100%;max-width:200px;margin-top:10px;border-radius:10px;background:#000;"></canvas>' +
