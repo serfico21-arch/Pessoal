@@ -1212,7 +1212,9 @@ window.FCBand = (function(){
   let audioFile = null;
   let narrationBlob = null;
   let narrRecorder = null, narrStream = null, narrTimer = null;
-  let lastVideoUrl = null;
+  let lastVideoUrl = null, lastBlob = null;
+  // Guarda o vídeo na memória: se o endereço temporário do link for invalidado, o clique cria outro e o download continua funcionando
+  downloadLink.addEventListener('click', ()=>{ if(lastBlob){ try{ downloadLink.href = URL.createObjectURL(lastBlob); }catch(e){} } });
   let wakeLock = null;
 
   // Logo do corretor, embutida no arquivo (sem depender de link externo).
@@ -2157,7 +2159,7 @@ window.FCBand = (function(){
       URL.revokeObjectURL(lastVideoUrl); // libera o vídeo anterior da memória
     }
     const url = URL.createObjectURL(blob);
-    lastVideoUrl = url;
+    lastVideoUrl = url; lastBlob = blob;
     resultVideo.src = url;
     downloadLink.href = url;
     downloadLink.download = (window.__fcBld ? 'tour-construtora.' : 'tour-imovel.') + (isMp4 ? 'mp4' : 'webm'); downloadLink.textContent = isMp4 ? 'Baixar vídeo (MP4)' : 'Baixar vídeo (WebM: este navegador não gera MP4)';
