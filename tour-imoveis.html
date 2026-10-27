@@ -1215,6 +1215,22 @@ window.FCBand = (function(){
   let lastVideoUrl = null, lastBlob = null;
   // Guarda o vídeo na memória: se o endereço temporário do link for invalidado, o clique cria outro e o download continua funcionando
   downloadLink.addEventListener('click', ()=>{ if(lastBlob){ try{ downloadLink.href = URL.createObjectURL(lastBlob); }catch(e){} } });
+  // Guarda o último vídeo no aparelho (IndexedDB): se o celular recarregar a página por falta de memória, o vídeo volta sozinho
+  const fcDB = {
+    open(){ return new Promise((res,rej)=>{ const r = indexedDB.open('fc-tour-video',1); r.onupgradeneeded = ()=>r.result.createObjectStore('v'); r.onsuccess = ()=>res(r.result); r.onerror = ()=>rej(r.error); }); },
+    async put(rec){ const db = await this.open(); return new Promise((res,rej)=>{ const t = db.transaction('v','readwrite'); t.objectStore('v').put(rec,'last'); t.oncomplete = ()=>res(); t.onerror = ()=>rej(t.error); }); },
+    async get(){ const db = await this.open(); return new Promise((res,rej)=>{ const q = db.transaction('v').objectStore('v').get('last'); q.onsuccess = ()=>res(q.result); q.onerror = ()=>rej(q.error); }); }
+  };
+  (async()=>{
+    try{
+      const r = await fcDB.get();
+      if(!r || !r.blob || Date.now() - r.t > 6*3600*1000) return;
+      lastBlob = r.blob; lastVideoUrl = URL.createObjectURL(r.blob);
+      resultVideo.src = lastVideoUrl; downloadLink.href = lastVideoUrl; downloadLink.download = r.name; downloadLink.textContent = r.label;
+      resultBox.style.display = 'block'; statusBox.classList.add('show');
+      statusText.textContent = 'Último vídeo gerado recuperado (' + (r.blob.size / 1048576).toFixed(1).replace('.', ',') + ' MB). Se a página recarregou sozinha, foi falta de memória do celular.';
+    }catch(e){}
+  })();
   let wakeLock = null;
 
   // Logo do corretor, embutida no arquivo (sem depender de link externo).
@@ -2143,6 +2159,12 @@ window.FCBand = (function(){
     }finally{
       clearTimeout(safetyTimeout);
       if(wakeLock){ try{ await wakeLock.release(); }catch(e){} wakeLock = null; }
+      // libera a memória da gravação (no celular, a página pode recarregar sozinha se isso ficar preso)
+      try{ finalStream.getTracks().forEach(t=>t.stop()); }catch(e){}
+      try{ if(audioCtx) audioCtx.close(); }catch(e){}
+      try{ photos.forEach(p=>{ p.renderImg = null; p.bgImg = null; }); }catch(e){}
+      try{ if(cubeA){ cubeA.width = cubeA.height = 1; cubeB.width = cubeB.height = 1; } }catch(e){}
+      try{ stage.width = 1; stage.height = 1; }catch(e){}
     }
 
     const blob = new Blob(chunks, { type: isMp4 ? 'video/mp4' : 'video/webm' });
@@ -2164,6 +2186,7 @@ window.FCBand = (function(){
     downloadLink.href = url;
     downloadLink.download = (window.__fcBld ? 'tour-construtora.' : 'tour-imovel.') + (isMp4 ? 'mp4' : 'webm'); downloadLink.textContent = isMp4 ? 'Baixar vídeo (MP4)' : 'Baixar vídeo (WebM: este navegador não gera MP4)';
     resultBox.style.display = 'block';
+    fcDB.put({ blob, name: downloadLink.download, label: downloadLink.textContent, t: Date.now() }).catch(()=>{});
     statusText.textContent = 'Vídeo pronto (' + (blob.size / 1048576).toFixed(1).replace('.', ',') + ' MB)' + (limitado && blob.size > LIMITE_MB ? ' — acima de 15 MB, tente com menos fotos ou menos segundos por foto.' : '.');
   }
 })();
