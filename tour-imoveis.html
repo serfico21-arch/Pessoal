@@ -3783,5 +3783,115 @@ window.FCLogo = (function(){
 })();
 
 </script>
+<style>
+.ia-box{border:1.5px dashed var(--accent);border-radius:12px;padding:14px;margin:0 0 14px;background:var(--accent-soft);}
+.ia-box textarea{width:100%;min-height:110px;box-sizing:border-box;padding:10px;border:1px solid var(--rule);border-radius:8px;font:inherit;font-size:14px;background:var(--surface);color:inherit;resize:vertical;}
+.ia-box .ia-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;}
+.ia-box input[type=password],.ia-box input[type=number]{padding:8px;border:1px solid var(--rule);border-radius:8px;font:inherit;font-size:13px;background:var(--surface);color:inherit;}
+.ia-st{font-size:13px;color:var(--ink-soft);margin-top:8px;min-height:18px;}
+</style>
+<script>
+(function(){
+  const TIPOS = {
+    'Tour de imóvel (acolhedor)':'acolhedor e convidativo, como um corretor apresentando o imóvel cômodo por cômodo, destacando conforto e qualidade de vida',
+    'Reels / Stories (dinâmico)':'dinâmico, animado e direto, frases curtas, com gancho forte na primeira frase e chamada para ação no final',
+    'Anúncio de venda / aluguel':'persuasivo e claro, destacando diferenciais e benefícios, com chamada para ação no final',
+    'Imóvel de alto padrão (sofisticado)':'sofisticado, elegante e sereno, vocabulário refinado, ritmo calmo',
+    'Institucional / corretor':'profissional, confiável e próximo, apresentando a marca ou o corretor',
+    'Outro tipo de vídeo (neutro)':'natural, claro e agradável, adequado ao assunto do texto'
+  };
+  const VOZES = {Kore:'Kore (feminina)',Leda:'Leda (feminina)',Aoede:'Aoede (feminina)',Zephyr:'Zephyr (feminina)',Sulafat:'Sulafat (feminina)',Charon:'Charon (masculina)',Puck:'Puck (masculina)',Orus:'Orus (masculina)',Fenrir:'Fenrir (masculina)',Algieba:'Algieba (masculina)'};
+  const TTS_MODELS = ['gemini-2.5-flash-preview-tts','gemini-2.5-pro-preview-tts'];
+  const TXT_MODELS = ['gemini-2.5-flash','gemini-flash-latest'];
+  const API = 'https://generativelanguage.googleapis.com/v1beta/models/';
+  const KEY = 'fc-gemini-key';
+  const getKey = () => { try{ return localStorage.getItem(KEY) || ''; }catch(e){ return ''; } };
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  async function call(models, body, key){
+    let err = null;
+    for(const m of models){
+      for(let t = 0; t < 3; t++){
+        const r = await fetch(API + m + ':generateContent', {method:'POST', headers:{'Content-Type':'application/json','x-goog-api-key':key}, body:JSON.stringify(body)});
+        if(r.ok) return r.json();
+        const j = await r.json().catch(() => ({}));
+        err = (j.error && j.error.message) || ('Erro ' + r.status);
+        if(r.status === 429){ await sleep(25000); continue; }
+        if(r.status === 404) break;
+        throw new Error(err);
+      }
+    }
+    throw new Error(err || 'Falha na chamada');
+  }
+
+  function b64ToBytes(b){ const s = atob(b), a = new Uint8Array(s.length); for(let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; }
+  function wav(pcm, rate){
+    const h = new DataView(new ArrayBuffer(44)), w = (o, s) => [...s].forEach((c, i) => h.setUint8(o + i, c.charCodeAt(0)));
+    w(0,'RIFF'); h.setUint32(4, 36 + pcm.length, true); w(8,'WAVE'); w(12,'fmt '); h.setUint32(16,16,true); h.setUint16(20,1,true); h.setUint16(22,1,true);
+    h.setUint32(24,rate,true); h.setUint32(28,rate*2,true); h.setUint16(32,2,true); h.setUint16(34,16,true); w(36,'data'); h.setUint32(40,pcm.length,true);
+    return new Blob([h, pcm], {type:'audio/wav'});
+  }
+  function chunks(text, max){
+    const parts = text.split(/(?<=[.!?…])\s+/), out = []; let cur = '';
+    for(const p of parts){ if((cur + ' ' + p).length > max && cur){ out.push(cur); cur = p; } else cur = cur ? cur + ' ' + p : p; }
+    if(cur) out.push(cur); return out;
+  }
+
+  function panel(inputId){
+    const input = document.getElementById(inputId); if(!input) return;
+    const row = input.closest('.audio-row'); if(!row) return;
+    const box = document.createElement('div'); box.className = 'ia-box';
+    box.innerHTML =
+      '<strong style="display:block;font-size:15px;margin-bottom:4px;">✨ Narração por IA (voz Gemini)</strong>' +
+      '<div class="hint" style="margin:0 0 10px;">Escreva ou cole o texto, aperfeiçoe com a IA e gere a voz. O áudio entra direto como narração deste vídeo.</div>' +
+      '<div class="ia-row" style="margin-top:0;"><input type="password" class="ia-key" placeholder="Chave da API do Google AI Studio" style="flex:1;min-width:220px;" autocomplete="off"><span class="hint" style="margin:0;">Fica salva só neste navegador.</span></div>' +
+      '<textarea class="ia-txt" placeholder="Escreva aqui o texto da narração..." style="margin-top:10px;"></textarea>' +
+      '<div class="ia-row"><select class="ia-tipo"></select><select class="ia-voz"></select><label style="font-size:13px;">Duração (s) <input type="number" class="ia-dur" min="5" max="300" placeholder="opcional" style="width:90px;"></label></div>' +
+      '<div class="ia-row"><button type="button" class="file-btn ia-melhorar">✨ Aperfeiçoar texto</button><button type="button" class="file-btn ia-undo" style="display:none;">↶ Desfazer</button><button type="button" class="btn-primary ia-gerar" style="padding:10px 18px;">🔊 Gerar narração</button></div>' +
+      '<div class="ia-st"></div>';
+    row.parentNode.insertBefore(box, row);
+    const $ = s => box.querySelector(s), st = $('.ia-st'), txt = $('.ia-txt'), key = $('.ia-key');
+    $('.ia-tipo').innerHTML = Object.keys(TIPOS).map(k => '<option>' + k + '</option>').join('');
+    $('.ia-voz').innerHTML = Object.entries(VOZES).map(([k, v]) => '<option value="' + k + '">' + v + '</option>').join('');
+    key.value = getKey();
+    key.onchange = () => { try{ localStorage.setItem(KEY, key.value.trim()); }catch(e){} };
+    let antes = '';
+    const busy = (on, msg) => { box.querySelectorAll('button').forEach(b => b.disabled = on); st.textContent = msg || ''; };
+    const need = () => { const k = key.value.trim(); if(!k){ st.textContent = 'Cole a sua chave da API acima.'; return null; } key.onchange(); return k; };
+
+    $('.ia-melhorar').onclick = async () => {
+      const k = need(); if(!k) return; const original = txt.value.trim(); if(!original){ st.textContent = 'Escreva um texto primeiro.'; return; }
+      const dur = parseInt($('.ia-dur').value, 10), tipo = $('.ia-tipo').value;
+      busy(true, 'Aperfeiçoando o texto...');
+      try{
+        const sys = 'Você é um locutor e roteirista brasileiro experiente. Reescreva o texto do usuário para ser FALADO EM VOZ ALTA exclusivamente em português do Brasil (pt-BR), mesmo que o texto original esteja em outro idioma: nunca use palavras, expressões ou grafia de Portugal nem de outro idioma (use "você", "celular", "banheiro", "café da manhã", "ônibus", "gerente", etc.). O resultado precisa soar 100% humano, como uma pessoa real conversando com carinho com quem assiste, e não como texto lido: tom ' + TIPOS[tipo] + '. Regras: mantenha todos os fatos e NÃO invente preços, medidas, endereços ou características que não estejam no texto; fale direto com o espectador, de forma calorosa e natural; alterne frases curtas e médias para criar ritmo; pode usar com moderação contrações do dia a dia ("pra", "tá", "né") quando combinarem com o tom, sem exagerar nem ficar vulgar; use vírgulas, pontos, reticências e travessões para criar pausas e respiração; evite clichês de anúncio e frases robóticas; escreva números, valores, metragens e siglas por extenso do jeito que se fala no Brasil; sem emojis, hashtags, markdown, títulos, aspas ou indicações de cena.' + (dur ? ' O texto deve durar cerca de ' + dur + ' segundos falado (aprox. ' + Math.round(dur * 2.5) + ' palavras).' : '') + ' Responda somente com o texto final da narração, em português do Brasil.';
+        const j = await call(TXT_MODELS, {systemInstruction:{parts:[{text:sys}]}, contents:[{role:'user', parts:[{text:original}]}]}, k);
+        const out = j.candidates[0].content.parts.map(p => p.text || '').join('').trim();
+        if(!out) throw new Error('Resposta vazia');
+        antes = original; txt.value = out; $('.ia-undo').style.display = ''; busy(false, 'Texto aperfeiçoado. Confira, ajuste se quiser e gere a narração.');
+      }catch(e){ busy(false, 'Não consegui aperfeiçoar: ' + e.message); }
+    };
+    $('.ia-undo').onclick = () => { txt.value = antes; $('.ia-undo').style.display = 'none'; st.textContent = 'Texto original restaurado.'; };
+
+    $('.ia-gerar').onclick = async () => {
+      const k = need(); if(!k) return; const t = txt.value.trim(); if(!t){ st.textContent = 'Escreva um texto primeiro.'; return; }
+      const voz = $('.ia-voz').value, partes = chunks(t, 2200), pcms = [];
+      try{
+        for(let i = 0; i < partes.length; i++){
+          busy(true, 'Gerando a voz... parte ' + (i + 1) + ' de ' + partes.length + ' (pode levar alguns segundos)');
+          const j = await call(TTS_MODELS, {contents:[{parts:[{text:'Você é uma pessoa brasileira de verdade falando com naturalidade. Narre o texto a seguir exclusivamente em português do Brasil, com sotaque brasileiro neutro e pronúncia clara, nunca com sotaque de Portugal ou estrangeiro. Soe totalmente humano: tom ' + TIPOS[$('.ia-tipo').value] + ', ritmo de conversa, entonação que varia, respiração e pausas naturais nas vírgulas e reticências, um leve sorriso na voz, sem soar como leitura robótica nem locução de rádio exagerada. Leia somente o texto, sem comentar nada:\n\n' + partes[i]}]}], generationConfig:{responseModalities:['AUDIO'], speechConfig:{voiceConfig:{prebuiltVoiceConfig:{voiceName:voz}}}}}, k);
+          const d = j.candidates[0].content.parts.find(p => p.inlineData).inlineData.data; pcms.push(b64ToBytes(d));
+        }
+        const total = pcms.reduce((n, a) => n + a.length, 0), all = new Uint8Array(total); let o = 0; pcms.forEach(a => { all.set(a, o); o += a.length; });
+        const file = new File([wav(all, 24000)], 'narracao-ia-' + voz + '.wav', {type:'audio/wav'});
+        const dt = new DataTransfer(); dt.items.add(file); input.files = dt.files; input.dispatchEvent(new Event('change', {bubbles:true}));
+        busy(false, 'Narração pronta e aplicada neste vídeo. Ouça no player abaixo.');
+      }catch(e){ busy(false, 'Não consegui gerar a voz: ' + e.message); }
+    };
+  }
+  ['narrInput', 'adpNarrInput', 'tvNarr'].forEach(panel);
+})();
+</script>
+
 </body>
 </html>
