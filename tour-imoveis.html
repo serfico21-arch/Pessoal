@@ -599,6 +599,13 @@
             </select>
           </div>
           <div class="field">
+            <label for="device">Editar para</label>
+            <select id="device">
+              <option value="celular">Celular (leve e seguro)</option>
+              <option value="pc">PC (máxima qualidade)</option>
+            </select>
+          </div>
+          <div class="field">
             <label for="quality">Qualidade</label>
             <select id="quality">
               <option value="leve" selected>Leve (recomendado no celular)</option>
@@ -778,6 +785,7 @@
           <video id="resultVideo" controls playsinline></video>
           <button type="button" class="btn-secondary fc-fs-btn" data-fc-for="resultVideo">&#9974; Ver em tela cheia</button>
           <a class="download" id="downloadLink" download="tour-imovel.mp4">Baixar vídeo</a>
+          <button type="button" class="btn-secondary" id="shareVideoBtn" style="display:none;margin-top:10px;">&#128242; Salvar / compartilhar no celular</button>
         </div>
       </div>
     </div>
@@ -1171,6 +1179,7 @@ window.FCBand = (function(){
   const transitionSelect = document.getElementById('transition');
   const formatSelect = document.getElementById('format');
   const qualitySelect = document.getElementById('quality');
+  const deviceSelect = document.getElementById('device');
   const kenburnsCheck = document.getElementById('kenburns');
   const fillScreenCheck = document.getElementById('fillScreen');
   const propertyInfoInput = document.getElementById('propertyInfo');
@@ -1215,6 +1224,40 @@ window.FCBand = (function(){
   let lastVideoUrl = null, lastBlob = null;
   // Guarda o vídeo na memória: se o endereço temporário do link for invalidado, o clique cria outro e o download continua funcionando
   downloadLink.addEventListener('click', ()=>{ if(lastBlob){ try{ downloadLink.href = URL.createObjectURL(lastBlob); }catch(e){} } });
+  // Celular x PC: o celular grava mais leve (menos memória); o PC mantém a qualidade máxima
+  function isPhone(){ return deviceSelect.value === 'celular'; }
+  function applyDevice(){
+    const phone = isPhone();
+    const optPadrao = qualitySelect.querySelector('option[value="padrao"]');
+    const optCube = transitionSelect.querySelector('option[value="cube"]');
+    if(phone){
+      qualitySelect.value = 'leve'; optPadrao.disabled = true;
+      optCube.disabled = true; if(transitionSelect.value === 'cube') transitionSelect.value = 'fade';
+    }else{
+      optPadrao.disabled = false; optCube.disabled = false; qualitySelect.value = 'padrao';
+    }
+    try{ localStorage.setItem('fc-device', deviceSelect.value); }catch(e){}
+  }
+  (function(){
+    let saved = null; try{ saved = localStorage.getItem('fc-device'); }catch(e){}
+    const celular = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent) || (window.matchMedia && matchMedia('(pointer:coarse)').matches && Math.min(screen.width, screen.height) < 820);
+    deviceSelect.value = (saved === 'pc' || saved === 'celular') ? saved : (celular ? 'celular' : 'pc');
+    applyDevice();
+  })();
+  deviceSelect.addEventListener('change', applyDevice);
+
+  // Botão "Salvar / compartilhar": no celular abre a folha do sistema (Salvar em Arquivos/Galeria, WhatsApp...), alternativa quando o download direto falha
+  const shareVideoBtn = document.getElementById('shareVideoBtn');
+  function refreshShare(){
+    try{
+      const f = lastBlob ? new File([lastBlob], downloadLink.download || 'tour-imovel.mp4', { type: lastBlob.type }) : null;
+      shareVideoBtn.style.display = (f && navigator.canShare && navigator.canShare({ files:[f] })) ? 'inline-block' : 'none';
+    }catch(e){ shareVideoBtn.style.display = 'none'; }
+  }
+  shareVideoBtn.addEventListener('click', async ()=>{
+    if(!lastBlob) return;
+    try{ await navigator.share({ files:[ new File([lastBlob], downloadLink.download || 'tour-imovel.mp4', { type: lastBlob.type }) ], title: 'Tour do imóvel' }); }catch(e){}
+  });
   // Guarda o último vídeo no aparelho (IndexedDB): se o celular recarregar a página por falta de memória, o vídeo volta sozinho
   const fcDB = {
     open(){ return new Promise((res,rej)=>{ const r = indexedDB.open('fc-tour-video',1); r.onupgradeneeded = ()=>r.result.createObjectStore('v'); r.onsuccess = ()=>res(r.result); r.onerror = ()=>rej(r.error); }); },
@@ -1227,7 +1270,7 @@ window.FCBand = (function(){
       if(!r || !r.blob || Date.now() - r.t > 6*3600*1000) return;
       lastBlob = r.blob; lastVideoUrl = URL.createObjectURL(r.blob);
       resultVideo.src = lastVideoUrl; downloadLink.href = lastVideoUrl; downloadLink.download = r.name; downloadLink.textContent = r.label;
-      resultBox.style.display = 'block'; statusBox.classList.add('show');
+      resultBox.style.display = 'block'; statusBox.classList.add('show'); refreshShare();
       statusText.textContent = 'Último vídeo gerado recuperado (' + (r.blob.size / 1048576).toFixed(1).replace('.', ',') + ' MB). Se a página recarregou sozinha, foi falta de memória do celular.';
     }catch(e){}
   })();
@@ -1589,6 +1632,9 @@ window.FCBand = (function(){
       alert('Adicione pelo menos duas fotos para montar o tour.');
       return;
     }
+    if(isPhone() && photos.length > 12 && !confirm('Você está no modo Celular com ' + photos.length + ' fotos. Mais de 12 fotos pode travar o celular na hora de gerar. Continuar mesmo assim? (Para o máximo de fotos e qualidade, use o PC.)')){
+      return;
+    }
     if(!stage.captureStream || !window.MediaRecorder){
       alert('Este navegador não consegue gravar vídeo por aqui. Tente abrir o arquivo no Google Chrome (computador ou Android) e tentar de novo.');
       return;
@@ -1631,7 +1677,8 @@ window.FCBand = (function(){
     // cheia (12MP+) podem estourar a memória do navegador no meio da gravação
     // e fazer a página travar ou fechar sozinha. No modo "Leve" a redução é maior.
     statusText.textContent = 'Preparando imagens...';
-    const leve = qualitySelect.value === 'leve';
+    const phone = isPhone();
+    const leve = phone || qualitySelect.value === 'leve';
     const fmt = formatSelect.value in { portrait:1, feed:1, square:1, landscape:1 } ? formatSelect.value : 'portrait';
     const portrait = fmt === 'portrait', landscape = fmt === 'landscape';
     // Reels/Stories 1080x1920, feed 1080x1350, quadrado 1080x1080, horizontal 1920x1080. "Leve" grava na metade.
@@ -1657,9 +1704,10 @@ window.FCBand = (function(){
     let perPhoto = parseFloat(durationSlider.value); // segundos
     const useKenBurns = kenburnsCheck.checked;
     const fillScreen = fillScreenCheck.checked;
-    const useFade = transitionSelect.value === 'fade';
+    const transVal = (phone && transitionSelect.value === 'cube') ? 'fade' : transitionSelect.value;
+    const useFade = transVal === 'fade';
     const fadeTime = useFade ? 0.6 : 0;
-    const useCube = transitionSelect.value === 'cube';
+    const useCube = transVal === 'cube';
     let cubeA = null, cubeB = null;
     const fps = leve ? 24 : 30;
     let totalDuration = perPhoto * photos.length;
@@ -2168,6 +2216,7 @@ window.FCBand = (function(){
     }
 
     const blob = new Blob(chunks, { type: isMp4 ? 'video/mp4' : 'video/webm' });
+    chunks.length = 0; // libera a cópia dos pedaços: o vídeo já está montado no blob
     if(blob.size < 1000){
       throw new Error('A gravação não produziu um vídeo válido. Tente novamente: mantenha esta aba em primeiro plano, evite trocar de aplicativo ou tocar em outros botões do celular durante a gravação, e feche outras abas para liberar memória.');
     }
@@ -2182,10 +2231,12 @@ window.FCBand = (function(){
     }
     const url = URL.createObjectURL(blob);
     lastVideoUrl = url; lastBlob = blob;
+    resultVideo.preload = 'metadata';
     resultVideo.src = url;
     downloadLink.href = url;
     downloadLink.download = (window.__fcBld ? 'tour-construtora.' : 'tour-imovel.') + (isMp4 ? 'mp4' : 'webm'); downloadLink.textContent = isMp4 ? 'Baixar vídeo (MP4)' : 'Baixar vídeo (WebM: este navegador não gera MP4)';
     resultBox.style.display = 'block';
+    refreshShare();
     fcDB.put({ blob, name: downloadLink.download, label: downloadLink.textContent, t: Date.now() }).catch(()=>{});
     statusText.textContent = 'Vídeo pronto (' + (blob.size / 1048576).toFixed(1).replace('.', ',') + ' MB)' + (limitado && blob.size > LIMITE_MB ? ' — acima de 15 MB, tente com menos fotos ou menos segundos por foto.' : '.');
   }
