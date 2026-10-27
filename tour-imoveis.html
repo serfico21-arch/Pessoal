@@ -2019,11 +2019,19 @@ window.FCBand = (function(){
     };
     if(infoMode === 'under' || fillScreen){ base.title = propertyInfoInput.value.trim(); base.logo = (window.__fcHideMine() || (window.FCLogo && window.FCLogo.on('lgG'))) ? null : brokerLogo; }
     const maxWI = landscape ? Math.round(W * (infoMode === 'over' ? 0.40 : 0.70)) : W - mxI*2;
+    let reserveB = 0;
+    if(portrait){
+      const mB = Math.round(Math.min(W, H) * 0.04);
+      const dm = (!window.__fcHideMine() && window.FCLogo) ? window.FCLogo.dims('lgG', W, H, 'br') : null;
+      const db = window.FCBuilderLogo ? window.FCBuilderLogo.dims(W, H, 'br') : null;
+      reserveB = (dm ? dm.h + mB : 0) + (db ? db.h + mB : 0);
+      if(reserveB) reserveB += Math.round(H * 0.01);
+    }
     bandLay = window.FCBand.place({
       W, H, u, mode: infoMode,
       scale: (+infoScaleInput.value || 100) * (landscape ? 0.82 : 1), pos: +infoPosInput.value || 0,
       topY: (infoMode === 'under' && portrait) ? Math.round(H*0.09) : 0,
-      bottomLimit: portrait ? Math.round(H*0.99) : (landscape ? H - Math.round(H*0.02) : H - Math.round(H*0.012)),
+      bottomLimit: portrait ? Math.round(H*0.99) - reserveB : (landscape ? H - Math.round(H*0.02) : H - Math.round(H*0.012)),
       maxW: maxWI,
       bandX: landscape ? (infoMode === 'over' ? mxI : Math.round((W - maxWI)/2)) : mxI,
       maxFrac: landscape ? 0.30 : 0.42,
@@ -2045,9 +2053,9 @@ window.FCBand = (function(){
         if(header) layers.push({ c: header, x: mxI, y: headerTop, delay: 0.1, slide: 0 });
       }
     }
-    const wmG = (window.FCLogo && !window.__fcHideMine()) ? window.FCLogo.build('lgG', W, H) : null;
+    const wmG = (window.FCLogo && !window.__fcHideMine()) ? window.FCLogo.build('lgG', W, H, bandLay.band ? bandLay.bandY : H) : null;
     if(wmG) layers.push({ c: wmG.c, x: wmG.x, y: wmG.y, delay: 0.1, slide: 0 });
-    const wmB = window.FCBuilderLogo ? window.FCBuilderLogo.build(W, H, wmG) : null;
+    const wmB = window.FCBuilderLogo ? window.FCBuilderLogo.build(W, H, wmG, bandLay.band ? bandLay.bandY : H) : null;
     if(wmB) layers.push({ c: wmB.c, x: wmB.x, y: wmB.y, delay: 0.1, slide: 0 });
     if(bandLay.band) layers.push({ c: bandLay.band, x: bandLay.bandX, y: bandLay.bandY, delay: 0.45, slide: Math.round(60*u) });
 
@@ -2935,7 +2943,7 @@ window.FCLogo = (function(){
   function img(){ return (custom && custom.naturalWidth) ? custom : def(); }
   function g(p, k){ return document.getElementById(p + k); }
   function on(p){ var e = g(p, 'On'); return !!(e && e.checked); }
-  function build(p, W, H){
+  function build(p, W, H, limitY){
     if(!on(p)) return null;
     var im = img(); if(!im || !im.naturalWidth) return null;
     var base = Math.min(W, H), S = Math.round(base * (+g(p,'Size').value || 20) / 100);
@@ -2949,7 +2957,7 @@ window.FCLogo = (function(){
     var y = r > 1.5 ? Math.round(H * 0.12) : (r > 1.2 ? Math.round(H * 0.05) : m);
     var pos = g(p,'Pos').value, px = m;
     if(pos === 'tc') px = Math.round((W - w) / 2); else if(pos === 'tr') px = W - w - m;
-    if(pos === 'br'){ px = W - w - m; y = Math.round(H * (r > 1.5 ? 0.70 : 0.82)) - h; if(r <= 1.5) y = H - h - m; }
+    if(pos === 'br'){ px = W - w - m; y = Math.round(H * (r > 1.5 ? (limitY != null ? 0.90 : 0.70) : 0.82)) - h; if(r <= 1.5) y = H - h - m; if(r > 1.5 && limitY != null) y = H - h - Math.round(H * 0.02); }
     return { c: c, x: px, y: y };
   }
   function mount(p){
@@ -2978,7 +2986,13 @@ window.FCLogo = (function(){
     g(p,'Reset').addEventListener('click', function(){ custom = null; });
   }
   mount('lgG');
-  return { build: build, on: on };
+  function dims(p, W, H, posReq){
+    if(!on(p) || g(p,'Pos').value !== posReq) return null;
+    var im = img(); if(!im || !im.naturalWidth) return null;
+    var S = Math.round(Math.min(W, H) * (+g(p,'Size').value || 20) / 100), k = S / Math.max(im.naturalWidth, im.naturalHeight);
+    return { h: Math.max(1, Math.round(im.naturalHeight * k)) };
+  }
+  return { build: build, on: on, dims: dims };
 })();
 </script>
 <script>
@@ -3288,7 +3302,7 @@ window.FCLogo = (function(){
   window.FCBuilderLogo = (function(){
     var img = null;
     function g(k){ return $('lgB' + k); }
-    function build(W, H, other){
+    function build(W, H, other, limitY){
       var e = g('On'); if(!img || !img.naturalWidth || !e || !(e.checked || window.__fcBld)) return null;
       var base = Math.min(W, H), S = Math.round(base * (+g('Size').value || 18) / 100);
       var k = S / Math.max(img.naturalWidth, img.naturalHeight);
@@ -3300,7 +3314,7 @@ window.FCLogo = (function(){
       var y = r > 1.5 ? Math.round(H * 0.12) : (r > 1.2 ? Math.round(H * 0.05) : m);
       var pos = g('Pos').value, px = m;
       if(pos === 'tc') px = Math.round((W - w) / 2); else if(pos === 'tr') px = W - w - m;
-      if(pos === 'br'){ px = W - w - m; y = Math.round(H * (r > 1.5 ? 0.70 : 0.82)) - h; if(r <= 1.5) y = H - h - m; }
+      if(pos === 'br'){ px = W - w - m; y = Math.round(H * (r > 1.5 ? (limitY != null ? 0.90 : 0.70) : 0.82)) - h; if(r <= 1.5) y = H - h - m; if(r > 1.5 && limitY != null) y = H - h - Math.round(H * 0.02); }
       if(other && other.c){ // se bater na logo do corretor, empurra para não ficar uma em cima da outra
         var ox = other.x, oy = other.y, ow = other.c.width, oh = other.c.height;
         if(px < ox + ow + m && px + w + m > ox && y < oy + oh + m && y + h + m > oy){
@@ -3335,11 +3349,191 @@ window.FCLogo = (function(){
       i.src = u; e.target.value = '';
     });
     g('Reset').addEventListener('click', function(){ img = null; g('Name').textContent = 'Nenhuma logo da construtora (envie um PNG com fundo transparente, se tiver).'; });
-    return { build: build, has: has };
+    function dims(W, H, posReq){
+      var e = g('On'); if(!img || !img.naturalWidth || !e || !(e.checked || window.__fcBld) || !g('Pos') || g('Pos').value !== posReq) return null;
+      var S = Math.round(Math.min(W, H) * (+g('Size').value || 18) / 100), k = S / Math.max(img.naturalWidth, img.naturalHeight);
+      return { h: Math.max(1, Math.round(img.naturalHeight * k)) };
+    }
+    return { build: build, has: has, dims: dims };
   })();
 
   window.FCEbook = { analyze: analyze, extract: extract, findLabel: findLabel };
 })();
+</script>
+<script>
+/* Músicas prontas, criadas aqui no navegador (originais, sem direitos autorais) */
+(function(){
+  var SR = 44100;
+  var T = {
+    piano:{ nome:'Elegante · piano suave', bpm:68, root:261.63, bars:2,
+      prog:[{r:0,t:[0,4,7,11]},{r:-3,t:[0,3,7,10]},{r:-7,t:[0,4,7,11]},{r:-5,t:[0,4,7,10]}],
+      pad:{vol:.10,type:'triangle',lp:1400}, arp:{inst:'piano',vol:.20,step:.5,pat:[0,1,2,3,2,1,2,3],oct:1},
+      bass:{vol:.24,mode:'whole'}, bell:true },
+    lux:{ nome:'Luxo · cinematográfico', bpm:58, root:220, bars:2,
+      prog:[{r:0,t:[0,3,7,10]},{r:-4,t:[0,4,7,11]},{r:3,t:[0,4,7,11]},{r:-2,t:[0,4,7,10]}],
+      pad:{vol:.15,type:'sawtooth',lp:900}, arp:{inst:'piano',vol:.15,step:1,pat:[0,2,1,3],oct:1},
+      bass:{vol:.28,mode:'whole'}, bell:true, wet:.5 },
+    calor:{ nome:'Acolhedor · violão e calor', bpm:92, root:196, bars:2,
+      prog:[{r:0,t:[0,4,7,12]},{r:-3,t:[0,3,7,12]},{r:-7,t:[0,4,7,12]},{r:2,t:[0,4,7,12]}],
+      pad:{vol:.06,type:'triangle',lp:1100}, arp:{inst:'pluck',vol:.2,step:.5,pat:[0,1,2,1,3,1,2,1],oct:0},
+      bass:{vol:.2,mode:'pulse'}, bell:false },
+    lofi:{ nome:'Moderno · lo-fi suave', bpm:78, root:174.61, bars:2,
+      prog:[{r:0,t:[0,4,7,11]},{r:-1,t:[0,3,7,10]},{r:-3,t:[0,3,7,10]},{r:-5,t:[0,4,7,11]}],
+      pad:{vol:.06,type:'triangle',lp:1000}, arp:{inst:'ep',mode:'chord',vol:.2,step:2,oct:1},
+      bass:{vol:.24,mode:'pulse'}, beat:{kick:[0,2.5],hat:true}, bell:false },
+    inspira:{ nome:'Inspirador · crescendo leve', bpm:100, root:261.63, bars:2,
+      prog:[{r:0,t:[0,4,7,12]},{r:-5,t:[0,4,7,12]},{r:-3,t:[0,3,7,12]},{r:-7,t:[0,4,7,12]}],
+      pad:{vol:.11,type:'sawtooth',lp:1500}, arp:{inst:'piano',vol:.16,step:.5,pat:[0,1,2,3,2,1,2,3],oct:1},
+      bass:{vol:.2,mode:'pulse'}, beat:{kick:[0,1,2,3],hat:true}, bell:true },
+    alegre:{ nome:'Alegre · leve e solar', bpm:108, root:196, bars:2,
+      prog:[{r:0,t:[0,4,7,12]},{r:7,t:[0,4,7,12]},{r:4,t:[0,3,7,12]},{r:-7,t:[0,4,7,12]}],
+      pad:{vol:.05,type:'triangle',lp:1300}, arp:{inst:'mar',vol:.22,step:.5,pat:[0,2,1,3,2,3,1,2],oct:1},
+      bass:{vol:.2,mode:'pulse'}, beat:{kick:[0,2],hat:true}, bell:false }
+  };
+
+  function impulse(ctx, secs){
+    var n = Math.round(secs * SR), b = ctx.createBuffer(2, n, SR);
+    for(var c = 0; c < 2; c++){ var d = b.getChannelData(c); for(var i = 0; i < n; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/n, 3); }
+    return b;
+  }
+
+  function render(c){
+    var beat = 60 / c.bpm, chordLen = beat * 4 * c.bars, cycles = 2, L = chordLen * c.prog.length * cycles, tail = 4;
+    var ctx = new OfflineAudioContext(2, Math.ceil((L + tail) * SR), SR);
+    var comp = ctx.createDynamicsCompressor(); comp.connect(ctx.destination);
+    var master = ctx.createGain(); master.gain.value = .9; master.connect(comp);
+    var rev = ctx.createConvolver(); rev.buffer = impulse(ctx, 2.8);
+    var wet = ctx.createGain(); wet.gain.value = c.wet || .35; rev.connect(wet); wet.connect(master);
+    var dry = ctx.createGain(); dry.connect(master);
+    var nb = ctx.createBuffer(1, Math.round(.1 * SR), SR), nd = nb.getChannelData(0);
+    for(var q = 0; q < nd.length; q++) nd[q] = Math.random()*2-1;
+
+    function route(node, send){ node.connect(dry); if(send){ var s = ctx.createGain(); s.gain.value = send; node.connect(s); s.connect(rev); } }
+    function osc(type, f, det){ var o = ctx.createOscillator(); o.type = type; o.frequency.value = f; if(det) o.detune.value = det; return o; }
+    function pad(f, t, dur, v, type, lp){
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + 1.4);
+      g.gain.setValueAtTime(v, t + Math.max(1.4, dur)); g.gain.linearRampToValueAtTime(0, t + dur + 1.6);
+      var fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = lp;
+      [-7, 7].forEach(function(d){ var o = osc(type, f, d); o.connect(fl); o.start(t); o.stop(t + dur + 1.7); });
+      fl.connect(g); route(g, .6);
+    }
+    function dn(type, f, t, v, dec, lp, send){
+      var g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .006);
+      g.gain.exponentialRampToValueAtTime(.0001, t + dec);
+      var fl = ctx.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.setValueAtTime(lp, t);
+      fl.frequency.exponentialRampToValueAtTime(Math.max(300, lp / 4), t + dec);
+      var o = osc(type, f); o.connect(fl); fl.connect(g); o.start(t); o.stop(t + dec + .05); route(g, send);
+    }
+    function inst(name, f, t, v){
+      if(name === 'piano'){ dn('triangle', f, t, v, 2.2, 3200, .45); dn('sine', f*2, t, v*.25, 1.2, 4000, .45); }
+      else if(name === 'ep'){ dn('sine', f, t, v, 1.6, 3000, .4); dn('sine', f*2, t, v*.3, .7, 3000, .4); }
+      else if(name === 'pluck'){ dn('sawtooth', f, t, v*.6, 1.0, 2600, .3); }
+      else if(name === 'mar'){ dn('sine', f, t, v, .7, 5000, .35); dn('sine', f*4, t, v*.2, .2, 6000, .35); }
+      else { dn('sine', f*2, t, v, 3, 6000, .7); dn('sine', f*3.01, t, v*.3, 2, 6000, .7); }
+    }
+    function kick(t, v){
+      var o = osc('sine', 120); o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(42, t + .14);
+      var g = ctx.createGain(); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + .28);
+      o.connect(g); o.start(t); o.stop(t + .3); g.connect(dry);
+    }
+    function hat(t, v){
+      var s = ctx.createBufferSource(); s.buffer = nb;
+      var h = ctx.createBiquadFilter(); h.type = 'highpass'; h.frequency.value = 7500;
+      var g = ctx.createGain(); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t + .06);
+      s.connect(h); h.connect(g); s.start(t); s.stop(t + .07); g.connect(dry);
+    }
+
+    for(var cy = 0; cy < cycles; cy++){
+      c.prog.forEach(function(ch, ci){
+        var t0 = (cy * c.prog.length + ci) * chordLen;
+        var rf = c.root * Math.pow(2, (((ch.r % 12) + 12) % 12) / 12);
+        var tones = ch.t.map(function(x){ return rf * Math.pow(2, x / 12); });
+        tones.forEach(function(f){ pad(f / 2, t0, chordLen, c.pad.vol, c.pad.type, c.pad.lp); });
+        var bf = rf / 4; if(bf < 55) bf *= 2;
+        if(c.bass.mode === 'whole') dn('sine', bf, t0, c.bass.vol, chordLen * .95, 220, .1);
+        else for(var b = 0; b < chordLen / (beat * 2); b++) dn('sine', bf, t0 + b * beat * 2, c.bass.vol, 1.2, 260, .1);
+        var a = c.arp, steps = Math.floor(chordLen / (a.step * beat));
+        for(var k = 0; k < steps; k++){
+          var t = t0 + k * a.step * beat + Math.random() * .012, v = a.vol * (k % 2 ? .8 : 1), mul = Math.pow(2, a.oct || 0);
+          if(a.mode === 'chord') tones.forEach(function(f){ inst(a.inst, f * mul, t, v / 2.2); });
+          else { var ix = a.pat[k % a.pat.length], semi = ix < 4 ? ch.t[ix % ch.t.length] : ch.t[(ix - 4) % ch.t.length] + 12; inst(a.inst, rf * Math.pow(2, semi / 12) * mul, t, v); }
+        }
+        if(c.bell && cy === 1){ inst('bell', tones[3] * 2, t0 + beat * 2, .05); inst('bell', tones[0] * 4, t0 + beat * 6, .04); }
+        if(c.beat){
+          var bars = Math.round(chordLen / (beat * 4));
+          for(var bar = 0; bar < bars; bar++){
+            var tb = t0 + bar * beat * 4;
+            c.beat.kick.forEach(function(p){ kick(tb + p * beat, .5); });
+            if(c.beat.hat) for(var h = 0; h < 8; h++) hat(tb + h * beat * .5, h % 2 ? .05 : .08);
+          }
+        }
+      });
+    }
+
+    return ctx.startRendering().then(function(buf){
+      var Ls = Math.round(L * SR), out = ctx.createBuffer(2, Ls, SR), peak = 0;
+      for(var ch = 0; ch < 2; ch++){
+        var src = buf.getChannelData(ch), dst = out.getChannelData(ch);
+        for(var i = 0; i < Ls; i++) dst[i] = src[i];
+        for(var j = Ls; j < src.length; j++) dst[j - Ls] += src[j];
+        for(var m = 0; m < Ls; m++){ var p = Math.abs(dst[m]); if(p > peak) peak = p; }
+      }
+      var k2 = peak > 0 ? .85 / peak : 1;
+      for(var ch2 = 0; ch2 < 2; ch2++){ var d2 = out.getChannelData(ch2); for(var z = 0; z < Ls; z++) d2[z] *= k2; }
+      return out;
+    });
+  }
+
+  function wav(buf){
+    var n = buf.length, b = new ArrayBuffer(44 + n * 4), v = new DataView(b);
+    function s(o, t){ for(var i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); }
+    s(0,'RIFF'); v.setUint32(4, 36 + n*4, true); s(8,'WAVE'); s(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,2,true);
+    v.setUint32(24, buf.sampleRate, true); v.setUint32(28, buf.sampleRate*4, true); v.setUint16(32,4,true); v.setUint16(34,16,true); s(36,'data'); v.setUint32(40, n*4, true);
+    var l = buf.getChannelData(0), r = buf.getChannelData(1), o = 44;
+    for(var i = 0; i < n; i++){ v.setInt16(o, Math.max(-1, Math.min(1, l[i])) * 32767, true); o += 2; v.setInt16(o, Math.max(-1, Math.min(1, r[i])) * 32767, true); o += 2; }
+    return new Blob([b], { type: 'audio/wav' });
+  }
+
+  var cache = {};
+  function get(k, onWait){
+    if(cache[k]) return Promise.resolve(cache[k]);
+    if(onWait) onWait();
+    return render(T[k]).then(function(buf){ var b = wav(buf); cache[k] = { blob: b, url: URL.createObjectURL(b) }; return cache[k]; });
+  }
+  window.FCMusic = { tracks: T, render: render, wav: wav, get: get };
+
+  if(typeof document === 'undefined') return;
+  function mount(inputId, where){
+    var inp = document.getElementById(inputId); if(!inp) return;
+    var anchor = where === 'card' ? inp.closest('.card') : inp.closest('.audio-row'); if(!anchor) return;
+    var box = document.createElement('div'); box.className = 'time-box'; box.style.marginTop = '12px';
+    var opts = Object.keys(T).map(function(k){ return '<option value="' + k + '">' + T[k].nome + '</option>'; }).join('');
+    box.innerHTML = '<div class="time-head"><strong>🎵 Músicas prontas (sem direitos autorais)</strong></div>' +
+      '<select class="mlSel">' + opts + '</select>' +
+      '<div class="audio-row" style="margin-top:10px;"><button type="button" class="file-btn mlPlay">▶ Ouvir</button><button type="button" class="btn-secondary mlUse" style="padding:9px 16px;">✓ Usar no vídeo</button></div>' +
+      '<audio class="mlAud" controls style="display:none;width:100%;margin-top:10px;"></audio>' +
+      '<div class="time-read mlMsg" style="font-weight:400;color:var(--ink-soft);">Músicas originais criadas aqui no editor, livres de direitos autorais. Tocam em loop do começo ao fim do vídeo.</div>';
+    anchor.insertAdjacentElement('afterend', box);
+    var sel = box.querySelector('.mlSel'), aud = box.querySelector('.mlAud'), msg = box.querySelector('.mlMsg');
+    var bt = box.querySelectorAll('button');
+    function busy(x){ bt.forEach(function(b){ b.disabled = x; }); }
+    function load(){ return get(sel.value, function(){ msg.textContent = 'Criando a música... (alguns segundos)'; busy(true); }).then(function(r){ busy(false); return r; }, function(e){ busy(false); msg.textContent = 'Não consegui criar a música neste navegador.'; throw e; }); }
+    box.querySelector('.mlPlay').onclick = function(){ load().then(function(r){ aud.src = r.url; aud.style.display = 'block'; msg.textContent = T[sel.value].nome; aud.play().catch(function(){}); }).catch(function(){}); };
+    box.querySelector('.mlUse').onclick = function(){
+      load().then(function(r){
+        var f = new File([r.blob], 'musica-' + sel.value + '.wav', { type: 'audio/wav' });
+        var dt = new DataTransfer(); dt.items.add(f); inp.files = dt.files;
+        inp.dispatchEvent(new Event('change', { bubbles: true }));
+        msg.textContent = '✓ Música selecionada: ' + T[sel.value].nome;
+      }).catch(function(){});
+    };
+  }
+  mount('audioInput', 'card');
+  mount('adpAudioInput', 'row');
+  mount('tvMusic', 'row');
+})();
+
 </script>
 </body>
 </html>
