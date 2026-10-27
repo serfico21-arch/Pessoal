@@ -779,6 +779,7 @@
         <div class="status" id="status">
           <span id="statusText">Preparando...</span>
           <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+          <button type="button" class="btn-secondary" id="cancelGenBtn" style="display:none;margin-top:12px;">&#9632; Parar e voltar para editar</button>
         </div>
         <canvas id="stage" style="display:none;"></canvas>
         <div class="result" id="result" style="display:none;">
@@ -1640,6 +1641,15 @@ window.FCBand = (function(){
       return;
     }
 
+    window.__fcCancelGen = false;
+    const cancelGenBtn = document.getElementById('cancelGenBtn');
+    cancelGenBtn.style.display = '';
+    cancelGenBtn.disabled = false;
+    cancelGenBtn.onclick = function(){
+      window.__fcCancelGen = true;
+      cancelGenBtn.disabled = true;
+      statusText.textContent = 'Parando...';
+    };
     generateBtn.disabled = true; generateBldBtn.disabled = true;
     statusBox.classList.add('show');
     resultBox.style.display = 'none';
@@ -1651,9 +1661,14 @@ window.FCBand = (function(){
       await gerarVideo();
     }catch(err){
       console.error(err);
+      if(err && err.fcCancelado){
+        statusText.textContent = 'Geração interrompida. Faça os ajustes que precisar e clique em gerar de novo.';
+        barFill.style.width = '0%';
+      } else
       statusText.textContent = 'Não foi possível gerar o vídeo (' + (err && err.message ? err.message : 'erro desconhecido') + '). Tente com menos fotos ou em outro navegador (Chrome).';
     }finally{
       stage.style.display = 'none';
+      cancelGenBtn.style.display = 'none';
       generateBtn.disabled = false; generateBldBtn.disabled = false;
       window.__fcBld = false;
       if(wakeLock){ try{ await wakeLock.release(); }catch(e){} wakeLock = null; }
@@ -1840,6 +1855,9 @@ window.FCBand = (function(){
 
     function render(now){
       try{
+        if(window.__fcCancelGen){
+          const e = new Error('Geração interrompida pelo usuário'); e.fcCancelado = true; throw e;
+        }
         const elapsed = (now - startTime) / 1000;
         const pct = Math.min(100, Math.round((elapsed/totalDuration)*100));
         barFill.style.width = pct + '%';
