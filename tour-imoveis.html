@@ -2037,20 +2037,20 @@ window.FCBand = (function(){
     };
     if(infoMode === 'under' || fillScreen){ base.title = propertyInfoInput.value.trim(); base.logo = (window.__fcHideMine() || (window.FCLogo && window.FCLogo.on('lgG'))) ? null : brokerLogo; }
     const maxWI = landscape ? Math.round(W * (infoMode === 'over' ? 0.40 : 0.70)) : W - mxI*2;
-    let reserveB = 0;
+    let reserveR = 0;
     if(portrait){
       const mB = Math.round(Math.min(W, H) * 0.04);
       const dm = (!window.__fcHideMine() && window.FCLogo) ? window.FCLogo.dims('lgG', W, H, 'br') : null;
       const db = window.FCBuilderLogo ? window.FCBuilderLogo.dims(W, H, 'br') : null;
-      reserveB = (dm ? dm.h + mB : 0) + (db ? db.h + mB : 0);
-      if(reserveB) reserveB += Math.round(H * 0.01);
+      reserveR = Math.max(dm ? dm.w : 0, db ? db.w : 0);
+      if(reserveR) reserveR += mB;   // a faixa fica ao lado da logo, na mesma linha, em vez de subir
     }
     bandLay = window.FCBand.place({
       W, H, u, mode: infoMode,
       scale: (+infoScaleInput.value || 100) * (landscape ? 0.82 : 1), pos: +infoPosInput.value || 0,
       topY: (infoMode === 'under' && portrait) ? Math.round(H*0.09) : 0,
-      bottomLimit: portrait ? Math.round(H*0.99) - reserveB : (landscape ? H - Math.round(H*0.02) : H - Math.round(H*0.012)),
-      maxW: maxWI,
+      bottomLimit: portrait ? (reserveR ? H - Math.round(H*0.02) : Math.round(H*0.99)) : (landscape ? H - Math.round(H*0.02) : H - Math.round(H*0.012)),
+      maxW: maxWI - reserveR,
       bandX: landscape ? (infoMode === 'over' ? mxI : Math.round((W - maxWI)/2)) : mxI,
       maxFrac: landscape ? 0.30 : 0.42,
       opts: base
@@ -3008,7 +3008,7 @@ window.FCLogo = (function(){
     if(!on(p) || g(p,'Pos').value !== posReq) return null;
     var im = img(); if(!im || !im.naturalWidth) return null;
     var S = Math.round(Math.min(W, H) * (+g(p,'Size').value || 20) / 100), k = S / Math.max(im.naturalWidth, im.naturalHeight);
-    return { h: Math.max(1, Math.round(im.naturalHeight * k)) };
+    return { w: Math.max(1, Math.round(im.naturalWidth * k)), h: Math.max(1, Math.round(im.naturalHeight * k)) };
   }
   return { build: build, on: on, dims: dims };
 })();
@@ -3259,7 +3259,10 @@ window.FCLogo = (function(){
         if(!bad(txt) && txt.length <= 60) return txt;
       }
     }catch(e){}
-    return file.name.replace(/\.pdf$/i, '').replace(/[_]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 50);
+    var nm = file.name.replace(/\.pdf$/i, '').replace(/[_\-\.]+/g, ' ').replace(/\([^)]*\)/g, ' ');
+    nm = nm.replace(/\b(book|online|ebook|e-book|digital|catalogo|cat[aá]logo|folder|apresenta[cç][aã]o|tabela|vendas|final|vers[aã]o|v\d+|copia|c[oó]pia|pdf|\d{4,})\b/ig, ' ').replace(/\s+/g, ' ').trim();
+    nm = nm.replace(/\b([a-zà-ú])([a-zà-ú]*)/gi, function(m0, a0, b0){ return a0.toUpperCase() + b0.toLowerCase(); });
+    return (nm || file.name.replace(/\.pdf$/i, '')).slice(0, 60);
   }
 
   /* ---------- tela ---------- */
@@ -3337,46 +3340,74 @@ window.FCLogo = (function(){
   window.FCBuilderLogo = (function(){
     var img = null;
     function g(k){ return $('lgB' + k); }
-    // Monta a imagem: logo da construtora + nome do projeto ao lado
+    // Monta a imagem: logo da construtora + nome do projeto (ao lado ou, se faltar espaço, embaixo). Nunca corta o nome.
+    function wrapFit(probe, text, maxW, maxLines){
+      var words = text.split(/\s+/).filter(Boolean), lines = [], cur = '';
+      for(var i = 0; i < words.length; i++){
+        var w = words[i]; if(probe.measureText(w).width > maxW) return null;
+        var t = cur ? cur + ' ' + w : w;
+        if(probe.measureText(t).width <= maxW) cur = t; else { lines.push(cur); cur = w; }
+      }
+      if(cur) lines.push(cur);
+      return lines.length <= maxLines ? lines : null;
+    }
+    function bubble(proj, fsStart, fsMin, maxW, maxLines){
+      var probe = mk(4, 4).getContext('2d'), fit = null, fs;
+      for(fs = fsStart; fs >= fsMin && !fit; fs -= 2){
+        var pad = Math.round(fs * .55); probe.font = '700 ' + fs + 'px Fraunces, Georgia, serif';
+        var ln = wrapFit(probe, proj, maxW - pad*2, maxLines); if(ln) fit = { fs: fs, pad: pad, lines: ln };
+      }
+      if(!fit) return null;
+      probe.font = '700 ' + fit.fs + 'px Fraunces, Georgia, serif';
+      var tw = 0; fit.lines.forEach(function(t){ tw = Math.max(tw, probe.measureText(t).width); });
+      var lh = Math.round(fit.fs * 1.2), bw = Math.round(tw + fit.pad*2), bh = fit.lines.length * lh + Math.round(fit.pad * .9);
+      var c = mk(bw, bh), x = c.getContext('2d'), rad = Math.round(Math.min(bh * .22, 22));
+      x.fillStyle = 'rgba(12,20,34,.74)'; x.beginPath(); x.moveTo(rad, 0); x.arcTo(bw, 0, bw, bh, rad); x.arcTo(bw, bh, 0, bh, rad); x.arcTo(0, bh, 0, 0, rad); x.arcTo(0, 0, bw, 0, rad); x.closePath(); x.fill();
+      x.font = '700 ' + fit.fs + 'px Fraunces, Georgia, serif'; x.fillStyle = '#FFFFFF'; x.textBaseline = 'middle';
+      var ty = bh / 2 - (fit.lines.length - 1) * lh / 2;
+      fit.lines.forEach(function(t, i){ x.fillText(t, fit.pad, ty + i * lh + 1); });
+      return c;
+    }
     function compose(W, H){
       var e = g('On'), on = !!(e && (e.checked || window.__fcBld));
       var pj = g('Proj'), proj = ((pj && pj.value) || '').trim(), hasImg = !!(img && img.naturalWidth);
       if(!on || (!hasImg && !proj)) return null;
-      var base = Math.min(W, H), S = Math.round(base * (+g('Size').value || 18) / 100);
+      var base = Math.min(W, H), S = Math.round(base * (+g('Size').value || 18) / 100), mg = Math.round(base * .04);
       var lw = 0, lh = 0;
       if(hasImg){ var k = S / Math.max(img.naturalWidth, img.naturalHeight); lw = Math.max(1, Math.round(img.naturalWidth * k)); lh = Math.max(1, Math.round(img.naturalHeight * k)); }
       var op = Math.min(1, Math.max(.1, (+g('Op').value || 100) / 100));
-      var pos = g('Pos').value, left = (pos === 'tr' || pos === 'br');
-      if(!proj){
-        var c0 = mk(lw, lh), x0 = c0.getContext('2d'); x0.imageSmoothingQuality = 'high'; x0.globalAlpha = op; x0.drawImage(img, 0, 0, lw, lh); return c0;
+      var pos = g('Pos').value, right = (pos === 'tr' || pos === 'br'), center = (pos === 'tc');
+      function drawLogo(x, lx, ly){ x.save(); x.globalAlpha = op; x.imageSmoothingQuality = 'high'; x.drawImage(img, lx, ly, lw, lh); x.restore(); }
+      if(!proj){ var c0 = mk(lw, lh); drawLogo(c0.getContext('2d'), 0, 0); return c0; }
+      var h0 = hasImg ? lh : Math.round(S * .6), gap = hasImg ? Math.round(S * .12) : 0;
+      // 1) ao lado da logo (até 2 linhas, letra não menor que ~28% da altura da logo)
+      var bb = null, stacked = false;
+      var sideW = W - mg*2 - lw - gap;
+      if(!hasImg) bb = bubble(proj, Math.max(22, Math.round(h0 * .5)), 14, W - mg*2, 3);
+      else if(sideW >= Math.round(W * .22)) bb = bubble(proj, Math.max(20, Math.round(h0 * .46)), Math.max(18, Math.round(h0 * .28)), sideW, 2);
+      // 2) senão, embaixo da logo, em até 3 linhas
+      if(!bb){ stacked = true; bb = bubble(proj, Math.max(24, Math.round(base * .042)), 14, W - mg*2, 3); }
+      // 3) último recurso: letra pequena, até 6 linhas (jamais corta)
+      if(!bb) bb = bubble(proj, 14, 8, W - mg*2, 6);
+      var bw = bb.width, bh = bb.height, c, x;
+      if(stacked){
+        var cw2 = Math.max(lw, bw), ch2 = lh + gap + bh; c = mk(cw2, ch2); x = c.getContext('2d');
+        var al = function(w){ return right ? cw2 - w : (center ? Math.round((cw2 - w) / 2) : 0); };
+        if(hasImg) drawLogo(x, al(lw), 0);
+        x.drawImage(bb, al(bw), hasImg ? lh + gap : 0);
+      } else {
+        var cw = lw + gap + bw, ch = Math.max(h0, bh); c = mk(cw, ch); x = c.getContext('2d');
+        var lx = right ? bw + gap : 0, bx = right ? 0 : lw + gap;
+        if(hasImg) drawLogo(x, lx, Math.round((ch - lh) / 2));
+        x.drawImage(bb, bx, Math.round((ch - bh) / 2));
       }
-      var h0 = hasImg ? lh : Math.round(S * .6), gap = hasImg ? Math.round(S * .14) : 0;
-      var fs = Math.max(16, Math.round(h0 * .46)), pad, probe = mk(4, 4).getContext('2d'), lines, lhh;
-      var maxTW = Math.max(120, Math.round(W * .66) - lw - gap - Math.round(base * .08));
-      for(;;){
-        pad = Math.round(fs * .55); probe.font = '700 ' + fs + 'px Fraunces, Georgia, serif';
-        lines = window.FCBand.wrapText(probe, proj, maxTW - pad*2, 2);
-        if(!/…$/.test(lines[lines.length - 1]) || fs <= 16) break;
-        fs -= 2;
-      }
-      lhh = Math.round(fs * 1.2);
-      var tw = 0; lines.forEach(function(t){ tw = Math.max(tw, probe.measureText(t).width); });
-      var bw = Math.round(tw + pad*2), bh = lines.length * lhh + Math.round(pad * .9), ch = Math.max(h0, bh), cw = lw + gap + bw;
-      var c = mk(cw, ch), x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
-      var lx = left ? bw + gap : 0, bx = left ? 0 : lw + gap;
-      if(hasImg){ x.save(); x.globalAlpha = op; x.drawImage(img, lx, Math.round((ch - lh) / 2), lw, lh); x.restore(); }
-      var by = Math.round((ch - bh) / 2), rad = Math.round(bh * .22);
-      x.fillStyle = 'rgba(12,20,34,.62)'; x.beginPath(); x.moveTo(bx + rad, by); x.arcTo(bx + bw, by, bx + bw, by + bh, rad); x.arcTo(bx + bw, by + bh, bx, by + bh, rad); x.arcTo(bx, by + bh, bx, by, rad); x.arcTo(bx, by, bx + bw, by, rad); x.closePath(); x.fill();
-      x.font = '700 ' + fs + 'px Fraunces, Georgia, serif'; x.fillStyle = '#FFFFFF'; x.textBaseline = 'middle';
-      var ty = by + bh / 2 - (lines.length - 1) * lhh / 2;
-      lines.forEach(function(t, i){ x.fillText(t, bx + pad, ty + i * lhh + 1); });
       return c;
     }
     function build(W, H, other, limitY){
       var c = compose(W, H); if(!c) return null;
       var w = c.width, h = c.height, base = Math.min(W, H);
       var m = Math.round(base * 0.04), r = H / W;
-      var y = r > 1.5 ? Math.round(H * 0.12) : (r > 1.2 ? Math.round(H * 0.05) : m);
+      var y = r > 1.5 ? Math.round(H * 0.025) : (r > 1.2 ? Math.round(H * 0.05) : m);
       var pos = g('Pos').value, px = m;
       if(pos === 'tc') px = Math.round((W - w) / 2); else if(pos === 'tr') px = W - w - m;
       if(pos === 'br'){ px = W - w - m; y = Math.round(H * (r > 1.5 ? (limitY != null ? 0.90 : 0.70) : 0.82)) - h; if(r <= 1.5) y = H - h - m; if(r > 1.5 && limitY != null) y = H - h - Math.round(H * 0.02); }
@@ -3418,7 +3449,7 @@ window.FCLogo = (function(){
     g('Reset').addEventListener('click', function(){ img = null; g('Name').textContent = 'Nenhuma logo da construtora (envie um PNG com fundo transparente, se tiver).'; });
     function dims(W, H, posReq){
       if(!g('Pos') || g('Pos').value !== posReq) return null;
-      var c = compose(W, H); return c ? { h: c.height } : null;
+      var c = compose(W, H); return c ? { w: c.width, h: c.height } : null;
     }
     return { build: build, has: has, dims: dims };
   })();
