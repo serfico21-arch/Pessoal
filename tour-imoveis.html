@@ -3911,5 +3911,228 @@ window.FCLogo = (function(){
 })();
 </script>
 
+<script>
+/* ===== ADICIONADO: tipo de tour "Passeio virtual (grátis)" =====
+   Bloco independente: não altera nenhuma linha do código original acima.
+   Acrescenta um 4º tipo no seletor "Que tipo de tour você quer fazer?". Ao escolhê-lo, o fluxo é o de "Fotos → vídeo",
+   mas as fotos ganham uma câmera que caminha para dentro do cômodo (profundidade + balanço de passos).
+   Sem IA, sem chave, sem internet e sem nenhuma cobrança: tudo é calculado no navegador. */
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var grid = document.querySelector('.tt-grid'), wrap = document.querySelector('.wrap');
+  if(!grid || !wrap) return;
+  var steps = Array.prototype.slice.call(wrap.querySelectorAll(':scope > .step'));
+  var sRitmo = steps.filter(function(s){ return s.querySelector('#duration'); })[0];
+  var stageEl = $('stage'), kb = $('kenburns');
+  if(!sRitmo || !stageEl) return;
+
+  /* ---------- motor do passeio ---------- */
+  var photos = function(){ return window.__fcPhotos ? window.__fcPhotos() : []; };
+  var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  var CAP = mobile ? 960 : 1440, NX = mobile ? 16 : 22, NY = mobile ? 16 : 22;
+  var LEVEL = { suave: 0.10, medio: 0.18, forte: 0.28 };
+  var TAU = Math.PI * 2;
+  var clamp = function(v, a, b){ return Math.max(a, Math.min(b, v)); };
+  var smooth = function(t){ return t * t * (3 - 2 * t); };
+  var level = function(){ var s = $('vpInt'); return LEVEL[s && s.value] || LEVEL.medio; };
+  var bobOn = function(){ var c = $('vpBob'); return !c || c.checked; };
+
+  function plan(effect, idx, u){
+    var P = { dz: 1, dx: 0, dy: 0, fx: 0.5, fy: 0.46, abs: false };
+    switch(effect){
+      case 'auto':         P.dx = ((idx % 3) - 1) * 0.35; break;
+      case 'in':           break;
+      case 'out':          P.dz = -1; break;
+      case 'left':         P.dz = 0.3; P.dx = -1; break;
+      case 'right':        P.dz = 0.3; P.dx = 1; break;
+      case 'up':           P.dz = 0.3; P.dy = -1; break;
+      case 'down':         P.dz = 0.3; P.dy = 1; break;
+      case 'diagUp':       P.dz = 0.3; P.dx = 1;  P.dy = -1; break;
+      case 'diagDown':     P.dz = 0.3; P.dx = 1;  P.dy = 1; break;
+      case 'diagUpLeft':   P.dz = 0.3; P.dx = -1; P.dy = -1; break;
+      case 'diagDownLeft': P.dz = 0.3; P.dx = -1; P.dy = 1; break;
+      case 'inLeft':       P.dx = -0.8; break;
+      case 'inRight':      P.dx = 0.8; break;
+      case 'outLeft':      P.dz = -1; P.dx = -0.8; break;
+      case 'outRight':     P.dz = -1; P.dx = 0.8; break;
+      case 'riseIn':       P.dy = -0.8; break;
+      case 'fallOut':      P.dz = -1; P.dy = 0.8; break;
+      case 'orbit':        P.dz = 0.35; P.abs = true; P.dx = Math.sin(TAU * u) * 0.9; P.dy = -Math.cos(TAU * u) * 0.4; break;
+      case 'drift':        P.dz = 0.2;  P.abs = true; P.dx = Math.sin(TAU * u) * 0.7; P.dy = Math.sin(TAU * u * 2) * 0.4; break;
+      case 'detail':       P.fx = 0.58; P.fy = 0.5; break;
+      case 'detailTL':     P.fx = 0.3;  P.fy = 0.3; break;
+      case 'detailTR':     P.fx = 0.7;  P.fy = 0.3; break;
+      case 'detailBL':     P.fx = 0.3;  P.fy = 0.7; break;
+      case 'detailBR':     P.fx = 0.7;  P.fy = 0.7; break;
+    }
+    return P;
+  }
+
+  var FR = null; // quadro único reaproveitado
+  function renderFrame(p, idx, tt, per, fade){
+    var src = (p.renderImg && p.renderImg.width) ? p.renderImg : p.img;
+    if(!src) return null;
+    var iw = src.naturalWidth || src.width, ih = src.naturalHeight || src.height;
+    if(!iw || !ih) return null;
+    var k = Math.min(1, CAP / Math.max(iw, ih));
+    var W = Math.max(2, Math.round(iw * k)), H = Math.max(2, Math.round(ih * k));
+    if(!FR) FR = document.createElement('canvas');
+    if(FR.width !== W || FR.height !== H){ FR.width = W; FR.height = H; }
+    var g = FR.getContext('2d');
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+    var u = clamp((tt + fade) / (per + fade), 0, 1);
+    var v = 0.3 * smooth(u) + 0.7 * u;
+    var pl = plan(p.effect || 'auto', idx, u);
+    var amt = level() * Math.abs(pl.dz);
+    var zc = pl.dz >= 0 ? v : 1 - v;
+    var lat = (v - 0.5) * 2;
+    var lx = pl.abs ? pl.dx : pl.dx * lat, ly = pl.abs ? pl.dy : pl.dy * lat;
+    var bob = bobOn();
+    var bx = bob ? Math.sin(TAU * 0.95 * tt) * 0.0012 * W : 0;
+    var by = bob ? Math.sin(TAU * 1.9 * tt) * 0.0016 * H : 0;
+    var shX = lx * 0.016 * W, shY = ly * 0.016 * H;
+    var s0 = 1.05 + 0.4 * amt * zc, c = 0.9 * amt * zc;
+    var fx = pl.fx, fy = pl.fy, hx = Math.max(fx, 1 - fx), hy = Math.max(fy, 1 - fy);
+    var xs = [], ys = [], i, j, e;
+    for(i = 0; i <= NX; i++){ e = (i / NX - fx) / hx; xs.push((fx + hx * (e * s0 + c * e * Math.abs(e))) * W); }
+    for(j = 0; j <= NY; j++){ e = (j / NY - fy) / hy; ys.push((fy + hy * (e * s0 + c * e * Math.abs(e))) * H); }
+    g.drawImage(src, 0, 0, W, H);
+    var sw = iw / NX, sh = ih / NY;
+    for(j = 0; j < NY; j++){
+      var vm = (j + 0.5) / NY;
+      var near = 0.55 + 0.75 * smooth(clamp((vm - 0.35) / 0.65, 0, 1));
+      var offX = -shX * near + bx, dy = ys[j] - shY + by, dh = ys[j + 1] - ys[j] + 1;
+      for(i = 0; i < NX; i++) g.drawImage(src, i * sw, j * sh, sw, sh, xs[i] + offX, dy, xs[i + 1] - xs[i] + 1, dh);
+    }
+    return FR;
+  }
+
+  /* ---------- ligação com o gravador de vídeo (sem editar o código original) ----------
+     Enquanto este tipo estiver ativo, quando o gravador desenha uma foto no canvas "stage",
+     troca a foto parada pelo quadro do passeio no mesmo instante. */
+  var ON = false;
+  var S = { t0: {}, main: false };
+  var proto = CanvasRenderingContext2D.prototype;
+  var origDraw = proto.drawImage, origFill = proto.fillRect;
+  var origCap = HTMLCanvasElement.prototype.captureStream;
+  if(origCap){
+    HTMLCanvasElement.prototype.captureStream = function(){
+      if(this === stageEl){ S = { t0: {}, main: false }; FR = null; }
+      return origCap.apply(this, arguments);
+    };
+  }
+  proto.fillRect = function(x, y, w, h){
+    if(ON && this.canvas === stageEl && x === 0 && y === 0 && w === stageEl.width && h === stageEl.height && this.fillStyle === '#000000') S.main = false;
+    return origFill.apply(this, arguments);
+  };
+  /* No primeiro quadro o relógio do navegador pode vir um pouco antes do início da gravação e derrubar o vídeo;
+     neste tipo de tour o gravador recebe sempre a hora atual. */
+  var origRaf = window.requestAnimationFrame;
+  window.requestAnimationFrame = function(cb){
+    return origRaf.call(window, function(ts){ return cb(ON ? Math.max(ts, performance.now()) : ts); });
+  };
+  function perPhoto(){
+    var ks = Object.keys(S.t0).map(Number).filter(function(n){ return n > 0; });
+    if(ks.length){ var n = Math.max.apply(null, ks); return (S.t0[n] - S.t0[0]) / n; }
+    return parseFloat(($('duration') || {}).value) || 4;
+  }
+  proto.drawImage = function(src){
+    if(ON && this.canvas === stageEl && src){
+      var list = photos(), idx = -1;
+      for(var q = 0; q < list.length; q++){ if(list[q].renderImg === src){ idx = q; break; } }
+      if(idx >= 0){
+        var fade = ($('transition') && $('transition').value === 'fade') ? 0.6 : 0;
+        var now = performance.now() / 1000, tt;
+        if(!S.main){
+          S.main = true;
+          if(S.t0[idx] == null) S.t0[idx] = now;
+          tt = now - S.t0[idx];
+        }else{
+          tt = this.globalAlpha < 1 ? (this.globalAlpha - 1) * fade : -0.3; // próxima foto entrando: já "andando"
+        }
+        var f = null;
+        try{ f = renderFrame(list[idx], idx, tt, perPhoto(), fade); }catch(e){ f = null; }
+        if(f){ var a = Array.prototype.slice.call(arguments); a[0] = f; return origDraw.apply(this, a); }
+      }
+    }
+    return origDraw.apply(this, arguments);
+  };
+
+  /* ---------- tela: botão do tipo + painel ---------- */
+  var btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'tt-btn'; btn.dataset.k = 'passeio';
+  btn.innerHTML = '<b>🚶 Passeio virtual (grátis)</b><span>Vídeo das fotos com a câmera caminhando para dentro de cada cômodo. Sem IA e sem cobrança.</span>';
+  grid.appendChild(btn);
+
+  var panel = document.createElement('div');
+  panel.className = 'ia-box'; panel.id = 'vpBox'; panel.style.cssText = 'margin-top:20px;display:none;';
+  panel.innerHTML =
+    '<strong style="display:block;font-size:15px;margin-bottom:4px;">🚶 Passeio virtual (grátis, feito no próprio navegador)</strong>' +
+    '<div class="hint" style="margin:0 0 10px;">A câmera "caminha" para dentro de cada foto: o centro e as bordas se movem em velocidades diferentes (sensação de profundidade), com leve balanço de passos. Ao trocar de cômodo o movimento continua, como se você atravessasse a porta. Sem internet, sem IA, sem chave e <strong>sem nenhuma cobrança</strong>. Enquanto este tipo estiver escolhido, o "movimento suave de câmera" comum fica desligado para não somar os dois.</div>' +
+    '<div class="ia-row" style="margin-top:0;"><label style="font-size:13px;">Intensidade ' +
+    '<select id="vpInt" style="margin-left:6px;padding:8px;border:1px solid var(--rule);border-radius:8px;font:inherit;font-size:13px;background:var(--surface);color:inherit;"><option value="suave">Suave</option><option value="medio" selected>Médio</option><option value="forte">Forte</option></select></label>' +
+    '<label style="font-size:13px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="vpBob" checked> Balanço de passos</label></div>' +
+    '<div class="ia-row"><button type="button" class="file-btn" id="vpPrevBtn">▶ Ver prévia com as minhas fotos</button><button type="button" class="file-btn" id="vpPrevStop" style="display:none;">&#9632; Parar prévia</button></div>' +
+    '<canvas id="vpPrev" width="270" height="480" style="display:none;width:100%;max-width:200px;margin-top:10px;border-radius:10px;background:#000;"></canvas>' +
+    '<div class="ia-st" id="vpSt"></div>';
+  (sRitmo.querySelector('.step-body') || sRitmo).appendChild(panel);
+
+  var st = $('vpSt'), cv = $('vpPrev'), bGo = $('vpPrevBtn'), bStop = $('vpPrevStop');
+  var say = function(m){ st.textContent = m || ''; };
+  try{ var si = localStorage.getItem('fc-passeio-int'); if(si && LEVEL[si]) $('vpInt').value = si; }catch(e){}
+  $('vpInt').addEventListener('change', function(){ try{ localStorage.setItem('fc-passeio-int', this.value); }catch(e){} });
+
+  var raf = 0, t0 = 0;
+  function cover(g, f, W, H){ var k = Math.max(W / f.width, H / f.height), dw = f.width * k, dh = f.height * k; origDraw.call(g, f, (W - dw) / 2, (H - dh) / 2, dw, dh); }
+  function loop(now){
+    var list = photos();
+    if(!list.length){ stopPrev(); say('Adicione as fotos para ver a prévia.'); return; }
+    if(!t0) t0 = now;
+    var PER = 4, FADE = 0.6, total = PER * list.length;
+    var e = ((now - t0) / 1000) % total, idx = Math.min(list.length - 1, Math.floor(e / PER)), lt = e - idx * PER;
+    var g = cv.getContext('2d'), W = cv.width, H = cv.height;
+    g.fillStyle = '#000'; origFill.call(g, 0, 0, W, H);
+    var f = renderFrame(list[idx], idx, lt, PER, FADE);
+    if(f) cover(g, f, W, H);
+    if(idx < list.length - 1 && lt > PER - FADE){
+      var f2 = renderFrame(list[idx + 1], idx + 1, lt - PER, PER, FADE);
+      if(f2){ g.save(); g.globalAlpha = (lt - (PER - FADE)) / FADE; cover(g, f2, W, H); g.restore(); }
+    }
+    raf = requestAnimationFrame(loop);
+  }
+  function stopPrev(){ cancelAnimationFrame(raf); raf = 0; t0 = 0; bStop.style.display = 'none'; bGo.style.display = ''; }
+  bGo.addEventListener('click', function(){
+    if(!photos().length){ say('Adicione as fotos para ver a prévia.'); return; }
+    say('Prévia em tempo real (4 s por foto). Para gravar o vídeo, use o botão de gerar vídeo.');
+    cv.style.display = ''; bGo.style.display = 'none'; bStop.style.display = ''; t0 = 0; raf = requestAnimationFrame(loop);
+  });
+  bStop.addEventListener('click', function(){ stopPrev(); say(''); });
+
+  /* ---------- ligar / desligar ---------- */
+  var kbBefore = null, activating = false;
+  function activate(){
+    var fb = grid.querySelector('[data-k="fotos"]');
+    activating = true; if(fb) fb.click(); activating = false;   // mesmo fluxo de "Fotos → vídeo"
+    ON = true; S = { t0: {}, main: false };
+    if(fb) fb.classList.remove('on');
+    btn.classList.add('on'); panel.style.display = '';
+    if(kb && kbBefore === null){ kbBefore = kb.checked; kb.checked = false; kb.disabled = true; }
+    try{ localStorage.setItem('fcTourTipo2', 'passeio'); }catch(e){}
+  }
+  function deactivate(){
+    if(!ON) return;
+    ON = false; stopPrev(); panel.style.display = 'none'; btn.classList.remove('on');
+    if(kb && kbBefore !== null){ kb.disabled = false; kb.checked = kbBefore; kbBefore = null; }
+    try{ localStorage.setItem('fcTourTipo2', ''); }catch(e){}
+  }
+  btn.addEventListener('click', activate);
+  Array.prototype.forEach.call(grid.children, function(b){
+    if(b !== btn) b.addEventListener('click', function(){ if(!activating) deactivate(); });
+  });
+  var saved = ''; try{ saved = localStorage.getItem('fcTourTipo2') || ''; }catch(e){}
+  if(saved === 'passeio') activate();
+})();
+</script>
+
 </body>
 </html>
