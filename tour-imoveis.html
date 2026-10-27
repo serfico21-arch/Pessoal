@@ -505,6 +505,29 @@
   header::before{color:#8A5C0E;}
   .thumb button:hover{color:#C0392B;}
   audio{color-scheme:light;}
+
+  /* Ebook da construtora */
+  .eb-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px;}
+  .eb-picker{display:none;margin-top:12px;padding:12px;border:1px solid var(--rule);border-radius:var(--radius);background:rgba(0,0,0,.12);}
+  .eb-bar{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:6px 0;}
+  .eb-bar .btn-primary{width:auto;padding:10px 18px;}
+  .eb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;max-height:440px;overflow:auto;padding:2px;}
+  .eb-it{position:relative;border:2px solid var(--rule);border-radius:8px;overflow:hidden;cursor:pointer;background:#000;opacity:.55;}
+  .eb-it.on{border-color:var(--cta);opacity:1;}
+  .eb-it img{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;}
+  .eb-it .nm{font-size:11px;padding:4px 6px;background:rgba(0,0,0,.65);color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .eb-it .ck{position:absolute;top:5px;left:5px;width:22px;height:22px;border-radius:50%;background:var(--cta);color:#12202F;font-weight:700;font-size:14px;display:none;align-items:center;justify-content:center;}
+  .eb-it.on .ck{display:flex;}
+
+  /* Excluir fotos */
+  .thumb button.del{color:#C0392B;border:1px solid rgba(192,57,43,.45);border-radius:8px;font-size:13px;padding:5px 8px;margin-top:4px;white-space:nowrap;}
+  .thumb button.del:hover{background:rgba(192,57,43,.1);color:#C0392B;}
+  .undo-bar{display:none;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:16px;padding:10px 12px;border-radius:var(--radius);background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.35);font-size:13px;}
+  .undo-bar button{background:none;border:none;color:#8A5C0E;font-weight:700;text-decoration:underline;cursor:pointer;font-size:13px;font-family:inherit;padding:0;}
+  .eb-it .xdel{position:absolute;top:5px;right:5px;z-index:2;min-width:26px;height:26px;padding:0 8px;border-radius:13px;border:none;background:rgba(192,57,43,.95);color:#fff;font-weight:700;font-size:12px;cursor:pointer;}
+  .file-btn.danger{color:#C0392B;border-color:rgba(192,57,43,.5);}
+  .btn-bld{margin-left:10px;}
+  @media (max-width:560px){.btn-bld{margin:10px 0 0;display:block;width:100%;}}
 </style>
 <script src="fcosta-padrao.js" defer></script>
 </head>
@@ -527,6 +550,18 @@
           <span>ou arraste os arquivos aqui — JPG ou PNG</span>
         </div>
         <input type="file" id="fileInput" accept="image/*" multiple>
+        <div class="eb-row">
+          <button type="button" class="file-btn" id="ebBtn">&#128214; Subir ebook (PDF) da construtora</button>
+          <input type="file" id="ebInput" accept="application/pdf,.pdf">
+          <span class="audio-name" id="ebMsg">Envie o PDF do ebook: eu separo as fotos e você marca as que quer usar no tour.</span>
+        </div>
+        <div class="eb-picker" id="ebPicker">
+          <div class="eb-bar"><strong id="ebCount"></strong><span style="display:inline-flex;gap:8px;"><button type="button" class="file-btn" id="ebAll">Marcar todas</button><button type="button" class="file-btn" id="ebNone">Limpar</button><button type="button" class="file-btn danger" id="ebDelUn">&#128465; Excluir desmarcadas</button></span></div>
+          <p class="hint" style="margin:0 0 8px;">Toque na foto para marcar/desmarcar. Use o <strong>✕ Excluir</strong> no canto da foto para tirá-la de vez (logos, plantas, textos...).</p>
+          <div class="eb-grid" id="ebGrid"></div>
+          <div class="eb-bar"><button type="button" class="btn-primary" id="ebAdd">Adicionar fotos marcadas</button><button type="button" class="file-btn" id="ebClose">Fechar</button></div>
+        </div>
+        <div class="undo-bar" id="undoBar"><span id="undoTxt"></span><button type="button" id="undoBtn">Desfazer</button></div>
         <div class="thumbs" id="thumbs"></div>
         <div class="empty-note" id="emptyNote">Nenhuma foto adicionada ainda.</div>
         <p class="hint">Dica: escreva o nome do cômodo só na <strong>primeira foto de cada ambiente</strong> (ex.: "Sala", "Cozinha", "Suíte 1"). O nome aparece na tela quando o vídeo entra naquele ambiente, e o movimento de câmera de cada foto ajuda a dar a sensação de entrar, olhar ao redor e sair do cômodo.</p>
@@ -615,7 +650,7 @@
           </div>
           <div class="field" style="flex:1 1 100%;">
             <label for="propertyContact">Contato (opcional)</label>
-            <input type="text" id="propertyContact" maxlength="60" value="WhatsApp (11) 99350-9109" placeholder="Ex.: WhatsApp (11) 99999-9999 · CRECI 12345">
+            <input type="text" id="propertyContact" maxlength="60" value="FCosta Corretor · WhatsApp (11) 99350-9109" placeholder="Ex.: WhatsApp (11) 99999-9999 · CRECI 12345">
           </div>
           <div class="field" style="flex:1 1 100%;">
             <label>Dados do imóvel (aparecem na faixa; deixe em branco o que não quiser mostrar)</label>
@@ -651,6 +686,7 @@
             <div class="time-read ok" id="infoRead"></div>
           </div>
           <div id="lgGHost" style="flex:1 1 100%;"></div>
+          <div id="lgBHost" class="vid-only" style="flex:1 1 100%;"></div>
         </div>
         <p class="hint"><strong>Como funciona a faixa:</strong><br>• <em>Embaixo</em>: a foto aparece inteira e a faixa fica separada, sem cobrir nada (recomendado).<br>• <em>Por cima da foto</em>: a faixa fica sobre a imagem; use a opacidade para ver a foto por trás.<br>• <em>Subir a faixa</em>: afasta a faixa da borda de baixo (no 9:16, para não ficar atrás dos botões do Instagram e do TikTok).<br>• <em>Tamanho dos textos</em>: aumenta ou diminui tudo dentro da faixa.<br>• <em>Opacidade</em>: 100% = fundo sólido; menos deixa a foto aparecer por trás. Abaixo de 70% o texto pode ficar difícil de ler. A mesma opacidade vale para o gerador e para o adaptador.</p>
         <div class="field-row" style="margin-top:20px;">
@@ -728,7 +764,10 @@
       <h2>Gerar o vídeo</h2>
       <p>O vídeo é montado e gravado aqui mesmo. Para imóveis com muitas fotos, pode levar um minuto — deixe esta aba aberta até terminar.</p>
       <div class="card">
-        <button class="btn-primary" id="generateBtn">Gerar vídeo do tour</button>
+        <button class="btn-primary" id="generateBtn">Gerar vídeo do tour</button><button class="btn-primary btn-bld" id="generateBldBtn" type="button">&#127970; Gerar para construtora</button>
+        <div class="field" style="margin:14px 0 0;"><label for="bldContact">Contato na versão da construtora (opcional)</label><input type="text" id="bldContact" maxlength="60" placeholder="Ex.: Vendas (11) 3333-4444 · www.construtora.com.br"></div>
+        <div class="toggle-row" style="margin:12px 0 0;"><input type="checkbox" id="bldMine" checked><label for="bldMine" style="margin:0;">Incluir também a minha logo e o meu contato na versão da construtora</label></div>
+        <p class="hint" style="margin:8px 0 0;"><strong>Gerar para construtora:</strong> mesmo vídeo, com a logo da construtora (envie em “Logo da construtora”, no bloco de dados). A sua logo segue as opções de “Minha logo na tela” (posição, tamanho, opacidade) e o seu contato é o do bloco de dados. Se preencher o contato acima, ele substitui o seu. Desmarque a caixa para sair só a marca da construtora.</p>
         <p style="font-size:13px;color:var(--ink-soft);margin:10px 0 0;">Importante: mantenha esta aba aberta e em primeiro plano (não minimize, não troque de aba) até o vídeo terminar — o navegador pausa a gravação se a aba fica em segundo plano.</p>
         <div class="status" id="status">
           <span id="statusText">Preparando...</span>
@@ -1189,6 +1228,12 @@ window.FCBand = (function(){
     renderThumbs();
   }
 
+  // usado pelo "Subir ebook": adiciona fotos já prontas à lista
+  window.__fcAddPhotos = function(items){
+    items.forEach(it=>{ const img = new Image(); img.src = it.url; photos.push({ file: it.file, url: it.url, img, room: it.room || '', effect: 'auto' }); });
+    renderThumbs();
+  };
+
   const EFFECT_LABELS = {
     auto: 'Automático (alterna)',
     in: 'Entrando (aproxima)',
@@ -1253,6 +1298,19 @@ window.FCBand = (function(){
     return { scale, panX, panY };
   }
 
+  let lastRemoved = null;
+  const undoBar = document.getElementById('undoBar'), undoTxt = document.getElementById('undoTxt');
+  function showUndo(){
+    if(!lastRemoved){ undoBar.style.display = 'none'; return; }
+    undoTxt.textContent = 'Foto ' + (lastRemoved.i + 1) + ' excluída do vídeo.';
+    undoBar.style.display = 'flex';
+  }
+  document.getElementById('undoBtn').addEventListener('click', ()=>{
+    if(!lastRemoved) return;
+    photos.splice(Math.min(lastRemoved.i, photos.length), 0, lastRemoved.p);
+    lastRemoved = null; renderThumbs(); showUndo();
+  });
+
   function renderThumbs(){
     thumbs.innerHTML = '';
     emptyNote.style.display = photos.length ? 'none' : 'block';
@@ -1274,7 +1332,7 @@ window.FCBand = (function(){
         <div class="actions">
           <button data-act="left" class="move" title="Mover para trás">&#8593;</button>
           <button data-act="right" class="move" title="Mover para frente">&#8595;</button>
-          <button data-act="remove" title="Remover">&#10005;</button>
+          <button data-act="remove" class="del" title="Excluir esta foto do vídeo">&#128465; Excluir</button>
         </div>`;
       el.querySelector('[data-field="room"]').addEventListener('input', e=>{
         photos[i].room = e.target.value;
@@ -1283,7 +1341,8 @@ window.FCBand = (function(){
         photos[i].effect = e.target.value;
       });
       el.querySelector('[data-act="remove"]').addEventListener('click', ()=>{
-        photos.splice(i,1); renderThumbs();
+        lastRemoved = { p: photos[i], i: i };
+        photos.splice(i,1); renderThumbs(); showUndo();
       });
       el.querySelector('[data-act="left"]').addEventListener('click', ()=>{
         if(i>0){ [photos[i-1],photos[i]] = [photos[i],photos[i-1]]; renderThumbs(); }
@@ -1471,7 +1530,25 @@ window.FCBand = (function(){
     return c;
   }
 
-  generateBtn.addEventListener('click', async ()=>{
+  const generateBldBtn = document.getElementById('generateBldBtn');
+  const bldContactInput = document.getElementById('bldContact');
+  window.__fcHideMine = () => !!window.__fcBld && !document.getElementById('bldMine').checked;
+  const contactVal = () => {
+    if(!window.__fcBld) return propertyContactInput.value.trim();
+    const b = bldContactInput.value.trim();
+    return b || (window.__fcHideMine() ? '' : propertyContactInput.value.trim());
+  };
+  generateBtn.addEventListener('click', ()=> startGen(false));
+  generateBldBtn.addEventListener('click', ()=>{
+    if(!(window.FCBuilderLogo && window.FCBuilderLogo.has && window.FCBuilderLogo.has())){
+      alert('Envie primeiro a logo da construtora (botão “Escolher logo”, no bloco de dados do imóvel).');
+      return;
+    }
+    startGen(true);
+  });
+
+  async function startGen(bld){
+    window.__fcBld = !!bld;
     if(photos.length < 2){
       alert('Adicione pelo menos duas fotos para montar o tour.');
       return;
@@ -1481,7 +1558,7 @@ window.FCBand = (function(){
       return;
     }
 
-    generateBtn.disabled = true;
+    generateBtn.disabled = true; generateBldBtn.disabled = true;
     statusBox.classList.add('show');
     resultBox.style.display = 'none';
     stage.style.display = 'block'; // mostra a prévia ao vivo enquanto grava
@@ -1495,10 +1572,11 @@ window.FCBand = (function(){
       statusText.textContent = 'Não foi possível gerar o vídeo (' + (err && err.message ? err.message : 'erro desconhecido') + '). Tente com menos fotos ou em outro navegador (Chrome).';
     }finally{
       stage.style.display = 'none';
-      generateBtn.disabled = false;
+      generateBtn.disabled = false; generateBldBtn.disabled = false;
+      window.__fcBld = false;
       if(wakeLock){ try{ await wakeLock.release(); }catch(e){} wakeLock = null; }
     }
-  });
+  }
 
   async function gerarVideo(scale){
     scale = scale || 1;
@@ -1860,7 +1938,7 @@ window.FCBand = (function(){
         maxW, u,
         price: formatPrice(propertyPriceInput.value),
         desc: propertyDescInput.value.trim(),
-        contact: propertyContactInput.value.trim(),
+        contact: contactVal(),
         bandKey: bandThemeSelect.value, bandColor: bandColorInput.value, accentKey: accentSelect.value,
         maxDescLines: 2
       });
@@ -1869,7 +1947,7 @@ window.FCBand = (function(){
     // Faixa de título (vertical): logo + título em até 2 linhas
     function buildHeader(maxW, maxH){
       const title = propertyInfoInput.value.trim();
-      const hasLogo = brokerLogo.naturalWidth > 0;
+      const hasLogo = brokerLogo.naturalWidth > 0 && !window.__fcHideMine();
       if(!title && !hasLogo) return null;
       const c = newLayer(maxW, maxH);
       const g = c.getContext('2d');
@@ -1920,7 +1998,7 @@ window.FCBand = (function(){
     }
 
     function buildLogo(size){
-      if(!brokerLogo.naturalWidth) return null;
+      if(!brokerLogo.naturalWidth || window.__fcHideMine()) return null;
       const c = newLayer(size, size);
       const g = c.getContext('2d');
       g.globalAlpha = 0.9;
@@ -1935,11 +2013,11 @@ window.FCBand = (function(){
     const base = {
       price: formatPrice(propertyPriceInput.value),
       desc: propertyDescInput.value.trim(),
-      contact: propertyContactInput.value.trim(),
+      contact: contactVal(),
       facts: window.FCBand.facts(dtAreaInput.value, dtQuartosInput.value, dtSuitesInput.value, dtBanhInput.value, dtVagasInput.value),
       bandKey: bandThemeSelect.value, bandColor: bandColorInput.value, accentKey: accentSelect.value
     };
-    if(infoMode === 'under' || fillScreen){ base.title = propertyInfoInput.value.trim(); base.logo = (window.FCLogo && window.FCLogo.on('lgG')) ? null : brokerLogo; }
+    if(infoMode === 'under' || fillScreen){ base.title = propertyInfoInput.value.trim(); base.logo = (window.__fcHideMine() || (window.FCLogo && window.FCLogo.on('lgG'))) ? null : brokerLogo; }
     const maxWI = landscape ? Math.round(W * (infoMode === 'over' ? 0.40 : 0.70)) : W - mxI*2;
     bandLay = window.FCBand.place({
       W, H, u, mode: infoMode,
@@ -1967,8 +2045,10 @@ window.FCBand = (function(){
         if(header) layers.push({ c: header, x: mxI, y: headerTop, delay: 0.1, slide: 0 });
       }
     }
-    const wmG = window.FCLogo ? window.FCLogo.build('lgG', W, H) : null;
+    const wmG = (window.FCLogo && !window.__fcHideMine()) ? window.FCLogo.build('lgG', W, H) : null;
     if(wmG) layers.push({ c: wmG.c, x: wmG.x, y: wmG.y, delay: 0.1, slide: 0 });
+    const wmB = window.FCBuilderLogo ? window.FCBuilderLogo.build(W, H, wmG) : null;
+    if(wmB) layers.push({ c: wmB.c, x: wmB.x, y: wmB.y, delay: 0.1, slide: 0 });
     if(bandLay.band) layers.push({ c: bandLay.band, x: bandLay.bandX, y: bandLay.bandY, delay: 0.45, slide: Math.round(60*u) });
 
     function drawOverlay(ctx, t){
@@ -2049,7 +2129,7 @@ window.FCBand = (function(){
     lastVideoUrl = url;
     resultVideo.src = url;
     downloadLink.href = url;
-    downloadLink.download = isMp4 ? 'tour-imovel.mp4' : 'tour-imovel.webm'; downloadLink.textContent = isMp4 ? 'Baixar vídeo (MP4)' : 'Baixar vídeo (WebM: este navegador não gera MP4)';
+    downloadLink.download = (window.__fcBld ? 'tour-construtora.' : 'tour-imovel.') + (isMp4 ? 'mp4' : 'webm'); downloadLink.textContent = isMp4 ? 'Baixar vídeo (MP4)' : 'Baixar vídeo (WebM: este navegador não gera MP4)';
     resultBox.style.display = 'block';
     statusText.textContent = 'Vídeo pronto (' + (blob.size / 1048576).toFixed(1).replace('.', ',') + ' MB)' + (limitado && blob.size > LIMITE_MB ? ' — acima de 15 MB, tente com menos fotos ou menos segundos por foto.' : '.');
   }
@@ -2260,7 +2340,7 @@ window.FCBand = (function(){
   }
 
   // ---------- Logo, descrição e WhatsApp (camada fixa, desenhada uma vez) ----------
-  const DEFAULT_CONTACT = 'WhatsApp (11) 99350-9109';
+  const DEFAULT_CONTACT = 'FCosta Corretor · WhatsApp (11) 99350-9109';
   const logoImg = new Image();
   if(window.__brokerLogoSrc) logoImg.src = window.__brokerLogoSrc;
   function roundRect(g, x, y, w, h, r){
@@ -2334,6 +2414,8 @@ window.FCBand = (function(){
     }
     const wmA = window.FCLogo ? window.FCLogo.build('lgG', W, H) : null;
     if(wmA) g.drawImage(wmA.c, wmA.x, wmA.y);
+    const wmAB = window.FCBuilderLogo ? window.FCBuilderLogo.build(W, H, wmA) : null;
+    if(wmAB) g.drawImage(wmAB.c, wmAB.x, wmAB.y);
     if(L.band) g.drawImage(L.band, L.bandX, L.bandY);
     return { canvas: c, area: L.area };
   }
@@ -2953,6 +3035,310 @@ window.FCLogo = (function(){
   }
   var saved = 'fotos'; try{ saved = localStorage.getItem('fcTourTipo') || 'fotos'; }catch(e){}
   setType(saved);
+})();
+</script>
+<script>
+/* Ebook da construtora (PDF) -> fotos separadas  +  Logo da construtora na tela */
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var PDFJS_V = '3.11.174';
+  var PDFJS_JS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/' + PDFJS_V + '/pdf.min.js';
+  var PDFJS_WK = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/' + PDFJS_V + '/pdf.worker.min.js';
+  var MAX_SIDE = 1920;          // lado maior das fotos geradas
+  var FLAT_CROP_BOTTOM = 0.125; // páginas "achatadas": corta a faixa de rodapé com o aviso legal
+  var MIN_SIDE = 400;           // ignora ícones/logos pequenos
+
+  /* ---------- utilidades ---------- */
+  function mul(a, b){
+    return [a[0]*b[0]+a[2]*b[1], a[1]*b[0]+a[3]*b[1], a[0]*b[2]+a[2]*b[3], a[1]*b[2]+a[3]*b[3],
+            a[0]*b[4]+a[2]*b[5]+a[4], a[1]*b[4]+a[3]*b[5]+a[5]];
+  }
+  function mk(w, h){ var c = document.createElement('canvas'); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); return c; }
+  function tick(){ return new Promise(function(r){ setTimeout(r, 0); }); }
+  function getObj(page, id){
+    return new Promise(function(res){
+      var store = /^g_/.test(id) ? page.commonObjs : page.objs;
+      var done = false, t = setTimeout(function(){ if(!done){ done = true; res(null); } }, 20000);
+      try{ store.get(id, function(o){ if(!done){ done = true; clearTimeout(t); res(o); } }); }
+      catch(e){ if(!done){ done = true; clearTimeout(t); res(null); } }
+    });
+  }
+  function hashObj(o){
+    if(!o) return 'x';
+    var h = 17;
+    if(o.data && o.data.length){
+      var d = o.data, step = Math.max(1, Math.floor(d.length / 257));
+      for(var i = 0; i < d.length; i += step) h = (h * 31 + d[i]) | 0;
+      return o.width + 'x' + o.height + ':' + h;
+    }
+    if(o.bitmap){
+      try{
+        var c = mk(24, 14), g = c.getContext('2d'); g.drawImage(o.bitmap, 0, 0, 24, 14);
+        var dd = g.getImageData(0, 0, 24, 14).data;
+        for(var j = 0; j < dd.length; j++) h = (h * 31 + dd[j]) | 0;
+      }catch(e){}
+      return o.bitmap.width + 'x' + o.bitmap.height + ':' + h;
+    }
+    return 'x';
+  }
+  function objToCanvas(o){
+    if(!o) return null;
+    if(o.bitmap){ var c = mk(o.bitmap.width, o.bitmap.height); c.getContext('2d').drawImage(o.bitmap, 0, 0); return c; }
+    if(o.data && o.width && o.height){
+      var w = o.width, h = o.height, s = o.data, c2 = mk(w, h), g = c2.getContext('2d'), id = g.createImageData(w, h), d = id.data, i, j;
+      if(s.length === w*h*4){ d.set(s); }
+      else if(s.length === w*h*3){ for(i = 0, j = 0; i < s.length; i += 3, j += 4){ d[j] = s[i]; d[j+1] = s[i+1]; d[j+2] = s[i+2]; d[j+3] = 255; } }
+      else if(s.length === w*h){ for(i = 0, j = 0; i < s.length; i++, j += 4){ d[j] = d[j+1] = d[j+2] = s[i]; d[j+3] = 255; } }
+      else { var rb = (w + 7) >> 3; for(var y = 0; y < h; y++){ for(var x = 0; x < w; x++){ var v = (s[y*rb + (x >> 3)] >> (7 - (x & 7))) & 1 ? 255 : 0, k = (y*w + x)*4; d[k] = d[k+1] = d[k+2] = v; d[k+3] = 255; } } }
+      g.putImageData(id, 0, 0); return c2;
+    }
+    return null;
+  }
+  function toBlob(c, q){ return new Promise(function(res){ c.toBlob(res, 'image/jpeg', q || 0.9); }); }
+  function shrink(src, maxSide){
+    var k = Math.min(1, maxSide / Math.max(src.width, src.height));
+    if(k >= 1) return src;
+    var c = mk(src.width * k, src.height * k), g = c.getContext('2d'); g.imageSmoothingQuality = 'high';
+    g.drawImage(src, 0, 0, c.width, c.height); return c;
+  }
+  // fundo branco (imagens com transparência) -> JPEG
+  function flatten(src){
+    var c = mk(src.width, src.height), g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(src, 0, 0); return c;
+  }
+  // 0 = página cheia de cor chapada (texto/layout); 1 = foto com muita variação
+  function photoScore(c){
+    try{
+      var t = mk(64, 36), g = t.getContext('2d'); g.drawImage(c, 0, 0, 64, 36);
+      var d = g.getImageData(0, 0, 64, 36).data, bins = {}, n = d.length / 4, top = 0;
+      for(var i = 0; i < d.length; i += 4){ var key = (d[i] >> 4) * 256 + (d[i+1] >> 4) * 16 + (d[i+2] >> 4); bins[key] = (bins[key] || 0) + 1; if(bins[key] > top) top = bins[key]; }
+      return 1 - top / n;
+    }catch(e){ return 0.5; }
+  }
+
+  /* ---------- 1ª passada: acha as imagens de cada página (sem decodificar tudo) ---------- */
+  async function analyze(pdfjs, doc, onProg){
+    var OPS = pdfjs.OPS, N = doc.numPages, pages = [], sigCount = {};
+    var imgOps = {};
+    ['paintImageXObject','paintJpegXObject','paintInlineImageXObject','paintImageXObjectRepeat'].forEach(function(k){ if(OPS[k] != null) imgOps[OPS[k]] = k; });
+    for(var n = 1; n <= N; n++){
+      onProg && onProg(n, N, 'Lendo a página');
+      var page = await doc.getPage(n), vp = page.getViewport({ scale: 1 });
+      var ol = await page.getOperatorList();
+      var ctm = [1,0,0,1,0,0], st = [], found = [];
+      for(var i = 0; i < ol.fnArray.length; i++){
+        var fn = ol.fnArray[i], a = ol.argsArray[i];
+        if(fn === OPS.save){ st.push(ctm.slice()); }
+        else if(fn === OPS.restore){ if(st.length) ctm = st.pop(); }
+        else if(fn === OPS.transform){ ctm = mul(ctm, a); }
+        else if(fn === OPS.paintFormXObjectBegin){ st.push(ctm.slice()); if(a && a[0]) ctm = mul(ctm, a[0]); }
+        else if(fn === OPS.paintFormXObjectEnd){ if(st.length) ctm = st.pop(); }
+        else if(imgOps[fn]){
+          var xs = [ctm[4], ctm[4]+ctm[0], ctm[4]+ctm[2], ctm[4]+ctm[0]+ctm[2]];
+          var ys = [ctm[5], ctm[5]+ctm[1], ctm[5]+ctm[3], ctm[5]+ctm[1]+ctm[3]];
+          var r = [Math.min.apply(null, xs), Math.min.apply(null, ys), Math.max.apply(null, xs), Math.max.apply(null, ys)];
+          var vr = vp.convertToViewportRectangle(r); // [x1,y1,x2,y2] na tela
+          var box = { x: Math.min(vr[0], vr[2]), y: Math.min(vr[1], vr[3]), w: Math.abs(vr[2] - vr[0]), h: Math.abs(vr[3] - vr[1]) };
+          var inline = imgOps[fn] === 'paintInlineImageXObject';
+          found.push({ id: inline ? null : a[0], w: inline ? (a[0] && a[0].width) : a[1], h: inline ? (a[0] && a[0].height) : a[2], box: box, pdfRect: r, inline: inline, inlineData: inline ? a[0] : null });
+        }
+      }
+      var info = { n: n, page: page, vp: vp, imgs: found };
+      var pageArea = vp.width * vp.height;
+      for(var k = 0; k < found.length; k++){
+        var f = found[k]; f.full = (f.box.w * f.box.h) / pageArea >= 0.92;
+        if(f.full && !f.inline){ var o = await getObj(page, f.id); f.sig = hashObj(o); f.obj = null; sigCount[f.sig] = (sigCount[f.sig] || 0) + 1; }
+      }
+      pages.push(info);
+      if(n % 4 === 0) await tick();
+    }
+    var bg = {}, hasBg = false;
+    Object.keys(sigCount).forEach(function(s){ if(sigCount[s] >= 3 && N >= 6 && s !== 'x'){ bg[s] = true; hasBg = true; } });
+    return { pages: pages, bg: bg, hasBg: hasBg };
+  }
+
+  // nome do ambiente: texto curto (etiqueta da foto) no canto inferior da imagem
+  async function findLabel(page, vp, box){
+    try{
+      var tc = await page.getTextContent(), best = null;
+      for(var i = 0; i < tc.items.length; i++){
+        var it = tc.items[i], s = (it.str || '').trim();
+        if(s.length < 3 || s.length > 32) continue;
+        if(/imagem|meramente|ilustrativ|planta|^\*|\d{4}|www\.|©/i.test(s)) continue;
+        var p = vp.convertToViewportPoint(it.transform[4], it.transform[5]);
+        var fx = (p[0] - box.x) / box.w, fy = (p[1] - box.y) / box.h;
+        if(fx < 0.35 || fx > 1.01 || fy < 0.74 || fy > 1.02) continue;
+        if(!best) best = s;
+      }
+      return (best || '').replace(/\*+$/, '');
+    }catch(e){ return ''; }
+  }
+
+  /* ---------- 2ª passada: gera as fotos (JPEG) ---------- */
+  async function extract(pdfjs, doc, info, onProg){
+    var out = [], N = doc.numPages;
+    for(var p = 0; p < info.pages.length; p++){
+      var pg = info.pages[p];
+      onProg && onProg(pg.n, N, 'Separando as fotos da página');
+      var cands = pg.imgs.filter(function(f){
+        if(f.inline) return false;
+        if(f.full && info.bg[f.sig]) return false;           // fundo repetido de todas as páginas
+        if(Math.min(f.w || 0, f.h || 0) < MIN_SIDE) return false;
+        if(f.box.w < pg.vp.width * 0.12 || f.box.h < pg.vp.height * 0.12) return false;
+        return true;
+      });
+      var flat = !info.hasBg && cands.length === 1 && cands[0].full;
+      cands.sort(function(a, b){ var dy = Math.round(a.box.y / 40) - Math.round(b.box.y / 40); return dy || (a.box.x - b.box.x); });
+      if(flat){
+        var sc = MAX_SIDE / pg.vp.width, vp2 = pg.page.getViewport({ scale: sc });
+        var cv = mk(vp2.width, vp2.height);
+        await pg.page.render({ canvasContext: cv.getContext('2d'), viewport: vp2 }).promise;
+        var cut = mk(cv.width, cv.height * (1 - FLAT_CROP_BOTTOM));
+        cut.getContext('2d').drawImage(cv, 0, 0);
+        out.push({ page: pg.n, kind: 'pagina', blob: await toBlob(cut, 0.9), w: cut.width, h: cut.height, room: '', score: photoScore(cut) });
+      } else {
+        for(var k = 0; k < cands.length; k++){
+          var f = cands[k], c = null;
+          try{ c = objToCanvas(await getObj(pg.page, f.id)); }catch(e){ c = null; }
+          if(!c){ // plano B: recorta da página renderizada
+            var s2 = Math.min(3, MAX_SIDE / Math.max(f.box.w, f.box.h)), v3 = pg.page.getViewport({ scale: s2 }), big = mk(v3.width, v3.height);
+            await pg.page.render({ canvasContext: big.getContext('2d'), viewport: v3 }).promise;
+            c = mk(f.box.w * s2, f.box.h * s2); c.getContext('2d').drawImage(big, f.box.x * s2, f.box.y * s2, f.box.w * s2, f.box.h * s2, 0, 0, c.width, c.height);
+          }
+          var fin = shrink(flatten(c), MAX_SIDE);
+          var asp = fin.width / fin.height, ok = asp <= 2.6 && asp >= 0.4 && Math.min(f.w, f.h) >= 500;
+          out.push({ page: pg.n, kind: 'foto', blob: await toBlob(fin, 0.9), w: fin.width, h: fin.height, room: await findLabel(pg.page, pg.vp, f.box), score: ok ? 1 : 0 });
+        }
+      }
+      await tick();
+    }
+    return out;
+  }
+
+  /* ---------- tela ---------- */
+  var btn = $('ebBtn'), inp = $('ebInput'), msg = $('ebMsg'), pick = $('ebPicker'), grid = $('ebGrid'), cnt = $('ebCount');
+  var items = [], busy = false;
+
+  function loadPdfJs(){
+    if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+    return new Promise(function(res, rej){
+      var s = document.createElement('script'); s.src = PDFJS_JS;
+      s.onload = function(){ window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WK; res(window.pdfjsLib); };
+      s.onerror = function(){ rej(new Error('Não consegui carregar o leitor de PDF. Confira a internet e tente de novo.')); };
+      document.head.appendChild(s);
+    });
+  }
+  function count(){ var n = items.filter(function(i){ return i.on; }).length; cnt.textContent = n + ' de ' + items.length + ' marcadas'; $('ebAdd').disabled = !n; }
+  function clearPicker(){ items.forEach(function(i){ if(i.url) URL.revokeObjectURL(i.url); }); items = []; grid.innerHTML = ''; pick.style.display = 'none'; }
+  function render(){
+    grid.innerHTML = '';
+    items.forEach(function(it){
+      var el = document.createElement('div'); el.className = 'eb-it' + (it.on ? ' on' : '');
+      el.innerHTML = '<img alt=""><span class="ck">✓</span><button type="button" class="xdel" title="Excluir esta foto">✕ Excluir</button><div class="nm"></div>';
+      el.querySelector('.xdel').onclick = function(ev){ ev.stopPropagation(); if(it.url) URL.revokeObjectURL(it.url); items = items.filter(function(x){ return x !== it; }); if(!items.length){ clearPicker(); msg.textContent = 'Todas as imagens foram excluídas.'; } else render(); };
+      el.querySelector('img').src = it.url;
+      el.querySelector('.nm').textContent = 'Pág. ' + it.page + (it.room ? ' · ' + it.room : '');
+      el.onclick = function(){ it.on = !it.on; el.classList.toggle('on', it.on); count(); };
+      grid.appendChild(el);
+    });
+    pick.style.display = 'block'; count();
+  }
+
+  async function run(file){
+    if(busy) return; busy = true; btn.disabled = true; clearPicker();
+    try{
+      msg.textContent = 'Carregando o leitor de PDF...';
+      var pdfjs = await loadPdfJs();
+      var doc = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
+      var info = await analyze(pdfjs, doc, function(n, N, t){ msg.textContent = t + ' ' + n + ' de ' + N + '...'; });
+      var res = await extract(pdfjs, doc, info, function(n, N, t){ msg.textContent = t + ' ' + n + ' de ' + N + '...'; });
+      items = res.map(function(r){ return { page: r.page, blob: r.blob, url: URL.createObjectURL(r.blob), room: r.room, on: r.score >= 0.28, kind: r.kind }; });
+      try{ doc.destroy(); }catch(e){}
+      if(!items.length){ msg.textContent = 'Não achei fotos neste PDF.'; }
+      else {
+        msg.textContent = items.length + ' imagens encontradas em "' + file.name + '". Toque nas que quer usar.';
+        render();
+      }
+    }catch(err){ msg.textContent = 'Não deu para ler o ebook: ' + (err && err.message ? err.message : err); }
+    busy = false; btn.disabled = false; inp.value = '';
+  }
+  btn.addEventListener('click', function(){ inp.click(); });
+  inp.addEventListener('change', function(e){ var f = e.target.files && e.target.files[0]; if(f) run(f); });
+  $('ebAll').addEventListener('click', function(){ items.forEach(function(i){ i.on = true; }); render(); });
+  $('ebNone').addEventListener('click', function(){ items.forEach(function(i){ i.on = false; }); render(); });
+  $('ebDelUn').addEventListener('click', function(){
+    var n = items.filter(function(i){ return !i.on; }).length;
+    if(!n || !confirm('Excluir ' + n + ' imagem(ns) desmarcada(s)?')) return;
+    items = items.filter(function(i){ if(!i.on && i.url) URL.revokeObjectURL(i.url); return i.on; });
+    if(!items.length){ clearPicker(); return; }
+    render();
+  });
+  $('ebClose').addEventListener('click', function(){ clearPicker(); });
+  $('ebAdd').addEventListener('click', function(){
+    var sel = items.filter(function(i){ return i.on; }), base = (new Date()).getTime();
+    var add = sel.map(function(i, k){
+      var f = new File([i.blob], 'ebook-p' + i.page + '-' + (base + k) + '.jpg', { type: 'image/jpeg' });
+      return { file: f, url: URL.createObjectURL(f), room: i.room || '' };
+    });
+    if(window.__fcAddPhotos) window.__fcAddPhotos(add);
+    msg.textContent = add.length + ' fotos adicionadas à lista. Confira a ordem e os nomes dos ambientes logo abaixo.';
+    clearPicker();
+  });
+
+  /* ---------- logo da construtora ---------- */
+  window.FCBuilderLogo = (function(){
+    var img = null;
+    function g(k){ return $('lgB' + k); }
+    function build(W, H, other){
+      var e = g('On'); if(!img || !img.naturalWidth || !e || !(e.checked || window.__fcBld)) return null;
+      var base = Math.min(W, H), S = Math.round(base * (+g('Size').value || 18) / 100);
+      var k = S / Math.max(img.naturalWidth, img.naturalHeight);
+      var w = Math.max(1, Math.round(img.naturalWidth * k)), h = Math.max(1, Math.round(img.naturalHeight * k));
+      var c = mk(w, h), x = c.getContext('2d'); x.imageSmoothingQuality = 'high';
+      x.globalAlpha = Math.min(1, Math.max(.1, (+g('Op').value || 100) / 100));
+      x.drawImage(img, 0, 0, w, h);
+      var m = Math.round(base * 0.04), r = H / W;
+      var y = r > 1.5 ? Math.round(H * 0.12) : (r > 1.2 ? Math.round(H * 0.05) : m);
+      var pos = g('Pos').value, px = m;
+      if(pos === 'tc') px = Math.round((W - w) / 2); else if(pos === 'tr') px = W - w - m;
+      if(pos === 'br'){ px = W - w - m; y = Math.round(H * (r > 1.5 ? 0.70 : 0.82)) - h; if(r <= 1.5) y = H - h - m; }
+      if(other && other.c){ // se bater na logo do corretor, empurra para não ficar uma em cima da outra
+        var ox = other.x, oy = other.y, ow = other.c.width, oh = other.c.height;
+        if(px < ox + ow + m && px + w + m > ox && y < oy + oh + m && y + h + m > oy){
+          if(pos === 'br') y = oy - h - m; else y = oy + oh + m;
+        }
+      }
+      return { c: c, x: px, y: y };
+    }
+    var has = function(){ return !!(img && img.naturalWidth); };
+    var host = $('lgBHost'); if(!host) return { build: build, has: has };
+    host.innerHTML =
+      '<div class="time-box" style="margin-top:0;">' +
+      '<div class="time-head"><strong>Logo da construtora</strong>' +
+      '<span style="display:inline-flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
+      '<label class="file-btn" style="margin:0;">Escolher logo<input type="file" id="lgBFile" accept="image/*" style="display:none;"></label>' +
+      '<button type="button" class="file-btn" id="lgBReset">Remover</button></span></div>' +
+      '<div class="audio-name" id="lgBName" style="margin:6px 0;">Nenhuma logo da construtora (envie um PNG com fundo transparente, se tiver).</div>' +
+      '<div class="toggle-row" style="margin:6px 0 4px;"><input type="checkbox" id="lgBOn" checked><label for="lgBOn" style="margin:0;">Mostrar a logo da construtora no vídeo</label></div>' +
+      '<label class="sl" for="lgBPos">Posição</label>' +
+      '<select id="lgBPos"><option value="tr" selected>Canto superior direito</option><option value="tl">Canto superior esquerdo</option><option value="tc">Topo, centralizada</option><option value="br">Canto inferior direito</option></select>' +
+      '<label class="sl" for="lgBSize">Tamanho da logo</label>' +
+      '<input type="range" id="lgBSize" min="8" max="40" step="1" value="18"><div class="time-scale"><span>Menor</span><span>Maior</span></div>' +
+      '<label class="sl" for="lgBOp">Opacidade: <span id="lgBOpV">100</span>%</label>' +
+      '<input type="range" id="lgBOp" min="10" max="100" step="5" value="100"><div class="time-scale"><span>Transparente</span><span>Sólida</span></div>' +
+      '<div class="time-read ok" style="font-weight:400;color:var(--ink-soft);">Se ficar no mesmo canto da sua logo, ela é colocada logo abaixo automaticamente.</div></div>';
+    g('Op').addEventListener('input', function(){ g('OpV').textContent = this.value; });
+    g('File').addEventListener('change', function(e){
+      var f = e.target.files && e.target.files[0]; if(!f) return;
+      var u = URL.createObjectURL(f), i = new Image();
+      i.onload = function(){ img = i; g('Name').textContent = 'Logo: ' + f.name; };
+      i.onerror = function(){ alert('Não foi possível abrir esta imagem.'); };
+      i.src = u; e.target.value = '';
+    });
+    g('Reset').addEventListener('click', function(){ img = null; g('Name').textContent = 'Nenhuma logo da construtora (envie um PNG com fundo transparente, se tiver).'; });
+    return { build: build, has: has };
+  })();
+
+  window.FCEbook = { analyze: analyze, extract: extract, findLabel: findLabel };
 })();
 </script>
 </body>
