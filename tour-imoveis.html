@@ -1594,6 +1594,10 @@ window.FCBand = (function(){
       window.__fcBld = false;
       if(wakeLock){ try{ await wakeLock.release(); }catch(e){} wakeLock = null; }
     }
+    // Vídeo pronto: leva a tela até o botão de baixar e avisa o bloco do tour (botão "Baixar vídeo MP4 do tour")
+    const okVideo = resultBox.style.display === 'block';
+    if(okVideo){ setTimeout(()=>{ try{ resultBox.scrollIntoView({ behavior:'smooth', block:'center' }); }catch(e){} }, 80); }
+    try{ window.dispatchEvent(new CustomEvent('fc-video-done', { detail:{ ok: okVideo, href: downloadLink.href, name: downloadLink.download, label: downloadLink.textContent, status: statusText.textContent } })); }catch(e){}
   }
 
   async function gerarVideo(scale){
@@ -2146,6 +2150,7 @@ window.FCBand = (function(){
     if(limitado && blob.size > LIMITE_MB && scale > 0.35){
       statusText.textContent = 'Passou de 15 MB, refazendo com mais compressão...';
       barFill.style.width = '0%';
+      window.__fcExtraAudio = ex; // mantém a música/narração do tour na nova tentativa
       return gerarVideo(scale * (14 * 1024 * 1024 / blob.size) * 0.92);
     }
     if(lastVideoUrl){
@@ -2815,14 +2820,24 @@ window.FCBand = (function(){
       tvRecorder.start(); $('tvRec').innerHTML = '&#9632; Parar gravação';
     }catch(e){ msg('Não consegui usar o microfone. Permita o acesso quando o navegador pedir.'); }
   };
+  let tvWait = false;
+  window.addEventListener('fc-video-done', function(e){
+    if(!tvWait) return; tvWait = false;
+    const d = e.detail || {}, box = $('tvMsg');
+    box.textContent = '';
+    if(!d.ok){ box.textContent = d.status || 'Não foi possível gerar o vídeo.'; return; }
+    const a = document.createElement('a'); a.className = 'download'; a.href = d.href; a.download = d.name; a.textContent = d.label || 'Baixar vídeo';
+    box.appendChild(document.createTextNode('Vídeo pronto. ')); box.appendChild(a);
+  });
   $('tvMp4').onclick = function(){
     if(!PH().length){ msg('Adicione as fotos em "Fotos do imóvel" primeiro.'); return; }
     const g = document.getElementById('generateBtn');
     window.__fcExtraAudio = { music: tvMusicFile, narr: tvNarrBlob, vol: parseInt($('tvMusicVol').value,10) };
     const vazio = !$('propertyInfo').value.trim() || !$('propertyDesc').value.trim();
     g.scrollIntoView({behavior:'smooth', block:'center'});
+    tvWait = !g.disabled;
     g.click();
-    msg('Gerando o vídeo com as suas fotos' + ((tvMusicFile || tvNarrBlob) ? ', com a música/narração escolhidas aqui' : ' (sem som: escolha uma música ou narração acima)') + '. Ele aparece no passo 4 com o botão de baixar.' + (vazio ? ' Atenção: título ou descrição do imóvel estão vazios no passo 2; preencha para aparecerem no vídeo.' : ''));
+    msg('Gerando o vídeo com as suas fotos' + ((tvMusicFile || tvNarrBlob) ? ', com a música/narração escolhidas aqui' : ' (sem som: escolha uma música ou narração acima)') + '. Quando terminar, o botão de baixar aparece aqui embaixo (e também no passo 4).' + (vazio ? ' Atenção: título ou descrição do imóvel estão vazios no passo 2; preencha para aparecerem no vídeo.' : ''));
   };
   $('tvBuild').onclick = async function(){
     const photos = window.__fcPhotos ? window.__fcPhotos() : [];
