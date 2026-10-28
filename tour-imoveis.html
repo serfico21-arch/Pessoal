@@ -4259,12 +4259,16 @@ window.FCLogo = (function(){
   function two(s, d1, d2){ var a = (s || '').split('|'); return [(a[0] || '').trim() || d1, (a[1] || '').trim() || d2]; }
 
   /* ---------- leitura das opções ---------- */
-  function cfg(){
+  function projName(){ var p = $('lgBProj'); return ((p && p.value) || window.__fcProjName || '').trim(); }
+  function cfg(bld){
     var op = two($('cnOpen').value, '', ''), cta = two($('cnCta').value, 'Gostou?', 'Agende sua visita');
+    var mine = !bld || $('cnMine').checked, pillMine = ($('cnPill').value || '').trim(), pill = pillMine;
+    if(bld){ var bp = ($('cnBldPill').value || '').trim(); pill = bp || (mine ? pillMine : ''); }   // mesma regra do gerador original
     return {
-      type: ($('cnType').value || '').trim(),
+      bld: !!bld, mine: mine,
+      type: ($('cnType').value || '').trim() || (bld ? projName() : ''),
       open: $('cnOpen').value.trim() ? op : null,
-      cta: $('cnEnd').checked ? { l1: cta[0], l2: cta[1], pill: ($('cnPill').value || '').trim() } : null,
+      cta: $('cnEnd').checked ? { l1: cta[0], l2: cta[1], pill: pill } : null,
       auto: $('cnAuto').checked,
       per: parseFloat($('cnPer').value) || 3.5,
       inten: parseFloat($('cnInt').value) || 1,
@@ -4426,6 +4430,27 @@ window.FCLogo = (function(){
     return a;
   }
 
+  /* ---------- logos fixas na tela (a minha + a da construtora), desenhadas uma vez por tamanho ---------- */
+  function fontsReady(){
+    if(!document.fonts || !document.fonts.load) return Promise.resolve();
+    return Promise.all(['700 40px Inter', '400 40px Inter', '700 40px Fraunces'].map(function(f){ return document.fonts.load(f).catch(function(){}); })).catch(function(){});
+  }
+  function wmLayer(W, H, c){
+    var mine = null, theirs = null, prev = window.__fcBld;
+    window.__fcBld = !!c.bld;       // o módulo da construtora usa esta chave para ignorar o “mostrar” desmarcado
+    try{
+      if(window.FCLogo && c.mine) mine = window.FCLogo.build('lgG', W, H);
+      if(window.FCBuilderLogo && window.FCBuilderLogo.build) theirs = window.FCBuilderLogo.build(W, H, mine);
+    }catch(e){ console.error('Logos do Cinema:', e); }
+    window.__fcBld = prev;
+    if(!mine && !theirs) return null;
+    var o = document.createElement('canvas'); o.width = W; o.height = H;
+    var g = o.getContext('2d'); g.imageSmoothingQuality = 'high';
+    if(mine) g.drawImage(mine.c, mine.x, mine.y);
+    if(theirs) g.drawImage(theirs.c, theirs.x, theirs.y);
+    return o;
+  }
+
   var layer = {};
   function cv(name, W, H){
     var c = layer[name];
@@ -4480,6 +4505,7 @@ window.FCLogo = (function(){
       if(sc.label && e > 0.001) chip(g, W, H, sc.label, e);
       if(sc.head && ha > 0.001) headline(g, W, H, sc.head, ha, 1 - ha);
     });
+    if(S.wm) g.drawImage(S.wm, 0, 0, W, H);     // logos sempre por cima, fixas durante o vídeo todo
   }
 
   /* ---------- tela: botão do tipo + painel ---------- */
@@ -4499,6 +4525,9 @@ window.FCLogo = (function(){
     '<div class="ia-row" style="display:block;"><label style="font-size:13px;display:block;margin-bottom:4px;">Frase de abertura (separe as duas linhas com |) — deixe vazio para não usar</label><input type="text" id="cnOpen" maxlength="50" value="Vem conhecer | por dentro" style="' + inCss + '"></div>' +
     '<div class="ia-row" style="display:block;"><label style="font-size:13px;display:block;margin-bottom:4px;">Frase da tela final</label><input type="text" id="cnCta" maxlength="50" value="Gostou? | Agende sua visita" style="' + inCss + '"></div>' +
     '<div class="ia-row" style="display:block;"><label style="font-size:13px;display:block;margin-bottom:4px;">Faixa da tela final</label><input type="text" id="cnPill" maxlength="50" value="FCOSTA CORRETOR • ZONA LESTE SP" style="' + inCss + '"></div>' +
+    '<div class="ia-row" style="display:block;"><label style="font-size:13px;display:block;margin-bottom:4px;">Faixa da tela final na versão da construtora (opcional — se vazio, usa a faixa acima)</label><input type="text" id="cnBldPill" maxlength="50" placeholder="Ex.: VENDAS (11) 3333-4444" style="' + inCss + '"></div>' +
+    '<div class="ia-row"><label style="font-size:13px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="cnMine" checked> Na versão da construtora, incluir também a minha logo e o meu contato</label></div>' +
+    '<div class="hint" id="cnLogoSt" style="margin:0 0 10px;"></div>' +
     '<div class="ia-row"><label style="font-size:13px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="cnEnd" checked> Incluir a tela final</label>' +
     '<label style="font-size:13px;display:flex;align-items:center;gap:6px;margin-left:14px;"><input type="checkbox" id="cnAuto" checked> Frases automáticas (churrasqueira, quadra, piscina)</label></div>' +
     '<div class="ia-row"><label style="font-size:13px;">Segundos por foto <select id="cnPer" style="' + selCss + '"><option value="2.5">2,5</option><option value="3">3</option><option value="3.5" selected>3,5</option><option value="4">4</option><option value="5">5</option></select></label>' +
@@ -4506,17 +4535,24 @@ window.FCLogo = (function(){
     '<label style="font-size:13px;margin-left:12px;">Velocidade do avanço <select id="cnAdv" style="' + selCss + '"><option value="1.2">Lento</option><option value="1.4" selected>Médio</option><option value="1.7">Rápido</option><option value="2.1">Ultra rápido</option></select></label>' +
     '<label style="font-size:13px;margin-left:12px;">Movimento <select id="cnInt" style="' + selCss + '"><option value="0.6">Suave</option><option value="1" selected>Normal</option><option value="1.4">Forte</option></select></label>' +
     '<label style="font-size:13px;margin-left:12px;">Qualidade <select id="cnQ" style="' + selCss + '"><option value="leve" selected>720×1280 (leve)</option><option value="hd">1080×1920 (mais nítido)</option></select></label></div>' +
-    '<div class="ia-row"><button type="button" class="file-btn" id="cnPrevBtn">▶ Ver prévia com as minhas fotos</button><button type="button" class="file-btn" id="cnPrevStop" style="display:none;">&#9632; Parar prévia</button></div>' +
+    '<div class="ia-row"><button type="button" class="file-btn" id="cnPrevBtn">▶ Ver prévia com as minhas fotos</button><button type="button" class="file-btn" id="cnPrevBtnB">▶ Prévia versão construtora</button><button type="button" class="file-btn" id="cnPrevStop" style="display:none;">&#9632; Parar prévia</button></div>' +
     '<canvas id="cnPrev" width="270" height="480" style="display:none;width:100%;max-width:200px;margin-top:10px;border-radius:10px;background:#000;"></canvas>' +
-    '<div class="ia-row"><button type="button" class="btn-primary" id="cnGen">🎬 Gerar vídeo Cinema</button></div>' +
+    '<div class="ia-row"><button type="button" class="btn-primary" id="cnGen">🎬 Gerar vídeo Cinema</button><button type="button" class="btn-primary btn-bld" id="cnGenB">&#127970; Gerar Cinema para construtora</button></div>' +
     '<div class="ia-st" id="cnSt"></div>' +
     '<div id="cnRes" style="display:none;margin-top:12px;"><video id="cnVid" controls playsinline style="width:100%;max-width:260px;border-radius:10px;background:#000;"></video>' +
     '<div class="ia-row"><a id="cnDl" class="download" href="#">Baixar vídeo</a><button type="button" class="file-btn" id="cnShare" style="display:none;">Compartilhar</button></div></div>';
   (sRitmo.querySelector('.step-body') || sRitmo).appendChild(panel);
 
-  var st = $('cnSt'), pv = $('cnPrev'), bPrev = $('cnPrevBtn'), bStop = $('cnPrevStop'), bGen = $('cnGen');
+  var st = $('cnSt'), pv = $('cnPrev'), bPrev = $('cnPrevBtn'), bPrevB = $('cnPrevBtnB'), bStop = $('cnPrevStop'), bGen = $('cnGen'), bGenB = $('cnGenB');
   var say = function(m){ st.textContent = m || ''; };
-  ['cnStyle', 'cnAdv', 'cnType', 'cnOpen', 'cnCta', 'cnPill', 'cnPer', 'cnInt', 'cnQ', 'cnEnd', 'cnAuto'].forEach(function(id){
+  function updLogoSt(){
+    var el = $('cnLogoSt'); if(!el) return;
+    var mineOn = !!(window.FCLogo && window.FCLogo.on('lgG')), hasB = !!(window.FCBuilderLogo && window.FCBuilderLogo.has && window.FCBuilderLogo.has()), pj = projName();
+    el.innerHTML = '<strong>Logos neste vídeo:</strong> minha logo ' + (mineOn ? '<b>ligada</b>' : '<b>desligada</b> (marque “Mostrar a logo no vídeo” em “Minha logo na tela”)') +
+      ' · construtora ' + (hasB ? '<b>logo enviada</b>' : '<b>sem logo</b> (envie em “Logo da construtora”)') + (pj ? ' · projeto “' + pj.replace(/</g, '&lt;') + '”' : '') +
+      '. Posição, tamanho e opacidade ficam em “Dados do imóvel e faixa”.';
+  }
+  ['cnStyle', 'cnAdv', 'cnType', 'cnOpen', 'cnCta', 'cnPill', 'cnBldPill', 'cnMine', 'cnPer', 'cnInt', 'cnQ', 'cnEnd', 'cnAuto'].forEach(function(id){
     try{ var v = localStorage.getItem('fc-cinema-' + id); if(v != null){ var el = $(id); if(el.type === 'checkbox') el.checked = v === '1'; else el.value = v; } }catch(e){}
     $(id).addEventListener('change', function(){ try{ localStorage.setItem('fc-cinema-' + id, this.type === 'checkbox' ? (this.checked ? '1' : '0') : this.value); }catch(e){} });
     $(id).addEventListener('input', function(){ if(this.type === 'text'){ try{ localStorage.setItem('fc-cinema-' + id, this.value); }catch(e){} } });
@@ -4524,14 +4560,16 @@ window.FCLogo = (function(){
 
   /* ---------- prévia ---------- */
   var raf = 0, t0 = 0, pvS = null;
-  async function startPrev(){
+  async function startPrev(bld){
     var list = photos();
     if(!list.length){ say('Adicione as fotos para ver a prévia.'); return; }
-    say('Preparando a prévia…');
-    var c = cfg(), pp = await prepare(list, 800);
-    pvS = { c: c, sc: buildScenes(list, c), pp: pp, TL: mkTL(list.length, c) };
-    say('Prévia em tempo real. Para gravar o vídeo, use o botão “Gerar vídeo Cinema”.');
-    pv.style.display = ''; bPrev.style.display = 'none'; bStop.style.display = ''; t0 = 0; raf = requestAnimationFrame(loop);
+    if(raf){ cancelAnimationFrame(raf); raf = 0; }
+    say('Preparando a prévia…'); updLogoSt();
+    await fontsReady();
+    var c = cfg(bld), pp = await prepare(list, 800);
+    pvS = { c: c, sc: buildScenes(list, c), pp: pp, TL: mkTL(list.length, c), wm: wmLayer(pv.width, pv.height, c) };
+    say('Prévia ' + (bld ? 'da versão construtora' : 'em tempo real') + '. Para gravar o vídeo, use o botão de gerar.');
+    pv.style.display = ''; bPrev.style.display = 'none'; bPrevB.style.display = 'none'; bStop.style.display = ''; t0 = 0; raf = requestAnimationFrame(loop);
   }
   function loop(now){
     if(!pvS){ return; }
@@ -4541,8 +4579,12 @@ window.FCLogo = (function(){
     try{ drawFrame(g, pv.width, pv.height, pvS, Math.min(T, pvS.TL.total)); }catch(e){}
     raf = requestAnimationFrame(loop);
   }
-  function stopPrev(){ cancelAnimationFrame(raf); raf = 0; t0 = 0; pvS = null; bStop.style.display = 'none'; bPrev.style.display = ''; }
-  bPrev.addEventListener('click', startPrev);
+  function stopPrev(){ cancelAnimationFrame(raf); raf = 0; t0 = 0; pvS = null; bStop.style.display = 'none'; bPrev.style.display = ''; bPrevB.style.display = ''; }
+  bPrev.addEventListener('click', function(){ startPrev(false); });
+  bPrevB.addEventListener('click', function(){
+    if(!(window.FCBuilderLogo && window.FCBuilderLogo.has && window.FCBuilderLogo.has())) say('Atenção: ainda não há logo da construtora (envie em “Logo da construtora”, no bloco de dados do imóvel).');
+    startPrev(true);
+  });
   bStop.addEventListener('click', function(){ stopPrev(); say(''); });
 
   /* ---------- gravação ---------- */
@@ -4561,17 +4603,21 @@ window.FCLogo = (function(){
     }catch(e){ return null; }
   }
 
-  async function generate(){
+  async function generate(bld){
     if(busy) return;
     var list = photos();
     if(!list.length){ say('Adicione as fotos do imóvel primeiro (passo “Fotos do imóvel”).'); return; }
+    if(bld && !(window.FCBuilderLogo && window.FCBuilderLogo.has && window.FCBuilderLogo.has())){
+      alert('Envie primeiro a logo da construtora (botão “Escolher logo”, no bloco de dados do imóvel).'); return;
+    }
     if(!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream){ say('Este navegador não grava vídeo por aqui. Abra o arquivo no Google Chrome (computador ou Android).'); return; }
-    stopPrev(); busy = true; bGen.disabled = true; $('cnRes').style.display = 'none';
-    var c = cfg(), W = c.hd ? 1080 : 720, H = c.hd ? 1920 : 1280;
+    stopPrev(); busy = true; bGen.disabled = true; bGenB.disabled = true; $('cnRes').style.display = 'none'; updLogoSt();
+    var c = cfg(bld), W = c.hd ? 1080 : 720, H = c.hd ? 1920 : 1280;
     try{
-      say('Preparando as fotos…');
+      say('Preparando as fotos e as logos…');
+      await fontsReady();
       var pp = await prepare(list, c.hd ? 1920 : 1440);
-      var S = { c: c, sc: buildScenes(list, c), pp: pp, TL: mkTL(list.length, c) };
+      var S = { c: c, sc: buildScenes(list, c), pp: pp, TL: mkTL(list.length, c), wm: wmLayer(W, H, c) };
       var total = S.TL.total;
       var out = document.createElement('canvas'); out.width = W; out.height = H;
       var g = out.getContext('2d'); drawFrame(g, W, H, S, 0);
@@ -4604,7 +4650,7 @@ window.FCLogo = (function(){
       if(lastBlob){ try{ URL.revokeObjectURL($('cnVid').src); }catch(e){} }
       lastBlob = blob;
       var url = URL.createObjectURL(blob), a = $('cnDl');
-      $('cnVid').src = url; a.href = url; a.download = 'tour-cinema.' + (isMp4 ? 'mp4' : 'webm');
+      $('cnVid').src = url; a.href = url; a.download = (bld ? 'tour-cinema-construtora.' : 'tour-cinema.') + (isMp4 ? 'mp4' : 'webm');
       a.textContent = isMp4 ? 'Baixar vídeo (MP4)' : 'Baixar vídeo (WebM: este navegador não gera MP4)';
       $('cnRes').style.display = '';
       try{
@@ -4615,9 +4661,10 @@ window.FCLogo = (function(){
     }catch(err){
       say('Não consegui gerar o vídeo: ' + (err && err.message ? err.message : err));
     }
-    busy = false; bGen.disabled = false;
+    busy = false; bGen.disabled = false; bGenB.disabled = false;
   }
-  bGen.addEventListener('click', generate);
+  bGen.addEventListener('click', function(){ generate(false); });
+  bGenB.addEventListener('click', function(){ generate(true); });
   $('cnShare').addEventListener('click', async function(){
     if(!lastBlob) return;
     try{ await navigator.share({ files: [new File([lastBlob], $('cnDl').download || 'tour-cinema.mp4', { type: lastBlob.type })], title: 'Tour do imóvel' }); }catch(e){}
@@ -4655,6 +4702,7 @@ window.FCLogo = (function(){
   });
   var saved = ''; try{ saved = localStorage.getItem('fcTourTipo2') || ''; }catch(e){}
   if(saved === 'cinema') activate();
+  updLogoSt(); setInterval(function(){ if(ON) updLogoSt(); }, 1000);
 })();
 </script>
 
