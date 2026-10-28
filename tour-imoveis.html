@@ -3930,7 +3930,8 @@ window.FCLogo = (function(){
   var photos = function(){ return window.__fcPhotos ? window.__fcPhotos() : []; };
   var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   var CAP = mobile ? 960 : 1440, NX = mobile ? 16 : 22, NY = mobile ? 16 : 22;
-  var LEVEL = { suave: 0.16, medio: 0.26, forte: 0.85 };
+  var LEVEL = { suave: 1.2, medio: 1.4, forte: 1.7, ultra: 2.1 };   // até onde a câmera chega (1 = ponto mais afastado: foto ocupando a tela toda)
+  var S_FAR = 1.03;                                                      // começa no ponto mais afastado possível sem deixar faixas vazias
   var TAU = Math.PI * 2;
   var clamp = function(v, a, b){ return Math.max(a, Math.min(b, v)); };
   var smooth = function(t){ return t * t * (3 - 2 * t); };
@@ -3971,7 +3972,7 @@ window.FCLogo = (function(){
     return P;
   }
 
-  var FR = null, TMP = null;
+  var FR = null, TMP = null, AR = 9 / 16;   // AR = proporção da tela onde o quadro será mostrado
   var BG = (typeof WeakMap !== 'undefined') ? new WeakMap() : null;
   function bgOf(src, iw, ih){
     var b = BG && BG.get(src);
@@ -3995,34 +3996,34 @@ window.FCLogo = (function(){
     var g = FR.getContext('2d');
     g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
     var u = clamp((tt + fade) / (per + fade), 0, 1);
-    var v = 0.3 * smooth(u) + 0.7 * u;
+    // avanço e giro são independentes: o avanço rápido termina mais cedo, e o giro usa o tempo que sobra, sempre na velocidade escolhida
+    var lvKey = ($('vpInt') && $('vpInt').value) || 'medio', gvKey = ($('vpGiro') && $('vpGiro').value) || 'lento';
+    var FA = ({ suave: 0.6, medio: 0.5, forte: 0.4, ultra: 0.3 })[lvKey] || 0.5;
+    var GV = ({ lento: 0.045, medio: 0.09, rapido: 0.16 })[gvKey] || 0.045;   // giro, em larguras da tela por segundo
+    var uf = clamp(u / FA, 0, 1);
+    var v = 0.55 * smooth(uf) + 0.45 * uf;   // arranca e para com suavidade, velocidade quase constante no meio
     var pl = plan(p.effect || 'auto', idx, u);
-    var R = level() * Math.abs(pl.dz);
-    var zc = pl.dz >= 0 ? v : 1 - v;
-    var lat = (v - 0.5) * 2;
-    var lx = pl.abs ? pl.dx : pl.dx * lat, ly = pl.abs ? pl.dy : pl.dy * lat;
-    var bob = bobOn();
-    var bx = bob ? Math.sin(TAU * 0.95 * tt) * 0.0012 * W : 0;
-    var by = bob ? Math.sin(TAU * 1.9 * tt) * 0.0016 * H : 0;
-    var swk = swayK(), latK = Math.max(1, swk);
-    var shX = lx * 0.02 * W * latK, shY = ly * 0.02 * H * latK;
-    var roll = 0, sweep = swayOn();
-    var s0 = sweep ? (1.2 + 0.3 * swk + 0.35 * R * v) : (1 - 0.6 * R + R * zc), c = 0.6 * R * zc;
-    var fx = sweep ? 0.5 : pl.fx, fy = pl.fy, hx = Math.max(fx, 1 - fx), hy = Math.max(fy, 1 - fy);
+    // câmera reta, sem balanço, sem giro: só avança, de bem longe até perto (caminhada distante)
+    var S1 = level(), s0 = S_FAR + (S1 - S_FAR) * v, c = 0.22 * (S1 - S_FAR) * v;
+    var bx = 0, by = 0, shX = 0, shY = 0, roll = 0;
+    var fx = 0.5, fy = 0.5, hx = 0.5, hy = 0.5;
     var xs = [], ys = [], i, j, e;
     for(i = 0; i <= NX; i++){ e = (i / NX - fx) / hx; xs.push((fx + hx * (e * s0 + c * e * Math.abs(e))) * W); }
     for(j = 0; j <= NY; j++){ e = (j / NY - fy) / hy; ys.push((fy + hy * (e * s0 + c * e * Math.abs(e))) * H); }
-    if(sweep){
-      // giro de ponta a ponta pelo cômodo (como virar o corpo ~180°): varre a foto toda, sem subir nem descer
-      var room = Math.max(0, Math.min(-xs[0], xs[NX] - W)) * 0.95 / 1.3;
-      shX = (idx % 2 ? -1 : 1) * (2 * smooth(u) - 1) * room;
-      shY = 0; by = 0;
+    if(u > FA){
+      // fim do avanço: a câmera vira para um lado, volta ao centro e vira para o outro, suave e sem balançar
+      var q = (u - FA) / (1 - FA), ex = Math.max(0, Math.min(-xs[0], xs[NX] - W));
+      // parte da foto que aparece na tela (em pé no celular mostra só o meio da foto; o resto fica disponível para o giro)
+      var vis = AR < W / H ? AR / (W / H) : 1;
+      var exv = ex + (1 - vis) / 2 * W * 0.9;
+      var amp = Math.min(exv * 0.97, GV * (1 - FA) * per / 4 * W * vis);   // distância = velocidade do giro x tempo disponível
+      shX = (idx % 2 ? -1 : 1) * Math.sin(TAU * smooth(q)) * amp;   // centro → um lado → outro lado → volta ao centro
     }
     g.globalAlpha = 1;
     g.drawImage(bgOf(src, iw, ih), 0, 0, W, H);
     g.fillStyle = 'rgba(0,0,0,0.25)'; g.fillRect(0, 0, W, H);
-    var mx = Math.abs(shX) * 1.3 + Math.abs(bx) + 1, my = Math.abs(shY) + Math.abs(by) + 1;
-    var covers = !roll && xs[0] + mx <= 0 && xs[NX] - mx >= W && ys[0] + my <= 0 && ys[NY] - my >= H;
+    var mx = Math.abs(shX) + Math.abs(bx) + 1, my = Math.abs(shY) + Math.abs(by) + 1;
+    var covers = !roll && xs[0] + mx <= 2 && xs[NX] - mx >= W - 2 && ys[0] + my <= 2 && ys[NY] - my >= H - 2;
     var tg = g;
     if(!covers){
       if(!TMP) TMP = document.createElement('canvas');
@@ -4035,7 +4036,7 @@ window.FCLogo = (function(){
     var sw = iw / NX, sh = ih / NY;
     for(j = 0; j < NY; j++){
       var vm = (j + 0.5) / NY;
-      var near = 0.55 + 0.75 * smooth(clamp((vm - 0.35) / 0.65, 0, 1));
+      var near = 1;
       var offX = -shX * near + bx, dy = ys[j] - shY + by, dh = ys[j + 1] - ys[j] + 1;
       for(i = 0; i < NX; i++) tg.drawImage(src, i * sw, j * sh, sw, sh, xs[i] + offX, dy, xs[i + 1] - xs[i] + 1, dh);
     }
@@ -4098,7 +4099,7 @@ window.FCLogo = (function(){
           tt = this.globalAlpha < 1 ? (this.globalAlpha - 1) * fade : -0.3; // próxima foto entrando: já "andando"
         }
         var f = null;
-        try{ f = renderFrame(list[idx], idx, tt, perPhoto(), fade); }catch(e){ f = null; }
+        try{ AR = stageEl.width / stageEl.height; f = renderFrame(list[idx], idx, tt, perPhoto(), fade); }catch(e){ f = null; }
         if(f){
           var a = Array.prototype.slice.call(arguments); a[0] = f;
           if(a.length >= 9 && src.width && src.height){   // recorte da foto (transições 3D/fatias): ajusta ao tamanho do quadro do passeio
@@ -4122,12 +4123,13 @@ window.FCLogo = (function(){
   panel.className = 'ia-box'; panel.id = 'vpBox'; panel.style.cssText = 'margin-top:20px;display:none;';
   panel.innerHTML =
     '<strong style="display:block;font-size:15px;margin-bottom:4px;">🚶 Passeio virtual (grátis, feito no próprio navegador)</strong>' +
-    '<div class="hint" style="margin:0 0 10px;">A câmera "caminha" para dentro de cada foto: o centro e as bordas se movem em velocidades diferentes (sensação de profundidade), com leve balanço de passos. Ao trocar de cômodo o movimento continua, como se você atravessasse a porta. Sem internet, sem IA, sem chave e <strong>sem nenhuma cobrança</strong>. A câmera começa afastada, com a foto inteira, e vai chegando perto aos poucos. Enquanto este tipo estiver escolhido, o "movimento suave de câmera" comum fica desligado para não somar os dois.</div>' +
+    '<div class="hint" style="margin:0 0 10px;">A foto ocupa a tela toda (formato do celular, ou normal no computador). A câmera começa no ponto mais afastado e avança reta para dentro do cômodo, sem balanço e sem giro: o centro e as bordas se movem em velocidades diferentes (sensação de profundidade). Ao trocar de cômodo o movimento continua, como se você atravessasse a porta. Sem internet, sem IA, sem chave e <strong>sem nenhuma cobrança</strong>. A câmera começa afastada, com a foto inteira, e vai chegando perto aos poucos. Enquanto este tipo estiver escolhido, o "movimento suave de câmera" comum fica desligado para não somar os dois.</div>' +
     '<div class="ia-row" style="margin-top:0;"><label style="font-size:13px;">Velocidade do passeio ' +
-    '<select id="vpInt" style="margin-left:6px;padding:8px;border:1px solid var(--rule);border-radius:8px;font:inherit;font-size:13px;background:var(--surface);color:inherit;"><option value="suave">Suave</option><option value="medio" selected>Médio</option><option value="forte">Rápido</option></select></label>' +
-    '<label style="font-size:13px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="vpBob" checked> Balanço de passos</label>' +
-    '<label style="font-size:13px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="vpSway" checked> Giro da câmera pelo cômodo (tipo 180°)</label></div>' +
-    '<div class="ia-row"><label style="font-size:13px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="vpWide" checked> Câmera afastada: mostrar a foto inteira (sem cortar nem ampliar)</label></div>' +
+    '<select id="vpInt" style="margin-left:6px;padding:8px;border:1px solid var(--rule);border-radius:8px;font:inherit;font-size:13px;background:var(--surface);color:inherit;"><option value="suave">Lento</option><option value="medio" selected>Médio</option><option value="forte">Rápido</option><option value="ultra">Ultra rápido</option></select></label>' +
+    '<label style="font-size:13px;margin-left:12px;">Velocidade do giro ' +
+    '<select id="vpGiro" style="margin-left:6px;padding:8px;border:1px solid var(--rule);border-radius:8px;font:inherit;font-size:13px;background:var(--surface);color:inherit;"><option value="lento" selected>Lento</option><option value="medio">Médio</option><option value="rapido">Rápido</option></select></label>' +
+    '</div>' +
+    '<div class="ia-row"><label style="font-size:13px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="vpWide"> Mostrar a foto inteira com faixas desfocadas (em vez de ocupar a tela toda)</label></div>' +
     '<div class="ia-row"><button type="button" class="file-btn" id="vpPrevBtn">▶ Ver prévia com as minhas fotos</button><button type="button" class="file-btn" id="vpPrevStop" style="display:none;">&#9632; Parar prévia</button></div>' +
     '<canvas id="vpPrev" width="270" height="480" style="display:none;width:100%;max-width:200px;margin-top:10px;border-radius:10px;background:#000;"></canvas>' +
     '<div class="ia-st" id="vpSt"></div>';
@@ -4153,6 +4155,7 @@ window.FCLogo = (function(){
     var e = ((now - t0) / 1000) % total, idx = Math.min(list.length - 1, Math.floor(e / PER)), lt = e - idx * PER;
     var g = cv.getContext('2d'), W = cv.width, H = cv.height;
     g.fillStyle = '#000'; origFill.call(g, 0, 0, W, H);
+    AR = cv.width / cv.height;
     var f = renderFrame(list[idx], idx, lt, PER, FADE);
     if(f) cover(g, f, W, H);
     if(idx < list.length - 1 && lt > PER - FADE){
@@ -4175,7 +4178,7 @@ window.FCLogo = (function(){
     if(!ON || !fs) return;
     var wide = $('vpWide').checked;
     if(fsBefore === null) fsBefore = fs.checked;
-    fs.checked = wide ? false : fsBefore; fs.disabled = wide;
+    fs.checked = !wide; fs.disabled = false;
     fs.dispatchEvent(new Event('change', { bubbles: true }));
   }
   $('vpWide').addEventListener('change', applyWide);
