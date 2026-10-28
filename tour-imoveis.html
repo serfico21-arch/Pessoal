@@ -4208,5 +4208,425 @@ window.FCLogo = (function(){
 })();
 </script>
 
+<script>
+/* ===== ADICIONADO: tipo de tour "Cinema (estilo do vídeo de referência)" =====
+   Bloco independente: não altera nenhuma linha do código original acima.
+   Só com as fotos (e o nome do ambiente na 1ª foto de cada cômodo) gera um vídeo vertical 9:16 no estilo do vídeo de referência:
+   foto ocupando a tela toda, câmera lenta (aproximação, afastamento, panorâmica), troca de cena com desfoque,
+   etiqueta do ambiente no canto, frases de destaque e tela final "Gostou? Agende sua visita".
+   Sem IA, sem internet, sem cobrança: tudo é calculado e gravado no próprio navegador. */
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+  var grid = document.querySelector('.tt-grid'), wrap = document.querySelector('.wrap');
+  if(!grid || !wrap) return;
+  var steps = Array.prototype.slice.call(wrap.querySelectorAll(':scope > .step'));
+  var sRitmo = steps.filter(function(s){ return s.querySelector('#duration'); })[0];
+  var sGerar = steps.filter(function(s){ return s.querySelector('#generateBtn'); })[0];
+  if(!sRitmo) return;
+
+  var photos = function(){ return window.__fcPhotos ? window.__fcPhotos() : []; };
+  var clamp = function(v, a, b){ return Math.max(a, Math.min(b, v)); };
+  var smooth = function(t){ t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+  var SANS = '"Inter","Helvetica Neue",Arial,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif';
+  var SERIF = '"Playfair Display",Georgia,"Times New Roman",serif';
+  var GOLD = '#E7CF9B';
+  var TR = 0.7;   // duração da troca de cena (desfoque + fusão)
+
+  /* ---------- movimentos de câmera (valores relativos: z = zoom, x/y = posição dentro da folga da foto, -1..1) ---------- */
+  var MOT = {
+    push:   { z0: 1.00, z1: 1.16, x0: 0,    x1: 0,     y0: 0,    y1: 0 },      // aproximação reta
+    pull:   { z0: 1.14, z1: 1.00, x0: 0,    x1: 0,     y0: 0,    y1: 0 },      // afastamento
+    panL:   { z0: 1.08, z1: 1.08, x0: 0.45, x1: -0.45, y0: 0,    y1: 0 },      // panorâmica: câmera vai para a esquerda
+    panR:   { z0: 1.08, z1: 1.08, x0: -0.45, x1: 0.45, y0: 0,    y1: 0 },      // panorâmica: câmera vai para a direita
+    pushR:  { z0: 1.00, z1: 1.15, x0: -0.30, x1: 0.25, y0: 0.15, y1: -0.10 },  // aproximação com leve deslocamento p/ a direita
+    pushL:  { z0: 1.00, z1: 1.15, x0: 0.30, x1: -0.25, y0: -0.10, y1: 0.15 }   // aproximação com leve deslocamento p/ a esquerda
+  };
+  var CYCLE = ['push', 'panR', 'pull', 'panL', 'pushR', 'pushL'];
+  var EFF = { 'in': 'push', 'out': 'pull', 'left': 'panL', 'right': 'panR', 'inRight': 'pushR', 'inLeft': 'pushL' };
+  function motionFor(p, i){
+    var e = p && p.effect;
+    return MOT[EFF[e] || CYCLE[i % CYCLE.length]];
+  }
+  var CTA_MOT = { z0: 1.00, z1: 1.07, x0: 0, x1: 0, y0: 0, y1: 0 };
+
+  /* ---------- frases de destaque automáticas (só na 1ª foto de certos ambientes, como no vídeo de referência) ---------- */
+  function norm(s){ return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+  var HEADS = [
+    { re: /churrasq/,                 kick: 'ÁREA COBERTA',        l1: 'Churrasco',    l2: 'com a turma' },
+    { re: /quadra|playground|campo/,  kick: 'QUADRA E PLAYGROUND', l1: 'Diversão',     l2: 'para todos' },
+    { re: /piscina/,                  kick: 'PISCINA',             l1: 'Pronto para',  l2: 'o fim de semana' }
+  ];
+  function two(s, d1, d2){ var a = (s || '').split('|'); return [(a[0] || '').trim() || d1, (a[1] || '').trim() || d2]; }
+
+  /* ---------- leitura das opções ---------- */
+  function cfg(){
+    var op = two($('cnOpen').value, '', ''), cta = two($('cnCta').value, 'Gostou?', 'Agende sua visita');
+    return {
+      type: ($('cnType').value || '').trim(),
+      open: $('cnOpen').value.trim() ? op : null,
+      cta: $('cnEnd').checked ? { l1: cta[0], l2: cta[1], pill: ($('cnPill').value || '').trim() } : null,
+      auto: $('cnAuto').checked,
+      per: parseFloat($('cnPer').value) || 3.5,
+      inten: parseFloat($('cnInt').value) || 1,
+      hd: $('cnQ').value === 'hd'
+    };
+  }
+
+  function buildScenes(list, c){
+    var sc = [], room = '';
+    list.forEach(function(p, i){
+      var r = (p.room || '').trim(), first = false;
+      if(r){ first = (r !== room); room = r; }
+      var s = { mot: motionFor(p, i), label: room, head: null };
+      if(i === 0 && c.open){ s.head = { kick: c.type, l1: c.open[0], l2: c.open[1] }; }
+      else if(first && c.auto){
+        var n = norm(r);
+        for(var h = 0; h < HEADS.length; h++){ if(HEADS[h].re.test(n)){ s.head = HEADS[h]; break; } }
+      }
+      sc.push(s);
+    });
+    return sc;
+  }
+
+  /* ---------- fotos preparadas (reduzidas uma vez para ficar leve) ---------- */
+  var PREP = {};
+  async function prepare(list, cap){
+    var out = [];
+    for(var i = 0; i < list.length; i++){
+      var p = list[i], key = cap + '|' + (p.url || i), c = PREP[key];
+      if(!c){
+        var im = p.img;
+        if(!im.complete || !im.naturalWidth){ try{ await im.decode(); }catch(e){} }
+        var iw = im.naturalWidth || im.width, ih = im.naturalHeight || im.height;
+        if(!iw || !ih){ out.push(null); continue; }
+        var k = Math.min(1, cap / Math.max(iw, ih));
+        c = document.createElement('canvas'); c.width = Math.max(2, Math.round(iw * k)); c.height = Math.max(2, Math.round(ih * k));
+        var g = c.getContext('2d'); g.imageSmoothingQuality = 'high'; g.drawImage(im, 0, 0, c.width, c.height);
+        PREP[key] = c;
+      }
+      out.push(c);
+    }
+    return out;
+  }
+
+  /* ---------- desenho ---------- */
+  var small = document.createElement('canvas'), sg = small.getContext('2d');
+  function blurInto(g, src, W, H, f){      // desfoque barato (reduz e amplia): funciona em qualquer navegador
+    if(f <= 1.05){ g.drawImage(src, 0, 0, W, H); return; }
+    var w = Math.max(8, Math.round(W / f)), h = Math.max(8, Math.round(H / f));
+    if(small.width !== w || small.height !== h){ small.width = w; small.height = h; }
+    sg.imageSmoothingEnabled = true; sg.imageSmoothingQuality = 'high';
+    sg.drawImage(src, 0, 0, W, H, 0, 0, w, h);
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+    g.drawImage(small, 0, 0, w, h, 0, 0, W, H);
+  }
+
+  function drawPhoto(g, W, H, src, m, u, I){
+    var iw = src.width, ih = src.height, k0 = Math.max(W / iw, H / ih);
+    var vw = W / (k0 * iw), vh = H / (k0 * ih);          // parte da foto que cabe na tela, no zoom 1
+    var e = smooth(u);
+    var z = 1 + ((m.z0 + (m.z1 - m.z0) * e) - 1) * I;
+    var x = clamp((m.x0 + (m.x1 - m.x0) * e) * I, -1, 1), y = clamp((m.y0 + (m.y1 - m.y0) * e) * I, -1, 1);
+    var visW = vw / z, visH = vh / z;
+    var cx = 0.5 + x * (0.5 - visW / 2), cy = 0.5 + y * (0.5 - visH / 2);
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+    g.drawImage(src, (cx - visW / 2) * iw, (cy - visH / 2) * ih, visW * iw, visH * ih, 0, 0, W, H);
+  }
+
+  function trackedW(g, t, sp){ var w = 0; for(var i = 0; i < t.length; i++) w += g.measureText(t[i]).width + sp; return Math.max(0, w - sp); }
+  function tracked(g, t, x, y, sp, align){
+    var w = trackedW(g, t, sp), sx = align === 'center' ? x - w / 2 : x;
+    for(var i = 0; i < t.length; i++){ g.fillText(t[i], sx, y); sx += g.measureText(t[i]).width + sp; }
+    return w;
+  }
+  function rrect(g, x, y, w, h, r){ g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
+
+  function chip(g, W, H, text, a){
+    var u = W / 1080; g.save(); g.globalAlpha = a; g.textBaseline = 'alphabetic';
+    var fs = 22 * u, sp = 2.2 * u, h = 58 * u, padX = 26 * u, dot = 7 * u, gap = 14 * u;
+    g.font = '700 ' + fs + 'px ' + SANS;
+    var t = text.toUpperCase(), tw = trackedW(g, t, sp), w = padX * 2 + dot * 2 + gap + tw;
+    var x = 72 * u, y = 0.104 * H - h / 2;
+    g.shadowColor = 'rgba(0,0,0,.25)'; g.shadowBlur = 14 * u;
+    g.fillStyle = 'rgba(255,255,255,.93)'; rrect(g, x, y, w, h, h / 2); g.fill();
+    g.shadowBlur = 0;
+    g.fillStyle = '#E3B95F'; g.beginPath(); g.arc(x + padX + dot, y + h / 2, dot, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#1B1B1B'; tracked(g, t, x + padX + dot * 2 + gap, y + h / 2 + fs * 0.36, sp, 'left');
+    g.restore();
+  }
+
+  function headline(g, W, H, hd, a, slide){
+    var u = W / 1080; g.save(); g.globalAlpha = a; g.textBaseline = 'alphabetic';
+    var x = 72 * u, dy = slide * 24 * u;
+    g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 18 * u;
+    if(hd.kick){ g.font = '700 ' + (22 * u) + 'px ' + SANS; g.fillStyle = 'rgba(236,222,192,.82)'; tracked(g, hd.kick.toUpperCase(), x, 0.628 * H + dy, 4 * u, 'left'); }
+    g.font = '700 ' + (84 * u) + 'px ' + SANS; g.fillStyle = '#fff'; g.fillText(hd.l1, x, 0.706 * H + dy);
+    if(hd.l2){ g.font = 'italic 400 ' + (82 * u) + 'px ' + SERIF; g.fillStyle = GOLD; g.fillText(hd.l2, x, 0.780 * H + dy * 1.2); }
+    g.restore();
+  }
+
+  function ctaOverlay(g, W, H, c, t){      // t = tempo desde o início da tela final
+    var u = W / 1080, st = function(k){ return smooth((t - TR * 0.6 - k * 0.2) / 0.55); };
+    g.save(); g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 20 * u;
+    var a;
+    if(c.type){ a = st(0); g.globalAlpha = a; g.font = '700 ' + (23 * u) + 'px ' + SANS; g.fillStyle = 'rgba(236,222,192,.85)'; tracked(g, c.type.toUpperCase(), W / 2, 0.382 * H + (1 - a) * 18 * u, 4.5 * u, 'center'); }
+    a = st(1); g.globalAlpha = a; g.font = '700 ' + (108 * u) + 'px ' + SANS; g.fillStyle = '#fff'; g.fillText(c.cta.l1, W / 2, 0.468 * H + (1 - a) * 20 * u);
+    a = st(2); g.globalAlpha = a; g.font = 'italic 400 ' + (84 * u) + 'px ' + SERIF; g.fillStyle = GOLD; g.fillText(c.cta.l2, W / 2, 0.552 * H + (1 - a) * 20 * u);
+    if(c.cta.pill){
+      a = st(3); g.globalAlpha = a; g.shadowBlur = 0;
+      var fs = 25 * u, sp = 3 * u, padX = 38 * u, h = 76 * u, tw;
+      g.textAlign = 'left'; g.font = '700 ' + fs + 'px ' + SANS; tw = trackedW(g, c.cta.pill, sp);
+      var maxW = W * 0.88 - padX * 2; if(tw > maxW){ fs *= maxW / tw; sp *= maxW / tw; g.font = '700 ' + fs + 'px ' + SANS; tw = trackedW(g, c.cta.pill, sp); }
+      var w = tw + padX * 2, x = (W - w) / 2, y = 0.64 * H - h / 2 + (1 - a) * 16 * u;
+      g.fillStyle = '#F3DDB0'; rrect(g, x, y, w, h, h / 2); g.fill();
+      g.fillStyle = '#2A2118'; tracked(g, c.cta.pill, x + padX, y + h / 2 + fs * 0.36, sp, 'left');
+    }
+    g.restore();
+  }
+
+  /* ---------- linha do tempo ---------- */
+  function mkTL(n, c){
+    var PER = c.per, CTA = c.cta ? 3.4 : 0, tr = Math.min(TR, PER * 0.4);
+    return { n: n, M: n + (c.cta ? 1 : 0), PER: PER, TR: tr, total: n * PER + CTA };
+  }
+  function winStart(TL, j){ return j === 0 ? 0 : j * TL.PER - TL.TR; }
+  function winEnd(TL, j){ return j < TL.n ? (j + 1) * TL.PER : TL.total; }
+  function prog(TL, j, T){ var s = winStart(TL, j), e = winEnd(TL, j); return clamp((T - s) / Math.max(0.001, e - s), 0, 1); }
+  function env(TL, j, T){
+    var a = smooth((T - winStart(TL, j)) / (j === 0 ? 0.35 : TL.TR));
+    if(j < TL.M - 1) a = Math.min(a, smooth((winEnd(TL, j) - T) / TL.TR));
+    return a;
+  }
+
+  var layer = {};
+  function cv(name, W, H){
+    var c = layer[name];
+    if(!c){ c = layer[name] = document.createElement('canvas'); }
+    if(c.width !== W || c.height !== H){ c.width = W; c.height = H; }
+    return c;
+  }
+
+  function renderScene(g, W, H, S, j, T){
+    var n = S.TL.n, isCta = j >= n, src = S.pp[isCta ? n - 1 : j];
+    if(!src){ g.fillStyle = '#000'; g.fillRect(0, 0, W, H); return; }
+    var m = isCta ? CTA_MOT : S.sc[j].mot, u = prog(S.TL, j, T);
+    if(!isCta){ drawPhoto(g, W, H, src, m, u, S.c.inten); return; }
+    var z = cv('z', W, H), zg = z.getContext('2d');
+    drawPhoto(zg, W, H, src, m, u, 1);
+    blurInto(g, z, W, H, 7);
+    g.fillStyle = 'rgba(10,12,16,.46)'; g.fillRect(0, 0, W, H);
+  }
+
+  function drawFrame(g, W, H, S, T){
+    var TL = S.TL, k = Math.min(TL.M - 1, Math.floor(T / TL.PER));
+    if(k >= TL.n && !S.c.cta) k = TL.n - 1;
+    var x = -1;
+    if(k + 1 < TL.M){ var ts = (k + 1) * TL.PER - TL.TR; if(T >= ts) x = clamp((T - ts) / TL.TR, 0, 1); }
+    if(x < 0){
+      renderScene(g, W, H, S, k, T);
+    }else{
+      var A = cv('a', W, H), B = cv('b', W, H), L = cv('l', W, H);
+      renderScene(A.getContext('2d'), W, H, S, k, T);
+      renderScene(B.getContext('2d'), W, H, S, k + 1, T);
+      var lg = L.getContext('2d');
+      lg.globalAlpha = 1; lg.drawImage(A, 0, 0);
+      lg.globalAlpha = smooth(x); lg.drawImage(B, 0, 0); lg.globalAlpha = 1;
+      var s = Math.sin(Math.PI * x), f = 1 + 8 * s, bump = 1 + 0.05 * s;
+      g.save(); g.translate(W / 2, H / 2); g.scale(bump, bump); g.translate(-W / 2, -H / 2);
+      blurInto(g, L, W, H, f);
+      g.restore();
+    }
+    var js = x >= 0 ? [k, k + 1] : [k];
+    js.forEach(function(j){
+      var e = env(TL, j, T), st = winStart(TL, j);
+      if(j >= TL.n){ ctaOverlay(g, W, H, S.c, Math.max(0, T - st)); return; }
+      var sc = S.sc[j], ha = 0;
+      if(sc.head){
+        ha = e * smooth((T - st - (j === 0 ? 0.2 : TL.TR) - 0.1) / 0.55);
+        if(ha > 0.001){
+          var gr = g.createLinearGradient(0, H * 0.5, 0, H);
+          gr.addColorStop(0, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(0,0,0,' + (0.62 * ha).toFixed(3) + ')');
+          g.fillStyle = gr; g.fillRect(0, H * 0.5, W, H * 0.5);
+        }
+      }
+      if(sc.label && e > 0.001) chip(g, W, H, sc.label, e);
+      if(sc.head && ha > 0.001) headline(g, W, H, sc.head, ha, 1 - ha);
+    });
+  }
+
+  /* ---------- tela: botão do tipo + painel ---------- */
+  var btn = document.createElement('button');
+  btn.type = 'button'; btn.className = 'tt-btn'; btn.dataset.k = 'cinema';
+  btn.innerHTML = '<b>🎬 Cinema (estilo do vídeo de referência)</b><span>Só as fotos: câmera lenta, troca de cena com desfoque, etiqueta do ambiente, frases de destaque e tela final. Sem IA e sem cobrança.</span>';
+  grid.appendChild(btn);
+
+  var selCss = 'margin-left:6px;padding:8px;border:1px solid var(--rule);border-radius:8px;font:inherit;font-size:13px;background:var(--surface);color:inherit;';
+  var inCss = 'width:100%;padding:9px;border:1px solid var(--rule);border-radius:8px;font:inherit;font-size:13px;background:var(--surface);color:inherit;box-sizing:border-box;';
+  var panel = document.createElement('div');
+  panel.className = 'ia-box'; panel.id = 'cnBox'; panel.style.cssText = 'margin-top:20px;display:none;';
+  panel.innerHTML =
+    '<strong style="display:block;font-size:15px;margin-bottom:4px;">🎬 Cinema (grátis, feito no próprio navegador)</strong>' +
+    '<div class="hint" style="margin:0 0 10px;">Vídeo vertical 9:16, foto ocupando a tela toda. Cada foto ganha um movimento lento de câmera (aproxima, afasta ou desliza de um lado para o outro, alternando) e a troca entre fotos tem desfoque. Escreva o nome do ambiente na <strong>primeira foto de cada cômodo</strong> para aparecer a etiqueta no canto. A música é a escolhida no passo de áudio (narração não é usada neste tipo). Os movimentos são feitos sobre a foto em 2D: não existe profundidade 3D de verdade, que só se consegue com IA.</div>' +
+    '<div class="ia-row" style="display:block;"><label style="font-size:13px;display:block;margin-bottom:4px;">Tipo do imóvel (texto pequeno dourado)</label><input type="text" id="cnType" maxlength="30" placeholder="Ex.: Imóvel de lazer, Apartamento, Casa" style="' + inCss + '"></div>' +
+    '<div class="ia-row" style="display:block;"><label style="font-size:13px;display:block;margin-bottom:4px;">Frase de abertura (separe as duas linhas com |) — deixe vazio para não usar</label><input type="text" id="cnOpen" maxlength="50" value="Vem conhecer | por dentro" style="' + inCss + '"></div>' +
+    '<div class="ia-row" style="display:block;"><label style="font-size:13px;display:block;margin-bottom:4px;">Frase da tela final</label><input type="text" id="cnCta" maxlength="50" value="Gostou? | Agende sua visita" style="' + inCss + '"></div>' +
+    '<div class="ia-row" style="display:block;"><label style="font-size:13px;display:block;margin-bottom:4px;">Faixa da tela final</label><input type="text" id="cnPill" maxlength="50" value="FCOSTA CORRETOR • ZONA LESTE SP" style="' + inCss + '"></div>' +
+    '<div class="ia-row"><label style="font-size:13px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="cnEnd" checked> Incluir a tela final</label>' +
+    '<label style="font-size:13px;display:flex;align-items:center;gap:6px;margin-left:14px;"><input type="checkbox" id="cnAuto" checked> Frases automáticas (churrasqueira, quadra, piscina)</label></div>' +
+    '<div class="ia-row"><label style="font-size:13px;">Segundos por foto <select id="cnPer" style="' + selCss + '"><option value="2.5">2,5</option><option value="3">3</option><option value="3.5" selected>3,5</option><option value="4">4</option><option value="5">5</option></select></label>' +
+    '<label style="font-size:13px;margin-left:12px;">Movimento <select id="cnInt" style="' + selCss + '"><option value="0.6">Suave</option><option value="1" selected>Normal</option><option value="1.4">Forte</option></select></label>' +
+    '<label style="font-size:13px;margin-left:12px;">Qualidade <select id="cnQ" style="' + selCss + '"><option value="leve" selected>720×1280 (leve)</option><option value="hd">1080×1920 (mais nítido)</option></select></label></div>' +
+    '<div class="ia-row"><button type="button" class="file-btn" id="cnPrevBtn">▶ Ver prévia com as minhas fotos</button><button type="button" class="file-btn" id="cnPrevStop" style="display:none;">&#9632; Parar prévia</button></div>' +
+    '<canvas id="cnPrev" width="270" height="480" style="display:none;width:100%;max-width:200px;margin-top:10px;border-radius:10px;background:#000;"></canvas>' +
+    '<div class="ia-row"><button type="button" class="btn-primary" id="cnGen">🎬 Gerar vídeo Cinema</button></div>' +
+    '<div class="ia-st" id="cnSt"></div>' +
+    '<div id="cnRes" style="display:none;margin-top:12px;"><video id="cnVid" controls playsinline style="width:100%;max-width:260px;border-radius:10px;background:#000;"></video>' +
+    '<div class="ia-row"><a id="cnDl" class="download" href="#">Baixar vídeo</a><button type="button" class="file-btn" id="cnShare" style="display:none;">Compartilhar</button></div></div>';
+  (sRitmo.querySelector('.step-body') || sRitmo).appendChild(panel);
+
+  var st = $('cnSt'), pv = $('cnPrev'), bPrev = $('cnPrevBtn'), bStop = $('cnPrevStop'), bGen = $('cnGen');
+  var say = function(m){ st.textContent = m || ''; };
+  ['cnType', 'cnOpen', 'cnCta', 'cnPill', 'cnPer', 'cnInt', 'cnQ', 'cnEnd', 'cnAuto'].forEach(function(id){
+    try{ var v = localStorage.getItem('fc-cinema-' + id); if(v != null){ var el = $(id); if(el.type === 'checkbox') el.checked = v === '1'; else el.value = v; } }catch(e){}
+    $(id).addEventListener('change', function(){ try{ localStorage.setItem('fc-cinema-' + id, this.type === 'checkbox' ? (this.checked ? '1' : '0') : this.value); }catch(e){} });
+    $(id).addEventListener('input', function(){ if(this.type === 'text'){ try{ localStorage.setItem('fc-cinema-' + id, this.value); }catch(e){} } });
+  });
+
+  /* ---------- prévia ---------- */
+  var raf = 0, t0 = 0, pvS = null;
+  async function startPrev(){
+    var list = photos();
+    if(!list.length){ say('Adicione as fotos para ver a prévia.'); return; }
+    say('Preparando a prévia…');
+    var c = cfg(), pp = await prepare(list, 800);
+    pvS = { c: c, sc: buildScenes(list, c), pp: pp, TL: mkTL(list.length, c) };
+    say('Prévia em tempo real. Para gravar o vídeo, use o botão “Gerar vídeo Cinema”.');
+    pv.style.display = ''; bPrev.style.display = 'none'; bStop.style.display = ''; t0 = 0; raf = requestAnimationFrame(loop);
+  }
+  function loop(now){
+    if(!pvS){ return; }
+    if(!t0) t0 = now;
+    var T = ((now - t0) / 1000) % (pvS.TL.total + 0.6);
+    var g = pv.getContext('2d');
+    try{ drawFrame(g, pv.width, pv.height, pvS, Math.min(T, pvS.TL.total)); }catch(e){}
+    raf = requestAnimationFrame(loop);
+  }
+  function stopPrev(){ cancelAnimationFrame(raf); raf = 0; t0 = 0; pvS = null; bStop.style.display = 'none'; bPrev.style.display = ''; }
+  bPrev.addEventListener('click', startPrev);
+  bStop.addEventListener('click', function(){ stopPrev(); say(''); });
+
+  /* ---------- gravação ---------- */
+  var busy = false, lastBlob = null;
+  async function makeAudio(total){
+    var f = ($('audioInput') && $('audioInput').files && $('audioInput').files[0]) || (window.__fcExtraAudio && window.__fcExtraAudio.music) || null;
+    if(!f) return null;
+    try{
+      var AC = window.AudioContext || window.webkitAudioContext, ac = new AC();
+      try{ await ac.resume(); }catch(e){}
+      var buf = await ac.decodeAudioData(await f.arrayBuffer());
+      var dest = ac.createMediaStreamDestination(), src = ac.createBufferSource(), gn = ac.createGain();
+      src.buffer = buf; src.loop = true; gn.gain.value = 0.6;
+      src.connect(gn); gn.connect(dest);
+      return { ac: ac, src: src, gn: gn, stream: dest.stream, total: total };
+    }catch(e){ return null; }
+  }
+
+  async function generate(){
+    if(busy) return;
+    var list = photos();
+    if(!list.length){ say('Adicione as fotos do imóvel primeiro (passo “Fotos do imóvel”).'); return; }
+    if(!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream){ say('Este navegador não grava vídeo por aqui. Abra o arquivo no Google Chrome (computador ou Android).'); return; }
+    stopPrev(); busy = true; bGen.disabled = true; $('cnRes').style.display = 'none';
+    var c = cfg(), W = c.hd ? 1080 : 720, H = c.hd ? 1920 : 1280;
+    try{
+      say('Preparando as fotos…');
+      var pp = await prepare(list, c.hd ? 1920 : 1440);
+      var S = { c: c, sc: buildScenes(list, c), pp: pp, TL: mkTL(list.length, c) };
+      var total = S.TL.total;
+      var out = document.createElement('canvas'); out.width = W; out.height = H;
+      var g = out.getContext('2d'); drawFrame(g, W, H, S, 0);
+      var vs = out.captureStream(30), au = await makeAudio(total);
+      var tracks = vs.getVideoTracks().concat(au ? au.stream.getAudioTracks() : []);
+      var mime = '', cand = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp8', 'video/webm;codecs=vp9', 'video/webm'];
+      for(var q = 0; q < cand.length; q++){ if(MediaRecorder.isTypeSupported(cand[q])){ mime = cand[q]; break; } }
+      var isMp4 = mime.indexOf('video/mp4') === 0;
+      var vbps = Math.max(250000, Math.min(c.hd ? 8e6 : 4e6, (14 * 1048576 * 8 / total - 96000)));   // mesmo limite de ~15 MB do gerador original
+      var rec = new MediaRecorder(new MediaStream(tracks), Object.assign(mime ? { mimeType: mime } : {}, { videoBitsPerSecond: Math.round(vbps), audioBitsPerSecond: 96000 }));
+      var chunks = [];
+      rec.ondataavailable = function(e){ if(e.data && e.data.size) chunks.push(e.data); };
+      var done = new Promise(function(res, rej){ rec.onstop = res; rec.onerror = function(e){ rej(e.error || new Error('Falha ao gravar')); }; });
+      rec.start(1000);
+      if(au){ au.src.start(); au.gn.gain.setValueAtTime(0.6, au.ac.currentTime + Math.max(0, total - 1.5)); au.gn.gain.linearRampToValueAtTime(0, au.ac.currentTime + total); }
+      var tStart = performance.now();
+      await new Promise(function(res){
+        (function tick(){
+          var T = (performance.now() - tStart) / 1000;
+          drawFrame(g, W, H, S, Math.min(T, total));
+          say('Gravando o vídeo… ' + Math.min(100, Math.round(T / total * 100)) + '% (mantenha esta tela aberta e o celular ligado)');
+          if(T >= total + 0.25){ res(); return; }
+          requestAnimationFrame(tick);
+        })();
+      });
+      rec.stop(); await done;
+      vs.getTracks().forEach(function(t){ t.stop(); });
+      if(au){ try{ au.src.stop(); au.ac.close(); }catch(e){} }
+      var blob = new Blob(chunks, { type: (rec.mimeType || mime || 'video/webm') });
+      if(lastBlob){ try{ URL.revokeObjectURL($('cnVid').src); }catch(e){} }
+      lastBlob = blob;
+      var url = URL.createObjectURL(blob), a = $('cnDl');
+      $('cnVid').src = url; a.href = url; a.download = 'tour-cinema.' + (isMp4 ? 'mp4' : 'webm');
+      a.textContent = isMp4 ? 'Baixar vídeo (MP4)' : 'Baixar vídeo (WebM: este navegador não gera MP4)';
+      $('cnRes').style.display = '';
+      try{
+        var file = new File([blob], a.download, { type: blob.type });
+        $('cnShare').style.display = (navigator.canShare && navigator.canShare({ files: [file] })) ? '' : 'none';
+      }catch(e){ $('cnShare').style.display = 'none'; }
+      say('Vídeo pronto (' + (blob.size / 1048576).toFixed(1).replace('.', ',') + ' MB' + (blob.size > 15 * 1048576 ? ' — acima de 15 MB: use menos fotos ou menos segundos por foto' : '') + ').');
+    }catch(err){
+      say('Não consegui gerar o vídeo: ' + (err && err.message ? err.message : err));
+    }
+    busy = false; bGen.disabled = false;
+  }
+  bGen.addEventListener('click', generate);
+  $('cnShare').addEventListener('click', async function(){
+    if(!lastBlob) return;
+    try{ await navigator.share({ files: [new File([lastBlob], $('cnDl').download || 'tour-cinema.mp4', { type: lastBlob.type })], title: 'Tour do imóvel' }); }catch(e){}
+  });
+
+  /* ---------- ligar / desligar ---------- */
+  var activating = false, ON = false;
+  function activate(){
+    var fb = grid.querySelector('[data-k="fotos"]');
+    activating = true; if(fb) fb.click(); activating = false;     // mesmo fluxo de "Fotos → vídeo"
+    ON = true;
+    if(fb) fb.classList.remove('on');
+    btn.classList.add('on');
+    var body = sRitmo.querySelector('.step-body') || sRitmo;
+    Array.prototype.forEach.call(body.children, function(ch){
+      if(ch !== panel){ ch.dataset.cnOld = ch.style.display; ch.style.display = 'none'; }
+    });
+    panel.style.display = '';
+    if(sGerar) sGerar.classList.add('tt-hide');                    // o botão de gerar fica dentro do painel Cinema
+    try{ localStorage.setItem('fcTourTipo2', 'cinema'); }catch(e){}
+  }
+  function deactivate(){
+    if(!ON) return;
+    ON = false; stopPrev(); panel.style.display = 'none'; btn.classList.remove('on');
+    var body = sRitmo.querySelector('.step-body') || sRitmo;
+    Array.prototype.forEach.call(body.children, function(ch){
+      if(ch !== panel && ch.dataset.cnOld !== undefined){ ch.style.display = ch.dataset.cnOld; delete ch.dataset.cnOld; }
+    });
+    if(sGerar) sGerar.classList.remove('tt-hide');
+    try{ if(localStorage.getItem('fcTourTipo2') === 'cinema') localStorage.setItem('fcTourTipo2', ''); }catch(e){}
+  }
+  btn.addEventListener('click', activate);
+  Array.prototype.forEach.call(grid.children, function(b){
+    if(b !== btn) b.addEventListener('click', function(){ if(!activating) deactivate(); });
+  });
+  var saved = ''; try{ saved = localStorage.getItem('fcTourTipo2') || ''; }catch(e){}
+  if(saved === 'cinema') activate();
+})();
+</script>
+
 </body>
 </html>
