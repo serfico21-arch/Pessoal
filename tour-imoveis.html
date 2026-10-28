@@ -4268,6 +4268,9 @@ window.FCLogo = (function(){
       auto: $('cnAuto').checked,
       per: parseFloat($('cnPer').value) || 3.5,
       inten: parseFloat($('cnInt').value) || 1,
+      walk: $('cnStyle').value !== 'var',
+      assoc: $('cnStyle').value === 'assoc',
+      adv: parseFloat($('cnAdv').value) || 1.4,
       hd: $('cnQ').value === 'hd'
     };
   }
@@ -4331,6 +4334,31 @@ window.FCLogo = (function(){
     var cx = 0.5 + x * (0.5 - visW / 2), cy = 0.5 + y * (0.5 - visH / 2);
     g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
     g.drawImage(src, (cx - visW / 2) * iw, (cy - visH / 2) * ih, visW * iw, visH * ih, 0, 0, W, H);
+  }
+
+  /* Caminhada: começa no ponto mais afastado (foto inteira na tela) e avança reto para dentro; centro e bordas
+     andam em velocidades diferentes, o que dá a sensação de profundidade (sem IA). */
+  var WN = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 14 : 18;
+  function drawWalk(g, W, H, src, u, I, idx, m, S1){
+    var iw = src.width, ih = src.height, k0 = Math.max(W / iw, H / ih);
+    var vw = W / (k0 * iw), vh = H / (k0 * ih), e = smooth(u);
+    var x, y, back = false;
+    if(m){   // movimentos associados: o deslocamento/giro do movimento escolhido + o avanço da caminhada
+      x = clamp((m.x0 + (m.x1 - m.x0) * e) * I, -1, 1); y = clamp((m.y0 + (m.y1 - m.y0) * e) * I, -1, 1);
+      back = m.z1 < m.z0;                       // "afastar" continua afastando (de perto para longe)
+    }else{   // caminhada reta: só um leve desvio alternado
+      x = (idx % 2 ? -1 : 1) * 0.3 * I * e; y = 0;
+    }
+    var cx = 0.5 + x * (0.5 - vw / 2), cy = 0.5 + y * (0.5 - vh / 2);
+    var sx0 = (cx - vw / 2) * iw, sy0 = (cy - vh / 2) * ih, sw = vw * iw, sh = vh * ih;
+    var w = 0.55 * e + 0.45 * u; if(back) w = 1 - w;
+    var s = 1 + (S1 - 1) * w, c = 0.22 * (S1 - 1) * w, fx = 0.5, fy = 0.46;
+    var xs = [], ys = [], i, j, d;
+    for(i = 0; i <= WN; i++){ d = i / WN - fx; xs.push((fx + d * s + c * d * Math.abs(d)) * W); }
+    for(j = 0; j <= WN; j++){ d = j / WN - fy; ys.push((fy + d * s + c * d * Math.abs(d)) * H); }
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+    for(j = 0; j < WN; j++) for(i = 0; i < WN; i++)
+      g.drawImage(src, sx0 + i * sw / WN, sy0 + j * sh / WN, sw / WN, sh / WN, xs[i], ys[j], xs[i + 1] - xs[i] + 1, ys[j + 1] - ys[j] + 1);
   }
 
   function trackedW(g, t, sp){ var w = 0; for(var i = 0; i < t.length; i++) w += g.measureText(t[i]).width + sp; return Math.max(0, w - sp); }
@@ -4410,7 +4438,7 @@ window.FCLogo = (function(){
     var n = S.TL.n, isCta = j >= n, src = S.pp[isCta ? n - 1 : j];
     if(!src){ g.fillStyle = '#000'; g.fillRect(0, 0, W, H); return; }
     var m = isCta ? CTA_MOT : S.sc[j].mot, u = prog(S.TL, j, T);
-    if(!isCta){ drawPhoto(g, W, H, src, m, u, S.c.inten); return; }
+    if(!isCta){ if(S.c.walk) drawWalk(g, W, H, src, u, S.c.inten, j, S.c.assoc ? m : null, S.c.adv); else drawPhoto(g, W, H, src, m, u, S.c.inten); return; }
     var z = cv('z', W, H), zg = z.getContext('2d');
     drawPhoto(zg, W, H, src, m, u, 1);
     blurInto(g, z, W, H, 7);
@@ -4466,7 +4494,7 @@ window.FCLogo = (function(){
   panel.className = 'ia-box'; panel.id = 'cnBox'; panel.style.cssText = 'margin-top:20px;display:none;';
   panel.innerHTML =
     '<strong style="display:block;font-size:15px;margin-bottom:4px;">🎬 Cinema (grátis, feito no próprio navegador)</strong>' +
-    '<div class="hint" style="margin:0 0 10px;">Vídeo vertical 9:16, foto ocupando a tela toda. Cada foto ganha um movimento lento de câmera (aproxima, afasta ou desliza de um lado para o outro, alternando) e a troca entre fotos tem desfoque. Escreva o nome do ambiente na <strong>primeira foto de cada cômodo</strong> para aparecer a etiqueta no canto. A música é a escolhida no passo de áudio (narração não é usada neste tipo). Os movimentos são feitos sobre a foto em 2D: não existe profundidade 3D de verdade, que só se consegue com IA.</div>' +
+    '<div class="hint" style="margin:0 0 10px;">Vídeo vertical 9:16, foto ocupando a tela toda. No estilo Associado cada foto junta o avanço da caminhada (começa no ponto mais afastado e a câmera entra no cômodo, com centro e bordas em velocidades diferentes) com os movimentos que se alternam foto a foto (deslizar para a esquerda ou direita, deriva, afastar); a Caminhada reta só avança; o Variado não avança, só aproxima, afasta e desliza e a troca entre fotos tem desfoque. Escreva o nome do ambiente na <strong>primeira foto de cada cômodo</strong> para aparecer a etiqueta no canto. A música é a escolhida no passo de áudio (narração não é usada neste tipo). Os movimentos são feitos sobre a foto em 2D: não existe profundidade 3D de verdade, que só se consegue com IA.</div>' +
     '<div class="ia-row" style="display:block;"><label style="font-size:13px;display:block;margin-bottom:4px;">Tipo do imóvel (texto pequeno dourado)</label><input type="text" id="cnType" maxlength="30" placeholder="Ex.: Imóvel de lazer, Apartamento, Casa" style="' + inCss + '"></div>' +
     '<div class="ia-row" style="display:block;"><label style="font-size:13px;display:block;margin-bottom:4px;">Frase de abertura (separe as duas linhas com |) — deixe vazio para não usar</label><input type="text" id="cnOpen" maxlength="50" value="Vem conhecer | por dentro" style="' + inCss + '"></div>' +
     '<div class="ia-row" style="display:block;"><label style="font-size:13px;display:block;margin-bottom:4px;">Frase da tela final</label><input type="text" id="cnCta" maxlength="50" value="Gostou? | Agende sua visita" style="' + inCss + '"></div>' +
@@ -4474,6 +4502,8 @@ window.FCLogo = (function(){
     '<div class="ia-row"><label style="font-size:13px;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="cnEnd" checked> Incluir a tela final</label>' +
     '<label style="font-size:13px;display:flex;align-items:center;gap:6px;margin-left:14px;"><input type="checkbox" id="cnAuto" checked> Frases automáticas (churrasqueira, quadra, piscina)</label></div>' +
     '<div class="ia-row"><label style="font-size:13px;">Segundos por foto <select id="cnPer" style="' + selCss + '"><option value="2.5">2,5</option><option value="3">3</option><option value="3.5" selected>3,5</option><option value="4">4</option><option value="5">5</option></select></label>' +
+    '<label style="font-size:13px;">Estilo <select id="cnStyle" style="' + selCss + '"><option value="assoc" selected>Associado (caminhada + movimentos)</option><option value="walk">Caminhada reta (começa longe e avança)</option><option value="var">Variado (sem avanço)</option></select></label>' +
+    '<label style="font-size:13px;margin-left:12px;">Velocidade do avanço <select id="cnAdv" style="' + selCss + '"><option value="1.2">Lento</option><option value="1.4" selected>Médio</option><option value="1.7">Rápido</option><option value="2.1">Ultra rápido</option></select></label>' +
     '<label style="font-size:13px;margin-left:12px;">Movimento <select id="cnInt" style="' + selCss + '"><option value="0.6">Suave</option><option value="1" selected>Normal</option><option value="1.4">Forte</option></select></label>' +
     '<label style="font-size:13px;margin-left:12px;">Qualidade <select id="cnQ" style="' + selCss + '"><option value="leve" selected>720×1280 (leve)</option><option value="hd">1080×1920 (mais nítido)</option></select></label></div>' +
     '<div class="ia-row"><button type="button" class="file-btn" id="cnPrevBtn">▶ Ver prévia com as minhas fotos</button><button type="button" class="file-btn" id="cnPrevStop" style="display:none;">&#9632; Parar prévia</button></div>' +
@@ -4486,7 +4516,7 @@ window.FCLogo = (function(){
 
   var st = $('cnSt'), pv = $('cnPrev'), bPrev = $('cnPrevBtn'), bStop = $('cnPrevStop'), bGen = $('cnGen');
   var say = function(m){ st.textContent = m || ''; };
-  ['cnType', 'cnOpen', 'cnCta', 'cnPill', 'cnPer', 'cnInt', 'cnQ', 'cnEnd', 'cnAuto'].forEach(function(id){
+  ['cnStyle', 'cnAdv', 'cnType', 'cnOpen', 'cnCta', 'cnPill', 'cnPer', 'cnInt', 'cnQ', 'cnEnd', 'cnAuto'].forEach(function(id){
     try{ var v = localStorage.getItem('fc-cinema-' + id); if(v != null){ var el = $(id); if(el.type === 'checkbox') el.checked = v === '1'; else el.value = v; } }catch(e){}
     $(id).addEventListener('change', function(){ try{ localStorage.setItem('fc-cinema-' + id, this.type === 'checkbox' ? (this.checked ? '1' : '0') : this.value); }catch(e){} });
     $(id).addEventListener('input', function(){ if(this.type === 'text'){ try{ localStorage.setItem('fc-cinema-' + id, this.value); }catch(e){} } });
