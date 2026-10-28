@@ -4838,7 +4838,14 @@ window.FCLogo = (function(){
 #pubBox .row button{flex:1;padding:12px;border-radius:10px;border:none;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
 #pubGo{background:#E0AA47;color:#1B1304;}
 #pubX{background:#e6edf5;color:#1b2a3a;}
-#pubGo:disabled{opacity:.5;}
+#pubGo:disabled,#pubDel:disabled{opacity:.5;}
+#pubRef{display:none;margin-top:12px;border:1px solid #b8c6d6;border-radius:12px;padding:10px;background:#f4f7fb;font-size:13px;line-height:1.4;}
+#pubRef .cod{display:inline-block;background:#1b2a3a;color:#fff;font-weight:800;font-size:13px;padding:3px 9px;border-radius:6px;letter-spacing:.5px;}
+#pubRef .ti{font-weight:700;margin-top:6px;}
+#pubRef .mt{color:#51657a;}
+#pubRef .vv{margin-top:8px;}
+#pubRef video{width:100%;max-height:220px;border-radius:8px;background:#000;margin-top:6px;}
+#pubDel{display:none;width:100%;margin-top:8px;padding:11px;border-radius:10px;border:none;background:#c0392b;color:#fff;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
 #pubBar{height:8px;background:#e6edf5;border-radius:6px;margin-top:14px;overflow:hidden;display:none;}
 #pubBar i{display:block;height:100%;width:0;background:#2e9e5b;transition:width .2s;}
 #pubMsg{margin-top:10px;font-size:13px;line-height:1.4;}
@@ -4850,6 +4857,8 @@ window.FCLogo = (function(){
   <p>O vídeo vai para o seu index (seção Vídeos e página do imóvel).</p>
   <label>Imóvel</label>
   <select id="pubImovel"><option value="">Carregando imóveis…</option></select>
+  <div id="pubRef"></div>
+  <button type="button" id="pubDel">🗑 Apagar vídeo deste imóvel do site</button>
   <label>Vídeo</label>
   <select id="pubVideo"></select>
   <label>…ou escolher um arquivo do aparelho</label>
@@ -4863,6 +4872,45 @@ window.FCLogo = (function(){
   var CFG={apiKey:'AIzaSyBo3zQ-yUNJ2Zk9d6jkEpslF-bsrFcRu8I',authDomain:'fcosta2026-847c3.firebaseapp.com',databaseURL:'https://fcosta2026-847c3-default-rtdb.firebaseio.com',projectId:'fcosta2026-847c3',storageBucket:'fcosta2026-847c3.firebasestorage.app',messagingSenderId:'131225040087',appId:'1:131225040087:web:d468aad3d80bd26aaa2c92'};
   var $=function(id){return document.getElementById(id);};
   var db=null,st=null,imoveis={},busy=false;
+  var SG={venda:'FCV',aluguel:'FCA',lancamento:'FCL',panfleto:'FCP',vendido:'FCV'};
+  function cod(i){ if(i.codigo) return i.codigo; var n=i.numeroCodigo?String(i.numeroCodigo).padStart(3,'0'):((String(i.id||'').slice(-3).replace(/[^0-9]/g,'').padStart(3,'0'))||'001'); return (SG[i.status]||'FCV')+n; }
+  function mostraRef(){
+    var id=$('pubImovel').value,box=$('pubRef'),del=$('pubDel');
+    box.innerHTML=''; box.style.display='none'; del.style.display='none';
+    if(!id||!imoveis[id]) return;
+    var i=Object.assign({id:id},imoveis[id]);
+    var a=document.createElement('span'); a.className='cod'; a.textContent=cod(i); box.appendChild(a);
+    var t=document.createElement('div'); t.className='ti'; t.textContent=i.titulo||'Imóvel'; box.appendChild(t);
+    var m=document.createElement('div'); m.className='mt';
+    m.textContent=[i.bairro,i.cidade].filter(Boolean).join(' — ')+(i.preco?'  ·  R$ '+i.preco:'')+(i.status?'  ·  '+i.status:''); box.appendChild(m);
+    var k=document.createElement('div'); k.className='mt'; k.textContent='ID no Firebase: fcosta_imoveis/'+id; box.appendChild(k);
+    var v=document.createElement('div'); v.className='vv';
+    if(i.videoMp4){
+      v.textContent='🎬 Vídeo publicado neste imóvel:';
+      var vd=document.createElement('video'); vd.controls=true; vd.playsInline=true; vd.preload='metadata'; vd.src=i.videoMp4+'#t=0.1'; v.appendChild(vd);
+      del.style.display='block';
+    } else v.textContent='Sem vídeo MP4 publicado neste imóvel.';
+    box.appendChild(v); box.style.display='block';
+  }
+  async function apagar(){
+    if(busy) return;
+    var id=$('pubImovel').value; if(!id||!imoveis[id]||!imoveis[id].videoMp4) return;
+    var i=Object.assign({id:id},imoveis[id]);
+    if(!confirm('Apagar o vídeo do imóvel '+cod(i)+' do site? Isso remove o arquivo e o link. Não dá para desfazer.')) return;
+    busy=true; $('pubDel').disabled=true; $('pubGo').disabled=true; msg('Apagando…','');
+    var url=i.videoMp4,avisoArq='';
+    try{
+      await db.ref('fcosta_imoveis/'+id+'/videoMp4').remove();
+      try{ await st.refFromURL(url).delete(); }
+      catch(e){ var c=(e&&e.code)||''; if(/object-not-found/.test(c)) avisoArq=''; else avisoArq=' O link saiu do site, mas o arquivo não foi apagado do Storage ('+(c||e.message||e)+'). Apague em Storage → videos no console do Firebase.'; }
+      delete imoveis[id].videoMp4;
+      msg('✅ Vídeo removido do imóvel '+cod(i)+'.'+avisoArq, avisoArq?'err':'ok');
+      mostraRef(); carregaImoveis(true);
+    }catch(e){
+      var m=(e&&(e.code||e.message))||String(e);
+      msg(/permission|denied|unauthorized|403/i.test(m)?'O Firebase bloqueou a exclusão (regras). Apague pelo console: Realtime Database → fcosta_imoveis → '+id+' → videoMp4, e Storage → videos. Detalhe: '+m:'Erro: '+m,'err');
+    }finally{ busy=false; $('pubDel').disabled=false; $('pubGo').disabled=false; }
+  }
   function init(){
     if(db&&st) return true;
     if(!window.firebase||!firebase.storage) return false;
@@ -4887,8 +4935,8 @@ window.FCLogo = (function(){
     v.forEach(function(x){ var o=document.createElement('option'); o.value=x.url; o.textContent=x.label; sel.appendChild(o); });
     sel.value=v[v.length-1].url;
   }
-  function carregaImoveis(){
-    var sel=$('pubImovel');
+  function carregaImoveis(keep){
+    var sel=$('pubImovel'),antes=keep?sel.value:'';
     if(!init()){ sel.innerHTML='<option value="">Sem conexão com o Firebase</option>'; msg('Não consegui carregar o Firebase. Verifique a internet e tente de novo.','err'); return; }
     db.ref('fcosta_imoveis').once('value').then(function(snap){
       var d=snap.val()||{}; imoveis=d;
@@ -4898,13 +4946,15 @@ window.FCLogo = (function(){
       sel.innerHTML='<option value="">Escolha o imóvel…</option>';
       lista.forEach(function(i){
         var o=document.createElement('option'); o.value=i.id;
-        var c=i.codigo||(i.numeroCodigo?('#'+i.numeroCodigo):'');
-        o.textContent=(c?c+' · ':'')+(i.titulo||'Imóvel')+(i.bairro?' — '+i.bairro:'')+(i.videoMp4?'  (já tem vídeo)':'');
+        var c=cod(i);
+        o.textContent=c+' · '+(i.titulo||'Imóvel')+(i.bairro?' — '+i.bairro:'')+(i.videoMp4?'  (já tem vídeo)':'');
         sel.appendChild(o);
       });
+      if(antes) sel.value=antes;
+      mostraRef();
     }).catch(function(e){ sel.innerHTML='<option value="">Erro ao listar imóveis</option>'; msg('Erro ao listar imóveis: '+(e&&e.message||e),'err'); });
   }
-  function abrir(){ msg('',''); $('pubBar').style.display='none'; $('pubFile').value=''; preencheVideos(); $('pubBg').classList.add('on'); carregaImoveis(); }
+  function abrir(){ msg('',''); $('pubRef').style.display='none'; $('pubDel').style.display='none'; $('pubBar').style.display='none'; $('pubFile').value=''; preencheVideos(); $('pubBg').classList.add('on'); carregaImoveis(); }
   function fechar(){ if(busy) return; $('pubBg').classList.remove('on'); }
   async function pegaBlob(){
     var f=$('pubFile').files&&$('pubFile').files[0];
@@ -4934,6 +4984,7 @@ window.FCLogo = (function(){
       await db.ref('fcosta_imoveis/'+id).update({videoMp4:url});
       msg('✅ Publicado! O vídeo já aparece no seu index.','ok');
       if(imoveis[id]) imoveis[id].videoMp4=url;
+      mostraRef(); carregaImoveis(true);
     }catch(e){
       var m=(e&&(e.code||e.message))||String(e);
       if(/unauthorized|permission|denied|403/i.test(m)) msg('O Firebase bloqueou o envio (regras do Storage/Database). Plano B: baixe o vídeo, hospede o MP4 e cole o link no campo de vídeo MP4 do painel ADM. Detalhe: '+m,'err');
@@ -4943,6 +4994,8 @@ window.FCLogo = (function(){
   $('pubBtn').addEventListener('click',abrir);
   $('pubX').addEventListener('click',fechar);
   $('pubGo').addEventListener('click',publicar);
+  $('pubDel').addEventListener('click',apagar);
+  $('pubImovel').addEventListener('change',function(){ msg('',''); mostraRef(); });
   $('pubBg').addEventListener('click',function(e){ if(e.target===this) fechar(); });
 })();
 </script>
