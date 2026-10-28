@@ -530,6 +530,9 @@
   @media (max-width:560px){.btn-bld{margin:10px 0 0;display:block;width:100%;}}
 </style>
 <script src="fcosta-padrao.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -4821,5 +4824,128 @@ window.FCLogo = (function(){
 })();
 </script>
 
+<!-- ===== fcPublicarSite: publicar vídeo gerado no index (Firebase) ===== -->
+<style>
+#pubBtn{position:fixed;right:12px;bottom:12px;z-index:99990;background:#E0AA47;color:#1B1304;border:none;border-radius:999px;padding:12px 18px;font:700 14px/1 inherit;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer;}
+#pubBg{position:fixed;inset:0;z-index:99995;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;}
+#pubBg.on{display:flex;}
+#pubBox{background:#fff;color:#1b2a3a;width:100%;max-width:440px;border-radius:18px 18px 0 0;padding:18px 16px 22px;max-height:92vh;overflow:auto;font-family:inherit;}
+#pubBox h3{margin:0 0 4px;font-size:18px;}
+#pubBox p{margin:0 0 12px;font-size:13px;color:#51657a;}
+#pubBox label{display:block;font-size:12px;font-weight:700;margin:12px 0 4px;color:#33475b;}
+#pubBox select,#pubBox input[type=file]{width:100%;padding:10px;border:1px solid #b8c6d6;border-radius:10px;font-size:14px;background:#fff;color:#1b2a3a;box-sizing:border-box;}
+#pubBox .row{display:flex;gap:8px;margin-top:16px;}
+#pubBox .row button{flex:1;padding:12px;border-radius:10px;border:none;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
+#pubGo{background:#E0AA47;color:#1B1304;}
+#pubX{background:#e6edf5;color:#1b2a3a;}
+#pubGo:disabled{opacity:.5;}
+#pubBar{height:8px;background:#e6edf5;border-radius:6px;margin-top:14px;overflow:hidden;display:none;}
+#pubBar i{display:block;height:100%;width:0;background:#2e9e5b;transition:width .2s;}
+#pubMsg{margin-top:10px;font-size:13px;line-height:1.4;}
+#pubMsg.err{color:#b3261e;}#pubMsg.ok{color:#1d7a46;font-weight:700;}
+</style>
+<button type="button" id="pubBtn">📤 Publicar no site</button>
+<div id="pubBg"><div id="pubBox">
+  <h3>Publicar vídeo no site</h3>
+  <p>O vídeo vai para o seu index (seção Vídeos e página do imóvel).</p>
+  <label>Imóvel</label>
+  <select id="pubImovel"><option value="">Carregando imóveis…</option></select>
+  <label>Vídeo</label>
+  <select id="pubVideo"></select>
+  <label>…ou escolher um arquivo do aparelho</label>
+  <input type="file" id="pubFile" accept="video/*">
+  <div id="pubBar"><i></i></div>
+  <div id="pubMsg"></div>
+  <div class="row"><button type="button" id="pubX">Fechar</button><button type="button" id="pubGo">Publicar</button></div>
+</div></div>
+<script>
+(function fcPublicarSite(){
+  var CFG={apiKey:'AIzaSyBo3zQ-yUNJ2Zk9d6jkEpslF-bsrFcRu8I',authDomain:'fcosta2026-847c3.firebaseapp.com',databaseURL:'https://fcosta2026-847c3-default-rtdb.firebaseio.com',projectId:'fcosta2026-847c3',storageBucket:'fcosta2026-847c3.firebasestorage.app',messagingSenderId:'131225040087',appId:'1:131225040087:web:d468aad3d80bd26aaa2c92'};
+  var $=function(id){return document.getElementById(id);};
+  var db=null,st=null,imoveis={},busy=false;
+  function init(){
+    if(db&&st) return true;
+    if(!window.firebase||!firebase.storage) return false;
+    try{ if(!firebase.apps.length) firebase.initializeApp(CFG); db=firebase.database(); st=firebase.storage(); }catch(e){ return false; }
+    return true;
+  }
+  function msg(t,c){ var m=$('pubMsg'); m.textContent=t; m.className=c||''; }
+  function achaVideos(){
+    var urls=[],out=[];
+    document.querySelectorAll('a[href^="blob:"],video[src^="blob:"]').forEach(function(el){
+      var u=el.getAttribute('href')||el.getAttribute('src');
+      if(!u||urls.indexOf(u)>-1) return;
+      if(el.offsetParent===null && el.tagName==='A') { /* link escondido: ainda aceita */ }
+      urls.push(u);
+    });
+    urls.forEach(function(u,i){ out.push({url:u,label:'Vídeo gerado '+(i+1)+(i===urls.length-1?' (mais recente)':'')}); });
+    return out;
+  }
+  function preencheVideos(){
+    var sel=$('pubVideo'),v=achaVideos(); sel.innerHTML='';
+    if(!v.length){ var o=document.createElement('option'); o.value=''; o.textContent='Nenhum vídeo gerado ainda — gere um ou escolha o arquivo'; sel.appendChild(o); return; }
+    v.forEach(function(x){ var o=document.createElement('option'); o.value=x.url; o.textContent=x.label; sel.appendChild(o); });
+    sel.value=v[v.length-1].url;
+  }
+  function carregaImoveis(){
+    var sel=$('pubImovel');
+    if(!init()){ sel.innerHTML='<option value="">Sem conexão com o Firebase</option>'; msg('Não consegui carregar o Firebase. Verifique a internet e tente de novo.','err'); return; }
+    db.ref('fcosta_imoveis').once('value').then(function(snap){
+      var d=snap.val()||{}; imoveis=d;
+      var lista=Object.keys(d).map(function(k){return Object.assign({id:k},d[k]);})
+        .filter(function(i){return i.publicado!==false&&i._del!==true&&i._excluido!==true;})
+        .sort(function(a,b){return String(b.atualizado||b.criado||'').localeCompare(String(a.atualizado||a.criado||''));});
+      sel.innerHTML='<option value="">Escolha o imóvel…</option>';
+      lista.forEach(function(i){
+        var o=document.createElement('option'); o.value=i.id;
+        var c=i.codigo||(i.numeroCodigo?('#'+i.numeroCodigo):'');
+        o.textContent=(c?c+' · ':'')+(i.titulo||'Imóvel')+(i.bairro?' — '+i.bairro:'')+(i.videoMp4?'  (já tem vídeo)':'');
+        sel.appendChild(o);
+      });
+    }).catch(function(e){ sel.innerHTML='<option value="">Erro ao listar imóveis</option>'; msg('Erro ao listar imóveis: '+(e&&e.message||e),'err'); });
+  }
+  function abrir(){ msg('',''); $('pubBar').style.display='none'; $('pubFile').value=''; preencheVideos(); $('pubBg').classList.add('on'); carregaImoveis(); }
+  function fechar(){ if(busy) return; $('pubBg').classList.remove('on'); }
+  async function pegaBlob(){
+    var f=$('pubFile').files&&$('pubFile').files[0];
+    if(f) return f;
+    var u=$('pubVideo').value; if(!u) return null;
+    var r=await fetch(u); return await r.blob();
+  }
+  async function publicar(){
+    if(busy) return;
+    var id=$('pubImovel').value;
+    if(!id){ msg('Escolha o imóvel.','err'); return; }
+    if(!init()){ msg('Firebase não carregou.','err'); return; }
+    if(imoveis[id]&&imoveis[id].videoMp4&&!confirm('Esse imóvel já tem um vídeo MP4. Substituir?')) return;
+    busy=true; $('pubGo').disabled=true; msg('Preparando vídeo…','');
+    try{
+      var blob=await pegaBlob();
+      if(!blob||!blob.size){ throw new Error('Nenhum vídeo selecionado.'); }
+      var tipo=blob.type||'video/mp4';
+      var ext=/webm/i.test(tipo)?'webm':'mp4';
+      var ref=st.ref('videos/tour_'+id+'_'+Date.now()+'.'+ext);
+      var bar=$('pubBar'); bar.style.display='block'; bar.firstChild.style.width='0%';
+      var url=await new Promise(function(ok,fail){
+        var t=ref.put(blob,{contentType:tipo});
+        t.on('state_changed',function(s){ var p=Math.round(100*s.bytesTransferred/s.totalBytes); bar.firstChild.style.width=p+'%'; msg('Enviando… '+p+'%',''); },fail,function(){ t.snapshot.ref.getDownloadURL().then(ok,fail); });
+      });
+      msg('Gravando no imóvel…','');
+      await db.ref('fcosta_imoveis/'+id).update({videoMp4:url});
+      msg('✅ Publicado! O vídeo já aparece no seu index.','ok');
+      if(imoveis[id]) imoveis[id].videoMp4=url;
+    }catch(e){
+      var m=(e&&(e.code||e.message))||String(e);
+      if(/unauthorized|permission|denied|403/i.test(m)) msg('O Firebase bloqueou o envio (regras do Storage/Database). Plano B: baixe o vídeo, hospede o MP4 e cole o link no campo de vídeo MP4 do painel ADM. Detalhe: '+m,'err');
+      else msg('Erro: '+m,'err');
+    }finally{ busy=false; $('pubGo').disabled=false; }
+  }
+  $('pubBtn').addEventListener('click',abrir);
+  $('pubX').addEventListener('click',fechar);
+  $('pubGo').addEventListener('click',publicar);
+  $('pubBg').addEventListener('click',function(e){ if(e.target===this) fechar(); });
+})();
+</script>
+<!-- ===== /fcPublicarSite ===== -->
 </body>
 </html>
