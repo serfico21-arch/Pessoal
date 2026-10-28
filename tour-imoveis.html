@@ -4249,6 +4249,15 @@ window.FCLogo = (function(){
   }
   var CTA_MOT = { z0: 1.00, z1: 1.07, x0: 0, x1: 0, y0: 0, y1: 0 };
 
+  /* ---------- posições arrastáveis (deslocamento em fração da largura/altura; valem em qualquer resolução) ---------- */
+  var OFF_KEYS = ['chip', 'head', 'cta', 'pill', 'mine', 'theirs'], OFF_NAMES = { chip: 'Etiqueta do ambiente', head: 'Frase de abertura', cta: 'Frase final', pill: 'Contato', mine: 'Minha logo', theirs: 'Logo da construtora' };
+  var OFF = {}; OFF_KEYS.forEach(function(k){ OFF[k] = { x: 0, y: 0 }; });
+  try{ var sv = JSON.parse(localStorage.getItem('fc-cinema-off') || 'null'); if(sv) OFF_KEYS.forEach(function(k){ if(sv[k] && isFinite(sv[k].x) && isFinite(sv[k].y)) OFF[k] = { x: +sv[k].x, y: +sv[k].y }; }); }catch(e){}
+  function saveOff(){ try{ localStorage.setItem('fc-cinema-off', JSON.stringify(OFF)); }catch(e){} }
+  var CUR = null, ZERO = { x: 0, y: 0 };
+  function OFFS(k){ return (CUR && CUR.off && CUR.off[k]) || ZERO; }
+  function BOX(k, x, y, w, h){ if(CUR && CUR.boxes) CUR.boxes[k] = [x, y, w, h]; }
+
   /* ---------- frases de destaque automáticas (só na 1ª foto de certos ambientes, como no vídeo de referência) ---------- */
   function norm(s){ return (s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
   var HEADS = [
@@ -4378,7 +4387,7 @@ window.FCLogo = (function(){
     var fs = 22 * u, sp = 2.2 * u, h = 58 * u, padX = 26 * u, dot = 7 * u, gap = 14 * u;
     g.font = '700 ' + fs + 'px ' + SANS;
     var t = text.toUpperCase(), tw = trackedW(g, t, sp), w = padX * 2 + dot * 2 + gap + tw;
-    var x = 72 * u, y = 0.104 * H - h / 2;
+    var oc = OFFS('chip'), x = 72 * u + oc.x * W, y = 0.104 * H - h / 2 + oc.y * H; BOX('chip', x, y, w, h);
     g.shadowColor = 'rgba(0,0,0,.25)'; g.shadowBlur = 14 * u;
     g.fillStyle = 'rgba(255,255,255,.93)'; rrect(g, x, y, w, h, h / 2); g.fill();
     g.shadowBlur = 0;
@@ -4391,6 +4400,11 @@ window.FCLogo = (function(){
     var u = W / 1080; g.save(); g.globalAlpha = a; g.textBaseline = 'alphabetic';
     var x = 72 * u, dy = slide * 24 * u;
     g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 18 * u;
+    var oh = OFFS('head'); g.translate(oh.x * W, oh.y * H);
+    g.font = '700 ' + (84 * u) + 'px ' + SANS; var hw1 = g.measureText(hd.l1).width, hw2 = 0;
+    if(hd.l2){ g.font = 'italic 400 ' + (82 * u) + 'px ' + SERIF; hw2 = g.measureText(hd.l2).width; }
+    var hy0 = (hd.kick ? 0.628 * H - 34 * u : 0.706 * H - 92 * u);
+    BOX('head', x - 14 * u + oh.x * W, hy0 + oh.y * H, Math.max(hw1, hw2, hd.kick ? 330 * u : 0) + 28 * u, 0.780 * H + 26 * u - hy0);
     if(hd.kick){ g.font = '700 ' + (22 * u) + 'px ' + SANS; g.fillStyle = 'rgba(236,222,192,.82)'; tracked(g, hd.kick.toUpperCase(), x, 0.628 * H + dy, 4 * u, 'left'); }
     g.font = '700 ' + (84 * u) + 'px ' + SANS; g.fillStyle = '#fff'; g.fillText(hd.l1, x, 0.706 * H + dy);
     if(hd.l2){ g.font = 'italic 400 ' + (82 * u) + 'px ' + SERIF; g.fillStyle = GOLD; g.fillText(hd.l2, x, 0.780 * H + dy * 1.2); }
@@ -4400,16 +4414,22 @@ window.FCLogo = (function(){
   function ctaOverlay(g, W, H, c, t){      // t = tempo desde o início da tela final
     var u = W / 1080, st = function(k){ return smooth((t - TR * 0.6 - k * 0.2) / 0.55); };
     g.save(); g.textAlign = 'center'; g.textBaseline = 'alphabetic'; g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 20 * u;
-    var a;
+    var a, oc = OFFS('cta'), op = OFFS('pill');
+    g.font = '700 ' + (108 * u) + 'px ' + SANS; var cw1 = g.measureText(c.cta.l1).width;
+    g.font = 'italic 400 ' + (84 * u) + 'px ' + SERIF; var cw2 = g.measureText(c.cta.l2).width, cwm = Math.max(cw1, cw2, c.type ? 380 * u : 0), cy0 = c.type ? 0.382 * H - 34 * u : 0.468 * H - 112 * u;
+    BOX('cta', W / 2 - cwm / 2 - 18 * u + oc.x * W, cy0 + oc.y * H, cwm + 36 * u, 0.552 * H + 26 * u - cy0);
+    g.translate(oc.x * W, oc.y * H);
     if(c.type){ a = st(0); g.globalAlpha = a; g.font = '700 ' + (23 * u) + 'px ' + SANS; g.fillStyle = 'rgba(236,222,192,.85)'; tracked(g, c.type.toUpperCase(), W / 2, 0.382 * H + (1 - a) * 18 * u, 4.5 * u, 'center'); }
     a = st(1); g.globalAlpha = a; g.font = '700 ' + (108 * u) + 'px ' + SANS; g.fillStyle = '#fff'; g.fillText(c.cta.l1, W / 2, 0.468 * H + (1 - a) * 20 * u);
     a = st(2); g.globalAlpha = a; g.font = 'italic 400 ' + (84 * u) + 'px ' + SERIF; g.fillStyle = GOLD; g.fillText(c.cta.l2, W / 2, 0.552 * H + (1 - a) * 20 * u);
+    g.translate(-oc.x * W, -oc.y * H); g.translate(op.x * W, op.y * H);
     if(c.cta.pill){
       a = st(3); g.globalAlpha = a; g.shadowBlur = 0;
       var fs = 25 * u, sp = 3 * u, padX = 38 * u, h = 76 * u, tw;
       g.textAlign = 'left'; g.font = '700 ' + fs + 'px ' + SANS; tw = trackedW(g, c.cta.pill, sp);
       var maxW = W * 0.88 - padX * 2; if(tw > maxW){ fs *= maxW / tw; sp *= maxW / tw; g.font = '700 ' + fs + 'px ' + SANS; tw = trackedW(g, c.cta.pill, sp); }
       var w = tw + padX * 2, x = (W - w) / 2, y = 0.64 * H - h / 2 + (1 - a) * 16 * u;
+      BOX('pill', x + op.x * W, y + op.y * H, w, h);
       g.fillStyle = '#F3DDB0'; rrect(g, x, y, w, h, h / 2); g.fill();
       g.fillStyle = '#2A2118'; tracked(g, c.cta.pill, x + padX, y + h / 2 + fs * 0.36, sp, 'left');
     }
@@ -4444,11 +4464,15 @@ window.FCLogo = (function(){
     }catch(e){ console.error('Logos do Cinema:', e); }
     window.__fcBld = prev;
     if(!mine && !theirs) return null;
-    var o = document.createElement('canvas'); o.width = W; o.height = H;
-    var g = o.getContext('2d'); g.imageSmoothingQuality = 'high';
-    if(mine) g.drawImage(mine.c, mine.x, mine.y);
-    if(theirs) g.drawImage(theirs.c, theirs.x, theirs.y);
-    return o;
+    return { mine: mine, theirs: theirs };
+  }
+  function drawWm(g, W, H, S){
+    if(!S.wm) return;
+    ['mine', 'theirs'].forEach(function(k){
+      var p = S.wm[k]; if(!p) return;
+      var o = OFFS(k), x = p.x + o.x * W, y = p.y + o.y * H;
+      g.drawImage(p.c, x, y); BOX(k, x, y, p.c.width, p.c.height);
+    });
   }
 
   var layer = {};
@@ -4471,6 +4495,7 @@ window.FCLogo = (function(){
   }
 
   function drawFrame(g, W, H, S, T){
+    CUR = S; if(S.boxes) S.boxes = {};
     var TL = S.TL, k = Math.min(TL.M - 1, Math.floor(T / TL.PER));
     if(k >= TL.n && !S.c.cta) k = TL.n - 1;
     var x = -1;
@@ -4505,7 +4530,7 @@ window.FCLogo = (function(){
       if(sc.label && e > 0.001) chip(g, W, H, sc.label, e);
       if(sc.head && ha > 0.001) headline(g, W, H, sc.head, ha, 1 - ha);
     });
-    if(S.wm) g.drawImage(S.wm, 0, 0, W, H);     // logos sempre por cima, fixas durante o vídeo todo
+    drawWm(g, W, H, S);     // logos sempre por cima, fixas durante o vídeo todo
   }
 
   /* ---------- tela: botão do tipo + painel ---------- */
@@ -4535,8 +4560,12 @@ window.FCLogo = (function(){
     '<label style="font-size:13px;margin-left:12px;">Velocidade do avanço <select id="cnAdv" style="' + selCss + '"><option value="1.2">Lento</option><option value="1.4" selected>Médio</option><option value="1.7">Rápido</option><option value="2.1">Ultra rápido</option></select></label>' +
     '<label style="font-size:13px;margin-left:12px;">Movimento <select id="cnInt" style="' + selCss + '"><option value="0.6">Suave</option><option value="1" selected>Normal</option><option value="1.4">Forte</option></select></label>' +
     '<label style="font-size:13px;margin-left:12px;">Qualidade <select id="cnQ" style="' + selCss + '"><option value="leve" selected>720×1280 (leve)</option><option value="hd">1080×1920 (mais nítido)</option></select></label></div>' +
-    '<div class="ia-row"><button type="button" class="file-btn" id="cnPrevBtn">▶ Ver prévia com as minhas fotos</button><button type="button" class="file-btn" id="cnPrevBtnB">▶ Prévia versão construtora</button><button type="button" class="file-btn" id="cnPrevStop" style="display:none;">&#9632; Parar prévia</button></div>' +
-    '<canvas id="cnPrev" width="270" height="480" style="display:none;width:100%;max-width:200px;margin-top:10px;border-radius:10px;background:#000;"></canvas>' +
+    '<div class="ia-row"><button type="button" class="file-btn" id="cnPrevBtn">▶ Ver prévia com as minhas fotos</button><button type="button" class="file-btn" id="cnPrevBtnB">▶ Prévia versão construtora</button><button type="button" class="file-btn" id="cnEditBtn">✋ Posicionar logos, textos e contato</button><button type="button" class="file-btn" id="cnPrevStop" style="display:none;">&#9632; Parar prévia</button></div>' +
+    '<div id="cnEditBox" style="display:none;margin-top:10px;"><div class="hint" style="margin:0 0 8px;"><strong>Modo posicionar:</strong> arraste com o dedo ou o mouse cada item dentro dos contornos tracejados: sua logo, a logo da construtora, a etiqueta do ambiente, a frase de abertura, a frase final e a faixa do contato. A posição vale para o vídeo inteiro e fica salva neste navegador.</div>' +
+    '<div class="ia-row"><label style="font-size:13px;">Tela <select id="cnEditScene" style="' + selCss + '"><option value="open">Abertura (etiqueta e frase)</option><option value="end">Tela final (frase e contato)</option></select></label>' +
+    '<label style="font-size:13px;margin-left:12px;">Versão <select id="cnEditVer" style="' + selCss + '"><option value="n">Normal</option><option value="b">Construtora</option></select></label></div>' +
+    '<div class="ia-row"><button type="button" class="file-btn" id="cnEditReset">Restaurar posições</button><button type="button" class="file-btn" id="cnEditDone">✔ Concluir</button></div></div>' +
+    '<canvas id="cnPrev" width="360" height="640" style="display:none;width:100%;max-width:200px;margin-top:10px;border-radius:10px;background:#000;touch-action:none;"></canvas>' +
     '<div class="ia-row"><button type="button" class="btn-primary" id="cnGen">🎬 Gerar vídeo Cinema</button><button type="button" class="btn-primary btn-bld" id="cnGenB">&#127970; Gerar Cinema para construtora</button></div>' +
     '<div class="ia-st" id="cnSt"></div>' +
     '<div id="cnRes" style="display:none;margin-top:12px;"><video id="cnVid" controls playsinline style="width:100%;max-width:260px;border-radius:10px;background:#000;"></video>' +
@@ -4564,10 +4593,10 @@ window.FCLogo = (function(){
     var list = photos();
     if(!list.length){ say('Adicione as fotos para ver a prévia.'); return; }
     if(raf){ cancelAnimationFrame(raf); raf = 0; }
-    say('Preparando a prévia…'); updLogoSt();
+    stopEdit(); say('Preparando a prévia…'); updLogoSt();
     await fontsReady();
     var c = cfg(bld), pp = await prepare(list, 800);
-    pvS = { c: c, sc: buildScenes(list, c), pp: pp, TL: mkTL(list.length, c), wm: wmLayer(pv.width, pv.height, c) };
+    pvS = { c: c, sc: buildScenes(list, c), pp: pp, TL: mkTL(list.length, c), wm: wmLayer(pv.width, pv.height, c), off: OFF, boxes: {} };
     say('Prévia ' + (bld ? 'da versão construtora' : 'em tempo real') + '. Para gravar o vídeo, use o botão de gerar.');
     pv.style.display = ''; bPrev.style.display = 'none'; bPrevB.style.display = 'none'; bStop.style.display = ''; t0 = 0; raf = requestAnimationFrame(loop);
   }
@@ -4586,6 +4615,68 @@ window.FCLogo = (function(){
     startPrev(true);
   });
   bStop.addEventListener('click', function(){ stopPrev(); say(''); });
+
+  /* ---------- modo posicionar (arrastar) ---------- */
+  var edS = null, edSel = '', drag = null, edRaf = 0;
+  function edT(S){ return $('cnEditScene').value === 'end' ? S.TL.total - 0.3 : 1.2; }
+  function edDraw(){
+    edRaf = 0; if(!edS) return;
+    var g = pv.getContext('2d'), W = pv.width, H = pv.height;
+    try{ drawFrame(g, W, H, edS, edT(edS)); }catch(e){ console.error(e); }
+    g.save(); g.lineWidth = Math.max(2, W / 180); g.textBaseline = 'top'; g.font = '700 ' + Math.round(W / 26) + 'px ' + SANS;
+    Object.keys(edS.boxes).forEach(function(k){
+      var b = edS.boxes[k], on = k === edSel;
+      g.setLineDash([W / 45, W / 70]); g.strokeStyle = on ? '#FFD36B' : 'rgba(255,255,255,.95)'; g.strokeRect(b[0], b[1], b[2], b[3]);
+      g.setLineDash([]); var t = OFF_NAMES[k], tw = g.measureText(t).width + 12, ty = Math.max(0, b[1] - Math.round(W / 26) - 8);
+      g.fillStyle = on ? '#FFD36B' : 'rgba(20,20,20,.85)'; g.fillRect(b[0], ty, tw, Math.round(W / 26) + 8);
+      g.fillStyle = on ? '#222' : '#fff'; g.fillText(t, b[0] + 6, ty + 4);
+    });
+    g.restore();
+  }
+  function edAsk(){ if(!edRaf) edRaf = requestAnimationFrame(edDraw); }
+  async function startEdit(){
+    var list = photos();
+    if(!list.length){ say('Adicione as fotos para posicionar os itens.'); return; }
+    stopPrev(); say('Preparando…'); updLogoSt(); await fontsReady();
+    var bld = $('cnEditVer').value === 'b', c = cfg(bld), ct = two($('cnCta').value, 'Gostou?', 'Agende sua visita');
+    c.cta = { l1: (c.cta && c.cta.l1) || ct[0], l2: (c.cta && c.cta.l2) || ct[1], pill: (c.cta && c.cta.pill) || 'SEU CONTATO AQUI' };   // mostra tudo, mesmo o que está desligado
+    var sc = buildScenes(list, c);
+    sc[0].label = sc[0].label || 'Ambiente';
+    sc[0].head = sc[0].head || { kick: c.type || 'TIPO DO IMÓVEL', l1: 'Frase', l2: 'de abertura' };
+    edS = { c: c, sc: sc, pp: await prepare(list, 800), TL: mkTL(list.length, c), wm: wmLayer(pv.width, pv.height, c), off: OFF, boxes: {} };
+    $('cnEditBox').style.display = ''; pv.style.display = ''; pv.style.maxWidth = '320px'; pv.style.cursor = 'grab';
+    bPrev.style.display = 'none'; bPrevB.style.display = 'none'; $('cnEditBtn').style.display = 'none';
+    say('Arraste os itens para o lugar que quiser.'); edDraw();
+  }
+  function stopEdit(){
+    if(!edS) return;
+    edS = null; drag = null; edSel = ''; $('cnEditBox').style.display = 'none'; pv.style.maxWidth = '200px'; pv.style.cursor = '';
+    $('cnEditBtn').style.display = ''; bPrev.style.display = ''; bPrevB.style.display = ''; pv.style.display = 'none';
+  }
+  function pt(e){ var r = pv.getBoundingClientRect(); return { x: (e.clientX - r.left) * pv.width / r.width, y: (e.clientY - r.top) * pv.height / r.height }; }
+  pv.addEventListener('pointerdown', function(e){
+    if(!edS) return;
+    var p = pt(e), hit = '', ord = ['pill', 'mine', 'theirs', 'cta', 'head', 'chip'];
+    for(var i = 0; i < ord.length; i++){ var b = edS.boxes[ord[i]]; if(b && p.x >= b[0] && p.x <= b[0] + b[2] && p.y >= b[1] && p.y <= b[1] + b[3]){ hit = ord[i]; break; } }
+    if(!hit) return;
+    drag = { n: hit, px: p.x, py: p.y, b: edS.boxes[hit].slice(), o: { x: OFF[hit].x, y: OFF[hit].y } }; edSel = hit;
+    try{ pv.setPointerCapture(e.pointerId); }catch(x){}
+    pv.style.cursor = 'grabbing'; e.preventDefault(); edAsk();
+  });
+  pv.addEventListener('pointermove', function(e){
+    if(!edS || !drag) return;
+    var p = pt(e), W = pv.width, H = pv.height;
+    var nx = clamp(drag.b[0] + p.x - drag.px, 0, Math.max(0, W - drag.b[2])), ny = clamp(drag.b[1] + p.y - drag.py, 0, Math.max(0, H - drag.b[3]));
+    OFF[drag.n] = { x: drag.o.x + (nx - drag.b[0]) / W, y: drag.o.y + (ny - drag.b[1]) / H };
+    e.preventDefault(); edAsk();
+  });
+  function endDrag(){ if(drag){ drag = null; saveOff(); pv.style.cursor = edS ? 'grab' : ''; edAsk(); } }
+  pv.addEventListener('pointerup', endDrag); pv.addEventListener('pointercancel', endDrag);
+  $('cnEditBtn').addEventListener('click', startEdit);
+  $('cnEditDone').addEventListener('click', function(){ stopEdit(); say('Posições salvas. Use a prévia ou gere o vídeo.'); });
+  $('cnEditScene').addEventListener('change', function(){ edAsk(); });
+  $('cnEditVer').addEventListener('change', function(){ if(edS) startEdit(); });
+  $('cnEditReset').addEventListener('click', function(){ OFF_KEYS.forEach(function(k){ OFF[k] = { x: 0, y: 0 }; }); saveOff(); edSel = ''; edAsk(); });
 
   /* ---------- gravação ---------- */
   var busy = false, lastBlob = null;
@@ -4617,7 +4708,7 @@ window.FCLogo = (function(){
       say('Preparando as fotos e as logos…');
       await fontsReady();
       var pp = await prepare(list, c.hd ? 1920 : 1440);
-      var S = { c: c, sc: buildScenes(list, c), pp: pp, TL: mkTL(list.length, c), wm: wmLayer(W, H, c) };
+      var S = { c: c, sc: buildScenes(list, c), pp: pp, TL: mkTL(list.length, c), wm: wmLayer(W, H, c), off: OFF, boxes: {} };
       var total = S.TL.total;
       var out = document.createElement('canvas'); out.width = W; out.height = H;
       var g = out.getContext('2d'); drawFrame(g, W, H, S, 0);
@@ -4688,7 +4779,7 @@ window.FCLogo = (function(){
   }
   function deactivate(){
     if(!ON) return;
-    ON = false; stopPrev(); panel.style.display = 'none'; btn.classList.remove('on');
+    ON = false; stopPrev(); stopEdit(); panel.style.display = 'none'; btn.classList.remove('on');
     var body = sRitmo.querySelector('.step-body') || sRitmo;
     Array.prototype.forEach.call(body.children, function(ch){
       if(ch !== panel && ch.dataset.cnOld !== undefined){ ch.style.display = ch.dataset.cnOld; delete ch.dataset.cnOld; }
