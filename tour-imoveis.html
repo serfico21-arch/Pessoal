@@ -1463,6 +1463,8 @@ window.FCBand = (function(){
   const musicVolVal = document.getElementById('musicVolVal');
   const fitNarr = document.getElementById('fitNarr');
   musicVol.addEventListener('input', ()=> musicVolVal.textContent = musicVol.value);
+  // o gerador Cinema usa a mesma música e a mesma narração escolhidas no passo 3
+  window.__fcGetAudio = () => ({ music: audioFile, narr: narrationBlob, vol: parseInt(musicVol.value, 10) });
 
   // ---------- Tempo do vídeo x narração ----------
   const timeBox = document.getElementById('timeBox');
@@ -3477,7 +3479,7 @@ window.FCLogo = (function(){
       fit.lines.forEach(function(t, i){ x.fillText(t, fit.pad, ty + i * lh + 1); });
       return c;
     }
-    function compose(W, H){
+    function compose(W, H, split){
       var e = g('On'), on = !!(e && (e.checked || window.__fcBld));
       var pj = g('Proj'), proj = ((pj && pj.value) || '').trim(), hasImg = !!(img && img.naturalWidth);
       if(!on || (!hasImg && !proj)) return null;
@@ -3487,7 +3489,7 @@ window.FCLogo = (function(){
       var op = Math.min(1, Math.max(.1, (+g('Op').value || 100) / 100));
       var pos = g('Pos').value, right = (pos === 'tr' || pos === 'br'), center = (pos === 'tc');
       function drawLogo(x, lx, ly){ x.save(); x.globalAlpha = op; x.imageSmoothingQuality = 'high'; x.drawImage(img, lx, ly, lw, lh); x.restore(); }
-      if(!proj){ var c0 = mk(lw, lh); drawLogo(c0.getContext('2d'), 0, 0); return c0; }
+      if(!proj){ var c0 = mk(lw, lh); drawLogo(c0.getContext('2d'), 0, 0); return split ? { logo: c0, name: null, cw: lw, ch: lh, lx: 0, nx: 0, ny: 0 } : c0; }
       var h0 = hasImg ? lh : Math.round(S * .6), gap = hasImg ? Math.round(S * .12) : 0;
       // Logo e nome do projeto SEPARADOS: o nome fica embaixo da logo, com tamanho próprio
       // (controle "Tamanho do nome do projeto"), sem depender da altura da logo.
@@ -3499,8 +3501,13 @@ window.FCLogo = (function(){
       if(!bb) bb = bubble(proj, 14, 8, W - mg*2, 6);
       var bw = bb.width, bh = bb.height, c, x;
       if(stacked){
-        var cw2 = Math.max(lw, bw), ch2 = lh + gap + bh; c = mk(cw2, ch2); x = c.getContext('2d');
+        var cw2 = Math.max(lw, bw), ch2 = lh + gap + bh;
         var al = function(w){ return right ? cw2 - w : (center ? Math.round((cw2 - w) / 2) : 0); };
+        if(split){
+          var lc = null; if(hasImg){ lc = mk(lw, lh); drawLogo(lc.getContext('2d'), 0, 0); }
+          return { logo: lc, name: bb, cw: cw2, ch: hasImg ? ch2 : bh, lx: al(lw), nx: al(bw), ny: hasImg ? lh + gap : 0 };
+        }
+        c = mk(cw2, ch2); x = c.getContext('2d');
         if(hasImg) drawLogo(x, al(lw), 0);
         x.drawImage(bb, al(bw), hasImg ? lh + gap : 0);
       } else {
@@ -3511,9 +3518,9 @@ window.FCLogo = (function(){
       }
       return c;
     }
-    function build(W, H, other, limitY){
-      var c = compose(W, H); if(!c) return null;
-      var w = c.width, h = c.height, base = Math.min(W, H);
+    function build(W, H, other, limitY, split){
+      var c = compose(W, H, split); if(!c) return null;
+      var w = split ? c.cw : c.width, h = split ? c.ch : c.height, base = Math.min(W, H);
       var m = Math.round(base * 0.04), r = H / W;
       var y = r > 1.5 ? Math.round(H * 0.025) : (r > 1.2 ? Math.round(H * 0.05) : m);
       var pos = g('Pos').value, px = m;
@@ -3525,6 +3532,10 @@ window.FCLogo = (function(){
           if(pos === 'br') y = oy - h - m; else y = oy + oh + m;
         }
       }
+      if(split) return {
+        logo: c.logo ? { c: c.logo, x: px + c.lx, y: y } : null,
+        name: c.name ? { c: c.name, x: px + c.nx, y: y + c.ny } : null
+      };
       return { c: c, x: px, y: y };
     }
     var has = function(){ return !!(img && img.naturalWidth); };
@@ -4251,7 +4262,7 @@ window.FCLogo = (function(){
   var CTA_MOT = { z0: 1.00, z1: 1.07, x0: 0, x1: 0, y0: 0, y1: 0 };
 
   /* ---------- posições arrastáveis (deslocamento em fração da largura/altura; valem em qualquer resolução) ---------- */
-  var OFF_KEYS = ['chip', 'head', 'cta', 'pill', 'mine', 'theirs'], OFF_NAMES = { chip: 'Etiqueta do ambiente', head: 'Frase de abertura', cta: 'Frase final', pill: 'Contato', mine: 'Minha logo', theirs: 'Logo da construtora' };
+  var OFF_KEYS = ['chip', 'head', 'cta', 'pill', 'mine', 'theirs', 'proj'], OFF_NAMES = { chip: 'Etiqueta do ambiente', head: 'Frase de abertura', cta: 'Frase final', pill: 'Contato', mine: 'Minha logo', theirs: 'Logo da construtora', proj: 'Nome do projeto' };
   var OFF = {}; OFF_KEYS.forEach(function(k){ OFF[k] = { x: 0, y: 0 }; });
   try{ var sv = JSON.parse(localStorage.getItem('fc-cinema-off') || 'null'); if(sv) OFF_KEYS.forEach(function(k){ if(sv[k] && isFinite(sv[k].x) && isFinite(sv[k].y)) OFF[k] = { x: +sv[k].x, y: +sv[k].y }; }); }catch(e){}
   function saveOff(){ try{ localStorage.setItem('fc-cinema-off', JSON.stringify(OFF)); }catch(e){} }
@@ -4457,19 +4468,19 @@ window.FCLogo = (function(){
     return Promise.all(['700 40px Inter', '400 40px Inter', '700 40px Fraunces'].map(function(f){ return document.fonts.load(f).catch(function(){}); })).catch(function(){});
   }
   function wmLayer(W, H, c){
-    var mine = null, theirs = null, prev = window.__fcBld;
+    var mine = null, theirs = null, proj = null, prev = window.__fcBld;
     window.__fcBld = !!c.bld;       // o módulo da construtora usa esta chave para ignorar o “mostrar” desmarcado
     try{
       if(window.FCLogo && c.mine) mine = window.FCLogo.build('lgG', W, H);
-      if(window.FCBuilderLogo && window.FCBuilderLogo.build) theirs = window.FCBuilderLogo.build(W, H, mine);
+      if(window.FCBuilderLogo && window.FCBuilderLogo.build){ var pr = window.FCBuilderLogo.build(W, H, mine, undefined, true); if(pr){ theirs = pr.logo; proj = pr.name; } }
     }catch(e){ console.error('Logos do Cinema:', e); }
     window.__fcBld = prev;
-    if(!mine && !theirs) return null;
-    return { mine: mine, theirs: theirs };
+    if(!mine && !theirs && !proj) return null;
+    return { mine: mine, theirs: theirs, proj: proj };
   }
   function drawWm(g, W, H, S){
     if(!S.wm) return;
-    ['mine', 'theirs'].forEach(function(k){
+    ['mine', 'theirs', 'proj'].forEach(function(k){
       var p = S.wm[k]; if(!p) return;
       var o = OFFS(k), x = p.x + o.x * W, y = p.y + o.y * H;
       g.drawImage(p.c, x, y); BOX(k, x, y, p.c.width, p.c.height);
@@ -4580,7 +4591,9 @@ window.FCLogo = (function(){
     var mineOn = !!(window.FCLogo && window.FCLogo.on('lgG')), hasB = !!(window.FCBuilderLogo && window.FCBuilderLogo.has && window.FCBuilderLogo.has()), pj = projName();
     el.innerHTML = '<strong>Logos neste vídeo:</strong> minha logo ' + (mineOn ? '<b>ligada</b>' : '<b>desligada</b> (marque “Mostrar a logo no vídeo” em “Minha logo na tela”)') +
       ' · construtora ' + (hasB ? '<b>logo enviada</b>' : '<b>sem logo</b> (envie em “Logo da construtora”)') + (pj ? ' · projeto “' + pj.replace(/</g, '&lt;') + '”' : '') +
-      '. Posição, tamanho e opacidade ficam em “Dados do imóvel e faixa”.';
+      '. Posição, tamanho e opacidade ficam em “Dados do imóvel e faixa”.' +
+      (function(){ var A = (window.__fcGetAudio && window.__fcGetAudio()) || {}, X = window.__fcExtraAudio || {}, ai = $('audioInput'), m = A.music || (ai && ai.files && ai.files[0]) || X.music, n = A.narr || X.narr;
+        return '<br><strong>Som neste vídeo:</strong> música ' + (m ? '<b>ligada</b>' : '<b>nenhuma</b>') + ' · narração ' + (n ? '<b>ligada</b>' : '<b>nenhuma</b>') + ' (escolhidas no passo “Trilha sonora e narração”).'; })();
   }
   ['cnStyle', 'cnAdv', 'cnType', 'cnOpen', 'cnCta', 'cnPill', 'cnBldPill', 'cnMine', 'cnPer', 'cnInt', 'cnQ', 'cnEnd', 'cnAuto'].forEach(function(id){
     try{ var v = localStorage.getItem('fc-cinema-' + id); if(v != null){ var el = $(id); if(el.type === 'checkbox') el.checked = v === '1'; else el.value = v; } }catch(e){}
@@ -4657,7 +4670,7 @@ window.FCLogo = (function(){
   function pt(e){ var r = pv.getBoundingClientRect(); return { x: (e.clientX - r.left) * pv.width / r.width, y: (e.clientY - r.top) * pv.height / r.height }; }
   pv.addEventListener('pointerdown', function(e){
     if(!edS) return;
-    var p = pt(e), hit = '', ord = ['pill', 'mine', 'theirs', 'cta', 'head', 'chip'];
+    var p = pt(e), hit = '', ord = ['pill', 'mine', 'theirs', 'proj', 'cta', 'head', 'chip'];
     for(var i = 0; i < ord.length; i++){ var b = edS.boxes[ord[i]]; if(b && p.x >= b[0] && p.x <= b[0] + b[2] && p.y >= b[1] && p.y <= b[1] + b[3]){ hit = ord[i]; break; } }
     if(!hit) return;
     drag = { n: hit, px: p.x, py: p.y, b: edS.boxes[hit].slice(), o: { x: OFF[hit].x, y: OFF[hit].y } }; edSel = hit;
@@ -4682,17 +4695,27 @@ window.FCLogo = (function(){
   /* ---------- gravação ---------- */
   var busy = false, lastBlob = null;
   async function makeAudio(total){
-    var f = ($('audioInput') && $('audioInput').files && $('audioInput').files[0]) || (window.__fcExtraAudio && window.__fcExtraAudio.music) || null;
-    if(!f) return null;
+    var A = (window.__fcGetAudio && window.__fcGetAudio()) || {}, X = window.__fcExtraAudio || {};
+    var mf = A.music || ($('audioInput') && $('audioInput').files && $('audioInput').files[0]) || X.music || null;
+    var nf = A.narr || X.narr || null;
+    if(!mf && !nf) return null;
     try{
       var AC = window.AudioContext || window.webkitAudioContext, ac = new AC();
       try{ await ac.resume(); }catch(e){}
-      var buf = await ac.decodeAudioData(await f.arrayBuffer());
-      var dest = ac.createMediaStreamDestination(), src = ac.createBufferSource(), gn = ac.createGain();
-      src.buffer = buf; src.loop = true; gn.gain.value = 0.6;
-      src.connect(gn); gn.connect(dest);
-      return { ac: ac, src: src, gn: gn, stream: dest.stream, total: total };
-    }catch(e){ return null; }
+      var dest = ac.createMediaStreamDestination(), gn = ac.createGain(), msrc = null, nsrc = null, nsec = 0;
+      var vol = (A.music ? A.vol : (X.vol != null ? X.vol : A.vol));
+      gn.gain.value = nf ? (isFinite(vol) ? vol / 100 : .2) : 0.6;   // com narração, a música fica baixa
+      gn.connect(dest);
+      if(mf){ var mb = await ac.decodeAudioData(await mf.arrayBuffer()); msrc = ac.createBufferSource(); msrc.buffer = mb; msrc.loop = true; msrc.connect(gn); }
+      if(nf){
+        try{ var nb = await ac.decodeAudioData(await nf.arrayBuffer()); nsrc = ac.createBufferSource(); nsrc.buffer = nb; nsrc.connect(dest); nsec = nb.duration; }
+        catch(e){ console.error('Narração:', e); }
+      }
+      if(!msrc && !nsrc) return null;
+      return { ac: ac, gn: gn, stream: dest.stream, total: total, nsec: nsec,
+        go: function(){ if(msrc) msrc.start(); if(nsrc) nsrc.start(); },
+        stop: function(){ try{ if(msrc) msrc.stop(); }catch(e){} try{ if(nsrc) nsrc.stop(); }catch(e){} try{ ac.close(); }catch(e){} } };
+    }catch(e){ console.error('Áudio do Cinema:', e); return null; }
   }
 
   async function generate(bld){
@@ -4724,20 +4747,20 @@ window.FCLogo = (function(){
       rec.ondataavailable = function(e){ if(e.data && e.data.size) chunks.push(e.data); };
       var done = new Promise(function(res, rej){ rec.onstop = res; rec.onerror = function(e){ rej(e.error || new Error('Falha ao gravar')); }; });
       rec.start(1000);
-      if(au){ au.src.start(); au.gn.gain.setValueAtTime(0.6, au.ac.currentTime + Math.max(0, total - 1.5)); au.gn.gain.linearRampToValueAtTime(0, au.ac.currentTime + total); }
+      if(au){ au.go(); var g0 = au.gn.gain.value; au.gn.gain.setValueAtTime(g0, au.ac.currentTime + Math.max(0, total - 1.5)); au.gn.gain.linearRampToValueAtTime(0, au.ac.currentTime + total); }
       var tStart = performance.now();
       await new Promise(function(res){
         (function tick(){
           var T = (performance.now() - tStart) / 1000;
           drawFrame(g, W, H, S, Math.min(T, total));
-          say('Gravando o vídeo… ' + Math.min(100, Math.round(T / total * 100)) + '% (mantenha esta tela aberta e o celular ligado)');
+          say('Gravando o vídeo… ' + Math.min(100, Math.round(T / total * 100)) + '% (mantenha esta tela aberta e o celular ligado)' + (au && au.nsec > total + 0.5 ? ' · a narração é mais longa que o vídeo e será cortada no final' : ''));
           if(T >= total + 0.25){ res(); return; }
           requestAnimationFrame(tick);
         })();
       });
       rec.stop(); await done;
       vs.getTracks().forEach(function(t){ t.stop(); });
-      if(au){ try{ au.src.stop(); au.ac.close(); }catch(e){} }
+      if(au){ au.stop(); }
       var blob = new Blob(chunks, { type: (rec.mimeType || mime || 'video/webm') });
       if(lastBlob){ try{ URL.revokeObjectURL($('cnVid').src); }catch(e){} }
       lastBlob = blob;
