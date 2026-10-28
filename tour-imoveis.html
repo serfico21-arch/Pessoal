@@ -4871,6 +4871,7 @@ window.FCLogo = (function(){
 (function fcPublicarSite(){
   var CFG={apiKey:'AIzaSyBo3zQ-yUNJ2Zk9d6jkEpslF-bsrFcRu8I',authDomain:'fcosta2026-847c3.firebaseapp.com',databaseURL:'https://fcosta2026-847c3-default-rtdb.firebaseio.com',projectId:'fcosta2026-847c3',storageBucket:'fcosta2026-847c3.firebasestorage.app',messagingSenderId:'131225040087',appId:'1:131225040087:web:d468aad3d80bd26aaa2c92'};
   var $=function(id){return document.getElementById(id);};
+  var CLOUD_NAME='dvtfxqw66', CLOUD_PRESET='fcosta_videos';
   var db=null,st=null,imoveis={},busy=false;
   var SG={venda:'FCV',aluguel:'FCA',lancamento:'FCL',panfleto:'FCP',vendido:'FCV'};
   function cod(i){ if(i.codigo) return i.codigo; var n=i.numeroCodigo?String(i.numeroCodigo).padStart(3,'0'):((String(i.id||'').slice(-3).replace(/[^0-9]/g,'').padStart(3,'0'))||'001'); return (SG[i.status]||'FCV')+n; }
@@ -4901,7 +4902,7 @@ window.FCLogo = (function(){
     var url=i.videoMp4,avisoArq='';
     try{
       await db.ref('fcosta_imoveis/'+id+'/videoMp4').remove();
-      try{ await st.refFromURL(url).delete(); }
+      if(/res\.cloudinary\.com/.test(url)){ avisoArq=' O link saiu do site. O arquivo continua no Cloudinary: para apagar, entre em Media Library, ache o vídeo e exclua.'; } else try{ var mb=(url.match(/\/b\/([^\/]+)\/o\//)||[])[1]; await (mb?stFor(mb):st).refFromURL(url).delete(); }
       catch(e){ var c=(e&&e.code)||''; if(/object-not-found/.test(c)) avisoArq=''; else avisoArq=' O link saiu do site, mas o arquivo não foi apagado do Storage ('+(c||e.message||e)+'). Apague em Storage → videos no console do Firebase.'; }
       delete imoveis[id].videoMp4;
       msg('✅ Vídeo removido do imóvel '+cod(i)+'.'+avisoArq, avisoArq?'err':'ok');
@@ -4917,6 +4918,7 @@ window.FCLogo = (function(){
     try{ if(!firebase.apps.length) firebase.initializeApp(CFG); db=firebase.database(); st=firebase.storage(); }catch(e){ return false; }
     return true;
   }
+  function stFor(b){ var x=firebase.app().storage('gs://'+b); try{ x.setMaxUploadRetryTime(15000); x.setMaxOperationRetryTime(15000); }catch(e){} return x; }
   function msg(t,c){ var m=$('pubMsg'); m.textContent=t; m.className=c||''; }
   function achaVideos(){
     var urls=[],out=[];
@@ -4974,11 +4976,21 @@ window.FCLogo = (function(){
       if(!blob||!blob.size){ throw new Error('Nenhum vídeo selecionado.'); }
       var tipo=blob.type||'video/mp4';
       var ext=/webm/i.test(tipo)?'webm':'mp4';
-      var ref=st.ref('videos/tour_'+id+'_'+Date.now()+'.'+ext);
       var bar=$('pubBar'); bar.style.display='block'; bar.firstChild.style.width='0%';
+      msg('Conectando ao Cloudinary…','');
       var url=await new Promise(function(ok,fail){
-        var t=ref.put(blob,{contentType:tipo});
-        t.on('state_changed',function(s){ var p=Math.round(100*s.bytesTransferred/s.totalBytes); bar.firstChild.style.width=p+'%'; msg('Enviando… '+p+'%',''); },fail,function(){ t.snapshot.ref.getDownloadURL().then(ok,fail); });
+        var fd=new FormData(); fd.append('file',blob,'tour_'+id+'.'+ext); fd.append('upload_preset',CLOUD_PRESET);
+        var x=new XMLHttpRequest();
+        x.open('POST','https://api.cloudinary.com/v1_1/'+CLOUD_NAME+'/video/upload');
+        x.upload.onprogress=function(ev){ if(ev.lengthComputable){ var p=Math.round(100*ev.loaded/ev.total); bar.firstChild.style.width=p+'%'; msg('Enviando… '+p+'%',''); } };
+        x.onerror=function(){ fail(new Error('Cloudinary: sem conexão ou bloqueado pelo navegador.')); };
+        x.ontimeout=function(){ fail(new Error('Cloudinary: tempo esgotado.')); };
+        x.onload=function(){
+          var r={}; try{ r=JSON.parse(x.responseText); }catch(e){}
+          if(x.status>=200&&x.status<300&&r.secure_url){ ok(r.secure_url.replace(/\.[a-z0-9]+$/i,'.mp4')); }
+          else fail(new Error('Cloudinary: '+((r.error&&r.error.message)||('erro '+x.status))));
+        };
+        x.send(fd);
       });
       msg('Gravando no imóvel…','');
       await db.ref('fcosta_imoveis/'+id).update({videoMp4:url});
@@ -4987,7 +4999,9 @@ window.FCLogo = (function(){
       mostraRef(); carregaImoveis(true);
     }catch(e){
       var m=(e&&(e.code||e.message))||String(e);
-      if(/unauthorized|permission|denied|403/i.test(m)) msg('O Firebase bloqueou o envio (regras do Storage/Database). Plano B: baixe o vídeo, hospede o MP4 e cole o link no campo de vídeo MP4 do painel ADM. Detalhe: '+m,'err');
+      if(/^Cloudinary/.test(m)) msg(m+(/preset/i.test(m)?' — crie o preset "'+CLOUD_PRESET+'" (Signing mode: Unsigned) em Settings → Upload → Upload presets.':''),'err');
+      else if(/unauthorized|permission|denied|403/i.test(m)) msg('Bloqueado pelas regras do Firebase ('+m+'). No console: Storage → Regras → permita gravar em videos/ (e Realtime Database → Regras para fcosta_imoveis). Plano B: hospede o MP4 e cole o link no painel ADM.','err');
+      else if(/retry-limit|bucket-not-found|unknown|network|404|0/i.test(m)) msg('Não consegui falar com o Storage ('+m+'). Causas comuns: o Storage ainda não foi ativado no console do Firebase (Build → Storage → Começar), regras fechadas, ou o bucket tem outro nome. Me mande esse código de erro.','err');
       else msg('Erro: '+m,'err');
     }finally{ busy=false; $('pubGo').disabled=false; }
   }
