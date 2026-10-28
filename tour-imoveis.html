@@ -3489,13 +3489,12 @@ window.FCLogo = (function(){
       function drawLogo(x, lx, ly){ x.save(); x.globalAlpha = op; x.imageSmoothingQuality = 'high'; x.drawImage(img, lx, ly, lw, lh); x.restore(); }
       if(!proj){ var c0 = mk(lw, lh); drawLogo(c0.getContext('2d'), 0, 0); return c0; }
       var h0 = hasImg ? lh : Math.round(S * .6), gap = hasImg ? Math.round(S * .12) : 0;
-      // 1) ao lado da logo (até 2 linhas, letra não menor que ~28% da altura da logo)
-      var bb = null, stacked = false;
-      var sideW = W - mg*2 - lw - gap;
-      if(!hasImg) bb = bubble(proj, Math.max(22, Math.round(h0 * .5)), 14, W - mg*2, 3);
-      else if(sideW >= Math.round(W * .22)) bb = bubble(proj, Math.max(20, Math.round(h0 * .46)), Math.max(18, Math.round(h0 * .28)), sideW, 2);
-      // 2) senão, embaixo da logo, em até 3 linhas
-      if(!bb){ stacked = true; bb = bubble(proj, Math.max(24, Math.round(base * .042)), 14, W - mg*2, 3); }
+      // Logo e nome do projeto SEPARADOS: o nome fica embaixo da logo, com tamanho próprio
+      // (controle "Tamanho do nome do projeto"), sem depender da altura da logo.
+      var nsEl = g('NSize'), ns = Math.min(2, Math.max(.4, (+(nsEl && nsEl.value) || 100) / 100));
+      var bb = null, stacked = true;
+      gap = hasImg ? Math.round(S * .16) : 0;
+      bb = bubble(proj, Math.max(14, Math.round(base * .04 * ns)), 12, W - mg*2, 3);
       // 3) último recurso: letra pequena, até 6 linhas (jamais corta)
       if(!bb) bb = bubble(proj, 14, 8, W - mg*2, 6);
       var bw = bb.width, bh = bb.height, c, x;
@@ -3538,8 +3537,10 @@ window.FCLogo = (function(){
       '<button type="button" class="file-btn" id="lgBReset">Remover</button></span></div>' +
       '<div class="audio-name" id="lgBName" style="margin:6px 0;">Nenhuma logo da construtora (envie um PNG com fundo transparente, se tiver).</div>' +
       '<div class="toggle-row" style="margin:6px 0 4px;"><input type="checkbox" id="lgBOn" checked><label for="lgBOn" style="margin:0;">Mostrar a logo e o nome do projeto no vídeo</label></div>' +
-      '<label class="sl" for="lgBProj">Nome do projeto (aparece ao lado da logo)</label>' +
+      '<label class="sl" for="lgBProj">Nome do projeto (aparece separado, embaixo da logo)</label>' +
       '<div class="field" style="margin:0 0 4px;"><input type="text" id="lgBProj" maxlength="50" placeholder="Ex.: Residencial Vista Verde"></div>' +
+      '<label class="sl" for="lgBNSize">Tamanho do nome do projeto</label>' +
+      '<input type="range" id="lgBNSize" min="50" max="200" step="5" value="100"><div class="time-scale"><span>Menor</span><span>Maior</span></div>' +
       '<label class="sl" for="lgBPos">Posição</label>' +
       '<select id="lgBPos"><option value="tr" selected>Canto superior direito</option><option value="tl">Canto superior esquerdo</option><option value="tc">Topo, centralizada</option><option value="br">Canto inferior direito</option></select>' +
       '<label class="sl" for="lgBSize">Tamanho da logo</label>' +
