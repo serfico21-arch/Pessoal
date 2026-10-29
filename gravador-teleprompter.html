@@ -103,6 +103,7 @@ canvas#out.mir{transform:scaleX(-1)}
 .vu i{display:block;height:100%;width:0;background:var(--gold);border-radius:6px;transition:width .08s}
 #outbox audio{width:100%;display:none}
 #bMp3{width:100%;margin-top:10px}
+#bTv{width:100%;margin-top:10px}
 
 /* painel (gaveta no celular, coluna no computador) */
 .veil{position:fixed;inset:0;background:rgba(4,5,9,.55);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .3s;z-index:20}
@@ -348,6 +349,7 @@ h3{font-size:1.2rem}
       <button class="btn" id="bShare">Compartilhar</button>
     </div>
     <button class="btn" id="bMp3">Baixar áudio MP3 (com música)</button>
+    <button class="btn p" id="bTv">📺 Enviar para a TV FCosta</button>
     <p class="hint" id="saveHint"></p>
   </div>
 </div>
@@ -719,6 +721,7 @@ async function begin(){
     pv.style.display=isA?'none':'block';pa.style.display=isA?'block':'none';
     $('resTitle').textContent=isA?'Sua narração':'Sua gravação';
     $('bMp3').style.display=isA?'none':'flex';
+    $('bTv').style.display=isA?'none':'flex';
     $('bSave').textContent=isA?'Baixar MP3':'Baixar vídeo ('+ext().toUpperCase()+')';
     $('saveHint').textContent='';
     $('outbox').style.display='flex';updLock();
@@ -803,6 +806,22 @@ $('bSave').onclick=async()=>{
   doSave(blob,'gravacao-'+stamp()+'.'+ext(),'vídeo');
 };
 $('bMp3').onclick=async()=>{const m=await needMp3();if(m)doSave(m,'audio-'+stamp()+'.mp3','áudio')};
+$('bTv').onclick=()=>{
+  if(!blob||outKind!=='video'){toast('Grave um vídeo primeiro.');return}
+  const b=$('bTv');b.disabled=true;b.textContent='Enviando para a TV…';
+  const volta=()=>{b.disabled=false;b.textContent='📺 Enviar para a TV FCosta'};
+  let r;
+  try{r=indexedDB.open('tvfc',1)}catch(e){volta();toast('Este navegador não consegue enviar para a TV. Use Baixar vídeo.');return}
+  r.onupgradeneeded=()=>{try{r.result.createObjectStore('vid')}catch(e){}};
+  r.onerror=()=>{volta();toast('Não foi possível enviar para a TV. Use Baixar vídeo.')};
+  r.onsuccess=()=>{
+    const d=r.result;
+    if(!d.objectStoreNames.contains('vid')){volta();toast('Abra a TV FCosta uma vez neste aparelho e tente de novo.');return}
+    const tx=d.transaction('vid','readwrite');tx.objectStore('vid').put(blob,'inbox');
+    tx.oncomplete=()=>{toast('Vídeo enviado! Abrindo a TV FCosta…');setTimeout(()=>{location.href='tv-fcosta.html?gravado=1'},700)};
+    tx.onerror=tx.onabort=()=>{volta();toast('Não coube no aparelho. Use Baixar vídeo.')};
+  };
+};
 $('bShare').onclick=async()=>{
   let b=blob,name='gravacao.'+ext();
   if(outKind==='audio'){b=await needMp3();name='narracao.mp3'}

@@ -200,6 +200,18 @@ body:not(.ed) .ed-only{display:none!important}
 .lk button{flex:none;height:36px;padding:0 16px;border:0;border-radius:18px;background:var(--ac);color:var(--acx);font:500 14px/20px var(--sans);cursor:pointer}
 .lk button:hover{opacity:.9}
 .lk.hide{display:none}
+#rec{position:fixed;top:0;left:0;right:0;bottom:0;z-index:40;background:#000;display:none;flex-direction:column}
+#rec.on{display:flex}
+#rec video{flex:1;min-height:0;width:100%;object-fit:contain;background:#000}
+#rec .rt{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));left:0;right:0;text-align:center;color:#fff;font:500 16px/24px var(--sans);text-shadow:0 1px 4px #000;pointer-events:none}
+#rec .rt b{display:inline-block;padding:2px 12px;border-radius:14px;background:rgba(0,0,0,.55)}
+#rec .rt.go b{background:#d00}
+#rec .rb{display:flex;align-items:center;justify-content:space-around;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px));background:#000}
+#rec .rb button{border:0;color:#fff;background:#333;border-radius:24px;height:48px;min-width:48px;padding:0 16px;font:500 14px/20px var(--sans);cursor:pointer}
+#rec .rb #recG{width:72px;height:72px;border-radius:50%;background:#fff;border:5px solid #888;padding:0;position:relative}
+#rec .rb #recG::after{content:'';position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:#e00;transition:all .15s}
+#rec .rb #recG.on::after{width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:5px}
+.recI{margin:8px 0 0;padding:8px 12px;border-radius:8px;background:var(--sf);font-size:13px;line-height:18px}
 .net a,.net button{display:flex;flex-direction:column;align-items:center;gap:7px;background:none;border:0;color:var(--tx);font-size:12px;font-weight:500;text-decoration:none;cursor:pointer;padding:0}
 .net i{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:700;font-size:18px;color:#fff;font-family:Arial,sans-serif}
 .cfg{margin-top:18px;border-top:1px solid var(--bd);padding-top:12px;font-size:12px;color:var(--mut);line-height:1.5}
@@ -290,6 +302,7 @@ footer b{color:var(--tx);font-weight:500}
   <label for="fc" class="hide">Capa</label><input id="fc" class="hide" placeholder="">
   <label for="fi">Foto de capa (opcional)</label><input type="file" id="fi" accept="image/*">
   <div class="hint">Se não escolher, a capa é um quadro do próprio vídeo MP4. Aparece no WhatsApp quando você compartilha o link, após “Publicar p/ todos”.</div>
+  <button type="button" class="b p" id="recB" style="margin-top:14px;width:100%;height:44px">🎥 Gravar agora</button><div class="recI hide" id="recI"></div>
   <label for="ff">Vídeo MP4 (do computador ou celular)</label><input type="file" id="ff" accept="video/mp4,.mp4">
   <div class="hint" id="fh">Tamanho máximo: 60 MB por vídeo (cerca de 3 min em 720p comprimido). Depois de salvar, toque em “Publicar p/ todos”: o vídeo vai direto para o site e depois abrem as redes para enviar. Na primeira vez o navegador pede o token do GitHub.</div>
   <label class="chk"><input type="checkbox" id="fv"> Vídeo vertical (gravado em pé no celular)</label>
@@ -326,6 +339,7 @@ footer b{color:var(--tx);font-weight:500}
   <div class="cfg" id="cfg"></div>
 </div></div>
 <div class="ov" id="gate"><div class="sh"><div class="hh"><h4>Acesso de editor</h4><button class="x" id="xg" aria-label="Fechar">✕</button></div><p>Digite a senha para adicionar ou remover vídeos.</p><input class="gi" id="gp" type="password" autocomplete="current-password" placeholder="Senha"><div class="acts"><button class="b p" id="go">Entrar</button></div></div></div>
+<div id="rec" role="dialog" aria-label="Gravar vídeo"><video id="recV" playsinline muted autoplay></video><div class="rt" id="recT"><b>00:00</b></div><div class="rb"><button type="button" id="recX">✕ Fechar</button><button type="button" id="recG" aria-label="Gravar ou parar"></button><button type="button" id="recF">🔄 Virar</button></div></div>
 <div class="msg" id="msg"></div>
 <script type="text/plain" id="tplLand"><!DOCTYPE html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>%%TITLEH%% · TV FCosta</title><meta name="theme-color" content="#0f0f0f">%%META%%
@@ -677,10 +691,10 @@ function idb(cb){try{var r=indexedDB.open('tvfc',1);r.onupgradeneeded=function()
 function idbPut(id,blob,cb){idb(function(d){if(!d)return cb(false);var tx=d.transaction('vid','readwrite');tx.objectStore('vid').put(blob,id);tx.oncomplete=function(){cb(true);};tx.onerror=tx.onabort=function(){cb(false);};});}
 function idbGet(id,cb){idb(function(d){if(!d)return cb(null);var q=d.transaction('vid').objectStore('vid').get(id);q.onsuccess=function(){cb(q.result||null);};q.onerror=function(){cb(null);};});}
 function idbDel(id){idb(function(d){if(d)d.transaction('vid','readwrite').objectStore('vid').delete(id);});}
-function resetForm(){$('fl').value='';$('fp').value='';EDIT=null;$('form').classList.remove('edt');$('fi').value='';$('fc').value='';$('ft').value='';$('fu').value='';$('ff').value='';$('fv').checked=false;$('form').classList.remove('on');}
-$('ff').onchange=function(){var f=this.files[0];if(f&&!$('ft').value.trim())$('ft').value=f.name.replace(/\.[^.]+$/,'');};
+function resetForm(){RECF=null;$('recI').classList.add('hide');$('fl').value='';$('fp').value='';EDIT=null;$('form').classList.remove('edt');$('fi').value='';$('fc').value='';$('ft').value='';$('fu').value='';$('ff').value='';$('fv').checked=false;$('form').classList.remove('on');}
+$('ff').onchange=function(){RECF=null;$('recI').classList.add('hide');var f=this.files[0];if(f&&!$('ft').value.trim())$('ft').value=f.name.replace(/\.[^.]+$/,'');};
 $('save').onclick=function(){
-  if(EDIT){saveEdit();return;}var f=$('ff').files[0],cv=$('fc').value.trim(),t=$('ft').value.trim(),u=$('fu').value.trim(),vert=$('fv').checked,sv=$('save');
+  if(EDIT){saveEdit();return;}var f=$('ff').files[0]||RECF,cv=$('fc').value.trim(),t=$('ft').value.trim(),u=$('fu').value.trim(),vert=$('fv').checked,sv=$('save');
   if(f){
     if(f.size>60e6){toast('Vídeo com '+Math.round(f.size/1e6)+' MB: o limite é 60 MB para publicar direto no site. Comprima o vídeo e tente de novo.');return;}
     if(!t)t=f.name.replace(/\.[^.]+$/,'');
@@ -1100,6 +1114,69 @@ $('srf').onsubmit=function(e){e.preventDefault();try{$('q').blur();}catch(x){}re
   try{matchMedia('(prefers-color-scheme:dark)').addListener(upd);}catch(e){}
   upd();})();
 render();
+
+/* ---------- gravar direto na TV ---------- */
+var RECF=null,RS=null,RR=null,RC=[],RI=null,RT0=0,RFACE='environment',RMAX=180;
+function recType(){if(!window.MediaRecorder)return '';var c=['video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];for(var i=0;i<c.length;i++){try{if(MediaRecorder.isTypeSupported(c[i]))return c[i];}catch(e){}}return '';}
+function recKill(){try{if(RS)RS.getTracks().forEach(function(t){t.stop();});}catch(e){}RS=null;try{$('recV').srcObject=null;}catch(e){}}
+function recClose(){clearInterval(RI);if(RR&&RR.state==='recording'){RR.onstop=null;try{RR.stop();}catch(e){}}RR=null;recKill();$('rec').classList.remove('on');$('recG').classList.remove('on');$('recT').classList.remove('go');$('recT').firstChild.textContent='00:00';$('recF').style.display='';}
+function recCam(){
+  recKill();
+  navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:RFACE},width:{ideal:1280},height:{ideal:720}},audio:true}).then(function(st){
+    RS=st;var v=$('recV');v.srcObject=st;v.style.transform=RFACE==='user'?'scaleX(-1)':'none';try{v.play();}catch(e){}
+  },function(){toast('Não consegui abrir a câmera. Permita o uso da câmera e do microfone nas configurações do navegador.');recClose();});
+}
+function recOpen(){
+  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder)){toast('Este navegador não grava vídeo. Atualize o Chrome ou o Safari, ou escolha um arquivo.');return;}
+  $('rec').classList.add('on');recCam();
+}
+function recGo(){
+  var g=$('recG');
+  if(RR&&RR.state==='recording'){RR.stop();return;}
+  if(!RS){toast('A câmera ainda está abrindo…');return;}
+  var ty=recType(),o={videoBitsPerSecond:2000000,audioBitsPerSecond:96000};if(ty)o.mimeType=ty;
+  try{RR=new MediaRecorder(RS,o);}catch(e){try{RR=new MediaRecorder(RS);}catch(e2){toast('Não foi possível iniciar a gravação neste aparelho.');return;}}
+  RC=[];var rr=RR;
+  rr.ondataavailable=function(e){if(e.data&&e.data.size)RC.push(e.data);};
+  rr.onstop=function(){
+    clearInterval(RI);var v=$('recV'),vert=v.videoHeight>v.videoWidth,t=((rr.mimeType||ty||'video/mp4').split(';')[0])||'video/mp4',ext=/webm/.test(t)?'webm':'mp4',b=new Blob(RC,{type:t});
+    recClose();
+    if(!b.size){toast('A gravação saiu vazia. Tente de novo.');return;}
+    var d=new Date(),z=function(n){return ('0'+n).slice(-2);},nm='gravacao-'+d.getFullYear()+z(d.getMonth()+1)+z(d.getDate())+'-'+z(d.getHours())+z(d.getMinutes()),f;
+    try{f=new File([b],nm+'.'+ext,{type:t});}catch(e){f=b;f.name=nm+'.'+ext;}
+    useRec(f,vert,'Vídeo gravado em '+z(d.getDate())+'/'+z(d.getMonth()+1));
+  };
+  rr.start(1000);RT0=Date.now();g.classList.add('on');$('recT').classList.add('go');$('recF').style.display='none';
+  RI=setInterval(function(){
+    var sec=Math.floor((Date.now()-RT0)/1000),m=Math.floor(sec/60),r=sec%60;
+    $('recT').firstChild.textContent=('0'+m).slice(-2)+':'+('0'+r).slice(-2)+(sec>=RMAX-30?'  ·  acabando':'');
+    if(sec>=RMAX){toast('Chegou ao limite de 3 minutos.');if(RR&&RR.state==='recording')RR.stop();}
+  },500);
+}
+function useRec(f,vert,tit){
+  RECF=f;$('ff').value='';$('fv').checked=!!vert;
+  if(!$('ft').value.trim())$('ft').value=tit||'Vídeo gravado';
+  var mb=(f.size/1e6).toFixed(1),i=$('recI');
+  i.textContent='🎥 Vídeo gravado ('+mb+' MB) pronto. Confira o título, preencha local e preço e toque em Salvar vídeo.'+(f.size>60e6?' ⚠ Passou de 60 MB: não dá para publicar. Grave de novo, mais curto.':'');
+  i.classList.remove('hide');
+  var fm=$('form');fm.classList.add('on');fm.classList.remove('edt');EDIT=null;
+  try{fm.scrollIntoView({behavior:'smooth'});}catch(e){}
+}
+$('recB').onclick=recOpen;$('recG').onclick=recGo;$('recX').onclick=recClose;
+$('recF').onclick=function(){RFACE=RFACE==='user'?'environment':'user';recCam();};
+/* vídeo vindo do gravador-teleprompter (mesmo site): fica numa caixa de entrada */
+function checkInbox(){
+  idbGet('inbox',function(b){
+    if(!b)return;
+    if(!ED){toast('Chegou um vídeo gravado. Toque 2 vezes na logo, entre como editor e abra a página de novo.');return;}
+    var t=b.type||'video/mp4',ext=/webm/.test(t)?'webm':'mp4',f;
+    try{f=new File([b],'gravacao-teleprompter.'+ext,{type:t});}catch(e){f=b;f.name='gravacao-teleprompter.'+ext;}
+    idbDel('inbox');
+    useRec(f,false,'Vídeo gravado no Estúdio');
+    var v=document.createElement('video');v.preload='metadata';v.muted=true;v.onloadedmetadata=function(){if(v.videoHeight>v.videoWidth)$('fv').checked=true;try{URL.revokeObjectURL(v.src);}catch(e){}};v.src=URL.createObjectURL(f);
+  });
+}
+setTimeout(checkInbox,400);
 </script>
 </body>
 </html>
