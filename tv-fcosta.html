@@ -222,6 +222,12 @@ body:not(.ed) .ed-only{display:none!important}
 .shp::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(0,0,0,.8))}
 .shp .tt{position:absolute;z-index:1;left:12px;right:12px;bottom:9px;white-space:pre-line;font-size:13px;font-weight:500;line-height:18px;color:#fff;text-shadow:0 1px 4px #000}
 .shst{font-size:12px;line-height:1.45;margin:0 0 14px;padding:8px 10px;border-radius:8px}
+.cvp{margin:0 0 14px;padding:12px;border-radius:12px;background:var(--sf);font-size:13px;line-height:1.45}
+.cvp .cvt{display:flex;justify-content:space-between;gap:8px;font-weight:500}
+.cvp .cvb{height:6px;border-radius:3px;background:var(--sf2);margin:10px 0 8px;overflow:hidden}
+.cvp .cvb i{display:block;height:100%;width:0;background:var(--ac);transition:width .25s}
+.cvp .cvs{color:var(--mut);font-size:12px}
+.cvp .cvr{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .shst.ok{background:rgba(31,157,85,.2);color:#2ba55f}.shst.no{background:rgba(245,100,80,.14);color:#e5493a}
 .msg{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);max-width:calc(100% - 32px);background:#212121;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:30;box-shadow:0 4px 16px rgba(0,0,0,.4)}
 .msg.on{opacity:1}
@@ -334,7 +340,7 @@ footer b{color:var(--tx);font-weight:500}
   <div class="hh"><h4>Compartilhar</h4><button class="x" id="xs" aria-label="Fechar">✕</button></div>
   <p id="shT"></p>
   <div id="shP"></div>
-  <div class="net" id="net"></div>
+  <div class="net" id="net"></div><div id="cvBox"></div>
   <div class="lk" id="lk"><input id="lkI" type="text" readonly aria-label="Link do vídeo"><button type="button" id="lkB">Copiar</button></div>
   <div class="cfg" id="cfg"></div>
 </div></div>
@@ -614,9 +620,80 @@ function videoBlob(v,cb){
 }
 function canFiles(){try{return !!(navigator.canShare&&navigator.share&&navigator.canShare({files:[new File(['x'],'a.mp4',{type:'video/mp4'})]}));}catch(e){return false;}}
 function fileOf(bl,t){var ext=/webm/.test(bl.type)?'webm':'mp4',nm=(t||'video').replace(/[^\wÀ-ÿ\- ]+/g,'').trim().slice(0,40)||'video';return new File([bl],nm+'.'+ext,{type:bl.type||'video/mp4'});}
+/* ---------- formato certo para cada rede: 9:16 (Stories/Reels/TikTok) e 16:9 (Facebook no PC) ---------- */
+var FMTS={st:{w:1080,h:1920,n:'Stories, Reels e TikTok',t:'9:16'},fb:{w:1920,h:1080,n:'Facebook no PC',t:'16:9'}},FMTC={vid:'',m:{}},CVJ=null;
+function fmtFile(bl,t,key){var f=fileOf(bl,t),nm=f.name.replace(/(\.\w+)$/,'-'+(key==='st'?'stories':'facebook')+'$1');return new File([bl],nm,{type:f.type});}
+function fmtMB(n){return (n/1048576).toFixed(1).replace('.',',');}
+function fmtConvert(bl,key,prog,done,fail){
+  var F=FMTS[key],W=F.w,H=F.h,u=URL.createObjectURL(bl),v=document.createElement('video'),cv=document.createElement('canvas'),ctx=cv.getContext('2d');
+  var AC=window.AudioContext||window.webkitAudioContext,ac=null,dst=null,rec=null,ch=[],ui=0,di=0,sf=0,started=false,ended=false,dead=false,ty='';
+  cv.width=W;cv.height=H;v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';v.src=u;
+  if(!window.MediaRecorder||!cv.captureStream){URL.revokeObjectURL(u);fail('Este navegador não consegue converter o vídeo. Use o Chrome ou o Safari atualizado.');return;}
+  try{if(AC){ac=new AC();dst=ac.createMediaStreamDestination();ac.createMediaElementSource(v).connect(dst);if(ac.resume)ac.resume();}}catch(e){ac=null;dst=null;}
+  function clean(){dead=true;clearInterval(ui);clearInterval(di);clearTimeout(sf);try{v.pause();}catch(e){}try{v.removeAttribute('src');v.load();}catch(e){}try{if(ac)ac.close();}catch(e){}URL.revokeObjectURL(u);}
+  CVJ={cancel:function(){if(dead)return;try{if(rec&&rec.state!=='inactive'){rec.onstop=null;rec.stop();}}catch(e){}clean();CVJ=null;}};
+  function bad(m){if(dead)return;try{if(rec&&rec.state!=='inactive'){rec.onstop=null;rec.stop();}}catch(e){}clean();CVJ=null;fail(m);}
+  function begin(){
+    if(started||dead)return;started=true;
+    var vw=v.videoWidth,vh=v.videoHeight;if(!vw||!vh)return bad('Não consegui ler a imagem deste vídeo.');
+    var s=vw/vh,t=W/H;
+    if(Math.abs(s-t)/t<0.06){clean();CVJ=null;done(bl,true);return;}
+    var cover=key==='st'||s>=1.5,sc=cover?Math.max(W/vw,H/vh):Math.min(W/vw,H/vh),dw=vw*sc,dh=vh*sc,dx=(W-dw)/2,dy=(H-dh)/2;
+    function draw(){if(!cover){ctx.fillStyle='#0e1726';ctx.fillRect(0,0,W,H);}try{ctx.drawImage(v,dx,dy,dw,dh);}catch(e){}}
+    var dur=isFinite(v.duration)&&v.duration>0?v.duration:0;
+    var bps=dur?Math.max(2500000,Math.min(6000000,Math.floor(55*8e6/dur)-128000)):5000000;
+    var tracks=cv.captureStream(30).getVideoTracks();if(dst)tracks=tracks.concat(dst.stream.getAudioTracks());
+    ty=recType();var o={videoBitsPerSecond:bps,audioBitsPerSecond:128000};if(ty)o.mimeType=ty;
+    try{rec=new MediaRecorder(new MediaStream(tracks),o);}catch(e){return bad('Não consegui iniciar a gravação neste aparelho.');}
+    rec.ondataavailable=function(ev){if(ev.data&&ev.data.size)ch.push(ev.data);};
+    rec.onstop=function(){
+      var mt=((rec.mimeType||ty||'video/webm').split(';')[0])||'video/webm',out=new Blob(ch,{type:mt});
+      clean();CVJ=null;
+      if(out.size<1000)return fail('A conversão saiu vazia. Mantenha esta tela aberta e tente de novo.');
+      done(out,false);
+    };
+    draw();rec.start(500);
+    di=setInterval(draw,33);
+    ui=setInterval(function(){prog(dur?Math.min(1,v.currentTime/dur):0,document.hidden);},250);
+    function fin(){if(ended||dead)return;ended=true;draw();setTimeout(function(){try{if(rec&&rec.state!=='inactive')rec.stop();}catch(e){bad('Falha ao finalizar o vídeo.');}},300);}
+    v.onended=fin;v.onerror=function(){if(!ended)bad('O navegador não conseguiu reproduzir este vídeo.');};
+    sf=setTimeout(fin,((dur||600)+20)*1000);
+  }
+  v.onplaying=begin;
+  var pp=v.play();if(pp&&pp.catch)pp.catch(function(){bad('O navegador não deixou iniciar. Toque de novo no botão.');});
+}
+function fmtStart(vv,key,bl){
+  var F=FMTS[key],box=$('cvBox'),fk=vv.p.id+'|'+key;
+  if(CVJ)CVJ.cancel();
+  if(FMTC.vid!==vv.p.id){FMTC={vid:vv.p.id,m:{}};}
+  function ready(out,same){
+    FMTC.m[key]={bl:out,same:same};
+    var ext=/webm/.test(out.type)?'webm':'mp4';
+    box.innerHTML='<div class="cvp"><div class="cvt"><span></span><b>'+fmtMB(out.size)+' MB</b></div><div class="cvs"></div><div class="cvr"></div></div>';
+    box.querySelector('.cvt span').textContent=same?'Já está em '+F.t+' · '+F.n:'Pronto em '+F.t+' · '+F.n;
+    box.querySelector('.cvs').textContent=(same?'Este vídeo já tem o formato certo, sai sem perder qualidade.':(key==='st'?'Vídeo vertical, preenche a tela toda.':'Vídeo horizontal, tela de computador.'))+(ext==='webm'?' Atenção: este aparelho gerou WebM; no celular o MP4 é o ideal.':'');
+    var r=box.querySelector('.cvr'),cf=canFiles(),f=fmtFile(out,vv.t,key);
+    function bt(txt,cls,fn){var b=document.createElement('button');b.type='button';b.className='b '+cls;b.textContent=txt;b.onclick=fn;r.appendChild(b);}
+    function save(){var a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();toast(cf?'Vídeo salvo. Agora abra o app e escolha este vídeo na galeria.':'Vídeo baixado em '+F.t+'.');}
+    if(cf)bt('Enviar','p',function(){navigator.share({files:[f],title:vv.t,text:shareTx(vv)}).catch(function(e){if(e&&e.name!=='AbortError')toast('Não foi possível abrir o compartilhar.');});});
+    bt(cf?'Salvar na galeria':'Baixar vídeo',cf?'':'p',save);
+  }
+  function fail(m){box.innerHTML='<div class="cvp"><div class="cvt"><span>Não deu certo</span></div><div class="cvs"></div></div>';box.querySelector('.cvs').textContent=m;}
+  if(FMTC.m[key]){ready(FMTC.m[key].bl,FMTC.m[key].same);return;}
+  box.innerHTML='<div class="cvp"><div class="cvt"><span></span><b>0%</b></div><div class="cvb"><i></i></div><div class="cvs"></div><div class="cvr"></div></div>';
+  box.querySelector('.cvt span').textContent='Preparando em '+F.t+' · '+F.n;
+  var cs=box.querySelector('.cvs');cs.textContent='Mantenha esta tela aberta até terminar.';
+  var cb=document.createElement('button');cb.type='button';cb.className='b';cb.textContent='Cancelar';cb.onclick=function(){if(CVJ)CVJ.cancel();box.innerHTML='';};box.querySelector('.cvr').appendChild(cb);
+  fmtConvert(bl,key,function(p,hid){box.querySelector('.cvt b').textContent=Math.round(p*100)+'%';box.querySelector('.cvb i').style.width=Math.round(p*100)+'%';cs.textContent=hid?'Volte para esta aba: a conversão para quando a tela fica em segundo plano.':'Mantenha esta tela aberta até terminar.';},ready,fail);
+}
+function fmtGo(vv,key,pre){
+  if(pre){fmtStart(vv,key,pre);return;}
+  toast('Preparando o vídeo…');
+  videoBlob(vv,function(b){if(!b){toast('Não consegui abrir o vídeo neste aparelho.');return;}fmtStart(vv,key,b);});
+}
 function openShare(L,t,loc){
   var tx=(cur?shareTx(cur):t+' — TV FCosta Corretor'),e=encodeURIComponent,n=$('net'),gdNote=null;n.innerHTML='';[].forEach.call(document.querySelectorAll('.gdn2'),function(x){x.remove();});
-  $('shT').textContent=t;
+  $('shT').textContent=t;if(CVJ)CVJ.cancel();$('cvBox').innerHTML='';
   function it(lbl,bg,ic,o){
     var el=document.createElement(o.href?'a':'button');
     if(o.href){el.href=o.href;if(o.href.indexOf('http')===0){el.target='_blank';el.rel='noopener';}}
@@ -646,8 +723,10 @@ function openShare(L,t,loc){
       }
       if(pre)sv(pre);else videoBlob(vv,sv);
     }});
+    it('Stories e Reels','linear-gradient(45deg,#f9a03f,#e1306c,#833ab4)','<span style="font-size:13px;letter-spacing:-.3px">9:16</span>',{fn:function(){fmtGo(vv,'st',pre);}});
+    it('Facebook PC','#1877F2','<span style="font-size:13px;letter-spacing:-.3px">16:9</span>',{fn:function(){fmtGo(vv,'fb',pre);}});
     var gd=document.createElement('div');gd.className='gdn2';
-    gd.textContent='WhatsApp recebe o vídeo direto. Facebook, Instagram e TikTok quase nunca aceitam vídeo vindo daqui: toque em Salvar na galeria, abra o app e escolha o vídeo.'+(ED?' Ou publique e mande o link.':'');
+    gd.textContent='Stories, Reels e TikTok: toque em Stories e Reels (vídeo vertical 9:16). Facebook no computador: toque em Facebook PC (horizontal 16:9). Depois toque em Enviar ou Salvar na galeria. WhatsApp recebe o vídeo direto.'+(ED?' Ou publique e mande o link.':'');
     gdNote=gd;
   }
   if(!un){
@@ -682,7 +761,7 @@ function shPreview(L){
   d.querySelector('.tt').textContent=v.t+(infoOf(v)?'\n'+infoOf(v):'');box.appendChild(d);
   bannerSrc(v,function(src){if(!src)return;d.style.backgroundImage='url("'+(typeof src==='string'?src:URL.createObjectURL(src))+'")';});
 }
-function closeShare(){$('ov').classList.remove('on');}
+function closeShare(){if(CVJ)CVJ.cancel();$('ov').classList.remove('on');}
 $('xs').onclick=closeShare;$('ov').onclick=function(ev){if(ev.target===this)closeShare();};
 function btn(a,t,c,fn){var b=document.createElement('button');b.className='b '+c;b.textContent=t;b.onclick=fn;a.appendChild(b);}
 function copy(t){
