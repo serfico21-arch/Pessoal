@@ -298,6 +298,7 @@ footer b{color:var(--tx);font-weight:500}
 <div id="splash" aria-hidden="true"><div class="lg"></div><b>TV FCosta</b><i class="spb"></i></div>
 <header class="top"><div class="w"><a class="brand" id="brand" href="#" aria-label="TV FCosta - início"><div class="lg" role="img" aria-label="Logo FCosta Corretor de Imóveis"></div><h1>TV FCosta</h1></a><form class="sr" id="srf" role="search" action="#" onsubmit="return false"><input id="q" type="search" placeholder="Pesquisar imóveis" autocomplete="off" enterkeyhint="search" aria-label="Pesquisar imóveis"><button type="submit" aria-label="Pesquisar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21" stroke-linecap="round"/></svg></button></form><div class="tools"><button class="ib" id="shs" type="button" aria-label="Compartilhar a TV FCosta"></button><button class="ib" id="thm" type="button" aria-label="Alternar tema claro e escuro"></button><div class="cr">CRECI-SP 294791-F<br>CNAI 52708</div></div></div></header>
 <div class="edbar ed-only"><span>MODO EDITOR</span><button class="b" id="pub">📦 Publicar p/ todos</button><button class="b" id="pw">🔑 Trocar senha</button><button class="b" id="out">Sair</button></div>
+<div class="hide" id="shcw" style="padding:10px 16px 0"><button class="b p" id="shc" type="button">Compartilhar o canal completo</button></div>
 <div class="chips hide" id="chips" role="group" aria-label="Filtros"></div>
 <main><div class="w">
 <div class="form" id="form">
@@ -429,16 +430,16 @@ document.getElementById('pl').onclick=function(){
   sc.innerHTML='';sc.className+=' go';sc.appendChild(f);
 };
 document.getElementById('sh').onclick=function(){
-  var L=C.self,T=C.t+' \u2014 TV FCosta Corretor',e=encodeURIComponent,n=document.getElementById('nt'),o=document.getElementById('ovl');
+  var L=C.self,CH=C.main||L,T='\uD83D\uDCFA TV FCosta \u2014 im\u00f3veis em v\u00eddeo\n'+C.t,TC=T+'\n\n\u25B6 Veja todos os im\u00f3veis do canal: '+CH,MSG=T+'\n'+L+'\n\n\u25B6 Veja todos os im\u00f3veis do canal: '+CH,e=encodeURIComponent,n=document.getElementById('nt'),o=document.getElementById('ovl');
   n.innerHTML='';
   function it(lbl,bg,ic,h,fn){var el=document.createElement(h?'a':'button');if(h){el.href=h;el.target='_blank';el.rel='noopener';}el.innerHTML='<i style="background:'+bg+'">'+ic+'</i>'+lbl;if(fn)el.onclick=fn;n.appendChild(el);}
-  if(navigator.share)it('Mais apps','#606060','\u22EF','',function(){navigator.share({title:C.t,text:T,url:L}).catch(function(){});});
-  it('WhatsApp','#25D366','\u2706','https://wa.me/?text='+e(T+'\n'+L));
+  if(navigator.share)it('Mais apps','#606060','\u22EF','',function(){navigator.share({title:C.t,text:TC,url:L}).catch(function(){});});
+  it('WhatsApp','#25D366','\u2706','https://wa.me/?text='+e(MSG));
   it('Facebook','#1877F2','f','https://www.facebook.com/sharer/sharer.php?u='+e(L));
-  it('X','#000','\uD835\uDD4F','https://twitter.com/intent/tweet?text='+e(T)+'&url='+e(L));
-  it('Telegram','#2AABEE','\u27A4','https://t.me/share/url?url='+e(L)+'&text='+e(T));
-  it('E-mail','#6b7280','\u2709','mailto:?subject='+e(T)+'&body='+e(T+'\n'+L));
-  it('SMS','#34c759','\uD83D\uDCAC','sms:?&body='+e(T+' '+L));
+  it('X','#000','\uD835\uDD4F','https://twitter.com/intent/tweet?text='+e(TC)+'&url='+e(L));
+  it('Telegram','#2AABEE','\u27A4','https://t.me/share/url?url='+e(L)+'&text='+e(TC));
+  it('E-mail','#6b7280','\u2709','mailto:?subject='+e(C.t+' \u2014 TV FCosta')+'&body='+e(MSG));
+  it('SMS','#34c759','\uD83D\uDCAC','sms:?&body='+e(MSG));
   var i=document.getElementById('lki'),b=document.getElementById('lkb');i.value=L;b.textContent='Copiar';
   i.onfocus=function(){this.select();};
   b.onclick=function(){function ok(){b.textContent='Copiado';setTimeout(function(){b.textContent='Copiar';},2000);}
@@ -669,6 +670,7 @@ function show(){
   var h=(location.hash||'').slice(1)||(!HOME&&SH&&parse(SH.u)?'v-'+parse(SH.u).id:'');
   var f=list.filter(function(v){return token(v)===h;})[0],home=!f;
   cur=f||list[0];
+  $('shcw').classList.toggle('hide',!home);
   $('home').classList.toggle('hide',!home);$('stage').classList.toggle('hide',home);$('chips').classList.toggle('hide',!home||($('chips')._n||0)<2);
   if(home){$('screen').innerHTML='';document.title='TV FCosta Corretor';renderHome();return;}
   document.title=cur.t+' · TV FCosta';
@@ -788,7 +790,7 @@ function fmtGo(vv,key,pre){
   videoBlob(vv,function(b){if(!b){toast('Não consegui abrir o vídeo neste aparelho.');return;}fmtStart(vv,key,b);});
 }
 function openShare(L,t,loc){
-  var tx=(cur?shareTx(cur):t+' — TV FCosta Corretor'),e=encodeURIComponent,n=$('net'),gdNote=null;n.innerHTML='';[].forEach.call(document.querySelectorAll('.gdn2'),function(x){x.remove();});
+  var CH=baseUrl(),ch='\n\n\u25B6 Veja todos os im\u00f3veis do canal: '+CH,tx='\uD83D\uDCFA TV FCosta \u2014 im\u00f3veis em v\u00eddeo\n'+(cur?shareTx(cur):t+' — TV FCosta Corretor'),e=encodeURIComponent,n=$('net'),gdNote=null;n.innerHTML='';[].forEach.call(document.querySelectorAll('.gdn2'),function(x){x.remove();});
   $('shT').textContent=t;if(CVJ)CVJ.cancel();$('cvBox').innerHTML='';
   function it(lbl,bg,ic,o){
     var el=document.createElement(o.href?'a':'button');
@@ -826,16 +828,16 @@ function openShare(L,t,loc){
     gdNote=gd;
   }
   if(!un){
-  if(navigator.share)it('Mais apps','linear-gradient(135deg,#8a6420,#e6c45f)','⋯',{fn:function(){navigator.share({title:t,text:tx,url:L}).catch(function(){});closeShare();}});
-  it('WhatsApp','#25D366','✆',{href:'https://wa.me/?text='+e(tx+'\n'+L)});
+  if(navigator.share)it('Mais apps','linear-gradient(135deg,#8a6420,#e6c45f)','⋯',{fn:function(){navigator.share({title:t,text:tx+ch,url:L}).catch(function(){});closeShare();}});
+  it('WhatsApp','#25D366','✆',{href:'https://wa.me/?text='+e(tx+'\n'+L+ch)});
   it('Instagram','linear-gradient(45deg,#f9a03f,#e1306c,#833ab4)','◎',{fn:function(){copy(L);toast('Link copiado! Cole no Instagram (stories, direct ou bio).');setTimeout(function(){window.open('https://www.instagram.com/','_blank');},900);closeShare();}});
   it('Facebook','#1877F2','f',{href:'https://www.facebook.com/sharer/sharer.php?u='+e(L)});
   it('TikTok','#111;border:1px solid #444','♪',{fn:function(){copy(L);toast('Link copiado! Cole no TikTok (bio ou mensagem).');setTimeout(function(){window.open('https://www.tiktok.com/','_blank');},900);closeShare();}});
-  it('X (Twitter)','#000;border:1px solid #444','𝕏',{href:'https://twitter.com/intent/tweet?text='+e(tx)+'&url='+e(L)});
-  it('Telegram','#2AABEE','➤',{href:'https://t.me/share/url?url='+e(L)+'&text='+e(tx)});
+  it('X (Twitter)','#000;border:1px solid #444','𝕏',{href:'https://twitter.com/intent/tweet?text='+e(tx+ch)+'&url='+e(L)});
+  it('Telegram','#2AABEE','➤',{href:'https://t.me/share/url?url='+e(L)+'&text='+e(tx+ch)});
   it('LinkedIn','#0A66C2','in',{href:'https://www.linkedin.com/sharing/share-offsite/?url='+e(L)});
-  it('E-mail','#6b7280','✉',{href:'mailto:?subject='+e(tx)+'&body='+e(tx+'\n'+L)});
-  it('SMS','#34c759','💬',{href:'sms:?&body='+e(tx+' '+L)});
+  it('E-mail','#6b7280','✉',{href:'mailto:?subject='+e(t+' \u2014 TV FCosta')+'&body='+e(tx+'\n'+L+ch)});
+  it('SMS','#34c759','💬',{href:'sms:?&body='+e(tx+' '+L+ch)});
   }
   if(gdNote)n.parentNode.insertBefore(gdNote,n.nextSibling);
   var lk=$('lk');lk.classList.toggle('hide',!!un);$('lkI').value=L;
@@ -1071,7 +1073,7 @@ function landingHtml(o,p,img,w,h,pimg,self,main){
   function mt(a,b,c){return '<meta '+a+'="'+b+'" content="'+ea(c)+'">';}
   m+=mt('property','og:type','website')+mt('property','og:locale','pt_BR')+mt('property','og:site_name','TV FCosta Corretor')+mt('property','og:title',o.t)+mt('property','og:description',ds)+mt('property','og:url',self)+mt('property','og:image',img)+mt('property','og:image:width',w)+mt('property','og:image:height',h)+mt('property','og:image:alt',o.t)+mt('name','twitter:card','summary_large_image')+mt('name','twitter:title',o.t)+mt('name','twitter:description',ds)+mt('name','twitter:image',img);
   var fb=p.k==='yt'?'https://i.ytimg.com/vi/'+p.id+'/hqdefault.jpg':'';
-  var cfg=JSON.stringify({k:p.k,emb:p.emb,open:p.open,t:o.t,fb:fb,self:self}).replace(/</g,'\\u003c');
+  var cfg=JSON.stringify({k:p.k,emb:p.emb,open:p.open,t:o.t,fb:fb,self:self,main:main}).replace(/</g,'\\u003c');
   var t=$('tplLand').textContent.replace(/<\\\/script>/g,'<'+'/script>');
   var R={INFO:ea(inf),TITLEH:ea(o.t),META:m,VERT:o.v?' v':'',IMG:ea(pimg),TITLE:ea(o.t),CFG:cfg,MAIN:ea(main),OPEN:ea(p.open),WA:'https://wa.me/5511993509109?text='+encodeURIComponent('Olá! Vi o vídeo "'+o.t+'" na TV FCosta e quero saber mais.')};
   return t.replace(/%%(\w+)%%/g,function(_,k){return R[k]!==undefined?R[k]:'';});
@@ -1316,7 +1318,7 @@ function onHash(){if((location.hash||'').slice(1))HOME=false;show();}
 window.addEventListener('hashchange',onHash);
 function goHome(){HOME=true;if((location.hash||'').slice(1)){location.hash='';}else show();window.scrollTo(0,0);}
 $('brand').onclick=function(e){e.preventDefault();goHome();};
-$('shs').innerHTML=ICO_SHARE;$('shs').onclick=openSite;
+$('shs').innerHTML=ICO_SHARE;$('shs').onclick=openSite;$('shc').onclick=openSite;
 $('q').oninput=function(){Q=this.value;if((location.hash||'').slice(1)||(!HOME&&SH)){HOME=true;if((location.hash||'').slice(1)){location.hash='';return;}show();}else renderHome();};
 $('srf').onsubmit=function(e){e.preventDefault();try{$('q').blur();}catch(x){}return false;};
 (function(){var r=document.documentElement,b=$('thm'),m=$('tc');
