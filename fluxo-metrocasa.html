@@ -114,12 +114,12 @@ function parcelas(f,taxa,n,sis){
 function calc(){
   var gar=m("gar"),renda=m("renda"),imv=m("imv"),ent=m("ent"),idade=parseInt($("idade").value,10)||0,sis=$("sis").value,st=$("st");
   var fx=faixa(renda),n=prazoMax(idade);
-  var finEst=0,subEst=0;
+  var finEst=0,subEst=0,ref=imv>0?imv:gar;
   if(fx&&!fx.fora&&n>0){
     finEst=maxFin(renda,fx.taxa,n,sis);
-    if(imv>0)finEst=Math.min(finEst,imv*COTA);
-    finEst=Math.floor(finEst/10)*10;
     subEst=Math.round(fx.sub/10)*10;
+    if(ref>0)finEst=Math.min(finEst,ref*COTA,Math.max(0,ref-subEst));
+    finEst=Math.floor(finEst/10)*10;
   }
   var finOf=!!$("finc").value.trim(),subOf=!!$("subc").value.trim();
   var finCap=finOf?m("finc"):finEst,sub=subOf?m("subc"):subEst;
@@ -132,7 +132,7 @@ function calc(){
   else if(fx&&fx.fora&&!finOf){st.className="st bad";st.textContent="Renda acima do limite do Minha Casa Minha Vida. Faça a simulação na Caixa."}
   else if(idade&&n<=0&&!finOf){st.className="st bad";st.textContent="Idade acima do limite para financiar. Faça a simulação na Caixa."}
   else if(gar===0){st.className="st";st.textContent="Informe o garantido da construtora."}
-  else if(hit){st.className="st bad";st.textContent="GARANTIDO METROCASA: "+brl(soma)+" fechou o valor de "+brl(gar)+"."}
+  else if(hit){st.className="st bad";st.textContent="GARANTIDO METROCASA ALCANÇADO: "+brl(soma)+" fecham os "+brl(gar)+"."}
   else if(falta<0){st.className="st bad";st.textContent="Garantido ultrapassado em "+brl(-falta)+"."}
   else if(entVazia){st.className="st";st.textContent="Entrada necessária do cliente: "+brl(falta)+"."}
   else{st.className="st";st.textContent="Faltam "+brl(falta)+" para o garantido de "+brl(gar)+"."}
@@ -147,15 +147,15 @@ function calc(){
       s+=row("Sistema de amortização",sis==="sac"?"SAC":"PRICE");
       s+=row("Taxa nominal / efetiva",pct(fx.taxa)+" / "+pct(ef)+" a.a.");
       if(n>0)s+=row("Prazo",n+" meses ("+(n/12).toFixed(1).replace(".",",")+" anos)");
-      if(imv>0)s+=row("Cota máxima","80% = "+brl(imv*COTA));
+      if(ref>0)s+=row("Cota máxima"+(imv>0?"":" (sobre o garantido)"),"80% = "+brl(ref*COTA));
       s+=row("Financiamento liberado"+(finOf?" (Caixa)":" (estimado)"),finCap>0?brl(finCap):"-");
       s+=row("Subsídio"+(subOf?" (Caixa)":" (estimado)"),sub>0?brl(sub):"-");
       if(imv>0)s+=row("Entrada mínima (imóvel)",brl(Math.max(0,r2(imv-finCap-sub))));
       if(finCap>0&&n>0){
         var pc=parcelas(finCap,fx.taxa,n,sis);
-        if(sis==="sac"){s+=row("Primeira parcela",brl(pc.p1));s+=row("Última parcela",brl(pc.pn))}
-        else s+=row("Parcela",brl(pc.p1));
-        s+=row("Comprometimento da renda",pct(pc.p1/renda*100));
+        if(sis==="sac"){s+=row("Primeira parcela máxima",brl(pc.p1));s+=row("Última parcela máxima",brl(pc.pn))}
+        else s+=row("Parcela máxima",brl(pc.p1));
+        s+=row("Comprometimento máximo","30,00% = "+brl(renda*COMPROMETE));
       }
       if(imv>fx.teto)s+=row("Atenção","Imóvel acima do teto da "+fx.n+" ("+brl(fx.teto)+")");
     }
@@ -177,9 +177,15 @@ function calc(){
   var h='<h2>Fluxo do garantido</h2>';
   h+=row(fin<finCap?"Financiamento usado":"Financiamento",fin>0?brl(fin):"-");
   h+=row("Subsídio",sub>0?brl(sub):"-");
-  if(fx&&!fx.fora&&n>0&&fin>0&&fin<finCap){var pu=parcelas(fin,fx.taxa,n,sis);h+=row(sis==="sac"?"Primeira parcela (usado)":"Parcela (usado)",brl(pu.p1))}
+  if(fx&&!fx.fora&&n>0&&fin>0&&renda>0){
+    var pu=parcelas(fin,fx.taxa,n,sis),cr=pu.p1/renda*100;
+    h+=row(sis==="sac"?"Primeira parcela":"Parcela",brl(pu.p1));
+    if(sis==="sac")h+=row("Última parcela",brl(pu.pn));
+    h+=row("Comprometimento da renda",pct(cr));
+    if(cr>COMPROMETE*100+0.005)h+=row("Atenção","Parcela acima de 30% da renda");
+  }
   h+=row("Entrada do cliente",ent>0?brl(ent):(!temBase?"-":(entVazia&&falta>0.005?"não informada":brl(0))));
-  h+=row(hit?"GARANTIDO METROCASA":"Total",soma>0?brl(soma):"-",hit?"hit":true);
+  h+=row(hit?"GARANTIDO METROCASA ALCANÇADO":"Total",soma>0?brl(soma):"-",hit?"hit":true);
   h+=row("Garantido da construtora",gar>0?brl(gar):"-");
   if(gar>0&&falta>0&&temBase)h+=row(entVazia?"Entrada necessária":"Falta",brl(falta));
   $("res").innerHTML=h;
