@@ -30,6 +30,8 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid 
 .r.big span:first-child{color:#fff}
 .r.big b{font-size:20px}
 .r.big.hit{background:var(--bad)}
+.r.warn{background:#fdeaea;color:var(--bad)}
+.r.warn span:first-child{color:var(--bad)}
 .btns{display:flex;gap:10px;flex-wrap:wrap}
 .btns>*{flex:1;min-width:140px;padding:13px;border:0;border-radius:4px;font:700 16px Arial,Helvetica,sans-serif;cursor:pointer;text-align:center;text-decoration:none}
 .zap{background:var(--lar);color:#1c1200}
@@ -47,7 +49,7 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid 
 <div id="st" class="st"></div>
 
 <div class="card noprint"><div class="cb">
-<div><label for="gar">Garantido da construtora (R$)</label><input id="gar" type="text" inputmode="numeric" placeholder="0,00" value="145.000,00"></div>
+<input id="gar" type="hidden" value="145.000,00">
 <div><label for="renda">Renda familiar mensal (R$)</label><input id="renda" type="text" inputmode="numeric" placeholder="0,00"></div>
 <div><label for="idade">Idade do comprador mais velho</label><input id="idade" type="text" inputmode="numeric" placeholder="ex.: 35" maxlength="2"></div>
 <div><label for="imv">Valor do imóvel (R$)</label><input id="imv" type="text" inputmode="numeric" placeholder="0,00"></div>
@@ -137,7 +139,11 @@ function calc(){
   else if(entVazia){st.className="st";st.textContent="Entrada necessária do cliente: "+brl(falta)+"."}
   else{st.className="st";st.textContent="Faltam "+brl(falta)+" para o garantido de "+brl(gar)+"."}
 
-  var row=function(a,b,c){return '<div class="r'+(c?' big':'')+(c==='hit'?' hit':'')+'"><span>'+a+'</span><b>'+b+'</b></div>'};
+  var finNec=gar>0?Math.min(Math.max(0,r2(gar-sub-ent)),ref>0?ref*COTA:Infinity):0;
+  var falt=!finOf&&fx&&!fx.fora&&n>0&&renda>0&&finNec>fin+0.5,pn,crn,rmin;
+  if(falt){pn=parcelas(finNec,fx.taxa,n,sis);crn=pn.p1/renda*100;rmin=pn.p1/COMPROMETE;st.className="st bad";st.textContent+=" A renda só comporta financiar "+brl(fin)+" (limite de 30%)."}
+
+  var row=function(a,b,c){return '<div class="r'+(c==='warn'?' warn':(c?' big':''))+(c==='hit'?' hit':'')+'"><span>'+a+'</span><b>'+b+'</b></div>'};
 
   var s="";
   if(renda>0){
@@ -183,6 +189,11 @@ function calc(){
     if(sis==="sac")h+=row("Última parcela",brl(pu.pn));
     h+=row("Comprometimento da renda",pct(cr));
     if(cr>COMPROMETE*100+0.005)h+=row("Atenção","Parcela acima de 30% da renda");
+  }
+  if(falt){
+    h+=row("Financiamento necessário",brl(finNec),"warn");
+    h+=row("Comprometimento necessário",pct(crn)+" (acima de 30%)","warn");
+    h+=row("Renda mínima para esse financiamento",brl(Math.ceil(rmin/10)*10),"warn");
   }
   h+=row("Entrada do cliente",ent>0?brl(ent):(!temBase?"-":(entVazia&&falta>0.005?"não informada":brl(0))));
   h+=row(hit?"GARANTIDO METROCASA ALCANÇADO":"Total",soma>0?brl(soma):"-",hit?"hit":true);
