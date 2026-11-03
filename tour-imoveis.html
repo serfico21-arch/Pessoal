@@ -1676,6 +1676,7 @@ window.FCBand = (function(){
       cancelGenBtn.style.display = 'none';
       generateBtn.disabled = false; generateBldBtn.disabled = false;
       window.__fcBld = false;
+      try{ photos.forEach(p=>{ if(p.url && !p.img.getAttribute('src')) p.img.src = p.url; }); }catch(e){}   // devolve as fotos originais
       if(wakeLock){ try{ await wakeLock.release(); }catch(e){} wakeLock = null; }
     }
     // Vídeo pronto: leva a tela até o botão de baixar e avisa o bloco do tour (botão "Baixar vídeo MP4 do tour")
@@ -1703,9 +1704,9 @@ window.FCBand = (function(){
     const portrait = fmt === 'portrait', landscape = fmt === 'landscape';
     // Reels/Stories 1080x1920, feed 1080x1350, quadrado 1080x1080, horizontal 1920x1080. "Leve" grava na metade.
     const DIM = { portrait:[1080,1920], feed:[1080,1350], square:[1080,1080], landscape:[1920,1080] };
-    const kDim = leve ? .5 : 1;
+    const kDim = phone ? .4 : (leve ? .5 : 1);   // celular: quadro menor (432x768 no vertical)
     const W = Math.round(DIM[fmt][0] * kDim), H = Math.round(DIM[fmt][1] * kDim);
-    const MAX_DIM = leve ? 1080 : 1920;
+    const MAX_DIM = phone ? 720 : (leve ? 1080 : 1920);
     photos.forEach(p=>{
       const iw = p.img.naturalWidth, ih = p.img.naturalHeight;
       const scale = Math.min(1, MAX_DIM / Math.max(iw, ih));
@@ -1717,6 +1718,8 @@ window.FCBand = (function(){
       p.renderImg = off;
       p.bgImg = makeBlurBg(off, W, H);
     });
+    // Celular: solta as fotos originais (pesadas, 12 MP+) da memória durante a gravação; elas voltam no final
+    if(phone){ photos.forEach(p=>{ try{ p.img.removeAttribute('src'); }catch(e){} }); }
 
     stage.width = W; stage.height = H;
     const ctx = stage.getContext('2d');
@@ -1729,7 +1732,7 @@ window.FCBand = (function(){
     const fadeTime = useFade ? 0.6 : 0;
     const useCube = transVal === 'cube';
     let cubeA = null, cubeB = null;
-    const fps = leve ? 24 : 30;
+    const fps = phone ? 20 : (leve ? 24 : 30);
     let totalDuration = perPhoto * photos.length;
 
     // --- layout do quadro ---
@@ -1812,7 +1815,7 @@ window.FCBand = (function(){
 
     const LIMITE_MB = 15 * 1024 * 1024;
     const limitado = true; // todos os vídeos do editor ficam com no máximo 15 MB
-    let vbps = leve ? 3_000_000 : 8_000_000;
+    let vbps = phone ? 1_500_000 : (leve ? 3_000_000 : 8_000_000);
     // áudio em 96 kbps; só em vídeos muito longos (mais de ~5 min) reduz para caber nos 15 MB
     let abps = 96_000, vfloor = 250_000;
     if(limitado && (14 * 1024 * 1024 * 8 / totalDuration) < 346_000){ abps = 48_000; vfloor = 60_000; }
@@ -1836,7 +1839,7 @@ window.FCBand = (function(){
     const stopOriginal = recorder.stop.bind(recorder);
     recorder.stop = function(){
       try{ stopOriginal(); }catch(e){}
-      setTimeout(()=>{ if(!recStopped && forceFinish) forceFinish(); }, 8000);
+      if(phone) setTimeout(()=>{ if(!recStopped && forceFinish) forceFinish(); }, 8000);   // só no celular
     };
 
     // trava de segurança: se por algum motivo travar, não deixa preso pra sempre
@@ -1878,7 +1881,7 @@ window.FCBand = (function(){
 
         if(elapsed >= totalDuration){
           // desenha o último frame parado e encerra
-          statusText.textContent = 'Finalizando o vídeo... aguarde alguns segundos.';
+          if(phone) statusText.textContent = 'Finalizando o vídeo... aguarde alguns segundos.';
           drawSlide(photos.length-1, perPhoto);
           drawOverlay(ctx, totalDuration);
           const chunksBefore = chunks.length;
@@ -3953,7 +3956,7 @@ window.FCLogo = (function(){
   /* ---------- motor do passeio ---------- */
   var photos = function(){ return window.__fcPhotos ? window.__fcPhotos() : []; };
   var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  var CAP = mobile ? 720 : 1440, NX = mobile ? 12 : 22, NY = mobile ? 12 : 22;   // celular: quadro menor e malha mais simples (gravação mais leve)
+  var CAP = mobile ? 560 : 1440, NX = mobile ? 8 : 22, NY = mobile ? 8 : 22;   // celular: quadro menor e malha mais simples (gravação mais leve)
   var SMOOTH = mobile ? 'low' : 'high';
   var LEVEL = { suave: 1.2, medio: 1.4, forte: 1.7, ultra: 2.1 };   // até onde a câmera chega (1 = ponto mais afastado: foto ocupando a tela toda)
   var S_FAR = 1.03;                                                      // começa no ponto mais afastado possível sem deixar faixas vazias
@@ -4771,7 +4774,7 @@ window.FCLogo = (function(){
           requestAnimationFrame(tick);
         })();
       });
-      rec.stop(); await Promise.race([done, new Promise(function(r){ setTimeout(r, 8000); })]);   // celular que não avisa o fim: segue com o que gravou
+      rec.stop(); await Promise.race([done, new Promise(function(r){ if(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) setTimeout(r, 8000); })]);   // celular que não avisa o fim: segue com o que gravou
       vs.getTracks().forEach(function(t){ t.stop(); });
       if(au){ au.stop(); }
       var blob = new Blob(chunks, { type: (rec.mimeType || mime || 'video/webm') });
