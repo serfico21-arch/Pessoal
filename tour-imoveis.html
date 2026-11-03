@@ -1868,6 +1868,7 @@ window.FCBand = (function(){
     }
 
     const startTime = performance.now();
+    let lastDraw = -1e9;
 
     function render(now){
       try{
@@ -1904,6 +1905,8 @@ window.FCBand = (function(){
           return;
         }
 
+        if(phone && (now - lastDraw) < (1000 / fps - 4)){ requestAnimationFrame(render); return; }   // celular: não desenha mais rápido que a gravação
+        lastDraw = now;
         const idx = Math.min(photos.length-1, Math.floor(elapsed / perPhoto));
         const localT = elapsed - idx*perPhoto;
 
@@ -4355,13 +4358,14 @@ window.FCLogo = (function(){
 
   /* ---------- desenho ---------- */
   var small = document.createElement('canvas'), sg = small.getContext('2d');
+  var QS = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 'low' : 'high';   // celular: suavização mais leve; PC igual
   function blurInto(g, src, W, H, f){      // desfoque barato (reduz e amplia): funciona em qualquer navegador
     if(f <= 1.05){ g.drawImage(src, 0, 0, W, H); return; }
     var w = Math.max(8, Math.round(W / f)), h = Math.max(8, Math.round(H / f));
     if(small.width !== w || small.height !== h){ small.width = w; small.height = h; }
-    sg.imageSmoothingEnabled = true; sg.imageSmoothingQuality = 'high';
+    sg.imageSmoothingEnabled = true; sg.imageSmoothingQuality = QS;
     sg.drawImage(src, 0, 0, W, H, 0, 0, w, h);
-    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = QS;
     g.drawImage(small, 0, 0, w, h, 0, 0, W, H);
   }
 
@@ -4373,7 +4377,7 @@ window.FCLogo = (function(){
     var x = clamp((m.x0 + (m.x1 - m.x0) * e) * I, -1, 1), y = clamp((m.y0 + (m.y1 - m.y0) * e) * I, -1, 1);
     var visW = vw / z, visH = vh / z;
     var cx = 0.5 + x * (0.5 - visW / 2), cy = 0.5 + y * (0.5 - visH / 2);
-    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = QS;
     g.drawImage(src, (cx - visW / 2) * iw, (cy - visH / 2) * ih, visW * iw, visH * ih, 0, 0, W, H);
   }
 
@@ -4743,21 +4747,23 @@ window.FCLogo = (function(){
     }
     if(!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream){ say('Este navegador não grava vídeo por aqui. Abra o arquivo no Google Chrome (computador ou Android).'); return; }
     stopPrev(); busy = true; bGen.disabled = true; bGenB.disabled = true; $('cnRes').style.display = 'none'; updLogoSt();
-    var c = cfg(bld), W = c.hd ? 1080 : 720, H = c.hd ? 1920 : 1280;
+    var c = cfg(bld), cel = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && !c.hd;   // celular na qualidade leve: quadro menor
+    var W = c.hd ? 1080 : (cel ? 540 : 720), H = c.hd ? 1920 : (cel ? 960 : 1280);
     try{
       say('Preparando as fotos e as logos…');
       await fontsReady();
-      var pp = await prepare(list, c.hd ? 1920 : 1440);
+      var pp = await prepare(list, c.hd ? 1920 : (cel ? 900 : 1440));
+      if(cel){ list.forEach(function(p){ try{ p.img.removeAttribute('src'); }catch(e){} }); }   // solta as fotos originais da memória
       var S = { c: c, sc: buildScenes(list, c), pp: pp, TL: mkTL(list.length, c), wm: wmLayer(W, H, c), off: OFF, boxes: {} };
       var total = S.TL.total;
       var out = document.createElement('canvas'); out.width = W; out.height = H;
       var g = out.getContext('2d'); drawFrame(g, W, H, S, 0);
-      var vs = out.captureStream(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 24 : 30), au = await makeAudio(total);
+      var vs = out.captureStream(cel ? 20 : (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 24 : 30)), au = await makeAudio(total);
       var tracks = vs.getVideoTracks().concat(au ? au.stream.getAudioTracks() : []);
       var mime = '', cand = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp8', 'video/webm;codecs=vp9', 'video/webm'];
       for(var q = 0; q < cand.length; q++){ if(MediaRecorder.isTypeSupported(cand[q])){ mime = cand[q]; break; } }
       var isMp4 = mime.indexOf('video/mp4') === 0;
-      var vbps = Math.max(250000, Math.min(c.hd ? 8e6 : 4e6, (14 * 1048576 * 8 / total - 96000)));   // mesmo limite de ~15 MB do gerador original
+      var vbps = Math.max(250000, Math.min(c.hd ? 8e6 : (cel ? 1.8e6 : 4e6), (14 * 1048576 * 8 / total - 96000)));   // mesmo limite de ~15 MB do gerador original
       var rec = new MediaRecorder(new MediaStream(tracks), Object.assign(mime ? { mimeType: mime } : {}, { videoBitsPerSecond: Math.round(vbps), audioBitsPerSecond: 96000 }));
       var chunks = [];
       rec.ondataavailable = function(e){ if(e.data && e.data.size) chunks.push(e.data); };
@@ -4765,9 +4771,12 @@ window.FCLogo = (function(){
       rec.start(1000);
       if(au){ au.go(); var g0 = au.gn.gain.value; au.gn.gain.setValueAtTime(g0, au.ac.currentTime + Math.max(0, total - 1.5)); au.gn.gain.linearRampToValueAtTime(0, au.ac.currentTime + total); }
       var tStart = performance.now();
+      var lastD = -1e9;
       await new Promise(function(res){
         (function tick(){
           var T = (performance.now() - tStart) / 1000;
+          if(cel && T < total && (performance.now() - lastD) < 46){ requestAnimationFrame(tick); return; }   // celular: ~20 quadros/s
+          lastD = performance.now();
           drawFrame(g, W, H, S, Math.min(T, total));
           say('Gravando o vídeo… ' + Math.min(100, Math.round(T / total * 100)) + '% (mantenha esta tela aberta e o celular ligado)' + (au && au.nsec > total + 0.5 ? ' · a narração é mais longa que o vídeo e será cortada no final' : ''));
           if(T >= total + 0.25){ res(); return; }
@@ -4792,6 +4801,7 @@ window.FCLogo = (function(){
     }catch(err){
       say('Não consegui gerar o vídeo: ' + (err && err.message ? err.message : err));
     }
+    try{ list.forEach(function(p){ if(p.url && !p.img.getAttribute('src')) p.img.src = p.url; }); }catch(e){}   // devolve as originais
     busy = false; bGen.disabled = false; bGenB.disabled = false;
   }
   bGen.addEventListener('click', function(){ generate(false); });
