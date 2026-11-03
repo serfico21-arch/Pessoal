@@ -1824,12 +1824,20 @@ window.FCBand = (function(){
     const chunks = [];
     recorder.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
 
-    let rejectFinished;
+    let rejectFinished, recStopped = false, forceFinish = null;
     const finished = new Promise((resolve, reject)=>{
-      recorder.onstop = resolve;
+      recorder.onstop = () => { recStopped = true; resolve(); };
+      forceFinish = resolve;
       recorder.onerror = e => reject(e.error || new Error('Falha ao gravar o vídeo'));
       rejectFinished = reject;
     });
+    // Alguns celulares Android gravam tudo mas nunca avisam que terminaram (o vídeo "não termina de gerar").
+    // Depois de mandar parar, espera até 8 s e segue com o que já foi gravado, em vez de ficar preso.
+    const stopOriginal = recorder.stop.bind(recorder);
+    recorder.stop = function(){
+      try{ stopOriginal(); }catch(e){}
+      setTimeout(()=>{ if(!recStopped && forceFinish) forceFinish(); }, 8000);
+    };
 
     // trava de segurança: se por algum motivo travar, não deixa preso pra sempre
     const safetyTimeout = setTimeout(()=>{
@@ -1870,6 +1878,7 @@ window.FCBand = (function(){
 
         if(elapsed >= totalDuration){
           // desenha o último frame parado e encerra
+          statusText.textContent = 'Finalizando o vídeo... aguarde alguns segundos.';
           drawSlide(photos.length-1, perPhoto);
           drawOverlay(ctx, totalDuration);
           const chunksBefore = chunks.length;
@@ -2243,7 +2252,7 @@ window.FCBand = (function(){
     if(blob.size < 1000){
       throw new Error('A gravação não produziu um vídeo válido. Tente novamente: mantenha esta aba em primeiro plano, evite trocar de aplicativo ou tocar em outros botões do celular durante a gravação, e feche outras abas para liberar memória.');
     }
-    if(limitado && blob.size > LIMITE_MB && scale > 0.35){
+    if(limitado && !phone && blob.size > LIMITE_MB && scale > 0.35){   // no celular não regrava (a espera dobrava e parecia nunca fechar)
       statusText.textContent = 'Passou de 15 MB, refazendo com mais compressão...';
       barFill.style.width = '0%';
       window.__fcExtraAudio = ex; // mantém a música/narração do tour na nova tentativa
@@ -3944,7 +3953,8 @@ window.FCLogo = (function(){
   /* ---------- motor do passeio ---------- */
   var photos = function(){ return window.__fcPhotos ? window.__fcPhotos() : []; };
   var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  var CAP = mobile ? 960 : 1440, NX = mobile ? 16 : 22, NY = mobile ? 16 : 22;
+  var CAP = mobile ? 720 : 1440, NX = mobile ? 12 : 22, NY = mobile ? 12 : 22;   // celular: quadro menor e malha mais simples (gravação mais leve)
+  var SMOOTH = mobile ? 'low' : 'high';
   var LEVEL = { suave: 1.2, medio: 1.4, forte: 1.7, ultra: 2.1 };   // até onde a câmera chega (1 = ponto mais afastado: foto ocupando a tela toda)
   var S_FAR = 1.03;                                                      // começa no ponto mais afastado possível sem deixar faixas vazias
   var TAU = Math.PI * 2;
@@ -4009,7 +4019,7 @@ window.FCLogo = (function(){
     if(!FR) FR = document.createElement('canvas');
     if(FR.width !== W || FR.height !== H){ FR.width = W; FR.height = H; }
     var g = FR.getContext('2d');
-    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+    g.imageSmoothingEnabled = true; g.imageSmoothingQuality = SMOOTH;
     var u = clamp((tt + fade) / (per + fade), 0, 1);
     // avanço e giro são independentes: o avanço rápido termina mais cedo, e o giro usa o tempo que sobra, sempre na velocidade escolhida
     var lvKey = ($('vpInt') && $('vpInt').value) || 'medio', gvKey = ($('vpGiro') && $('vpGiro').value) || 'lento';
@@ -4043,7 +4053,7 @@ window.FCLogo = (function(){
     if(!covers){
       if(!TMP) TMP = document.createElement('canvas');
       if(TMP.width !== W || TMP.height !== H){ TMP.width = W; TMP.height = H; }
-      tg = TMP.getContext('2d'); tg.imageSmoothingEnabled = true; tg.imageSmoothingQuality = 'high';
+      tg = TMP.getContext('2d'); tg.imageSmoothingEnabled = true; tg.imageSmoothingQuality = SMOOTH;
       tg.globalCompositeOperation = 'source-over'; tg.clearRect(0, 0, W, H);
       tg.save();
       if(roll){ tg.translate(W / 2, H / 2); tg.rotate(roll); tg.translate(-W / 2, -H / 2); }
@@ -4739,7 +4749,7 @@ window.FCLogo = (function(){
       var total = S.TL.total;
       var out = document.createElement('canvas'); out.width = W; out.height = H;
       var g = out.getContext('2d'); drawFrame(g, W, H, S, 0);
-      var vs = out.captureStream(30), au = await makeAudio(total);
+      var vs = out.captureStream(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? 24 : 30), au = await makeAudio(total);
       var tracks = vs.getVideoTracks().concat(au ? au.stream.getAudioTracks() : []);
       var mime = '', cand = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp8', 'video/webm;codecs=vp9', 'video/webm'];
       for(var q = 0; q < cand.length; q++){ if(MediaRecorder.isTypeSupported(cand[q])){ mime = cand[q]; break; } }
@@ -4761,7 +4771,7 @@ window.FCLogo = (function(){
           requestAnimationFrame(tick);
         })();
       });
-      rec.stop(); await done;
+      rec.stop(); await Promise.race([done, new Promise(function(r){ setTimeout(r, 8000); })]);   // celular que não avisa o fim: segue com o que gravou
       vs.getTracks().forEach(function(t){ t.stop(); });
       if(au){ au.stop(); }
       var blob = new Blob(chunks, { type: (rec.mimeType || mime || 'video/webm') });
