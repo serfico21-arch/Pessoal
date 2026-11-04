@@ -21,6 +21,7 @@ small,.m{color:var(--m)}.tag{background:var(--bg);border:1px solid var(--b);bord
 h3{margin:4px 0 10px}.d{display:inline-flex;gap:3px;align-items:center;margin-right:8px}
 .ph{display:flex;gap:6px;overflow-x:auto;margin:8px 0}.ph img{height:90px;width:120px;object-fit:cover;border-radius:8px;flex:none;cursor:pointer;background:var(--bg)}
 #lb{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:9;padding:10px}.lbx{display:flex;align-items:center;gap:6px;max-width:100%}.lbx img{max-width:78vw;max-height:70vh;border-radius:8px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}.pc{background:var(--c);border:1px solid var(--b);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}.pim{position:relative;height:170px;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--m);font-size:13px}.pim img{width:100%;height:100%;object-fit:cover;display:block}.pim .rf,.pim .nf{position:absolute;top:8px;background:rgba(30,58,95,.9);color:#fff;font-size:12px;padding:3px 8px;border-radius:20px}.pim .rf{left:8px}.pim .nf{right:8px}.pbd{padding:12px;display:flex;flex-direction:column;gap:4px;flex:1}.ppr{font-size:19px;font-weight:800}.pbd p{margin:4px 0 8px;font-size:14px;flex:1}.pbt{display:flex;gap:6px;flex-wrap:wrap}.pbt>*{flex:1;min-width:80px;text-align:center;text-decoration:none}
 summary{font-weight:700;cursor:pointer}.hp{margin-top:8px;line-height:1.5}.hp ol,.hp ul{padding-left:20px;margin:6px 0}
 </style></head><body>
 <header>Publicador FCosta · CRECI-SP 294791-F</header>
@@ -68,17 +69,17 @@ function txt(i,n){
 function copy(s,cb){
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(cb,function(){fb(s,cb)})}else fb(s,cb)}
 function fb(s,cb){var t=document.createElement("textarea");t.value=s;document.body.appendChild(t);t.select();try{document.execCommand("copy")}catch(e){}t.remove();if(cb)cb()}
-var TABS=["Imóveis","Grupos","Textos","Publicar","Status","Clientes","Limpeza","Ajuda"],tab=0;
+var TABS=["Imóveis","Grupos","Textos","Publicar","Status","Clientes","Limpeza","Portfólio","Ajuda"],tab=0;
 function nav(){$("nav").innerHTML=TABS.map(function(t,i){return '<button class="'+(i==tab?"on":"")+'" onclick="go('+i+')">'+t+'</button>'}).join("")}
-function go(i){tab=i;nav();[vImo,vGru,vTex,vPub,vSta,vCli,vLim,vAju][i]()}
+function go(i){tab=i;nav();[vImo,vGru,vTex,vPub,vSta,vCli,vLim,vPor,vAju][i]()}
 function opts(sel){return IM.map(function(i){return '<option value="'+i.c+'"'+(i.c==sel?" selected":"")+'>'+i.c+' · '+esc(i.t)+' · '+esc(i.b)+' · R$ '+i.p+'</option>'}).join("")}
 /* IMÓVEIS */
 function vImo(){
- $("app").innerHTML='<input id="q" placeholder="Filtrar por bairro, tipo ou código" style="width:100%;margin-bottom:10px" oninput="lstImo()"><div id="l"></div>';lstImo();carregar()}
+ $("app").innerHTML='<button class="b g" style="margin-bottom:10px" onclick="expF()">Exportar para o portfólio</button><input id="q" placeholder="Filtrar por bairro, tipo ou código" style="width:100%;margin-bottom:10px" oninput="lstImo()"><div id="l"></div>';lstImo();carregar()}
 function lstImo(){
  var q=($("q").value||"").toLowerCase();
  $("l").innerHTML=IM.filter(function(i){return (i.c+i.t+i.b+i.ci).toLowerCase().indexOf(q)>-1}).map(function(i){
-  return '<div class="card"><div class="row"><b>'+i.c+'</b><span class="tag">'+esc(i.t)+'</span><span class="m">'+esc(i.b)+' · '+esc(i.ci)+'</span><b style="margin-left:auto">R$ '+i.p+'</b></div><small>'+esc(specs(i))+'</small>'+strip(i.c)+'<div>'+esc(i.d)+'</div><div class="row" style="margin-top:8px"><button class="b" onclick="S.sel=\''+i.c+'\';save();go(2)">Gerar textos</button></div></div>'}).join("")}
+  return '<div class="card"><div class="row"><b>'+i.c+'</b><span class="tag">'+esc(i.t)+'</span><span class="m">'+esc(i.b)+' · '+esc(i.ci)+'</span><b style="margin-left:auto">R$ '+i.p+'</b></div><small>'+esc(specs(i))+'</small>'+strip(i.c)+'<div>'+esc(i.d)+'</div><div class="row" style="margin-top:8px"><button class="b g" onclick="addF(\''+i.c+'\')">Fotos</button><button class="b" onclick="S.sel=\''+i.c+'\';save();go(2)">Gerar textos</button></div></div>'}).join("")}
 /* GRUPOS */
 function vGru(){
  var dd=DIAS.map(function(d,i){return '<label class="d"><input type="checkbox" class="dk" value="'+i+'" checked>'+d+'</label>'}).join("");
@@ -137,37 +138,69 @@ function carregar(){
   return Promise.all(IM.filter(function(i){return !FT[i.c]}).map(function(i){
    return jget(r+"/"+encodeURIComponent(i.k)).then(function(d){var o=[];imgs(d,o);FT[i.c]=uniq(o).slice(0,12)},function(){})}))
  }).then(function(){try{localStorage.setItem("pubft",JSON.stringify(FT))}catch(e){}},function(){ERR=1}).then(function(){CAR=0;atualizar()})}
-function atualizar(){if(tab==0&&$("q"))lstImo();if(tab==2&&$("fp"))fotosT()}
+function atualizar(){if(tab==7&&$("pg"))lstPor();if(tab==0&&$("q"))lstImo();if(tab==2&&$("fp"))fotosT()}
+function fts(c){var m=(S.fotos||{})[c]||[],a=FT[c];if(!a&&!m.length)return undefined;return uniq(m.concat(a||[]))}
 function strip(c){
- var a=FT[c];
+ var a=fts(c);
  if(!a)return '<small class="m">'+(ERR?"Não consegui buscar as fotos. Veja Ajuda › Conexão das fotos.":"Carregando fotos…")+'</small>';
- if(!a.length)return '<small class="m">Nenhuma foto encontrada para este imóvel.</small>';
+ if(!a.length)return '<small class="m">Sem fotos. Toque em "Fotos" para adicionar do celular.</small>';
  return '<div class="ph">'+a.map(function(u,n){return '<img loading="lazy" src="'+esc(th(u,300))+'" onclick="lb(\''+c+'\','+n+')">'}).join("")+'</div>'}
 function fotosT(){var i=find($("si").value);$("fp").innerHTML='<b>'+i.c+'</b> <span class="m">· '+esc(i.t)+' · '+esc(i.b)+'</span>'+strip(i.c)}
 function lb(c,n){
- LB={c:c,n:n};var a=FT[c],u=a[n],d=$("lb");
+ LB={c:c,n:n};var a=fts(c),u=a[n],d=$("lb");
  if(!d){d=document.createElement("div");d.id="lb";document.body.appendChild(d)}
- d.innerHTML='<div class="lbx"><button class="b s" onclick="lbn(-1)">‹</button><img src="'+esc(th(u,1200))+'"><button class="b s" onclick="lbn(1)">›</button></div><div class="row" style="justify-content:center;margin-top:10px"><span style="color:#fff">'+(n+1)+' / '+a.length+'</span><a class="b" style="text-decoration:none" href="'+esc(u)+'" target="_blank">Abrir original</a><button class="b r" onclick="lbx()">Fechar</button></div>';
+ d.innerHTML='<div class="lbx"><button class="b s" onclick="lbn(-1)">‹</button><img src="'+esc(th(u,1200))+'"><button class="b s" onclick="lbn(1)">›</button></div><div class="row" style="justify-content:center;margin-top:10px"><span style="color:#fff">'+(n+1)+' / '+a.length+'</span><a class="b" style="text-decoration:none" href="'+esc(u)+'" target="_blank">Abrir original</a>'+(((S.fotos||{})[c]||[]).indexOf(u)>-1?'<button class="b s" onclick="delF()">Excluir foto</button>':'')+'<button class="b r" onclick="lbx()">Fechar</button></div>';
  d.style.display="flex"}
-function lbn(k){var a=FT[LB.c];lb(LB.c,(LB.n+k+a.length)%a.length)}
+function lbn(k){var a=fts(LB.c);lb(LB.c,(LB.n+k+a.length)%a.length)}
 function lbx(){$("lb").style.display="none"}
 function cp(b){copy($("tx").value,function(){b.textContent="Copiado ✓"})}
 function blobs(c,cb){
- Promise.all((FT[c]||[]).slice(0,6).map(function(x,n){return fetch(th(x,1280)).then(function(r){return r.blob()}).then(function(b){return new File([b],c+"-"+(n+1)+".jpg",{type:b.type||"image/jpeg"})})})).then(cb,function(){cb(null)})}
+ Promise.all((fts(c)||[]).slice(0,6).map(function(x,n){return fetch(th(x,1280)).then(function(r){return r.blob()}).then(function(b){return new File([b],c+"-"+(n+1)+".jpg",{type:b.type||"image/jpeg"})})})).then(cb,function(){cb(null)})}
 function comp(b){
  var c=$("si").value,t=$("tx").value;
- if(!(FT[c]||[]).length){alert("Este imóvel não tem fotos carregadas.");return}
+ if(!(fts(c)||[]).length){alert("Este imóvel não tem fotos. Na aba Imóveis, toque em ‘Fotos’ para adicionar.");return}
  b.textContent="Preparando…";
  blobs(c,function(f){b.textContent="Compartilhar com fotos";
   if(f&&navigator.canShare&&navigator.canShare({files:f})){navigator.share({files:f,text:t}).catch(function(){})}
   else copy(t,function(){alert("Seu aparelho não envia as fotos direto. O texto foi copiado. Use o botão Baixar fotos e anexe no grupo.")})})}
 function baixar(b){
  var c=$("si").value;
- if(!(FT[c]||[]).length){alert("Este imóvel não tem fotos carregadas.");return}
+ if(!(fts(c)||[]).length){alert("Este imóvel não tem fotos. Na aba Imóveis, toque em ‘Fotos’ para adicionar.");return}
  b.textContent="Baixando…";
  blobs(c,function(f){b.textContent="Baixar fotos";
-  if(!f){FT[c].slice(0,6).forEach(function(u){window.open(u,"_blank")});return}
+  if(!f){fts(c).slice(0,6).forEach(function(u){window.open(u,"_blank")});return}
   f.forEach(function(x,n){setTimeout(function(){var a=document.createElement("a");a.href=URL.createObjectURL(x);a.download=x.name;document.body.appendChild(a);a.click();a.remove()},n*400)})})}
+/* FOTOS DO CELULAR */
+var FI="";
+function addF(c){FI=c;var e=$("fi");if(!e){e=document.createElement("input");e.type="file";e.accept="image/*";e.multiple=true;e.id="fi";e.style.display="none";e.onchange=upF;document.body.appendChild(e)}e.value="";e.click()}
+function upF(){
+ var fs=[].slice.call($("fi").files),c=FI,n=0;if(!fs.length)return;S.fotos=S.fotos||{};S.fotos[c]=S.fotos[c]||[];
+ function nx(){if(!fs.length){save();atualizar();alert(n+" foto(s) enviada(s) para "+c+".");return}
+  var f=fs.shift(),fd=new FormData();fd.append("file",f);fd.append("upload_preset","fcosta_imoveis");
+  fetch("https://api.cloudinary.com/v1_1/"+CLD+"/image/upload",{method:"POST",body:fd}).then(function(r){return r.json()}).then(function(d){if(d.secure_url){S.fotos[c].push(d.secure_url);n++;save();atualizar()}}).catch(function(){}).then(nx)}
+ alert("Enviando "+fs.length+" foto(s)... aguarde a mensagem de conclusão.");nx()}
+function delF(){var m=S.fotos[LB.c],u=fts(LB.c)[LB.n],k=m.indexOf(u);if(k<0||!confirm("Excluir esta foto da lista?"))return;m.splice(k,1);save();lbx();atualizar()}
+function expF(){
+ var f={};IM.forEach(function(i){f[i.c]=fts(i.c)||[]});
+ var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({im:IM,fotos:f,root:S.root||""})],{type:"application/json"}));a.download="portfolio-dados.json";document.body.appendChild(a);a.click();a.remove();
+ alert("Arquivo portfolio-dados.json baixado. Suba no GitHub, na mesma pasta do portfolio-fcosta.html.")}
+/* PORTFÓLIO (vitrine do cliente dentro do Publicador) */
+function lkP(c){var u=location.href.split("#")[0].split("?")[0].replace(/[^\/]*$/,"")+"portfolio-fcosta.html";return c?u+"#"+c:u}
+function vPor(){
+ var cs=uniq(IM.map(function(i){return i.ci})).sort();
+ $("app").innerHTML='<div class="card"><div class="row"><button class="b g" onclick="expF()">Exportar para o portfólio</button><button class="b" onclick="envP(\'\')">Enviar portfólio</button><a class="b s" style="text-decoration:none" target="_blank" href="'+esc(lkP(""))+'">Abrir página do cliente</a></div><p class="m" style="margin:8px 0 0">Vitrine igual à que o cliente vê. Link de cada imóvel: <b>portfolio-fcosta.html#FCV001</b>. Depois de mexer nas fotos, toque em Exportar e suba o portfolio-dados.json no GitHub.</p></div><div class="row" style="margin-bottom:10px"><input id="pq" placeholder="Buscar por bairro, tipo ou código" style="flex:1;min-width:160px" oninput="lstPor()"><select id="pc" onchange="lstPor()"><option value="">Todas as cidades</option>'+cs.map(function(x){return '<option>'+esc(x)+'</option>'}).join("")+'</select></div><div id="pg" class="pgrid"></div>';
+ lstPor();carregar()}
+function lstPor(){
+ var q=($("pq").value||"").toLowerCase(),ct=$("pc").value;
+ var l=IM.filter(function(i){return (!ct||i.ci==ct)&&(i.c+i.t+i.b+i.ci+i.d).toLowerCase().indexOf(q)>-1});
+ $("pg").innerHTML=l.length?l.map(function(i){
+  var a=fts(i.c),loc=i.b+(i.ci&&i.ci!=i.b?" – "+i.ci:""),sp=specs(i);
+  var im=(a&&a.length)?'<img loading="lazy" alt="" src="'+esc(th(a[0],600))+'">':(a?'Sem fotos':(ERR?'Fotos indisponíveis':'Carregando foto…'));
+  return '<div class="pc"><div class="pim" onclick="'+(a&&a.length?"lb(\''+i.c+'\',0)":"addF(\''+i.c+'\')")+'">'+im+'<span class="rf">'+i.c+'</span>'+(a&&a.length>1?'<span class="nf">'+a.length+' fotos</span>':'')+'</div><div class="pbd"><div class="ppr">R$ '+esc(i.p)+'</div><b>'+esc(i.t)+'</b><small class="m">'+esc(loc)+'</small><small class="m">'+esc(sp)+'</small><p>'+esc(i.d)+'</p><div class="pbt"><button class="b" onclick="envP(\''+i.c+'\')">Enviar</button><button class="b g" onclick="copy(lkP(\''+i.c+'\'),function(){alert(\'Link copiado\')})">Copiar link</button><a class="b s" style="border-radius:8px;padding:9px 13px;color:#fff" target="_blank" href="'+esc(SITE+i.k)+'">Site</a></div></div></div>'}).join(""):'<p class="m">Nenhum imóvel encontrado.</p>'}
+function envP(c){
+ var i=c&&find(c),u=lkP(c),t=i?"🏡 "+i.t+" – "+i.b+" | R$ "+i.p+"\nVeja as fotos e detalhes:":"Portfólio de imóveis – FCosta Corretor";
+ if(navigator.share)navigator.share({title:i?i.t+" – "+i.b:"Portfólio de imóveis",text:t,url:u}).catch(function(){});
+ else copy(t+"\n"+u,function(){alert("Texto e link copiados.")})}
 /* STATUS */
 function vSta(){
  var hj=new Date().toDateString(),h=S.log.filter(function(l){return new Date(l.t).toDateString()==hj}).length,por={};
@@ -182,7 +215,7 @@ function vAju(){
  $("app").innerHTML=
  d("O que é o Publicador","Ferramenta para divulgar seus imóveis nos grupos de WhatsApp e Facebook sem perder tempo. Ela monta o texto pronto, lembra em quais grupos você posta em cada dia, conta suas postagens e mostra quais grupos trazem cliente.",1)+
  d("Passo a passo do dia a dia","<ol><li>Aba <b>Grupos</b>: cadastre cada grupo, o link e os dias em que você posta nele. Só precisa fazer uma vez.</li><li>Aba <b>Publicar</b>: escolha o imóvel, o tipo de texto e o dia (já vem o de hoje).</li><li>Toque em <b>Abrir e copiar</b> no grupo. O texto é copiado e o grupo abre.</li><li>Cole o texto, anexe as fotos e publique.</li><li>Volte e toque em <b>Publicado</b>. A contagem sobe.</li><li>Se alguém chamar, registre na aba <b>Clientes</b> dizendo de qual grupo veio.</li></ol>")+
- d("Aba Imóveis","Mostra os seus 21 imóveis com preço, descrição e as fotos do seu site. Toque numa foto para ampliar e passar as próximas. Use o campo de cima para filtrar por bairro, tipo ou código (ex.: Kemel, FCV004). O botão <b>Gerar textos</b> leva o imóvel direto para a aba Textos.")+
+ d("Aba Imóveis","Mostra os seus 21 imóveis com preço, descrição e as fotos do seu site. Toque numa foto para ampliar e passar as próximas. Use o campo de cima para filtrar por bairro, tipo ou código (ex.: Kemel, FCV004). O botão <b>Gerar textos</b> leva o imóvel direto para a aba Textos. O botão <b>Fotos</b> adiciona fotos da galeria do celular (elas vão para o seu Cloudinary). O botão verde de cima, <b>Exportar para o portfólio</b>, gera o arquivo portfolio-dados.json para o portfólio compartilhável.")+
  d("Aba Grupos","Cadastre o nome do grupo, o link (opcional, mas é ele que abre o grupo) e marque os dias da semana em que você posta. Cada grupo mostra quantos posts você fez e quantos clientes vieram dele. O botão Remover tira o grupo da lista.")+
  d("Aba Textos","Escolha o imóvel e o estilo: <b>Curto</b> (rápido, para WhatsApp), <b>Completo</b> (com referência e chamada para visita) e <b>Convite</b> (conversa mais pessoal). Você pode editar o texto na caixa antes de usar. Botões:<ul><li><b>Copiar texto</b>: copia para colar onde quiser.</li><li><b>Compartilhar com fotos</b>: no celular, abre o envio com até 6 fotos e o texto juntos (escolha o WhatsApp ou o grupo).</li><li><b>Baixar fotos</b>: salva as fotos no aparelho para anexar manualmente.</li></ul>")+
  d("Aba Publicar","Lista só os grupos marcados para o dia escolhido. <b>Abrir e copiar</b> copia o texto e abre o grupo. <b>Publicado</b> soma 1 post no grupo e guarda no histórico. Mude o dia no seletor se quiser adiantar ou repor um dia.")+
@@ -192,6 +225,8 @@ function vAju(){
  d("De onde vêm as fotos","As fotos são buscadas direto do banco do seu site (o mesmo que mostra o imóvel em fcostacorretor.com). Se você trocar ou incluir fotos no painel do site, toque em <b>Atualizar fotos</b> abaixo para o Publicador pegar as novas. Depois de carregadas, ficam guardadas no aparelho e abrem mais rápido.<div class='row' style='margin-top:8px'><button class='b' onclick='atuF(this)'>Atualizar fotos</button></div>")+
  d("Conexão das fotos (se não aparecerem)","Toque em <b>Testar conexão</b>. O teste mostra se o banco respondeu e quantas fotos achou no FCV001. Se não achar a pasta dos imóveis, digite o nome dela no campo (ex.: <i>imoveis</i>) e salve.<div class='row' style='margin:8px 0'><input id='rt' placeholder='Pasta dos imóveis no banco' value='"+esc(S.root||"")+"'><button class='b g' onclick='salvaRt()'>Salvar pasta</button><button class='b' onclick='teste()'>Testar conexão</button></div><div id='tr' class='m'></div>")+
  d("Seus dados e cópia de segurança","Grupos, clientes e contagens ficam guardados <b>só neste aparelho e neste navegador</b>. Se trocar de celular ou limpar os dados do navegador, perde tudo. Por isso, de vez em quando toque em <b>Salvar cópia</b>. Para recuperar, use <b>Restaurar cópia</b>.<div class='row' style='margin-top:8px'><button class='b g' onclick='bk()'>Salvar cópia</button><label class='b s' style='cursor:pointer'>Restaurar cópia<input type='file' accept='.json' style='display:none' onchange='rs(this)'></label></div>")+
+ d("Aba Portfólio","Mostra a vitrine dos imóveis como o cliente vê, com foto, preço e descrição. <b>Enviar</b> manda o link do imóvel (portfolio-fcosta.html#código) pelo WhatsApp ou outro app. <b>Copiar link</b> copia o mesmo link. Toque na foto para ampliar. <b>Abrir página do cliente</b> abre a página pública.")+
+ d("Portfólio compartilhável","O portfólio é uma página para mandar ao cliente: <b>portfolio-fcosta.html</b>. Ele mostra todos os imóveis com fotos, botão de WhatsApp e botão Compartilhar (cada imóvel tem seu próprio link). Para atualizar: 1) adicione fotos em Imóveis › Fotos; 2) toque em <b>Exportar para o portfólio</b>; 3) suba o portfolio-dados.json no GitHub, na mesma pasta; 4) pronto, o link já mostra as fotos novas.")+
  d("Dicas","<ul><li>Não poste o mesmo imóvel em todos os grupos no mesmo dia. Alterne os estilos de texto.</li><li>Grupos com muitas postagens e nenhum cliente: use a aba Limpeza.</li><li>Poste com foto: chama muito mais atenção que só o link.</li><li>Fale comigo (WhatsApp (11) 99350-9109) se aparecer algum erro.</li></ul>")}
 function atuF(b){FT={};try{localStorage.removeItem("pubft")}catch(e){}b.textContent="Buscando…";carregar();setTimeout(function(){b.textContent="Atualizar fotos"},2500)}
 function salvaRt(){S.root=($("rt").value||"").trim().replace(/^\/+|\/+$/g,"");FT={};try{localStorage.removeItem("pubft")}catch(e){}save();teste();carregar()}
