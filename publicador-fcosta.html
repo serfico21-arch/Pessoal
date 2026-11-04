@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Publicador FCosta</title>
+<style>
+:root{--bg:#f4f6f9;--c:#fff;--t:#1b2430;--m:#6b7785;--p:#0b5ed7;--g:#198754;--r:#c0392b;--b:#dde3ea}
+@media(prefers-color-scheme:dark){:root{--bg:#10151c;--c:#1a222d;--t:#e8edf3;--m:#93a0ae;--b:#2b3644}}
+*{box-sizing:border-box}body{margin:0;font:15px system-ui,sans-serif;background:var(--bg);color:var(--t)}
+header{padding:14px 16px;background:var(--p);color:#fff;font-weight:700}
+nav{display:flex;gap:4px;overflow-x:auto;padding:8px;background:var(--c);border-bottom:1px solid var(--b);position:sticky;top:0}
+nav button{border:0;background:none;color:var(--m);padding:9px 12px;border-radius:8px;font-weight:600;white-space:nowrap;cursor:pointer}
+nav button.on{background:var(--p);color:#fff}
+main{max-width:900px;margin:auto;padding:12px}
+.card{background:var(--c);border:1px solid var(--b);border-radius:10px;padding:12px;margin-bottom:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select,textarea{padding:9px;border:1px solid var(--b);border-radius:8px;background:var(--bg);color:var(--t);font:inherit;max-width:100%}
+textarea{width:100%;min-height:210px}
+button.b{border:0;border-radius:8px;padding:9px 13px;background:var(--p);color:#fff;font-weight:600;cursor:pointer}
+button.g{background:var(--g)}button.r{background:var(--r)}button.s{background:var(--m)}
+small,.m{color:var(--m)}.tag{background:var(--bg);border:1px solid var(--b);border-radius:20px;padding:2px 9px;font-size:12px}
+h3{margin:4px 0 10px}.d{display:inline-flex;gap:3px;align-items:center;margin-right:8px}
+</style></head><body>
+<header>Publicador FCosta · CRECI-SP 294791-F</header>
+<nav id="nav"></nav><main id="app"></main>
+<script>
+var WA="5511993509109",SITE="https://fcostacorretor.com/imovel?id=";
+var IM=[
+{c:"FCV001",k:"uid_1773957315252_j78ayd4vqep",t:"Sobrado",b:"Jardim Luiz Mauro",ci:"Ferraz de Vasconcelos",p:"650.000",d:"2 residências independentes, garagem para 2 carros com portão automático e espaço gourmet"},
+{c:"FCV002",k:"-P2n05G1GeQjwVMwaR1w",t:"Sobrado",b:"Cidade Kemel",ci:"Itaim Paulista",p:"450.000",d:"Fachada moderna, escada flutuante, cozinha planejada, churrasqueira e frente para escola"},
+{c:"FCV003",k:"-OsY60m63S3egI2LlW3-",t:"Galpão + salão + 2 residências",b:"Cidade Kemel",ci:"Itaim Paulista",p:"750.000",d:"Galpão com pé-direito alto, porão, salão comercial e 2 residências no andar superior"},
+{c:"FCV004",k:"-OsY8va3F9rCNTEphs89",t:"Sobrado",b:"Cidade Kemel",ci:"Itaim Paulista",p:"500.000",q:2,v:3,d:"3 unidades independentes, espaço gourmet com churrasqueira e garagem coberta"},
+{c:"FCV005",k:"-Os8j89U7jFgaLR4e13j",t:"Sobrado",b:"Cidade Kemel",ci:"Itaim Paulista",p:"350.000",a:"240m²",d:"3 residências independentes, ótimo para renda após reforma"},
+{c:"FCV006",k:"-Os8xzmKu4Tt7rIGY6n1",t:"Sobrado",b:"Cidade Kemel",ci:"Itaim Paulista",p:"700.000",q:3,a:"183m²",d:"Residencial ou comercial, entrada R$ 400 mil + parcelamento do saldo"},
+{c:"FCV007",k:"-OsOboVp_F01bEO34WvM",t:"Casa com edícula",b:"Cidade Kemel",ci:"Itaim Paulista",p:"399.000",a:"terreno 10x25",d:"2 casas completas, suíte, churrasqueira, ideal para 2 famílias ou renda"},
+{c:"FCV008",k:"-OzC6xXd9U7FW2ZOXRzF",t:"Sobrado",b:"Vila Rica",ci:"São Paulo",p:"350.000",d:"Potencial de reforma, matrícula individualizada, bairro consolidado"},
+{c:"FCV009",k:"-OsXx4qQTbyKNDfL1EPc",t:"Apartamento",b:"Jardim Miray",ci:"Itaquaquecetuba",p:"150.000",q:1,v:1,d:"Residencial Solar 3, condomínio fechado com portaria 24h"},
+{c:"FCV010",k:"-OsYB6unfo-Farz01UYF",t:"Chácara para eventos",b:"Suzano",ci:"Suzano",p:"1.300.000",v:18,a:"2.140m²",d:"6 suítes, 2 piscinas, quadra de futsal, pronta para eventos e temporada"},
+{c:"FCV011",k:"-OsYD56Z13SDnifx_wbT",t:"Terreno",b:"Jundiapeba",ci:"Mogi das Cruzes",p:"75.000",a:"125m² (5x25)",d:"100% plano, pronto para construir"},
+{c:"FCV012",k:"-P3q5WfB0BnxY-5PrHej",t:"Kitnet",b:"Vila Real",ci:"Praia Grande",p:"150.000",q:1,a:"35m²",d:"Perto da praia, ótima para temporada ou renda"},
+{c:"FCV013",k:"-OzCA5-tfL-bfJyUZ-fp",t:"Chácara",b:"Vale dos Eucaliptos",ci:"Guararema",p:"1.100.000",v:2,a:"909,5m²",d:"Piscina com deck, espaço gourmet rústico com forno a lenha, muita área verde"},
+{c:"FCV014",k:"-OzCt1H5XM1Z_lcexyaA",t:"Apartamento reformado",b:"São Mateus",ci:"São Paulo",p:"296.000",q:2,v:1,a:"43m²",d:"Condomínio R$ 396, academia, portaria 24h, IPTU isento"},
+{c:"FCV015",k:"-P2iY5YGvKksZzWnaLv8",t:"Sobrado",b:"Cidade Kemel",ci:"Itaim Paulista",p:"600.000",q:5,a:"250m²",d:"4 moradias independentes + salão comercial, terreno 10x25"},
+{c:"FCV016",k:"-OsYGzcmfg4KyAmW3NHt",t:"Sobrado CDHU",b:"Conjunto Encosta Norte",ci:"Itaim Paulista",p:"200.000",d:"Quitado, documentação em ordem, perto da Fábrica de Cultura"},
+{c:"FCV017",k:"-P32dfibLXN5u0gMfiEx",t:"Casa",b:"Cidade Kemel",ci:"Itaim Paulista",p:"320.000",d:"Quitada na CDHU, quintal com varanda, garagem ampla e salão nos fundos"},
+{c:"FCV018",k:"-P32fncrRSzDK1zxmYIt",t:"Casa",b:"Conjunto Encosta Norte",ci:"Itaim Paulista",p:"320.000",d:"Quitada na CDHU, quintal com varanda, garagem ampla e salão nos fundos"},
+{c:"FCV019",k:"uid_1773171271900_uw4gec3wx8r",t:"Imóvel de renda",b:"Cidade Kemel",ci:"Itaim Paulista",p:"480.000",d:"5 casas + salão comercial independentes, renda imediata (já alugados)"},
+{c:"FCV020",k:"-P-_4-GY_sQJo5IC0p7v",t:"Sobrado com 4 casas",b:"Jardim São Fernando",ci:"Ferraz de Vasconcelos",p:"500.000",a:"250m²",d:"4 casas independentes no mesmo terreno, perto do Mercado Rossi"},
+{c:"FCV021",k:"-P32An9GDhLQoegp8Ze_",t:"Apartamento",b:"Conjunto Encosta Norte",ci:"Itaim Paulista",p:"120.000",d:"Condomínio fechado, aceita carro como parte do pagamento"}
+];
+var DIAS=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+var S={g:[],cl:[],log:[],lim:5,vi:0};
+try{var x=localStorage.getItem("pubfc");if(x)S=Object.assign(S,JSON.parse(x))}catch(e){}
+function save(){try{localStorage.setItem("pubfc",JSON.stringify(S))}catch(e){}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function $(id){return document.getElementById(id)}
+function find(c){return IM.filter(function(i){return i.c==c})[0]}
+function specs(i){var a=[];if(i.q)a.push(i.q+" quarto"+(i.q>1?"s":""));if(i.v)a.push(i.v+" vaga"+(i.v>1?"s":""));if(i.a)a.push(i.a);return a.join(" · ")}
+function txt(i,n){
+ var loc=i.b+(i.ci&&i.ci!=i.b?" – "+i.ci:""),lk=SITE+i.k,sp=specs(i);
+ var ft="\n\n📲 WhatsApp: (11) 99350-9109\nFCosta Corretor · CRECI-SP 294791-F | CNAI 52708";
+ if(n==0)return "🏡 "+i.t+" à venda – "+loc+"\n💰 R$ "+i.p+(sp?"\n📐 "+sp:"")+"\n✅ "+i.d+"\n\n👉 Fotos e detalhes: "+lk+ft;
+ if(n==1)return "🔥 OPORTUNIDADE – "+i.t.toUpperCase()+"\n📍 "+loc+"\n\n"+i.d+".\n"+(sp?"\n📐 "+sp:"")+"\n💰 Valor: R$ "+i.p+"\n🔖 Ref: "+i.c+"\n\nAgende sua visita! Veja tudo aqui:\n"+lk+ft;
+ return "Procurando "+i.t.toLowerCase()+" em "+i.b+"?\n\nTenho este: "+i.d+".\nR$ "+i.p+(sp?" ("+sp+")":"")+"\n\nChame no WhatsApp com a ref. "+i.c+" e eu te mostro.\n"+lk+ft;
+}
+function copy(s,cb){
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(cb,function(){fb(s,cb)})}else fb(s,cb)}
+function fb(s,cb){var t=document.createElement("textarea");t.value=s;document.body.appendChild(t);t.select();try{document.execCommand("copy")}catch(e){}t.remove();if(cb)cb()}
+var TABS=["Imóveis","Grupos","Textos","Publicar","Status","Clientes","Limpeza"],tab=0;
+function nav(){$("nav").innerHTML=TABS.map(function(t,i){return '<button class="'+(i==tab?"on":"")+'" onclick="go('+i+')">'+t+'</button>'}).join("")}
+function go(i){tab=i;nav();[vImo,vGru,vTex,vPub,vSta,vCli,vLim][i]()}
+function opts(sel){return IM.map(function(i){return '<option value="'+i.c+'"'+(i.c==sel?" selected":"")+'>'+i.c+' · '+esc(i.t)+' · '+esc(i.b)+' · R$ '+i.p+'</option>'}).join("")}
+/* IMÓVEIS */
+function vImo(){
+ $("app").innerHTML='<input id="q" placeholder="Filtrar por bairro, tipo ou código" style="width:100%;margin-bottom:10px" oninput="lstImo()"><div id="l"></div>';lstImo()}
+function lstImo(){
+ var q=($("q").value||"").toLowerCase();
+ $("l").innerHTML=IM.filter(function(i){return (i.c+i.t+i.b+i.ci).toLowerCase().indexOf(q)>-1}).map(function(i){
+  return '<div class="card"><div class="row"><b>'+i.c+'</b><span class="tag">'+esc(i.t)+'</span><span class="m">'+esc(i.b)+' · '+esc(i.ci)+'</span><b style="margin-left:auto">R$ '+i.p+'</b></div><small>'+esc(specs(i))+'</small><div>'+esc(i.d)+'</div><div class="row" style="margin-top:8px"><button class="b" onclick="S.sel=\''+i.c+'\';save();go(2)">Gerar textos</button></div></div>'}).join("")}
+/* GRUPOS */
+function vGru(){
+ var dd=DIAS.map(function(d,i){return '<label class="d"><input type="checkbox" class="dk" value="'+i+'" checked>'+d+'</label>'}).join("");
+ $("app").innerHTML='<div class="card"><h3>Novo grupo</h3><div class="row"><input id="gn" placeholder="Nome do grupo"><input id="gl" placeholder="Link do grupo (opcional)" style="flex:1"></div><p class="m" style="margin:8px 0 4px">Dias em que você posta neste grupo:</p>'+dd+'<div style="margin-top:8px"><button class="b" onclick="addG()">Adicionar</button></div></div><div id="l"></div>';lstG()}
+function addG(){var n=$("gn").value.trim();if(!n)return;var ds=[].slice.call(document.querySelectorAll(".dk")).filter(function(c){return c.checked}).map(function(c){return +c.value});
+ S.g.push({id:Date.now(),n:n,l:$("gl").value.trim(),ds:ds,posts:0,leads:0});save();vGru()}
+function lstG(){
+ $("l").innerHTML=S.g.length?S.g.map(function(g,ix){return '<div class="card"><div class="row"><b>'+esc(g.n)+'</b><span class="m">'+g.ds.map(function(d){return DIAS[d]}).join(", ")+'</span><span class="tag">'+g.posts+' posts</span><span class="tag">'+g.leads+' clientes</span><button class="b r" style="margin-left:auto" onclick="if(confirm(\'Remover?\')){S.g.splice('+ix+',1);save();lstG()}">Remover</button></div></div>'}).join(""):'<p class="m">Nenhum grupo ainda.</p>'}
+/* TEXTOS */
+function vTex(){
+ $("app").innerHTML='<div class="card"><div class="row"><select id="si" onchange="S.sel=this.value;save();genT()" style="flex:1">'+opts(S.sel)+'</select><select id="sv" onchange="genT()"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select></div></div><div class="card"><textarea id="tx"></textarea><div class="row" style="margin-top:8px"><button class="b g" onclick="copy($(\'tx\').value,function(){this.textContent=1})">Copiar texto</button></div></div>';genT()}
+function genT(){var i=find($("si").value);$("tx").value=txt(i,+$("sv").value)}
+/* PUBLICAR */
+function vPub(){
+ var h=new Date().getDay();
+ $("app").innerHTML='<div class="card"><div class="row"><select id="pi" style="flex:1">'+opts(S.sel)+'</select><select id="pv"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select><select id="pd">'+DIAS.map(function(d,i){return '<option value="'+i+'"'+(i==h?" selected":"")+'>'+d+'</option>'}).join("")+'</select></div><p class="m">Toque em "Abrir e copiar": o texto vai para a área de transferência e o grupo abre. Cole e clique em Publicar. Depois marque como publicado.</p></div><div id="l"></div>';
+ $("pi").onchange=$("pv").onchange=$("pd").onchange=lstP;lstP()}
+function lstP(){
+ var d=+$("pd").value,gs=S.g.filter(function(g){return g.ds.indexOf(d)>-1});
+ $("l").innerHTML=gs.length?gs.map(function(g){return '<div class="card"><div class="row"><b>'+esc(g.n)+'</b><span class="tag">'+g.posts+' posts</span><span style="margin-left:auto" class="row"><button class="b" onclick="openG('+g.id+')">Abrir e copiar</button><button class="b g" onclick="done('+g.id+')">Publicado</button></span></div></div>'}).join(""):'<p class="m">Nenhum grupo marcado para este dia. Cadastre em Grupos.</p>'}
+function gid(id){return S.g.filter(function(g){return g.id==id})[0]}
+function openG(id){var g=gid(id),i=find($("pi").value);copy(txt(i,+$("pv").value),function(){if(g.l)window.open(g.l,"_blank");else alert("Texto copiado. Este grupo não tem link cadastrado.")})}
+function done(id){var g=gid(id);g.posts++;S.log.push({g:id,i:$("pi").value,t:Date.now()});save();lstP()}
+/* CLIENTES */
+function vCli(){
+ $("app").innerHTML='<div class="card"><h3>Novo contato</h3><div class="row"><input id="cn" placeholder="Nome"><input id="ct" placeholder="Telefone"><select id="ci">'+opts()+'</select><select id="cg"><option value="">Origem: grupo</option>'+S.g.map(function(g){return '<option value="'+g.id+'">'+esc(g.n)+'</option>'}).join("")+'<option value="0">Outra origem</option></select><button class="b" onclick="addC()">Salvar</button></div></div><div id="l"></div>';lstC()}
+function addC(){var n=$("cn").value.trim();if(!n)return;var gv=$("cg").value;S.cl.push({n:n,t:$("ct").value.trim(),i:$("ci").value,g:gv,d:new Date().toLocaleDateString("pt-BR")});var g=gid(gv);if(g)g.leads++;save();vCli()}
+function lstC(){
+ $("l").innerHTML=S.cl.length?S.cl.slice().reverse().map(function(c){var g=gid(c.g),tel=(c.t||"").replace(/\D/g,"");return '<div class="card"><div class="row"><b>'+esc(c.n)+'</b><span class="tag">'+esc(c.i)+'</span><span class="m">'+esc(g?g.n:"outra origem")+' · '+c.d+'</span>'+(tel?'<a class="b" style="margin-left:auto;text-decoration:none;border-radius:8px;padding:9px 13px;background:var(--g);color:#fff" target="_blank" href="https://wa.me/55'+tel+'">WhatsApp</a>':'')+'</div></div>'}).join(""):'<p class="m">Nenhum contato registrado.</p>'}
+/* LIMPEZA */
+function vLim(){
+ var bad=S.g.filter(function(g){return g.posts>=S.lim&&g.leads==0});
+ $("app").innerHTML='<div class="card"><div class="row">Sugerir sair dos grupos com <input type="number" id="lm" value="'+S.lim+'" min="1" style="width:70px" onchange="S.lim=+this.value||5;save();vLim()"> ou mais posts e nenhum cliente.</div></div>'+(bad.length?bad.map(function(g){return '<div class="card"><div class="row"><b>'+esc(g.n)+'</b><span class="tag">'+g.posts+' posts · 0 clientes</span>'+(g.l?'<a class="b" style="margin-left:auto;text-decoration:none;border-radius:8px;padding:9px 13px;color:#fff" target="_blank" href="'+esc(g.l)+'">Abrir para sair</a>':'')+'<button class="b r" onclick="if(confirm(\'Remover da lista?\')){S.g.splice(S.g.indexOf(gid('+g.id+')),1);save();vLim()}">Já saí</button></div></div>'}).join(""):'<p class="m">Nenhum grupo para sair por enquanto.</p>')}
+go(0);
+</script></body></html>
