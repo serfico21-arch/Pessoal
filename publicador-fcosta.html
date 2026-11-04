@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Publicador FCosta</title>
+<style>
+:root{--bg:#f4f6f9;--c:#fff;--t:#1b2430;--m:#6b7785;--p:#0b5ed7;--g:#198754;--r:#c0392b;--b:#dde3ea}
+@media(prefers-color-scheme:dark){:root{--bg:#10151c;--c:#1a222d;--t:#e8edf3;--m:#93a0ae;--b:#2b3644}}
+*{box-sizing:border-box}body{margin:0;font:15px system-ui,sans-serif;background:var(--bg);color:var(--t)}
+header{padding:14px 16px;background:var(--p);color:#fff;font-weight:700}
+nav{display:flex;gap:4px;overflow-x:auto;padding:8px;background:var(--c);border-bottom:1px solid var(--b);position:sticky;top:0}
+nav button{border:0;background:none;color:var(--m);padding:9px 12px;border-radius:8px;font-weight:600;white-space:nowrap;cursor:pointer}
+nav button.on{background:var(--p);color:#fff}
+main{max-width:900px;margin:auto;padding:12px}
+.card{background:var(--c);border:1px solid var(--b);border-radius:10px;padding:12px;margin-bottom:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select,textarea{padding:9px;border:1px solid var(--b);border-radius:8px;background:var(--bg);color:var(--t);font:inherit;max-width:100%}
+textarea{width:100%;min-height:210px}
+button.b{border:0;border-radius:8px;padding:9px 13px;background:var(--p);color:#fff;font-weight:600;cursor:pointer}
+button.g{background:var(--g)}button.r{background:var(--r)}button.s{background:var(--m)}
+small,.m{color:var(--m)}.tag{background:var(--bg);border:1px solid var(--b);border-radius:20px;padding:2px 9px;font-size:12px}
+h3{margin:4px 0 10px}.d{display:inline-flex;gap:3px;align-items:center;margin-right:8px}
+.ph{display:flex;gap:6px;overflow-x:auto;margin:8px 0}.ph img{height:90px;width:120px;object-fit:cover;border-radius:8px;flex:none;cursor:pointer;background:var(--bg)}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:9;padding:10px}.lbx{display:flex;align-items:center;gap:6px;max-width:100%}.lbx img{max-width:78vw;max-height:70vh;border-radius:8px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}.pc{background:var(--c);border:1px solid var(--b);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}.pim{position:relative;height:170px;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--m);font-size:13px}.pim img{width:100%;height:100%;object-fit:cover;display:block}.pim .rf,.pim .nf{position:absolute;top:8px;background:rgba(30,58,95,.9);color:#fff;font-size:12px;padding:3px 8px;border-radius:20px}.pim .rf{left:8px}.pim .nf{right:8px}.pbd{padding:12px;display:flex;flex-direction:column;gap:4px;flex:1}.ppr{font-size:19px;font-weight:800}.pbd p{margin:4px 0 8px;font-size:14px;flex:1}.pbt{display:flex;gap:6px;flex-wrap:wrap}.pbt>*{flex:1;min-width:80px;text-align:center;text-decoration:none}
+summary{font-weight:700;cursor:pointer}.hp{margin-top:8px;line-height:1.5}.hp ol,.hp ul{padding-left:20px;margin:6px 0}
+</style></head><body>
+<header>Publicador FCosta · CRECI-SP 294791-F</header>
+<nav id="nav"></nav><main id="app"></main>
+<script>
+var WA="5511993509109",SITE="https://fcostacorretor.com/imovel?id=";
+var IM=[
+{c:"FCV001",k:"uid_1773957315252_j78ayd4vqep",t:"Sobrado",b:"Jardim Luiz Mauro",ci:"Ferraz de Vasconcelos",p:"650.000",d:"2 residências independentes, garagem para 2 carros com portão automático e espaço gourmet"},
+{c:"FCV002",k:"-P2n05G1GeQjwVMwaR1w",t:"Sobrado",b:"Cidade Kemel",ci:"Itaim Paulista",p:"450.000",d:"Fachada moderna, escada flutuante, cozinha planejada, churrasqueira e frente para escola"},
+{c:"FCV003",k:"-OsY60m63S3egI2LlW3-",t:"Galpão + salão + 2 residências",b:"Cidade Kemel",ci:"Itaim Paulista",p:"750.000",d:"Galpão com pé-direito alto, porão, salão comercial e 2 residências no andar superior"},
+{c:"FCV004",k:"-OsY8va3F9rCNTEphs89",t:"Sobrado",b:"Cidade Kemel",ci:"Itaim Paulista",p:"500.000",q:2,v:3,d:"3 unidades independentes, espaço gourmet com churrasqueira e garagem coberta"},
+{c:"FCV005",k:"-Os8j89U7jFgaLR4e13j",t:"Sobrado",b:"Cidade Kemel",ci:"Itaim Paulista",p:"350.000",a:"240m²",d:"3 residências independentes, ótimo para renda após reforma"},
+{c:"FCV006",k:"-Os8xzmKu4Tt7rIGY6n1",t:"Sobrado",b:"Cidade Kemel",ci:"Itaim Paulista",p:"700.000",q:3,a:"183m²",d:"Residencial ou comercial, entrada R$ 400 mil + parcelamento do saldo"},
+{c:"FCV007",k:"-OsOboVp_F01bEO34WvM",t:"Casa com edícula",b:"Cidade Kemel",ci:"Itaim Paulista",p:"399.000",a:"terreno 10x25",d:"2 casas completas, suíte, churrasqueira, ideal para 2 famílias ou renda"},
+{c:"FCV008",k:"-OzC6xXd9U7FW2ZOXRzF",t:"Sobrado",b:"Vila Rica",ci:"São Paulo",p:"350.000",d:"Potencial de reforma, matrícula individualizada, bairro consolidado"},
+{c:"FCV009",k:"-OsXx4qQTbyKNDfL1EPc",t:"Apartamento",b:"Jardim Miray",ci:"Itaquaquecetuba",p:"150.000",q:1,v:1,d:"Residencial Solar 3, condomínio fechado com portaria 24h"},
+{c:"FCV010",k:"-OsYB6unfo-Farz01UYF",t:"Chácara para eventos",b:"Suzano",ci:"Suzano",p:"1.300.000",v:18,a:"2.140m²",d:"6 suítes, 2 piscinas, quadra de futsal, pronta para eventos e temporada"},
+{c:"FCV011",k:"-OsYD56Z13SDnifx_wbT",t:"Terreno",b:"Jundiapeba",ci:"Mogi das Cruzes",p:"75.000",a:"125m² (5x25)",d:"100% plano, pronto para construir"},
+{c:"FCV012",k:"-P3q5WfB0BnxY-5PrHej",t:"Kitnet",b:"Vila Real",ci:"Praia Grande",p:"150.000",q:1,a:"35m²",d:"Perto da praia, ótima para temporada ou renda"},
+{c:"FCV013",k:"-OzCA5-tfL-bfJyUZ-fp",t:"Chácara",b:"Vale dos Eucaliptos",ci:"Guararema",p:"1.100.000",v:2,a:"909,5m²",d:"Piscina com deck, espaço gourmet rústico com forno a lenha, muita área verde"},
+{c:"FCV014",k:"-OzCt1H5XM1Z_lcexyaA",t:"Apartamento reformado",b:"São Mateus",ci:"São Paulo",p:"296.000",q:2,v:1,a:"43m²",d:"Condomínio R$ 396, academia, portaria 24h, IPTU isento"},
+{c:"FCV015",k:"-P2iY5YGvKksZzWnaLv8",t:"Sobrado",b:"Cidade Kemel",ci:"Itaim Paulista",p:"600.000",q:5,a:"250m²",d:"4 moradias independentes + salão comercial, terreno 10x25"},
+{c:"FCV016",k:"-OsYGzcmfg4KyAmW3NHt",t:"Sobrado CDHU",b:"Conjunto Encosta Norte",ci:"Itaim Paulista",p:"200.000",d:"Quitado, documentação em ordem, perto da Fábrica de Cultura"},
+{c:"FCV017",k:"-P32dfibLXN5u0gMfiEx",t:"Casa",b:"Cidade Kemel",ci:"Itaim Paulista",p:"320.000",d:"Quitada na CDHU, quintal com varanda, garagem ampla e salão nos fundos"},
+{c:"FCV018",k:"-P32fncrRSzDK1zxmYIt",t:"Casa",b:"Conjunto Encosta Norte",ci:"Itaim Paulista",p:"320.000",d:"Quitada na CDHU, quintal com varanda, garagem ampla e salão nos fundos"},
+{c:"FCV019",k:"uid_1773171271900_uw4gec3wx8r",t:"Imóvel de renda",b:"Cidade Kemel",ci:"Itaim Paulista",p:"480.000",d:"5 casas + salão comercial independentes, renda imediata (já alugados)"},
+{c:"FCV020",k:"-P-_4-GY_sQJo5IC0p7v",t:"Sobrado com 4 casas",b:"Jardim São Fernando",ci:"Ferraz de Vasconcelos",p:"500.000",a:"250m²",d:"4 casas independentes no mesmo terreno, perto do Mercado Rossi"},
+{c:"FCV021",k:"-P32An9GDhLQoegp8Ze_",t:"Apartamento",b:"Conjunto Encosta Norte",ci:"Itaim Paulista",p:"120.000",d:"Condomínio fechado, aceita carro como parte do pagamento"}
+];
+var DIAS=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+var S={g:[],cl:[],log:[],ab:[],lim:5,vi:0};
+try{var x=localStorage.getItem("pubfc");if(x)S=Object.assign(S,JSON.parse(x))}catch(e){}
+function save(){try{localStorage.setItem("pubfc",JSON.stringify(S))}catch(e){}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function $(id){return document.getElementById(id)}
+function find(c){return IM.filter(function(i){return i.c==c})[0]}
+function specs(i){var a=[];if(i.q)a.push(i.q+" quarto"+(i.q>1?"s":""));if(i.v)a.push(i.v+" vaga"+(i.v>1?"s":""));if(i.a)a.push(i.a);return a.join(" · ")}
+function txt(i,n){
+ var loc=i.b+(i.ci&&i.ci!=i.b?" – "+i.ci:""),lk=SITE+i.k,sp=specs(i);
+ var ft="\n\n📲 WhatsApp: (11) 99350-9109\nFCosta Corretor · CRECI-SP 294791-F | CNAI 52708";
+ if(n==0)return "🏡 "+i.t+" à venda – "+loc+"\n💰 R$ "+i.p+(sp?"\n📐 "+sp:"")+"\n✅ "+i.d+"\n\n👉 Fotos e detalhes: "+lk+ft;
+ if(n==1)return "🔥 OPORTUNIDADE – "+i.t.toUpperCase()+"\n📍 "+loc+"\n\n"+i.d+".\n"+(sp?"\n📐 "+sp:"")+"\n💰 Valor: R$ "+i.p+"\n🔖 Ref: "+i.c+"\n\nAgende sua visita! Veja tudo aqui:\n"+lk+ft;
+ return "Procurando "+i.t.toLowerCase()+" em "+i.b+"?\n\nTenho este: "+i.d+".\nR$ "+i.p+(sp?" ("+sp+")":"")+"\n\nChame no WhatsApp com a ref. "+i.c+" e eu te mostro.\n"+lk+ft;
+}
+function copy(s,cb){
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(cb,function(){fb(s,cb)})}else fb(s,cb)}
+function fb(s,cb){var t=document.createElement("textarea");t.value=s;document.body.appendChild(t);t.select();try{document.execCommand("copy")}catch(e){}t.remove();if(cb)cb()}
+var TABS=["Imóveis","Grupos","Textos","Publicar","Status","Clientes","Limpeza","Portfólio","Ajuda"],tab=0;
+function nav(){$("nav").innerHTML=TABS.map(function(t,i){return '<button class="'+(i==tab?"on":"")+'" onclick="go('+i+')">'+t+'</button>'}).join("")}
+function go(i){tab=i;nav();[vImo,vGru,vTex,vPub,vSta,vCli,vLim,vPor,vAju][i]()}
+function opts(sel){return IM.map(function(i){return '<option value="'+i.c+'"'+(i.c==sel?" selected":"")+'>'+i.c+' · '+esc(i.t)+' · '+esc(i.b)+' · R$ '+i.p+'</option>'}).join("")}
+/* IMÓVEIS */
+function vImo(){
+ $("app").innerHTML='<button class="b g" style="margin-bottom:10px" onclick="expF()">Exportar para o portfólio</button><input id="q" placeholder="Filtrar por bairro, tipo ou código" style="width:100%;margin-bottom:10px" oninput="lstImo()"><div id="l"></div>';lstImo();carregar()}
+function lstImo(){
+ var q=($("q").value||"").toLowerCase();
+ $("l").innerHTML=IM.filter(function(i){return (i.c+i.t+i.b+i.ci).toLowerCase().indexOf(q)>-1}).map(function(i){
+  return '<div class="card"><div class="row"><b>'+i.c+'</b><span class="tag">'+esc(i.t)+'</span><span class="m">'+esc(i.b)+' · '+esc(i.ci)+'</span><b style="margin-left:auto">R$ '+i.p+'</b></div><small>'+esc(specs(i))+'</small>'+strip(i.c)+'<div>'+esc(i.d)+'</div><div class="row" style="margin-top:8px"><button class="b g" onclick="addF(\''+i.c+'\')">Fotos</button><button class="b" onclick="S.sel=\''+i.c+'\';save();go(2)">Gerar textos</button></div></div>'}).join("")}
+/* GRUPOS */
+var CQ={},CQE=0,Q=null,QT=null;
+function isFb(g){return /facebook|fb\.com|fb\.watch|fb\.me/i.test(g.l||"")}
+function hojeS(x){return new Date(x.t).toDateString()==new Date().toDateString()}
+function hojeFb(){return S.log.filter(function(x){var g=gid(x.g);return hojeS(x)&&g&&isFb(g)}).length}
+function feitoHoje(id){return S.log.some(function(x){return x.g==id&&hojeS(x)})}
+function tl(g,i){return lkP("")+"?o="+g.id+"#"+i.c}
+function tx(g,i,n){var t=txt(i,n);return t.split(SITE+i.k).join(tl(g,i))}
+function cq(){jget("cliques").then(function(d){CQ={};Object.keys(d||{}).forEach(function(k){CQ[k]=Object.keys(d[k]||{}).length});CQE=0;if($("l"))lstG()},function(){CQE=1;if($("l"))lstG()})}
+function vGru(){
+ var dd=DIAS.map(function(d,i){return '<label class="d"><input type="checkbox" class="dk" value="'+i+'" checked>'+d+'</label>'}).join("");
+ $("app").innerHTML='<div id="fila"></div><div id="pn"></div>'
+ +'<div class="card"><h3>Fila de postagem</h3><div class="row"><select id="fi2" style="flex:1">'+opts(S.sel)+'</select><select id="fv"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select></div>'
+ +'<div class="row" style="margin-top:8px">Limite de posts no Facebook por dia <input type="number" id="fm" min="1" value="'+(S.maxd||10)+'" style="width:70px"> Intervalo entre grupos <input type="number" id="fe" min="15" value="'+(S.esp||45)+'" style="width:70px"> s</div>'
+ +'<p class="m" style="margin:8px 0">Abre um grupo por vez (somente os marcados abaixo), copia o texto com link rastreado e espera o intervalo definido entre um grupo e outro. O Facebook não permite postar sozinho nem abrir vários grupos de uma vez, e não divulga um limite oficial de postagens; por isso o padrão é 10 por dia no Facebook. Ajuste ao seu caso.</p><button class="b g" onclick="iniFila()">Iniciar fila de hoje</button></div>'
+ +'<div class="card"><h3>Novo grupo</h3><div class="row"><input id="gn" placeholder="Nome do grupo"><input id="gl" placeholder="Link do grupo" style="flex:1"></div><p class="m" style="margin:8px 0 4px">Dias em que você posta:</p>'+dd
+ +'<div style="margin-top:8px"><button class="b" onclick="addG()">Adicionar</button></div>'
+ +'<p class="m" style="margin:12px 0 4px">Ou cole vários, um por linha (Nome | link, ou só o link):</p><textarea id="gb" rows="5" placeholder="Corretores ZL | https://facebook.com/groups/123&#10;https://facebook.com/groups/456"></textarea><div style="margin-top:8px"><button class="b" onclick="addVarios()">Adicionar vários</button></div></div>'
+ +'<div class="row" style="margin-bottom:8px"><button class="b s" onclick="cq()">Atualizar cliques</button><span class="m" id="cqm"></span></div><div id="l"></div>';
+ lstG();rdQ();cq()}
+function isSel(g){return g.sel!==false}
+function selG(id,v){gid(id).sel=v;save();lstG()}
+function selTodos(v){S.g.forEach(function(g){g.sel=v});save();lstG()}
+function selHoje(){var d=new Date().getDay();S.g.forEach(function(g){g.sel=g.ds.indexOf(d)>-1});save();lstG()}
+function reg(g){g.opens=(g.opens||0)+1;S.ab=S.ab||[];S.ab.push({g:g.id,t:Date.now()});if(S.ab.length>500)S.ab.shift()}
+function abHoje(){return (S.ab||[]).filter(hojeS).length}
+function pausado(){return S.pa&&S.pa>Date.now()}
+function alerta(){if(!confirm("Pausar o Facebook por 48 horas e reduzir o limite diário pela metade? Faça isso ao receber qualquer aviso ou bloqueio."))return;S.pa=Date.now()+172800000;S.maxd=Math.max(3,Math.floor((S.maxd||10)/2));Q=null;clearInterval(QT);save();vGru()}
+function fimPausa(){if(!confirm("Encerrar a pausa agora? Só faça isso se o Facebook já liberou sua conta."))return;S.pa=0;save();vGru()}
+function abrirMeus(){if(pausado()&&!confirm("Pausa de segurança ativa. Abrir mesmo assim?"))return;S.ab=S.ab||[];S.ab.push({g:0,t:Date.now()});save();window.open("https://www.facebook.com/groups/joins/","_blank");pnG()}
+function pnG(){
+ var el=$("pn");if(!el)return;
+ var mx=S.maxd||10,fb=hojeFb(),pc=Math.min(100,Math.round(fb/mx*100)),cor=fb>=mx?"var(--r)":(fb>=mx*.7?"#e0a800":"var(--g)"),tc=0;
+ Object.keys(CQ).forEach(function(k){tc+=CQ[k]});
+ var ns=S.g.filter(isSel).length,h="";
+ if(pausado()){var hr=Math.max(1,Math.ceil((S.pa-Date.now())/3600000));h+='<div class="card" style="border-color:var(--r)"><b style="color:var(--r)">⛔ Pausa de segurança ativa</b><p class="m" style="margin:6px 0">Faltam cerca de '+hr+' h. Não publique em grupos do Facebook até acabar. Resolva qualquer verificação que o Facebook pedir e, ao voltar, use metade do limite por alguns dias.</p><button class="b s" onclick="fimPausa()">Encerrar pausa</button></div>'}
+ h+='<div class="card"><h3>Controle do Facebook</h3>'
+ +'<div class="row"><span class="tag">Posts hoje: '+fb+'/'+mx+'</span><span class="tag">Aberturas hoje: '+abHoje()+'</span><span class="tag">'+(CQE?'Cliques: indisponível':'Cliques nos links: '+tc)+'</span><span class="tag">Selecionados: '+ns+'/'+S.g.length+'</span></div>'
+ +'<div style="height:8px;background:var(--bg);border:1px solid var(--b);border-radius:6px;margin:8px 0;overflow:hidden"><div style="height:100%;width:'+pc+'%;background:'+cor+'"></div></div>'
+ +'<div class="row"><button class="b" onclick="abrirMeus()">Abrir meus grupos do Facebook</button><button class="b s" onclick="selTodos(true)">Marcar todos</button><button class="b s" onclick="selTodos(false)">Desmarcar todos</button><button class="b s" onclick="selHoje()">Só os de hoje</button><button class="b r" onclick="alerta()">⚠ Recebi alerta</button></div>'
+ +'<details class="hp"><summary>Como trazer e escolher meus grupos</summary><ol><li>Toque em <b>Abrir meus grupos do Facebook</b>. Abre a página com todos os grupos em que você participa.</li><li>Entre no grupo que quer usar e copie o link da barra de endereço.</li><li>Cole os links em <b>Adicionar vários</b> (um por linha) e marque os dias.</li><li>Na lista abaixo, deixe marcados só os grupos que quer usar. A fila usa apenas os marcados.</li></ol><p class="m">O Facebook não deixa o site ler sua lista de grupos automaticamente, por isso o cadastro dos links é manual, uma vez só.</p></details>'
+ +'<details class="hp"><summary>⚠ Sinais de alerta: pare na hora</summary><ul><li>Mensagens como <b>Ação bloqueada</b>, <b>Você está tentando fazer isso rápido demais</b> ou <b>Tente novamente mais tarde</b>.</li><li>Pedido de verificação de identidade, código, captcha ou confirmação de login em outro aparelho.</li><li>Posts recusados ou removidos por spam, ou aviso de violação das regras da comunidade.</li><li>Vários grupos deixando seu post pendente ou apagando o link.</li><li>Administrador avisando, removendo você ou pedindo para parar de anunciar.</li></ul><p><b>O que fazer:</b> toque em <b>⚠ Recebi alerta</b> (pausa o Facebook por 48 h e baixa o limite pela metade), faça a verificação se o Facebook pedir, não tente contornar nem criar outro perfil, e volte devagar.</p></details>'
+ +'<details class="hp"><summary>Regras para não passar dos limites</summary><ul><li>O Facebook não divulga um limite oficial. Comece com 10 posts por dia ou menos e baixe se aparecer qualquer alerta.</li><li>Abra um grupo por vez, nunca vários ao mesmo tempo. Respeite o intervalo entre grupos.</li><li>Leia as regras de cada grupo: muitos proíbem anúncio ou exigem dia e horário certos.</li><li>Não cole o mesmo texto em todos. Alterne os estilos e os imóveis, e mude algo no texto.</li><li>Poste com foto, não só o link, e responda os comentários.</li><li>Use sempre o mesmo aparelho e navegador, logado na sua conta, sem VPN.</li><li>Mantenha dias de descanso na semana.</li></ul></details></div>';
+ el.innerHTML=h}
+function dsSel(){return [].slice.call(document.querySelectorAll(".dk")).filter(function(c){return c.checked}).map(function(c){return +c.value})}
+function addG(){var n=$("gn").value.trim(),l=$("gl").value.trim();if(!n&&l)n=nomeL(l);if(!n)return;S.g.push({id:Date.now(),n:n,l:l,ds:dsSel(),posts:0,leads:0,opens:0});save();vGru()}
+function nomeL(l){var m=l.match(/groups\/([^\/?#]+)/);return "Grupo "+(m?m[1]:l.replace(/^https?:\/\/(www\.)?/,"").slice(0,24))}
+function addVarios(){var ds=dsSel(),t=$("gb").value.split("\n"),k=0;t.forEach(function(ln){ln=ln.trim();if(!ln)return;var p=ln.split(/\s*\|\s*|\t/),n,l;if(p.length>1){n=p[0];l=p[1]}else if(/^https?:\/\//.test(p[0])){l=p[0];n=nomeL(l)}else{n=p[0];l=""}
+ if(l&&S.g.some(function(g){return g.l==l}))return;S.g.push({id:Date.now()+k,n:n,l:l,ds:ds,posts:0,leads:0,opens:0});k++});save();alert(k+" grupo(s) adicionados.");vGru()}
+function lstG(){pnG();
+ if($("cqm"))$("cqm").textContent=CQE?"Contador de cliques indisponível (veja Ajuda › Cliques).":"";
+ $("l").innerHTML=S.g.length?S.g.map(function(g,ix){var c=CQ[g.id]||0;return '<div class="card"><div class="row"><label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox"'+(isSel(g)?' checked':'')+' onchange="selG('+g.id+',this.checked)"><b>'+esc(g.n)+'</b></label>'+(isFb(g)?'<span class="tag">Facebook</span>':'')+'<span class="m">'+g.ds.map(function(d){return DIAS[d]}).join(", ")+'</span></div><div class="row" style="margin-top:6px"><span class="tag">'+g.posts+' posts</span><span class="tag">'+(g.opens||0)+' aberturas</span><span class="tag">'+(CQE?"— cliques":c+" cliques no link")+'</span><span class="tag">'+g.leads+' clientes</span><span style="margin-left:auto" class="row">'+(g.l?'<button class="b s" onclick="abreG('+g.id+')">Abrir</button>':'')+'<button class="b r" onclick="if(confirm(\'Remover?\')){S.g.splice('+ix+',1);save();lstG()}">Remover</button></span></div></div>'}).join(""):'<p class="m">Nenhum grupo ainda.</p>'}
+function abreG(id){var g=gid(id);if(isFb(g)&&pausado()&&!confirm("Pausa de segurança ativa por alerta do Facebook. Abrir mesmo assim?"))return;window.open(g.l,"_blank");reg(g);save();lstG()}
+function iniFila(){S.maxd=+$("fm").value||10;S.esp=Math.max(15,+$("fe").value||45);save();Q={ids:S.g.filter(function(g){return isSel(g)&&!feitoHoje(g.id)}).map(function(g){return g.id}),i:$("fi2").value,v:+$("fv").value,w:0,op:0};rdQ()}
+function rdQ(){
+ var el=$("fila");if(!el)return;if(!Q){el.innerHTML="";return}
+ var g=gid(Q.ids[0]);
+ if(!g){el.innerHTML='<div class="card"><b>Fila concluída ✓</b><p class="m" style="margin:6px 0">Posts no Facebook hoje: '+hojeFb()+'/'+(S.maxd||10)+'</p><button class="b" onclick="qFim()">Fechar</button></div>';return}
+ var lim=isFb(g)&&(hojeFb()>=(S.maxd||10)||pausado()),h='<div class="card" style="border-color:var(--p)"><div class="row"><span class="tag">Restam '+Q.ids.length+'</span><span class="tag">Facebook hoje: '+hojeFb()+'/'+(S.maxd||10)+'</span></div><h3 style="margin-top:8px">'+esc(g.n)+'</h3>';
+ if(lim)h+='<p class="m">'+(pausado()?'Pausa de segurança ativa por alerta do Facebook. Não publique em grupos do Facebook até acabar.':'Limite diário do Facebook atingido. Pare por hoje para evitar bloqueio, ou pule este grupo.')+'</p><div class="row"><button class="b s" onclick="qPula()">Pular</button><button class="b r" onclick="qFim()">Encerrar</button></div>';
+ else h+='<div class="row"><button class="b" onclick="qAbrir()"'+(Q.w>0?' disabled':'')+'>'+(Q.w>0?'Aguarde '+Q.w+'s':'Abrir e copiar')+'</button><button class="b g" onclick="qOk()"'+(Q.op?'':' disabled')+'>Publicado ✓</button><button class="b s" onclick="qPula()">Pular</button><button class="b r" onclick="qFim()">Encerrar</button></div><p class="m" style="margin-top:6px">Toque em Abrir e copiar, cole o texto no grupo, publique e volte aqui para marcar Publicado.</p>';
+ el.innerHTML=h+'</div>'}
+function qAbrir(){var g=gid(Q.ids[0]),i=find(Q.i);if(g.l)window.open(g.l,"_blank");reg(g);Q.op=1;save();copy(tx(g,i,Q.v),function(){if(!g.l)alert("Texto copiado. Este grupo não tem link cadastrado.")});rdQ()}
+function qOk(){var g=gid(Q.ids[0]);g.posts++;S.log.push({g:g.id,i:Q.i,t:Date.now()});save();Q.ids.shift();Q.op=0;Q.w=(isFb(g)?(S.esp||45):25);clearInterval(QT);QT=setInterval(function(){if(Q&&Q.w>0){Q.w--;rdQ()}else clearInterval(QT)},1000);rdQ()}
+function qPula(){Q.ids.shift();Q.op=0;rdQ()}
+function qFim(){Q=null;clearInterval(QT);rdQ();if($("l"))lstG()}
+/* TEXTOS */
+function vTex(){
+ $("app").innerHTML='<div class="card"><div class="row"><select id="si" onchange="S.sel=this.value;save();genT()" style="flex:1">'+opts(S.sel)+'</select><select id="sv" onchange="genT()"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select></div></div><div class="card"><div id="fp"></div></div><div class="card"><textarea id="tx"></textarea><div class="row" style="margin-top:8px"><button class="b g" onclick="cp(this)">Copiar texto</button><button class="b" onclick="comp(this)">Compartilhar com fotos</button><button class="b s" onclick="baixar(this)">Baixar fotos</button></div></div>';genT();carregar()}
+function genT(){var i=find($("si").value);$("tx").value=txt(i,+$("sv").value);fotosT()}
+/* PUBLICAR */
+function vPub(){
+ var h=new Date().getDay();
+ $("app").innerHTML='<div class="card"><div class="row"><select id="pi" style="flex:1">'+opts(S.sel)+'</select><select id="pv"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select><select id="pd">'+DIAS.map(function(d,i){return '<option value="'+i+'"'+(i==h?" selected":"")+'>'+d+'</option>'}).join("")+'</select></div><p class="m">Toque em "Abrir e copiar": o texto vai para a área de transferência e o grupo abre. Cole e clique em Publicar. Depois marque como publicado.</p></div><div id="l"></div>';
+ $("pi").onchange=$("pv").onchange=$("pd").onchange=lstP;lstP()}
+function lstP(){
+ var d=+$("pd").value,gs=S.g.filter(function(g){return g.ds.indexOf(d)>-1});
+ $("l").innerHTML=gs.length?gs.map(function(g){return '<div class="card"><div class="row"><b>'+esc(g.n)+'</b><span class="tag">'+g.posts+' posts</span><span style="margin-left:auto" class="row"><button class="b" onclick="openG('+g.id+')">Abrir e copiar</button><button class="b g" onclick="done('+g.id+')">Publicado</button></span></div></div>'}).join(""):'<p class="m">Nenhum grupo marcado para este dia. Cadastre em Grupos.</p>'}
+function gid(id){return S.g.filter(function(g){return g.id==id})[0]}
+function openG(id){var g=gid(id),i=find($("pi").value);if(g.l)window.open(g.l,"_blank");reg(g);save();copy(tx(g,i,+$("pv").value),function(){if(!g.l)alert("Texto copiado. Este grupo não tem link cadastrado.")})}
+function done(id){var g=gid(id);g.posts++;S.log.push({g:id,i:$("pi").value,t:Date.now()});save();lstP()}
+/* CLIENTES */
+function vCli(){
+ $("app").innerHTML='<div class="card"><h3>Novo contato</h3><div class="row"><input id="cn" placeholder="Nome"><input id="ct" placeholder="Telefone"><select id="ci">'+opts()+'</select><select id="cg"><option value="">Origem: grupo</option>'+S.g.map(function(g){return '<option value="'+g.id+'">'+esc(g.n)+'</option>'}).join("")+'<option value="0">Outra origem</option></select><button class="b" onclick="addC()">Salvar</button></div></div><div id="l"></div>';lstC()}
+function addC(){var n=$("cn").value.trim();if(!n)return;var gv=$("cg").value;S.cl.push({n:n,t:$("ct").value.trim(),i:$("ci").value,g:gv,d:new Date().toLocaleDateString("pt-BR")});var g=gid(gv);if(g)g.leads++;save();vCli()}
+function lstC(){
+ $("l").innerHTML=S.cl.length?S.cl.slice().reverse().map(function(c){var g=gid(c.g),tel=(c.t||"").replace(/\D/g,"");return '<div class="card"><div class="row"><b>'+esc(c.n)+'</b><span class="tag">'+esc(c.i)+'</span><span class="m">'+esc(g?g.n:"outra origem")+' · '+c.d+'</span>'+(tel?'<a class="b" style="margin-left:auto;text-decoration:none;border-radius:8px;padding:9px 13px;background:var(--g);color:#fff" target="_blank" href="https://wa.me/55'+tel+'">WhatsApp</a>':'')+'</div></div>'}).join(""):'<p class="m">Nenhum contato registrado.</p>'}
+/* LIMPEZA */
+function vLim(){
+ var bad=S.g.filter(function(g){return g.posts>=S.lim&&g.leads==0});
+ $("app").innerHTML='<div class="card"><div class="row">Sugerir sair dos grupos com <input type="number" id="lm" value="'+S.lim+'" min="1" style="width:70px" onchange="S.lim=+this.value||5;save();vLim()"> ou mais posts e nenhum cliente.</div></div>'+(bad.length?bad.map(function(g){return '<div class="card"><div class="row"><b>'+esc(g.n)+'</b><span class="tag">'+g.posts+' posts · 0 clientes</span>'+(g.l?'<a class="b" style="margin-left:auto;text-decoration:none;border-radius:8px;padding:9px 13px;color:#fff" target="_blank" href="'+esc(g.l)+'">Abrir para sair</a>':'')+'<button class="b r" onclick="if(confirm(\'Remover da lista?\')){S.g.splice(S.g.indexOf(gid('+g.id+')),1);save();vLim()}">Já saí</button></div></div>'}).join(""):'<p class="m">Nenhum grupo para sair por enquanto.</p>')}
+/* FOTOS */
+var DB="https://fcosta2026-847c3-default-rtdb.firebaseio.com",CLD="dpquob8gh",FT={},NONE={},CAR=0,ERR=0,LB=null,RT=null,DIAG="";
+try{FT=JSON.parse(localStorage.getItem("pubft3")||"{}")}catch(e){}
+function gravaFT(){try{localStorage.setItem("pubft3",JSON.stringify(FT))}catch(e){}}
+function jget(p,q){return fetch(DB+"/"+p+".json"+(q||"")).then(function(r){if(!r.ok)throw 0;return r.json()})}
+function th(u,w){return u.indexOf("res.cloudinary.com")>-1&&u.indexOf("/image/upload/")>-1&&!/\/upload\/[a-z]_/.test(u)?u.replace("/upload/","/upload/w_"+w+",q_auto/"):u}
+var FK=/foto|img|imag|photo|galer|capa|cover|thumb|pic|midia|media|public_?id/i;
+function imgs(o,out,k){
+ if(o==null)return;
+ if(typeof o=="string"){
+  if(/^https?:\/\/\S+$/.test(o)){if(!/\.(mp4|mov|webm|pdf)(\?|$)/i.test(o)&&!/\/video\/upload\//.test(o)&&(/\.(jpe?g|png|webp|gif|avif)(\?|$)/i.test(o)||/cloudinary|firebasestorage|googleusercontent/i.test(o)))out.push(o)}
+  else if(k&&FK.test(k)&&/^[\w\-\/\.]{5,}$/.test(o)&&!/^\d+$/.test(o))out.push("https://res.cloudinary.com/"+CLD+"/image/upload/"+o);
+  return}
+ if(Array.isArray(o)){o.forEach(function(v){imgs(v,out,k)});return}
+ if(typeof o=="object")for(var x in o)imgs(o[x],out,x)}
+function uniq(a){return a.filter(function(v,i){return a.indexOf(v)==i})}
+var RC=["fcosta_imoveis","imoveis","imóveis","properties","imovel","anuncios","venda","comprar","listings","imoveis/venda","casas","items","posts"];
+function roots(){
+ if(RT)return RT;
+ RT=jget("","?shallow=true").then(function(d){
+  var k=Object.keys(d||{});
+  return Promise.all(k.slice(0,30).map(function(a){return jget(a,"?shallow=true").then(function(x){var n=Object.keys(x||{});return n.length<=15?n.map(function(b){return a+"/"+b}):[]},function(){return []})})).then(function(n){return k.concat([].concat.apply([],n))})
+ },function(){return []}).then(function(ex){return uniq((S.root?[S.root]:[]).concat(S.hits||[]).concat(RC).concat(ex))});
+ return RT}
+function achar(i){
+ return roots().then(function(rs){
+  rs=uniq((S.root?[S.root]:[]).concat(S.hits||[]).concat(rs));
+  var n=0,k=encodeURIComponent(i.k);
+  function t(){if(n>=rs.length)return Promise.resolve(null);var r=rs[n++];return jget(r+"/"+k).then(function(d){
+   if(d&&typeof d=="object"){S.hits=S.hits||[];if(S.hits.indexOf(r)<0){S.hits.push(r);save()}return{r:r,d:d}}return t()},t)}
+  return t()})}
+function cldTag(i){
+ var tags=uniq([i.c,i.c.toLowerCase(),i.k]),n=0;
+ function t(){if(n>=tags.length)return Promise.resolve([]);var g=tags[n++];
+  return fetch("https://res.cloudinary.com/"+CLD+"/image/list/"+encodeURIComponent(g)+".json").then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){
+   var a=(j.resources||[]).map(function(x){return "https://res.cloudinary.com/"+CLD+"/image/upload/v"+x.version+"/"+x.public_id+"."+x.format});return a.length?a:t()},t)}
+ return t()}
+function busca(i){
+ return achar(i).then(function(h){var o=[];if(h)imgs(h.d,o);o=uniq(o);return o.length?o.slice(0,12):cldTag(i)})}
+function carregar(){
+ var q=IM.filter(function(i){return !(FT[i.c]&&FT[i.c].length)&&!NONE[i.c]});
+ if(!q.length||CAR)return;
+ CAR=1;ERR=0;var ok=0;
+ function nx(){if(!q.length)return Promise.resolve();var i=q.shift();
+  return busca(i).then(function(a){if(a&&a.length){FT[i.c]=a;ok++;gravaFT()}else NONE[i.c]=1;atualizar()},function(){NONE[i.c]=1}).then(nx)}
+ Promise.all([nx(),nx(),nx()]).then(function(){ERR=ok==0?1:0;CAR=0;atualizar()},function(){ERR=1;CAR=0;atualizar()})}
+function atualizar(){if(tab==7&&$("pg"))lstPor();if(tab==0&&$("q"))lstImo();if(tab==2&&$("fp"))fotosT()}
+function fts(c){var m=(S.fotos||{})[c]||[],a=FT[c];if(!(a&&a.length)&&!m.length&&!NONE[c])return undefined;return uniq(m.concat(a||[]))}
+function strip(c){
+ var a=fts(c);
+ if(!a)return '<small class="m">Carregando fotos…</small>';
+ if(!a.length)return '<small class="m">'+(ERR?"Não achei as fotos no site. Veja Ajuda › Conexão das fotos.":"Sem fotos. Toque em ‘Fotos’ para adicionar do celular.")+'</small>';
+ return '<div class="ph">'+a.map(function(u,n){return '<img loading="lazy" src="'+esc(th(u,300))+'" onclick="lb(\''+c+'\','+n+')">'}).join("")+'</div>'}
+function fotosT(){var i=find($("si").value);$("fp").innerHTML='<b>'+i.c+'</b> <span class="m">· '+esc(i.t)+' · '+esc(i.b)+'</span>'+strip(i.c)}
+function lb(c,n){
+ LB={c:c,n:n};var a=fts(c),u=a[n],d=$("lb");
+ if(!d){d=document.createElement("div");d.id="lb";document.body.appendChild(d)}
+ d.innerHTML='<div class="lbx"><button class="b s" onclick="lbn(-1)">‹</button><img src="'+esc(th(u,1200))+'"><button class="b s" onclick="lbn(1)">›</button></div><div class="row" style="justify-content:center;margin-top:10px"><span style="color:#fff">'+(n+1)+' / '+a.length+'</span><a class="b" style="text-decoration:none" href="'+esc(u)+'" target="_blank">Abrir original</a>'+(((S.fotos||{})[c]||[]).indexOf(u)>-1?'<button class="b s" onclick="delF()">Excluir foto</button>':'')+'<button class="b r" onclick="lbx()">Fechar</button></div>';
+ d.style.display="flex"}
+function lbn(k){var a=fts(LB.c);lb(LB.c,(LB.n+k+a.length)%a.length)}
+function lbx(){$("lb").style.display="none"}
+function cp(b){copy($("tx").value,function(){b.textContent="Copiado ✓"})}
+function blobs(c,cb){
+ Promise.all((fts(c)||[]).slice(0,6).map(function(x,n){return fetch(th(x,1280)).then(function(r){return r.blob()}).then(function(b){return new File([b],c+"-"+(n+1)+".jpg",{type:b.type||"image/jpeg"})})})).then(cb,function(){cb(null)})}
+function comp(b){
+ var c=$("si").value,t=$("tx").value;
+ if(!(fts(c)||[]).length){alert("Este imóvel não tem fotos. Na aba Imóveis, toque em ‘Fotos’ para adicionar.");return}
+ b.textContent="Preparando…";
+ blobs(c,function(f){b.textContent="Compartilhar com fotos";
+  if(f&&navigator.canShare&&navigator.canShare({files:f})){navigator.share({files:f,text:t}).catch(function(){})}
+  else copy(t,function(){alert("Seu aparelho não envia as fotos direto. O texto foi copiado. Use o botão Baixar fotos e anexe no grupo.")})})}
+function baixar(b){
+ var c=$("si").value;
+ if(!(fts(c)||[]).length){alert("Este imóvel não tem fotos. Na aba Imóveis, toque em ‘Fotos’ para adicionar.");return}
+ b.textContent="Baixando…";
+ blobs(c,function(f){b.textContent="Baixar fotos";
+  if(!f){fts(c).slice(0,6).forEach(function(u){window.open(u,"_blank")});return}
+  f.forEach(function(x,n){setTimeout(function(){var a=document.createElement("a");a.href=URL.createObjectURL(x);a.download=x.name;document.body.appendChild(a);a.click();a.remove()},n*400)})})}
+/* FOTOS DO CELULAR */
+var FI="";
+function addF(c){FI=c;var e=$("fi");if(!e){e=document.createElement("input");e.type="file";e.accept="image/*";e.multiple=true;e.id="fi";e.style.display="none";e.onchange=upF;document.body.appendChild(e)}e.value="";e.click()}
+function upF(){
+ var fs=[].slice.call($("fi").files),c=FI,n=0;if(!fs.length)return;S.fotos=S.fotos||{};S.fotos[c]=S.fotos[c]||[];
+ function nx(){if(!fs.length){save();atualizar();alert(n+" foto(s) enviada(s) para "+c+".");return}
+  var f=fs.shift(),fd=new FormData();fd.append("file",f);fd.append("upload_preset","fcosta_imoveis");
+  fetch("https://api.cloudinary.com/v1_1/"+CLD+"/image/upload",{method:"POST",body:fd}).then(function(r){return r.json()}).then(function(d){if(d.secure_url){S.fotos[c].push(d.secure_url);n++;save();atualizar()}}).catch(function(){}).then(nx)}
+ alert("Enviando "+fs.length+" foto(s)... aguarde a mensagem de conclusão.");nx()}
+function delF(){var m=S.fotos[LB.c],u=fts(LB.c)[LB.n],k=m.indexOf(u);if(k<0||!confirm("Excluir esta foto da lista?"))return;m.splice(k,1);save();lbx();atualizar()}
+function expF(){
+ var f={};IM.forEach(function(i){f[i.c]=fts(i.c)||[]});
+ var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({im:IM,fotos:f,root:S.root||""})],{type:"application/json"}));a.download="portfolio-dados.json";document.body.appendChild(a);a.click();a.remove();
+ alert("Arquivo portfolio-dados.json baixado. Suba no GitHub, na mesma pasta do portfolio-fcosta.html.")}
+/* PORTFÓLIO (vitrine do cliente dentro do Publicador) */
+function lkP(c){var u=location.href.split("#")[0].split("?")[0].replace(/[^\/]*$/,"")+"portfolio-fcosta.html";return c?u+"#"+c:u}
+function vPor(){
+ var cs=uniq(IM.map(function(i){return i.ci})).sort();
+ $("app").innerHTML='<div class="card"><div class="row"><button class="b g" onclick="expF()">Exportar para o portfólio</button><button class="b" onclick="envP(\'\')">Enviar portfólio</button><a class="b s" style="text-decoration:none" target="_blank" href="'+esc(lkP(""))+'">Abrir página do cliente</a></div><p class="m" style="margin:8px 0 0">Vitrine igual à que o cliente vê. Link de cada imóvel: <b>portfolio-fcosta.html#FCV001</b>. Depois de mexer nas fotos, toque em Exportar e suba o portfolio-dados.json no GitHub.</p></div><div class="row" style="margin-bottom:10px"><input id="pq" placeholder="Buscar por bairro, tipo ou código" style="flex:1;min-width:160px" oninput="lstPor()"><select id="pc" onchange="lstPor()"><option value="">Todas as cidades</option>'+cs.map(function(x){return '<option>'+esc(x)+'</option>'}).join("")+'</select></div><div id="pg" class="pgrid"></div>';
+ lstPor();carregar()}
+function lstPor(){
+ var q=($("pq").value||"").toLowerCase(),ct=$("pc").value;
+ var l=IM.filter(function(i){return (!ct||i.ci==ct)&&(i.c+i.t+i.b+i.ci+i.d).toLowerCase().indexOf(q)>-1});
+ $("pg").innerHTML=l.length?l.map(function(i){
+  var a=fts(i.c),loc=i.b+(i.ci&&i.ci!=i.b?" – "+i.ci:""),sp=specs(i);
+  var im=(a&&a.length)?'<img loading="lazy" alt="" src="'+esc(th(a[0],600))+'">':(a?'Sem fotos':(ERR?'Fotos indisponíveis':'Carregando foto…'));
+  return '<div class="pc"><div class="pim" onclick="'+(a&&a.length?"lb(\''+i.c+'\',0)":"addF(\''+i.c+'\')")+'">'+im+'<span class="rf">'+i.c+'</span>'+(a&&a.length>1?'<span class="nf">'+a.length+' fotos</span>':'')+'</div><div class="pbd"><div class="ppr">R$ '+esc(i.p)+'</div><b>'+esc(i.t)+'</b><small class="m">'+esc(loc)+'</small><small class="m">'+esc(sp)+'</small><p>'+esc(i.d)+'</p><div class="pbt"><button class="b" onclick="envP(\''+i.c+'\')">Enviar</button><button class="b g" onclick="copy(lkP(\''+i.c+'\'),function(){alert(\'Link copiado\')})">Copiar link</button><a class="b s" style="border-radius:8px;padding:9px 13px;color:#fff" target="_blank" href="'+esc(SITE+i.k)+'">Site</a></div></div></div>'}).join(""):'<p class="m">Nenhum imóvel encontrado.</p>'}
+function envP(c){
+ var i=c&&find(c),u=lkP(c),t=i?"🏡 "+i.t+" – "+i.b+" | R$ "+i.p+"\nVeja as fotos e detalhes:":"Portfólio de imóveis – FCosta Corretor";
+ if(navigator.share)navigator.share({title:i?i.t+" – "+i.b:"Portfólio de imóveis",text:t,url:u}).catch(function(){});
+ else copy(t+"\n"+u,function(){alert("Texto e link copiados.")})}
+/* STATUS */
+function vSta(){
+ var hj=new Date().toDateString(),h=S.log.filter(function(l){return new Date(l.t).toDateString()==hj}).length,por={};
+ S.log.forEach(function(l){por[l.i]=(por[l.i]||0)+1});
+ var top=Object.keys(por).sort(function(a,b){return por[b]-por[a]}).slice(0,5);
+ $("app").innerHTML='<div class="card"><div class="row"><span class="tag">Hoje: '+h+' posts</span><span class="tag">Total: '+S.log.length+' posts</span><span class="tag">'+S.cl.length+' clientes</span></div></div>'+
+ '<div class="card"><h3>Por grupo</h3>'+(S.g.length?S.g.map(function(g){return '<div class="row" style="padding:4px 0"><b>'+esc(g.n)+'</b><span class="tag" style="margin-left:auto">'+g.posts+' posts</span><span class="tag">'+g.leads+' clientes</span></div>'}).join(""):'<p class="m">Nenhum grupo cadastrado.</p>')+'</div>'+
+ '<div class="card"><h3>Imóveis mais postados</h3>'+(top.length?top.map(function(c){var i=find(c);return '<div class="row" style="padding:4px 0"><b>'+c+'</b><span class="m">'+esc(i?i.t+" · "+i.b:"")+'</span><span class="tag" style="margin-left:auto">'+por[c]+'x</span></div>'}).join(""):'<p class="m">Nada publicado ainda.</p>')+'</div>'}
+/* AJUDA */
+function vAju(){
+ function d(t,h,o){return '<details class="card"'+(o?" open":"")+'><summary>'+t+'</summary><div class="hp">'+h+'</div></details>'}
+ $("app").innerHTML=
+ d("O que é o Publicador","Ferramenta para divulgar seus imóveis nos grupos de WhatsApp e Facebook sem perder tempo. Ela monta o texto pronto, lembra em quais grupos você posta em cada dia, conta suas postagens e mostra quais grupos trazem cliente.",1)+
+ d("Passo a passo do dia a dia","<ol><li>Aba <b>Grupos</b>: cadastre cada grupo, o link e os dias em que você posta nele. Só precisa fazer uma vez.</li><li>Aba <b>Publicar</b>: escolha o imóvel, o tipo de texto e o dia (já vem o de hoje).</li><li>Toque em <b>Abrir e copiar</b> no grupo. O texto é copiado e o grupo abre.</li><li>Cole o texto, anexe as fotos e publique.</li><li>Volte e toque em <b>Publicado</b>. A contagem sobe.</li><li>Se alguém chamar, registre na aba <b>Clientes</b> dizendo de qual grupo veio.</li></ol>")+
+ d("Aba Imóveis","Mostra os seus 21 imóveis com preço, descrição e as fotos do seu site. Toque numa foto para ampliar e passar as próximas. Use o campo de cima para filtrar por bairro, tipo ou código (ex.: Kemel, FCV004). O botão <b>Gerar textos</b> leva o imóvel direto para a aba Textos. O botão <b>Fotos</b> adiciona fotos da galeria do celular (elas vão para o seu Cloudinary). O botão verde de cima, <b>Exportar para o portfólio</b>, gera o arquivo portfolio-dados.json para o portfólio compartilhável.")+
+ d("Aba Grupos","Cadastre grupos um a um ou cole vários de uma vez (Nome | link, um por linha). Marque os dias em que você posta. <b>Iniciar fila de hoje</b> abre um grupo por vez, copia o texto e espera 25 segundos entre grupos; o limite diário de posts no Facebook (padrão 10) evita bloqueio. Cada grupo mostra posts, aberturas, <b>cliques no link</b> e clientes. O texto copiado leva um link do portfólio com a marca do grupo, e cada clique de cliente nesse link é contado. Marque ao lado do nome os grupos que entram na fila; o painel Controle do Facebook mostra posts do dia, aberturas, cliques e o botão de alerta.")+
+d("Cliques (uma vez só)","Para o contador de cliques funcionar, no Firebase (projeto fcosta2026) abra <b>Realtime Database › Regras</b> e acrescente dentro de <b>rules</b>: <code>\"cliques\":{\".read\":true,\"$g\":{\"$id\":{\".write\":\"!data.exists()\"}}}</code>. Sem isso a aba mostra cliques indisponíveis, mas o resto funciona. Cliques seus também contam.")+
+ d("Aba Textos","Escolha o imóvel e o estilo: <b>Curto</b> (rápido, para WhatsApp), <b>Completo</b> (com referência e chamada para visita) e <b>Convite</b> (conversa mais pessoal). Você pode editar o texto na caixa antes de usar. Botões:<ul><li><b>Copiar texto</b>: copia para colar onde quiser.</li><li><b>Compartilhar com fotos</b>: no celular, abre o envio com até 6 fotos e o texto juntos (escolha o WhatsApp ou o grupo).</li><li><b>Baixar fotos</b>: salva as fotos no aparelho para anexar manualmente.</li></ul>")+
+ d("Aba Publicar","Lista só os grupos marcados para o dia escolhido. <b>Abrir e copiar</b> copia o texto e abre o grupo. <b>Publicado</b> soma 1 post no grupo e guarda no histórico. Mude o dia no seletor se quiser adiantar ou repor um dia.")+
+ d("Aba Status","Resumo do seu trabalho: posts de hoje, total de posts, número de clientes, desempenho de cada grupo e os 5 imóveis mais postados.")+
+ d("Aba Clientes","Anote nome, telefone, o imóvel de interesse e de qual grupo veio. O botão <b>WhatsApp</b> abre a conversa direto com o cliente. Cada contato novo soma um cliente no grupo de origem.")+
+ d("Aba Limpeza","Mostra grupos em que você já postou várias vezes e nunca veio cliente, para você sair deles. Mude o número de posts no campo de cima (padrão: 5). O botão <b>Abrir para sair</b> abre o grupo; depois de sair, toque em <b>Já saí</b> para tirar da lista.")+
+ d("De onde vêm as fotos","As fotos são buscadas direto do banco do seu site (o mesmo que mostra o imóvel em fcostacorretor.com). Se você trocar ou incluir fotos no painel do site, toque em <b>Atualizar fotos</b> abaixo para o Publicador pegar as novas. Depois de carregadas, ficam guardadas no aparelho e abrem mais rápido.<div class='row' style='margin-top:8px'><button class='b' onclick='atuF(this)'>Atualizar fotos</button></div>")+
+ d("Conexão das fotos (se não aparecerem)","Toque em <b>Testar conexão</b>. O teste mostra em qual pasta do banco cada imóvel foi achado e quantas fotos tem. Se não achar nada, toque em <b>Copiar diagnóstico</b> e mande para mim. Se souber o nome da pasta, digite no campo e salve.<div class='row' style='margin:8px 0'><input id='rt' placeholder='Pasta dos imóveis no banco' value='"+esc(S.root||"")+"'><button class='b g' onclick='salvaRt()'>Salvar pasta</button><button class='b' onclick='teste()'>Testar conexão</button></div><div id='tr' class='m'></div>")+
+ d("Seus dados e cópia de segurança","Grupos, clientes e contagens ficam guardados <b>só neste aparelho e neste navegador</b>. Se trocar de celular ou limpar os dados do navegador, perde tudo. Por isso, de vez em quando toque em <b>Salvar cópia</b>. Para recuperar, use <b>Restaurar cópia</b>.<div class='row' style='margin-top:8px'><button class='b g' onclick='bk()'>Salvar cópia</button><label class='b s' style='cursor:pointer'>Restaurar cópia<input type='file' accept='.json' style='display:none' onchange='rs(this)'></label></div>")+
+ d("Aba Portfólio","Mostra a vitrine dos imóveis como o cliente vê, com foto, preço e descrição. <b>Enviar</b> manda o link do imóvel (portfolio-fcosta.html#código) pelo WhatsApp ou outro app. <b>Copiar link</b> copia o mesmo link. Toque na foto para ampliar. <b>Abrir página do cliente</b> abre a página pública.")+
+ d("Portfólio compartilhável","O portfólio é uma página para mandar ao cliente: <b>portfolio-fcosta.html</b>. Ele mostra todos os imóveis com fotos, botão de WhatsApp e botão Compartilhar (cada imóvel tem seu próprio link). Para atualizar: 1) adicione fotos em Imóveis › Fotos; 2) toque em <b>Exportar para o portfólio</b>; 3) suba o portfolio-dados.json no GitHub, na mesma pasta; 4) pronto, o link já mostra as fotos novas.")+
+ d("Dicas","<ul><li>Não poste o mesmo imóvel em todos os grupos no mesmo dia. Alterne os estilos de texto.</li><li>Grupos com muitas postagens e nenhum cliente: use a aba Limpeza.</li><li>Poste com foto: chama muito mais atenção que só o link.</li><li>Fale comigo (WhatsApp (11) 99350-9109) se aparecer algum erro.</li></ul>")}
+function limpaFT(){FT={};NONE={};RT=null;try{localStorage.removeItem("pubft3");localStorage.removeItem("pubft")}catch(e){}}
+function atuF(b){limpaFT();b.textContent="Buscando…";carregar();setTimeout(function(){b.textContent="Atualizar fotos"},2500)}
+function salvaRt(){S.root=($("rt").value||"").trim().replace(/^\/+|\/+$/g,"");S.hits=[];limpaFT();save();teste();carregar()}
+function cut(v){if(typeof v=="string")return v.length>70?v.slice(0,70)+"…":v;if(Array.isArray(v))return v.slice(0,3).map(cut).concat(v.length>3?["(+"+(v.length-3)+")"]:[]);if(v&&typeof v=="object"){var r={};Object.keys(v).slice(0,40).forEach(function(k){r[k]=cut(v[k])});return r}return v}
+function teste(){
+ var o=$("tr"),out=[];o.textContent="Testando…";RT=null;
+ jget("","?shallow=true").then(function(d){out.push("Raiz do banco: "+Object.keys(d||{}).join(", "))},function(){out.push("A raiz do banco não pode ser listada (bloqueada). Usei os nomes comuns de pasta.")}).then(function(){
+  return Promise.all(IM.slice(0,3).map(function(i){return achar(i).then(function(h){
+   if(!h){out.push(i.c+": registro NÃO encontrado em nenhuma pasta do banco.");return}
+   var a=[];imgs(h.d,a);a=uniq(a);out.push(i.c+": pasta "+h.r+" · "+a.length+" foto(s)");
+   if(!a.length)out.push("Campos de "+i.c+": "+JSON.stringify(cut(h.d)).slice(0,1500))},function(){out.push(i.c+": erro ao consultar o banco.")})}))
+ }).then(function(){DIAG=out.join("\n");o.innerHTML='<pre style="white-space:pre-wrap;word-break:break-word;margin:0">'+esc(DIAG)+'</pre><button class="b s" style="margin-top:8px" onclick="copy(DIAG,function(){alert(\'Diagnóstico copiado\')})">Copiar diagnóstico</button>'})}
+function bk(){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:"application/json"}));a.download="publicador-backup.json";a.click()}
+function rs(el){var f=el.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{S=Object.assign(S,JSON.parse(r.result));save();alert("Cópia restaurada.");go(1)}catch(e){alert("Arquivo inválido.")}};r.readAsText(f)}
+go(0);
+</script></body></html>
