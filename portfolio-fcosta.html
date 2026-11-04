@@ -59,14 +59,21 @@ function render(){
   +(i.preco?'<div class="pr">'+preco(i.preco,i.status)+'</div>':'')
   +'<div class="tg">'+(i.quartos?'<span>🛏 '+esc(i.quartos)+'</span>':'')+(i.banheiros?'<span>🚿 '+esc(i.banheiros)+'</span>':'')+(i.area?'<span>📐 '+esc(i.area)+' m²</span>':'')+(i.vagas?'<span>🚗 '+esc(i.vagas)+'</span>':'')+'</div>'
   +(i.descricao?'<p class="ds">'+esc(i.descricao)+'</p>':'')
-  +'<div class="ac"><a class="wa" target="_blank" href="https://wa.me/'+WA+'?text='+msg+'">💬 WhatsApp</a><button onclick="comp('+n+')">Compartilhar</button></div></div></article>'}).join("");
+  +'<div class="ac"><a class="wa" target="_blank" href="https://wa.me/'+WA+'?text='+msg+'">💬 WhatsApp</a><button onclick="comp('+n+')">Compartilhar imagem</button></div></div></article>'}).join("");
  var h=decodeURIComponent((location.hash||"").slice(1)).toUpperCase(),el=h&&document.getElementById(h);
  if(el){el.classList.add("hl");el.scrollIntoView({block:"center"})}
 }
-function comp(n){var c=cod(L[n]),u=link(c),t=(L[n].titulo||"Imóvel FCosta")+" — "+c;
- if(navigator.share){navigator.share({title:t,url:u}).catch(function(){})}
- else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){alert("Link copiado!")})}
- else prompt("Copie o link:",u)}
+function jpg(u,w){if(typeof u!=="string")return"";if(u.indexOf("res.cloudinary.com")<0||u.indexOf("/upload/")<0||/\/upload\/[a-z]_/.test(u))return u;return u.replace("/upload/","/upload/f_jpg,q_auto,w_"+w+"/")}
+function comp(n){
+ var i=L[n],c=cod(i),fs=fotos(i),t="🏡 "+(i.titulo||"Imóvel FCosta")+" — "+c+(i.preco?"\n💰 "+preco(i.preco,i.status):"")+"\n📲 WhatsApp: (11) 99350-9109";
+ if(!fs.length){alert("Este imóvel ainda não tem foto para compartilhar.");return}
+ fetch(jpg(fs[0],1280)).then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(b){
+  var f=new File([b],c+".jpg",{type:b.type||"image/jpeg"});
+  if(navigator.canShare&&navigator.canShare({files:[f]}))return navigator.share({files:[f],text:t});
+  var a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=c+".jpg";document.body.appendChild(a);a.click();a.remove();
+  if(navigator.clipboard)navigator.clipboard.writeText(t).catch(function(){});
+  alert("Imagem baixada e texto copiado.")
+ }).catch(function(e){if(e&&e.name==="AbortError")return;alert("Não consegui preparar a imagem agora. Tente de novo em instantes.")})}
 function abrir(n,k){LF=fotos(L[n]);if(!LF.length)return;LI=k;mostra();document.getElementById("lb").classList.add("on")}
 function mostra(){document.getElementById("li").src=cld(LF[LI],1400);document.getElementById("lc").textContent=(LI+1)+" / "+LF.length}
 function nav(d){LI=(LI+d+LF.length)%LF.length;mostra()}

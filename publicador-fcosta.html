@@ -60,11 +60,11 @@ function $(id){return document.getElementById(id)}
 function find(c){return IM.filter(function(i){return i.c==c})[0]}
 function specs(i){var a=[];if(i.q)a.push(i.q+" quarto"+(i.q>1?"s":""));if(i.v)a.push(i.v+" vaga"+(i.v>1?"s":""));if(i.a)a.push(i.a);return a.join(" · ")}
 function txt(i,n){
- var loc=i.b+(i.ci&&i.ci!=i.b?" – "+i.ci:""),lk=SITE+i.k,sp=specs(i);
+ var loc=i.b+(i.ci&&i.ci!=i.b?" – "+i.ci:""),lk=S.lk?SITE+i.k:"",sp=specs(i);
  var ft="\n\n📲 WhatsApp: (11) 99350-9109\nFCosta Corretor · CRECI-SP 294791-F | CNAI 52708";
- if(n==0)return "🏡 "+i.t+" à venda – "+loc+"\n💰 R$ "+i.p+(sp?"\n📐 "+sp:"")+"\n✅ "+i.d+"\n\n👉 Fotos e detalhes: "+lk+ft;
- if(n==1)return "🔥 OPORTUNIDADE – "+i.t.toUpperCase()+"\n📍 "+loc+"\n\n"+i.d+".\n"+(sp?"\n📐 "+sp:"")+"\n💰 Valor: R$ "+i.p+"\n🔖 Ref: "+i.c+"\n\nAgende sua visita! Veja tudo aqui:\n"+lk+ft;
- return "Procurando "+i.t.toLowerCase()+" em "+i.b+"?\n\nTenho este: "+i.d+".\nR$ "+i.p+(sp?" ("+sp+")":"")+"\n\nChame no WhatsApp com a ref. "+i.c+" e eu te mostro.\n"+lk+ft;
+ if(n==0)return "🏡 "+i.t+" à venda – "+loc+"\n💰 R$ "+i.p+(sp?"\n📐 "+sp:"")+"\n✅ "+i.d+"\n\n"+(lk?"👉 Fotos e detalhes: "+lk:"🔖 Ref: "+i.c)+ft;
+ if(n==1)return "🔥 OPORTUNIDADE – "+i.t.toUpperCase()+"\n📍 "+loc+"\n\n"+i.d+".\n"+(sp?"\n📐 "+sp:"")+"\n💰 Valor: R$ "+i.p+"\n🔖 Ref: "+i.c+"\n\nAgende sua visita!"+(lk?" Veja tudo aqui:\n"+lk:"")+ft;
+ return "Procurando "+i.t.toLowerCase()+" em "+i.b+"?\n\nTenho este: "+i.d+".\nR$ "+i.p+(sp?" ("+sp+")":"")+"\n\nChame no WhatsApp com a ref. "+i.c+" e eu te mostro."+(lk?"\n"+lk:"")+ft;
 }
 function copy(s,cb){
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(cb,function(){fb(s,cb)})}else fb(s,cb)}
@@ -93,7 +93,7 @@ function vGru(){
  var dd=DIAS.map(function(d,i){return '<label class="d"><input type="checkbox" class="dk" value="'+i+'" checked>'+d+'</label>'}).join("");
  $("app").innerHTML='<div id="fila"></div><div id="pn"></div>'
  +'<div class="card"><h3>Fila de postagem</h3><div class="row"><select id="fi2" style="flex:1">'+opts(S.sel)+'</select><select id="fv"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select></div>'
- +'<div class="row" style="margin-top:8px">Limite de posts no Facebook por dia <input type="number" id="fm" min="1" value="'+(S.maxd||10)+'" style="width:70px"> Intervalo entre grupos <input type="number" id="fe" min="15" value="'+(S.esp||45)+'" style="width:70px"> s</div>'
+ +'<div class="row" style="margin-top:8px">Limite de posts no Facebook por dia <input type="number" id="fm" min="1" value="'+(S.maxd||10)+'" style="width:70px"> Intervalo entre grupos <input type="number" id="fe" min="15" value="'+(S.esp||45)+'" style="width:70px"> s <label style="display:flex;gap:6px;align-items:center"><input type="checkbox"'+(S.lk?' checked':'')+' onchange="S.lk=this.checked;save()"> Incluir link no texto</label></div>'
  +'<p class="m" style="margin:8px 0">Abre um grupo por vez (somente os marcados abaixo), copia o texto com link rastreado e espera o intervalo definido entre um grupo e outro. O Facebook não permite postar sozinho nem abrir vários grupos de uma vez, e não divulga um limite oficial de postagens; por isso o padrão é 10 por dia no Facebook. Ajuste ao seu caso.</p><button class="b g" onclick="iniFila()">Iniciar fila de hoje</button></div>'
  +'<div class="card"><h3>Novo grupo</h3><div class="row"><input id="gn" placeholder="Nome do grupo"><input id="gl" placeholder="Link do grupo" style="flex:1"></div><p class="m" style="margin:8px 0 4px">Dias em que você posta:</p>'+dd
  +'<div style="margin-top:8px"><button class="b" onclick="addG()">Adicionar</button></div>'
@@ -117,7 +117,7 @@ function pnG(){
  var ns=S.g.filter(isSel).length,h="";
  if(pausado()){var hr=Math.max(1,Math.ceil((S.pa-Date.now())/3600000));h+='<div class="card" style="border-color:var(--r)"><b style="color:var(--r)">⛔ Pausa de segurança ativa</b><p class="m" style="margin:6px 0">Faltam cerca de '+hr+' h. Não publique em grupos do Facebook até acabar. Resolva qualquer verificação que o Facebook pedir e, ao voltar, use metade do limite por alguns dias.</p><button class="b s" onclick="fimPausa()">Encerrar pausa</button></div>'}
  h+='<div class="card"><h3>Controle do Facebook</h3>'
- +'<div class="row"><span class="tag">Posts hoje: '+fb+'/'+mx+'</span><span class="tag">Aberturas hoje: '+abHoje()+'</span><span class="tag">'+(CQE?'Cliques: indisponível':'Cliques nos links: '+tc)+'</span><span class="tag">Selecionados: '+ns+'/'+S.g.length+'</span></div>'
+ +'<div class="row"><span class="tag">Posts hoje: '+fb+'/'+mx+'</span><span class="tag">Aberturas hoje: '+abHoje()+'</span><span class="tag">'+(CQE?'Cliques: indisponível':'Cliques nos links: '+tc+(S.lk?'':' (link desligado)'))+'</span><span class="tag">Selecionados: '+ns+'/'+S.g.length+'</span></div>'
  +'<div style="height:8px;background:var(--bg);border:1px solid var(--b);border-radius:6px;margin:8px 0;overflow:hidden"><div style="height:100%;width:'+pc+'%;background:'+cor+'"></div></div>'
  +'<div class="row"><button class="b" onclick="abrirMeus()">Abrir meus grupos do Facebook</button><button class="b s" onclick="selTodos(true)">Marcar todos</button><button class="b s" onclick="selTodos(false)">Desmarcar todos</button><button class="b s" onclick="selHoje()">Só os de hoje</button><button class="b r" onclick="alerta()">⚠ Recebi alerta</button></div>'
  +'<details class="hp"><summary>Como trazer e escolher meus grupos</summary><ol><li>Toque em <b>Abrir meus grupos do Facebook</b>. Abre a página com todos os grupos em que você participa.</li><li>Entre no grupo que quer usar e copie o link da barra de endereço.</li><li>Cole os links em <b>Adicionar vários</b> (um por linha) e marque os dias.</li><li>Na lista abaixo, deixe marcados só os grupos que quer usar. A fila usa apenas os marcados.</li></ol><p class="m">O Facebook não deixa o site ler sua lista de grupos automaticamente, por isso o cadastro dos links é manual, uma vez só.</p></details>'
@@ -140,7 +140,7 @@ function rdQ(){
  if(!g){el.innerHTML='<div class="card"><b>Fila concluída ✓</b><p class="m" style="margin:6px 0">Posts no Facebook hoje: '+hojeFb()+'/'+(S.maxd||10)+'</p><button class="b" onclick="qFim()">Fechar</button></div>';return}
  var lim=isFb(g)&&(hojeFb()>=(S.maxd||10)||pausado()),h='<div class="card" style="border-color:var(--p)"><div class="row"><span class="tag">Restam '+Q.ids.length+'</span><span class="tag">Facebook hoje: '+hojeFb()+'/'+(S.maxd||10)+'</span></div><h3 style="margin-top:8px">'+esc(g.n)+'</h3>';
  if(lim)h+='<p class="m">'+(pausado()?'Pausa de segurança ativa por alerta do Facebook. Não publique em grupos do Facebook até acabar.':'Limite diário do Facebook atingido. Pare por hoje para evitar bloqueio, ou pule este grupo.')+'</p><div class="row"><button class="b s" onclick="qPula()">Pular</button><button class="b r" onclick="qFim()">Encerrar</button></div>';
- else h+='<div class="row"><button class="b" onclick="qAbrir()"'+(Q.w>0?' disabled':'')+'>'+(Q.w>0?'Aguarde '+Q.w+'s':'Abrir e copiar')+'</button><button class="b g" onclick="qOk()"'+(Q.op?'':' disabled')+'>Publicado ✓</button><button class="b s" onclick="qPula()">Pular</button><button class="b r" onclick="qFim()">Encerrar</button></div><p class="m" style="margin-top:6px">Toque em Abrir e copiar, cole o texto no grupo, publique e volte aqui para marcar Publicado.</p>';
+ else h+='<div class="row"><button class="b" onclick="qAbrir()"'+(Q.w>0?' disabled':'')+'>'+(Q.w>0?'Aguarde '+Q.w+'s':'Abrir e copiar')+'</button><button class="b g" onclick="qOk()"'+(Q.op?'':' disabled')+'>Publicado ✓</button><button class="b s" onclick="qPula()">Pular</button><button class="b r" onclick="qFim()">Encerrar</button></div><div class="row" style="margin-top:8px"><button class="b" onclick="imgCopia(Q.i,this)">Copiar imagem</button><button class="b s" onclick="imgShare(Q.i,this)">Compartilhar imagem</button><button class="b s" onclick="imgBaixa(Q.i,this)">Baixar imagem</button></div><p class="m" style="margin-top:6px">1) Abrir e copiar e cole o texto no grupo. 2) Volte, toque em Copiar imagem e cole a imagem no mesmo post. No celular, use Compartilhar imagem ou Baixar imagem e anexe. 3) Publique e marque Publicado.</p>';
  el.innerHTML=h+'</div>'}
 function qAbrir(){var g=gid(Q.ids[0]),i=find(Q.i);if(g.l)window.open(g.l,"_blank");reg(g);Q.op=1;save();copy(tx(g,i,Q.v),function(){if(!g.l)alert("Texto copiado. Este grupo não tem link cadastrado.")});rdQ()}
 function qOk(){var g=gid(Q.ids[0]);g.posts++;S.log.push({g:g.id,i:Q.i,t:Date.now()});save();Q.ids.shift();Q.op=0;Q.w=(isFb(g)?(S.esp||45):25);clearInterval(QT);QT=setInterval(function(){if(Q&&Q.w>0){Q.w--;rdQ()}else clearInterval(QT)},1000);rdQ()}
@@ -148,12 +148,12 @@ function qPula(){Q.ids.shift();Q.op=0;rdQ()}
 function qFim(){Q=null;clearInterval(QT);rdQ();if($("l"))lstG()}
 /* TEXTOS */
 function vTex(){
- $("app").innerHTML='<div class="card"><div class="row"><select id="si" onchange="S.sel=this.value;save();genT()" style="flex:1">'+opts(S.sel)+'</select><select id="sv" onchange="genT()"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select></div></div><div class="card"><div id="fp"></div></div><div class="card"><textarea id="tx"></textarea><div class="row" style="margin-top:8px"><button class="b g" onclick="cp(this)">Copiar texto</button><button class="b" onclick="comp(this)">Compartilhar com fotos</button><button class="b s" onclick="baixar(this)">Baixar fotos</button></div></div>';genT();carregar()}
+ $("app").innerHTML='<div class="card"><div class="row"><select id="si" onchange="S.sel=this.value;save();genT()" style="flex:1">'+opts(S.sel)+'</select><select id="sv" onchange="genT()"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select></div><label style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox"'+(S.lk?' checked':'')+' onchange="S.lk=this.checked;save();genT()"> Incluir link do imóvel no texto</label></div><div class="card"><div id="fp"></div></div><div class="card"><textarea id="tx"></textarea><div class="row" style="margin-top:8px"><button class="b g" onclick="cp(this)">Copiar texto</button><button class="b" onclick="comp(this)">Compartilhar com fotos</button><button class="b s" onclick="baixar(this)">Baixar fotos</button><button class="b" onclick="imgCopia(\'si\',this)">Copiar imagem</button></div></div>';genT();carregar()}
 function genT(){var i=find($("si").value);$("tx").value=txt(i,+$("sv").value);fotosT()}
 /* PUBLICAR */
 function vPub(){
  var h=new Date().getDay();
- $("app").innerHTML='<div class="card"><div class="row"><select id="pi" style="flex:1">'+opts(S.sel)+'</select><select id="pv"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select><select id="pd">'+DIAS.map(function(d,i){return '<option value="'+i+'"'+(i==h?" selected":"")+'>'+d+'</option>'}).join("")+'</select></div><p class="m">Toque em "Abrir e copiar": o texto vai para a área de transferência e o grupo abre. Cole e clique em Publicar. Depois marque como publicado.</p></div><div id="l"></div>';
+ $("app").innerHTML='<div class="card"><div class="row"><select id="pi" style="flex:1">'+opts(S.sel)+'</select><select id="pv"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select><select id="pd">'+DIAS.map(function(d,i){return '<option value="'+i+'"'+(i==h?" selected":"")+'>'+d+'</option>'}).join("")+'</select></div><p class="m">Toque em "Abrir e copiar": o texto vai para a área de transferência e o grupo abre. Cole e clique em Publicar. Depois marque como publicado.</p><div class="row"><button class="b" onclick="imgCopia(\'pi\',this)">Copiar imagem</button><button class="b s" onclick="imgShare(\'pi\',this)">Compartilhar imagem</button><button class="b s" onclick="imgBaixa(\'pi\',this)">Baixar imagem</button></div></div><div id="l"></div>';
  $("pi").onchange=$("pv").onchange=$("pd").onchange=lstP;lstP()}
 function lstP(){
  var d=+$("pd").value,gs=S.g.filter(function(g){return g.ds.indexOf(d)>-1});
@@ -233,8 +233,28 @@ function lb(c,n){
 function lbn(k){var a=fts(LB.c);lb(LB.c,(LB.n+k+a.length)%a.length)}
 function lbx(){$("lb").style.display="none"}
 function cp(b){copy($("tx").value,function(){b.textContent="Copiado ✓"})}
-function blobs(c,cb){
- Promise.all((fts(c)||[]).slice(0,6).map(function(x,n){return fetch(th(x,1280)).then(function(r){return r.blob()}).then(function(b){return new File([b],c+"-"+(n+1)+".jpg",{type:b.type||"image/jpeg"})})})).then(cb,function(){cb(null)})}
+function blobs(c,cb,nn){
+ Promise.all((fts(c)||[]).slice(0,nn||6).map(function(x,n){return fetch(th(x,1280)).then(function(r){return r.blob()}).then(function(b){return new File([b],c+"-"+(n+1)+".jpg",{type:b.type||"image/jpeg"})})})).then(cb,function(){cb(null)})}
+function codI(x){return find(x)?x:$(x).value}
+function semFoto(c){if((fts(c)||[]).length)return false;alert("Este imóvel não tem fotos. Na aba Imóveis, toque em ‘Fotos’ para adicionar.");return true}
+function imgPng(u){return fetch(th(u,1280)).then(function(r){return r.blob()}).then(function(b){return createImageBitmap(b)}).then(function(bm){var cv=document.createElement("canvas");cv.width=bm.width;cv.height=bm.height;cv.getContext("2d").drawImage(bm,0,0);return new Promise(function(ok,no){cv.toBlob(function(x){x?ok(x):no()},"image/png")})})}
+function imgCopia(x,b){
+ var c=codI(x);if(semFoto(c))return;
+ if(!(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write)){alert("Este navegador não copia imagem. Use Compartilhar imagem ou Baixar imagem.");return}
+ var t=b.textContent;b.textContent="Copiando…";
+ navigator.clipboard.write([new ClipboardItem({"image/png":imgPng(fts(c)[0])})]).then(function(){b.textContent="Imagem copiada ✓";setTimeout(function(){b.textContent=t},2500)},function(){b.textContent=t;alert("Não consegui copiar a imagem. Use Baixar imagem.")})}
+function imgShare(x,b,t){
+ var c=codI(x);if(semFoto(c))return;
+ var o=b.textContent;b.textContent="Preparando…";
+ blobs(c,function(f){b.textContent=o;
+  if(f&&navigator.canShare&&navigator.canShare({files:f})){navigator.share(t?{files:f,text:t}:{files:f}).catch(function(){})}
+  else alert("Seu aparelho não envia a imagem direto. Use Copiar imagem ou Baixar imagem.")},1)}
+function imgBaixa(x,b){
+ var c=codI(x);if(semFoto(c))return;
+ var o=b.textContent;b.textContent="Baixando…";
+ blobs(c,function(f){b.textContent=o;
+  if(!f){window.open(th(fts(c)[0],1280),"_blank");return}
+  var a=document.createElement("a");a.href=URL.createObjectURL(f[0]);a.download=f[0].name;document.body.appendChild(a);a.click();a.remove()},1)}
 function comp(b){
  var c=$("si").value,t=$("tx").value;
  if(!(fts(c)||[]).length){alert("Este imóvel não tem fotos. Na aba Imóveis, toque em ‘Fotos’ para adicionar.");return}
@@ -275,11 +295,15 @@ function lstPor(){
  $("pg").innerHTML=l.length?l.map(function(i){
   var a=fts(i.c),loc=i.b+(i.ci&&i.ci!=i.b?" – "+i.ci:""),sp=specs(i);
   var im=(a&&a.length)?'<img loading="lazy" alt="" src="'+esc(th(a[0],600))+'">':(a?'Sem fotos':(ERR?'Fotos indisponíveis':'Carregando foto…'));
-  return '<div class="pc"><div class="pim" onclick="'+(a&&a.length?"lb(\''+i.c+'\',0)":"addF(\''+i.c+'\')")+'">'+im+'<span class="rf">'+i.c+'</span>'+(a&&a.length>1?'<span class="nf">'+a.length+' fotos</span>':'')+'</div><div class="pbd"><div class="ppr">R$ '+esc(i.p)+'</div><b>'+esc(i.t)+'</b><small class="m">'+esc(loc)+'</small><small class="m">'+esc(sp)+'</small><p>'+esc(i.d)+'</p><div class="pbt"><button class="b" onclick="envP(\''+i.c+'\')">Enviar</button><button class="b g" onclick="copy(lkP(\''+i.c+'\'),function(){alert(\'Link copiado\')})">Copiar link</button><a class="b s" style="border-radius:8px;padding:9px 13px;color:#fff" target="_blank" href="'+esc(SITE+i.k)+'">Site</a></div></div></div>'}).join(""):'<p class="m">Nenhum imóvel encontrado.</p>'}
+  return '<div class="pc"><div class="pim" onclick="'+(a&&a.length?"lb(\''+i.c+'\',0)":"addF(\''+i.c+'\')")+'">'+im+'<span class="rf">'+i.c+'</span>'+(a&&a.length>1?'<span class="nf">'+a.length+' fotos</span>':'')+'</div><div class="pbd"><div class="ppr">R$ '+esc(i.p)+'</div><b>'+esc(i.t)+'</b><small class="m">'+esc(loc)+'</small><small class="m">'+esc(sp)+'</small><p>'+esc(i.d)+'</p><div class="pbt"><button class="b" onclick="envP(\''+i.c+'\')">Enviar</button><button class="b g" onclick="imgCopia(\''+i.c+'\',this)">Copiar imagem</button><a class="b s" style="border-radius:8px;padding:9px 13px;color:#fff" target="_blank" href="'+esc(SITE+i.k)+'">Site</a></div></div></div>'}).join(""):'<p class="m">Nenhum imóvel encontrado.</p>'}
 function envP(c){
- var i=c&&find(c),u=lkP(c),t=i?"🏡 "+i.t+" – "+i.b+" | R$ "+i.p+"\nVeja as fotos e detalhes:":"Portfólio de imóveis – FCosta Corretor";
- if(navigator.share)navigator.share({title:i?i.t+" – "+i.b:"Portfólio de imóveis",text:t,url:u}).catch(function(){});
- else copy(t+"\n"+u,function(){alert("Texto e link copiados.")})}
+ var i=c&&find(c);
+ if(i){var t="🏡 "+i.t+" – "+i.b+" | R$ "+i.p+"\n🔖 Ref: "+i.c+"\n📲 WhatsApp: (11) 99350-9109";
+  if(semFoto(c))return;
+  blobs(c,function(f){if(f&&navigator.canShare&&navigator.canShare({files:f}))navigator.share({files:f,text:t}).catch(function(){});else copy(t,function(){alert("Seu aparelho não envia a imagem direto. O texto foi copiado. Use Copiar imagem ou Baixar imagem.")})},1);return}
+ var u=lkP(""),t2="Portfólio de imóveis – FCosta Corretor";
+ if(navigator.share)navigator.share({title:"Portfólio de imóveis",text:t2,url:u}).catch(function(){});
+ else copy(t2+"\n"+u,function(){alert("Texto e link copiados.")})}
 /* STATUS */
 function vSta(){
  var hj=new Date().toDateString(),h=S.log.filter(function(l){return new Date(l.t).toDateString()==hj}).length,por={};
@@ -295,7 +319,7 @@ function vAju(){
  d("O que é o Publicador","Ferramenta para divulgar seus imóveis nos grupos de WhatsApp e Facebook sem perder tempo. Ela monta o texto pronto, lembra em quais grupos você posta em cada dia, conta suas postagens e mostra quais grupos trazem cliente.",1)+
  d("Passo a passo do dia a dia","<ol><li>Aba <b>Grupos</b>: cadastre cada grupo, o link e os dias em que você posta nele. Só precisa fazer uma vez.</li><li>Aba <b>Publicar</b>: escolha o imóvel, o tipo de texto e o dia (já vem o de hoje).</li><li>Toque em <b>Abrir e copiar</b> no grupo. O texto é copiado e o grupo abre.</li><li>Cole o texto, anexe as fotos e publique.</li><li>Volte e toque em <b>Publicado</b>. A contagem sobe.</li><li>Se alguém chamar, registre na aba <b>Clientes</b> dizendo de qual grupo veio.</li></ol>")+
  d("Aba Imóveis","Mostra os seus 21 imóveis com preço, descrição e as fotos do seu site. Toque numa foto para ampliar e passar as próximas. Use o campo de cima para filtrar por bairro, tipo ou código (ex.: Kemel, FCV004). O botão <b>Gerar textos</b> leva o imóvel direto para a aba Textos. O botão <b>Fotos</b> adiciona fotos da galeria do celular (elas vão para o seu Cloudinary). O botão verde de cima, <b>Exportar para o portfólio</b>, gera o arquivo portfolio-dados.json para o portfólio compartilhável.")+
- d("Aba Grupos","Cadastre grupos um a um ou cole vários de uma vez (Nome | link, um por linha). Marque os dias em que você posta. <b>Iniciar fila de hoje</b> abre um grupo por vez, copia o texto e espera 25 segundos entre grupos; o limite diário de posts no Facebook (padrão 10) evita bloqueio. Cada grupo mostra posts, aberturas, <b>cliques no link</b> e clientes. O texto copiado leva um link do portfólio com a marca do grupo, e cada clique de cliente nesse link é contado. Marque ao lado do nome os grupos que entram na fila; o painel Controle do Facebook mostra posts do dia, aberturas, cliques e o botão de alerta.")+
+ d("Aba Grupos","Cadastre grupos um a um ou cole vários de uma vez (Nome | link, um por linha). Marque os dias em que você posta. <b>Iniciar fila de hoje</b> abre um grupo por vez, copia o texto e espera 25 segundos entre grupos; o limite diário de posts no Facebook (padrão 10) evita bloqueio. Cada grupo mostra posts, aberturas, <b>cliques no link</b> e clientes. O texto copiado leva um link do portfólio com a marca do grupo, e cada clique de cliente nesse link é contado. Marque ao lado do nome os grupos que entram na fila; o painel Controle do Facebook mostra posts do dia, aberturas, cliques e o botão de alerta. O texto sai sem link (dá para ligar em Incluir link no texto) e a imagem do imóvel vai pelos botões Copiar imagem, Compartilhar imagem e Baixar imagem.")+
 d("Cliques (uma vez só)","Para o contador de cliques funcionar, no Firebase (projeto fcosta2026) abra <b>Realtime Database › Regras</b> e acrescente dentro de <b>rules</b>: <code>\"cliques\":{\".read\":true,\"$g\":{\"$id\":{\".write\":\"!data.exists()\"}}}</code>. Sem isso a aba mostra cliques indisponíveis, mas o resto funciona. Cliques seus também contam.")+
  d("Aba Textos","Escolha o imóvel e o estilo: <b>Curto</b> (rápido, para WhatsApp), <b>Completo</b> (com referência e chamada para visita) e <b>Convite</b> (conversa mais pessoal). Você pode editar o texto na caixa antes de usar. Botões:<ul><li><b>Copiar texto</b>: copia para colar onde quiser.</li><li><b>Compartilhar com fotos</b>: no celular, abre o envio com até 6 fotos e o texto juntos (escolha o WhatsApp ou o grupo).</li><li><b>Baixar fotos</b>: salva as fotos no aparelho para anexar manualmente.</li></ul>")+
  d("Aba Publicar","Lista só os grupos marcados para o dia escolhido. <b>Abrir e copiar</b> copia o texto e abre o grupo. <b>Publicado</b> soma 1 post no grupo e guarda no histórico. Mude o dia no seletor se quiser adiantar ou repor um dia.")+
