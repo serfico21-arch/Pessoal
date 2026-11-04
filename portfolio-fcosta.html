@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portfólio FCosta Corretor — Zona Leste SP</title>
+<style>
+:root{--az:#2F8FCB;--es:#1E3A5F;--bg:#F4F8FC;--bd:#E1EAF3;--tx:#1B2B3D;--sec:#5B6E80}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1b2a;--bd:#24384f;--tx:#e8f0f8;--sec:#9fb3c7;--es:#cfe6fa}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx)}
+header{background:#1E3A5F;color:#fff;padding:22px 16px;text-align:center}
+header h1{font-size:1.25rem}header p{font-size:.8rem;opacity:.8;margin-top:4px}
+main{max-width:1100px;margin:0 auto;padding:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{background:var(--bg);border:1px solid var(--bd);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.card.hl{outline:3px solid var(--az)}
+.ph{position:relative;height:210px;background:#cfe0ef;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:2.5rem}
+.ph img{width:100%;height:100%;object-fit:cover}
+.cod{position:absolute;top:10px;left:10px;background:#1E3A5F;color:#fff;font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:20px}
+.nf{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.55);color:#fff;font-size:.68rem;padding:3px 9px;border-radius:20px}
+.bd{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tp{font-size:.72rem;color:var(--az);font-weight:600}
+.nm{font-size:1rem;font-weight:700}
+.lc{font-size:.8rem;color:var(--sec)}
+.pr{font-size:1.35rem;font-weight:800;color:var(--es)}
+.tg{display:flex;flex-wrap:wrap;gap:6px}.tg span{font-size:.72rem;border:1px solid var(--bd);border-radius:20px;padding:4px 9px;color:var(--sec)}
+.ds{font-size:.82rem;color:var(--sec);line-height:1.55}
+.ac{display:flex;gap:8px;margin-top:auto;padding-top:8px}
+.ac a,.ac button{flex:1;text-align:center;text-decoration:none;font:600 .82rem system-ui;padding:11px;border-radius:10px;border:1.5px solid var(--bd);background:transparent;color:var(--tx);cursor:pointer}
+.ac .wa{background:#25D366;border-color:#25D366;color:#fff}
+.msg{text-align:center;padding:60px 16px;color:var(--sec)}
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.93);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:9;padding:12px}
+#lb.on{display:flex}#lb img{max-width:94vw;max-height:76vh;border-radius:8px;object-fit:contain}
+#lb .r{display:flex;gap:10px;margin-top:12px;align-items:center;color:#fff;font-size:.85rem}
+#lb button{background:rgba(255,255,255,.15);color:#fff;border:0;border-radius:50%;width:42px;height:42px;font-size:1.2rem;cursor:pointer}
+</style>
+</head>
+<body>
+<header><h1>FCosta Corretor</h1><p>CRECI-SP 294791-F · Zona Leste de São Paulo</p></header>
+<main><div class="grid" id="g"><div class="msg">Carregando imóveis…</div></div></main>
+<div id="lb" onclick="fechar()"><img id="li" alt=""><div class="r" onclick="event.stopPropagation()"><button onclick="nav(-1)">‹</button><span id="lc"></span><button onclick="nav(1)">›</button><button onclick="fechar()">✕</button></div></div>
+<script>
+var DB="https://fcosta2026-847c3-default-rtdb.firebaseio.com/fcosta_imoveis.json",WA="5511993509109";
+var SG={venda:"FCV",aluguel:"FCA",lancamento:"FCL",panfleto:"FCP",vendido:"FCV"},L=[],LF=[],LI=0;
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function cod(i){if(i.codigo)return String(i.codigo);var n=i.numeroCodigo?String(i.numeroCodigo).padStart(3,"0"):(i.id.slice(-3).replace(/[^0-9]/g,"").padStart(3,"0")||"001");return(SG[i.status]||"FCV")+n}
+function fotos(i){var f=i.fotos;if(!f)return[];return(Array.isArray(f)?f:Object.values(f)).filter(Boolean)}
+function cld(u,w){if(typeof u!=="string")return"";if(u.indexOf("res.cloudinary.com")<0||u.indexOf("/upload/")<0||/\/upload\/[a-z]_/.test(u))return u;return u.replace("/upload/","/upload/f_auto,q_auto"+(w?",w_"+w:"")+"/")}
+function preco(v,s){if(!v)return"";var n=typeof v==="number"?v:parseFloat(String(v).replace(/\./g,"").replace(",",".").replace(/[^\d.]/g,""));if(!n)return esc(v);return n.toLocaleString("pt-BR",{style:"currency",currency:"BRL",maximumFractionDigits:0})+(s==="aluguel"?"/mês":"")}
+function link(c){return location.href.split("#")[0]+"#"+c}
+function render(){
+ var g=document.getElementById("g");
+ if(!L.length){g.innerHTML='<div class="msg">Nenhum imóvel disponível no momento.</div>';return}
+ g.innerHTML=L.map(function(i,n){var fs=fotos(i),c=cod(i);
+  var msg=encodeURIComponent("Olá! Tenho interesse no imóvel *"+c+"* - "+(i.titulo||""));
+  return '<article class="card" id="'+esc(c)+'"><div class="ph" onclick="abrir('+n+',0)">'+(fs[0]?'<img loading="lazy" src="'+esc(cld(fs[0],600))+'" alt="">':'🏠')+'<span class="cod">'+esc(c)+'</span>'+(fs.length>1?'<span class="nf">'+fs.length+' fotos</span>':'')+'</div>'
+  +'<div class="bd"><div class="tp">'+esc(i.tipo||"Imóvel")+'</div><div class="nm">'+esc(i.titulo||"Imóvel FCosta")+'</div><div class="lc">📍 '+esc([i.bairro,i.cidade].filter(Boolean).join(" — "))+'</div>'
+  +(i.preco?'<div class="pr">'+preco(i.preco,i.status)+'</div>':'')
+  +'<div class="tg">'+(i.quartos?'<span>🛏 '+esc(i.quartos)+'</span>':'')+(i.banheiros?'<span>🚿 '+esc(i.banheiros)+'</span>':'')+(i.area?'<span>📐 '+esc(i.area)+' m²</span>':'')+(i.vagas?'<span>🚗 '+esc(i.vagas)+'</span>':'')+'</div>'
+  +(i.descricao?'<p class="ds">'+esc(i.descricao)+'</p>':'')
+  +'<div class="ac"><a class="wa" target="_blank" href="https://wa.me/'+WA+'?text='+msg+'">💬 WhatsApp</a><button onclick="comp('+n+')">Compartilhar</button></div></div></article>'}).join("");
+ var h=decodeURIComponent((location.hash||"").slice(1)).toUpperCase(),el=h&&document.getElementById(h);
+ if(el){el.classList.add("hl");el.scrollIntoView({block:"center"})}
+}
+function comp(n){var c=cod(L[n]),u=link(c),t=(L[n].titulo||"Imóvel FCosta")+" — "+c;
+ if(navigator.share){navigator.share({title:t,url:u}).catch(function(){})}
+ else if(navigator.clipboard){navigator.clipboard.writeText(u).then(function(){alert("Link copiado!")})}
+ else prompt("Copie o link:",u)}
+function abrir(n,k){LF=fotos(L[n]);if(!LF.length)return;LI=k;mostra();document.getElementById("lb").classList.add("on")}
+function mostra(){document.getElementById("li").src=cld(LF[LI],1400);document.getElementById("lc").textContent=(LI+1)+" / "+LF.length}
+function nav(d){LI=(LI+d+LF.length)%LF.length;mostra()}
+function fechar(){document.getElementById("lb").classList.remove("on")}
+document.addEventListener("keydown",function(e){if(e.key==="Escape")fechar();if(e.key==="ArrowLeft")nav(-1);if(e.key==="ArrowRight")nav(1)});
+window.addEventListener("hashchange",render);
+fetch(DB).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
+ L=Object.keys(d||{}).map(function(k){return Object.assign({id:k},d[k])}).filter(function(i){return i.publicado!==false&&i.status!=="vendido"});
+ L.sort(function(a,b){return(parseInt(cod(a).replace(/\D/g,""))||0)-(parseInt(cod(b).replace(/\D/g,""))||0)});
+ render()}).catch(function(){document.getElementById("g").innerHTML='<div class="msg">Não foi possível carregar os imóveis agora. Tente novamente em instantes.</div>'});
+</script>
+</body>
+</html>
