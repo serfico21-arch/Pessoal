@@ -72,6 +72,8 @@ function mostra(){document.getElementById("li").src=cld(LF[LI],1400);document.ge
 function nav(d){LI=(LI+d+LF.length)%LF.length;mostra()}
 function fechar(){document.getElementById("lb").classList.remove("on")}
 document.addEventListener("keydown",function(e){if(e.key==="Escape")fechar();if(e.key==="ArrowLeft")nav(-1);if(e.key==="ArrowRight")nav(1)});
+function track(){try{var o=new URLSearchParams(location.search).get("o");if(!o)return;var c=decodeURIComponent((location.hash||"").slice(1)).toUpperCase()||"geral",k="trk_"+o+"_"+c;if(sessionStorage.getItem(k))return;sessionStorage.setItem(k,"1");fetch(DB.replace("/fcosta_imoveis.json","/cliques/"+encodeURIComponent(o)+".json"),{method:"POST",body:JSON.stringify({t:Date.now(),c:c}),keepalive:true}).catch(function(){})}catch(e){}}
+track();
 window.addEventListener("hashchange",render);
 fetch(DB).then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(d){
  L=Object.keys(d||{}).map(function(k){return Object.assign({id:k},d[k])}).filter(function(i){return i.publicado!==false&&i.status!=="vendido"});

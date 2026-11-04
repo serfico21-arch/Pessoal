@@ -81,13 +81,47 @@ function lstImo(){
  $("l").innerHTML=IM.filter(function(i){return (i.c+i.t+i.b+i.ci).toLowerCase().indexOf(q)>-1}).map(function(i){
   return '<div class="card"><div class="row"><b>'+i.c+'</b><span class="tag">'+esc(i.t)+'</span><span class="m">'+esc(i.b)+' · '+esc(i.ci)+'</span><b style="margin-left:auto">R$ '+i.p+'</b></div><small>'+esc(specs(i))+'</small>'+strip(i.c)+'<div>'+esc(i.d)+'</div><div class="row" style="margin-top:8px"><button class="b g" onclick="addF(\''+i.c+'\')">Fotos</button><button class="b" onclick="S.sel=\''+i.c+'\';save();go(2)">Gerar textos</button></div></div>'}).join("")}
 /* GRUPOS */
+var CQ={},CQE=0,Q=null,QT=null;
+function isFb(g){return /facebook|fb\.com|fb\.watch|fb\.me/i.test(g.l||"")}
+function hojeS(x){return new Date(x.t).toDateString()==new Date().toDateString()}
+function hojeFb(){return S.log.filter(function(x){var g=gid(x.g);return hojeS(x)&&g&&isFb(g)}).length}
+function feitoHoje(id){return S.log.some(function(x){return x.g==id&&hojeS(x)})}
+function tl(g,i){return lkP("")+"?o="+g.id+"#"+i.c}
+function tx(g,i,n){var t=txt(i,n);return t.split(SITE+i.k).join(tl(g,i))}
+function cq(){jget("cliques").then(function(d){CQ={};Object.keys(d||{}).forEach(function(k){CQ[k]=Object.keys(d[k]||{}).length});CQE=0;if($("l"))lstG()},function(){CQE=1;if($("l"))lstG()})}
 function vGru(){
  var dd=DIAS.map(function(d,i){return '<label class="d"><input type="checkbox" class="dk" value="'+i+'" checked>'+d+'</label>'}).join("");
- $("app").innerHTML='<div class="card"><h3>Novo grupo</h3><div class="row"><input id="gn" placeholder="Nome do grupo"><input id="gl" placeholder="Link do grupo (opcional)" style="flex:1"></div><p class="m" style="margin:8px 0 4px">Dias em que você posta neste grupo:</p>'+dd+'<div style="margin-top:8px"><button class="b" onclick="addG()">Adicionar</button></div></div><div id="l"></div>';lstG()}
-function addG(){var n=$("gn").value.trim();if(!n)return;var ds=[].slice.call(document.querySelectorAll(".dk")).filter(function(c){return c.checked}).map(function(c){return +c.value});
- S.g.push({id:Date.now(),n:n,l:$("gl").value.trim(),ds:ds,posts:0,leads:0});save();vGru()}
+ $("app").innerHTML='<div id="fila"></div>'
+ +'<div class="card"><h3>Fila de postagem</h3><div class="row"><select id="fi2" style="flex:1">'+opts(S.sel)+'</select><select id="fv"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select></div>'
+ +'<div class="row" style="margin-top:8px">Limite de posts no Facebook por dia <input type="number" id="fm" min="1" value="'+(S.maxd||10)+'" style="width:70px"></div>'
+ +'<p class="m" style="margin:8px 0">Abre um grupo por vez (os dos dias de hoje), copia o texto com link rastreado e espera 25 segundos entre um grupo e outro. O Facebook não permite postar sozinho nem abrir vários grupos de uma vez, e não divulga um limite oficial de postagens; por isso o padrão é 10 por dia no Facebook. Ajuste ao seu caso.</p><button class="b g" onclick="iniFila()">Iniciar fila de hoje</button></div>'
+ +'<div class="card"><h3>Novo grupo</h3><div class="row"><input id="gn" placeholder="Nome do grupo"><input id="gl" placeholder="Link do grupo" style="flex:1"></div><p class="m" style="margin:8px 0 4px">Dias em que você posta:</p>'+dd
+ +'<div style="margin-top:8px"><button class="b" onclick="addG()">Adicionar</button></div>'
+ +'<p class="m" style="margin:12px 0 4px">Ou cole vários, um por linha (Nome | link, ou só o link):</p><textarea id="gb" rows="5" placeholder="Corretores ZL | https://facebook.com/groups/123&#10;https://facebook.com/groups/456"></textarea><div style="margin-top:8px"><button class="b" onclick="addVarios()">Adicionar vários</button></div></div>'
+ +'<div class="row" style="margin-bottom:8px"><button class="b s" onclick="cq()">Atualizar cliques</button><span class="m" id="cqm"></span></div><div id="l"></div>';
+ lstG();rdQ();cq()}
+function dsSel(){return [].slice.call(document.querySelectorAll(".dk")).filter(function(c){return c.checked}).map(function(c){return +c.value})}
+function addG(){var n=$("gn").value.trim(),l=$("gl").value.trim();if(!n&&l)n=nomeL(l);if(!n)return;S.g.push({id:Date.now(),n:n,l:l,ds:dsSel(),posts:0,leads:0,opens:0});save();vGru()}
+function nomeL(l){var m=l.match(/groups\/([^\/?#]+)/);return "Grupo "+(m?m[1]:l.replace(/^https?:\/\/(www\.)?/,"").slice(0,24))}
+function addVarios(){var ds=dsSel(),t=$("gb").value.split("\n"),k=0;t.forEach(function(ln){ln=ln.trim();if(!ln)return;var p=ln.split(/\s*\|\s*|\t/),n,l;if(p.length>1){n=p[0];l=p[1]}else if(/^https?:\/\//.test(p[0])){l=p[0];n=nomeL(l)}else{n=p[0];l=""}
+ if(l&&S.g.some(function(g){return g.l==l}))return;S.g.push({id:Date.now()+k,n:n,l:l,ds:ds,posts:0,leads:0,opens:0});k++});save();alert(k+" grupo(s) adicionados.");vGru()}
 function lstG(){
- $("l").innerHTML=S.g.length?S.g.map(function(g,ix){return '<div class="card"><div class="row"><b>'+esc(g.n)+'</b><span class="m">'+g.ds.map(function(d){return DIAS[d]}).join(", ")+'</span><span class="tag">'+g.posts+' posts</span><span class="tag">'+g.leads+' clientes</span><button class="b r" style="margin-left:auto" onclick="if(confirm(\'Remover?\')){S.g.splice('+ix+',1);save();lstG()}">Remover</button></div></div>'}).join(""):'<p class="m">Nenhum grupo ainda.</p>'}
+ if($("cqm"))$("cqm").textContent=CQE?"Contador de cliques indisponível (veja Ajuda › Cliques).":"";
+ $("l").innerHTML=S.g.length?S.g.map(function(g,ix){var c=CQ[g.id]||0;return '<div class="card"><div class="row"><b>'+esc(g.n)+'</b>'+(isFb(g)?'<span class="tag">Facebook</span>':'')+'<span class="m">'+g.ds.map(function(d){return DIAS[d]}).join(", ")+'</span></div><div class="row" style="margin-top:6px"><span class="tag">'+g.posts+' posts</span><span class="tag">'+(g.opens||0)+' aberturas</span><span class="tag">'+(CQE?"— cliques":c+" cliques no link")+'</span><span class="tag">'+g.leads+' clientes</span><span style="margin-left:auto" class="row">'+(g.l?'<button class="b s" onclick="abreG('+g.id+')">Abrir</button>':'')+'<button class="b r" onclick="if(confirm(\'Remover?\')){S.g.splice('+ix+',1);save();lstG()}">Remover</button></span></div></div>'}).join(""):'<p class="m">Nenhum grupo ainda.</p>'}
+function abreG(id){var g=gid(id);window.open(g.l,"_blank");g.opens=(g.opens||0)+1;save();lstG()}
+function iniFila(){var d=new Date().getDay();S.maxd=+$("fm").value||10;save();Q={ids:S.g.filter(function(g){return g.ds.indexOf(d)>-1&&!feitoHoje(g.id)}).map(function(g){return g.id}),i:$("fi2").value,v:+$("fv").value,w:0,op:0};rdQ()}
+function rdQ(){
+ var el=$("fila");if(!el)return;if(!Q){el.innerHTML="";return}
+ var g=gid(Q.ids[0]);
+ if(!g){el.innerHTML='<div class="card"><b>Fila concluída ✓</b><p class="m" style="margin:6px 0">Posts no Facebook hoje: '+hojeFb()+'/'+(S.maxd||10)+'</p><button class="b" onclick="qFim()">Fechar</button></div>';return}
+ var lim=isFb(g)&&hojeFb()>=(S.maxd||10),h='<div class="card" style="border-color:var(--p)"><div class="row"><span class="tag">Restam '+Q.ids.length+'</span><span class="tag">Facebook hoje: '+hojeFb()+'/'+(S.maxd||10)+'</span></div><h3 style="margin-top:8px">'+esc(g.n)+'</h3>';
+ if(lim)h+='<p class="m">Limite diário do Facebook atingido. Pare por hoje para evitar bloqueio, ou pule este grupo.</p><div class="row"><button class="b s" onclick="qPula()">Pular</button><button class="b r" onclick="qFim()">Encerrar</button></div>';
+ else h+='<div class="row"><button class="b" onclick="qAbrir()"'+(Q.w>0?' disabled':'')+'>'+(Q.w>0?'Aguarde '+Q.w+'s':'Abrir e copiar')+'</button><button class="b g" onclick="qOk()"'+(Q.op?'':' disabled')+'>Publicado ✓</button><button class="b s" onclick="qPula()">Pular</button><button class="b r" onclick="qFim()">Encerrar</button></div><p class="m" style="margin-top:6px">Toque em Abrir e copiar, cole o texto no grupo, publique e volte aqui para marcar Publicado.</p>';
+ el.innerHTML=h+'</div>'}
+function qAbrir(){var g=gid(Q.ids[0]),i=find(Q.i);if(g.l)window.open(g.l,"_blank");g.opens=(g.opens||0)+1;Q.op=1;save();copy(tx(g,i,Q.v),function(){if(!g.l)alert("Texto copiado. Este grupo não tem link cadastrado.")});rdQ()}
+function qOk(){var g=gid(Q.ids[0]);g.posts++;S.log.push({g:g.id,i:Q.i,t:Date.now()});save();Q.ids.shift();Q.op=0;Q.w=25;clearInterval(QT);QT=setInterval(function(){if(Q&&Q.w>0){Q.w--;rdQ()}else clearInterval(QT)},1000);rdQ()}
+function qPula(){Q.ids.shift();Q.op=0;rdQ()}
+function qFim(){Q=null;clearInterval(QT);rdQ();if($("l"))lstG()}
 /* TEXTOS */
 function vTex(){
  $("app").innerHTML='<div class="card"><div class="row"><select id="si" onchange="S.sel=this.value;save();genT()" style="flex:1">'+opts(S.sel)+'</select><select id="sv" onchange="genT()"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select></div></div><div class="card"><div id="fp"></div></div><div class="card"><textarea id="tx"></textarea><div class="row" style="margin-top:8px"><button class="b g" onclick="cp(this)">Copiar texto</button><button class="b" onclick="comp(this)">Compartilhar com fotos</button><button class="b s" onclick="baixar(this)">Baixar fotos</button></div></div>';genT();carregar()}
@@ -101,7 +135,7 @@ function lstP(){
  var d=+$("pd").value,gs=S.g.filter(function(g){return g.ds.indexOf(d)>-1});
  $("l").innerHTML=gs.length?gs.map(function(g){return '<div class="card"><div class="row"><b>'+esc(g.n)+'</b><span class="tag">'+g.posts+' posts</span><span style="margin-left:auto" class="row"><button class="b" onclick="openG('+g.id+')">Abrir e copiar</button><button class="b g" onclick="done('+g.id+')">Publicado</button></span></div></div>'}).join(""):'<p class="m">Nenhum grupo marcado para este dia. Cadastre em Grupos.</p>'}
 function gid(id){return S.g.filter(function(g){return g.id==id})[0]}
-function openG(id){var g=gid(id),i=find($("pi").value);copy(txt(i,+$("pv").value),function(){if(g.l)window.open(g.l,"_blank");else alert("Texto copiado. Este grupo não tem link cadastrado.")})}
+function openG(id){var g=gid(id),i=find($("pi").value);if(g.l)window.open(g.l,"_blank");g.opens=(g.opens||0)+1;save();copy(tx(g,i,+$("pv").value),function(){if(!g.l)alert("Texto copiado. Este grupo não tem link cadastrado.")})}
 function done(id){var g=gid(id);g.posts++;S.log.push({g:id,i:$("pi").value,t:Date.now()});save();lstP()}
 /* CLIENTES */
 function vCli(){
@@ -237,7 +271,8 @@ function vAju(){
  d("O que é o Publicador","Ferramenta para divulgar seus imóveis nos grupos de WhatsApp e Facebook sem perder tempo. Ela monta o texto pronto, lembra em quais grupos você posta em cada dia, conta suas postagens e mostra quais grupos trazem cliente.",1)+
  d("Passo a passo do dia a dia","<ol><li>Aba <b>Grupos</b>: cadastre cada grupo, o link e os dias em que você posta nele. Só precisa fazer uma vez.</li><li>Aba <b>Publicar</b>: escolha o imóvel, o tipo de texto e o dia (já vem o de hoje).</li><li>Toque em <b>Abrir e copiar</b> no grupo. O texto é copiado e o grupo abre.</li><li>Cole o texto, anexe as fotos e publique.</li><li>Volte e toque em <b>Publicado</b>. A contagem sobe.</li><li>Se alguém chamar, registre na aba <b>Clientes</b> dizendo de qual grupo veio.</li></ol>")+
  d("Aba Imóveis","Mostra os seus 21 imóveis com preço, descrição e as fotos do seu site. Toque numa foto para ampliar e passar as próximas. Use o campo de cima para filtrar por bairro, tipo ou código (ex.: Kemel, FCV004). O botão <b>Gerar textos</b> leva o imóvel direto para a aba Textos. O botão <b>Fotos</b> adiciona fotos da galeria do celular (elas vão para o seu Cloudinary). O botão verde de cima, <b>Exportar para o portfólio</b>, gera o arquivo portfolio-dados.json para o portfólio compartilhável.")+
- d("Aba Grupos","Cadastre o nome do grupo, o link (opcional, mas é ele que abre o grupo) e marque os dias da semana em que você posta. Cada grupo mostra quantos posts você fez e quantos clientes vieram dele. O botão Remover tira o grupo da lista.")+
+ d("Aba Grupos","Cadastre grupos um a um ou cole vários de uma vez (Nome | link, um por linha). Marque os dias em que você posta. <b>Iniciar fila de hoje</b> abre um grupo por vez, copia o texto e espera 25 segundos entre grupos; o limite diário de posts no Facebook (padrão 10) evita bloqueio. Cada grupo mostra posts, aberturas, <b>cliques no link</b> e clientes. O texto copiado leva um link do portfólio com a marca do grupo, e cada clique de cliente nesse link é contado.")+
+d("Cliques (uma vez só)","Para o contador de cliques funcionar, no Firebase (projeto fcosta2026) abra <b>Realtime Database › Regras</b> e acrescente dentro de <b>rules</b>: <code>\"cliques\":{\".read\":true,\"$g\":{\"$id\":{\".write\":\"!data.exists()\"}}}</code>. Sem isso a aba mostra cliques indisponíveis, mas o resto funciona. Cliques seus também contam.")+
  d("Aba Textos","Escolha o imóvel e o estilo: <b>Curto</b> (rápido, para WhatsApp), <b>Completo</b> (com referência e chamada para visita) e <b>Convite</b> (conversa mais pessoal). Você pode editar o texto na caixa antes de usar. Botões:<ul><li><b>Copiar texto</b>: copia para colar onde quiser.</li><li><b>Compartilhar com fotos</b>: no celular, abre o envio com até 6 fotos e o texto juntos (escolha o WhatsApp ou o grupo).</li><li><b>Baixar fotos</b>: salva as fotos no aparelho para anexar manualmente.</li></ul>")+
  d("Aba Publicar","Lista só os grupos marcados para o dia escolhido. <b>Abrir e copiar</b> copia o texto e abre o grupo. <b>Publicado</b> soma 1 post no grupo e guarda no histórico. Mude o dia no seletor se quiser adiantar ou repor um dia.")+
  d("Aba Status","Resumo do seu trabalho: posts de hoje, total de posts, número de clientes, desempenho de cada grupo e os 5 imóveis mais postados.")+
