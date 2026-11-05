@@ -274,6 +274,49 @@ input,select,textarea{font-family:'DM Sans',sans-serif;background:var(--in);bord
 }
 @media print{.dock,.glow{display:none!important}body{padding-left:0;padding-bottom:0}.top{position:static}}
 </style>
+<style id="org-con">
+/* Construtora organizada em seções (uma coisa de cada vez) */
+.etabs{position:sticky;top:var(--hh);z-index:20;display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;padding:10px 18px;background:color-mix(in srgb,var(--card) 94%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.etabs button{border:1px solid var(--line);border-radius:30px;background:var(--card);padding:8px 16px;min-height:42px;color:var(--tx);font-size:14.5px;white-space:nowrap;flex:none}
+.etabs button[aria-current="page"]{background:color-mix(in srgb,var(--brand) 18%,transparent);border-color:var(--brand);color:var(--tx)}
+.etabs .n,.sh .n{background:var(--acc-bg);border-radius:999px;font-size:12px;padding:1px 8px;color:var(--acc-text);margin-left:2px}
+.fhb{padding-bottom:0}
+.addrow{margin:6px 0 16px}
+.brand details.more{margin-left:0}
+details.more>summary{cursor:pointer;list-style:none;border:1px solid var(--line);border-radius:12px;padding:9px 14px;font-weight:600;background:var(--card);min-height:42px;display:inline-flex;align-items:center;user-select:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more[open]{flex-basis:100%}
+details.more .mr{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:12px;margin:10px 0 16px}
+.tile{border:1px solid var(--line);border-radius:16px;padding:14px 16px;background:var(--card);display:flex;flex-direction:column;gap:8px;min-width:0}
+.tile.dr{border-left:5px solid var(--brand)}
+.tile h3{font-size:16px;display:flex;gap:8px;align-items:center}
+.tile h3 i{font-size:22px;color:var(--brand)}
+.tile .big{font:800 30px 'Sora',sans-serif;line-height:1}
+.tile .small{overflow-wrap:anywhere}
+.tile .tacts{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto;padding-top:4px}
+.pls{display:flex;gap:6px;flex-wrap:wrap}
+.pl{font-size:12.5px;font-weight:700;border-radius:999px;padding:2px 10px;border:1px solid var(--line);white-space:nowrap}
+.pl.ok{background:color-mix(in srgb,var(--em) 15%,transparent);color:#17704f;border-color:color-mix(in srgb,var(--em) 40%,transparent)}
+.pl.no{color:var(--mute);background:var(--in)}
+.itm{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 10px;background:var(--card);display:flex;gap:10px 16px;flex-wrap:wrap;align-items:center}
+.itm-m{flex:1 1 280px;min-width:0}
+.itm-t{display:block;overflow-wrap:anywhere;font-size:16px}
+.itm-s{display:flex;gap:4px 12px;flex-wrap:wrap;align-items:center;font-size:14px;color:var(--mute);margin-top:4px}
+.itm-a{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+details.itm-more{flex-basis:100%;border-top:1px dashed var(--line);padding-top:6px}
+details.itm-more>summary{cursor:pointer;font-size:13.5px;color:var(--acc-text);font-weight:600}
+details.itm-more .mr{display:flex;gap:10px 16px;flex-wrap:wrap;align-items:center;margin-top:8px}
+.lkg{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:4px 14px 8px;margin:0 0 14px}
+.lkg.drv{border-left:5px solid var(--brand)}
+.lkg>h3{font-size:15px;margin:10px 0 2px}
+.lkg>h3+.lkrow{border-top:none}
+.lkp .empty.s{margin-bottom:12px}
+.body .sitebar{border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:14px}
+.body .guia{margin:0 0 14px}
+.body .guia .lkg{margin-top:10px}
+@media(max-width:899px){.etabs{padding:8px 12px}}
+</style>
 </head>
 <body>
 <div class="glow"></div>
@@ -584,7 +627,7 @@ function renderLinks(doc){
 }
 
 /* =====================  ESTADO, ARMAZENAMENTO E TELAS  ===================== */
-const docs=[],books=[];let editSite=null,conKey=null,empTab='',conOv=true,logoKey=null;let view='lib',openId=null,query='',persistOK=true;
+const docs=[],books=[];let editSite=null,conKey=null,empTab='',conOv=true,logoKey=null;let conSec='resumo',empSec='tab',backTo=null;let view='lib',openId=null,query='',persistOK=true;
 const uf={q:'',c:'',max:''};
 const REMOVED_KEY='fcosta_tabeloes_removidos';
 function removedSet(){try{return new Set(JSON.parse(localStorage.getItem(REMOVED_KEY)||'[]'));}catch(e){return new Set();}}
@@ -773,7 +816,7 @@ const ehVideo=f=>/^video\//.test(f.type||'')||/\.(mp4|mov|m4v|webm|avi|mkv|3gp)$
 async function loadMany(files){
   files=[...files].filter(f=>isPdf(f)||ehVideo(f));
   if(!files.length){setStatus('Não achei PDF nem vídeo nos arquivos escolhidos.',true);return;}
-  const ctx=curCtx(),n=files.length,pastas=new Set();let last=null,ok=0,nV=0,nB=0,nT=0;
+  const ctx=curCtx(),n=files.length,pastas=new Set();const stay=view==='con'&&!conOv&&!!empTab,keepSec=view==='con'&&conOv&&(conSec==='tab'||conSec==='book');let last=null,ok=0,nV=0,nB=0,nT=0;
   Prog.begin('Subindo '+n+(n>1?' arquivos':' arquivo'),'Começando…');
   try{
     for(let i=0;i<n;i++){
@@ -793,8 +836,8 @@ async function loadMany(files){
     }
   }finally{Prog.multi(null);Prog.end();}
   if(last){
-    conKey=last.key;empTab='';conOv=true;go('con');window.scrollTo({top:0});
-    setStatus('Pronto: '+ok+' de '+n+' arquivo(s) guardados em '+pastas.size+' empreendimento(s) ('+nB+' book, '+nT+' tabelão, '+nV+' vídeo). Se algum ficou na pasta errada, abra o cartão e use “Pasta”.',ok<n);
+    conKey=last.key;if(!stay){empTab='';conOv=true;if(!keepSec)conSec='emps';}go('con');window.scrollTo({top:0});
+    setStatus('Pronto: '+ok+' de '+n+' arquivo(s) guardados em '+pastas.size+' empreendimento(s) ('+nB+' book, '+nT+' tabelão, '+nV+' vídeo). Se algum ficou na pasta errada, abra “Mais opções” no arquivo e mude a pasta.',ok<n);
   }
 }
 async function loadBooks(files){
@@ -802,7 +845,7 @@ async function loadBooks(files){
   let any=false;
   Prog.begin('Subindo o book','Salvando o arquivo…');
   try{for(const f of files)if(isPdf(f)){if(await loadBook(f,ctx))any=true;}}finally{Prog.end();}
-  if(any){conKey=ctx.key;empTab='';conOv=true;go('con');}
+  if(any){conKey=ctx.key;go('con');}
 }
 async function removeDoc(d){
   try{await dbDel(d.id);}catch(e){}
@@ -830,7 +873,7 @@ async function removeEmp(key,emp){
   const p=loadProfiles();if(p[key]){p[key].emps=(p[key].emps||[]).filter(e=>e!==emp);saveProfiles(p);}
   let n=0;
   for(const x of docs.concat(books))if(x.brand.key===key&&(x.emp||'')===emp){x.emp='';n++;await persistItem(x);}
-  empTab='';setStatus('Empreendimento "'+emp+'" removido.'+(n?' Os '+n+' arquivo(s) voltaram para a construtora mãe.':''));render();
+  empTab='';conOv=true;conSec='emps';setStatus('Empreendimento "'+emp+'" removido.'+(n?' Os '+n+' arquivo(s) voltaram para a construtora mãe.':''));render();
 }
 async function removeBrand(key){
   for(const x of docs.concat(books).filter(x=>x.brand.key===key)){try{await dbDel(x.id);}catch(e){}addRemoved(x.id);}
@@ -843,7 +886,7 @@ async function removeBrand(key){
 function newBrand(nome){
   const key=slug(nome);if(!key)return;
   ensureBrand(key,nome.trim());
-  conKey=key;empTab='';conOv=true;go('con');
+  conKey=key;empTab='';conOv=true;conSec='resumo';go('con');
 }
 
 /* ---------- gravar os tabelões dentro do HTML ---------- */
@@ -977,7 +1020,7 @@ function brandCard(key){
   if(em.length)meta.append(el('span',{class:'small',text:em.slice(0,6).join(', ')+(em.length>6?'…':'')}));
   c.append(meta);
   const a=el('div',{class:'card-a'});
-  const ob=el('button',{class:'pri',type:'button',text:'Abrir construtora'});ob.onclick=()=>{editSite=null;conKey=key;empTab='';conOv=true;go('con');window.scrollTo({top:0});};
+  const ob=el('button',{class:'pri',type:'button',text:'Abrir construtora'});ob.onclick=()=>{editSite=null;conKey=key;empTab='';conOv=true;conSec='resumo';go('con');window.scrollTo({top:0});};
   a.append(ob,armBtn('Excluir','Toque de novo para excluir tudo',()=>removeBrand(key)));const st=(loadProfiles()[key]||{}).site;if(st)a.append(el('a',{class:'btn',href:st,target:'_blank',rel:'noopener noreferrer',text:'Site'}));const dv=getLinks(key).find(x=>x.k==='Pasta no Drive');if(dv)a.append(linkEl(dv.u,'Drive','btn'));c.append(a);
   return c;
 }
@@ -1027,49 +1070,39 @@ function moveSel(x){
   cs.onchange=async()=>{x.brand=brandOf(cs.value);x.emp='';await persistItem(x);conKey=x.brand.key;empTab='';conOv=true;setStatus('Movido para '+x.brand.nome+'.');render();};
   return el('div',{},el('label',{class:'mvl'},'Construtora:',cs),el('label',{class:'mvl'},'Pasta:',s));
 }
-function renderOverview(wrap,key,br,em){
-  const body=el('div',{class:'body'});
-  const up=el('details',{class:'guia'},el('summary',{text:'Subir books, tabelões e vídeos'}),upBox('fi','Books, tabelões e vídeos','Escolha vários de uma vez. O app cria uma pasta por empreendimento, pelo nome de cada arquivo.','Subir arquivos',loadMany));up.open=!em.length;
-  const geral=docs.concat(books).filter(x=>x.brand.key===key&&!(x.emp||''));
-  const names=em.slice();
-  body.append(el('h3',{class:'sh',text:'Empreendimentos ('+names.length+')'}));
-  if(!names.length)body.append(el('div',{class:'empty s',text:'Ainda não tem empreendimento. Suba um book ou tabelão e ele aparece aqui.'}));
-  const g=el('div',{class:'cards'});
-  const vidSpans={};
-  const mkCard=(e)=>{
-    const here=x=>x.brand.key===key&&(x.emp||'')===e;
-    const nT=docs.filter(here).length,nB=books.filter(here).length;
-    const c=el('article',{class:'card'});
-    const vs=el('span',{class:'small',text:'… vídeos'});vidSpans[e]=vs;
-    c.append(el('div',{class:'card-h'},el('div',{class:'card-t'},el('h3',{text:e||'Geral (sem empreendimento)'}),el('p',{class:'small',text:plural(nB,'book','books')+' · '+plural(nT,'tabelão','tabelões')}),vs)));
-    const a=el('div',{class:'card-a'});
-    const ab=el('button',{type:'button',class:'pri',text:'Abrir'});ab.onclick=()=>{empTab=e;conOv=false;render();window.scrollTo({top:0});};
-    a.append(ab);
-    if(e){
-      const pick=el('input',{type:'file',accept:'video/*',hidden:'hidden'});
-      const vb=el('button',{type:'button',text:'Subir vídeo'});vb.onclick=()=>pick.click();
-      pick.onchange=async()=>{const f=pick.files[0];pick.value='';if(!f)return;await saveVideoFile(key,e,f,setStatus);render();};
-      const sb=el('button',{type:'button',text:'Compartilhar'});sb.onclick=()=>shareEmp(key,e);
-      a.append(vb,sb,pick);
-    }
-    c.append(a);return c;
-  };
-  names.forEach(e=>g.append(mkCard(e)));
-  if(geral.length)g.append(mkCard(''));
-  body.append(g);
-  vidAll().then(vs=>{Object.keys(vidSpans).forEach(e=>{const n=vs.filter(v=>v.key===key&&(v.emp||'')===e).length;vidSpans[e].textContent=n?plural(n,'vídeo','vídeos'):'sem vídeo';});}).catch(()=>{Object.values(vidSpans).forEach(x=>x.textContent='');});
-  const nf=el('details',{class:'novoemp'},el('summary',{text:'Criar empreendimento vazio (opcional)'}),el('div',{class:'addbar'},addForm('Nome do empreendimento (ex.: Penha, Carrão)','Criar empreendimento',v=>{const n=addEmp(key,v);if(n){empTab=n;conOv=false;}render();})));
-  body.append(nf);
-  body.append(up);
-  wrap.append(body);
+/* ---------- construtora organizada em seções: Resumo · Empreendimentos · Tabelões · E-books · Drive e links ---------- */
+function countsOf(key,emp){
+  const f=x=>x.brand.key===key&&(emp===undefined||(x.emp||'')===emp);
+  const lf=c=>emp===undefined||(c.emp||'')===emp||(!!emp&&!c.emp);
+  return{t:docs.filter(f).length,b:books.filter(f).length,l:getLinks(key).filter(lf).length};
 }
+function driveFor(key,emp){
+  const L=getLinks(key).filter(c=>c.k==='Pasta no Drive');
+  return(emp&&L.find(c=>c.emp===emp))||L.find(c=>!c.emp)||L[0]||null;
+}
+function secTabs(items,cur,pick){
+  const bar=el('div',{class:'etabs',role:'tablist'});
+  items.forEach(([k,t,n])=>{
+    const b=el('button',{type:'button',role:'tab','data-k':k},t);
+    if(n!=null)b.append(' ',el('span',{class:'n',text:String(n)}));
+    if(k===cur)b.setAttribute('aria-current','page');
+    b.onclick=()=>{pick(k);render();window.scrollTo({top:0});};
+    bar.append(b);
+  });
+  return bar;
+}
+function openDoc(d){
+  backTo={key:conKey,ov:conOv,sec:conSec,esec:empSec,emp:empTab};
+  conKey=d.brand.key;empTab=d.emp||'';conOv=false;
+  go('reader',d.id);window.scrollTo({top:0});
+}
+const pill=(n,txt)=>el('span',{class:'pl '+(n?'ok':'no'),text:(n?'✓ ':'— ')+txt+(n>1?' ('+n+')':'')});
+
 function renderCon(host){
   const key=conKey;
   if(!key||!brandKeys().includes(key)){go('lib');return;}
   const br=brandOf(key),em=empsOf(key);
   if(empTab&&!em.includes(empTab))empTab='';
-  const here=x=>x.brand.key===key&&(x.emp||'')===empTab;
-  const cnt=e=>docs.concat(books).filter(x=>x.brand.key===key&&(x.emp||'')===e).length;
   const wrap=el('div',{class:'panel'});
   const back=el('button',{type:'button',text:'← Construtoras'});back.onclick=()=>go('lib');
   const logo=el('div',{class:'logo',title:'Clique para trocar o logo'});
@@ -1077,68 +1110,234 @@ function renderCon(host){
   logo.onclick=()=>{logoKey=key;$('#li').click();};
   const nm=el('input',{class:'nm',value:br.nome,'aria-label':'Nome da construtora'});
   nm.oninput=()=>setBrandName(key,nm.value);
-  const nT=docs.filter(d=>d.brand.key===key).length,nB=books.filter(b=>b.brand.key===key).length;
-  const meta=el('div',{class:'meta',text:plural(em.length,'empreendimento','empreendimentos')+' · '+plural(nT,'tabelão','tabelões')+' · '+plural(nB,'e-book','e-books')});
+  const c=countsOf(key);
+  const meta=el('div',{class:'meta',text:plural(em.length,'empreendimento','empreendimentos')+' · '+plural(c.t,'tabelão','tabelões')+' · '+plural(c.b,'e-book','e-books')});
+  const hd=el('div',{class:'brand'},back,logo,el('div',{},nm,meta),el('span',{class:'sp'}));
+  const dv=driveFor(key,conOv?'':empTab);
+  if(dv)hd.append(linkEl(dv.u,'Abrir Drive','btn pri'));
+  const st=(loadProfiles()[key]||{}).site;
+  if(st)hd.append(linkEl(st,'Site','btn'));
+  const more=el('details',{class:'more'},el('summary',{text:'Mais'}));
   const rl=el('button',{type:'button',text:'Remover logo'});rl.onclick=()=>{setBrandLogo(key,null);render();};
-  const rb=armBtn('Excluir construtora','Toque de novo para excluir tudo',()=>removeBrand(key));
-  wrap.append(el('div',{class:'brand'},back,logo,el('div',{},nm,meta),el('span',{class:'sp'}),rl,rb));
-  wrap.append(acessoBar(key,conOv?null:empTab));
-  wrap.append(siteBar(key));
+  more.append(el('div',{class:'mr'},rl,armBtn('Excluir construtora','Toque de novo para excluir tudo',()=>removeBrand(key))));
+  hd.append(more);
+  wrap.append(hd);
+  if(conOv)brandLevel(wrap,key,br,em);else folderLevel(wrap,key,br,em);
+  host.append(wrap);
+}
 
-  if(conOv){renderOverview(wrap,key,br,em);host.append(wrap);return;}
-  const bkb=el('button',{type:'button',class:'pri',text:'← Todos os empreendimentos'});bkb.onclick=()=>{conOv=true;empTab='';render();window.scrollTo({top:0});};
+/* ===== nível da construtora ===== */
+function brandLevel(wrap,key,br,em){
+  const c=countsOf(key);
+  if(!['resumo','emps','tab','book','links'].includes(conSec))conSec='resumo';
+  wrap.append(secTabs([['resumo','Resumo'],['emps','Empreendimentos',em.length],['tab','Tabelões',c.t],['book','E-books',c.b],['links','Drive e links',c.l]],conSec,k=>{conSec=k;}));
+  const body=el('div',{class:'body'});wrap.append(body);
+  if(conSec==='emps')secEmps(body,key,em);
+  else if(conSec==='tab'||conSec==='book')secItems(body,key,conSec,undefined);
+  else if(conSec==='links')secLinks(body,key);
+  else secResumo(body,key,em);
+}
+function secResumo(body,key,em){
+  const c=countsOf(key),dr=getLinks(key).filter(x=>x.k==='Pasta no Drive'),site=(loadProfiles()[key]||{}).site||'';
+  const to=s=>()=>{conSec=s;render();window.scrollTo({top:0});};
+  const mk=(txt,fn,pri)=>{const b=el('button',{type:'button',class:pri?'pri':'',text:txt});b.onclick=fn;return b;};
+  const tile=(ic,titulo,big,info,acts,cls)=>{
+    const t=el('article',{class:'tile'+(cls?' '+cls:'')});
+    t.append(el('h3',{},el('i',{class:'ti ti-'+ic}),titulo));
+    if(big!=null)t.append(el('div',{class:'big',text:String(big)}));
+    if(info)t.append(typeof info==='string'?el('p',{class:'small',text:info}):info);
+    const a=el('div',{class:'tacts'});acts.forEach(x=>a.append(x));t.append(a);return t;
+  };
+  const ages=docs.filter(d=>d.brand.key===key).map(d=>ageInfo(d.ref)).filter(Boolean);
+  let ageEl=el('span',{class:'small',text:c.t?'Sem data de referência nos PDFs.':'Nenhum tabelão ainda.'});
+  if(ages.length){const ag=ages.reduce((m,x)=>x.days<m.days?x:m);ageEl=el('span',{class:'badge '+(ag.old?'old':'new'),text:ag.old?'Mais recente: '+ag.days+' dias, confira se saiu nova':(ag.days<=0?'Atualizado hoje':'Atualizado há '+ag.days+' dias')});}
+  const g=el('div',{class:'tiles'});
+  g.append(
+    tile('brand-google-drive','Pasta do Drive',null,dr.length?dr.slice(0,3).map(x=>x.t).join(' · '):'Nenhuma pasta guardada ainda.',
+      dr.length?[linkEl(dr[0].u,'Abrir Drive','btn pri'),mk('Gerenciar',to('links'))]:[mk('Adicionar pasta',to('links'),true)],'dr'),
+    tile('table','Tabelões',c.t,ageEl,[mk('Ver tabelões',to('tab'),true)]),
+    tile('book-2','E-books',c.b,c.b?'Books com fotos e apresentação.':'Nenhum e-book ainda.',[mk('Ver e-books',to('book'),true)]),
+    tile('building-skyscraper','Empreendimentos',em.length,em.length?em.slice(0,6).join(', ')+(em.length>6?'…':''):'Nenhum ainda.',[mk('Ver empreendimentos',to('emps'),true)]),
+    tile('world','Site da construtora',null,site||'Nenhum site cadastrado.',
+      site?[linkEl(site,'Abrir site','btn pri'),mk('Alterar',()=>{editSite=key;conSec='links';render();window.scrollTo({top:0});})]:[mk('Adicionar site',()=>{editSite=key;conSec='links';render();window.scrollTo({top:0});},true)])
+  );
+  body.append(g);
+  body.append(upBox('fi','Subir arquivos novos','Solte aqui tabelões, e-books e vídeos de uma vez. O app separa cada um por empreendimento pelo nome do arquivo.','Subir arquivos',loadMany));
+}
+function secEmps(body,key,em){
+  body.append(el('div',{class:'addrow'},addForm('Novo empreendimento (ex.: Penha, Carrão)','Criar empreendimento',v=>{const n=addEmp(key,v);if(n){empTab=n;conOv=false;empSec='tab';}render();window.scrollTo({top:0});})));
+  const geralN=docs.concat(books).filter(x=>x.brand.key===key&&!(x.emp||'')).length;
+  const names=(geralN?['']:[]).concat(em);
+  if(!names.length)body.append(el('div',{class:'empty s',text:'Ainda não há empreendimento. Crie um acima, ou suba um tabelão ou e-book: a pasta nasce pelo nome do arquivo.'}));
+  const g=el('div',{class:'cards'});body.append(g);
+  const vp={};
+  names.forEach(e=>{
+    const here=x=>x.brand.key===key&&(x.emp||'')===e;
+    const nT=docs.filter(here).length,nB=books.filter(here).length;
+    const nD=getLinks(key).filter(l=>l.k==='Pasta no Drive'&&(l.emp||'')===e).length;
+    const c=el('article',{class:'card'});
+    c.append(el('div',{class:'card-h'},el('div',{class:'card-t'},el('h3',{text:e||'Geral da construtora'}),el('p',{class:'small',text:e?'Empreendimento':'Tabelão geral, todos os empreendimentos juntos'}))));
+    const pls=el('div',{class:'pls'});pls.append(pill(nT,'Tabelão'),pill(nB,'E-book'));
+    if(e){const v=el('span',{class:'pl no',text:'… Vídeo'});vp[e]=v;pls.append(v);}
+    pls.append(pill(nD,'Drive'));
+    c.append(pls);
+    const a=el('div',{class:'card-a'});
+    const ab=el('button',{type:'button',class:'pri',text:'Abrir'});ab.onclick=()=>{empTab=e;conOv=false;empSec='tab';render();window.scrollTo({top:0});};
+    a.append(ab);
+    if(e){const sb=el('button',{type:'button',text:'Compartilhar'});sb.onclick=()=>shareEmp(key,e);a.append(sb);}
+    c.append(a);g.append(c);
+  });
+  vidAll().then(vs=>{Object.keys(vp).forEach(e=>{const n=vs.filter(v=>v.key===key&&(v.emp||'')===e).length;vp[e].className='pl '+(n?'ok':'no');vp[e].textContent=(n?'✓ ':'— ')+'Vídeo'+(n>1?' ('+n+')':'');});}).catch(()=>{Object.keys(vp).forEach(e=>{vp[e].textContent='— Vídeo';});});
+}
+function secItems(body,key,kind,emp){
+  const isTab=kind==='tab';
+  const scope=x=>x.brand.key===key&&(emp===undefined||(x.emp||'')===emp);
+  const list=(isTab?docs:books).filter(scope).sort((a,b)=>(b.added||0)-(a.added||0));
+  const onde=emp?'Vai direto para a pasta '+emp+'.':'O app separa por empreendimento pelo nome do arquivo.';
+  body.append(isTab
+    ?upBox('fi','Subir tabelão (tabela de preços)','Solte aqui ou escolha o PDF. '+onde,'Subir tabelão (PDF)',loadMany)
+    :upBox('fb','Subir e-book (book com fotos)','Solte aqui ou escolha o PDF. '+onde,'Subir e-book (PDF)',loadBooks));
+  if(!list.length){body.append(el('div',{class:'empty s',text:isTab?'Nenhum tabelão ainda.':'Nenhum e-book ainda.'}));return;}
+  const mk=x=>isTab?rowDoc(x):rowBook(x);
+  if(emp!==undefined){list.forEach(x=>body.append(mk(x)));return;}
+  const groups=new Map();
+  list.forEach(x=>{const k=x.emp||'';if(!groups.has(k))groups.set(k,[]);groups.get(k).push(x);});
+  [...groups.keys()].sort((a,b)=>a===''?-1:b===''?1:a.localeCompare(b,'pt-BR')).forEach(k=>{
+    const g=groups.get(k);
+    body.append(el('h3',{class:'sh'},k||'Geral da construtora',' ',el('span',{class:'n',text:String(g.length)})));
+    g.forEach(x=>body.append(mk(x)));
+  });
+}
+function rowDoc(d){
+  const ag=ageInfo(d.ref),links=d.pages.reduce((s,p)=>s+p.anns.length,0),cx=isCaixaDoc(d.pages);
+  const r=el('article',{class:'itm'});
+  const m=el('div',{class:'itm-m'},el('strong',{class:'itm-t',text:d.fileName}));
+  const s=el('div',{class:'itm-s'},el('span',{text:d.ref?'Data de referência: '+d.ref:'Sem data de referência no PDF'}));
+  if(ag)s.append(el('span',{class:'badge '+(ag.old?'old':'new'),text:ag.old?ag.days+' dias: confira se saiu nova':(ag.days<=0?'Atualizado hoje':'Atualizado há '+ag.days+' dias')}));
+  s.append(el('span',{text:cx?'Tabela de financiamento da Caixa':plural((d.units||[]).length,'unidade com preço','unidades com preço')+' · '+plural(links,'link','links')}));
+  m.append(s);
+  const a=el('div',{class:'itm-a'});
+  const ob=el('button',{class:'pri',type:'button',text:'Abrir tabelão'});ob.onclick=()=>openDoc(d);
+  const sh=btnMeusDados(d,'Compartilhar');sh.classList.remove('pri');
+  a.append(ob,sh);
+  const mo=el('details',{class:'itm-more'},el('summary',{text:'Mais opções (mudar de pasta, excluir)'}));
+  const bk2=el('button',{type:'button',text:'É um book'});bk2.title='Passar este arquivo para os e-books';bk2.onclick=()=>docToBook(d);
+  mo.append(el('div',{class:'mr'},moveSel(d),bk2,armBtn('Excluir tabelão','Toque de novo para excluir',()=>removeDoc(d))));
+  r.append(m,a,mo);return r;
+}
+function rowBook(b){
+  const r=el('article',{class:'itm'});
+  const m=el('div',{class:'itm-m'},el('strong',{class:'itm-t',text:b.fileName}));
+  m.append(el('div',{class:'itm-s'},el('span',{text:'E-book'+(b.bytes?' · '+(b.bytes.byteLength/1048576).toFixed(1).replace('.',',')+' MB':'')})));
+  const a=el('div',{class:'itm-a'});
+  const ob=el('button',{class:'pri',type:'button',text:'Abrir e-book'});ob.onclick=()=>openBook(b);
+  const sh=btnMeusDados(b,'Compartilhar');sh.classList.remove('pri');
+  const sv=el('button',{type:'button',text:'Baixar'});sv.onclick=()=>saveBook(b);
+  a.append(ob,sh,sv);
+  const mo=el('details',{class:'itm-more'},el('summary',{text:'Mais opções (mudar de pasta, excluir)'}));
+  mo.append(el('div',{class:'mr'},moveSel(b),armBtn('Excluir book','Toque de novo para excluir',()=>removeBook(b))));
+  r.append(m,a,mo);return r;
+}
+function secLinks(body,key){
+  body.append(el('h3',{class:'sh',text:'Site da construtora'}),siteBar(key));
+  body.append(el('h3',{class:'sh',text:'Drive e outros links'}),linksPanel(key,undefined));
+}
+
+/* ===== nível da pasta (empreendimento ou Geral) ===== */
+function folderLevel(wrap,key,br,em){
+  const e=empTab,geral=!e,c=countsOf(key,e);
+  const bkb=el('button',{type:'button',class:'pri',text:'← Todos os empreendimentos'});
+  bkb.onclick=()=>{conOv=true;empTab='';conSec='emps';render();window.scrollTo({top:0});};
   wrap.append(el('div',{class:'addbar'},bkb));
-
-  const body=el('div',{class:'body'});
-  const fh=el('div',{class:'fh'});
-  const ttl=el('div',{});
-  if(empTab){
-    const inp=el('input',{class:'nm',value:empTab,'aria-label':'Nome do empreendimento'});
-    const cur=empTab;inp.onchange=()=>renameEmp(key,cur,inp.value);
-    ttl.append(inp,el('p',{class:'small',text:'Neste empreendimento: 1. tabelão · 2. book · 3. vídeo do decorado.'}));
+  const fh=el('div',{class:'fh'}),ttl=el('div',{}),acts=el('div',{class:'acts'});
+  if(!geral){
+    const inp=el('input',{class:'nm',value:e,'aria-label':'Nome do empreendimento'});
+    const cur=e;inp.onchange=()=>renameEmp(key,cur,inp.value);
+    ttl.append(inp,el('p',{class:'small',text:'Tudo deste empreendimento num lugar só: tabelão, e-book, vídeo e Drive.'}));
+    const sh=el('button',{class:'pri',type:'button',text:'Compartilhar com o cliente'});sh.onclick=()=>shareEmp(key,e);acts.append(sh);
+    const mo=el('details',{class:'more'},el('summary',{text:'Mais'}));
+    mo.append(el('div',{class:'mr'},armBtn('Excluir empreendimento','Toque de novo para excluir',()=>removeEmp(key,e))));acts.append(mo);
   }else{
-    ttl.append(el('h2',{text:'Construtora mãe · tabelão geral'}),el('p',{class:'small',text:'Aqui fica o tabelão geral da construtora, com todos os empreendimentos juntos.'}));
+    ttl.append(el('h2',{text:'Geral da construtora'}),el('p',{class:'small',text:'Tabelão geral, com todos os empreendimentos juntos.'}));
   }
-  const acts=el('div',{class:'acts'});
-  if(empTab){const sh=el('button',{class:'pri',type:'button',text:'Compartilhar com o cliente'});const eN=empTab;sh.onclick=()=>shareEmp(key,eN);acts.append(sh);}
-  if(empTab)acts.append(armBtn('Excluir empreendimento','Toque de novo para excluir',()=>removeEmp(key,empTab)));
-  fh.append(ttl,acts);body.append(fh);
+  fh.append(ttl,acts);
+  wrap.append(el('div',{class:'body fhb'},fh));
+  if(geral&&empSec==='video')empSec='tab';
+  if(!['tab','book','video','links'].includes(empSec))empSec='tab';
+  const items=[['tab','Tabelão',c.t],['book','E-book',c.b]];
+  if(!geral)items.push(['video','Vídeo','…']);
+  items.push(['links','Drive e links',c.l]);
+  const tabs=secTabs(items,empSec,k=>{empSec=k;});
+  wrap.append(tabs);
+  if(!geral){
+    const setN=n=>{const bd=tabs.querySelector('[data-k="video"] .n');if(bd)bd.textContent=String(n);};
+    vidAll().then(vs=>setN(vs.filter(v=>v.key===key&&(v.emp||'')===e).length)).catch(()=>setN(0));
+  }
+  const body=el('div',{class:'body'});wrap.append(body);
+  if(empSec==='book')secItems(body,key,'book',e);
+  else if(empSec==='video'&&!geral)body.append(videoBox(key,e,br,setStatus));
+  else if(empSec==='links')body.append(linksPanel(key,e));
+  else secItems(body,key,'tab',e);
+}
 
-  const ds=docs.filter(here).sort((a,b)=>(b.added||0)-(a.added||0)),bk=books.filter(here).sort((a,b)=>(b.added||0)-(a.added||0));
-  if(bk.length)acts.prepend(btnMeusDados(bk[0],'Compartilhar book com meus dados'));else if(ds.length)acts.prepend(btnMeusDados(ds[0],'Compartilhar tabelão com meus dados'));
-  body.append(el('h3',{class:'sh',text:(empTab?'1. ':'')+'Tabelão: tabela de preços ('+ds.length+')'}));
-  body.append(upBox('fi','Tabelão (tabela de preços)','Suba ou solte aqui o PDF da tabela de valores.','Subir tabelão (PDF)',loadMany));
-  if(ds.length){const g=el('div',{class:'cards'});ds.forEach(d=>g.append(card(d)));body.append(g);}
-  else body.append(el('div',{class:'empty s',text:empTab?'Nenhum tabelão em '+empTab+' ainda. Use “Subir tabelão (PDF)”.':'Nenhum tabelão geral ainda. Use “Subir tabelão (PDF)”.'}));
-  body.append(el('h3',{class:'sh',text:(empTab?'2. ':'')+'Book: fotos e apresentação ('+bk.length+')'}));
-  body.append(upBox('fb','Book do empreendimento (fotos)','Suba ou solte aqui o PDF do book. É ele que pode ser compartilhado com o cliente.','Subir book (PDF)',loadBooks));
-  if(bk.length){const g=el('div',{class:'cards'});bk.forEach(b=>g.append(bookCard(b)));body.append(g);}
-  else body.append(el('div',{class:'empty s',text:'Nenhum book ainda. Use “Subir book (PDF)”.'}));
-  if(empTab){
-    const vh=el('h3',{class:'sh',text:'3. Vídeo do decorado',id:'sec-video'});
-    body.append(vh,videoBox(key,empTab,br,setStatus));
-    const vb=el('button',{type:'button',text:'Vídeo do decorado'});vb.onclick=()=>vh.scrollIntoView({behavior:'smooth',block:'start'});
-    acts.append(vb);
+/* ===== Drive e links, organizados por tipo ===== */
+const LK_ORD=[['Pasta no Drive','Pastas do Drive'],['Arquivo no Drive','Arquivos no Drive'],['Planilha','Planilhas'],['Apresentação','Apresentações'],['Documento','Documentos'],['Materiais','Páginas de materiais'],['Mapa','Mapas'],['Nuvem','Outras nuvens'],['Vídeo','Vídeos'],['PDF','PDFs'],['Imagem','Imagens'],['WhatsApp','WhatsApp'],['Site','Sites']];
+function lkGroupName(k){const f=LK_ORD.find(x=>x[0]===k);return f?f[1]:'Outros';}
+function linkRow(key,c,showEmp){
+  const row=el('div',{class:'lkrow'}),fr=el('div',{class:'dfr',hidden:'hidden'});
+  const isDr=c.k==='Pasta no Drive';
+  row.append(el('div',{class:'tt'},linkEl(c.u,c.t),(showEmp&&c.emp)?el('span',{class:'small',text:'  · '+c.emp}):null));
+  row.append(linkEl(c.u,isDr?'Abrir no Drive':'Abrir','btn'+(isDr?' pri':'')));
+  const id=isDr?driveId(c.u):'';
+  if(id){
+    const vb=el('button',{type:'button',text:'Ver aqui dentro'});
+    vb.onclick=()=>{
+      if(fr.hidden){
+        if(!fr.firstChild)fr.append(el('iframe',{src:'https://drive.google.com/embeddedfolderview?id='+id+'#list',title:c.t,loading:'lazy'}),el('p',{class:'small',text:'Se ficar em branco, a pasta não está liberada como “qualquer pessoa com o link”. Use “Abrir no Drive”.'}));
+        fr.hidden=false;vb.textContent='Esconder';
+      }else{fr.hidden=true;vb.textContent='Ver aqui dentro';}
+    };
+    row.append(vb);
   }
-  wrap.append(body);host.append(wrap);
+  const cp=el('button',{type:'button',text:'Copiar link'});cp.onclick=async()=>{setStatus(await copyText(c.u)?'Link copiado.':'Não consegui copiar.',false);};
+  const rm=el('button',{type:'button',class:'danger',text:'Remover'});
+  rm.onclick=()=>{const a=getLinks(key),i=a.findIndex(x=>x.u===c.u);if(i>=0){a.splice(i,1);setLinks(key,a);}render();};
+  row.append(cp,rm);
+  const f=document.createDocumentFragment();f.append(row,fr);return f;
 }
-function card(d){
-  const c=el('article',{class:'card'});
-  const th=el('div',{class:'thumb'});th.append(d.brand.logo?el('img',{src:d.brand.logo,alt:''}):((d.brand.nome||'?').charAt(0).toUpperCase()));
-  c.append(el('div',{class:'card-h'},th,el('div',{class:'card-t'},el('h3',{text:d.fileName}),el('p',{class:'small',text:'Tabelão'}))));
-  const ag=ageInfo(d.ref),links=d.pages.reduce((s,p)=>s+p.anns.length,0);
-  const meta=el('div',{class:'card-m'});
-  meta.append(el('span',{text:d.ref?'Data de referência: '+d.ref:'Sem data de referência no PDF'}));
-  if(ag)meta.append(el('span',{class:'badge '+(ag.old?'old':'new'),text:ag.old?ag.days+' dias: confira se saiu tabela nova':(ag.days<=0?'Atualizado hoje':'Atualizado há '+ag.days+' dias')}));
-  if(isCaixaDoc(d.pages)){const cx=extractCaixa(d.pages);meta.append(el('span',{class:'badge new',text:'Tabela de financiamento da Caixa'+(cx.ref?' · '+cx.ref:'')}),el('span',{class:'small',text:cx.mcmv.length+' faixas de renda · usada no Simulador'}));}
-  else meta.append(el('span',{class:'small',text:(d.units||[]).length+' unidades com preço · '+links+' links'}));
-  c.append(meta,moveSel(d));
-  const a=el('div',{class:'card-a'});
-  const ob=el('button',{class:'pri',type:'button',text:'Abrir tabelão'});ob.onclick=()=>{conKey=d.brand.key;empTab=d.emp||'';conOv=false;go('reader',d.id);window.scrollTo({top:0});};
-  const bk2=el('button',{type:'button',text:'É um book'});bk2.title='Passar este arquivo para os books';bk2.onclick=()=>docToBook(d);
-  a.append(ob,btnMeusDados(d),bk2,armBtn('Excluir tabelão','Toque de novo para excluir',()=>removeDoc(d)));c.append(a);
-  return c;
+function linksGrouped(key,list,showEmp,host){
+  const by={};
+  list.forEach(c=>{const g=lkGroupName(c.k);(by[g]=by[g]||[]).push(c);});
+  [...new Set(LK_ORD.map(x=>x[1]).concat(['Outros']))].forEach(g=>{
+    if(!by[g])return;
+    const box=el('section',{class:'lkg'+(g==='Pastas do Drive'?' drv':'')},el('h3',{text:g+' ('+by[g].length+')'}));
+    by[g].forEach(c=>box.append(linkRow(key,c,showEmp)));
+    host.append(box);
+  });
 }
+/* s: undefined = construtora toda; ''=Geral; texto = empreendimento */
+function linksPanel(key,s){
+  const host=el('div',{class:'lkp'});
+  const all=getLinks(key),isEmp=s!==undefined;
+  const own=isEmp?all.filter(c=>(c.emp||'')===s):all;
+  const ger=(isEmp&&s)?all.filter(c=>!c.emp):[];
+  if(!own.concat(ger).some(c=>c.k==='Pasta no Drive'))host.append(el('div',{class:'empty s',text:'Nenhuma pasta do Drive guardada'+(isEmp&&s?' para este empreendimento':'')+'. Cole o link em “Adicionar links”.'}));
+  const add=el('details',{class:'guia'},el('summary',{text:'＋ Adicionar links (Drive, planilha, mapa, site…)'}));
+  const box=el('div',{class:'lkbox'});
+  box.append(el('p',{class:'small',text:'Cole um ou vários links, um por linha (pode ser “Título - link”). O app reconhece sozinho se é pasta do Drive, planilha, mapa, vídeo ou site'+(isEmp?'.':', e coloca no empreendimento certo pelo título.')}));
+  const ta=el('textarea',{placeholder:'Ex.: Drive Penha - https://drive.google.com/drive/folders/...','aria-label':'Links'});
+  const b=el('button',{type:'button',class:'pri',text:'Salvar links'});
+  b.onclick=()=>{if(addLinks(ta.value,key,isEmp?s:undefined))render();};
+  box.append(ta,b);add.append(box);add.open=!all.length;host.append(add);
+  if(own.length)linksGrouped(key,own,!isEmp,host);
+  else if(all.length&&isEmp)host.append(el('div',{class:'empty s',text:'Nenhum link só deste empreendimento ainda.'}));
+  if(ger.length){
+    const d=el('details',{class:'guia'},el('summary',{text:'Links gerais da construtora ('+ger.length+')'}));
+    linksGrouped(key,ger,false,d);host.append(d);
+  }
+  return host;
+}
+
 function openBook(b){
   if(!b.bytes){setStatus('Este e-book foi salvo sem o arquivo. Suba o PDF de novo.',true);return;}
   const url=URL.createObjectURL(new Blob([b.bytes],{type:'application/pdf'}));
@@ -1172,19 +1371,6 @@ function btnMeusDados(b,label){
   };
   return sh;
 }
-function bookCard(b){
-  const c=el('article',{class:'card'});
-  c.append(el('div',{class:'card-h'},el('div',{class:'thumb bk',text:'PDF'}),el('div',{class:'card-t'},el('h3',{text:b.fileName}),el('p',{class:'small',text:'E-book'+(b.bytes?' · '+(b.bytes.byteLength/1048576).toFixed(1).replace('.',',')+' MB':'')}))));
-  c.append(moveSel(b));
-  const a=el('div',{class:'card-a'});
-  const ob=el('button',{class:'pri',type:'button',text:'Abrir e-book'});ob.onclick=()=>openBook(b);
-  const sv=el('button',{type:'button',text:'Baixar'});sv.onclick=()=>saveBook(b);
-  const sh=btnMeusDados(b);
-  a.append(ob,sh,sv,armBtn('Excluir book','Toque de novo para excluir',()=>removeBook(b)));c.append(a);
-  return c;
-}
-
-
 /* ---------- tela: leitor de um tabelão ---------- */
 function applyFilter(){
   const q=query.trim().toLowerCase();const root=$('#main');
@@ -1196,7 +1382,7 @@ function renderReader(host){
   const d=docs.find(x=>x.id===openId);if(!d){go(conKey?'con':'lib');return;}
   const key=d.brand.key;
   const wrap=el('div',{class:'panel'});
-  const back=el('button',{type:'button',text:'← '+d.brand.nome+' › '+(d.emp||'Construtora mãe')});back.onclick=()=>{conKey=key;empTab=d.emp||'';conOv=false;go('con');};
+  const back=el('button',{type:'button',text:'← '+d.brand.nome+' › '+(d.emp||'Construtora mãe')});back.onclick=()=>{if(backTo&&backTo.key===key){conKey=backTo.key;conOv=backTo.ov;conSec=backTo.sec;empSec=backTo.esec;empTab=backTo.emp;}else{conKey=key;empTab=d.emp||'';conOv=false;empSec='tab';}go('con');window.scrollTo({top:0});};
   const logo=el('div',{class:'logo',title:'Clique para trocar o logo'});
   logo.append(d.brand.logo?el('img',{src:d.brand.logo,alt:'Logo '+d.brand.nome}):'Clique para adicionar o logo');
   logo.onclick=()=>{logoKey=key;$('#li').click();};
@@ -2063,23 +2249,6 @@ function addLinks(text,ctxKey,forceEmp){
   else setStatus(ok+' link(s) guardado(s)'+(dup?', '+dup+' repetido(s)':'')+(sem?', '+sem+' sem construtora identificada (cole dentro da construtora certa)':'')+'.',!ok);
   return ok;
 }
-function linkRows(key,host,skip){
-  getLinks(key).forEach((c,i)=>{
-    if(skip&&c.k==='Pasta no Drive')return;
-    const row=el('div',{class:'lkrow'});
-    row.append(el('span',{class:'tg',text:c.k}),el('div',{class:'tt'},linkEl(c.u,c.t),c.emp?el('span',{class:'small',text:'  · '+c.emp}):null));
-    const cp=el('button',{type:'button',text:'Copiar link'});cp.onclick=async()=>{setStatus(await copyText(c.u)?'Link copiado.':'Não consegui copiar.',false);};
-    const rm=el('button',{type:'button',class:'danger',text:'Remover'});rm.onclick=()=>{const a=getLinks(key);a.splice(i,1);setLinks(key,a);render();};
-    row.append(linkEl(c.u,'Abrir','btn'),cp,rm);host.append(row);
-  });
-}
-function linksBar(key,emp){
-  const box=el('div',{class:'lkbox'});
-  box.append(el('h3',{text:'Links e materiais desta construtora'}),el('p',{class:'small',text:'Cole um ou vários links (um por linha, opcionalmente “Título - link”): pasta do Drive, planilha, mapa, página de materiais. O tipo e o empreendimento são identificados sozinhos.'}));
-  const ta=el('textarea',{placeholder:'Ex.: Tabela de prontos - https://docs.google.com/spreadsheets/d/...','aria-label':'Links'});
-  const b=el('button',{type:'button',class:'pri',text:'Salvar links'});b.onclick=()=>{if(addLinks(ta.value,key,emp))render();};
-  box.append(ta,b);linkRows(key,box,true);return box;
-}
 function linksBox(){
   const box=el('div',{class:'lkbox'});
   box.append(el('h3',{text:'Colar links das construtoras'}),el('p',{class:'small',text:'Cole vários de uma vez. Cada link vai para a aba da construtora pelo nome no título ou no endereço (ex.: metrocasa.com.br).'}));
@@ -2089,47 +2258,6 @@ function linksBox(){
 }
 
 function driveId(u){const m=String(u).match(/\/folders\/([\w-]+)/);return m?m[1]:'';}
-/* Pasta do Drive em destaque: abrir com um toque, ver o conteúdo aqui dentro, e links extras recolhidos. s: null = visão geral, ''=construtora mãe, texto = empreendimento */
-function acessoBar(key,s){
-  const box=el('div',{class:'acesso'});
-  const all=getLinks(key);
-  const dr=all.filter(c=>c.k==='Pasta no Drive'&&(s===null||!c.emp||c.emp===s));
-  box.append(el('h3',{text:'Pasta do Drive'}));
-  if(!dr.length)box.append(el('p',{class:'small',text:'Cole o link da pasta que a construtora mandou. Ele fica salvo aqui e abre com um toque, quando você quiser.'}));
-  dr.forEach(c=>{
-    const row=el('div',{class:'lkrow'}),fr=el('div',{class:'dfr',hidden:'hidden'});
-    row.append(el('div',{class:'tt',text:c.t}),linkEl(c.u,'Abrir no Drive','btn pri'));
-    const id=driveId(c.u);
-    if(id){
-      const vb=el('button',{type:'button',text:'Ver aqui dentro'});
-      vb.onclick=()=>{
-        if(fr.hidden){
-          if(!fr.firstChild)fr.append(el('iframe',{src:'https://drive.google.com/embeddedfolderview?id='+id+'#list',title:c.t,loading:'lazy'}),el('p',{class:'small',text:'Se ficar em branco, a pasta não está liberada como “qualquer pessoa com o link”. Use “Abrir no Drive”.'}));
-          fr.hidden=false;vb.textContent='Esconder';
-        }else{fr.hidden=true;vb.textContent='Ver aqui dentro';}
-      };
-      row.append(vb);
-    }
-    const cp=el('button',{type:'button',text:'Copiar link'});cp.onclick=async()=>{setStatus(await copyText(c.u)?'Link copiado.':'Não consegui copiar.',false);};
-    const rm=el('button',{type:'button',class:'danger',text:'Remover'});rm.onclick=()=>{const a=getLinks(key),i=a.findIndex(x=>x.u===c.u);if(i>=0)a.splice(i,1);setLinks(key,a);render();};
-    row.append(cp,rm);box.append(row,fr);
-  });
-  const f=el('form',{class:'addf'});
-  const inp=el('input',{type:'text',inputmode:'url',placeholder:'Cole o link da pasta do Drive','aria-label':'Link da pasta do Drive'});
-  f.append(inp,el('button',{type:'submit',class:dr.length?'':'pri',text:dr.length?'Adicionar outra pasta':'Salvar pasta'}));
-  f.onsubmit=ev=>{
-    ev.preventDefault();const u=siteUrl(inp.value);
-    if(!u||linkKind(u)!=='Pasta no Drive'){setStatus('Isso não parece link de pasta do Drive (precisa ter /folders/ no endereço).',true);return;}
-    if(addLinks('Drive: '+(s||'todos os empreendimentos')+' - '+u,key,s||''))render();
-  };
-  box.append(f);
-  const outros=all.filter(c=>c.k!=='Pasta no Drive').length;
-  const det=el('details',{class:'guia lks'},el('summary',{text:'Outros links e materiais ('+outros+'): planilha, mapa, página de materiais'}));
-  det.append(linksBar(key,s===null?undefined:s));
-  box.append(det);
-  return box;
-}
-
 async function init(){
   let emb=null;
   try{emb=JSON.parse($('#dados').textContent||'null');}catch(e){emb=null;}
