@@ -4874,21 +4874,21 @@ window.FCLogo = (function(){
 #pubMsg{margin-top:10px;font-size:13px;line-height:1.4;}
 #pubMsg.err{color:#b3261e;}#pubMsg.ok{color:#1d7a46;font-weight:700;}
 </style>
-<button type="button" id="pubBtn">📤 Publicar no site</button>
+<button type="button" id="pubBtn">📤 Compartilhar no site</button>
 <div id="pubBg"><div id="pubBox">
-  <h3>Publicar vídeo no site</h3>
-  <p>O vídeo vai para o seu index (seção Vídeos e página do imóvel).</p>
+  <h3>Compartilhar tour no site</h3>
+  <p>O vídeo vai para a aba Tour do imóvel no seu index.</p>
   <label>Imóvel</label>
   <select id="pubImovel"><option value="">Carregando imóveis…</option></select>
   <div id="pubRef"></div>
-  <button type="button" id="pubDel">🗑 Apagar vídeo deste imóvel do site</button>
+  <button type="button" id="pubDel">🗑 Apagar tour deste imóvel do site</button>
   <label>Vídeo</label>
   <select id="pubVideo"></select>
   <label>…ou escolher um arquivo do aparelho</label>
   <input type="file" id="pubFile" accept="video/*">
   <div id="pubBar"><i></i></div>
   <div id="pubMsg"></div>
-  <div class="row"><button type="button" id="pubX">Fechar</button><button type="button" id="pubGo">Publicar</button></div>
+  <div class="row"><button type="button" id="pubX">Fechar</button><button type="button" id="pubGo">Compartilhar</button></div>
 </div></div>
 <script>
 (function fcPublicarSite(){
@@ -4909,30 +4909,30 @@ window.FCLogo = (function(){
     m.textContent=[i.bairro,i.cidade].filter(Boolean).join(' — ')+(i.preco?'  ·  R$ '+i.preco:'')+(i.status?'  ·  '+i.status:''); box.appendChild(m);
     var k=document.createElement('div'); k.className='mt'; k.textContent='ID no Firebase: fcosta_imoveis/'+id; box.appendChild(k);
     var v=document.createElement('div'); v.className='vv';
-    if(i.videoMp4){
-      v.textContent='🎬 Vídeo publicado neste imóvel:';
-      var vd=document.createElement('video'); vd.controls=true; vd.playsInline=true; vd.preload='metadata'; vd.src=i.videoMp4+'#t=0.1'; v.appendChild(vd);
+    if(i.tourMp4){
+      v.textContent='🎬 Tour publicado neste imóvel:';
+      var vd=document.createElement('video'); vd.controls=true; vd.playsInline=true; vd.preload='metadata'; vd.src=i.tourMp4+'#t=0.1'; v.appendChild(vd);
       del.style.display='block';
-    } else v.textContent='Sem vídeo MP4 publicado neste imóvel.';
+    } else v.textContent='Sem tour publicado neste imóvel.';
     box.appendChild(v); box.style.display='block';
   }
   async function apagar(){
     if(busy) return;
-    var id=$('pubImovel').value; if(!id||!imoveis[id]||!imoveis[id].videoMp4) return;
+    var id=$('pubImovel').value; if(!id||!imoveis[id]||!imoveis[id].tourMp4) return;
     var i=Object.assign({id:id},imoveis[id]);
     if(!confirm('Apagar o vídeo do imóvel '+cod(i)+' do site? Isso remove o arquivo e o link. Não dá para desfazer.')) return;
     busy=true; $('pubDel').disabled=true; $('pubGo').disabled=true; msg('Apagando…','');
-    var url=i.videoMp4,avisoArq='';
+    var url=i.tourMp4,avisoArq='';
     try{
-      await db.ref('fcosta_imoveis/'+id+'/videoMp4').remove();
+      await db.ref('fcosta_imoveis/'+id+'/tourMp4').remove();
       if(/res\.cloudinary\.com/.test(url)){ avisoArq=' O link saiu do site. O arquivo continua no Cloudinary: para apagar, entre em Media Library, ache o vídeo e exclua.'; } else try{ var mb=(url.match(/\/b\/([^\/]+)\/o\//)||[])[1]; await (mb?stFor(mb):st).refFromURL(url).delete(); }
       catch(e){ var c=(e&&e.code)||''; if(/object-not-found/.test(c)) avisoArq=''; else avisoArq=' O link saiu do site, mas o arquivo não foi apagado do Storage ('+(c||e.message||e)+'). Apague em Storage → videos no console do Firebase.'; }
-      delete imoveis[id].videoMp4;
-      msg('✅ Vídeo removido do imóvel '+cod(i)+'.'+avisoArq, avisoArq?'err':'ok');
+      delete imoveis[id].tourMp4;
+      msg('✅ Tour removido do imóvel '+cod(i)+'.'+avisoArq, avisoArq?'err':'ok');
       mostraRef(); carregaImoveis(true);
     }catch(e){
       var m=(e&&(e.code||e.message))||String(e);
-      msg(/permission|denied|unauthorized|403/i.test(m)?'O Firebase bloqueou a exclusão (regras). Apague pelo console: Realtime Database → fcosta_imoveis → '+id+' → videoMp4, e Storage → videos. Detalhe: '+m:'Erro: '+m,'err');
+      msg(/permission|denied|unauthorized|403/i.test(m)?'O Firebase bloqueou a exclusão (regras). Apague pelo console: Realtime Database → fcosta_imoveis → '+id+' → tourMp4, e Storage → videos. Detalhe: '+m:'Erro: '+m,'err');
     }finally{ busy=false; $('pubDel').disabled=false; $('pubGo').disabled=false; }
   }
   function init(){
@@ -4972,7 +4972,7 @@ window.FCLogo = (function(){
       lista.forEach(function(i){
         var o=document.createElement('option'); o.value=i.id;
         var c=cod(i);
-        o.textContent=c+' · '+(i.titulo||'Imóvel')+(i.bairro?' — '+i.bairro:'')+(i.videoMp4?'  (já tem vídeo)':'');
+        o.textContent=c+' · '+(i.titulo||'Imóvel')+(i.bairro?' — '+i.bairro:'')+(i.tourMp4?'  (já tem tour)':'');
         sel.appendChild(o);
       });
       if(antes) sel.value=antes;
@@ -4992,7 +4992,7 @@ window.FCLogo = (function(){
     var id=$('pubImovel').value;
     if(!id){ msg('Escolha o imóvel.','err'); return; }
     if(!init()){ msg('Firebase não carregou.','err'); return; }
-    if(imoveis[id]&&imoveis[id].videoMp4&&!confirm('Esse imóvel já tem um vídeo MP4. Substituir?')) return;
+    if(imoveis[id]&&imoveis[id].tourMp4&&!confirm('Esse imóvel já tem um tour. Substituir?')) return;
     busy=true; $('pubGo').disabled=true; msg('Preparando vídeo…','');
     try{
       var blob=await pegaBlob();
@@ -5016,9 +5016,9 @@ window.FCLogo = (function(){
         x.send(fd);
       });
       msg('Gravando no imóvel…','');
-      await db.ref('fcosta_imoveis/'+id).update({videoMp4:url});
-      msg('✅ Publicado! O vídeo já aparece no seu index.','ok');
-      if(imoveis[id]) imoveis[id].videoMp4=url;
+      await db.ref('fcosta_imoveis/'+id).update({tourMp4:url});
+      msg('✅ Publicado! O tour já aparece na aba Tour do imóvel no index.','ok');
+      if(imoveis[id]) imoveis[id].tourMp4=url;
       mostraRef(); carregaImoveis(true);
     }catch(e){
       var m=(e&&(e.code||e.message))||String(e);
