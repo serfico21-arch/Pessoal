@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FCOSTA — Meus Arquivos</title>
+<style>
+:root{--az:#0a1628;--ou:#C9A84C;--bg:#eef1f5;--c:#fff;--t:#1b2430;--m:#6b7785;--b:#d9dfe7;--g:#198754;--r:#c0392b}
+*{box-sizing:border-box}body{margin:0;font:15px system-ui,Arial,sans-serif;background:var(--bg);color:var(--t)}
+header{background:var(--az);color:#fff;padding:10px 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:3px solid var(--ou)}header b{font-size:16px;color:var(--ou);margin-right:auto}
+button,a.bt{border:0;border-radius:7px;padding:8px 12px;background:var(--az);color:#fff;font:600 13px system-ui;cursor:pointer;text-decoration:none}header button,header a.bt{background:transparent;border:1.5px solid var(--ou);color:var(--ou)}button.o{background:var(--ou);color:var(--az)}button.r{background:var(--r)}button.s{background:#5b6672}
+main{max-width:900px;margin:auto;padding:12px}.cd{background:var(--c);border:1px solid var(--b);border-radius:10px;padding:12px;margin-bottom:10px}
+#dz{border:2px dashed var(--ou);border-radius:10px;padding:16px;text-align:center;color:var(--m);background:#fffdf5}#dz.on{background:#fff3cf}
+input[type=search]{width:100%;padding:9px;border:1px solid var(--b);border-radius:8px;font:inherit}.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.li{display:flex;gap:8px;align-items:center;padding:9px 4px;border-bottom:1px solid var(--b)}.li .n{flex:1;min-width:0;overflow-wrap:anywhere;cursor:pointer}.li small{color:var(--m);display:block}.bc a{color:#0b5ed7;cursor:pointer}
+#st{font-size:12px;color:var(--m)}#bar{height:6px;background:var(--b);border-radius:4px;overflow:hidden;margin-top:4px}#bar i{display:block;height:100%;background:var(--ou)}
+</style></head><body>
+<header><b>🗂 Meus Arquivos · FCOSTA</b><a class="bt" href="index.html">← Painel</a></header>
+<main>
+<div class="cd"><div id="dz"><b>Arraste pastas ou arquivos para cá</b><br>ou use os botões abaixo
+<div class="row" style="justify-content:center;margin-top:10px"><button class="o" onclick="$('fp').click()">📁 Subir pasta</button><button class="o" onclick="$('ff').click()">📄 Subir arquivos</button></div></div>
+<input type="file" id="fp" webkitdirectory multiple hidden onchange="sobe(this.files,1)"><input type="file" id="ff" multiple hidden onchange="sobe(this.files,0)">
+<div id="msg" class="m" style="margin-top:8px;font-size:13px"></div><div id="st"></div><div id="bar"><i style="width:0"></i></div></div>
+<div class="cd"><input type="search" id="q" placeholder="Buscar em todos os arquivos…" oninput="lista()"><p class="bc" id="bc" style="margin:10px 0 0"></p><div id="ls"></div></div>
+</main>
+<script>
+var db,cur="",ALL=[];function $(i){return document.getElementById(i)}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function tam(n){return n>=1048576?(n/1048576).toFixed(1)+" MB":Math.max(1,Math.round(n/1024))+" KB"}
+var rq=indexedDB.open("fcosta_arquivos",1);rq.onupgradeneeded=function(){rq.result.createObjectStore("f",{keyPath:"path"})};
+rq.onsuccess=function(){db=rq.result;carrega();try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}};
+rq.onerror=function(){$("msg").textContent="Este navegador bloqueou o armazenamento (modo privado?). Abra em uma janela normal."};
+function carrega(){var o=[];db.transaction("f").objectStore("f").openCursor().onsuccess=function(e){var c=e.target.result;if(c){var v=c.value;o.push({path:v.path,name:v.name,size:v.size,t:v.t});c.continue()}else{ALL=o;lista();uso()}}}
+function uso(){var tot=ALL.reduce(function(a,f){return a+f.size},0),t=ALL.length+" arquivo(s) · "+tam(tot);if(navigator.storage&&navigator.storage.estimate)navigator.storage.estimate().then(function(e){$("st").textContent=t+" · espaço usado pelo navegador: "+tam(e.usage)+" de "+tam(e.quota);$("bar").firstChild.style.width=Math.min(100,e.usage/e.quota*100)+"%"});else $("st").textContent=t}
+function guarda(lst,base){var n=0,pend=lst.length,fail=0;if(!pend){return}
+ var i=0;function nx(){if(i>=lst.length){$("msg").textContent=n+" arquivo(s) guardado(s)."+(fail?" "+fail+" falharam (espaço cheio?).":"");carrega();return}
+  var f=lst[i++],p=base+(f.rel||f.name);if(/(^|\/)(\.DS_Store|Thumbs\.db|desktop\.ini)$/i.test(p))return nx();
+  var tx=db.transaction("f","readwrite");tx.objectStore("f").put({path:p,name:f.name,size:f.size,type:f.type,t:Date.now(),blob:f});tx.oncomplete=function(){n++;$("msg").textContent="Guardando "+n+" de "+lst.length+"…";nx()};tx.onerror=tx.onabort=function(){fail++;nx()}}nx()}
+function sobe(fs,pasta){var l=[].slice.call(fs).map(function(f){f.rel=pasta?f.webkitRelativePath:f.name;return f});guarda(l,cur);$("fp").value="";$("ff").value=""}
+/* arrastar e soltar (inclui pastas) */
+var dz=$("dz");["dragenter","dragover"].forEach(function(e){dz.addEventListener(e,function(x){x.preventDefault();dz.classList.add("on")})});["dragleave","drop"].forEach(function(e){dz.addEventListener(e,function(x){x.preventDefault();dz.classList.remove("on")})});
+dz.addEventListener("drop",function(e){var its=[].slice.call(e.dataTransfer.items||[]).map(function(i){return i.webkitGetAsEntry&&i.webkitGetAsEntry()}).filter(Boolean),out=[],pend=0;
+ if(!its.length){sobe(e.dataTransfer.files,0);return}
+ function fim(){if(--pend==0)guarda(out,cur)}
+ function ler(en,pre){pend++;if(en.isFile){en.file(function(f){f.rel=pre+f.name;out.push(f);fim()},fim)}else{var rd=en.createReader(),all=[];(function lo(){rd.readEntries(function(r){if(r.length){all=all.concat([].slice.call(r));lo()}else{all.forEach(function(x){ler(x,pre+en.name+"/")});fim()}},fim)})()}}
+ its.forEach(function(en){ler(en,"")})});
+function lista(){var q=$("q").value.toLowerCase().trim(),h="",bc='<a onclick="ir(\'\')">🗂 Início</a>',acc="";
+ cur.split("/").filter(Boolean).forEach(function(p){acc+=p+"/";bc+=' › <a onclick="ir(\''+acc.replace(/'/g,"\\'")+'\')">'+esc(p)+'</a>'});$("bc").innerHTML=q?"Resultados da busca":bc;
+ if(q){ALL.filter(function(f){return f.path.toLowerCase().indexOf(q)>-1}).slice(0,200).forEach(function(f){h+=arq(f,1)})}
+ else{var pastas={},fs=[];ALL.forEach(function(f){if(f.path.indexOf(cur)!=0)return;var r=f.path.slice(cur.length),k=r.indexOf("/");if(k>-1){var d=r.slice(0,k);pastas[d]=pastas[d]||{n:0,s:0};pastas[d].n++;pastas[d].s+=f.size}else fs.push(f)});
+  Object.keys(pastas).sort().forEach(function(d){var p=cur+d+"/";h+='<div class="li"><div class="n" onclick="ir(\''+p.replace(/'/g,"\\'")+'\')"><b>📁 '+esc(d)+'</b><small>'+pastas[d].n+' arquivo(s) · '+tam(pastas[d].s)+'</small></div><button class="r" data-p="'+esc(p)+'" onclick="delP(this.dataset.p)">Excluir pasta</button></div>'});
+  fs.sort(function(a,b){return a.name.localeCompare(b.name)}).forEach(function(f){h+=arq(f,0)})}
+ $("ls").innerHTML=h||'<p class="m">Nada aqui ainda. Suba uma pasta ou arraste arquivos.</p>'}
+function arq(f,full){return'<div class="li"><div class="n" data-p="'+esc(f.path)+'" onclick="abre(this.dataset.p)">📄 '+esc(full?f.path:f.name)+'<small>'+tam(f.size)+' · '+new Date(f.t).toLocaleDateString("pt-BR")+'</small></div><button class="s" data-p="'+esc(f.path)+'" onclick="baixa(this.dataset.p)">Baixar</button><button class="r" data-p="'+esc(f.path)+'" onclick="delA(this.dataset.p)">×</button></div>'}
+function ir(p){cur=p;$("q").value="";lista()}
+function get(p,cb){db.transaction("f").objectStore("f").get(p).onsuccess=function(e){cb(e.target.result)}}
+function abre(p){get(p,function(v){if(v)window.open(URL.createObjectURL(v.blob),"_blank")})}
+function baixa(p){get(p,function(v){if(!v)return;var a=document.createElement("a");a.href=URL.createObjectURL(v.blob);a.download=v.name;a.click()})}
+function delA(p){if(!confirm("Excluir este arquivo daqui? (o original no seu PC não é afetado)"))return;db.transaction("f","readwrite").objectStore("f").delete(p).onsuccess=carrega}
+function delP(p){if(!confirm("Excluir toda a pasta daqui? (os originais no seu PC não são afetados)"))return;var tx=db.transaction("f","readwrite"),os=tx.objectStore("f");ALL.forEach(function(f){if(f.path.indexOf(p)==0)os.delete(f.path)});tx.oncomplete=carrega}
+</script></body></html>
