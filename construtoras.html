@@ -219,6 +219,12 @@ details.rg summary{cursor:pointer;font-weight:700;color:var(--acc-text);padding:
 .lkbox textarea::placeholder{color:var(--mute)}
 .lkbox button,.lkbox .btn{color:var(--acc-text)}
 .lkbox button.danger{color:#8A1C14}
+.acesso{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--brand);border-radius:16px;padding:14px 16px;margin:12px 18px}
+.acesso h3{font-size:17px;margin-bottom:4px}
+.acesso .addf{margin-top:10px}
+.dfr iframe{width:100%;height:480px;border:1px solid var(--line);border-radius:10px;background:#fff;margin-top:8px}
+details.lks{margin:10px 18px}
+@media print{.acesso,details.lks{display:none!important}}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
@@ -932,7 +938,7 @@ function addForm(ph,btn,onAdd){
 function renderLib(host){
   if(!persistOK)host.append(el('div',{class:'warnbox',text:'Este navegador não está guardando os arquivos (modo privado ou armazenamento bloqueado). Use "Baixar página com os tabelões dentro" para não perder o trabalho.'}));
   const keys=brandKeys();
-  host.append(linksBox());
+  host.append(el('details',{class:'guia'},el('summary',{text:'Colar vários links de uma vez (Drive, planilhas, mapas…)'}),linksBox()));
   if(docs.length||books.length){
     const keep=el('div',{class:'keep'});
     keep.append(el('div',{class:'tx'},el('h3',{text:'Tudo fica salvo, separado por construtora'}),
@@ -972,7 +978,7 @@ function brandCard(key){
   c.append(meta);
   const a=el('div',{class:'card-a'});
   const ob=el('button',{class:'pri',type:'button',text:'Abrir construtora'});ob.onclick=()=>{editSite=null;conKey=key;empTab='';conOv=true;go('con');window.scrollTo({top:0});};
-  a.append(ob,armBtn('Excluir','Toque de novo para excluir tudo',()=>removeBrand(key)));const st=(loadProfiles()[key]||{}).site;if(st)a.append(el('a',{class:'btn',href:st,target:'_blank',rel:'noopener noreferrer',text:'Site'}));c.append(a);
+  a.append(ob,armBtn('Excluir','Toque de novo para excluir tudo',()=>removeBrand(key)));const st=(loadProfiles()[key]||{}).site;if(st)a.append(el('a',{class:'btn',href:st,target:'_blank',rel:'noopener noreferrer',text:'Site'}));const dv=getLinks(key).find(x=>x.k==='Pasta no Drive');if(dv)a.append(linkEl(dv.u,'Drive','btn'));c.append(a);
   return c;
 }
 function siteUrl(v){
@@ -1023,8 +1029,7 @@ function moveSel(x){
 }
 function renderOverview(wrap,key,br,em){
   const body=el('div',{class:'body'});
-  body.append(el('h3',{class:'sh',text:'Subir arquivos'}));
-  body.append(upBox('fi','Books, tabelões e vídeos','Escolha vários de uma vez. O app cria uma pasta por empreendimento, pelo nome de cada arquivo.','Subir arquivos',loadMany));
+  const up=el('details',{class:'guia'},el('summary',{text:'Subir books, tabelões e vídeos'}),upBox('fi','Books, tabelões e vídeos','Escolha vários de uma vez. O app cria uma pasta por empreendimento, pelo nome de cada arquivo.','Subir arquivos',loadMany));up.open=!em.length;
   const geral=docs.concat(books).filter(x=>x.brand.key===key&&!(x.emp||''));
   const names=em.slice();
   body.append(el('h3',{class:'sh',text:'Empreendimentos ('+names.length+')'}));
@@ -1055,6 +1060,7 @@ function renderOverview(wrap,key,br,em){
   vidAll().then(vs=>{Object.keys(vidSpans).forEach(e=>{const n=vs.filter(v=>v.key===key&&(v.emp||'')===e).length;vidSpans[e].textContent=n?plural(n,'vídeo','vídeos'):'sem vídeo';});}).catch(()=>{Object.values(vidSpans).forEach(x=>x.textContent='');});
   const nf=el('details',{class:'novoemp'},el('summary',{text:'Criar empreendimento vazio (opcional)'}),el('div',{class:'addbar'},addForm('Nome do empreendimento (ex.: Penha, Carrão)','Criar empreendimento',v=>{const n=addEmp(key,v);if(n){empTab=n;conOv=false;}render();})));
   body.append(nf);
+  body.append(up);
   wrap.append(body);
 }
 function renderCon(host){
@@ -1076,8 +1082,8 @@ function renderCon(host){
   const rl=el('button',{type:'button',text:'Remover logo'});rl.onclick=()=>{setBrandLogo(key,null);render();};
   const rb=armBtn('Excluir construtora','Toque de novo para excluir tudo',()=>removeBrand(key));
   wrap.append(el('div',{class:'brand'},back,logo,el('div',{},nm,meta),el('span',{class:'sp'}),rl,rb));
+  wrap.append(acessoBar(key,conOv?null:empTab));
   wrap.append(siteBar(key));
-  wrap.append(linksBar(key));
 
   if(conOv){renderOverview(wrap,key,br,em);host.append(wrap);return;}
   const bkb=el('button',{type:'button',class:'pri',text:'← Todos os empreendimentos'});bkb.onclick=()=>{conOv=true;empTab='';render();window.scrollTo({top:0});};
@@ -2043,13 +2049,13 @@ function parseLinks(text){const out=[];String(text).split(/\n+/).forEach(line=>{
   out.push({u,t:line.replace(m[0],'').replace(/^[\s\-–:|•*]+|[\s\-–:|]+$/g,'').trim()});});return out;}
 function keyForLink(t,u){const f=norm(t+' '+u);
   for(const k of brandKeys().concat(KNOWN))if(norm(k).length>2&&f.includes(norm(k)))return k;return '';}
-function addLinks(text,ctxKey){
+function addLinks(text,ctxKey,forceEmp){
   const L=parseLinks(text);let ok=0,dup=0,sem=0;
   L.forEach(x=>{
     const key=ctxKey||keyForLink(x.t,x.u);if(!key){sem++;return;}
     ensureBrand(key,cap(key));
     const cur=getLinks(key);if(cur.some(c=>c.u===x.u)){dup++;return;}
-    const k=linkKind(x.u),emp=guessEmp(key,x.t+' '+x.u);
+    const k=linkKind(x.u),emp=(forceEmp!==undefined?forceEmp:guessEmp(key,x.t+' '+x.u));
     let host='';try{host=new URL(x.u).hostname.replace(/^www\./,'');}catch(e){}
     cur.push({u:x.u,t:x.t||(k+' · '+host),k,emp,add:Date.now()});setLinks(key,cur);ok++;
   });
@@ -2057,8 +2063,9 @@ function addLinks(text,ctxKey){
   else setStatus(ok+' link(s) guardado(s)'+(dup?', '+dup+' repetido(s)':'')+(sem?', '+sem+' sem construtora identificada (cole dentro da construtora certa)':'')+'.',!ok);
   return ok;
 }
-function linkRows(key,host){
+function linkRows(key,host,skip){
   getLinks(key).forEach((c,i)=>{
+    if(skip&&c.k==='Pasta no Drive')return;
     const row=el('div',{class:'lkrow'});
     row.append(el('span',{class:'tg',text:c.k}),el('div',{class:'tt'},linkEl(c.u,c.t),c.emp?el('span',{class:'small',text:'  · '+c.emp}):null));
     const cp=el('button',{type:'button',text:'Copiar link'});cp.onclick=async()=>{setStatus(await copyText(c.u)?'Link copiado.':'Não consegui copiar.',false);};
@@ -2066,12 +2073,12 @@ function linkRows(key,host){
     row.append(linkEl(c.u,'Abrir','btn'),cp,rm);host.append(row);
   });
 }
-function linksBar(key){
+function linksBar(key,emp){
   const box=el('div',{class:'lkbox'});
   box.append(el('h3',{text:'Links e materiais desta construtora'}),el('p',{class:'small',text:'Cole um ou vários links (um por linha, opcionalmente “Título - link”): pasta do Drive, planilha, mapa, página de materiais. O tipo e o empreendimento são identificados sozinhos.'}));
   const ta=el('textarea',{placeholder:'Ex.: Tabela de prontos - https://docs.google.com/spreadsheets/d/...','aria-label':'Links'});
-  const b=el('button',{type:'button',class:'pri',text:'Salvar links'});b.onclick=()=>{if(addLinks(ta.value,key))render();};
-  box.append(ta,b);linkRows(key,box);return box;
+  const b=el('button',{type:'button',class:'pri',text:'Salvar links'});b.onclick=()=>{if(addLinks(ta.value,key,emp))render();};
+  box.append(ta,b);linkRows(key,box,true);return box;
 }
 function linksBox(){
   const box=el('div',{class:'lkbox'});
@@ -2079,6 +2086,48 @@ function linksBox(){
   const ta=el('textarea',{placeholder:'Metrocasa materiais - https://www.metrocasa.com.br/materiais\nCyrela tabela - https://drive.google.com/...','aria-label':'Links'});
   const b=el('button',{type:'button',class:'pri',text:'Distribuir links'});b.onclick=()=>{if(addLinks(ta.value,null))render();};
   box.append(ta,b);return box;
+}
+
+function driveId(u){const m=String(u).match(/\/folders\/([\w-]+)/);return m?m[1]:'';}
+/* Pasta do Drive em destaque: abrir com um toque, ver o conteúdo aqui dentro, e links extras recolhidos. s: null = visão geral, ''=construtora mãe, texto = empreendimento */
+function acessoBar(key,s){
+  const box=el('div',{class:'acesso'});
+  const all=getLinks(key);
+  const dr=all.filter(c=>c.k==='Pasta no Drive'&&(s===null||!c.emp||c.emp===s));
+  box.append(el('h3',{text:'Pasta do Drive'}));
+  if(!dr.length)box.append(el('p',{class:'small',text:'Cole o link da pasta que a construtora mandou. Ele fica salvo aqui e abre com um toque, quando você quiser.'}));
+  dr.forEach(c=>{
+    const row=el('div',{class:'lkrow'}),fr=el('div',{class:'dfr',hidden:'hidden'});
+    row.append(el('div',{class:'tt',text:c.t}),linkEl(c.u,'Abrir no Drive','btn pri'));
+    const id=driveId(c.u);
+    if(id){
+      const vb=el('button',{type:'button',text:'Ver aqui dentro'});
+      vb.onclick=()=>{
+        if(fr.hidden){
+          if(!fr.firstChild)fr.append(el('iframe',{src:'https://drive.google.com/embeddedfolderview?id='+id+'#list',title:c.t,loading:'lazy'}),el('p',{class:'small',text:'Se ficar em branco, a pasta não está liberada como “qualquer pessoa com o link”. Use “Abrir no Drive”.'}));
+          fr.hidden=false;vb.textContent='Esconder';
+        }else{fr.hidden=true;vb.textContent='Ver aqui dentro';}
+      };
+      row.append(vb);
+    }
+    const cp=el('button',{type:'button',text:'Copiar link'});cp.onclick=async()=>{setStatus(await copyText(c.u)?'Link copiado.':'Não consegui copiar.',false);};
+    const rm=el('button',{type:'button',class:'danger',text:'Remover'});rm.onclick=()=>{const a=getLinks(key),i=a.findIndex(x=>x.u===c.u);if(i>=0)a.splice(i,1);setLinks(key,a);render();};
+    row.append(cp,rm);box.append(row,fr);
+  });
+  const f=el('form',{class:'addf'});
+  const inp=el('input',{type:'text',inputmode:'url',placeholder:'Cole o link da pasta do Drive','aria-label':'Link da pasta do Drive'});
+  f.append(inp,el('button',{type:'submit',class:dr.length?'':'pri',text:dr.length?'Adicionar outra pasta':'Salvar pasta'}));
+  f.onsubmit=ev=>{
+    ev.preventDefault();const u=siteUrl(inp.value);
+    if(!u||linkKind(u)!=='Pasta no Drive'){setStatus('Isso não parece link de pasta do Drive (precisa ter /folders/ no endereço).',true);return;}
+    if(addLinks('Drive: '+(s||'todos os empreendimentos')+' - '+u,key,s||''))render();
+  };
+  box.append(f);
+  const outros=all.filter(c=>c.k!=='Pasta no Drive').length;
+  const det=el('details',{class:'guia lks'},el('summary',{text:'Outros links e materiais ('+outros+'): planilha, mapa, página de materiais'}));
+  det.append(linksBar(key,s===null?undefined:s));
+  box.append(det);
+  return box;
 }
 
 async function init(){
