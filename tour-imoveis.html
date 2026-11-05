@@ -528,6 +528,7 @@
   .file-btn.danger{color:#C0392B;border-color:rgba(192,57,43,.5);}
   .btn-bld{margin-left:10px;}
   @media (max-width:560px){.btn-bld{margin:10px 0 0;display:block;width:100%;}}
+.thumb .fields .fitrow{display:flex;align-items:center;gap:6px;font-size:13px;margin-top:6px;line-height:1.2}.thumb .fields .fitrow input{width:auto;margin:0}
 </style>
 <script src="fcosta-padrao.js" defer></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -602,10 +603,12 @@ audio{color-scheme:dark}
           <span>ou arraste os arquivos aqui — JPG ou PNG</span>
         </div>
         <input type="file" id="fileInput" accept="image/*" multiple>
+        <div class="toggle-row" style="margin:12px 0 0;"><input type="checkbox" id="flyerAdd"><label for="flyerAdd" style="margin:0;">Estou subindo folhetos, fichas técnicas ou páginas de ebook: mostrar inteiros, sem cortar</label></div>
         <div class="eb-row">
           <button type="button" class="file-btn" id="ebBtn">&#128214; Subir ebook (PDF) da construtora</button>
           <input type="file" id="ebInput" accept="application/pdf,.pdf">
-          <span class="audio-name" id="ebMsg">Envie o PDF do ebook: eu separo as fotos e você marca as que quer usar no tour.</span>
+          <select id="ebMode" style="margin-top:8px;max-width:100%;"><option value="paginas" selected>Páginas inteiras do ebook (sem cortar)</option><option value="fotosW">Fotos separadas, inteiras (sem cortar)</option><option value="fotos">Fotos separadas (preenchem a tela e podem cortar)</option></select>
+          <span class="audio-name" id="ebMsg">Escolha como ler o ebook e envie o PDF. Você marca o que quer usar no tour.</span>
         </div>
         <div class="eb-picker" id="ebPicker">
           <div class="eb-bar"><strong id="ebCount"></strong><span style="display:inline-flex;gap:8px;"><button type="button" class="file-btn" id="ebAll">Marcar todas</button><button type="button" class="file-btn" id="ebNone">Limpar</button><button type="button" class="file-btn danger" id="ebDelUn">&#128465; Excluir desmarcadas</button></span></div>
@@ -614,6 +617,7 @@ audio{color-scheme:dark}
           <div class="eb-bar"><button type="button" class="btn-primary" id="ebAdd">Adicionar fotos marcadas</button><button type="button" class="file-btn" id="ebClose">Fechar</button></div>
         </div>
         <div class="undo-bar" id="undoBar"><span id="undoTxt"></span><button type="button" id="undoBtn">Desfazer</button></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0;"><button type="button" class="file-btn" id="fitAllBtn">Todas inteiras (sem cortar)</button><button type="button" class="file-btn" id="fitNoneBtn">Todas preenchendo a tela</button></div>
         <div class="thumbs" id="thumbs"></div>
         <div class="empty-note" id="emptyNote">Nenhuma foto adicionada ainda.</div>
         <p class="hint">Dica: escreva o nome do cômodo só na <strong>primeira foto de cada ambiente</strong> (ex.: "Sala", "Cozinha", "Suíte 1"). O nome aparece na tela quando o vídeo entra naquele ambiente, e o movimento de câmera de cada foto ajuda a dar a sensação de entrar, olhar ao redor e sair do cômodo.</p>
@@ -1354,7 +1358,7 @@ window.FCBand = (function(){
       const url = URL.createObjectURL(file);
       const img = new Image();
       img.src = url;
-      photos.push({ file, url, img, room:'', effect:'auto' });
+      photos.push({ file, url, img, room:'', effect:'auto', fit: (document.getElementById('flyerAdd') && document.getElementById('flyerAdd').checked) ? 'whole' : 'fill' });
     });
     fileInput.value = '';
     renderThumbs();
@@ -1362,7 +1366,7 @@ window.FCBand = (function(){
 
   // usado pelo "Subir ebook": adiciona fotos já prontas à lista
   window.__fcAddPhotos = function(items){
-    items.forEach(it=>{ const img = new Image(); img.src = it.url; photos.push({ file: it.file, url: it.url, img, room: it.room || '', effect: 'auto' }); });
+    items.forEach(it=>{ const img = new Image(); img.src = it.url; photos.push({ file: it.file, url: it.url, img, room: it.room || '', effect: 'auto', fit: it.whole ? 'whole' : 'fill' }); });
     renderThumbs();
   };
 
@@ -1460,6 +1464,7 @@ window.FCBand = (function(){
         <div class="fields">
           <input type="text" data-field="room" placeholder="Nome do ambiente (só na 1ª foto do cômodo)" value="${p.room.replace(/"/g,'&quot;')}">
           <select data-field="effect">${options}</select>
+          <label class="fitrow"><input type="checkbox" data-field="fit" ${p.fit==='whole'?'checked':''}> Mostrar inteira (sem cortar)</label>
         </div>
         <div class="actions">
           <button data-act="left" class="move" title="Mover para trás">&#8593;</button>
@@ -1471,6 +1476,9 @@ window.FCBand = (function(){
       });
       el.querySelector('[data-field="effect"]').addEventListener('change', e=>{
         photos[i].effect = e.target.value;
+      });
+      el.querySelector('[data-field="fit"]').addEventListener('change', e=>{
+        photos[i].fit = e.target.checked ? 'whole' : 'fill';
       });
       el.querySelector('[data-act="remove"]').addEventListener('click', ()=>{
         lastRemoved = { p: photos[i], i: i };
@@ -1487,6 +1495,8 @@ window.FCBand = (function(){
     updateTimeRead();
   }
 
+  document.getElementById('fitAllBtn').addEventListener('click', ()=>{ photos.forEach(p=>{ p.fit = 'whole'; }); renderThumbs(); });
+  document.getElementById('fitNoneBtn').addEventListener('click', ()=>{ photos.forEach(p=>{ p.fit = 'fill'; }); renderThumbs(); });
   durationSlider.addEventListener('input', ()=> durationVal.textContent = durationSlider.value);
 
   audioInput.addEventListener('change', e=>{
@@ -2037,7 +2047,8 @@ window.FCBand = (function(){
         scale = m.scale; panX = m.panX; panY = m.panY;
       }
       let r;
-      if(fillScreen){
+      const whole = p.fit === 'whole';   // folheto / página de ebook: nunca corta
+      if(fillScreen && !whole){
         // estilo TikTok/Reels: uma única foto preenchendo a tela toda
         r = drawCover(ctx, p.renderImg, W, H, scale, panX, panY);
       }else{
@@ -2045,8 +2056,12 @@ window.FCBand = (function(){
         ctx.drawImage(p.bgImg, 0, 0, W, H);
         ctx.fillStyle = 'rgba(0,0,0,0.35)';
         ctx.fillRect(0, 0, W, H);
-        // foto inteira por cima, dentro da área reservada
-        r = drawContain(ctx, p.renderImg, area.x, area.y, area.w, area.h, Math.min(scale, 1), panX, panY);
+        // foto inteira por cima, dentro da área reservada (com a faixa por cima da foto, fica acima dela)
+        let ar = area;
+        if(fillScreen && bandLay && bandLay.band && bandLay.mode === 'over') ar = { x:0, y:0, w:W, h:Math.max(Math.round(H*0.3), bandLay.bandY - bandLay.gap) };
+        const sc = whole ? 1 - (1 - Math.min(scale, 1)) * 0.5 : Math.min(scale, 1);   // folheto: movimento mais leve, texto legível
+        const k = whole ? 0.5 : 1;
+        r = drawContain(ctx, p.renderImg, ar.x, ar.y, ar.w, ar.h, sc, panX * k, panY * k);
       }
       // moldura fina por fora (não cobre nenhum pedaço da foto)
       if(landscape && !fillScreen){
@@ -3424,6 +3439,24 @@ window.FCLogo = (function(){
     return out;
   }
 
+  /* ---------- páginas inteiras (sem cortar nada), para ebooks em 16:9 ---------- */
+  async function extractPages(pdfjs, doc, onProg){
+    var out = [], N = doc.numPages;
+    for(var n = 1; n <= N; n++){
+      onProg && onProg(n, N, 'Convertendo a página');
+      var pg = await doc.getPage(n), v1 = pg.getViewport({ scale: 1 });
+      var vp = pg.getViewport({ scale: MAX_SIDE / Math.max(v1.width, v1.height) });
+      var cv = mk(vp.width, vp.height), g = cv.getContext('2d');
+      g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height);
+      await pg.render({ canvasContext: g, viewport: vp }).promise;
+      out.push({ page: n, kind: 'pagina', blob: await toBlob(cv, 0.88), w: cv.width, h: cv.height, room: '', score: 1 });
+      try{ pg.cleanup(); }catch(e){}
+      cv.width = cv.height = 1;
+      if(n % 3 === 0) await tick();
+    }
+    return out;
+  }
+
   /* ---------- nome do projeto (título do PDF ou maior texto da capa) ---------- */
   async function detectProject(doc, file){
     var bad = function(t){ return !t || t.length < 3 || /\.(indd|pdf|docx?|psd|ai)$/i.test(t) || /^(untitled|sem t[ií]tulo|microsoft)/i.test(t); };
@@ -3478,9 +3511,10 @@ window.FCLogo = (function(){
       msg.textContent = 'Carregando o leitor de PDF...';
       var pdfjs = await loadPdfJs();
       var doc = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
-      var info = await analyze(pdfjs, doc, function(n, N, t){ msg.textContent = t + ' ' + n + ' de ' + N + '...'; });
-      var res = await extract(pdfjs, doc, info, function(n, N, t){ msg.textContent = t + ' ' + n + ' de ' + N + '...'; });
-      items = res.map(function(r){ return { page: r.page, blob: r.blob, url: URL.createObjectURL(r.blob), room: r.room, on: r.score >= 0.28, kind: r.kind }; });
+      var mode = ($('ebMode') && $('ebMode').value) || 'paginas', prog = function(n, N, t){ msg.textContent = t + ' ' + n + ' de ' + N + '...'; }, res;
+      if(mode === 'paginas'){ res = await extractPages(pdfjs, doc, prog); }
+      else { var info = await analyze(pdfjs, doc, prog); res = await extract(pdfjs, doc, info, prog); }
+      items = res.map(function(r){ return { page: r.page, blob: r.blob, url: URL.createObjectURL(r.blob), room: r.room, on: r.score >= 0.28, kind: r.kind, whole: mode !== 'fotos' || r.kind === 'pagina' }; });
       try{ var pj = await detectProject(doc, file), pin = $('lgBProj'); if(pj && pin){ pin.value = pj; window.__fcProjName = pj; } }catch(e){}
       try{ doc.destroy(); }catch(e){}
       if(!items.length){ msg.textContent = 'Não achei fotos neste PDF.'; }
@@ -3507,7 +3541,7 @@ window.FCLogo = (function(){
     var sel = items.filter(function(i){ return i.on; }), base = (new Date()).getTime();
     var add = sel.map(function(i, k){
       var f = new File([i.blob], 'ebook-p' + i.page + '-' + (base + k) + '.jpg', { type: 'image/jpeg' });
-      return { file: f, url: URL.createObjectURL(f), room: i.room || '' };
+      return { file: f, url: URL.createObjectURL(f), room: i.room || '', whole: !!i.whole };
     });
     if(window.__fcAddPhotos) window.__fcAddPhotos(add);
     msg.textContent = add.length + ' fotos adicionadas à lista. Confira a ordem e os nomes dos ambientes logo abaixo.';
@@ -3642,7 +3676,7 @@ window.FCLogo = (function(){
     return { build: build, has: has, dims: dims };
   })();
 
-  window.FCEbook = { analyze: analyze, extract: extract, findLabel: findLabel };
+  window.FCEbook = { analyze: analyze, extract: extract, extractPages: extractPages, findLabel: findLabel };
 })();
 </script>
 <script>
