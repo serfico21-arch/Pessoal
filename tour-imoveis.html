@@ -652,6 +652,7 @@ audio{color-scheme:dark}
               <option value="feed">Feed do Instagram e Facebook — 4:5</option>
               <option value="square">Quadrado (Instagram, Facebook, WhatsApp) — 1:1</option>
               <option value="landscape">Horizontal (PC, site, YouTube, Facebook) — 16:9</option>
+              <option value="whatsapp">Status do WhatsApp — 9:16, até 30 s e 10 MB</option>
             </select>
           </div>
           <div class="field">
@@ -670,7 +671,7 @@ audio{color-scheme:dark}
           </div>
           <div class="field">
             <label for="sizeLimit">Tamanho do arquivo</label>
-            <div class="size-fixed">Até 15 MB (limite do editor)</div>
+            <div class="size-fixed" id="sizeFixedTxt">Até 15 MB (limite do editor)</div>
           </div>
         </div>
         <div class="field-row" style="margin-top:20px;">
@@ -1235,6 +1236,7 @@ window.FCBand = (function(){
   const durationVal = document.getElementById('durationVal');
   const transitionSelect = document.getElementById('transition');
   const formatSelect = document.getElementById('format');
+  formatSelect.addEventListener('change', function(){ const e = document.getElementById('sizeFixedTxt'); if(e) e.textContent = formatSelect.value === 'whatsapp' ? 'Até 10 MB e 30 s (Status do WhatsApp)' : 'Até 15 MB (limite do editor)'; });
   const qualitySelect = document.getElementById('quality');
   const deviceSelect = document.getElementById('device');
   const kenburnsCheck = document.getElementById('kenburns');
@@ -1759,7 +1761,8 @@ window.FCBand = (function(){
     statusText.textContent = 'Preparando imagens...';
     const phone = isPhone();
     const leve = phone || qualitySelect.value === 'leve';
-    const fmt = formatSelect.value in { portrait:1, feed:1, square:1, landscape:1 } ? formatSelect.value : 'portrait';
+    const wa = formatSelect.value === 'whatsapp';   // Status do WhatsApp: layout 9:16, no máximo 30 s e ~10 MB
+    const fmt = wa ? 'portrait' : (formatSelect.value in { portrait:1, feed:1, square:1, landscape:1 } ? formatSelect.value : 'portrait');
     const portrait = fmt === 'portrait', landscape = fmt === 'landscape';
     // Reels/Stories 1080x1920, feed 1080x1350, quadrado 1080x1080, horizontal 1920x1080. "Leve" grava na metade.
     const DIM = { portrait:[1080,1920], feed:[1080,1350], square:[1080,1080], landscape:[1920,1080] };
@@ -1793,6 +1796,7 @@ window.FCBand = (function(){
     let cubeA = null, cubeB = null;
     const fps = phone ? 20 : (leve ? 24 : 30);
     let totalDuration = perPhoto * photos.length;
+    if(wa && totalDuration > 30){ perPhoto = 30 / photos.length; totalDuration = 30; }
 
     // --- layout do quadro ---
     // Vertical: faixa de título no alto, foto inteira no meio, cartão de preço/descrição embaixo,
@@ -1854,6 +1858,7 @@ window.FCBand = (function(){
       }
     }
 
+    if(wa && totalDuration > 30){ totalDuration = 30; perPhoto = 30 / photos.length; }   // narração mais longa é cortada em 30 s
     const canvasStream = stage.captureStream(fps);
     let finalStream = canvasStream;
     if(audioDest){
@@ -1871,16 +1876,18 @@ window.FCBand = (function(){
     const candidates = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4;codecs=avc1','video/mp4','video/webm;codecs=vp8','video/webm;codecs=vp9','video/webm'];
     for(const c of candidates){ if(MediaRecorder.isTypeSupported(c)){ mimeType = c; break; } }
     const isMp4 = mimeType.startsWith('video/mp4');
+    if(wa && !isMp4) alert('Atenção: este navegador só grava WebM e o Status do WhatsApp pode não aceitar. Use o Chrome atualizado para gerar MP4.');
+    const ORC = wa ? 9 * 1048576 : 14 * 1048576;   // orçamento de bytes (Status: 9 MB p/ ficar abaixo de 10 MB)
 
     const LIMITE_MB = 15 * 1024 * 1024;
     const limitado = true; // todos os vídeos do editor ficam com no máximo 15 MB
     let vbps = phone ? 1_500_000 : (leve ? 3_000_000 : 8_000_000);
     // áudio em 96 kbps; só em vídeos muito longos (mais de ~5 min) reduz para caber nos 15 MB
     let abps = 96_000, vfloor = 250_000;
-    if(limitado && (14 * 1024 * 1024 * 8 / totalDuration) < 346_000){ abps = 48_000; vfloor = 60_000; }
+    if(limitado && (ORC * 8 / totalDuration) < 346_000){ abps = 48_000; vfloor = 60_000; }
     if(limitado){
       // orçamento de 14 MB (margem de segurança)
-      vbps = Math.max(vfloor, Math.min(vbps, (14 * 1024 * 1024 * 8 / totalDuration - abps) * scale));
+      vbps = Math.max(vfloor, Math.min(vbps, (ORC * 8 / totalDuration - abps) * scale));
     }
     const recorder = new MediaRecorder(finalStream, { ...(mimeType ? { mimeType } : {}), videoBitsPerSecond: Math.round(vbps), ...(limitado ? { audioBitsPerSecond: abps } : {}) });
     const chunks = [];
