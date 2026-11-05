@@ -24,11 +24,11 @@ h3{margin:4px 0 10px}.d{display:inline-flex;gap:3px;align-items:center;margin-ri
 .pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}.pc{background:var(--c);border:1px solid var(--b);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}.pim{position:relative;height:170px;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--m);font-size:13px}.pim img{width:100%;height:100%;object-fit:cover;display:block}.pim .rf,.pim .nf{position:absolute;top:8px;background:rgba(30,58,95,.9);color:#fff;font-size:12px;padding:3px 8px;border-radius:20px}.pim .rf{left:8px}.pim .nf{right:8px}.pbd{padding:12px;display:flex;flex-direction:column;gap:4px;flex:1}.ppr{font-size:19px;font-weight:800}.pbd p{margin:4px 0 8px;font-size:14px;flex:1}.pbt{display:flex;gap:6px;flex-wrap:wrap}.pbt>*{flex:1;min-width:80px;text-align:center;text-decoration:none}
 summary{font-weight:700;cursor:pointer}.hp{margin-top:8px;line-height:1.5}.hp ol,.hp ul{padding-left:20px;margin:6px 0}
 </style></head><body>
-<header>Publicador FCosta · CRECI-SP 294791-F</header>
+<header>Publicador FCosta · CRECI-SP 294791-F<div id="sy" style="font-weight:400;font-size:12px;opacity:.9;margin-top:2px"></div></header>
 <nav id="nav"></nav><main id="app"></main>
 <script>
 var WA="5511993509109",SITE="https://fcostacorretor.com/imovel?id=";
-var IM=[
+var IM0=[
 {c:"FCV001",k:"uid_1773957315252_j78ayd4vqep",t:"Sobrado",b:"Jardim Luiz Mauro",ci:"Ferraz de Vasconcelos",p:"650.000",d:"2 residências independentes, garagem para 2 carros com portão automático e espaço gourmet"},
 {c:"FCV002",k:"-P2n05G1GeQjwVMwaR1w",t:"Sobrado",b:"Cidade Kemel",ci:"Itaim Paulista",p:"450.000",d:"Fachada moderna, escada flutuante, cozinha planejada, churrasqueira e frente para escola"},
 {c:"FCV003",k:"-OsY60m63S3egI2LlW3-",t:"Galpão + salão + 2 residências",b:"Cidade Kemel",ci:"Itaim Paulista",p:"750.000",d:"Galpão com pé-direito alto, porão, salão comercial e 2 residências no andar superior"},
@@ -51,10 +51,11 @@ var IM=[
 {c:"FCV020",k:"-P-_4-GY_sQJo5IC0p7v",t:"Sobrado com 4 casas",b:"Jardim São Fernando",ci:"Ferraz de Vasconcelos",p:"500.000",a:"250m²",d:"4 casas independentes no mesmo terreno, perto do Mercado Rossi"},
 {c:"FCV021",k:"-P32An9GDhLQoegp8Ze_",t:"Apartamento",b:"Conjunto Encosta Norte",ci:"Itaim Paulista",p:"120.000",d:"Condomínio fechado, aceita carro como parte do pagamento"}
 ];
+var IM=IM0.slice();
 var DIAS=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 var S={g:[],cl:[],log:[],ab:[],lim:5,vi:0};
 try{var x=localStorage.getItem("pubfc");if(x)S=Object.assign(S,JSON.parse(x))}catch(e){}
-function save(){try{localStorage.setItem("pubfc",JSON.stringify(S))}catch(e){}}
+if(S.lk===undefined)S.lk=true;function save(){if(S.log.length>3000)S.log=S.log.slice(-2000);try{localStorage.setItem("pubfc",JSON.stringify(S))}catch(e){}}
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function $(id){return document.getElementById(id)}
 function find(c){return IM.filter(function(i){return i.c==c})[0]}
@@ -62,7 +63,7 @@ function specs(i){var a=[];if(i.q)a.push(i.q+" quarto"+(i.q>1?"s":""));if(i.v)a.
 function txt(i,n){
  var loc=i.b+(i.ci&&i.ci!=i.b?" – "+i.ci:""),lk=S.lk?SITE+i.k:"",sp=specs(i);
  var ft="\n\n📲 WhatsApp: (11) 99350-9109\nFCosta Corretor · CRECI-SP 294791-F | CNAI 52708";
- if(n==0)return "🏡 "+i.t+" à venda – "+loc+"\n💰 R$ "+i.p+(sp?"\n📐 "+sp:"")+"\n✅ "+i.d+"\n\n"+(lk?"👉 Fotos e detalhes: "+lk:"🔖 Ref: "+i.c)+ft;
+ if(n==0)return "🏡 "+i.t+(i.al?" para alugar – ":" à venda – ")+loc+"\n💰 R$ "+i.p+(sp?"\n📐 "+sp:"")+"\n✅ "+i.d+"\n\n"+(lk?"👉 Fotos e detalhes: "+lk:"🔖 Ref: "+i.c)+ft;
  if(n==1)return "🔥 OPORTUNIDADE – "+i.t.toUpperCase()+"\n📍 "+loc+"\n\n"+i.d+".\n"+(sp?"\n📐 "+sp:"")+"\n💰 Valor: R$ "+i.p+"\n🔖 Ref: "+i.c+"\n\nAgende sua visita!"+(lk?" Veja tudo aqui:\n"+lk:"")+ft;
  return "Procurando "+i.t.toLowerCase()+" em "+i.b+"?\n\nTenho este: "+i.d+".\nR$ "+i.p+(sp?" ("+sp+")":"")+"\n\nChame no WhatsApp com a ref. "+i.c+" e eu te mostro."+(lk?"\n"+lk:"")+ft;
 }
@@ -72,13 +73,13 @@ function fb(s,cb){var t=document.createElement("textarea");t.value=s;document.bo
 var TABS=["Imóveis","Grupos","Textos","Publicar","Status","Clientes","Limpeza","Portfólio","Ajuda"],tab=0;
 function nav(){$("nav").innerHTML=TABS.map(function(t,i){return '<button class="'+(i==tab?"on":"")+'" onclick="go('+i+')">'+t+'</button>'}).join("")}
 function go(i){tab=i;nav();[vImo,vGru,vTex,vPub,vSta,vCli,vLim,vPor,vAju][i]()}
-function opts(sel){return IM.map(function(i){return '<option value="'+i.c+'"'+(i.c==sel?" selected":"")+'>'+i.c+' · '+esc(i.t)+' · '+esc(i.b)+' · R$ '+i.p+'</option>'}).join("")}
+function opts(sel){return act().map(function(i){return '<option value="'+i.c+'"'+(i.c==sel?" selected":"")+'>'+i.c+' · '+esc(i.t)+' · '+esc(i.b)+' · R$ '+i.p+'</option>'}).join("")}
 /* IMÓVEIS */
 function vImo(){
- $("app").innerHTML='<button class="b g" style="margin-bottom:10px" onclick="expF()">Exportar para o portfólio</button><input id="q" placeholder="Filtrar por bairro, tipo ou código" style="width:100%;margin-bottom:10px" oninput="lstImo()"><div id="l"></div>';lstImo();carregar()}
+ $("app").innerHTML='<div class="row" style="margin-bottom:10px"><button class="b g" onclick="sync(1)">↻ Sincronizar com o site</button><span class="m" id="sy2"></span></div><input id="q" placeholder="Filtrar por bairro, tipo ou código" style="width:100%;margin-bottom:10px" oninput="lstImo()"><div id="l"></div>';lstImo();carregar()}
 function lstImo(){
  var q=($("q").value||"").toLowerCase();
- $("l").innerHTML=IM.filter(function(i){return (i.c+i.t+i.b+i.ci).toLowerCase().indexOf(q)>-1}).map(function(i){
+ $("l").innerHTML=act().filter(function(i){return (i.c+i.t+i.b+i.ci).toLowerCase().indexOf(q)>-1}).map(function(i){
   return '<div class="card"><div class="row"><b>'+i.c+'</b><span class="tag">'+esc(i.t)+'</span><span class="m">'+esc(i.b)+' · '+esc(i.ci)+'</span><b style="margin-left:auto">R$ '+i.p+'</b></div><small>'+esc(specs(i))+'</small>'+strip(i.c)+'<div>'+esc(i.d)+'</div><div class="row" style="margin-top:8px"><button class="b g" onclick="addF(\''+i.c+'\')">Fotos</button><button class="b" onclick="S.sel=\''+i.c+'\';save();go(2)">Gerar textos</button></div></div>'}).join("")}
 /* GRUPOS */
 var CQ={},CQE=0,Q=null,QT=null;
@@ -92,7 +93,7 @@ function cq(){jget("cliques").then(function(d){CQ={};Object.keys(d||{}).forEach(
 function vGru(){
  var dd=DIAS.map(function(d,i){return '<label class="d"><input type="checkbox" class="dk" value="'+i+'" checked>'+d+'</label>'}).join("");
  $("app").innerHTML='<div id="fila"></div><div id="pn"></div>'
- +'<div class="card"><h3>Fila de postagem</h3><div class="row"><select id="fi2" style="flex:1">'+opts(S.sel)+'</select><select id="fv"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select></div>'
+ +'<div class="card"><h3>Fila de postagem</h3><div class="row"><select id="fi2" style="flex:1"><option value="auto">🔄 Rodízio automático (melhor imóvel p/ cada grupo)</option>'+opts(S.sel)+'</select><select id="fv"><option value="3">Variar estilos</option><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select></div>'
  +'<div class="row" style="margin-top:8px">Limite de posts no Facebook por dia <input type="number" id="fm" min="1" value="'+(S.maxd||10)+'" style="width:70px"> Intervalo entre grupos <input type="number" id="fe" min="15" value="'+(S.esp||45)+'" style="width:70px"> s <label style="display:flex;gap:6px;align-items:center"><input type="checkbox"'+(S.lk?' checked':'')+' onchange="S.lk=this.checked;save()"> Incluir link no texto</label></div>'
  +'<p class="m" style="margin:8px 0">Abre um grupo por vez (somente os marcados abaixo), copia o texto com link rastreado e espera o intervalo definido entre um grupo e outro. O Facebook não permite postar sozinho nem abrir vários grupos de uma vez, e não divulga um limite oficial de postagens; por isso o padrão é 10 por dia no Facebook. Ajuste ao seu caso.</p><button class="b g" onclick="iniFila()">Iniciar fila de hoje</button></div>'
  +'<div class="card"><h3>Novo grupo</h3><div class="row"><input id="gn" placeholder="Nome do grupo"><input id="gl" placeholder="Link do grupo" style="flex:1"></div><p class="m" style="margin:8px 0 4px">Dias em que você posta:</p>'+dd
@@ -133,17 +134,17 @@ function lstG(){pnG();
  if($("cqm"))$("cqm").textContent=CQE?"Contador de cliques indisponível (veja Ajuda › Cliques).":"";
  $("l").innerHTML=S.g.length?S.g.map(function(g,ix){var c=CQ[g.id]||0;return '<div class="card"><div class="row"><label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox"'+(isSel(g)?' checked':'')+' onchange="selG('+g.id+',this.checked)"><b>'+esc(g.n)+'</b></label>'+(isFb(g)?'<span class="tag">Facebook</span>':'')+'<span class="m">'+g.ds.map(function(d){return DIAS[d]}).join(", ")+'</span></div><div class="row" style="margin-top:6px"><span class="tag">'+g.posts+' posts</span><span class="tag">'+(g.opens||0)+' aberturas</span><span class="tag">'+(CQE?"— cliques":c+" cliques no link")+'</span><span class="tag">'+g.leads+' clientes</span><span style="margin-left:auto" class="row">'+(g.l?'<button class="b s" onclick="abreG('+g.id+')">Abrir</button>':'')+'<button class="b r" onclick="if(confirm(\'Remover?\')){S.g.splice('+ix+',1);save();lstG()}">Remover</button></span></div></div>'}).join(""):'<p class="m">Nenhum grupo ainda.</p>'}
 function abreG(id){var g=gid(id);if(isFb(g)&&pausado()&&!confirm("Pausa de segurança ativa por alerta do Facebook. Abrir mesmo assim?"))return;window.open(g.l,"_blank");reg(g);save();lstG()}
-function iniFila(){S.maxd=+$("fm").value||10;S.esp=Math.max(15,+$("fe").value||45);save();Q={ids:S.g.filter(function(g){return isSel(g)&&!feitoHoje(g.id)}).map(function(g){return g.id}),i:$("fi2").value,v:+$("fv").value,w:0,op:0};rdQ()}
+function iniFila(){S.maxd=+$("fm").value||10;S.esp=Math.max(15,+$("fe").value||45);save();Q={ids:S.g.filter(function(g){return isSel(g)&&!feitoHoje(g.id)}).map(function(g){return g.id}),i:$("fi2").value,v:+$("fv").value,w:0,op:0,pm:{}};rdQ()}
 function rdQ(){
  var el=$("fila");if(!el)return;if(!Q){el.innerHTML="";return}
  var g=gid(Q.ids[0]);
  if(!g){el.innerHTML='<div class="card"><b>Fila concluída ✓</b><p class="m" style="margin:6px 0">Posts no Facebook hoje: '+hojeFb()+'/'+(S.maxd||10)+'</p><button class="b" onclick="qFim()">Fechar</button></div>';return}
- var lim=isFb(g)&&(hojeFb()>=(S.maxd||10)||pausado()),h='<div class="card" style="border-color:var(--p)"><div class="row"><span class="tag">Restam '+Q.ids.length+'</span><span class="tag">Facebook hoje: '+hojeFb()+'/'+(S.maxd||10)+'</span></div><h3 style="margin-top:8px">'+esc(g.n)+'</h3>';
+ var lim=isFb(g)&&(hojeFb()>=(S.maxd||10)||pausado()),h='<div class="card" style="border-color:var(--p)"><div class="row"><span class="tag">Restam '+Q.ids.length+'</span><span class="tag">Facebook hoje: '+hojeFb()+'/'+(S.maxd||10)+'</span></div><h3 style="margin-top:8px">'+esc(g.n)+'</h3><div class="m" style="margin-bottom:6px">Imóvel: <b>'+qi(g)+'</b> · '+esc(find(qi(g)).t)+' · '+esc(find(qi(g)).b)+'</div>';
  if(lim)h+='<p class="m">'+(pausado()?'Pausa de segurança ativa por alerta do Facebook. Não publique em grupos do Facebook até acabar.':'Limite diário do Facebook atingido. Pare por hoje para evitar bloqueio, ou pule este grupo.')+'</p><div class="row"><button class="b s" onclick="qPula()">Pular</button><button class="b r" onclick="qFim()">Encerrar</button></div>';
- else h+='<div class="row"><button class="b" onclick="qAbrir()"'+(Q.w>0?' disabled':'')+'>'+(Q.w>0?'Aguarde '+Q.w+'s':'Abrir e copiar')+'</button><button class="b g" onclick="qOk()"'+(Q.op?'':' disabled')+'>Publicado ✓</button><button class="b s" onclick="qPula()">Pular</button><button class="b r" onclick="qFim()">Encerrar</button></div><div class="row" style="margin-top:8px"><button class="b" onclick="imgCopia(Q.i,this)">Copiar imagem</button><button class="b s" onclick="imgShare(Q.i,this)">Compartilhar imagem</button><button class="b s" onclick="imgBaixa(Q.i,this)">Baixar imagem</button></div><p class="m" style="margin-top:6px">1) Abrir e copiar e cole o texto no grupo. 2) Volte, toque em Copiar imagem e cole a imagem no mesmo post. No celular, use Compartilhar imagem ou Baixar imagem e anexe. 3) Publique e marque Publicado.</p>';
+ else h+='<div class="row"><button class="b" onclick="qAbrir()"'+(Q.w>0?' disabled':'')+'>'+(Q.w>0?'Aguarde '+Q.w+'s':'Abrir e copiar')+'</button><button class="b g" onclick="qOk()"'+(Q.op?'':' disabled')+'>Publicado ✓</button><button class="b s" onclick="qPula()">Pular</button><button class="b r" onclick="qFim()">Encerrar</button></div><div class="row" style="margin-top:8px"><button class="b" onclick="imgCopia(qi(gid(Q.ids[0])),this)">Copiar imagem</button><button class="b s" onclick="imgShare(qi(gid(Q.ids[0])),this,qt(gid(Q.ids[0])))">Compartilhar foto + texto</button><button class="b s" onclick="imgBaixa(qi(gid(Q.ids[0])),this)">Baixar imagem</button></div><p class="m" style="margin-top:6px">1) Abrir e copiar e cole o texto no grupo. 2) Volte, toque em Copiar imagem e cole a imagem no mesmo post. No celular, use Compartilhar imagem ou Baixar imagem e anexe. 3) Publique e marque Publicado.</p>';
  el.innerHTML=h+'</div>'}
-function qAbrir(){var g=gid(Q.ids[0]),i=find(Q.i);if(g.l)window.open(g.l,"_blank");reg(g);Q.op=1;save();copy(tx(g,i,Q.v),function(){if(!g.l)alert("Texto copiado. Este grupo não tem link cadastrado.")});rdQ()}
-function qOk(){var g=gid(Q.ids[0]);g.posts++;S.log.push({g:g.id,i:Q.i,t:Date.now()});save();Q.ids.shift();Q.op=0;Q.w=(isFb(g)?(S.esp||45):25);clearInterval(QT);QT=setInterval(function(){if(Q&&Q.w>0){Q.w--;rdQ()}else clearInterval(QT)},1000);rdQ()}
+function qAbrir(){var g=gid(Q.ids[0]),i=find(qi(g));if(g.l)window.open(g.l,"_blank");reg(g);Q.op=1;save();copy(tx(g,i,qv(g,i)),function(){if(!g.l)alert("Texto copiado. Este grupo não tem link cadastrado.")});rdQ()}
+function qOk(){var g=gid(Q.ids[0]);g.posts++;S.log.push({g:g.id,i:qi(g),t:Date.now()});save();Q.ids.shift();Q.op=0;Q.w=(isFb(g)?(S.esp||45):25);clearInterval(QT);QT=setInterval(function(){if(Q&&Q.w>0){Q.w--;rdQ()}else clearInterval(QT)},1000);rdQ()}
 function qPula(){Q.ids.shift();Q.op=0;rdQ()}
 function qFim(){Q=null;clearInterval(QT);rdQ();if($("l"))lstG()}
 /* TEXTOS */
@@ -210,8 +211,8 @@ function cldTag(i){
  return t()}
 function busca(i){
  return achar(i).then(function(h){var o=[];if(h)imgs(h.d,o);o=uniq(o);return o.length?o.slice(0,12):cldTag(i)})}
-function carregar(){
- var q=IM.filter(function(i){return !(FT[i.c]&&FT[i.c].length)&&!NONE[i.c]});
+function carregarOld(){
+ var q=act().filter(function(i){return !(FT[i.c]&&FT[i.c].length)&&!NONE[i.c]});
  if(!q.length||CAR)return;
  CAR=1;ERR=0;var ok=0;
  function nx(){if(!q.length)return Promise.resolve();var i=q.shift();
@@ -280,18 +281,18 @@ function upF(){
  alert("Enviando "+fs.length+" foto(s)... aguarde a mensagem de conclusão.");nx()}
 function delF(){var m=S.fotos[LB.c],u=fts(LB.c)[LB.n],k=m.indexOf(u);if(k<0||!confirm("Excluir esta foto da lista?"))return;m.splice(k,1);save();lbx();atualizar()}
 function expF(){
- var f={};IM.forEach(function(i){f[i.c]=fts(i.c)||[]});
+ var f={};act().forEach(function(i){f[i.c]=fts(i.c)||[]});
  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify({im:IM,fotos:f,root:S.root||""})],{type:"application/json"}));a.download="portfolio-dados.json";document.body.appendChild(a);a.click();a.remove();
  alert("Arquivo portfolio-dados.json baixado. Suba no GitHub, na mesma pasta do portfolio-fcosta.html.")}
 /* PORTFÓLIO (vitrine do cliente dentro do Publicador) */
 function lkP(c){var u=location.href.split("#")[0].split("?")[0].replace(/[^\/]*$/,"")+"portfolio-fcosta.html";return c?u+"#"+c:u}
 function vPor(){
- var cs=uniq(IM.map(function(i){return i.ci})).sort();
+ var cs=uniq(act().map(function(i){return i.ci})).sort();
  $("app").innerHTML='<div class="card"><div class="row"><button class="b g" onclick="expF()">Exportar para o portfólio</button><button class="b" onclick="envP(\'\')">Enviar portfólio</button><a class="b s" style="text-decoration:none" target="_blank" href="'+esc(lkP(""))+'">Abrir página do cliente</a></div><p class="m" style="margin:8px 0 0">Vitrine igual à que o cliente vê. Link de cada imóvel: <b>portfolio-fcosta.html#FCV001</b>. Depois de mexer nas fotos, toque em Exportar e suba o portfolio-dados.json no GitHub.</p></div><div class="row" style="margin-bottom:10px"><input id="pq" placeholder="Buscar por bairro, tipo ou código" style="flex:1;min-width:160px" oninput="lstPor()"><select id="pc" onchange="lstPor()"><option value="">Todas as cidades</option>'+cs.map(function(x){return '<option>'+esc(x)+'</option>'}).join("")+'</select></div><div id="pg" class="pgrid"></div>';
  lstPor();carregar()}
 function lstPor(){
  var q=($("pq").value||"").toLowerCase(),ct=$("pc").value;
- var l=IM.filter(function(i){return (!ct||i.ci==ct)&&(i.c+i.t+i.b+i.ci+i.d).toLowerCase().indexOf(q)>-1});
+ var l=act().filter(function(i){return (!ct||i.ci==ct)&&(i.c+i.t+i.b+i.ci+i.d).toLowerCase().indexOf(q)>-1});
  $("pg").innerHTML=l.length?l.map(function(i){
   var a=fts(i.c),loc=i.b+(i.ci&&i.ci!=i.b?" – "+i.ci:""),sp=specs(i);
   var im=(a&&a.length)?'<img loading="lazy" alt="" src="'+esc(th(a[0],600))+'">':(a?'Sem fotos':(ERR?'Fotos indisponíveis':'Carregando foto…'));
@@ -330,7 +331,7 @@ d("Cliques (uma vez só)","Para o contador de cliques funcionar, no Firebase (pr
  d("Conexão das fotos (se não aparecerem)","Toque em <b>Testar conexão</b>. O teste mostra em qual pasta do banco cada imóvel foi achado e quantas fotos tem. Se não achar nada, toque em <b>Copiar diagnóstico</b> e mande para mim. Se souber o nome da pasta, digite no campo e salve.<div class='row' style='margin:8px 0'><input id='rt' placeholder='Pasta dos imóveis no banco' value='"+esc(S.root||"")+"'><button class='b g' onclick='salvaRt()'>Salvar pasta</button><button class='b' onclick='teste()'>Testar conexão</button></div><div id='tr' class='m'></div>")+
  d("Seus dados e cópia de segurança","Grupos, clientes e contagens ficam guardados <b>só neste aparelho e neste navegador</b>. Se trocar de celular ou limpar os dados do navegador, perde tudo. Por isso, de vez em quando toque em <b>Salvar cópia</b>. Para recuperar, use <b>Restaurar cópia</b>.<div class='row' style='margin-top:8px'><button class='b g' onclick='bk()'>Salvar cópia</button><label class='b s' style='cursor:pointer'>Restaurar cópia<input type='file' accept='.json' style='display:none' onchange='rs(this)'></label></div>")+
  d("Aba Portfólio","Mostra a vitrine dos imóveis como o cliente vê, com foto, preço e descrição. <b>Enviar</b> manda o link do imóvel (portfolio-fcosta.html#código) pelo WhatsApp ou outro app. <b>Copiar link</b> copia o mesmo link. Toque na foto para ampliar. <b>Abrir página do cliente</b> abre a página pública.")+
- d("Portfólio compartilhável","O portfólio é uma página para mandar ao cliente: <b>portfolio-fcosta.html</b>. Ele mostra todos os imóveis com fotos, botão de WhatsApp e botão Compartilhar (cada imóvel tem seu próprio link). Para atualizar: 1) adicione fotos em Imóveis › Fotos; 2) toque em <b>Exportar para o portfólio</b>; 3) suba o portfolio-dados.json no GitHub, na mesma pasta; 4) pronto, o link já mostra as fotos novas.")+
+ d("Portfólio compartilhável","O portfólio é uma página para mandar ao cliente: <b>portfolio-fcosta.html</b>. Ele mostra todos os imóveis com fotos, botão de WhatsApp e botão Compartilhar (cada imóvel tem seu próprio link). Ele lê o seu site em tempo real: imóvel novo, preço ou foto alterados no painel aparecem sozinhos, sem exportar nada. Basta subir o portfolio-fcosta.html no GitHub uma única vez.")+
  d("Dicas","<ul><li>Não poste o mesmo imóvel em todos os grupos no mesmo dia. Alterne os estilos de texto.</li><li>Grupos com muitas postagens e nenhum cliente: use a aba Limpeza.</li><li>Poste com foto: chama muito mais atenção que só o link.</li><li>Fale comigo (WhatsApp (11) 99350-9109) se aparecer algum erro.</li></ul>")}
 function limpaFT(){FT={};NONE={};RT=null;try{localStorage.removeItem("pubft3");localStorage.removeItem("pubft")}catch(e){}}
 function atuF(b){limpaFT();b.textContent="Buscando…";carregar();setTimeout(function(){b.textContent="Atualizar fotos"},2500)}
@@ -346,5 +347,72 @@ function teste(){
  }).then(function(){DIAG=out.join("\n");o.innerHTML='<pre style="white-space:pre-wrap;word-break:break-word;margin:0">'+esc(DIAG)+'</pre><button class="b s" style="margin-top:8px" onclick="copy(DIAG,function(){alert(\'Diagnóstico copiado\')})">Copiar diagnóstico</button>'})}
 function bk(){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(S)],{type:"application/json"}));a.download="publicador-backup.json";a.click()}
 function rs(el){var f=el.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{S=Object.assign(S,JSON.parse(r.result));save();alert("Cópia restaurada.");go(1)}catch(e){alert("Arquivo inválido.")}};r.readAsText(f)}
-go(0);
+/* ===== SINCRONIA COM O SITE (compartilhado Publicador + Portfólio) ===== */
+function nk(s){return String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,"")}
+function flat(o){var f={};Object.keys(o).forEach(function(k){var v=o[k];if(v==null)return;if(typeof v!="object")f[nk(k)]=v});
+ Object.keys(o).forEach(function(k){var v=o[k];if(v&&typeof v=="object"&&!Array.isArray(v))Object.keys(v).forEach(function(j){var w=v[j],n=nk(j);if(w!=null&&typeof w!="object"&&!(n in f))f[n]=w})});return f}
+function fx(f,names,bad){for(var n=0;n<names.length;n++){var v=f[names[n]];if(v!==undefined&&v!==null&&String(v).trim()!==""&&!(bad&&bad.test(nk(v))))return v}return ""}
+function fmtP(v){if(v===""||v==null)return"";if(typeof v=="number")return v>0?v.toLocaleString("pt-BR"):"";
+ var s=String(v).replace(/R\$|\s/g,"").replace(/,00$/,"");
+ if(/^\d+$/.test(s))return +s>0?(+s).toLocaleString("pt-BR"):"";
+ if(/^\d{1,3}(\.\d{3})+(,\d{1,2})?$/.test(s))return s;
+ if(/^\d+\.\d{1,2}$/.test(s))return (+s).toLocaleString("pt-BR");return""}
+function resumo(s){s=String(s||"").replace(/\s+/g," ").trim();if(s.length<=170)return s.replace(/[.\s]+$/,"");var c=s.slice(0,170),i=Math.max(c.lastIndexOf(". "),c.lastIndexOf(" "));return c.slice(0,i>80?i:170).replace(/[.,;:\s]+$/,"")}
+function mapR(k,o){
+ var f=flat(o),ph=[];imgs(o,ph);ph=uniq(ph);
+ var p=fmtP(fx(f,["preco","precovenda","valor","valorvenda","valordevenda","price"]));
+ var t=fx(f,["tipoimovel","tipo","type","categoria","titulo","nome"],/^(venda|aluguel|locacao|alugar|comprar|lancamento)$/),b=fx(f,["bairro","neighborhood"]);
+ if(!p&&!(t&&b))return null;
+ var c="";["codigo","cod","ref","referencia","code","id"].some(function(n){var v=String(f[n]||"").toUpperCase().trim();if(/^FC[A-Z]\d{1,4}$/.test(v)){c=v;return true}});
+ if(!c)Object.keys(f).some(function(n){var v=String(f[n]).toUpperCase().trim();if(/^FC[A-Z]\d{1,4}$/.test(v)){c=v;return true}});
+ var st=nk(fx(f,["status","situacao","disponibilidade"])),off=/vendid|alugad|inativ|indispon|oculto|rascunh|arquivad|removid/.test(st);
+ ["ativo","ativa","publicado","visivel","exibir"].forEach(function(n){if(n in f&&(f[n]===false||/^(false|nao|0)$/i.test(String(f[n]))))off=true});
+ ["vendido","alugado"].forEach(function(n){if(n in f&&(f[n]===true||/^(true|sim|1)$/i.test(String(f[n]))))off=true});
+ var q=parseInt(fx(f,["quartos","dormitorios","dorms","bedrooms"]))||0,v=parseInt(fx(f,["vagas","garagem","garagens"]))||0,a=String(fx(f,["area","areautil","areaterreno","areatotal","metragem","m2"]));
+ if(/^\d+([.,]\d+)?$/.test(a))a=a+"m²";
+ var fin=nk(fx(f,["finalidade","negocio","operacao","transacao"]));
+ var r={k:k,c:c,t:String(t||"Imóvel"),b:String(b||""),ci:String(fx(f,["cidade","city","municipio"])||b),p:p,d:resumo(fx(f,["descricaocurta","descricao","desc","description","detalhes","texto"]))||(String(t||"Imóvel")+" em "+String(b||fx(f,["cidade","city"]))),ph:ph,off:off,al:/alug|locac/.test(fin)||/^FCA/.test(c)};
+ if(q)r.q=q;if(v)r.v=v;if(a)r.a=a;return r}
+function mesclar(d,seed){
+ var bk={},live=[],out=[],ph={},used={},mx=0;
+ Object.keys(d||{}).forEach(function(k){var o=d[k];if(o&&typeof o=="object"&&!Array.isArray(o)){var m=mapR(k,o);if(m){bk[k]=m;live.push(m)}}});
+ var sd=0;
+ seed.forEach(function(l){var m=bk[l.k],x=Object.assign({},l);used[l.c]=1;var n=+l.c.slice(3);if(n>mx)mx=n;
+  if(!m)x.gone=1;else{sd++;if(m.p)x.p=m.p;if(m.off)x.gone=1;if(m.ph.length)ph[l.c]=m.ph}out.push(x)});
+ var sk={};seed.forEach(function(l){sk[l.k]=1});
+ live.filter(function(m){return !sk[m.k]}).sort(function(a,b){return a.k<b.k?-1:a.k>b.k?1:0}).forEach(function(m){
+  if(m.off)return;var c=m.c;
+  if(!c||used[c]){do{mx++;c="FCV"+("00"+mx).slice(-3)}while(used[c])}
+  used[c]=1;m.c=c;ph[c]=m.ph;delete m.ph;delete m.off;out.push(m)});
+ return{im:out,ph:ph,seeded:sd}}
+function descobre(){var r=S.root||(S.hits||[])[0];if(r)return Promise.resolve(r);var n=0;
+ function t(){if(n>=IM0.length)return Promise.resolve(null);return achar(IM0[n++]).then(function(h){return h?h.r:t()})}return t()}
+
+function act(){return IM.filter(function(i){return !i.gone})}
+var SYN=0,SYT=0;
+function stSy(m){if($("sy"))$("sy").textContent=m;if($("sy2"))$("sy2").textContent=m}
+function cacheLoad(){try{var c=JSON.parse(localStorage.getItem("pubim")||"null");if(c&&c.im&&c.im.length){IM=c.im;stSy("Dados salvos de "+new Date(c.t).toLocaleString("pt-BR"))}}catch(e){}}
+function sync(f){
+ if(SYN||(!f&&Date.now()-SYT<90000))return;SYN=1;stSy("Sincronizando com o site…");
+ descobre().then(function(r){if(!r)throw 0;return jget(r)}).then(function(d){var x=mesclar(d,IM0);if(!x.seeded)throw 0;return x}).then(function(x){
+  IM=x.im;Object.keys(x.ph).forEach(function(c){if(x.ph[c].length){FT[c]=x.ph[c];delete NONE[c]}});gravaFT();SYT=Date.now();SYN=0;
+  try{localStorage.setItem("pubim",JSON.stringify({im:IM,t:SYT}))}catch(e){}
+  var nv=IM.length-IM0.length,gn=IM.filter(function(i){return i.gone}).length;
+  stSy("✓ Site sincronizado às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+" · "+act().length+" imóveis"+(nv>0?" · "+nv+" novo(s)":"")+(gn?" · "+gn+" fora do ar":""));
+  ["fi2","si","pi"].forEach(function(id){var e=$(id);if(e){var v=e.value,au=id=="fi2"?'<option value="auto">🔄 Rodízio automático (melhor imóvel p/ cada grupo)</option>':"";e.innerHTML=au+opts(v);e.value=v}});
+  atualizar();carregarOld()
+ }).catch(function(){SYN=0;stSy("Sem conexão com o site — usando os últimos dados salvos")})}
+function carregar(){sync()}
+/* rodízio automático */
+function proxI(g){
+ var L=act().filter(function(i){return (fts(i.c)||[]).length});if(!L.length)L=act();
+ var u={};Object.keys(Q.pm).forEach(function(k){var c=Q.pm[k];u[c]=(u[c]||0)+1});
+ var sc=L.map(function(i){var lt=0,tt=0;S.log.forEach(function(x){if(x.i==i.c){tt++;if(x.g==g.id&&x.t>lt)lt=x.t}});return{c:i.c,lt:lt,u:u[i.c]||0,tt:tt,r:Math.random()}});
+ sc.sort(function(a,b){return a.lt-b.lt||a.u-b.u||a.tt-b.tt||a.r-b.r});return sc[0].c}
+function qi(g){return Q.i=="auto"?(Q.pm[g.id]=Q.pm[g.id]||proxI(g)):Q.i}
+function qv(g,i){return Q.v==3?S.log.filter(function(x){return x.g==g.id&&x.i==i.c}).length%3:Q.v}
+function qt(g){var i=find(qi(g));return tx(g,i,qv(g,i))}
+document.addEventListener("visibilitychange",function(){if(!document.hidden)sync()});
+setInterval(function(){sync()},300000);
+cacheLoad();go(0);sync();
 </script></body></html>
