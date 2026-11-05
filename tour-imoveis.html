@@ -4940,6 +4940,15 @@ window.FCLogo = (function(){
 #pubBox p{margin:0 0 12px;font-size:13px;color:#51657a;}
 #pubBox label{display:block;font-size:12px;font-weight:700;margin:12px 0 4px;color:#33475b;}
 #pubBox select,#pubBox input[type=file]{width:100%;padding:10px;border:1px solid #b8c6d6;border-radius:10px;font-size:14px;background:#fff;color:#1b2a3a;box-sizing:border-box;}
+#pubBox input[type=text]{width:100%;padding:10px;border:1px solid #b8c6d6;border-radius:10px;font-size:14px;background:#fff;color:#1b2a3a;box-sizing:border-box;}
+.pubNovoRow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px;}
+#pubNovoBtn{padding:10px 14px;border-radius:10px;border:1.5px solid #E0AA47;background:#fff7e3;color:#6b4a0a;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;}
+#pubPainel{font-size:13px;font-weight:700;color:#1b5fa8;text-decoration:underline;}
+#pubNovo{display:none;margin-top:8px;border:1px dashed #b8c6d6;border-radius:12px;padding:4px 12px 12px;background:#f9fbfd;}
+#pubNovo.on{display:block;}
+#pubNCriar{width:100%;margin-top:14px;padding:12px;border-radius:10px;border:none;background:#2e9e5b;color:#fff;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
+#pubNCriar:disabled{opacity:.5;}
+.pubNaviso{margin-top:8px;font-size:12px;color:#51657a;line-height:1.4;}
 #pubBox .row{display:flex;gap:8px;margin-top:16px;}
 #pubBox .row button{flex:1;padding:12px;border-radius:10px;border:none;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
 #pubGo{background:#E0AA47;color:#1B1304;}
@@ -4963,6 +4972,17 @@ window.FCLogo = (function(){
   <p>O vídeo vai para a aba Tour do imóvel no seu index.</p>
   <label>Imóvel</label>
   <select id="pubImovel"><option value="">Carregando imóveis…</option></select>
+  <div class="pubNovoRow"><button type="button" id="pubNovoBtn">➕ Criar novo imóvel</button><a id="pubPainel" href="index.html" target="_blank" rel="noopener">Abrir painel (cadastro completo)</a></div>
+  <div id="pubNovo">
+    <label>Título</label><input type="text" id="pubNTitulo" maxlength="80" placeholder="Ex.: Apto 3 dorms · 92 m² · Vila Mariana">
+    <label>Bairro</label><input type="text" id="pubNBairro" maxlength="60">
+    <label>Cidade</label><input type="text" id="pubNCidade" maxlength="60" value="São Paulo">
+    <label>Preço</label><input type="text" id="pubNPreco" maxlength="30" placeholder="Ex.: 850.000">
+    <label>Tipo</label>
+    <select id="pubNStatus"><option value="venda">Venda</option><option value="aluguel">Aluguel</option><option value="lancamento">Lançamento</option></select>
+    <button type="button" id="pubNCriar">Criar e selecionar</button>
+    <div class="pubNaviso">Cria o imóvel só com esses dados. Depois complete fotos, descrição e o resto pelo painel.</div>
+  </div>
   <div id="pubRef"></div>
   <button type="button" id="pubDel">🗑 Apagar tour deste imóvel do site</button>
   <label>Vídeo</label>
@@ -5111,6 +5131,46 @@ window.FCLogo = (function(){
       else msg('Erro: '+m,'err');
     }finally{ busy=false; $('pubGo').disabled=false; }
   }
+  /* ---- criar novo imóvel direto daqui ---- */
+  function abreNovo(){
+    var n=$('pubNovo'); n.classList.toggle('on');
+    if(n.classList.contains('on')){
+      if(!$('pubNTitulo').value) $('pubNTitulo').value=(document.getElementById('propertyInfo')||{}).value||'';
+      if(!$('pubNPreco').value) $('pubNPreco').value=(document.getElementById('propertyPrice')||{}).value||'';
+      $('pubNTitulo').focus();
+    }
+  }
+  async function criaNovo(){
+    if(busy) return;
+    if(!init()){ msg('Firebase não carregou.','err'); return; }
+    var titulo=$('pubNTitulo').value.trim();
+    if(!titulo){ msg('Digite o título do novo imóvel.','err'); return; }
+    busy=true; $('pubNCriar').disabled=true; $('pubGo').disabled=true; msg('Criando imóvel…','');
+    try{
+      var status=$('pubNStatus').value, pre=SG[status]||'FCV', max=0;
+      Object.keys(imoveis).forEach(function(k){
+        var i=imoveis[k]||{}; if((SG[i.status]||'FCV')===pre){ var n=parseInt(i.numeroCodigo,10); if(n>max) max=n; }
+      });
+      var agora=new Date().toISOString();
+      var dados={titulo:titulo,bairro:$('pubNBairro').value.trim(),cidade:$('pubNCidade').value.trim(),preco:$('pubNPreco').value.trim(),status:status,numeroCodigo:max+1,publicado:true,criado:agora,atualizado:agora};
+      var ref=db.ref('fcosta_imoveis').push();
+      await ref.set(dados);
+      imoveis[ref.key]=dados;
+      $('pubNovo').classList.remove('on');
+      await new Promise(function(r){ carregaImoveis(true); setTimeout(r,0); });
+      var sel=$('pubImovel'),tent=0;
+      (function pega(){
+        if(sel.querySelector('option[value="'+ref.key+'"]')){ sel.value=ref.key; mostraRef(); }
+        else if(tent++<20) setTimeout(pega,250);
+      })();
+      msg('✅ Imóvel criado ('+cod(Object.assign({id:ref.key},dados))+'). Agora escolha o vídeo e toque em Compartilhar. Complete o cadastro depois pelo painel.','ok');
+    }catch(e){
+      var m=(e&&(e.code||e.message))||String(e);
+      msg(/permission|denied/i.test(m)?'O Firebase bloqueou a criação (regras do Realtime Database). Crie o imóvel pelo painel. Detalhe: '+m:'Erro: '+m,'err');
+    }finally{ busy=false; $('pubNCriar').disabled=false; $('pubGo').disabled=false; }
+  }
+  $('pubNovoBtn').addEventListener('click',abreNovo);
+  $('pubNCriar').addEventListener('click',criaNovo);
   $('pubBtn').addEventListener('click',abrir);
   $('pubX').addEventListener('click',fechar);
   $('pubGo').addEventListener('click',publicar);
@@ -5264,6 +5324,43 @@ body{padding-bottom:0;}
 /* modos Passeio/Cinema: o título do passo some, então o painel desce para não ficar sob o número */
 .step-body>.ia-box{margin-top:44px!important;}
 .step-body{display:flow-root;}
+
+/* ===== CORREÇÃO: tema escuro (seções cinzas e barras deslizantes visíveis) ===== */
+.ed-sec{background:#101010!important;border-color:#2e2e2e!important;}
+.ed-sec[open]>summary{background:rgba(255,212,0,.10)!important;border-bottom-color:#2e2e2e!important;}
+.ed-t{color:#fff!important;}
+.ed-s{color:#bdbdbd!important;}
+.ed-sec>summary::after{color:#FFD400!important;}
+.ed-body details.ed-how{border-color:#3a3a3a!important;}
+.ed-body details.ed-how summary{color:#FFD400!important;}
+.ed-body details.ed-how p{color:#d0d0d0;}
+.time-box{background:#141414!important;border-color:rgba(255,212,0,.35)!important;}
+.time-box label.sl,.time-head strong{color:#fff!important;}
+.time-scale{color:#c8c8c8!important;}
+.adp-more{background:#101010!important;}
+.thumb,.adp-item{background:#141414!important;}
+.thumb .actions button{background:#1c1c1c!important;color:#fff!important;border-color:#3a3a3a!important;}
+.thumb .actions button.del{color:#ff8a7a!important;border-color:rgba(255,107,94,.55)!important;}
+.seg button{background:#1c1c1c!important;color:#FFD400!important;}
+.seg button.on{background:#FFD400!important;color:#000!important;}
+.card{background:#0b0b0b!important;}
+
+/* barras deslizantes: trilha cinza clara bem visível + bolinha amarela */
+.wrap input[type=range],input[type=range]{
+  -webkit-appearance:none!important;appearance:none!important;
+  height:10px!important;border-radius:10px!important;outline:none;cursor:pointer;
+  background:#8a8a8a!important;border:1px solid #bdbdbd;margin:16px 0 10px!important;padding:0!important;
+}
+input[type=range]::-webkit-slider-runnable-track{height:10px;border-radius:10px;background:transparent;}
+input[type=range]::-moz-range-track{height:10px;border-radius:10px;background:#8a8a8a;}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:28px;height:28px;margin-top:-10px;border-radius:50%;
+  background:#FFD400!important;border:4px solid #fff!important;box-shadow:0 2px 8px rgba(0,0,0,.7);cursor:pointer;
+}
+input[type=range]::-moz-range-thumb{
+  width:20px;height:20px;border-radius:50%;background:#FFD400!important;border:4px solid #fff!important;box-shadow:0 2px 8px rgba(0,0,0,.7);cursor:pointer;
+}
+input[type=range]:focus-visible{box-shadow:0 0 0 3px rgba(255,212,0,.5);}
 </style>
 <script id="fc-layout-v2-js">
 (function(){
