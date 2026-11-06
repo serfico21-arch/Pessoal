@@ -277,6 +277,7 @@ body.arrastando{user-select:none;-webkit-user-select:none;cursor:grabbing}
   <button type="button" data-go="inicio" style="--c:var(--brand)"><i class="ti ti-layout-dashboard"></i>Início</button>
   <button type="button" data-go="controle" style="--c:var(--brand)"><i class="ti ti-adjustments-horizontal"></i>Controle</button>
   <button type="button" data-go="corretor" style="--c:var(--em)"><i class="ti ti-building-skyscraper"></i>Corretor</button>
+  <button type="button" data-go="contratos" style="--c:var(--vi)"><i class="ti ti-file-certificate"></i>Contratos</button>
   <button type="button" data-go="pessoal" style="--c:var(--sk)"><i class="ti ti-user"></i>Pessoal</button>
   <button type="button" data-go="pastor" style="--c:var(--vi)"><i class="ti ti-book-2"></i>Pastor</button>
   <span id="dock-extra" style="display:contents"></span>
@@ -372,7 +373,7 @@ body.arrastando{user-select:none;-webkit-user-select:none;cursor:grabbing}
       <div class="campo"><label for="nv-href">Link ou nome do arquivo</label><input type="text" id="nv-href" placeholder="https://... ou minha-ferramenta.html" autocapitalize="none" autocomplete="off" /></div>
       <div class="linha-dois">
         <div class="campo"><label for="nv-modo">Onde fica</label>
-          <select id="nv-modo"><option value="corretor">Corretor</option><option value="pessoal">Pessoal</option><option value="pastor">Pastor</option></select></div>
+          <select id="nv-modo"><option value="corretor">Corretor</option><option value="contratos">Contratos</option><option value="pessoal">Pessoal</option><option value="pastor">Pastor</option></select></div>
         <div class="campo"><label for="nv-grupo">Grupo</label><select id="nv-grupo"></select></div>
       </div>
       <div class="campo" id="nv-grupo-novo-wrap" hidden><label for="nv-grupo-novo">Nome do novo grupo</label><input type="text" id="nv-grupo-novo" placeholder="Ex.: Obras e reformas" maxlength="40" /></div>
@@ -463,6 +464,13 @@ var GRUPOS = {
     { id: "ia",         n: "IA & Estudo",             i: "ti-brain",          c: "--ro", s: "Ferramentas de IA e guias" },
     { id: "utilidades", n: "Utilidades & Sites",      i: "ti-tool",           c: "--cy", s: "Assinatura, senhas e sites" }
   ],
+  contratos: [
+    { id: "residencial", n: "Locação Residencial", i: "ti-home",           c: "--em", s: "Casas, apartamentos e kitnets" },
+    { id: "comercial",   n: "Locação Comercial",   i: "ti-building-store", c: "--or", s: "Lojas, salas e galpões" },
+    { id: "temporada",   n: "Locação por Temporada", i: "ti-beach",        c: "--cy", s: "Até 90 dias" },
+    { id: "garagem",     n: "Vaga de Garagem",     i: "ti-parking",        c: "--sk", s: "Vagas autônomas e estacionamento" },
+    { id: "apoio",       n: "Apoio à Locação",     i: "ti-receipt",        c: "--vi", s: "Recibos, aluguéis e modelos CRECI" }
+  ],
   pessoal: [
     { id: "agenda", n: "Agenda & Notas",    i: "ti-calendar-event", c: "--sk", s: "Compromissos e anotações" },
     { id: "carro",  n: "Carro — Fiat Idea", i: "ti-car",            c: "--or", s: "Manutenção e manual do proprietário" }
@@ -536,6 +544,16 @@ var FERRAMENTAS = [
   {m:"corretor", g:"utilidades", t:"Gerador de Senhas", s:"Criar e guardar senhas", i:"ti-key", h:"gerador-senhas.html", k:"gerador de senhas cofre criar guardar"},
   {m:"corretor", g:"utilidades", t:"Assinatura Profissional", s:"Pronta para copiar", i:"ti-signature", h:"assinatura-profissional.html", k:"assinatura profissional e-mail carimbo"},
   {m:"corretor", g:"utilidades", t:"Site FCosta", s:"fcostacorretor.com", i:"ti-world", h:"https://fcostacorretor.com", k:"site fcosta fcostacorretor.com"},
+
+  {m:"contratos", g:"residencial", t:"Contrato Residencial", s:"Editável, com base legal em cada cláusula", i:"ti-home", h:"contrato-locacao-residencial.html", k:"contrato locação residencial aluguel casa apartamento lei do inquilinato 8245 editável imprimir pdf", d:1, b:"Novo"},
+  {m:"contratos", g:"comercial", t:"Contrato Comercial", s:"Ponto comercial e renovatória, com base legal", i:"ti-building-store", h:"contrato-locacao-comercial.html", k:"contrato locação comercial loja sala galpão ponto comercial renovatória lei do inquilinato editável", d:1, b:"Novo"},
+  {m:"contratos", g:"temporada", t:"Contrato de Temporada", s:"Até 90 dias, com inventário de móveis", i:"ti-beach", h:"contrato-locacao-temporada.html", k:"contrato locação temporada aluguel curta duração férias hóspede inventário móveis 90 dias editável", d:1, b:"Novo"},
+  {m:"contratos", g:"garagem", t:"Contrato de Garagem", s:"Vaga autônoma e estacionamento (Código Civil)", i:"ti-parking", h:"contrato-locacao-garagem.html", k:"contrato locação vaga garagem estacionamento box autônoma código civil editável", d:1, b:"Novo"},
+  {m:"contratos", g:"apoio", t:"Contratos CRECI (editor único)", s:"Locação, venda, autorizações e acordo particular", i:"ti-file-certificate", h:"contratos-editor.html", k:"contratos creci editor único locação venda administração autorização acordo particular"},
+  {m:"contratos", g:"apoio", t:"Recibos e Inquilinos", s:"Inquilinos cadastrados e histórico de recibos", i:"ti-receipt", h:"recibos.html", k:"recibos recibo inquilinos locatários aluguel mora multa juros imprimir pdf whatsapp"},
+  {m:"contratos", g:"apoio", t:"Controle de Aluguéis", s:"Locatários, recibos e vencimentos", i:"ti-key", h:"alugueis.html", k:"aluguéis locatários recibos contratos vencimento controle de aluguéis"},
+  {m:"contratos", g:"apoio", t:"Valor por Extenso", s:"Para escrever o aluguel e a multa nos contratos", i:"ti-cash", h:"valor-por-extenso.html", k:"valor por extenso contratos aluguel"},
+  {m:"contratos", g:"apoio", t:"Modelos CRECI-SP", s:"Modelos de documentos — área restrita", i:"ti-file-text", h:"https://www.crecisp.gov.br/arearestrita/modelodedocumentos", k:"contratos modelo creci sp modelo de documentos"},
 
   {m:"pessoal", g:"agenda", t:"Agenda Pessoal", s:"Compromissos e eventos", i:"ti-calendar", h:"agenda_p.html", k:"agenda pessoal compromissos eventos", d:1, b:"Principal"},
   {m:"pessoal", g:"agenda", t:"Bloco de Notas", s:"Anotações rápidas", i:"ti-notes", h:"notas.html", k:"bloco de notas anotações rápidas"},
@@ -659,10 +677,11 @@ var FERRAMENTAS = [
   }
 
   /* ── NAVEGAÇÃO: INÍCIO + 3 ÁREAS ─────────── */
-  var ORDEM_BASE = ['corretor', 'pessoal', 'pastor'];
+  var ORDEM_BASE = ['corretor', 'contratos', 'pessoal', 'pastor'];
   var ORDEM = ORDEM_BASE.slice();
   var MUNDOS = {
     corretor: { n: 'Corretor', i: 'ti-building-skyscraper', c: '--em', d: 'Imóveis, clientes, contratos e cálculos' },
+    contratos: { n: 'Contratos', i: 'ti-file-certificate', c: '--vi', d: 'Contratos de locação por finalidade' },
     pessoal: { n: 'Pessoal', i: 'ti-user', c: '--sk', d: 'Agenda, notas e o carro' },
     pastor: { n: 'Pastor', i: 'ti-book-2', c: '--vi', d: 'Igreja, pregação e estudos' }
   };
@@ -798,10 +817,11 @@ var FERRAMENTAS = [
       return href ? '<a class="item-link" style="--c:var(--or)" href="' + href + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' + inner + '</a>'
         : '<button type="button" class="item-link" style="--c:var(--or);width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer" ' + attr + '>' + inner + '</button>';
     };
-    html += '<h2 class="sec">Áreas do painel · ' + (8 + ORDEM.length - ORDEM_BASE.length) + '</h2><div class="lista">' +
+    html += '<h2 class="sec">Áreas do painel · ' + (9 + ORDEM.length - ORDEM_BASE.length) + '</h2><div class="lista">' +
       rap('ti-layout-dashboard', esc(nomeDock('inicio')), 'Saudação, atalhos rápidos e novidades', 'data-go="inicio"') +
       rap('ti-adjustments-horizontal', esc(nomeDock('controle')), 'Botões, links, sites, leads, pendências e backup', 'data-go="controle"') +
       rap('ti-building-skyscraper', esc(MUNDOS.corretor.n), MUNDOS.corretor.d, 'data-go="corretor"') +
+      rap('ti-file-certificate', esc(MUNDOS.contratos.n), MUNDOS.contratos.d, 'data-go="contratos"') +
       rap('ti-user', esc(MUNDOS.pessoal.n), MUNDOS.pessoal.d, 'data-go="pessoal"') +
       rap('ti-book-2', esc(MUNDOS.pastor.n), MUNDOS.pastor.d, 'data-go="pastor"') +
       ORDEM.slice(ORDEM_BASE.length).map(function (m) { return rap(esc(MUNDOS[m].i), esc(MUNDOS[m].n), esc(MUNDOS[m].d), 'data-go="' + esc(m) + '"'); }).join('') +
