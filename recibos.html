@@ -158,29 +158,32 @@ function pdfBx(){mkPdf(dlB)}
 function pdfWpp(){mkPdf(function(b,n){var f=new File([b],n,{type:"application/pdf"}),r=cur.r,i=cur.i,t="Olá, "+i.nome+"! Segue o recibo nº "+r.num+" do aluguel de "+mref(r.ref)+": "+R(r.total)+". Obrigado! — FCOSTA Corretor";if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],text:t}).catch(function(e){if(e&&e.name!="AbortError"){dlB(b,n);alert("PDF baixado. Toque em “💬 Conversa” e anexe o PDF no WhatsApp.")}});return}dlB(b,n);alert("PDF baixado. Toque em “💬 Conversa” para abrir o WhatsApp do locatário e anexe o PDF (clipe → Documento).")})}
 /* ===== contrato em PDF -> cadastro + recibos até hoje ===== */
 function ctrTx(f){return new Promise(function(ok,no){ldPdf(function(){var fr=new FileReader();fr.onload=async function(){try{var doc=await pdfjsLib.getDocument({data:new Uint8Array(fr.result)}).promise,tx="";for(var p=1;p<=Math.min(doc.numPages,30);p++){var c=await(await doc.getPage(p)).getTextContent();tx+=c.items.map(function(z){return z.str}).join(" ")+" "}ok(tx.replace(/\s+/g," "))}catch(e){no(e)}};fr.readAsArrayBuffer(f)})})}
-function ctrPar(tx){var o={},x,i0=0;
+function dAny(t){var x=t.match(/(\d{1,2})\s*[\/.\-]\s*(\d{1,2})\s*[\/.\-]\s*(\d{4})/);if(x)return ymd(x[3],x[2],x[1]);x=t.match(/(\d{1,2})\s*[ºo°]?\s+de\s+([a-zçãA-Z]+)\s+de\s+(\d{4})/i);if(x){var j=MES.indexOf(x[2].toLowerCase());if(j>-1)return ymd(x[3],j+1,x[1])}return""}
+function ctrPar(tx){var o={},x,i0=0,av=[];
 if((x=tx.match(/(?:LOCAT[ÁA]RI[OA]|Locat[áa]ri[oa])\s*(?:\(A\))?\s*:?\s*([A-Za-zÀ-ú' .]{5,80}?)\s*,/))){o.nome=x[1].trim();i0=x.index}
-if((x=tx.slice(i0,i0+500).match(/(\d{3}\.?\d{3}\.?\d{3}-?\d{2})/)))o.cpf=x[1];
-if((x=tx.match(/(?:tel|cel|whats\w*|fone)[^\d]{0,15}(\(?\d{2}\)?\s?9?\d{4}-?\d{4})/i)))o.tel=x[1];
+else{var re=/\d{3}\.?\d{3}\.?\d{3}-?\d{2}/g,m,c=[];while((m=re.exec(tx)))c.push(m);if(c.length>1){var b=tx.slice(Math.max(0,c[1].index-160),c[1].index),n=b.match(/[A-ZÀ-Ú]{2,}(?: (?:[A-ZÀ-Ú]{2,}|D[AEO]S?)){1,6}/g);if(n){o.nome=n[n.length-1].trim();i0=c[1].index-100}}}
+if((x=tx.slice(Math.max(0,i0),i0+500).match(/(\d{3}\.?\d{3}\.?\d{3}-?\d{2})/)))o.cpf=x[1];
+if((x=tx.match(/(?:tel|cel|whats\w*|fone)[^\d(]{0,15}(\(?\d{2}\)?\s?9?\d{4}-?\d{4})/i)))o.tel=x[1];
 if((x=tx.match(/im[óo]vel\s+(?:situado|localizado)\s+(?:à|a|na|no|em)\s+(.{10,160}?)(?:\.\s|,\s*(?:CEP|neste|nesta|doravante)|;)/i)))o.end=x[1].trim();
-if((x=tx.match(/contrato\s*(?:n[ºo°.]*)\s*:?\s*([\w\/.\-]*\d[\w\/.\-]*)/i)))o.contrato=x[1];
-if((x=tx.match(/aluguel[^R]{0,100}R\$\s*([\d.]+,\d{2})/i)))o.aluguel=nu(x[1]);
-if((x=tx.match(/condom[íi]nio[^R]{0,80}R\$\s*([\d.]+,\d{2})/i)))o.cond=nu(x[1]);
-if((x=tx.match(/dia\s+(\d{1,2})\s*(?:\([^)]*\)\s*)?(?:de cada|de todo|do m[eê]s|subsequente)/i)))o.venc=+x[1];
+if((x=tx.match(/(?:loca[çc][ãa]o|contrato)\s*(?:n[ºo°.]+)\s*:?\s*(\d[\w\/.\-]*)/i)))o.contrato=x[1].replace(/[.\-\/]+$/,"");
+[/aluguel[^$]{0,100}R\$\s*([\d.]+,\d{2})/i,/(?:valor mensal|mensalidade|loca[çc][ãa]o mensal)[^$]{0,80}R\$\s*([\d.]+,\d{2})/i,/R\$\s*([\d.]+,\d{2})\s*(?:\([^)]*\)\s*)?(?:mensais|por m[eê]s|ao m[eê]s)/i].some(function(r){return(x=tx.match(r))&&(o.aluguel=nu(x[1]))});
+if((x=tx.match(/condom[íi]nio[^$]{0,80}R\$\s*([\d.]+,\d{2})/i)))o.cond=nu(x[1]);
+if((x=tx.match(/dia\s+(\d{1,2})\s*(?:\([^)]*\)\s*)?(?:de cada|de todo|do m[eê]s|subsequente|de cada m[eê]s)/i))||(x=tx.match(/(?:vencimento|pagar[áa]|pagamento)[^0-9]{0,60}dia\s+(\d{1,2})/i)))o.venc=+x[1];
 if(/m[eê]s\s+(?:subsequente|seguinte|vencido)/i.test(tx))o.mp=1;
-o.ini=dIni(tx);if((x=tx.match(/prazo\s+de\s+(\d{1,3})\s*(?:\([^)]*\)\s*)?meses/i)))o.pcs=+x[1];
-if(o.ini&&o.pcs){var y=+o.ini.slice(0,4),m=+o.ini.slice(5,7),d=+o.ini.slice(8,10),e=new Date(y,m-1+o.pcs,d-1);o.fim=e.getFullYear()+"-"+("0"+(e.getMonth()+1)).slice(-2)+"-"+("0"+e.getDate()).slice(-2)}
+o.ini=dIni(tx);o.avisos=[];
+if(!o.ini&&(x=tx.match(/(?:prazo|vig[êe]ncia|dura[çc][ãa]o)[^]{0,250}/i)))o.ini=dAny(x[0]);
+if(!o.ini){var ds=tx.match(/\d{1,2}\s*[ºo°]?\s+de\s+[a-zçãA-Z]+\s+de\s+\d{4}|\d{1,2}\s*\/\s*\d{1,2}\s*\/\s*\d{4}/g);if(ds){o.ini=dAny(ds[ds.length-1]);if(o.ini)o.avisos.push("início = data de assinatura do contrato")}}
+if((x=tx.match(/prazo\s+de\s+(\d{1,3})\s*(?:\([^)]*\)\s*)?(meses|anos?)/i)))o.pcs=/ano/i.test(x[2])?+x[1]*12:+x[1];
+if(o.ini&&o.pcs){var y=+o.ini.slice(0,4),mo=+o.ini.slice(5,7),d=+o.ini.slice(8,10),e=new Date(y,mo-1+o.pcs,d-1);o.fim=e.getFullYear()+"-"+("0"+(e.getMonth()+1)).slice(-2)+"-"+("0"+e.getDate()).slice(-2)}
 return o}
 function gerAuto(i,fa){var tt=(+i.aluguel||0)+(+i.cond||0)+(+i.iptu||0);fa.forEach(function(m){D.rec.push({id:"r"+Date.now()+"_"+Math.random().toString(36).slice(2,7),inq:i.id,num:numFor(i,m),ref:m,data:due(i,m),aluguel:+i.aluguel||0,cond:+i.cond||0,iptu:+i.iptu||0,agua:0,outros:0,multa:0,juros:0,corr:0,total:+tt.toFixed(2),forma:"",obs:"Gerado a partir do contrato."})})}
 async function ctrImp(el){var fs=[].slice.call(el.files).filter(function(f){return/pdf$/i.test(f.name)||f.type=="application/pdf"}),lg=[];el.value="";if(!fs.length)return;
-for(var k=0;k<fs.length;k++){var f=fs[k];try{var o=ctrPar(await ctrTx(f));if(!o.nome){lg.push(f.name+": não achei o locatário (PDF escaneado/imagem?). Cadastre manualmente.");continue}
-var tmp={id:"?",ini:o.ini,mp:o.mp,fim:o.fim,pcs:o.pcs,venc:o.venc},ex=D.inq.filter(function(z){return nm(z.nome)==nm(o.nome)})[0],n=0;
-if(!o.ini||!o.aluguel){if(!confirm(f.name+"\nLocatário: "+o.nome+"\nNão consegui ler "+(!o.ini?"o início da locação ":"")+(!o.aluguel?"o valor do aluguel":"")+".\nCadastrar só com os dados lidos? (depois complete e use “Gerar os meses sem recibo”)"))continue}
-var i=tf(o.nome,o.cpf,{});["cpf","tel","end","contrato","aluguel","cond","venc","ini","fim","pcs","mp"].forEach(function(q){if(o[q]!==undefined&&o[q]!=="")i[q]=o[q]});if(i.mt===undefined)i.mt=10;if(i.jr===undefined)i.jr=1;delete i.iniEst;
-var fa=(i.ini&&+i.aluguel)?falt(i):[];
-if(!confirm("Contrato: "+f.name+"\n\nLocatário: "+i.nome+"\nCPF: "+(i.cpf||"—")+"\nImóvel: "+(i.end||"—")+"\nAluguel: "+R(i.aluguel)+" · Cond.: "+R(i.cond)+"\nInício: "+(i.ini?i.ini.split("-").reverse().join("/"):"—")+" · Vence dia "+(i.venc||"—")+"\n\nGerar o cadastro e "+fa.length+" recibo(s) até hoje, arquivados como RECEBIDOS?")){if(!ex&&!D.rec.some(function(r){return r.inq==i.id})&&!i.tel){}continue}
-gerAuto(i,fa);sel=i.id;pdb.transaction("p","readwrite").objectStore("p").put({key:i.id+"|"+f.name,inq:i.id,name:f.name,size:f.size,t:Date.now(),blob:f});
-lg.push(f.name+": "+i.nome+" — "+fa.length+" recibo(s) gerado(s)")}catch(e){lg.push(f.name+": erro ao ler o PDF")}}
-sv();lst();if(sel)ab(sel);if(lg.length)alert(lg.join("\n"))}
-var n0=leg();lst();if(D.inq.length)ab(D.inq[0].id);else $("mn").innerHTML='<div class="cd"><h3>Comece por aqui</h3><p>Nenhum inquilino encontrado neste navegador. Cadastre o primeiro em <b>+ Novo inquilino</b>, ou traga os que já existem em <b>⬆ Importar JSON</b> (lista de inquilinos, backup do Painel ou backup dos recibos).</p></div>';
+for(var k=0;k<fs.length;k++){var f=fs[k];try{var o=ctrPar(await ctrTx(f));if(!o.nome){lg.push("❌ "+f.name+": não achei o locatário (PDF escaneado/imagem?)");continue}
+var i=tf(o.nome,o.cpf,{});["cpf","tel","end","contrato","aluguel","cond","venc","ini","fim","pcs","mp"].forEach(function(q){if(o[q]!==undefined&&o[q]!=="")i[q]=o[q]});if(i.mt===undefined)i.mt=10;if(i.jr===undefined)i.jr=1;i.auto=1;delete i.iniEst;
+var fa=(i.ini&&+i.aluguel)?falt(i):[];gerAuto(i,fa);sel=i.id;pdb.transaction("p","readwrite").objectStore("p").put({key:i.id+"|"+f.name,inq:i.id,name:f.name,size:f.size,t:Date.now(),blob:f});
+var av=o.avisos.slice();if(!i.ini)av.push("início não encontrado");if(!+i.aluguel)av.push("aluguel não encontrado");if(!i.venc)av.push("vencimento não encontrado");
+lg.push((av.length&&(!i.ini||!+i.aluguel)?"⚠ ":"✅ ")+i.nome+": início "+(i.ini?i.ini.split("-").reverse().join("/"):"?")+", aluguel "+R(i.aluguel)+", vence dia "+(i.venc||"?")+" — "+fa.length+" recibo(s) gerado(s)"+(av.length?"\n    ("+av.join("; ")+")":""))}catch(e){lg.push("❌ "+f.name+": erro ao ler o PDF")}}
+sv();lst();if(sel)ab(sel);if(lg.length)alert("Contratos processados:\n\n"+lg.join("\n"))}
+function auto(){var ch=0;D.inq.forEach(function(i){if(i.auto&&i.ini&&+i.aluguel){var fa=falt(i);if(fa.length){gerAuto(i,fa);ch=1}}});if(ch)sv()}
+var n0=leg();auto();lst();if(D.inq.length)ab(D.inq[0].id);else $("mn").innerHTML='<div class="cd"><h3>Comece por aqui</h3><p>Nenhum inquilino encontrado neste navegador. Cadastre o primeiro em <b>+ Novo inquilino</b>, ou traga os que já existem em <b>⬆ Importar JSON</b> (lista de inquilinos, backup do Painel ou backup dos recibos).</p></div>';
 </script></body></html>
