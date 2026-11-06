@@ -33,7 +33,7 @@ a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:po
 .relogio{font-size:13px;color:var(--texto-muted);margin-right:8px;text-transform:capitalize;white-space:nowrap}.relogio strong{color:var(--tx);font-size:16px}
 .icon-btn{width:42px;height:42px;display:grid;place-items:center;flex:none;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:19px}
 .icon-btn:hover{border-color:var(--ac)}
-.dock{position:fixed;z-index:40;left:0;top:0;bottom:0;width:var(--dock);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;border-right:1px solid var(--line);background:color-mix(in srgb,var(--bg) 70%,transparent);backdrop-filter:blur(14px)}
+.dock{position:fixed;z-index:40;left:0;top:0;bottom:0;width:var(--dock);display:flex;flex-direction:column;align-items:center;justify-content:safe center;overflow-y:auto;scrollbar-width:none;gap:8px;border-right:1px solid var(--line);background:color-mix(in srgb,var(--bg) 70%,transparent);backdrop-filter:blur(14px)}
 .dock button,.dock a{width:70px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0;border-radius:16px;border:1px solid transparent;background:none;font-size:11.5px;font-weight:600;color:var(--texto-muted);transition:.18s}
 .dock button i,.dock a i{font-size:24px}
 .dock button:hover,.dock a:hover{color:var(--tx);background:color-mix(in srgb,var(--c) 10%,transparent)}
@@ -50,7 +50,7 @@ kbd{font:600 12px 'DM Sans';padding:2px 8px;border-radius:7px;border:1px solid v
 .acoes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 6px}
 .acao{display:flex;align-items:center;gap:10px;min-height:52px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:14px}
 .acao i{color:var(--c);font-size:20px}.acao:hover{border-color:var(--c)}
-.sec{font:700 12px 'Sora',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--texto-muted);margin:30px 0 12px}
+.sec{font:800 16px 'Sora',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--tx);margin:34px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
 .mundos{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .mundo{position:relative;overflow:hidden;text-align:left;display:flex;flex-direction:column;gap:4px;min-height:170px;padding:20px;border-radius:24px;border:1px solid color-mix(in srgb,var(--c) 35%,var(--line));background:linear-gradient(150deg,color-mix(in srgb,var(--c) 13%,var(--card)),var(--card) 70%);transition:.2s}
 .mundo:hover{transform:translateY(-3px);box-shadow:0 16px 32px -22px var(--c)}
@@ -98,7 +98,7 @@ body{padding-left:0;padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .dock button,.dock a{flex:1;width:auto;padding:8px 0;font-size:11px}
 main{padding:4px 16px 24px}.acoes{grid-template-columns:repeat(2,1fr)}
 .mundos{grid-template-columns:1fr}.mundo{min-height:118px}.mundo .big{font-size:90px}
-.lista{grid-template-columns:1fr}.busca-pill kbd{display:none}footer{margin:0 16px}
+.lista{grid-template-columns:minmax(0,1fr)}.item{min-width:0}.busca-pill kbd{display:none}footer{margin:0 16px}
 .mhead .btn-sec span{display:none}.mhead .btn-sec{min-height:44px;padding:0 12px}
 dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px 0 0;animation:subir .25s}
 .sh,.dlg-corpo{padding-bottom:calc(22px + env(safe-area-inset-bottom))}
@@ -154,7 +154,17 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
 #visor-externo{display:inline-flex;align-items:center;gap:6px;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--brand);color:var(--brand);text-decoration:none;font:700 14px 'Sora','DM Sans',sans-serif}
 #visor-frame{flex:1;width:100%;border:0;background:#fff}
 @media(max-width:480px){#visor-titulo{display:none}#visor-voltar{flex:1;justify-content:center}#visor-externo span{display:none}#visor-externo{padding:0 14px}}
-.gtit{display:flex;align-items:center;gap:8px;margin:20px 0 10px;font:700 14px 'Sora',sans-serif;color:var(--c)}.gtit em{font-style:normal;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--c) 16%,transparent)}
+.gtit{display:flex;align-items:center;gap:12px;margin:36px 0 14px;padding:12px 16px;font:800 25px/1.15 'Sora',sans-serif;letter-spacing:-.01em;color:var(--c);border-left:6px solid var(--c);border-radius:8px 18px 18px 8px;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 16%,transparent),transparent 85%)}.gtit>i{font-size:32px;flex:none}.gtit em{margin-left:auto;flex:none;font-style:normal;font-size:14px;font-weight:800;padding:3px 12px;border-radius:99px;background:color-mix(in srgb,var(--c) 20%,transparent)}
+/* Sumário A–Z */
+.sum-letras{position:sticky;top:var(--hh);z-index:20;display:flex;flex-wrap:wrap;gap:6px;padding:10px 0;margin:6px 0 0;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(10px)}
+.sum-letras button{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--tx);font:800 16px 'Sora',sans-serif;cursor:pointer}
+.sum-letras button:not([disabled]):hover{border-color:var(--or);color:var(--or)}
+.sum-letras button[disabled]{opacity:.25;cursor:default}
+.sum-L{display:flex;align-items:center;gap:14px;margin:30px 0 12px;font:800 38px/1 'Sora',sans-serif;color:var(--or);scroll-margin-top:calc(var(--hh) + 110px)}
+.sum-L em{font:700 13px 'DM Sans',sans-serif;font-style:normal;color:var(--texto-muted);padding:3px 10px;border-radius:99px;background:var(--card);border:1px solid var(--line)}
+.mundo.larga{grid-column:1/-1;min-height:120px}
+@media(max-width:600px){.sum-letras{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;background:var(--bg)}.sum-letras button{flex:none;width:36px;height:36px;font-size:14px}.sum-L{font-size:32px}.mundo.larga{min-height:110px}}
+@media(max-width:600px){.gtit{font-size:21px;padding:10px 12px;gap:10px;margin:30px 0 12px}.gtit>i{font-size:27px}}
 .ed-tabs{display:flex;flex-wrap:wrap;gap:8px}.ed-tabs .pill{flex:1 1 auto;justify-content:center;cursor:pointer;padding:10px 12px}
 .ed-pane{display:flex;flex-direction:column;gap:15px}.ed-pane[hidden]{display:none}
 #dlg-novo .dlg-corpo,#dlg-novo .ed-pane,#dlg-novo .lista,#dlg-novo .item{min-width:0;max-width:100%}#dlg-novo .lista{grid-template-columns:minmax(0,1fr)}#dlg-novo .item-link .tx{min-width:0;flex:1}#dlg-novo .item-link .tag{flex:none}
@@ -263,16 +273,6 @@ body.arrastando{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .cat-ed select{flex:0 1 130px;min-width:0;font-size:12.5px;padding:7px 6px}
 .cat-ed.off{opacity:.55}
 #ab-status{min-height:18px;font-size:12.5px;font-weight:600;color:var(--brand)}
-
-/* títulos de categoria maiores */
-.gtit{font:800 23px/1.2 'Sora',sans-serif;letter-spacing:-.01em;margin:36px 0 14px;padding-bottom:10px;border-bottom:2px solid color-mix(in srgb,var(--c) 40%,transparent)}
-.gtit i{font-size:28px}.gtit em{font-size:13px;padding:3px 10px}
-.sec{font-size:15px;margin:36px 0 14px}
-/* sumário A–Z */
-.sum-az{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
-.sum-az button{min-width:42px;min-height:42px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--tx);font:800 15px 'Sora',sans-serif;cursor:pointer}
-.sum-az button:hover{border-color:var(--brand);color:var(--brand)}
-.sum-l{font:800 36px/1 'Sora',sans-serif;color:var(--brand);margin:30px 0 12px;scroll-margin-top:84px}
 </style>
 </head>
 <body data-view="inicio">
@@ -292,8 +292,8 @@ body.arrastando{user-select:none;-webkit-user-select:none;cursor:grabbing}
   <button type="button" data-go="pastor" style="--c:var(--vi)"><i class="ti ti-book-2"></i>Pastor</button>
   <span id="dock-extra" style="display:contents"></span>
   <a href="construtoras.html" style="--c:var(--ro)"><i class="ti ti-building-factory-2"></i>Construtoras</a>
-  <button type="button" data-go="sumario" style="--c:var(--cy)"><i class="ti ti-list-letters"></i>Sumário</button>
   <button type="button" data-go="favoritos" style="--c:var(--am)"><i class="ti ti-star"></i>Favoritos</button>
+  <button type="button" data-go="sumario" style="--c:var(--or)"><i class="ti ti-list-letters"></i>Sumário</button>
   <button type="button" data-go="mapa" style="--c:var(--or)"><i class="ti ti-sitemap"></i>Mapa</button>
 </nav>
 <main id="vista"></main>
@@ -465,17 +465,17 @@ body.arrastando{user-select:none;-webkit-user-select:none;cursor:grabbing}
    ═══════════════════════════════════════════════════════════════════ */
 var GRUPOS = {
   corretor: [
-    { id: "anuncios",    n: "Divulgação dos Imóveis",         i: "ti-speakerphone",     c: "--am", s: "Banners, textos, fotos, vídeos e publicação nas redes" },
-    { id: "avaliacao",   n: "Avaliação e Vistoria",           i: "ti-home-search",      c: "--cy", s: "Preço, áreas e vistoria do imóvel" },
-    { id: "consulta",    n: "Consultas Oficiais do Imóvel",   i: "ti-file-search",      c: "--or", s: "Matrícula, mapa, IPTU e cartórios" },
-    { id: "calculos",    n: "Cálculos, Impostos e Financiamento", i: "ti-calculator",   c: "--em", s: "Comissão, ITBI, financiamento e valores" },
-    { id: "clientes",    n: "Clientes, Leads e Visitas",      i: "ti-users",            c: "--sk", s: "Leads, agenda de visitas e contato com o cliente" },
-    { id: "locatarios",  n: "Locatários e Análise de Cadastro", i: "ti-user-search",    c: "--vi", s: "Consulta do locatário, análise de cadastro, recibos e aluguéis" },
-    { id: "contratos",   n: "Contratos e Autorizações",       i: "ti-file-certificate", c: "--ro", s: "Autorizações de venda e modelos de contrato" },
-    { id: "documentos",  n: "Documentação e Arquivos",        i: "ti-folders",          c: "--cy", s: "Checklists, CDHU, orçamento de documentos e meus arquivos" },
-    { id: "financas",    n: "Finanças e Metas",               i: "ti-report-money",     c: "--or", s: "Controle financeiro e metas do mês" },
-    { id: "ia",          n: "Inteligência Artificial e Estudo", i: "ti-brain",          c: "--ro", s: "Ferramentas de IA, academy e guias" },
-    { id: "utilidades",  n: "Utilidades e Meus Sites",        i: "ti-tool",             c: "--sk", s: "Assinatura, senhas e sites" }
+    { id: "anuncios",   n: "Divulgação e Anúncios",            i: "ti-speakerphone",     c: "--am", s: "Banners, textos, fotos, vídeos e redes sociais" },
+    { id: "clientes",   n: "Clientes e Visitas",               i: "ti-users",            c: "--sk", s: "Leads, visitas e contato com o cliente" },
+    { id: "consulta",   n: "Consultas: Imóvel e Locatário",    i: "ti-file-search",      c: "--or", s: "Matrícula, mapa, IPTU, cartórios e análise do locatário" },
+    { id: "avaliacao",  n: "Avaliação e Vistoria",             i: "ti-home-search",      c: "--cy", s: "Preço, áreas e vistoria do imóvel" },
+    { id: "calculos",   n: "Cálculos e Simulações",            i: "ti-calculator",       c: "--em", s: "Comissão, impostos, financiamento e valores" },
+    { id: "contratos",  n: "Contratos e Autorizações",         i: "ti-file-certificate", c: "--vi", s: "Autorizações de venda e editor de contratos" },
+    { id: "documentos", n: "Documentação e Arquivos",          i: "ti-folders",          c: "--cy", s: "Checklists, orçamento de documentos, CDHU e meus arquivos" },
+    { id: "locacao",    n: "Locação: Recibos e Aluguéis",      i: "ti-key",              c: "--em", s: "Inquilinos, recibos, vencimentos e controle de aluguéis" },
+    { id: "financas",   n: "Finanças e Metas",                 i: "ti-report-money",     c: "--or", s: "Controle financeiro e metas do mês" },
+    { id: "ia",         n: "Inteligência Artificial e Estudo", i: "ti-brain",            c: "--ro", s: "Ferramentas de IA e guias" },
+    { id: "utilidades", n: "Utilidades e Sites",               i: "ti-tool",             c: "--sk", s: "Assinatura, senhas e sites" }
   ],
   contratos: [
     { id: "residencial", n: "Locação Residencial", i: "ti-home",           c: "--em", s: "Casas, apartamentos e kitnets" },
@@ -534,19 +534,19 @@ var FERRAMENTAS = [
   {m:"corretor", g:"clientes", t:"Central FCosta", s:"Controle de clientes e imóveis", i:"ti-layout-dashboard", h:"central-fcosta.html", k:"central fcosta controle clientes imóveis planilha"},
   {m:"corretor", g:"documentos", t:"Documentação Imobiliária", s:"Checklist de documentos por transação", i:"ti-file-certificate", h:"documentacao-imoveis.html", k:"documentação imobiliária acesso pessoal"},
   {m:"corretor", g:"documentos", t:"Orçamento de Documentos", s:"Calcule a taxa de levantamento documental", i:"ti-calculator", h:"orcamento-documentos.html", k:"orçamento levantamento documental matrícula certidões taxa"},
-  {m:"corretor", g:"locatarios", t:"Análise de Cadastro", s:"Ficha, documentos, consultas e nota de aprovação do locatário", i:"ti-clipboard-check", h:"analise-cadastro.html", k:"análise de cadastro locatário inquilino ficha renda 3x fiador garantia documentos aprovação serasa protesto cpf", d:1, b:"Novo"},
   {m:"corretor", g:"contratos", t:"Autorização de Venda — Exclusiva", s:"Vendedor preenche e assina pelo celular", i:"ti-file-certificate", h:"autorizacao-exclusiva.html", k:"autorização de venda com exclusividade contrato intermediação assinatura"},
   {m:"corretor", g:"contratos", t:"Autorização de Venda — Sem exclusividade", s:"Vendedor preenche e assina pelo celular", i:"ti-file-text", h:"autorizacao-sem-exclusividade.html", k:"autorização de venda sem exclusividade contrato intermediação assinatura"},
   {m:"corretor", g:"contratos", t:"Contratos Modelo CRECI-SP", s:"Modelos de documentos — área restrita", i:"ti-file-text", h:"https://www.crecisp.gov.br/arearestrita/modelodedocumentos", k:"contratos modelo creci sp modelo de documentos"},
   {m:"corretor", g:"contratos", t:"Contratos CRECI", s:"Editor único: locação, venda, autorizações e acordo particular", i:"ti-file-certificate", h:"contratos-editor.html", k:"contratos creci editor contrato locação compra e venda administração autorização exclusividade comodato temporada built to suit acordo particular sem corretagem word pdf", d:1, b:"Novo"},
   {m:"corretor", g:"documentos", t:"Meus Arquivos", s:"Suba pastas e arquivos do PC e deixe guardados aqui", i:"ti-folder", h:"meus-arquivos.html", k:"meus arquivos pastas documentos upload subir pasta pc guardar arquivo", b:"Novo"},
-  {m:"corretor", g:"locatarios", t:"Recibos e Inquilinos", s:"Inquilinos cadastrados e histórico de recibos", i:"ti-receipt", h:"recibos.html", k:"recibos recibo inquilinos locatários aluguel mora multa juros imprimir pdf whatsapp", b:"Novo"},
-  {m:"corretor", g:"locatarios", t:"Consulta de Locatário", s:"Consulta e análise do locatário antes de fechar a locação", i:"ti-user-search", h:"consulta_locatario.html", k:"consulta locatário inquilino análise ficha cadastro fiador locação aluguel", b:"Novo"},
+  {m:"corretor", g:"locacao", t:"Recibos e Inquilinos", s:"Inquilinos cadastrados e histórico de recibos", i:"ti-receipt", h:"recibos.html", k:"recibos recibo inquilinos locatários aluguel mora multa juros imprimir pdf whatsapp", b:"Novo"},
+  {m:"corretor", g:"consulta", t:"Consulta de Locatário", s:"Triagem completa do candidato: certidões e parecer final", i:"ti-user-search", h:"consulta_locatario.html", k:"consulta locatário inquilino análise ficha cadastro fiador locação aluguel", b:"Novo"},
+  {m:"corretor", g:"consulta", t:"Análise de Cadastro", s:"Ficha do cliente, documentos, consultas e resultado com pontuação", i:"ti-clipboard-check", h:"analise-cadastro.html", k:"análise de cadastro ficha cliente locatário inquilino renda 3x fiador garantia documentos serasa spc protesto cpf pontuação aprovar", d:1, b:"Novo"},
   {m:"corretor", g:"documentos", t:"CDHU — Painel do Corretor", s:"Requisitos, checklist, passo a passo e contrato de transferência", i:"ti-building-community", h:"cdhu-corretor.html", k:"cdhu painel corretor requisitos checklist gaveta transferência contrato procuração cpvc quitação dívidas apartamento casa habitacional", b:"Novo"},
   {m:"corretor", g:"documentos", t:"Meus Documentos (Google Docs)", s:"Abrir meus arquivos no Google Docs", i:"ti-brand-google-drive", h:"https://docs.google.com/document/u/1/", k:"google docs meus documentos contratos drive"},
   {m:"corretor", g:"financas", t:"Controle Financeiro", s:"Receitas e despesas", i:"ti-report-money", h:"controle_fin.html", k:"controle financeiro receitas despesas", d:1, b:"Principal"},
   {m:"corretor", g:"financas", t:"Metas do Mês", s:"Leads, visitas e fechamentos", i:"ti-target-arrow", h:"metas.html", k:"metas do mês leads visitas fechamentos"},
-  {m:"corretor", g:"locatarios", t:"Controle de Aluguéis", s:"Locatários, recibos e vencimentos", i:"ti-key", h:"alugueis.html", k:"aluguéis locatários recibos contratos vencimento controle de aluguéis"},
+  {m:"corretor", g:"locacao", t:"Controle de Aluguéis", s:"Locatários, recibos e vencimentos", i:"ti-key", h:"alugueis.html", k:"aluguéis locatários recibos contratos vencimento controle de aluguéis"},
   {m:"corretor", g:"ia", t:"Modelo I.A", s:"Crie a modelo: imagem, voz, vídeo e avatar falando", i:"ti-sparkles", h:"modelo-i-a.html", k:"modelo ia i.a inteligência artificial personagem imagem voz vídeo avatar book prompt fcosta chatgpt gemini flow", d:1, b:"Novo"},
   {m:"corretor", g:"ia", t:"Academy", s:"Dicas para corretores", i:"ti-school", h:"academy-corretor.html", k:"academy dicas corretores"},
   {m:"corretor", g:"ia", t:"Tijolo.IA", s:"Automação no Facebook: grupos, posts e vitrine de imóveis (site externo)", i:"ti-bricks", h:"https://tijoloia.com.br/corretor/sergio-fernandes-da-costa", k:"tijolo ia tijoloia automação facebook grupos posts prospecção leads corretor", b:"Novo"},
@@ -564,7 +564,6 @@ var FERRAMENTAS = [
   {m:"contratos", g:"comercial", t:"Contrato Comercial", s:"Ponto comercial e renovatória, com base legal", i:"ti-building-store", h:"contrato-locacao-comercial.html", k:"contrato locação comercial loja sala galpão ponto comercial renovatória lei do inquilinato editável", d:1, b:"Novo"},
   {m:"contratos", g:"temporada", t:"Contrato de Temporada", s:"Até 90 dias, com inventário de móveis", i:"ti-beach", h:"contrato-locacao-temporada.html", k:"contrato locação temporada aluguel curta duração férias hóspede inventário móveis 90 dias editável", d:1, b:"Novo"},
   {m:"contratos", g:"garagem", t:"Contrato de Garagem", s:"Vaga autônoma e estacionamento (Código Civil)", i:"ti-parking", h:"contrato-locacao-garagem.html", k:"contrato locação vaga garagem estacionamento box autônoma código civil editável", d:1, b:"Novo"},
-  {m:"contratos", g:"apoio", t:"Análise de Cadastro", s:"Ficha, documentos, consultas e nota de aprovação do locatário", i:"ti-clipboard-check", h:"analise-cadastro.html", k:"análise de cadastro locatário inquilino ficha renda 3x fiador garantia documentos aprovação serasa protesto cpf", b:"Novo"},
   {m:"contratos", g:"apoio", t:"Contratos CRECI (editor único)", s:"Locação, venda, autorizações e acordo particular", i:"ti-file-certificate", h:"contratos-editor.html", k:"contratos creci editor único locação venda administração autorização acordo particular"},
   {m:"contratos", g:"apoio", t:"Recibos e Inquilinos", s:"Inquilinos cadastrados e histórico de recibos", i:"ti-receipt", h:"recibos.html", k:"recibos recibo inquilinos locatários aluguel mora multa juros imprimir pdf whatsapp"},
   {m:"contratos", g:"apoio", t:"Controle de Aluguéis", s:"Locatários, recibos e vencimentos", i:"ti-key", h:"alugueis.html", k:"aluguéis locatários recibos contratos vencimento controle de aluguéis"},
@@ -704,7 +703,7 @@ var FERRAMENTAS = [
   /* abas principais criadas por você (guardadas no navegador) */
   function lerMundosExtra() { var l = lerStorage('painel_mundos', []); return Array.isArray(l) ? l.filter(function (x) { return x && x.id && x.n; }) : []; }
   var MUNDOS_ORIG = {}; Object.keys(MUNDOS).forEach(function (k) { MUNDOS_ORIG[k] = { n: MUNDOS[k].n, i: MUNDOS[k].i }; });
-  var DOCK_ABAS = [['inicio', 'Início'], ['controle', 'Controle'], ['sumario', 'Sumário'], ['favoritos', 'Favoritos'], ['mapa', 'Mapa'], ['construtoras', 'Construtoras']];
+  var DOCK_ABAS = [['inicio', 'Início'], ['controle', 'Controle'], ['favoritos', 'Favoritos'], ['sumario', 'Sumário'], ['mapa', 'Mapa'], ['construtoras', 'Construtoras']];
   /* nomes que você mudou: {"m:corretor":"…", "g:origem|id":"…", "d:mapa":"…"} */
   function lerNomes() { var o = lerStorage('painel_nomes', {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
   function nomeDock(k) { var p = DOCK_ABAS.filter(function (x) { return x[0] === k; })[0]; return lerNomes()['d:' + k] || (p ? p[1] : k); }
@@ -734,7 +733,7 @@ var FERRAMENTAS = [
   carregarMundos(); montarDock();
   var vistaEl = document.getElementById('vista');
   var modo = lerStorage('painel_vista', 'inicio');
-  if (modo !== 'inicio' && modo !== 'favoritos' && modo !== 'mapa' && modo !== 'controle' && modo !== 'sumario' && !MUNDOS[modo]) modo = 'inicio';
+  if (modo !== 'inicio' && modo !== 'favoritos' && modo !== 'mapa' && modo !== 'sumario' && modo !== 'controle' && !MUNDOS[modo]) modo = 'inicio';
   var aba = null;
   var favs = lerStorage('painel_favs', null);
   if (!Array.isArray(favs)) {
@@ -780,9 +779,9 @@ var FERRAMENTAS = [
       return '<button type="button" class="mundo" style="--c:var(--am)" data-go="favoritos"><i class="ti ti-star-filled big"></i>' +
         '<span class="mn">' + esc(nomeDock('favoritos')) + '</span><span class="md">Suas ferramentas fixadas com ★</span>' +
         '<span class="mq">' + n + (n === 1 ? ' favorito' : ' favoritos') + ' <i class="ti ti-arrow-right"></i></span></button>';
-    })() + '<button type="button" class="mundo" style="--c:var(--cy)" data-go="sumario"><i class="ti ti-list-letters big"></i>' +
-      '<span class="mn">' + esc(nomeDock('sumario')) + '</span><span class="md">Todos os arquivos em ordem alfabética, de A a Z</span>' +
-      '<span class="mq">Abrir <i class="ti ti-arrow-right"></i></span></button><button type="button" class="mundo" style="--c:var(--or)" data-go="mapa"><i class="ti ti-sitemap big"></i>' +
+    })() + '<button type="button" class="mundo larga" style="--c:var(--or)" data-go="sumario"><i class="ti ti-list-letters big"></i>' +
+      '<span class="mn">' + esc(nomeDock('sumario')) + ' A–Z</span><span class="md">Todas as ferramentas em ordem alfabética: toque para abrir</span>' +
+      '<span class="mq">' + itens.length + ' ferramentas <i class="ti ti-arrow-right"></i></span></button><button type="button" class="mundo" style="--c:var(--or)" data-go="mapa"><i class="ti ti-sitemap big"></i>' +
       '<span class="mn">' + esc(nomeDock('mapa')) + '</span><span class="md">Todos os botões numa página só</span>' +
       '<span class="mq">' + itens.length + ' botões <i class="ti ti-arrow-right"></i></span></button>' +
       '<a class="mundo" style="--c:var(--or)" href="repositorios-github.html"><i class="ti ti-brand-github big"></i>' +
@@ -811,6 +810,39 @@ var FERRAMENTAS = [
     ORDEM.forEach(function (m) {
       var l = fv.filter(function (i) { return i.m === m; }).sort(porNome);
       if (l.length) html += '<h2 class="sec">' + esc(MUNDOS[m].n) + '</h2><div class="lista">' + l.map(item).join('') + '</div>';
+    });
+    return html;
+  }
+
+  function htmlSumario() {
+    var itens = ligar(todosItens()), mapa = {}, lista = [];
+    itens.forEach(function (it) {
+      if (it._g && it._g.oculta) return;
+      var k = norm(it.t) + '|' + it.h, lugar = MUNDOS[it.m].n + ' › ' + it._g.n;
+      if (mapa[k]) { if (mapa[k]._lugares.indexOf(lugar) < 0) mapa[k]._lugares.push(lugar); return; }
+      var c = {}; for (var p in it) c[p] = it[p];
+      c._lugares = [lugar]; mapa[k] = c; lista.push(c);
+    });
+    lista.sort(function (a, b) { return a.t.localeCompare(b.t, 'pt-BR', { sensitivity: 'base' }); });
+    var porLetra = {}, letras = [];
+    lista.forEach(function (it) {
+      var L = norm(it.t).charAt(0).toUpperCase(); if (!/[A-Z]/.test(L)) L = '#';
+      if (!porLetra[L]) { porLetra[L] = []; letras.push(L); }
+      porLetra[L].push(it);
+    });
+    var todas = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''); if (porLetra['#']) todas.push('#');
+    var html = '<section class="mhead" style="--c:var(--or)"><span class="mh-ic"><i class="ti ti-list-letters"></i></span><div><h1>' + esc(nomeDock('sumario')) + ' A–Z</h1><p>' +
+      lista.length + ' ferramentas em ordem alfabética. Toque no nome para abrir.</p></div></section>' +
+      '<button type="button" class="busca-pill" data-open="busca" style="margin-bottom:6px"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button>' +
+      '<div class="sum-letras" role="navigation" aria-label="Ir para a letra">' + todas.map(function (L) {
+        return '<button type="button" data-sumletra="' + (L === '#' ? 'num' : L) + '"' + (porLetra[L] ? '' : ' disabled') + '>' + L + '</button>';
+      }).join('') + '</div>';
+    letras.sort(function (a, b) { return a === '#' ? 1 : b === '#' ? -1 : a < b ? -1 : 1; }).forEach(function (L) {
+      html += '<h2 class="sum-L" id="sum-' + (L === '#' ? 'num' : L) + '">' + L + '<em>' + porLetra[L].length + '</em></h2><div class="lista">' + porLetra[L].map(function (it) {
+        var c = {}; for (var p in it) c[p] = it[p];
+        c.s = it._lugares.join(' · ') + (it.s ? ' — ' + it.s : '');
+        return item(c);
+      }).join('') + '</div>';
     });
     return html;
   }
@@ -844,8 +876,8 @@ var FERRAMENTAS = [
       rap('ti-book-2', esc(MUNDOS.pastor.n), MUNDOS.pastor.d, 'data-go="pastor"') +
       ORDEM.slice(ORDEM_BASE.length).map(function (m) { return rap(esc(MUNDOS[m].i), esc(MUNDOS[m].n), esc(MUNDOS[m].d), 'data-go="' + esc(m) + '"'); }).join('') +
       rap('ti-building-factory-2', esc(nomeDock('construtoras')), 'Tabelões, empreendimentos, e-books e simulador por construtora', '', 'construtoras.html') +
-      rap('ti-list-letters', esc(nomeDock('sumario')), 'Todos os arquivos em ordem alfabética (A–Z)', 'data-go="sumario"') +
       rap('ti-star-filled', esc(nomeDock('favoritos')), 'Suas ferramentas fixadas com ★', 'data-go="favoritos"') +
+      rap('ti-list-letters', esc(nomeDock('sumario')) + ' A–Z', 'Todas as ferramentas em ordem alfabética', 'data-go="sumario"') +
       rap('ti-sitemap', esc(nomeDock('mapa')), 'Esta página, com todos os botões', 'data-go="mapa"') + '</div>';
     html += '<h2 class="sec">Recursos e atalhos do painel · 12</h2><div class="lista">' +
       rap('ti-search', 'Buscar', 'Procurar em todas as ferramentas (atalho: tecla /)', 'data-open="busca"') +
@@ -860,31 +892,6 @@ var FERRAMENTAS = [
       rap('ti-mailbox', 'Consulta de CEP', 'Correios', '', 'https://buscacepinter.correios.com.br/app/endereco/index.php') +
       rap('ti-certificate', 'CRECI-SP', 'Site oficial', '', 'https://www.crecisp.gov.br') +
       rap('ti-brand-github', 'Repositórios no GitHub', 'Pessoal, IBBC, Apostilas CRECI, ADM e PTAM', '', 'repositorios-github.html') + '</div>';
-    return html;
-  }
-
-  function htmlSumario() {
-    var itens = ligar(todosItens()), vistos = {}, lista = [];
-    itens.slice().sort(function (a, b) { return norm(a.t).localeCompare(norm(b.t), 'pt-BR'); }).forEach(function (i) {
-      var k = norm(i.t) + '|' + i.h; if (vistos[k]) return; vistos[k] = 1; lista.push(i);
-    });
-    var grupos = {}, letras = [];
-    lista.forEach(function (i) {
-      var l = norm(i.t).charAt(0).toUpperCase(); if (!/[A-Z]/.test(l)) l = '#';
-      if (!grupos[l]) { grupos[l] = []; letras.push(l); }
-      grupos[l].push(i);
-    });
-    var html = '<section class="mhead" style="--c:var(--cy)"><span class="mh-ic"><i class="ti ti-list-letters"></i></span><div><h1>' + esc(nomeDock('sumario')) + '</h1><p>' +
-      lista.length + ' arquivos e links em ordem alfabética. Toque para abrir.</p></div></section>' +
-      '<button type="button" class="busca-pill" data-open="busca" style="margin-bottom:6px"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button>' +
-      '<div class="sum-az" aria-label="Ir para a letra">' + letras.map(function (l) { return '<button type="button" data-letra="' + l + '">' + l + '</button>'; }).join('') + '</div>';
-    letras.forEach(function (l) {
-      html += '<h2 class="sum-l" id="sum-' + (l === '#' ? 'num' : l) + '">' + l + '</h2><div class="lista">' + grupos[l].map(function (i) {
-        var c = {}; for (var k in i) c[k] = i[k];
-        c.s = MUNDOS[i.m].n + ' · ' + i._g.n + (/^https?:/i.test(i.h) ? '' : ' · ' + i.h);
-        return item(c);
-      }).join('') + '</div>';
-    });
     return html;
   }
 
@@ -999,6 +1006,8 @@ var FERRAMENTAS = [
   });
 
   document.addEventListener('click', function (e) {
+    var sl = e.target.closest('[data-sumletra]');
+    if (sl) { var alvo = document.getElementById('sum-' + sl.getAttribute('data-sumletra')); if (alvo) alvo.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
     var t = e.target.closest('[data-go],[data-goaba],[data-open],[data-aba],[data-fav],[data-fechar]');
     if (t) {
       if (t.hasAttribute('data-goaba')) { var ga = t.getAttribute('data-goaba').split('|'); aplicarModo(ga[0]); irParaAba(ga[1]); }
@@ -1031,11 +1040,6 @@ var FERRAMENTAS = [
   function alternarTema() { tema = tema === 'dark' ? 'light' : 'dark'; gravarStorage('painel_tema2', tema); aplicarTema(); }
   document.getElementById('btn-tema').addEventListener('click', alternarTema);
   document.addEventListener('click', function (e) { if (e.target.closest('#map-tema')) alternarTema(); });
-  document.addEventListener('click', function (e) {
-    var b = e.target.closest('[data-letra]'); if (!b) return;
-    var l = b.getAttribute('data-letra'), el = document.getElementById('sum-' + (l === '#' ? 'num' : l));
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
   aplicarTema();
 
   /* ── NOVO BOTÃO (guardado neste navegador) ─ */
@@ -1149,7 +1153,7 @@ var FERRAMENTAS = [
     abrirAba(tab || 'site');
     nvTitulo.value = ''; nvSub.value = ''; nvHref.value = ''; nvGrupoNovo.value = '';
     iconeEscolhido = 'ti-star';
-    nvModo.value = (modo === 'inicio' || modo === 'favoritos' || modo === 'mapa') ? 'corretor' : modo;
+    nvModo.value = (modo === 'inicio' || modo === 'favoritos' || modo === 'mapa' || modo === 'sumario') ? 'corretor' : modo;
     preencherGrupos(aba);
     desenharIcones(); listarMeus();
     if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open', '');
