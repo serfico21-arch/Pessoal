@@ -263,6 +263,16 @@ body.arrastando{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .cat-ed select{flex:0 1 130px;min-width:0;font-size:12.5px;padding:7px 6px}
 .cat-ed.off{opacity:.55}
 #ab-status{min-height:18px;font-size:12.5px;font-weight:600;color:var(--brand)}
+
+/* títulos de categoria maiores */
+.gtit{font:800 23px/1.2 'Sora',sans-serif;letter-spacing:-.01em;margin:36px 0 14px;padding-bottom:10px;border-bottom:2px solid color-mix(in srgb,var(--c) 40%,transparent)}
+.gtit i{font-size:28px}.gtit em{font-size:13px;padding:3px 10px}
+.sec{font-size:15px;margin:36px 0 14px}
+/* sumário A–Z */
+.sum-az{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+.sum-az button{min-width:42px;min-height:42px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--tx);font:800 15px 'Sora',sans-serif;cursor:pointer}
+.sum-az button:hover{border-color:var(--brand);color:var(--brand)}
+.sum-l{font:800 36px/1 'Sora',sans-serif;color:var(--brand);margin:30px 0 12px;scroll-margin-top:84px}
 </style>
 </head>
 <body data-view="inicio">
@@ -282,6 +292,7 @@ body.arrastando{user-select:none;-webkit-user-select:none;cursor:grabbing}
   <button type="button" data-go="pastor" style="--c:var(--vi)"><i class="ti ti-book-2"></i>Pastor</button>
   <span id="dock-extra" style="display:contents"></span>
   <a href="construtoras.html" style="--c:var(--ro)"><i class="ti ti-building-factory-2"></i>Construtoras</a>
+  <button type="button" data-go="sumario" style="--c:var(--cy)"><i class="ti ti-list-letters"></i>Sumário</button>
   <button type="button" data-go="favoritos" style="--c:var(--am)"><i class="ti ti-star"></i>Favoritos</button>
   <button type="button" data-go="mapa" style="--c:var(--or)"><i class="ti ti-sitemap"></i>Mapa</button>
 </nav>
@@ -454,15 +465,17 @@ body.arrastando{user-select:none;-webkit-user-select:none;cursor:grabbing}
    ═══════════════════════════════════════════════════════════════════ */
 var GRUPOS = {
   corretor: [
-    { id: "anuncios",   n: "Anúncios & Divulgação",   i: "ti-speakerphone",   c: "--am", s: "Banners, textos, fotos e vídeos dos imóveis" },
-    { id: "avaliacao",  n: "Avaliação & Vistoria",    i: "ti-home-search",    c: "--cy", s: "Preço, áreas e vistoria do imóvel" },
-    { id: "consulta",   n: "Consulta do Imóvel",      i: "ti-file-search",    c: "--or", s: "Matrícula, mapa, IPTU e cartórios" },
-    { id: "calculos",   n: "Cálculos & Simulações",   i: "ti-calculator",     c: "--em", s: "Comissão, impostos, financiamento e valores" },
-    { id: "clientes",   n: "Clientes & Visitas",      i: "ti-users",          c: "--sk", s: "Leads, visitas e contato com o cliente" },
-    { id: "contratos",  n: "Contratos & Documentos",  i: "ti-file-certificate", c: "--vi", s: "Autorizações, modelos e documentação" },
-    { id: "financas",   n: "Finanças & Metas",        i: "ti-report-money",   c: "--or", s: "Controle financeiro, metas e aluguéis" },
-    { id: "ia",         n: "IA & Estudo",             i: "ti-brain",          c: "--ro", s: "Ferramentas de IA e guias" },
-    { id: "utilidades", n: "Utilidades & Sites",      i: "ti-tool",           c: "--cy", s: "Assinatura, senhas e sites" }
+    { id: "anuncios",    n: "Divulgação dos Imóveis",         i: "ti-speakerphone",     c: "--am", s: "Banners, textos, fotos, vídeos e publicação nas redes" },
+    { id: "avaliacao",   n: "Avaliação e Vistoria",           i: "ti-home-search",      c: "--cy", s: "Preço, áreas e vistoria do imóvel" },
+    { id: "consulta",    n: "Consultas Oficiais do Imóvel",   i: "ti-file-search",      c: "--or", s: "Matrícula, mapa, IPTU e cartórios" },
+    { id: "calculos",    n: "Cálculos, Impostos e Financiamento", i: "ti-calculator",   c: "--em", s: "Comissão, ITBI, financiamento e valores" },
+    { id: "clientes",    n: "Clientes, Leads e Visitas",      i: "ti-users",            c: "--sk", s: "Leads, agenda de visitas e contato com o cliente" },
+    { id: "locatarios",  n: "Locatários e Análise de Cadastro", i: "ti-user-search",    c: "--vi", s: "Consulta do locatário, análise de cadastro, recibos e aluguéis" },
+    { id: "contratos",   n: "Contratos e Autorizações",       i: "ti-file-certificate", c: "--ro", s: "Autorizações de venda e modelos de contrato" },
+    { id: "documentos",  n: "Documentação e Arquivos",        i: "ti-folders",          c: "--cy", s: "Checklists, CDHU, orçamento de documentos e meus arquivos" },
+    { id: "financas",    n: "Finanças e Metas",               i: "ti-report-money",     c: "--or", s: "Controle financeiro e metas do mês" },
+    { id: "ia",          n: "Inteligência Artificial e Estudo", i: "ti-brain",          c: "--ro", s: "Ferramentas de IA, academy e guias" },
+    { id: "utilidades",  n: "Utilidades e Meus Sites",        i: "ti-tool",             c: "--sk", s: "Assinatura, senhas e sites" }
   ],
   contratos: [
     { id: "residencial", n: "Locação Residencial", i: "ti-home",           c: "--em", s: "Casas, apartamentos e kitnets" },
@@ -519,20 +532,21 @@ var FERRAMENTAS = [
   {m:"corretor", g:"clientes", t:"Gestor de Leads", s:"Organizar contatos", i:"ti-users", h:"gestor-leads.html", k:"gestor de leads contatos clientes"},
   {m:"corretor", g:"clientes", t:"Agenda de Visitas", s:"Organizar horários", i:"ti-calendar-event", h:"agenda-visitas.html", k:"agenda de visitas horários"},
   {m:"corretor", g:"clientes", t:"Central FCosta", s:"Controle de clientes e imóveis", i:"ti-layout-dashboard", h:"central-fcosta.html", k:"central fcosta controle clientes imóveis planilha"},
-  {m:"corretor", g:"contratos", t:"Documentação Imobiliária", s:"Checklist de documentos por transação", i:"ti-file-certificate", h:"documentacao-imoveis.html", k:"documentação imobiliária acesso pessoal"},
-  {m:"corretor", g:"contratos", t:"Orçamento de Documentos", s:"Calcule a taxa de levantamento documental", i:"ti-calculator", h:"orcamento-documentos.html", k:"orçamento levantamento documental matrícula certidões taxa"},
+  {m:"corretor", g:"documentos", t:"Documentação Imobiliária", s:"Checklist de documentos por transação", i:"ti-file-certificate", h:"documentacao-imoveis.html", k:"documentação imobiliária acesso pessoal"},
+  {m:"corretor", g:"documentos", t:"Orçamento de Documentos", s:"Calcule a taxa de levantamento documental", i:"ti-calculator", h:"orcamento-documentos.html", k:"orçamento levantamento documental matrícula certidões taxa"},
+  {m:"corretor", g:"locatarios", t:"Análise de Cadastro", s:"Ficha, documentos, consultas e nota de aprovação do locatário", i:"ti-clipboard-check", h:"analise-cadastro.html", k:"análise de cadastro locatário inquilino ficha renda 3x fiador garantia documentos aprovação serasa protesto cpf", d:1, b:"Novo"},
   {m:"corretor", g:"contratos", t:"Autorização de Venda — Exclusiva", s:"Vendedor preenche e assina pelo celular", i:"ti-file-certificate", h:"autorizacao-exclusiva.html", k:"autorização de venda com exclusividade contrato intermediação assinatura"},
   {m:"corretor", g:"contratos", t:"Autorização de Venda — Sem exclusividade", s:"Vendedor preenche e assina pelo celular", i:"ti-file-text", h:"autorizacao-sem-exclusividade.html", k:"autorização de venda sem exclusividade contrato intermediação assinatura"},
   {m:"corretor", g:"contratos", t:"Contratos Modelo CRECI-SP", s:"Modelos de documentos — área restrita", i:"ti-file-text", h:"https://www.crecisp.gov.br/arearestrita/modelodedocumentos", k:"contratos modelo creci sp modelo de documentos"},
   {m:"corretor", g:"contratos", t:"Contratos CRECI", s:"Editor único: locação, venda, autorizações e acordo particular", i:"ti-file-certificate", h:"contratos-editor.html", k:"contratos creci editor contrato locação compra e venda administração autorização exclusividade comodato temporada built to suit acordo particular sem corretagem word pdf", d:1, b:"Novo"},
-  {m:"corretor", g:"contratos", t:"Meus Arquivos", s:"Suba pastas e arquivos do PC e deixe guardados aqui", i:"ti-folder", h:"meus-arquivos.html", k:"meus arquivos pastas documentos upload subir pasta pc guardar arquivo", b:"Novo"},
-  {m:"corretor", g:"contratos", t:"Recibos e Inquilinos", s:"Inquilinos cadastrados e histórico de recibos", i:"ti-receipt", h:"recibos.html", k:"recibos recibo inquilinos locatários aluguel mora multa juros imprimir pdf whatsapp", b:"Novo"},
-  {m:"corretor", g:"contratos", t:"Consulta de Locatário", s:"Consulta e análise do locatário antes de fechar a locação", i:"ti-user-search", h:"consulta_locatario.html", k:"consulta locatário inquilino análise ficha cadastro fiador locação aluguel", b:"Novo"},
-  {m:"corretor", g:"contratos", t:"CDHU — Painel do Corretor", s:"Requisitos, checklist, passo a passo e contrato de transferência", i:"ti-building-community", h:"cdhu-corretor.html", k:"cdhu painel corretor requisitos checklist gaveta transferência contrato procuração cpvc quitação dívidas apartamento casa habitacional", b:"Novo"},
-  {m:"corretor", g:"contratos", t:"Meus Documentos (Google Docs)", s:"Abrir meus arquivos no Google Docs", i:"ti-brand-google-drive", h:"https://docs.google.com/document/u/1/", k:"google docs meus documentos contratos drive"},
+  {m:"corretor", g:"documentos", t:"Meus Arquivos", s:"Suba pastas e arquivos do PC e deixe guardados aqui", i:"ti-folder", h:"meus-arquivos.html", k:"meus arquivos pastas documentos upload subir pasta pc guardar arquivo", b:"Novo"},
+  {m:"corretor", g:"locatarios", t:"Recibos e Inquilinos", s:"Inquilinos cadastrados e histórico de recibos", i:"ti-receipt", h:"recibos.html", k:"recibos recibo inquilinos locatários aluguel mora multa juros imprimir pdf whatsapp", b:"Novo"},
+  {m:"corretor", g:"locatarios", t:"Consulta de Locatário", s:"Consulta e análise do locatário antes de fechar a locação", i:"ti-user-search", h:"consulta_locatario.html", k:"consulta locatário inquilino análise ficha cadastro fiador locação aluguel", b:"Novo"},
+  {m:"corretor", g:"documentos", t:"CDHU — Painel do Corretor", s:"Requisitos, checklist, passo a passo e contrato de transferência", i:"ti-building-community", h:"cdhu-corretor.html", k:"cdhu painel corretor requisitos checklist gaveta transferência contrato procuração cpvc quitação dívidas apartamento casa habitacional", b:"Novo"},
+  {m:"corretor", g:"documentos", t:"Meus Documentos (Google Docs)", s:"Abrir meus arquivos no Google Docs", i:"ti-brand-google-drive", h:"https://docs.google.com/document/u/1/", k:"google docs meus documentos contratos drive"},
   {m:"corretor", g:"financas", t:"Controle Financeiro", s:"Receitas e despesas", i:"ti-report-money", h:"controle_fin.html", k:"controle financeiro receitas despesas", d:1, b:"Principal"},
   {m:"corretor", g:"financas", t:"Metas do Mês", s:"Leads, visitas e fechamentos", i:"ti-target-arrow", h:"metas.html", k:"metas do mês leads visitas fechamentos"},
-  {m:"corretor", g:"financas", t:"Controle de Aluguéis", s:"Locatários, recibos e vencimentos", i:"ti-key", h:"alugueis.html", k:"aluguéis locatários recibos contratos vencimento controle de aluguéis"},
+  {m:"corretor", g:"locatarios", t:"Controle de Aluguéis", s:"Locatários, recibos e vencimentos", i:"ti-key", h:"alugueis.html", k:"aluguéis locatários recibos contratos vencimento controle de aluguéis"},
   {m:"corretor", g:"ia", t:"Modelo I.A", s:"Crie a modelo: imagem, voz, vídeo e avatar falando", i:"ti-sparkles", h:"modelo-i-a.html", k:"modelo ia i.a inteligência artificial personagem imagem voz vídeo avatar book prompt fcosta chatgpt gemini flow", d:1, b:"Novo"},
   {m:"corretor", g:"ia", t:"Academy", s:"Dicas para corretores", i:"ti-school", h:"academy-corretor.html", k:"academy dicas corretores"},
   {m:"corretor", g:"ia", t:"Tijolo.IA", s:"Automação no Facebook: grupos, posts e vitrine de imóveis (site externo)", i:"ti-bricks", h:"https://tijoloia.com.br/corretor/sergio-fernandes-da-costa", k:"tijolo ia tijoloia automação facebook grupos posts prospecção leads corretor", b:"Novo"},
@@ -550,6 +564,7 @@ var FERRAMENTAS = [
   {m:"contratos", g:"comercial", t:"Contrato Comercial", s:"Ponto comercial e renovatória, com base legal", i:"ti-building-store", h:"contrato-locacao-comercial.html", k:"contrato locação comercial loja sala galpão ponto comercial renovatória lei do inquilinato editável", d:1, b:"Novo"},
   {m:"contratos", g:"temporada", t:"Contrato de Temporada", s:"Até 90 dias, com inventário de móveis", i:"ti-beach", h:"contrato-locacao-temporada.html", k:"contrato locação temporada aluguel curta duração férias hóspede inventário móveis 90 dias editável", d:1, b:"Novo"},
   {m:"contratos", g:"garagem", t:"Contrato de Garagem", s:"Vaga autônoma e estacionamento (Código Civil)", i:"ti-parking", h:"contrato-locacao-garagem.html", k:"contrato locação vaga garagem estacionamento box autônoma código civil editável", d:1, b:"Novo"},
+  {m:"contratos", g:"apoio", t:"Análise de Cadastro", s:"Ficha, documentos, consultas e nota de aprovação do locatário", i:"ti-clipboard-check", h:"analise-cadastro.html", k:"análise de cadastro locatário inquilino ficha renda 3x fiador garantia documentos aprovação serasa protesto cpf", b:"Novo"},
   {m:"contratos", g:"apoio", t:"Contratos CRECI (editor único)", s:"Locação, venda, autorizações e acordo particular", i:"ti-file-certificate", h:"contratos-editor.html", k:"contratos creci editor único locação venda administração autorização acordo particular"},
   {m:"contratos", g:"apoio", t:"Recibos e Inquilinos", s:"Inquilinos cadastrados e histórico de recibos", i:"ti-receipt", h:"recibos.html", k:"recibos recibo inquilinos locatários aluguel mora multa juros imprimir pdf whatsapp"},
   {m:"contratos", g:"apoio", t:"Controle de Aluguéis", s:"Locatários, recibos e vencimentos", i:"ti-key", h:"alugueis.html", k:"aluguéis locatários recibos contratos vencimento controle de aluguéis"},
@@ -689,7 +704,7 @@ var FERRAMENTAS = [
   /* abas principais criadas por você (guardadas no navegador) */
   function lerMundosExtra() { var l = lerStorage('painel_mundos', []); return Array.isArray(l) ? l.filter(function (x) { return x && x.id && x.n; }) : []; }
   var MUNDOS_ORIG = {}; Object.keys(MUNDOS).forEach(function (k) { MUNDOS_ORIG[k] = { n: MUNDOS[k].n, i: MUNDOS[k].i }; });
-  var DOCK_ABAS = [['inicio', 'Início'], ['controle', 'Controle'], ['favoritos', 'Favoritos'], ['mapa', 'Mapa'], ['construtoras', 'Construtoras']];
+  var DOCK_ABAS = [['inicio', 'Início'], ['controle', 'Controle'], ['sumario', 'Sumário'], ['favoritos', 'Favoritos'], ['mapa', 'Mapa'], ['construtoras', 'Construtoras']];
   /* nomes que você mudou: {"m:corretor":"…", "g:origem|id":"…", "d:mapa":"…"} */
   function lerNomes() { var o = lerStorage('painel_nomes', {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
   function nomeDock(k) { var p = DOCK_ABAS.filter(function (x) { return x[0] === k; })[0]; return lerNomes()['d:' + k] || (p ? p[1] : k); }
@@ -719,7 +734,7 @@ var FERRAMENTAS = [
   carregarMundos(); montarDock();
   var vistaEl = document.getElementById('vista');
   var modo = lerStorage('painel_vista', 'inicio');
-  if (modo !== 'inicio' && modo !== 'favoritos' && modo !== 'mapa' && modo !== 'controle' && !MUNDOS[modo]) modo = 'inicio';
+  if (modo !== 'inicio' && modo !== 'favoritos' && modo !== 'mapa' && modo !== 'controle' && modo !== 'sumario' && !MUNDOS[modo]) modo = 'inicio';
   var aba = null;
   var favs = lerStorage('painel_favs', null);
   if (!Array.isArray(favs)) {
@@ -765,7 +780,9 @@ var FERRAMENTAS = [
       return '<button type="button" class="mundo" style="--c:var(--am)" data-go="favoritos"><i class="ti ti-star-filled big"></i>' +
         '<span class="mn">' + esc(nomeDock('favoritos')) + '</span><span class="md">Suas ferramentas fixadas com ★</span>' +
         '<span class="mq">' + n + (n === 1 ? ' favorito' : ' favoritos') + ' <i class="ti ti-arrow-right"></i></span></button>';
-    })() + '<button type="button" class="mundo" style="--c:var(--or)" data-go="mapa"><i class="ti ti-sitemap big"></i>' +
+    })() + '<button type="button" class="mundo" style="--c:var(--cy)" data-go="sumario"><i class="ti ti-list-letters big"></i>' +
+      '<span class="mn">' + esc(nomeDock('sumario')) + '</span><span class="md">Todos os arquivos em ordem alfabética, de A a Z</span>' +
+      '<span class="mq">Abrir <i class="ti ti-arrow-right"></i></span></button><button type="button" class="mundo" style="--c:var(--or)" data-go="mapa"><i class="ti ti-sitemap big"></i>' +
       '<span class="mn">' + esc(nomeDock('mapa')) + '</span><span class="md">Todos os botões numa página só</span>' +
       '<span class="mq">' + itens.length + ' botões <i class="ti ti-arrow-right"></i></span></button>' +
       '<a class="mundo" style="--c:var(--or)" href="repositorios-github.html"><i class="ti ti-brand-github big"></i>' +
@@ -818,7 +835,7 @@ var FERRAMENTAS = [
       return href ? '<a class="item-link" style="--c:var(--or)" href="' + href + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' + inner + '</a>'
         : '<button type="button" class="item-link" style="--c:var(--or);width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer" ' + attr + '>' + inner + '</button>';
     };
-    html += '<h2 class="sec">Áreas do painel · ' + (9 + ORDEM.length - ORDEM_BASE.length) + '</h2><div class="lista">' +
+    html += '<h2 class="sec">Áreas do painel · ' + (10 + ORDEM.length - ORDEM_BASE.length) + '</h2><div class="lista">' +
       rap('ti-layout-dashboard', esc(nomeDock('inicio')), 'Saudação, atalhos rápidos e novidades', 'data-go="inicio"') +
       rap('ti-adjustments-horizontal', esc(nomeDock('controle')), 'Botões, links, sites, leads, pendências e backup', 'data-go="controle"') +
       rap('ti-building-skyscraper', esc(MUNDOS.corretor.n), MUNDOS.corretor.d, 'data-go="corretor"') +
@@ -827,6 +844,7 @@ var FERRAMENTAS = [
       rap('ti-book-2', esc(MUNDOS.pastor.n), MUNDOS.pastor.d, 'data-go="pastor"') +
       ORDEM.slice(ORDEM_BASE.length).map(function (m) { return rap(esc(MUNDOS[m].i), esc(MUNDOS[m].n), esc(MUNDOS[m].d), 'data-go="' + esc(m) + '"'); }).join('') +
       rap('ti-building-factory-2', esc(nomeDock('construtoras')), 'Tabelões, empreendimentos, e-books e simulador por construtora', '', 'construtoras.html') +
+      rap('ti-list-letters', esc(nomeDock('sumario')), 'Todos os arquivos em ordem alfabética (A–Z)', 'data-go="sumario"') +
       rap('ti-star-filled', esc(nomeDock('favoritos')), 'Suas ferramentas fixadas com ★', 'data-go="favoritos"') +
       rap('ti-sitemap', esc(nomeDock('mapa')), 'Esta página, com todos os botões', 'data-go="mapa"') + '</div>';
     html += '<h2 class="sec">Recursos e atalhos do painel · 12</h2><div class="lista">' +
@@ -842,6 +860,31 @@ var FERRAMENTAS = [
       rap('ti-mailbox', 'Consulta de CEP', 'Correios', '', 'https://buscacepinter.correios.com.br/app/endereco/index.php') +
       rap('ti-certificate', 'CRECI-SP', 'Site oficial', '', 'https://www.crecisp.gov.br') +
       rap('ti-brand-github', 'Repositórios no GitHub', 'Pessoal, IBBC, Apostilas CRECI, ADM e PTAM', '', 'repositorios-github.html') + '</div>';
+    return html;
+  }
+
+  function htmlSumario() {
+    var itens = ligar(todosItens()), vistos = {}, lista = [];
+    itens.slice().sort(function (a, b) { return norm(a.t).localeCompare(norm(b.t), 'pt-BR'); }).forEach(function (i) {
+      var k = norm(i.t) + '|' + i.h; if (vistos[k]) return; vistos[k] = 1; lista.push(i);
+    });
+    var grupos = {}, letras = [];
+    lista.forEach(function (i) {
+      var l = norm(i.t).charAt(0).toUpperCase(); if (!/[A-Z]/.test(l)) l = '#';
+      if (!grupos[l]) { grupos[l] = []; letras.push(l); }
+      grupos[l].push(i);
+    });
+    var html = '<section class="mhead" style="--c:var(--cy)"><span class="mh-ic"><i class="ti ti-list-letters"></i></span><div><h1>' + esc(nomeDock('sumario')) + '</h1><p>' +
+      lista.length + ' arquivos e links em ordem alfabética. Toque para abrir.</p></div></section>' +
+      '<button type="button" class="busca-pill" data-open="busca" style="margin-bottom:6px"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button>' +
+      '<div class="sum-az" aria-label="Ir para a letra">' + letras.map(function (l) { return '<button type="button" data-letra="' + l + '">' + l + '</button>'; }).join('') + '</div>';
+    letras.forEach(function (l) {
+      html += '<h2 class="sum-l" id="sum-' + (l === '#' ? 'num' : l) + '">' + l + '</h2><div class="lista">' + grupos[l].map(function (i) {
+        var c = {}; for (var k in i) c[k] = i[k];
+        c.s = MUNDOS[i.m].n + ' · ' + i._g.n + (/^https?:/i.test(i.h) ? '' : ' · ' + i.h);
+        return item(c);
+      }).join('') + '</div>';
+    });
     return html;
   }
 
@@ -899,7 +942,7 @@ var FERRAMENTAS = [
     document.body.setAttribute('data-view', modo);
     [].forEach.call(document.querySelectorAll('.dock [data-go]'), function (b) { b.classList.toggle('on', b.getAttribute('data-go') === modo); });
     vistaEl.classList.toggle('edmode', !!edicao && !!MUNDOS[modo]);
-    vistaEl.innerHTML = modo === 'inicio' ? htmlInicio() : modo === 'controle' ? htmlControle() : modo === 'favoritos' ? htmlFavoritos() : modo === 'mapa' ? htmlMapa() : htmlMundo(modo);
+    vistaEl.innerHTML = modo === 'inicio' ? htmlInicio() : modo === 'controle' ? htmlControle() : modo === 'favoritos' ? htmlFavoritos() : modo === 'mapa' ? htmlMapa() : modo === 'sumario' ? htmlSumario() : htmlMundo(modo);
     if (modo === 'controle' && ctAba === 'sites') setTimeout(function () { ctTestarSites(); }, 60);
   }
   function aplicarModo(m) {
@@ -988,6 +1031,11 @@ var FERRAMENTAS = [
   function alternarTema() { tema = tema === 'dark' ? 'light' : 'dark'; gravarStorage('painel_tema2', tema); aplicarTema(); }
   document.getElementById('btn-tema').addEventListener('click', alternarTema);
   document.addEventListener('click', function (e) { if (e.target.closest('#map-tema')) alternarTema(); });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-letra]'); if (!b) return;
+    var l = b.getAttribute('data-letra'), el = document.getElementById('sum-' + (l === '#' ? 'num' : l));
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
   aplicarTema();
 
   /* ── NOVO BOTÃO (guardado neste navegador) ─ */

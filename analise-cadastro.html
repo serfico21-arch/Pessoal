@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Análise de cadastro — FCosta</title>
+<meta name="theme-color" content="#070b16"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#070b16;--card:#0f1729;--line:rgba(148,163,184,.16);--tx:#eaf0ff;--mut:#8d9bbd;--am:#fbbf24;--em:#34d399;--ro:#fb7185;--sk:#60a5fa}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.45 'DM Sans',sans-serif;background:var(--bg);color:var(--tx);padding:20px 16px 60px}
+main{max-width:760px;margin:0 auto}
+a{color:var(--sk)}
+.voltar{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:12px;background:var(--am);color:#1a1200;font:700 14px 'Sora',sans-serif;text-decoration:none}
+h1{font:800 28px 'Sora',sans-serif;margin:18px 0 4px}
+.sub{color:var(--mut);margin-bottom:18px}
+h2{font:700 16px 'Sora',sans-serif;margin:0 0 12px}
+section{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:4px}
+input,select{width:100%;min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:#0a1122;color:var(--tx);font:inherit}
+input:focus,select:focus,button:focus-visible{outline:2px solid var(--am);outline-offset:1px}
+.chk{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 4px;border-bottom:1px solid var(--line)}
+.chk:last-child{border:0}
+.chk input{width:22px;min-height:22px;height:22px;accent-color:var(--em)}
+.chk span{flex:1}
+.cons{display:grid;grid-template-columns:1fr 130px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.cons:last-child{border:0}
+.cons small{display:block;color:var(--mut)}
+.res{border-radius:14px;padding:16px;border:2px solid var(--c);background:color-mix(in srgb,var(--c) 12%,transparent)}
+.res b{display:block;font:800 22px 'Sora',sans-serif;color:var(--c)}
+.res p{margin-top:6px}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--tx);font:600 14px 'Sora',sans-serif;cursor:pointer}
+button.p{background:var(--am);color:#1a1200;border:0}
+.fi{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}
+.fi:last-child{border:0}
+.fi small{color:var(--mut)}
+.aviso{color:var(--mut);font-size:12.5px;margin-top:10px}
+@media print{body{background:#fff;color:#000}section,.res{border-color:#999;background:#fff}.bar,.voltar,#lista{display:none}}
+</style>
+</head>
+<body>
+<main>
+  <a class="voltar" href="index.html">Voltar ao painel</a>
+  <h1>Análise de cadastro</h1>
+  <p class="sub">Ficha do cliente, documentos, consultas e resultado em um só lugar.</p>
+
+  <section>
+    <h2>Dados do cliente</h2>
+    <div class="g">
+      <div><label for="nome">Nome completo</label><input id="nome" autocomplete="off"/></div>
+      <div><label for="cpf">CPF</label><input id="cpf" inputmode="numeric" placeholder="000.000.000-00"/></div>
+      <div><label for="tel">WhatsApp</label><input id="tel" inputmode="tel" placeholder="(11) 90000-0000"/></div>
+      <div><label for="prof">Profissão / empresa</label><input id="prof"/></div>
+      <div><label for="renda">Renda mensal comprovada (R$)</label><input id="renda" inputmode="decimal"/></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Imóvel e garantia</h2>
+    <div class="g">
+      <div><label for="imov">Imóvel (código ou endereço)</label><input id="imov"/></div>
+      <div><label for="alug">Aluguel (R$)</label><input id="alug" inputmode="decimal"/></div>
+      <div><label for="cond">Condomínio + IPTU (R$)</label><input id="cond" inputmode="decimal"/></div>
+      <div><label for="gar">Garantia</label>
+        <select id="gar"><option>Fiador</option><option>Caução (depósito)</option><option>Seguro fiança</option><option>Título de capitalização</option><option>Sem garantia</option></select></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Documentos recebidos</h2>
+    <div id="docs"></div>
+  </section>
+
+  <section>
+    <h2>Consultas</h2>
+    <div id="cons"></div>
+    <p class="aviso">Os sites abrem em nova aba. Faça a consulta lá e marque aqui o resultado.</p>
+  </section>
+
+  <section>
+    <h2>Resultado</h2>
+    <div class="res" id="res" style="--c:var(--mut)"><b>Preencha a ficha</b></div>
+    <div class="bar">
+      <button class="p" onclick="salvar()">Salvar ficha</button>
+      <button onclick="zap()">Enviar resumo no WhatsApp</button>
+      <button onclick="window.print()">Imprimir / PDF</button>
+      <button onclick="nova()">Nova ficha</button>
+    </div>
+    <p class="aviso">Apoio à decisão: a aprovação final é sua. Os dados ficam salvos só neste aparelho. Trate CPF e documentos conforme a LGPD.</p>
+  </section>
+
+  <section id="lista">
+    <h2>Fichas salvas</h2>
+    <div id="fichas"></div>
+  </section>
+</main>
+
+<script>
+var DOCS=['RG ou CNH','CPF','Comprovante de renda (3 últimos holerites ou extratos)','Comprovante de residência','Certidão de estado civil','Imposto de renda (autônomo ou MEI)'];
+var CONS=[
+ ['Situação do CPF (Receita)','https://servicos.receita.fazenda.gov.br/servicos/cpf/consultasituacao/consultapublica.asp'],
+ ['Protestos em cartório (CENPROT)','https://www.pesquisaprotesto.com.br/'],
+ ['Ações cíveis (certidão TJSP)','https://esaj.tjsp.jus.br/sco/abrirCadastro.do'],
+ ['Crédito (Serasa / SPC)','https://www.serasa.com.br/']
+];
+var $=function(i){return document.getElementById(i)};
+var num=function(v){v=String(v||'').replace(/\./g,'').replace(',','.');return parseFloat(v)||0};
+var R=function(n){return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})};
+var atual=null,ultimo=null;
+
+$('docs').innerHTML=DOCS.map(function(d,i){return '<label class="chk"><input type="checkbox" class="dk" onchange="calc()"/><span>'+d+'</span></label>'}).join('');
+$('cons').innerHTML=CONS.map(function(c,i){return '<div class="cons"><div><a href="'+c[1]+'" target="_blank" rel="noopener">'+c[0]+'</a></div><select class="cs" onchange="calc()" aria-label="'+c[0]+'"><option value="0">Não feita</option><option value="1">Sem restrição</option><option value="2">Com restrição</option></select></div>'}).join('');
+
+document.addEventListener('input',function(e){
+  if(e.target.id==='cpf'){var v=e.target.value.replace(/\D/g,'').slice(0,11);e.target.value=v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2')}
+  calc();
+});
+
+function calc(){
+  var renda=num($('renda').value),custo=num($('alug').value)+num($('cond').value);
+  var dk=[].slice.call(document.querySelectorAll('.dk')),cs=[].slice.call(document.querySelectorAll('.cs')).map(function(s){return +s.value});
+  var docOk=dk.filter(function(c){return c.checked}).length,feitas=cs.filter(function(v){return v>0}).length,restr=cs.indexOf(2)>=0;
+  var razao=custo>0?renda/custo:0;
+  var pr=razao>=3?50:razao>=2.5?35:razao>0?15:0;
+  var pts=pr+Math.round(docOk/dk.length*25)+Math.round(feitas/cs.length*25);
+  var cor,tit,msg=[];
+  if(!renda||!custo){ultimo=null;$('res').style.setProperty('--c','var(--mut)');$('res').innerHTML='<b>Preencha a ficha</b><p>Informe renda, aluguel e condomínio para ver a análise.</p>';return}
+  if(restr||razao<2.5){cor='var(--ro)';tit='Risco alto'}
+  else if(pts>=90&&razao>=3){cor='var(--em)';tit='Pode aprovar'}
+  else{cor='var(--am)';tit='Pendências'}
+  msg.push('Renda de '+razao.toFixed(1).replace('.',',')+'x o custo mensal ('+R(custo)+'). O mais comum é pedir 3x ou mais.');
+  if(razao<3&&document.getElementById('gar').value!=='Sem garantia')msg.push('Renda abaixo de 3x: reforce a garantia ('+$('gar').value.toLowerCase()+').');
+  if(restr)msg.push('Há restrição em consulta. Avalie com o proprietário antes de seguir.');
+  if(docOk<dk.length)msg.push('Documentos: '+docOk+' de '+dk.length+' recebidos.');
+  if(feitas<cs.length)msg.push('Consultas feitas: '+feitas+' de '+cs.length+'.');
+  $('res').style.setProperty('--c',cor);
+  $('res').innerHTML='<b>'+tit+' · '+pts+'/100</b>'+msg.map(function(m){return '<p>'+m+'</p>'}).join('');
+  ultimo={tit:tit,pts:pts,razao:razao};
+}
+
+function dados(){
+  return {id:atual||String(Date.now()),nome:$('nome').value,cpf:$('cpf').value,tel:$('tel').value,prof:$('prof').value,renda:$('renda').value,imov:$('imov').value,alug:$('alug').value,cond:$('cond').value,gar:$('gar').value,
+    dk:[].slice.call(document.querySelectorAll('.dk')).map(function(c){return c.checked}),cs:[].slice.call(document.querySelectorAll('.cs')).map(function(s){return s.value}),
+    tit:ultimo?ultimo.tit:'',pts:ultimo?ultimo.pts:0,data:new Date().toLocaleDateString('pt-BR')};
+}
+function ler(){try{return JSON.parse(localStorage.getItem('fc_fichas')||'[]')}catch(e){return []}}
+function gravar(l){try{localStorage.setItem('fc_fichas',JSON.stringify(l))}catch(e){alert('Não foi possível salvar neste navegador.')}}
+function salvar(){
+  var d=dados();if(!d.nome){alert('Informe o nome do cliente.');return}
+  var l=ler(),i=l.findIndex(function(x){return x.id===d.id});if(i>=0)l[i]=d;else l.unshift(d);
+  atual=d.id;gravar(l);lista();alert('Ficha salva.');
+}
+function abrir(id){
+  var d=ler().find(function(x){return x.id===id});if(!d)return;atual=id;
+  ['nome','cpf','tel','prof','renda','imov','alug','cond','gar'].forEach(function(k){$(k).value=d[k]||''});
+  document.querySelectorAll('.dk').forEach(function(c,i){c.checked=!!d.dk[i]});
+  document.querySelectorAll('.cs').forEach(function(s,i){s.value=d.cs[i]||'0'});
+  calc();window.scrollTo({top:0,behavior:'smooth'});
+}
+function excluir(id){if(!confirm('Excluir esta ficha?'))return;gravar(ler().filter(function(x){return x.id!==id}));lista()}
+function nova(){atual=null;document.querySelectorAll('input:not(.dk)').forEach(function(i){i.value=''});document.querySelectorAll('.dk').forEach(function(c){c.checked=false});document.querySelectorAll('.cs').forEach(function(s){s.value='0'});$('gar').selectedIndex=0;calc()}
+function lista(){
+  var l=ler();
+  $('fichas').innerHTML=l.length?l.map(function(f){return '<div class="fi"><div><b>'+esc(f.nome)+'</b><br/><small>'+esc(f.imov||'sem imóvel')+' · '+f.data+' · '+esc(f.tit)+' '+f.pts+'/100</small></div><div><button onclick="abrir(\''+f.id+'\')">Abrir</button> <button onclick="excluir(\''+f.id+'\')" aria-label="Excluir">Excluir</button></div></div>'}).join(''):'<p class="aviso">Nenhuma ficha salva ainda. Preencha acima e toque em Salvar ficha.</p>';
+}
+function esc(s){return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function zap(){
+  var d=dados();if(!ultimo){alert('Preencha renda, aluguel e condomínio.');return}
+  var t='*Análise de cadastro*\nCliente: '+d.nome+'\nImóvel: '+(d.imov||'-')+'\nResultado: '+ultimo.tit+' ('+ultimo.pts+'/100)\nRenda: '+ultimo.razao.toFixed(1).replace('.',',')+'x o custo mensal\nGarantia: '+d.gar;
+  window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
+}
+lista();
+</script>
+</body>
+</html>
