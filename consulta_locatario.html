@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Consulta de Locatário</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--ink:#1c2433;--mut:#64708a;--line:#e1e6f0;--pri:#2457d6;--pri2:#1b44aa;--ok:#12805c;--warn:#b7791f;--bad:#c0392b;--r:14px}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,Roboto,system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+header{background:linear-gradient(135deg,#1b2f6b,#2457d6);color:#fff;padding:22px 16px}
+header .w,main{max-width:1100px;margin:0 auto}
+header h1{margin:0;font-size:1.4rem}
+header p{margin:4px 0 0;opacity:.85;font-size:.9rem}
+main{padding:16px;display:grid;gap:16px;grid-template-columns:1fr 1fr}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:0 1px 3px rgba(20,30,60,.05)}
+.full{grid-column:1/-1}
+h2{margin:0 0 12px;font-size:1.05rem}
+h3{margin:16px 0 6px;font-size:.92rem;display:flex;align-items:center;gap:8px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.span2{grid-column:1/-1}
+label{display:block;font-size:.8rem;font-weight:600;color:var(--mut);margin-bottom:4px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:2px solid #b9ccff;border-color:var(--pri)}
+.err{color:var(--bad);font-size:.78rem;min-height:1em;margin-top:2px}
+.calc{margin-top:14px;padding:14px;border-radius:12px;border:1px solid var(--line);background:#f8faff}
+.big{font-size:1.4rem;font-weight:700}
+.bar{height:12px;background:#e8ecf5;border-radius:99px;overflow:hidden;margin-top:8px}
+.bar>i{display:block;height:100%;width:0;background:var(--pri);transition:width .3s,background .3s}
+.tag{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.78rem;font-weight:600}
+.t-ok{background:#dcf5ec;color:var(--ok)}.t-warn{background:#fdf0d5;color:var(--warn)}.t-bad{background:#fbe1de;color:var(--bad)}.t-n{background:#e8ecf5;color:var(--mut)}
+.hub{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:10px}
+.hub button{text-align:left;padding:11px 12px;border:1px solid var(--line);background:#fff;border-radius:12px;cursor:pointer;font:inherit;transition:.15s;border-left:4px solid var(--ok)}
+.hub.paid button{border-left-color:var(--warn)}
+.hub button:hover{border-color:var(--pri);box-shadow:0 2px 8px rgba(36,87,214,.15);transform:translateY(-1px)}
+.hub b{display:block;font-size:.88rem}.hub span{font-size:.76rem;color:var(--mut)}
+.note{font-size:.8rem;color:var(--mut);margin:0 0 10px}
+.item{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:9px 2px;border-bottom:1px solid var(--line)}
+.item .lb{flex:1;min-width:200px;font-size:.9rem}
+.item .lb small{display:block;color:var(--mut);font-size:.74rem}
+.seg{display:flex;gap:4px}
+.seg button{padding:6px 10px;border:1px solid var(--line);background:#fff;border-radius:8px;font:inherit;font-size:.76rem;cursor:pointer}
+.seg button.on.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.seg button.on.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+.seg button.on.pen{background:#64708a;border-color:#64708a;color:#fff}
+.stt{display:none;font-weight:600;font-size:.82rem}
+.chk{display:flex;gap:10px;align-items:center;padding:9px 2px;border-bottom:1px solid var(--line);cursor:pointer;font-size:.9rem}
+.chk input{width:20px;height:20px;flex:none}
+.chk.done span{color:var(--mut)}
+.result{border-radius:14px;padding:18px;text-align:center;border:2px solid var(--line);background:#f8faff;margin-bottom:12px}
+.result .big{font-size:1.7rem}
+.result.ok{background:#e6f7ef;border-color:var(--ok);color:var(--ok)}
+.result.bad{background:#fdeceb;border-color:var(--bad);color:var(--bad)}
+.result.pen{background:#fdf6e3;border-color:var(--warn);color:var(--warn)}
+.reasons{font-size:.88rem;margin:0 0 10px;padding-left:20px}
+.reasons li.b{color:var(--bad)}.reasons li.p{color:var(--warn)}.reasons li.n{color:var(--mut)}
+.btn{padding:12px 18px;border:0;border-radius:10px;background:var(--pri);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--pri2)}
+.btn.sec{background:#e8ecf5;color:var(--ink)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+dialog{border:0;border-radius:var(--r);max-width:480px;width:92%;padding:20px}
+dialog::backdrop{background:rgba(10,20,40,.5)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1c2433;color:#fff;padding:10px 16px;border-radius:10px;font-size:.85rem;opacity:0;pointer-events:none;transition:.25s;z-index:9;max-width:90%;text-align:center}
+.toast.show{opacity:1}
+.print-head{display:none}
+@media(max-width:760px){main{grid-template-columns:1fr}.grid{grid-template-columns:1fr}}
+@media print{
+ body{background:#fff;font-size:10.5pt}
+ header,.hub-card,.no-print,.seg,.row,.toast{display:none!important}
+ main{display:block;padding:0}
+ .card{box-shadow:none;border:1px solid #bbb;margin-bottom:10px;break-inside:avoid}
+ .print-head{display:block;margin:0 0 10px;padding-bottom:8px;border-bottom:2px solid #000}
+ .print-head h1{font-size:16pt;margin:0}
+ .stt{display:inline}
+ input,select,textarea{border:0;border-bottom:1px solid #999;border-radius:0;padding:2px 0;appearance:none;-webkit-appearance:none}
+ textarea{border:1px solid #999;min-height:100px}
+ .err{display:none}
+ .result{border-width:3px}
+}
+</style>
+</head>
+<body>
+<header><div class="w"><h1>🏠 Consulta e Triagem de Locatário</h1><p>Verificação cadastral, certidões e resultado final para a locação</p></div></header>
+
+<main>
+<div class="print-head full"><h1>Ficha de Análise de Locatário</h1><div id="ph"></div></div>
+
+<section class="card full">
+ <h2>1. Cadastro do candidato</h2>
+ <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+  <div><label for="nome">Nome completo</label><input id="nome" autocomplete="off"></div>
+  <div><label for="cpf">CPF</label><input id="cpf" inputmode="numeric" maxlength="14" placeholder="000.000.000-00"><div class="err" id="cpfErr"></div></div>
+  <div><label for="nasc">Data de nascimento</label><input id="nasc" type="date"></div>
+  <div><label for="civil">Estado civil</label><select id="civil"><option value="">Selecione</option><option>Solteiro(a)</option><option>Casado(a)</option><option>União estável</option><option>Divorciado(a)</option><option>Viúvo(a)</option></select></div>
+  <div><label for="renda">Renda mensal informada</label><input id="renda" inputmode="numeric" placeholder="R$ 0,00"></div>
+  <div><label for="aluguel">Valor do aluguel pretendido</label><input id="aluguel" inputmode="numeric" placeholder="R$ 0,00"></div>
+ </div>
+ <div class="calc">
+  <div class="note" style="margin:0">Regra de mercado: renda ≥ 3× o aluguel</div>
+  <div class="big" id="pct">—</div>
+  <div class="bar"><i id="bar"></i></div>
+  <p id="calcTxt" style="margin:10px 0 0;font-size:.9rem">Preencha renda e aluguel.</p>
+ </div>
+</section>
+
+<section class="card full hub-card">
+ <h2>2. Onde consultar</h2>
+ <p class="note">Cada botão copia o CPF ou nome e abre o site oficial em nova aba. Cole o dado no site. Peça ao candidato a autorização por escrito para consultar os dados (LGPD). Os endereços podem mudar; se algum falhar, busque o nome do órgão.</p>
+ <h3><span class="tag t-ok">GRATUITAS</span> Sem custo</h3>
+ <div class="hub" id="hubFree"></div>
+ <h3><span class="tag t-warn">PAGAS</span> Com taxa ou assinatura</h3>
+ <div class="hub paid" id="hubPaid"></div>
+</section>
+
+<section class="card full">
+ <h2>3. Resultado das consultas e documentos</h2>
+ <div class="note" id="progTxt">0% concluído</div>
+ <div class="bar" style="margin:0 0 6px"><i id="prog"></i></div>
+ <h3>Consultas (marque o que apurou)</h3>
+ <div id="listC"></div>
+ <h3>Documentos recebidos</h3>
+ <div id="listD"></div>
+</section>
+
+<section class="card full">
+ <h2>4. Resultado final e parecer</h2>
+ <div class="result" id="result"><div class="big" id="resTitle">—</div><div id="resSub"></div></div>
+ <ul class="reasons" id="reasons"></ul>
+ <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+  <div><label for="aval">Avaliador / corretor</label><input id="aval" value="Sérgio Costa – CRECI-SP 29479-F"></div>
+  <div class="no-print"><label for="over">Decisão final (opcional)</label>
+   <select id="over"><option value="">Automática (pelas regras)</option><option value="ok">Aprovar manualmente</option><option value="bad">Reprovar manualmente</option></select></div>
+  <div class="span2"><label for="obs">Anotações</label><textarea id="obs" rows="5" placeholder="Observações da análise..."></textarea></div>
+ </div>
+ <p class="note" style="margin-top:10px">Regras: reprova se houver restrição em qualquer consulta, CPF irregular ou menor de 18 anos; renda abaixo de 3× só passa com garantia (fiador, seguro-fiança ou caução). Aprova só com todas as consultas e documentos obrigatórios concluídos. A decisão final é do proprietário.</p>
+ <div class="row no-print">
+  <button class="btn" id="print">🖨️ Imprimir / Salvar em PDF</button>
+  <button class="btn sec" id="clear">Nova ficha</button>
+ </div>
+</section>
+</main>
+
+<dialog id="dlg"><h2>Autochecagem Serasa / Boa Vista</h2>
+ <p style="font-size:.9rem">Peça ao candidato para consultar o próprio CPF gratuitamente e enviar print ou PDF:</p>
+ <ol style="font-size:.9rem;padding-left:18px">
+  <li><b>Serasa:</b> app ou site → "Consultar meu CPF" (score e pendências).</li>
+  <li><b>Boa Vista:</b> Consumidor Positivo → relatório do CPF.</li>
+  <li><b>Banco Central (Registrato):</b> dívidas bancárias (SCR).</li>
+  <li>Exija o print com <b>data e hora visíveis</b>.</li>
+ </ol>
+ <div class="row"><button class="btn" id="sera">Abrir Serasa</button><button class="btn sec" id="bv">Abrir Boa Vista</button><button class="btn sec" id="cls">Fechar</button></div>
+</dialog>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+/* c = copia: cpf | nome | ambos */
+const FREE=[
+ {t:"Receita Federal",d:"Situação cadastral do CPF",u:"https://servicos.receita.fazenda.gov.br/servicos/cpf/consultasituacao/consultapublica.asp",c:"cpf"},
+ {t:"CENPROT Nacional",d:"Consulta de protestos",u:"https://www.cenprotnacional.org.br/",c:"cpf"},
+ {t:"TJSP – Consulta de processos",d:"Ações cíveis, execuções, despejo (1º grau)",u:"https://esaj.tjsp.jus.br/cpopg/open.do",c:"nome"},
+ {t:"TST – CNDT",d:"Certidão de débitos trabalhistas",u:"https://cndt-certidao.tst.jus.br/inicio.faces",c:"cpf"},
+ {t:"TRT-2 – Consulta processual",d:"Processos trabalhistas (SP)",u:"https://pje.trt2.jus.br/consultaprocessual/",c:"nome"},
+ {t:"Justiça Federal – Certidão",d:"Certidão cível/criminal unificada",u:"https://www.cjf.jus.br/cjf/certidao-negativa",c:"ambos"},
+ {t:"TRF3 – Consulta processual",d:"Processos federais (SP/MS)",u:"https://web.trf3.jus.br/consultas/",c:"nome"},
+ {t:"Polícia Federal",d:"Certidão de antecedentes criminais",u:"https://servicos.pf.gov.br/epol-sinic-publico/",c:"cpf"},
+ {t:"BNMP – CNJ",d:"Mandados de prisão",u:"https://portalbnmp.cnj.jus.br/",c:"nome"},
+ {t:"Serasa (autochecagem)",d:"Orientar o inquilino",k:"serasa"},
+ {t:"Boa Vista / Consumidor Positivo",d:"Relatório do próprio CPF",u:"https://www.consumidorpositivo.com.br/",c:"cpf"},
+ {t:"Registrato – Banco Central",d:"Dívidas bancárias (SCR) – pelo inquilino",u:"https://www.bcb.gov.br/meubc/registrato",c:"cpf"}
+];
+const PAID=[
+ {t:"Serasa Experian",d:"Relatório de crédito e score (corretor/empresa)",u:"https://www.serasaexperian.com.br/",c:"cpf"},
+ {t:"SPC Brasil",d:"Consulta de inadimplência",u:"https://www.spcbrasil.org.br/",c:"cpf"},
+ {t:"Boa Vista SCPC",d:"Análise de crédito",u:"https://www.boavistaservicos.com.br/",c:"cpf"},
+ {t:"Quod",d:"Score e cadastro positivo",u:"https://www.quod.com.br/",c:"cpf"},
+ {t:"TJSP – Certidão de distribuição cível",d:"Certidão oficial (taxa)",u:"https://esaj.tjsp.jus.br/sco/abrirCadastro.do",c:"ambos"},
+ {t:"Certidão de protesto (IEPTB-SP)",d:"Certidão oficial dos cartórios (taxa)",u:"https://www.protestosp.com.br/",c:"cpf"},
+ {t:"Escavador",d:"Busca ampliada de processos (planos pagos)",u:"https://www.escavador.com/",c:"nome"}
+];
+/* consultas: req = obrigatória; ok/bad = rótulos */
+const CONS=[
+ {id:"c_cpf",t:"CPF – situação cadastral (Receita)",ok:"Regular",bad:"Irregular",req:1,crit:"CPF irregular na Receita"},
+ {id:"c_prot",t:"Protestos (CENPROT)",ok:"Nada consta",bad:"Consta",req:1,crit:"Protestos em cartório"},
+ {id:"c_tj",t:"Ações cíveis / execuções / despejo (TJSP)",ok:"Nada consta",bad:"Consta",req:1,crit:"Ações cíveis, execução ou despejo"},
+ {id:"c_jf",t:"Justiça Federal – cível/criminal",ok:"Nada consta",bad:"Consta",req:1,crit:"Ações na Justiça Federal"},
+ {id:"c_tst",t:"Débitos trabalhistas (CNDT / TST)",ok:"Nada consta",bad:"Consta",req:1,crit:"Débitos trabalhistas"},
+ {id:"c_crim",t:"Antecedentes criminais / mandados (PF, BNMP)",ok:"Nada consta",bad:"Consta",req:1,crit:"Antecedentes criminais ou mandado"},
+ {id:"c_neg",t:"Negativação e score (Serasa/SPC/Boa Vista)",ok:"Limpo",bad:"Negativado",req:1,crit:"Nome negativado"},
+ {id:"c_trt",t:"Processos trabalhistas (TRT)",ok:"Nada consta",bad:"Consta",req:0,crit:"Processos trabalhistas"},
+ {id:"c_scr",t:"Dívidas bancárias (Registrato/SCR)",ok:"Sem alerta",bad:"Alerta",req:0,crit:"Endividamento bancário elevado"}
+];
+const DOCS=[
+ {id:"d_aut",t:"Autorização assinada para consulta de dados (LGPD)",req:1},
+ {id:"d_id",t:"Documento de identidade (RG/CNH) conferido",req:1},
+ {id:"d_renda",t:"Comprovante de renda (holerites / extrato / IR)",req:1},
+ {id:"d_res",t:"Comprovante de residência atual",req:1},
+ {id:"d_ref",t:"Referências de locações anteriores (contato com ex-locador)",req:0},
+ {id:"d_cas",t:"Certidão de casamento / união estável (se aplicável)",req:0},
+ {id:"d_gar",t:"Garantia locatícia definida (fiador, seguro-fiança ou caução)",req:0,gar:1}
+];
+const KEY="consulta_locatario_v2";
+const F=["nome","cpf","nasc","civil","renda","aluguel","obs","aval","over"];
+let st={res:{},docs:{}};
+function save(){try{const d={st};F.forEach(f=>d[f]=$(f).value);localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY)||"null");if(d){F.forEach(f=>{if(d[f]!=null)$(f).value=d[f]});if(d.st)st=d.st}}catch(e){}}
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("show"),3000)}
+const brl=n=>n.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+function maskMoney(el){const v=el.value.replace(/\D/g,"");el.value=v?brl(parseInt(v,10)/100):""}
+function money(s){const v=s.replace(/\D/g,"");return v?parseInt(v,10)/100:0}
+function maskCPF(v){v=v.replace(/\D/g,"").slice(0,11);return v.replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d{1,2})$/,"$1-$2")}
+function validCPF(c){c=c.replace(/\D/g,"");if(c.length!==11||/^(\d)\1+$/.test(c))return false;for(let t=9;t<11;t++){let s=0;for(let i=0;i<t;i++)s+=c[i]*(t+1-i);if((s*10%11)%10!=c[t])return false}return true}
+function age(s){if(!s)return null;const b=new Date(s),n=new Date();let a=n.getFullYear()-b.getFullYear();const m=n.getMonth()-b.getMonth();if(m<0||(m===0&&n.getDate()<b.getDate()))a--;return a}
+
+function calc(){
+ const r=money($("renda").value),a=money($("aluguel").value);
+ if(!r||!a){$("pct").textContent="—";$("bar").style.width="0";$("calcTxt").textContent="Preencha renda e aluguel.";return}
+ const comp=a/r*100,ratio=r/a,ok=ratio>=3;
+ $("pct").textContent=comp.toFixed(1).replace(".",",")+"% da renda comprometida";
+ $("bar").style.width=Math.min(comp,100)+"%";
+ $("bar").style.background=comp<=33.34?"var(--ok)":comp<=45?"var(--warn)":"var(--bad)";
+ const min=a*3;
+ $("calcTxt").innerHTML=(ok?'<span class="tag t-ok">Atende a regra 3×</span> ':'<span class="tag t-bad">Abaixo da regra 3×</span> ')+"Renda = <b>"+ratio.toFixed(2).replace(".",",")+"×</b> o aluguel. Mínima: <b>"+brl(min)+"</b>"+(ok?"":" (faltam "+brl(min-r)+")");
+}
+
+function hubBtn(it){
+ const b=document.createElement("button");
+ b.innerHTML="<b>"+it.t+"</b><span>"+it.d+"</span>";
+ b.onclick=()=>it.k==="serasa"?$("dlg").showModal():openLink(it);
+ return b;
+}
+function openLink(it){
+ const cpf=$("cpf").value.trim(),nome=$("nome").value.trim();
+ let txt=it.c==="cpf"?cpf:it.c==="nome"?nome:[nome,cpf].filter(Boolean).join(" – CPF ");
+ if(txt){try{navigator.clipboard.writeText(txt)}catch(e){}toast("Copiado: "+txt+" — cole no site.")}
+ else toast("Preencha nome e CPF para copiar automaticamente.");
+ window.open(it.u,"_blank","noopener");
+}
+
+function renderLists(){
+ const C=$("listC");C.innerHTML="";
+ CONS.forEach(c=>{
+  const v=st.res[c.id]||"";
+  const d=document.createElement("div");d.className="item";
+  d.innerHTML='<div class="lb">'+c.t+(c.req?"":' <small>opcional</small>')+'</div><span class="stt">'+(v==="ok"?c.ok:v==="bad"?c.bad:"Pendente")+'</span><div class="seg"></div>';
+  const seg=d.querySelector(".seg");
+  [["","Pendente","pen"],["ok","✔ "+c.ok,"ok"],["bad","✖ "+c.bad,"bad"]].forEach(([val,lab,cl])=>{
+   const b=document.createElement("button");b.textContent=lab;b.className=cl+(v===val?" on":"");
+   b.onclick=()=>{st.res[c.id]=val;renderAll();save()};seg.appendChild(b)});
+  C.appendChild(d)});
+ const D=$("listD");D.innerHTML="";
+ DOCS.forEach(c=>{
+  const on=!!st.docs[c.id];
+  const lb=document.createElement("label");lb.className="chk"+(on?" done":"");
+  lb.innerHTML='<input type="checkbox"'+(on?" checked":"")+'><span>'+(on?"☑ ":"☐ ")+c.t+(c.req?"":" (opcional)")+'</span>';
+  lb.querySelector("input").onchange=e=>{st.docs[c.id]=e.target.checked;renderAll();save()};
+  D.appendChild(lb)});
+}
+
+function evaluate(){
+ const B=[],P=[],N=[];
+ const nome=$("nome").value.trim(),cpf=$("cpf").value,r=money($("renda").value),a=money($("aluguel").value),ag=age($("nasc").value);
+ if(nome.length<5)P.push("Informar o nome completo");
+ if(cpf.replace(/\D/g,"").length<11)P.push("Informar o CPF");
+ else if(!validCPF(cpf))B.push("CPF inválido");
+ if(ag===null)P.push("Informar a data de nascimento");
+ else if(ag<18)B.push("Candidato menor de 18 anos");
+ if(!r)P.push("Informar a renda mensal");
+ if(!a)P.push("Informar o valor do aluguel");
+ const gar=!!st.docs.d_gar;
+ if(r&&a){
+  if(r/a<3){gar?N.push("Renda abaixo de 3× o aluguel, compensada por garantia locatícia"):B.push("Renda abaixo de 3× o aluguel e sem garantia definida")}
+ }
+ CONS.forEach(c=>{
+  const v=st.res[c.id]||"";
+  if(v==="bad")B.push(c.crit+" – "+c.bad.toLowerCase());
+  else if(v!=="ok"&&c.req)P.push("Concluir: "+c.t);
+ });
+ DOCS.forEach(c=>{if(c.req&&!st.docs[c.id])P.push("Receber: "+c.t)});
+ let k,title,sub;
+ if(B.length){k="bad";title="⛔ REPROVADO PARA LOCAÇÃO";sub="Há restrições que impedem a aprovação."}
+ else if(P.length){k="pen";title="⏳ ANÁLISE INCOMPLETA";sub="Faltam "+P.length+" item(ns) para concluir o resultado."}
+ else{k="ok";title="✅ APROVADO PARA LOCAÇÃO";sub="Todas as verificações obrigatórias foram concluídas sem restrições."}
+ return{B,P,N,k,title,sub};
+}
+
+function renderResult(){
+ const e=evaluate(),o=$("over").value;
+ let k=e.k,title=e.title,sub=e.sub;
+ if(o==="ok"){k="ok";title="✅ APROVADO PARA LOCAÇÃO";sub="Decisão manual do corretor."}
+ if(o==="bad"){k="bad";title="⛔ REPROVADO PARA LOCAÇÃO";sub="Decisão manual do corretor."}
+ $("result").className="result "+k;$("resTitle").textContent=title;$("resSub").textContent=sub;
+ const ul=$("reasons");ul.innerHTML="";
+ const add=(arr,c,pre)=>arr.forEach(x=>{const li=document.createElement("li");li.className=c;li.textContent=pre+x;ul.appendChild(li)});
+ add(e.B,"b","Motivo: ");add(e.P,"p","Pendente: ");add(e.N,"n","Obs.: ");
+ return{k,title,e};
+}
+
+function renderAll(){
+ renderLists();
+ const tot=CONS.length+DOCS.length;
+ let n=0;CONS.forEach(c=>{if(st.res[c.id])n++});DOCS.forEach(c=>{if(st.docs[c.id])n++});
+ const p=Math.round(n/tot*100);
+ $("prog").style.width=p+"%";$("prog").style.background=p==100?"var(--ok)":"var(--pri)";
+ $("progTxt").textContent=p+"% concluído ("+n+" de "+tot+")";
+ renderResult();
+}
+
+function printHead(){
+ const r=renderResult(),n=$("nasc").value?$("nasc").value.split("-").reverse().join("/"):"—";
+ $("ph").innerHTML="<div><b>"+($("nome").value||"—")+"</b> | CPF: "+($("cpf").value||"—")+" | Nasc.: "+n+" | "+($("civil").value||"—")+"</div>"+
+  "<div>Renda: "+($("renda").value||"—")+" | Aluguel: "+($("aluguel").value||"—")+" | "+$("pct").textContent+"</div>"+
+  "<div>Avaliador: "+($("aval").value||"—")+" | Data: "+new Date().toLocaleDateString("pt-BR")+"</div>";
+}
+
+FREE.forEach(i=>$("hubFree").appendChild(hubBtn(i)));
+PAID.forEach(i=>$("hubPaid").appendChild(hubBtn(i)));
+load();$("cpf").value=maskCPF($("cpf").value);calc();renderAll();
+$("cpf").addEventListener("input",e=>{e.target.value=maskCPF(e.target.value);const v=e.target.value.replace(/\D/g,"");
+ $("cpfErr").textContent=v.length===11&&!validCPF(v)?"CPF inválido (dígitos verificadores não conferem)":"";renderAll();save()});
+["renda","aluguel"].forEach(id=>$(id).addEventListener("input",e=>{maskMoney(e.target);calc();renderAll();save()}));
+["nome","nasc","civil","obs","aval","over"].forEach(id=>{$(id).addEventListener("input",()=>{renderAll();save()});$(id).addEventListener("change",()=>{renderAll();save()})});
+$("sera").onclick=()=>window.open("https://www.serasa.com.br/","_blank","noopener");
+$("bv").onclick=()=>window.open("https://www.consumidorpositivo.com.br/","_blank","noopener");
+$("cls").onclick=()=>$("dlg").close();
+$("print").onclick=()=>{printHead();window.print()};
+$("clear").onclick=()=>{if(confirm("Limpar todos os dados e iniciar nova ficha?")){F.filter(f=>f!=="aval").forEach(f=>$(f).value="");st={res:{},docs:{}};$("cpfErr").textContent="";calc();renderAll();save()}};
+})();
+</script>
+</body>
+</html>
