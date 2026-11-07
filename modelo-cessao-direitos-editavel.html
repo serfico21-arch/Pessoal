@@ -40,7 +40,9 @@ body{margin:0;font-family:Arial,sans-serif;background:#e9ecef;color:#111}
 #dx .dxp{border-top:1px dashed #ccd;margin-top:8px;padding-top:6px}
 #dx .dxp b{font-size:12px;display:block;margin-bottom:4px}
 #dx .dxp input[type=tel]{width:100%;padding:6px;border:1px solid #bbb;border-radius:4px;font-size:13px}
-#dx .dxb{display:flex;gap:6px;margin-top:6px}
+#dx .dxb{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+#dx .dxs{font-size:11.5px;font-weight:bold;color:#1f3a5f;border-bottom:1px solid #d5dce6;margin:10px 0 2px;padding-bottom:2px}
+#dx .dxb button[data-sh]{background:#1f3a5f;color:#fff}
 #dx .dxb button{flex:1;border:0;border-radius:6px;padding:8px;font-size:12.5px;font-weight:bold;cursor:pointer;background:#e3e9f2;color:#1f3a5f}
 #dx .dxb button[data-wa]{background:#25a05a;color:#fff}
 #dx textarea{width:100%;min-height:56px;padding:6px;border:1px solid #bbb;border-radius:4px;font-size:12.5px}
@@ -236,19 +238,19 @@ function exemplo(){preencher(EX)}
 function limpar(){if(confirm("Apagar todos os dados preenchidos?"))preencher({})}
 function baixar(){var v={};Object.keys(L).forEach(function(k){v[k]=document.getElementById("f_"+k).value});
  var c=document.documentElement.cloneNode(true);c.querySelector("#panel").innerHTML="";c.querySelector("#doc").innerHTML="";
- var sc=c.querySelector("#main");var js=JSON.stringify({v:v,doc:doc.innerHTML,ck:CK,tel:TEL,ex:EXTRA,inc:INC}).replace(/</g,"\\u003c");
+ var sc=c.querySelector("#main");var js=JSON.stringify({v:v,doc:doc.innerHTML,sel:CK,tel:TEL,ex:EXTRA,inc:INC}).replace(/</g,"\\u003c");
  sc.textContent=sc.textContent.replace(/var SAVED=[\s\S]*?;\/\*S\*\//,function(){return "var SAVED="+js+";/*S*/"});
  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["<!DOCTYPE html>\n"+c.outerHTML],{type:"text/html"}));a.download="contrato-cessao-preenchido.html";a.click()}
 if(SAVED){Object.keys(SAVED.v).forEach(function(k){document.getElementById("f_"+k).value=SAVED.v[k]})}
 setv("situacao",document.getElementById("f_situacao").value);
 /* ===== valores e combinado + documentos exigidos + envio para cada parte ===== */
 var CK={},TEL={},EXTRA="",INC=true;
-if(SAVED){if(SAVED.ck)CK=SAVED.ck;if(SAVED.tel)TEL=SAVED.tel;if(typeof SAVED.ex=="string")EXTRA=SAVED.ex;if(typeof SAVED.inc=="boolean")INC=SAVED.inc}
+if(SAVED){if(SAVED.sel)CK=SAVED.sel;if(SAVED.tel)TEL=SAVED.tel;if(typeof SAVED.ex=="string")EXTRA=SAVED.ex;if(typeof SAVED.inc=="boolean")INC=SAVED.inc}
 function sit(){var e=document.getElementById("f_situacao");return e&&e.value=="n"?"n":"q"}
 function fv(k){var e=document.getElementById("f_"+k);return e?e.value.trim():""}
 function escX(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 var D_PESS=["RG e CPF (ou CNH/CIN), frente e verso","Comprovante de residência recente (até 90 dias)","Profissão e estado civil atual","Telefone e e-mail para contato"];
-var D_CED=["Certidão de estado civil atualizada: casamento com todas as averbações. Se divorciado: certidão com a averbação do divórcio, cópia da sentença e certidão de trânsito em julgado. Se viúvo: certidão de óbito e inventário ou alvará","Informar se o imóvel foi partilhado no divórcio (e enviar a partilha, se houver)","Dados para receber o preço: titular, banco, agência, conta ou chave PIX"];
+var D_CED=["Certidão de estado civil atualizada (casamento, com averbações). Divorciado: averbação do divórcio, sentença e trânsito em julgado. Viúvo: óbito e inventário ou alvará","Informar se o imóvel foi partilhado no divórcio (e enviar a partilha, se houver)","Dados para receber o preço: titular, banco, agência, conta ou chave PIX"];
 var D_IMV_COM=["Imóvel: Termo de Adesão ou contrato original com a CDHU (com o nº do TAOPOC)","Imóvel: endereço completo, quadra, lote, conjunto, CEP e nº da conta CDHU","Imóvel: certidão negativa de débitos de IPTU","Imóvel: declarações negativas de débito de água e luz, com a última conta de cada","Imóvel: matrícula atualizada, se já existir"];
 var D_IMV_Q=["Imóvel: Declaração de Quitação da CDHU (via atualizada) e ficha de financiamento"];
 var D_IMV_N=["Imóvel: extrato atualizado do saldo devedor e ficha de financiamento","Imóvel: carnê ou boleto da prestação e comprovantes das últimas 12 prestações pagas","Imóvel: declaração de adimplência da CDHU (prestações em dia, sem acordo pendente)","Imóvel: declaração negativa de débito de condomínio, com firma do síndico reconhecida (se unidade vertical)"];
@@ -257,6 +259,7 @@ var DXG=[
 {id:"cj",t:"Cônjuge anuente do cedente 2",ps:[["cj_nome","Cônjuge anuente"]],docs:function(s){return D_PESS.concat(["Certidão de casamento, com a data e o regime de bens (e pacto antenupcial, se houver)"])}},
 {id:"ces",t:"Cessionários (compradores)",ps:[["p1_nome","Cessionário 1"],["p2_nome","Cessionário 2"]],docs:function(s){var l=D_PESS.concat(["Certidão de casamento, com o regime de bens (e pacto antenupcial, se houver)"]);if(s=="n")l=l.concat(["Carteira de trabalho original de todos os adquirentes, mesmo sem registro","Comprovante de renda dos 3 últimos meses de quem tem renda (holerite ou declaração de IR)","Declaração de que não possuem outro imóvel nem financiamento de imóvel no país, e não foram atendidos por programas habitacionais","Estar presentes na entrevista socioeconômica da CDHU"]);return l}}];
 var GL={ced:"c",cj:"k",ces:"p"};
+function dxSec(g,x){if(D_PESS.indexOf(x)>-1)return"Documentos pessoais";if(D_IMV_COM.indexOf(x)>-1||D_IMV_Q.indexOf(x)>-1||D_IMV_N.indexOf(x)>-1)return"Documentos do imóvel";return g=="ced"?"Estado civil e recebimento":(g=="cj"?"Casamento":"Casamento, renda e declarações")}
 /* linhas do combinado: [quem recebe (c=cedentes, k=cônjuge, p=cessionários), texto] */
 function dxLinhas(){var s=sit(),L=[];function a(f,t){if(t)L.push([f,t])}
 a("ckp",fv("preco")?"Preço da cessão: R$ "+fv("preco")+(fv("preco_ext")?" ("+fv("preco_ext")+")":""):"");
@@ -287,29 +290,34 @@ h+='<div class="dxg"><h4><span>💰 Valores e combinado</span></h4><ul id="dxc-l
 '<label class="dxi"><input type="checkbox" data-inc'+(INC?" checked":"")+'><span>Incluir os valores e o combinado na mensagem de documentos</span></label>'+
 '<label class="dxl">Outros combinados (acordos verbais, observações; uma linha por item)</label><textarea data-ex placeholder="Ex.: vendedores entregam o imóvel limpo; pagamento na assinatura do contrato">'+escX(EXTRA)+'</textarea></div>';
 DXG.forEach(function(g){var L=g.docs(s),n=0;L.forEach(function(x,i){if(CK[g.id+i])n++});
-h+='<div class="dxg"><h4><span>'+g.t+'</span><small>'+n+' de '+L.length+' recebidos</small></h4>';
-L.forEach(function(x,i){h+='<label class="dxi"><input type="checkbox" data-dx="'+g.id+i+'"'+(CK[g.id+i]?" checked":"")+'><span>'+escX(x)+'</span></label>'});
-g.ps.forEach(function(p){h+='<div class="dxp"><b>'+escX(fv(p[0])||p[1])+'</b><input type="tel" data-tel="'+p[0]+'" placeholder="WhatsApp: (11) 90000-0000" value="'+escX(TEL[p[0]]||"")+'"><div class="dxb"><button type="button" data-wa="'+g.id+"|"+p[0]+'">💬 Enviar no WhatsApp</button><button type="button" data-wc="'+g.id+"|"+p[0]+'">📝 Só o combinado</button><button type="button" data-cp="'+g.id+"|"+p[0]+'">Copiar</button></div></div>'});
+h+='<div class="dxg"><h4><span>'+g.t+'</span><small>'+n+' de '+L.length+' marcados · <a href="#" data-tg="'+g.id+'">'+(n==L.length?'desmarcar todos':'marcar todos')+'</a></small></h4>';
+var _sc="";L.forEach(function(x,i){var _s=dxSec(g.id,x);if(_s!=_sc){_sc=_s;h+='<div class="dxs">'+escX(_s)+'</div>'}h+='<label class="dxi"><input type="checkbox" data-dx="'+g.id+i+'"'+(CK[g.id+i]?" checked":"")+'><span>'+escX(x.replace(/^Imóvel:\s*/,"").replace(/^./,function(c){return c.toUpperCase()}))+'</span></label>'});
+g.ps.forEach(function(p){h+='<div class="dxp"><b>'+escX(fv(p[0])||p[1])+'</b><input type="tel" data-tel="'+p[0]+'" placeholder="WhatsApp: (11) 90000-0000" value="'+escX(TEL[p[0]]||"")+'"><div class="dxb"><button type="button" data-wa="'+g.id+"|"+p[0]+'">💬 Enviar no WhatsApp</button><button type="button" data-wc="'+g.id+"|"+p[0]+'">📝 Só o combinado</button><button type="button" data-sh="'+g.id+"|"+p[0]+'">📤 Compartilhar</button><button type="button" data-cp="'+g.id+"|"+p[0]+'">Copiar</button></div></div>'});
 h+="</div>"});document.getElementById("dx-body").innerHTML=h;updateDXC()}
-function dxMsg(gid,pk,modo){var g=DXG.filter(function(x){return x.id==gid})[0],L=g.docs(sit()),f=[],comb=dxComb(gid);L.forEach(function(x,i){if(!CK[gid+i])f.push(x)});
+function dxMsg(gid,pk,modo){var g=DXG.filter(function(x){return x.id==gid})[0],L=g.docs(sit()),f=[],comb=dxComb(gid);L.forEach(function(x,i){if(CK[gid+i])f.push(x)});
 var nm=fv(pk),pn=nm?nm.split(/\s+/)[0].toLowerCase().replace(/^./,function(c){return c.toUpperCase()}):"";
 var imv=[fv("imovel_end"),fv("imovel_quadra")&&"Quadra "+fv("imovel_quadra"),fv("imovel_lote")&&"Lote "+fv("imovel_lote"),fv("imovel_conjunto")&&"Conjunto "+fv("imovel_conjunto")].filter(Boolean).join(", ");
 var ass=(fv("cor_nome")||"FCosta Corretor de Imóveis")+(fv("cor_creci")?" · CRECI/SP "+fv("cor_creci"):""),p=[];
 if(modo=="c"&&!comb.length)return"";
 if(modo=="c"||(INC&&comb.length))p.push("Segue o que ficou combinado para a cessão de direitos do imóvel CDHU"+(imv?" ("+imv+")":"")+":\n\n"+comb.join("\n")+"\n\nSe algo estiver diferente do que conversamos, me avise antes da assinatura.");
-if(modo!="c"){if(f.length){var t="Para preparar o contrato, preciso que você me envie os documentos abaixo, em foto nítida ou em PDF:\n\n";f.forEach(function(x,i){t+=(i+1)+". "+x+"\n"});p.push(t+"\nPode mandar por aqui mesmo.")}else p.push("Recebi todos os documentos necessários para o contrato. Obrigado!")}
+if(modo!="c"){if(f.length){var sec=[],ix={},n=0,t="Para preparar o contrato, preciso destes documentos (foto nítida ou PDF):\n";f.forEach(function(x){var q=dxSec(gid,x);if(!(q in ix)){ix[q]=sec.length;sec.push([q,[]])}sec[ix[q]][1].push(x.replace(/^Imóvel:\s*/,"").replace(/^./,function(c){return c.toUpperCase()}))});sec.forEach(function(z){t+="\n*"+z[0]+"*\n";z[1].forEach(function(x){n++;t+=n+". "+x+"\n"})});p.push(t+"\nPode mandar por aqui mesmo.")}}
+if(!p.length)return"";
 return"Olá"+(pn?", "+pn:"")+"! "+p.join("\n\n")+"\n\nObrigado!\n\n— "+ass}
 function dxFone(k){var d=(TEL[k]||"").replace(/\D/g,"");if(d.length==10||d.length==11)d="55"+d;return d}
 var dx=document.createElement("details");dx.id="dx";dx.open=true;
-dx.innerHTML='<summary>📋 Valores, combinado e documentos de cada parte</summary><p class="dxn">Marque o que já recebeu. O WhatsApp envia o combinado e só os documentos que ainda faltam, com o nome da parte. A lista muda ao escolher quitado ou financiado no campo abaixo.</p><div id="dx-body"></div>';
+dx.innerHTML='<summary>📋 Valores, combinado e documentos de cada parte</summary><p class="dxn"><b>Marque os documentos que quer pedir.</b> Só o que estiver marcado vai na mensagem; o que ficar sem marcar não é enviado. A lista muda ao escolher quitado ou financiado no campo abaixo.</p><div id="dx-body"></div>';
 panel.insertBefore(dx,panel.firstChild);
 dx.addEventListener("change",function(e){var k=e.target.getAttribute("data-dx");if(k){CK[k]=e.target.checked;renderDX()}if(e.target.hasAttribute("data-inc"))INC=e.target.checked});
 dx.addEventListener("input",function(e){var k=e.target.getAttribute("data-tel");if(k)TEL[k]=e.target.value;if(e.target.hasAttribute("data-ex")){EXTRA=e.target.value;updateDXC()}});
-dx.addEventListener("click",function(e){var b=e.target.closest("[data-wa],[data-wc],[data-cp]");if(!b)return;var w=b.getAttribute("data-wa"),c=b.getAttribute("data-wc"),a=(w||c||b.getAttribute("data-cp")).split("|"),m=dxMsg(a[0],a[1],c?"c":"");
-if(c&&!m){alert("Preencha o preço e os campos do bloco Negócio para montar o combinado.");return}
-if(w||c){window.open("https://wa.me/"+dxFone(a[1])+"?text="+encodeURIComponent(m),"_blank");return}
-var ok=function(){var o=b.textContent;b.textContent="✅ Copiado";setTimeout(function(){b.textContent=o},1500)};
-if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(m).then(ok,function(){prompt("Copie o texto:",m)});else prompt("Copie o texto:",m)});
+dx.addEventListener("click",function(e){var tg=e.target.closest("[data-tg]");if(tg){e.preventDefault();var gi=tg.getAttribute("data-tg"),gg=DXG.filter(function(x){return x.id==gi})[0],LL=gg.docs(sit()),al=LL.every(function(x,i){return CK[gi+i]});LL.forEach(function(x,i){CK[gi+i]=!al});renderDX();return}var b=e.target.closest("[data-wa],[data-wc],[data-cp],[data-sh]");if(!b)return;var w=b.getAttribute("data-wa"),c=b.getAttribute("data-wc"),h=b.getAttribute("data-sh"),a=(w||c||h||b.getAttribute("data-cp")).split("|"),m=dxMsg(a[0],a[1],c?"c":"");
+if(!m){alert(c?"Preencha o preço e os campos do bloco Negócio para montar o combinado.":"Marque os documentos que você quer pedir a esta pessoa.");return}
+var ok=function(t){var o=b.textContent;b.textContent=t||"✅ Copiado";setTimeout(function(){b.textContent=o},2500)};
+var cop=function(t){if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(m).then(function(){ok(t)},function(){prompt("Copie o texto:",m)});else prompt("Copie o texto:",m)};
+if(h&&navigator.share){navigator.share({text:m}).catch(function(){});return}
+if(w||c){var f=dxFone(a[1]),u="https://wa.me/"+f+"?text="+encodeURIComponent(m);
+if(u.length>2000){cop("✅ Copiado: cole no WhatsApp");window.open("https://wa.me/"+f,"_blank");return}
+window.open(u,"_blank");return}
+cop()});
 var _setv=setv;setv=function(k,v){_setv(k,v);if(/^(c1_nome|c2_nome|cj_nome|p1_nome|p2_nome|situacao|imovel_end|imovel_quadra|imovel_lote|imovel_conjunto)$/.test(k))renderDX();else if(/^(preco|preco_ext|forma|banco|posse|corr_val|corr_pct|corr_quem|prazo_proc|prazo_colab|multa_pct|cidade_ass|data_ass|saldo|parcela_val|parcela_venc|ult_parcela_paga|regra_saldo|prazo_devol)$/.test(k))updateDXC()};
 var sitSel=document.getElementById("f_situacao");if(sitSel)sitSel.addEventListener("change",renderDX);
 renderDX();
