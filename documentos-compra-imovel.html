@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentos para comprar imóvel — FCosta Corretor</title>
+<style>
+:root{--bg:#f3f6f4;--card:#fff;--tx:#14231c;--mut:#5b6b63;--pri:#0f6b4f;--pri2:#e3f2ec;--bd:#d5e0da;--warn:#fff4d6;--warnb:#e5c46a}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1713;--card:#17231d;--tx:#e8f1ec;--mut:#9db0a6;--pri:#4cc79b;--pri2:#1b3128;--bd:#2a3b33;--warn:#3a3217;--warnb:#7a6420}}
+*{box-sizing:border-box}
+body{margin:0;font-family:Georgia,"Times New Roman",serif;background:var(--bg);color:var(--tx);line-height:1.55}
+.wrap{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:1.7rem;line-height:1.2;margin:8px 0 6px}
+.sub{color:var(--mut);margin:0 0 18px;font-size:1rem}
+.bar{position:sticky;top:0;background:var(--bg);padding:10px 0;z-index:5;border-bottom:1px solid var(--bd)}
+.prog{height:10px;background:var(--pri2);border-radius:6px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--pri);transition:width .25s}
+.cnt{font-family:system-ui,sans-serif;font-size:.85rem;color:var(--mut);margin-top:4px}
+.item{background:var(--card);border:1px solid var(--bd);border-radius:10px;margin:12px 0;overflow:hidden}
+.item.ok{border-color:var(--pri)}
+.head{display:flex;gap:12px;align-items:flex-start;padding:14px;cursor:pointer}
+.head input{width:26px;height:26px;margin-top:2px;accent-color:var(--pri);flex:none}
+.head b{font-size:1.08rem;display:block}
+.head span{font-family:system-ui,sans-serif;font-size:.82rem;color:var(--mut)}
+.body{padding:0 14px 14px 52px;font-family:system-ui,sans-serif;font-size:.93rem}
+.body p{margin:6px 0}
+.lbl{font-weight:600}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.links a{background:var(--pri);color:#fff;text-decoration:none;padding:8px 12px;border-radius:8px;font-size:.88rem}
+@media(prefers-color-scheme:dark){.links a{color:#06130d}}
+.links a:focus-visible,.head input:focus-visible,button:focus-visible{outline:3px solid var(--warnb);outline-offset:2px}
+.note{background:var(--warn);border:1px solid var(--warnb);border-radius:10px;padding:12px 14px;margin:18px 0;font-family:system-ui,sans-serif;font-size:.9rem}
+button{font-family:system-ui,sans-serif;background:transparent;border:1px solid var(--bd);color:var(--mut);padding:8px 12px;border-radius:8px;cursor:pointer}
+footer{font-family:system-ui,sans-serif;font-size:.8rem;color:var(--mut);margin-top:24px}
+@media print{.bar,button,.links{display:none}.item{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Documentos para efetivar a compra de um imóvel</h1>
+<p class="sub">Confira cada item antes de assinar o contrato. Toque no documento para ver onde emitir.</p>
+
+<div class="bar">
+  <div class="prog"><i id="pb"></i></div>
+  <div class="cnt" id="cnt">0 de 9 conferidos</div>
+</div>
+
+<div id="lista"></div>
+
+<div class="note"><b>Atenção:</b> links e prazos de validade variam por estado e cartório. Confirme no órgão emissor. As certidões dos vendedores devem ser pedidas para <u>todos</u> os proprietários e cônjuges (CPF/RG de cada um). Emita o mais próximo possível da assinatura — em geral, certidões valem 30 dias.</div>
+
+<button id="reset">Limpar marcações</button>
+<footer>Material de apoio — não substitui análise jurídica. FCosta Corretor · CRECI-SP 294791-F</footer>
+</div>
+
+<script>
+var DOCS=[
+{t:"Matrícula atualizada do imóvel",
+ q:"Prova quem é o dono legal e a situação do imóvel (descrição, proprietários, hipotecas, penhoras, alienação fiduciária).",
+ o:"Cartório de Registro de Imóveis da região do imóvel (balcão ou online).",
+ v:"Emitir no máximo 30 dias antes da assinatura.",
+ l:[["Registro de Imóveis online (ONR)","https://registradores.onr.org.br"]]},
+{t:"Certidão de ônus reais e ações reais/reipersecutórias",
+ q:"Mostra se há hipoteca, penhora, usufruto, alienação fiduciária ou ações que perseguem o imóvel.",
+ o:"Mesmo Cartório de Registro de Imóveis da matrícula. Peça as duas certidões juntas.",
+ v:"Validade usual: 30 dias.",
+ l:[["Registro de Imóveis online (ONR)","https://registradores.onr.org.br"]]},
+{t:"Certidão negativa de débitos municipais (IPTU e taxas)",
+ q:"Garante que não há dívida de IPTU, que acompanha o imóvel e passa ao comprador.",
+ o:"Prefeitura do município do imóvel. Tenha em mãos o número do contribuinte (carnê do IPTU). Em São Paulo capital, pelo portal de certidões da Prefeitura.",
+ v:"Varia por município (geralmente 30 a 90 dias).",
+ l:[["Prefeitura de São Paulo — Finanças","https://www.prefeitura.sp.gov.br/cidade/secretarias/financas/"]]},
+{t:"Certidões dos vendedores: cível, criminal, trabalhista e federal",
+ q:"Revelam processos que podem gerar penhora do imóvel ou fraude contra credores.",
+ o:"Cível/criminal estadual: Tribunal de Justiça (e-SAJ no TJSP). Federal: Justiça Federal. Trabalhista: CNDT do TST. Receita: CND federal.",
+ v:"CNDT e CND federal: 180 dias. Demais: em geral 30 dias.",
+ l:[["TJSP — certidões (e-SAJ)","https://esaj.tjsp.jus.br/sco/abrirCadastro.do"],
+    ["Justiça Federal — certidão","https://certidoes-apf.apps.cjf.jus.br/"],
+    ["CNDT — TST (trabalhista)","https://cndt-certidao.tst.jus.br/inicio.faces"],
+    ["Receita Federal — certidões","https://servicos.receitafederal.gov.br/servico/certidoes/"]]},
+{t:"Certidão negativa de protestos",
+ q:"Mostra títulos protestados em nome dos vendedores (dívidas não pagas).",
+ o:"Cartórios de Protesto. Consulta nacional pela CENPROT; em SP também pelo IEPTB-SP.",
+ v:"Em geral 30 dias.",
+ l:[["CENPROT Nacional","https://site.cenprotnacional.org.br"],
+    ["Protesto SP","https://www.protestosp.com.br"]]},
+{t:"Certidão de quitação condominial (se for apartamento)",
+ q:"Comprova que não há taxas de condomínio em atraso, que ficam vinculadas ao imóvel.",
+ o:"Síndico ou administradora do condomínio. Peça também a convenção, o regimento e a ata de assembleias recentes.",
+ v:"Pedir perto da assinatura (cobrança mensal).",
+ l:[]},
+{t:"Contrato anterior ou escritura pública",
+ q:"Prova a origem da propriedade do vendedor (como ele adquiriu o imóvel) e a cadeia de transmissão.",
+ o:"Com o vendedor. Se perdeu, a 2ª via da escritura é pedida ao Cartório de Notas que a lavrou; escrituras digitais pelo e-Notariado.",
+ v:"Sem validade — conferir se está registrado na matrícula.",
+ l:[["e-Notariado","https://www.e-notariado.org.br"]]},
+{t:"Declaração de inexistência de ação possessória",
+ q:"Vendedor declara que ninguém disputa a posse do imóvel (usucapião, reintegração, etc.).",
+ o:"Declaração assinada pelo vendedor, de preferência com firma reconhecida, acompanhada da certidão do distribuidor cível (Fórum / TJ).",
+ v:"Fazer na data da assinatura.",
+ l:[["TJSP — certidões (e-SAJ)","https://esaj.tjsp.jus.br/sco/abrirCadastro.do"]]},
+{t:"Laudo técnico de vistoria do imóvel",
+ q:"Avalia estrutura, instalações, umidade, rachaduras e regularidade da construção.",
+ o:"Engenheiro civil ou arquiteto contratado pelo comprador, com ART (CREA) ou RRT (CAU).",
+ v:"Fazer antes de fechar o negócio.",
+ l:[["CREA-SP","https://www.creasp.org.br"],["CAU/SP","https://www.causp.gov.br"]]}
+];
+var KEY="docs_compra_fcosta";
+var st={};try{st=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){}
+var box=document.getElementById("lista");
+DOCS.forEach(function(d,i){
+ var el=document.createElement("div");el.className="item";
+ var links=d.l.map(function(x){return '<a href="'+x[1]+'" target="_blank" rel="noopener">'+x[0]+'</a>'}).join("");
+ el.innerHTML='<label class="head"><input type="checkbox" data-i="'+i+'"><div><b>'+d.t+'</b><span>'+d.q+'</span></div></label>'
+ +'<div class="body"><p><span class="lbl">Onde tirar:</span> '+d.o+'</p><p><span class="lbl">Validade:</span> '+d.v+'</p>'
+ +(links?'<div class="links">'+links+'</div>':'')+'</div>';
+ box.appendChild(el);
+ var cb=el.querySelector("input");cb.checked=!!st[i];
+ cb.addEventListener("change",function(){st[i]=cb.checked;save()});
+});
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}upd()}
+function upd(){
+ var n=0;document.querySelectorAll(".head input").forEach(function(c){c.closest(".item").classList.toggle("ok",c.checked);if(c.checked)n++});
+ document.getElementById("pb").style.width=(n/DOCS.length*100)+"%";
+ document.getElementById("cnt").textContent=n+" de "+DOCS.length+" conferidos";
+}
+document.getElementById("reset").onclick=function(){st={};document.querySelectorAll(".head input").forEach(function(c){c.checked=false});save()};
+upd();
+</script>
+</body>
+</html>
