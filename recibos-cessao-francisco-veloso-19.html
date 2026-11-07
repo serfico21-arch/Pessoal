@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recibos e termos – Cessão CDHU Francisco Veloso, 19</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#e9ecef;color:#111}
+#bar{position:sticky;top:0;z-index:5;background:#1f3a5f;color:#fff;padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#bar b{margin-right:auto;font-size:14px}
+#bar button{border:0;border-radius:6px;padding:8px 10px;font-size:13px;cursor:pointer;background:#fff;color:#1f3a5f;font-weight:bold}
+#bar button.on{background:#f2b705}
+#bar button.p{background:#2e9e5b;color:#fff}
+.dica{font-size:11px;color:#555;padding:6px 12px;background:#fff8d6}
+#wrap{display:flex;gap:14px;padding:14px;align-items:flex-start;flex-wrap:wrap}
+#panel{flex:1 1 300px;max-width:400px;background:#fff;border-radius:8px;padding:12px;max-height:calc(100vh - 110px);overflow:auto}
+#panel h3{margin:14px 0 6px;font-size:13px;color:#1f3a5f;text-transform:uppercase;border-bottom:1px solid #ccd}
+#panel label{display:block;font-size:12px;color:#444;margin:6px 0 2px}
+#panel input,#panel textarea{width:100%;padding:6px;border:1px solid #bbb;border-radius:4px;font-size:13px}
+#panel textarea{min-height:80px}
+#docs{flex:3 1 520px;min-width:0}
+.d{display:none;background:#fff;padding:30px 36px;font-family:"Times New Roman",serif;font-size:12pt;line-height:1.5;border-radius:8px}
+.d.on{display:block}
+.d h1{font-size:15pt;text-align:center;text-transform:uppercase;margin:0 0 14px}
+.d p{text-align:justify;margin:8px 0}
+.base{font-style:italic;font-size:10.5pt;color:#333}
+.v{white-space:pre-line}.v.empty{background:#fff176;padding:0 2px}
+.assin{display:grid;grid-template-columns:1fr 1fr;gap:38px 30px;margin-top:34px;font-size:11pt}
+.assin div{border-top:1px solid #111;padding-top:4px;text-align:center}
+@media print{
+ body{background:#fff}#bar,#panel,.dica{display:none}#wrap{display:block;padding:0}
+ .d{padding:0;border-radius:0}.d:not(.on){display:none}.v.empty{background:none}
+ @page{size:A4;margin:20mm}
+}
+</style></head><body>
+<div id="bar"><b>Recibos e termos</b>
+<button data-t="0" class="on">Recibo e quitação</button>
+<button data-t="1">Entrega de posse</button>
+<button data-t="2">Recibo de corretagem</button>
+<button data-t="3">Entrega de documentos</button>
+<button class="p" onclick="window.print()">Imprimir / PDF</button></div>
+<div class="dica">Escolha o documento no alto. Preencha os campos à esquerda (o que está em amarelo ainda falta). Você pode clicar no texto e editar. "Imprimir / PDF" imprime só o documento escolhido.</div>
+<div id="wrap"><div id="panel"></div><div id="docs"></div></div>
+<script>
+var G=[
+["Imóvel e contrato",[["imovel","Imóvel (descrição)"],["data_contrato","Data do contrato de cessão"],["local","Cidade da assinatura"]]],
+["Vendedores (cedentes)",[["c1_nome","Cedente 1"],["c1_cpf","CPF do cedente 1"],["c2_nome","Cedente 2"],["c2_cpf","CPF do cedente 2"],["cj_nome","Cônjuge anuente"],["cj_cpf","CPF do cônjuge anuente"]]],
+["Compradores (cessionários)",[["p1_nome","Cessionário 1"],["p1_cpf","CPF do cessionário 1"],["p2_nome","Cessionário 2"],["p2_cpf","CPF do cessionário 2"]]],
+["Pagamento do preço",[["preco","Valor (R$)"],["preco_ext","Valor por extenso"],["forma_pag","Forma (PIX, TED...)"],["data_pag","Data do pagamento"],["banco","Conta que recebeu (banco, agência, conta)"]]],
+["Entrega da posse",[["data_entrega","Data da entrega"],["chaves","Chaves entregues (quantidade e tipo)"],["leitura_agua","Leitura do medidor de água"],["leitura_luz","Leitura do medidor de luz"],["vistoria","Estado do imóvel (vistoria)","t"]]],
+["Corretagem",[["cor_nome","Corretor"],["cor_creci","CRECI"],["cor_cpf","CPF do corretor"],["pagador_corr","Quem pagou a comissão"],["corr_val","Comissão (R$)"],["corr_ext","Comissão por extenso"],["corr_pct","Percentual (%)"],["data_corr","Data do pagamento da comissão"],["forma_corr","Forma de pagamento da comissão"]]],
+["Documentos entregues",[["docs_entregues","Lista de documentos entregues","t"],["data_docs","Data da entrega dos documentos"]]]
+];
+var DEF={imovel:"unidade habitacional da CDHU situada na Rua Padre Francisco Veloso, nº 19, Quadra 29, Lote 13, Conjunto Encosta Norte, Itaim Paulista, São Paulo/SP, CEP 08131-180 (Conta CDHU nº 7216419; TAOPOC nº 000486)",data_contrato:"09 de novembro de 2026",local:"São Paulo",
+c1_nome:"EDNALDO GRANEIRO",c1_cpf:"047.385.498-80",c2_nome:"CELIA MARIA DOS SANTOS VENTURA",c2_cpf:"103.987.568-80",cj_nome:"JOSÉ ROBERTO VENTURA",cj_cpf:"",
+p1_nome:"ALEXANDRE FERNANDES DA COSTA",p1_cpf:"351.502.858-70",p2_nome:"ADRIANA PINHEIRO DA COSTA",p2_cpf:"294.406.758-37",
+preco:"200.000,00",preco_ext:"duzentos mil reais",forma_pag:"PIX/TED",data_pag:"09 de novembro de 2026",banco:"",
+data_entrega:"09 de novembro de 2026",chaves:"",leitura_agua:"",leitura_luz:"",vistoria:"",
+cor_nome:"FCOSTA CORRETOR DE IMÓVEIS",cor_creci:"294791-F",cor_cpf:"022.478.348-33",pagador_corr:"os CEDENTES, EDNALDO GRANEIRO e CELIA MARIA DOS SANTOS VENTURA",corr_val:"12.000,00",corr_ext:"doze mil reais",corr_pct:"6",data_corr:"",forma_corr:"",
+docs_entregues:"1. Declaração de Quitação da CDHU e ficha de financiamento\n2. Termo de Adesão nº 000486 (1989)\n3. Certidão negativa de débitos de IPTU\n4. Declarações negativas de débito de água e luz\n5. RG, CPF e comprovantes de residência dos CEDENTES\n6. Certidões de casamento e de divórcio, com sentença e trânsito em julgado",data_docs:"09 de novembro de 2026"};
+var L={};G.forEach(function(g){g[1].forEach(function(f){L[f[0]]=f[1]})});
+var SIG2='<div class="assin"><div><b>{{c1_nome}}</b><br>CEDENTE · CPF {{c1_cpf}}</div><div><b>{{c2_nome}}</b><br>CEDENTE · CPF {{c2_cpf}}</div><div><b>{{cj_nome}}</b><br>Cônjuge anuente · CPF {{cj_cpf}}</div><div></div></div>';
+var SIGC='<div class="assin"><div><b>{{p1_nome}}</b><br>CESSIONÁRIO · CPF {{p1_cpf}}</div><div><b>{{p2_nome}}</b><br>CESSIONÁRIA · CPF {{p2_cpf}}</div></div>';
+var TEST='<div class="assin"><div><b>Testemunha 1</b><br>Nome: ____________ CPF: ____________</div><div><b>Testemunha 2</b><br>Nome: ____________ CPF: ____________</div></div>';
+var T=[
+'<h1>Recibo e Termo de Quitação do Preço</h1><p>Nós, <b>{{c1_nome}}</b> (CPF {{c1_cpf}}) e <b>{{c2_nome}}</b> (CPF {{c2_cpf}}), CEDENTES, com a anuência de <b>{{cj_nome}}</b> (CPF {{cj_cpf}}), declaramos ter recebido de <b>{{p1_nome}}</b> (CPF {{p1_cpf}}) e <b>{{p2_nome}}</b> (CPF {{p2_cpf}}), CESSIONÁRIOS, a quantia de <b>R$ {{preco}} ({{preco_ext}})</b>, por {{forma_pag}}, em {{data_pag}}, na conta {{banco}}.</p><p>O valor corresponde ao <b>pagamento integral do preço</b> da cessão dos direitos sobre o imóvel descrito como {{imovel}}, conforme o Instrumento Particular de Cessão e Transferência de Direitos assinado em {{data_contrato}}.</p><p>Pelo recebimento integral, damos aos CESSIONÁRIOS <b>plena, geral, irrevogável e irretratável quitação do preço</b>, nada mais tendo a reclamar a esse título. Esta quitação vale após a compensação do pagamento e não afasta as demais obrigações do contrato, como a procuração em causa própria, a colaboração para a escritura e a responsabilidade pelos débitos anteriores à posse.</p><p>{{local}}, {{data_pag}}.</p>'+SIG2+TEST+'<p class="base" style="margin-top:20px">Reconhecer firma de todos os que assinam. Base legal: Código Civil, arts. 319 e 320 (recibo e quitação) e art. 422 (boa-fé).</p>',
+'<h1>Termo de Entrega de Posse</h1><p>Em {{data_entrega}}, os CEDENTES <b>{{c1_nome}}</b> e <b>{{c2_nome}}</b>, com a anuência de <b>{{cj_nome}}</b>, entregam aos CESSIONÁRIOS <b>{{p1_nome}}</b> e <b>{{p2_nome}}</b> a posse do imóvel {{imovel}}, em cumprimento ao Instrumento Particular de Cessão assinado em {{data_contrato}}.</p><p><b>Chaves entregues:</b> {{chaves}}.</p><p><b>Leitura dos medidores:</b> água {{leitura_agua}}; luz {{leitura_luz}}.</p><p><b>Estado do imóvel (vistoria):</b> {{vistoria}}. As fotos tiradas na vistoria fazem parte deste termo.</p><p>Os CESSIONÁRIOS declaram ter vistoriado o imóvel e recebê-lo no estado descrito. Os CEDENTES declaram que o imóvel está livre de pessoas e coisas e com água, luz e gás quitados até esta data. A partir de agora, os riscos e as despesas do imóvel (IPTU, água, luz e gás) passam aos CESSIONÁRIOS, e os débitos anteriores continuam com os CEDENTES.</p><p>{{local}}, {{data_entrega}}.</p>'+SIG2+SIGC+TEST+'<p class="base" style="margin-top:20px">Base legal: Código Civil, arts. 492 (riscos até a entrega), 502 (débitos até a entrega) e 1.204 (aquisição da posse).</p>',
+'<h1>Recibo de Corretagem</h1><p><b>{{cor_nome}}</b>, inscrito no CRECI/SP sob o nº {{cor_creci}} e no CPF/MF sob o nº {{cor_cpf}}, declara ter recebido de {{pagador_corr}} a quantia de <b>R$ {{corr_val}} ({{corr_ext}})</b>, em {{data_corr}}, por {{forma_corr}}.</p><p>O valor corresponde a {{corr_pct}}% sobre o preço de R$ {{preco}} ({{preco_ext}}) e é a <b>comissão de corretagem</b> pela intermediação da cessão de direitos do imóvel {{imovel}}, ajustada no Instrumento Particular de Cessão assinado em {{data_contrato}}.</p><p>Pelo recebimento, dá <b>plena e geral quitação</b> da comissão, nada mais tendo a reclamar a esse título.</p><p>{{local}}, {{data_corr}}.</p><div class="assin"><div><b>{{cor_nome}}</b><br>CRECI/SP {{cor_creci}} · CPF {{cor_cpf}}</div><div></div></div><p class="base" style="margin-top:20px">Base legal: Código Civil, arts. 722 a 729 (corretagem) e 319 (recibo); Lei nº 6.530/1978 e Decreto nº 81.871/1978.</p>',
+'<h1>Termo de Entrega de Documentos</h1><p>Em {{data_docs}}, os CEDENTES <b>{{c1_nome}}</b> e <b>{{c2_nome}}</b>, com a anuência de <b>{{cj_nome}}</b>, entregam aos CESSIONÁRIOS <b>{{p1_nome}}</b> e <b>{{p2_nome}}</b> os documentos abaixo, referentes ao imóvel {{imovel}}, conforme o Anexo I do Instrumento Particular de Cessão assinado em {{data_contrato}}:</p><p>{{docs_entregues}}</p><p>Os CESSIONÁRIOS declaram ter recebido e conferido os documentos listados. Os CEDENTES se comprometem a fornecer outras vias e documentos que a CDHU, o tabelião ou o cartório exigirem.</p><p>{{local}}, {{data_docs}}.</p>'+SIG2+SIGC+'<p class="base" style="margin-top:20px">Base legal: Código Civil, art. 422 (boa-fé) e cláusulas 2.1(e) e 11ª do contrato.</p>'
+];
+var panel=document.getElementById("panel"),docs=document.getElementById("docs");
+G.forEach(function(g){var h=document.createElement("h3");h.textContent=g[0];panel.appendChild(h);
+ g[1].forEach(function(f){var l=document.createElement("label");l.textContent=f[1];var i=document.createElement(f[2]=="t"?"textarea":"input");i.id="f_"+f[0];i.value=DEF[f[0]]||"";i.oninput=function(){setv(f[0],i.value)};panel.appendChild(l);panel.appendChild(i)})});
+T.forEach(function(t,n){var d=document.createElement("div");d.className="d"+(n==0?" on":"");d.contentEditable="true";d.spellcheck=false;
+ d.innerHTML=t.replace(/\{\{(\w+)\}\}/g,function(m,k){return '<span class="v empty" data-k="'+k+'"></span>'});docs.appendChild(d)});
+function setv(k,v){document.querySelectorAll('.v[data-k="'+k+'"]').forEach(function(s){if(v.trim()){s.textContent=v;s.className="v"}else{s.textContent="["+L[k]+"]";s.className="v empty"}})}
+Object.keys(L).forEach(function(k){setv(k,DEF[k]||"")});
+document.querySelectorAll("#bar button[data-t]").forEach(function(b){b.onclick=function(){document.querySelectorAll("#bar button[data-t]").forEach(function(x){x.className=""});b.className="on";document.querySelectorAll(".d").forEach(function(d,i){d.className="d"+(i==b.dataset.t?" on":"")})}});
+</script></body></html>

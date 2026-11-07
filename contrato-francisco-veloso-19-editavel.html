@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contrato editável – Francisco Veloso, 19</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#e9ecef;color:#111}
+#bar{position:sticky;top:0;z-index:5;background:#1f3a5f;color:#fff;padding:8px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#bar b{margin-right:auto;font-size:14px}
+#bar button{border:0;border-radius:6px;padding:8px 12px;font-size:13px;cursor:pointer;background:#fff;color:#1f3a5f;font-weight:bold}
+#bar button.p{background:#f2b705}
+#wrap{display:flex;gap:14px;padding:14px;align-items:flex-start;flex-wrap:wrap}
+#panel{flex:1 1 320px;max-width:420px;background:#fff;border-radius:8px;padding:12px;max-height:calc(100vh - 80px);overflow:auto}
+#panel h3{margin:14px 0 6px;font-size:13px;color:#1f3a5f;text-transform:uppercase;border-bottom:1px solid #ccd}
+#panel label{display:block;font-size:12px;color:#444;margin:6px 0 2px}
+#panel input,#panel textarea{width:100%;padding:6px;border:1px solid #bbb;border-radius:4px;font-size:13px}
+#panel textarea{min-height:70px}
+#doc{flex:3 1 520px;background:#fff;padding:28px 34px;font-family:"Times New Roman",serif;font-size:12pt;line-height:1.45;border-radius:8px;min-width:0}
+#doc h1{font-size:15pt;text-align:center;text-transform:uppercase;margin:0 0 4px}
+#doc h2{font-size:12pt;text-transform:uppercase;margin:20px 0 6px}
+#doc p{text-align:justify;margin:6px 0}
+.sub{text-align:center;font-size:10pt;color:#555}
+.base{font-style:italic;font-size:10.5pt;color:#333}
+.box{border:2px solid #111;padding:10px 14px;margin:14px 0;background:#f6f6f6}
+.v{white-space:pre-line}
+.v.empty{background:#fff176;padding:0 2px}
+.assin{display:grid;grid-template-columns:1fr 1fr;gap:34px 30px;margin-top:30px;font-size:11pt}
+.assin div{border-top:1px solid #111;padding-top:4px;text-align:center}
+.pb{page-break-before:always}
+.dica{font-size:11px;color:#555;padding:6px 12px;background:#fff8d6}
+#doc.mq .m.n{display:none}#doc.mn .m.q{display:none}
+@media print{
+ body{background:#fff}#bar,#panel,.dica{display:none}
+ #wrap{display:block;padding:0}#doc{padding:0;border-radius:0}
+ .v.empty{background:none}
+ @page{size:A4;margin:20mm}
+}
+</style></head><body>
+<div id="bar"><b>Contrato – Francisco Veloso, 19 (editável)</b>
+<button onclick="exemplo()">Carregar exemplo</button>
+<button onclick="limpar()">Limpar campos</button>
+<button onclick="document.querySelector('.sub').style.display=(document.querySelector('.sub').style.display=='none'?'':'none')">Mostrar/ocultar aviso de minuta</button>
+<button onclick="baixar()">Baixar este arquivo preenchido</button>
+<button class="p" onclick="window.print()">Imprimir / Salvar em PDF</button></div>
+<div class="dica">Preencha o formulário à esquerda e o contrato se atualiza. Você também pode clicar direto no texto do contrato e digitar para mudar qualquer frase. Campos em amarelo ainda estão vazios. Para gerar o PDF, use "Imprimir" e escolha "Salvar como PDF".</div>
+<div id="wrap"><div id="panel"></div><div id="doc" contenteditable="true" spellcheck="false"></div></div>
+
+<script id="main">
+var SAVED=null;/*S*/
+var G=[
+["Situação do imóvel",[["situacao","O financiamento da CDHU está","s"]]],
+["Financiamento (preencher só se NÃO estiver quitado)",[["saldo","Saldo devedor atual (R$)"],["parcela_val","Valor da prestação mensal (R$)"],["parcela_venc","Dia de vencimento da prestação"],["ult_parcela_paga","Última prestação paga (mês/ano)"],["prazo_devol","Prazo para devolução se a CDHU recusar (dias)"],["regra_saldo","Como o saldo devedor entra no preço (ex.: já descontado do preço; abatido; pago além do preço)","t"]]],
+["Imóvel",[
+["imovel_end","Rua e número"],["imovel_quadra","Quadra"],["imovel_lote","Lote"],["imovel_conjunto","Conjunto habitacional"],["imovel_bairro","Bairro"],["imovel_cidade","Cidade/UF"],["imovel_cep","CEP"],["conta_cdhu","Conta CDHU nº"],["taopoc","TAOPOC nº"]]],
+["Cedente 1 (vendedor)",[
+["c1_nome","Nome completo"],["c1_alias","Outra grafia do nome (se houver)"],["c1_civil","Estado civil"],["c1_prof","Profissão"],["c1_rg","RG"],["c1_cpf","CPF"],["c1_end","Endereço completo"]]],
+["Cedente 2 (vendedor)",[
+["c2_nome","Nome completo"],["c2_anterior","Nome anterior (se houver)"],["c2_civil","Estado civil"],["c2_prof","Profissão"],["c2_rg","RG"],["c2_cpf","CPF"],["c2_end","Endereço completo"]]],
+["Cônjuge anuente do cedente 2",[
+["cj_nome","Nome completo"],["cj_prof","Profissão"],["cj_rg","RG"],["cj_cpf","CPF"],["cj_regime","Regime de bens"],["cj_data","Data do casamento"]]],
+["Cessionário 1 (comprador)",[
+["p1_nome","Nome completo"],["p1_civil","Estado civil"],["p1_regime","Regime de bens"],["p1_prof","Profissão"],["p1_rg","RG"],["p1_cpf","CPF"],["p1_end","Endereço completo"]]],
+["Cessionário 2 (cônjuge)",[
+["p2_nome","Nome completo"],["p2_prof","Profissão"],["p2_doc","Documento (RG ou CIN nº)"],["p2_cpf","CPF"]]],
+["Corretor",[
+["cor_nome","Nome / empresa"],["cor_creci","CRECI nº"],["cor_cpf","CPF"]]],
+["Negócio",[
+["preco","Preço (R$)"],["preco_ext","Preço por extenso"],["forma","Forma de pagamento"],["banco","Dados bancários (PIX/TED)"],["posse","Quando a posse é entregue"],["corr_pct","Corretagem (%)"],["corr_val","Corretagem (R$)"],["corr_quem","Quem paga a corretagem"],["prazo_proc","Prazo da procuração (dias)"],["prazo_colab","Prazo de colaboração (dias)"],["multa_pct","Multa (%)"],["foro","Foro (comarca)"],["cidade_ass","Cidade da assinatura"],["data_ass","Data da assinatura"]]],
+["Textos livres",[
+["considerandos","Considerandos (origem do imóvel, quitação, divórcio etc.)","t"],["ciencia_d","Ciência dos cessionários – item (d), regras da CDHU","t"],["partilha","Item 2.1.f – situação de partilha","t"]]]
+];
+var EX={situacao:"q",imovel_end:"Rua Padre Francisco Veloso, nº 19",imovel_quadra:"29",imovel_lote:"13",imovel_conjunto:"Encosta Norte",imovel_bairro:"Itaim Paulista",imovel_cidade:"São Paulo/SP",imovel_cep:"08131-180",conta_cdhu:"7216419",taopoc:"000486",
+c1_nome:"EDNALDO GRANEIRO",c1_alias:"EDNALDO GRANERO nos registros da CDHU",c1_civil:"divorciado",c1_prof:"aposentado",c1_rg:"15.270.272-6 SSP/SP",c1_cpf:"047.385.498-80",c1_end:"Praça Guamirim, nº 65, Cidade Nova São Miguel, CEP 08042-430, São Paulo/SP",
+c2_nome:"CELIA MARIA DOS SANTOS VENTURA",c2_anterior:"CELIA MARIA DOS SANTOS GRANEIRO",c2_civil:"casada",c2_prof:"diarista",c2_rg:"",c2_cpf:"103.987.568-80",c2_end:"",
+cj_nome:"JOSÉ ROBERTO VENTURA",cj_prof:"",cj_rg:"",cj_cpf:"",cj_regime:"",cj_data:"15/09/2017",
+p1_nome:"ALEXANDRE FERNANDES DA COSTA",p1_civil:"casado",p1_regime:"",p1_prof:"vigilante",p1_rg:"43.751.675 SSP/SP",p1_cpf:"351.502.858-70",p1_end:"Rua Dom Pedro I, nº 138, Cidade Kemel, CEP 08542-210, Ferraz de Vasconcelos/SP",
+p2_nome:"ADRIANA PINHEIRO DA COSTA",p2_prof:"comerciante",p2_doc:"Carteira de Identidade Nacional (CIN) nº 294.406.758-37",p2_cpf:"294.406.758-37",
+cor_nome:"FCOSTA CORRETOR DE IMÓVEIS",cor_creci:"294791-F",cor_cpf:"022.478.348-33",
+preco:"200.000,00",preco_ext:"duzentos mil reais",forma:"à vista, em parcela única, no ato da assinatura deste instrumento",banco:"",posse:"com o pagamento integral do preço",corr_pct:"6",corr_val:"12.000,00",corr_quem:"CEDENTES",prazo_proc:"",prazo_colab:"10",multa_pct:"10",foro:"São Paulo",cidade_ass:"São Paulo",data_ass:"09 de novembro de 2026",
+considerandos:"A) Em 30/04/1989, o CEDENTE EDNALDO, casado com a CEDENTE CELIA sob o regime da comunhão parcial de bens (casamento de 07/01/1982), firmou com a Companhia de Desenvolvimento Habitacional do Estado de São Paulo (CDH, atual CDHU) o Termo de Adesão e Ocupação Provisória com Opção de Compra nº 000486, relativo ao imóvel objeto deste instrumento.\nB) O financiamento foi integralmente liquidado em 30/04/2014, conforme a Declaração de Quitação do Imóvel emitida pela CDHU e a ficha de financiamento (situação “quitado no prazo previsto”).\nC) A Declaração de Quitação informa que o instrumento de quitação será emitido oportunamente, após a regularização do empreendimento no Cartório de Registro de Imóveis. O imóvel ainda não possui matrícula individualizada.\nD) O casamento dos CEDENTES foi dissolvido por divórcio, decretado por sentença de 11/08/2016, transitada em julgado em 30/09/2016 (processo nº 1013888-48.2016.8.26.0005). Em 15/09/2017, a CEDENTE CELIA casou-se com JOSÉ ROBERTO VENTURA.\nE) Os CEDENTES desejam ceder, e os CESSIONÁRIOS desejam adquirir, os direitos sobre o imóvel, nos termos abaixo.",
+ciencia_d:"o Termo de Adesão de 1989 prevê ocupação pessoal e veda a cessão a terceiros durante o financiamento, já liquidado, mas a CDHU poderá apreciar administrativamente a cessão",
+partilha:"o IMÓVEL não foi partilhado no divórcio e permanece em comum entre os CEDENTES"};
+var T=`
+<h1>Instrumento Particular de Cessão e Transferência de Direitos sobre Imóvel CDHU <span class="m q">Quitado</span><span class="m n">com Financiamento em Andamento</span>, com Procuração em Causa Própria e Outras Avenças</h1>
+<p class="sub">Minuta de 07/11/2026 · FCosta Corretor · os campos em amarelo devem ser preenchidos ou confirmados antes da assinatura.<br>Cada cláusula traz, em itálico, a sua base legal. Recomenda-se revisão por advogado ou pelo tabelião antes da assinatura.</p>
+<div class="box"><p><b>QUADRO-RESUMO (informações em destaque)</b></p>
+<p><b>Objeto:</b> direitos de aquisição e posse da unidade habitacional da CDHU na {{imovel_end}}, Quadra {{imovel_quadra}}, Lote {{imovel_lote}}, Conjunto {{imovel_conjunto}}, {{imovel_bairro}}, {{imovel_cidade}} (Conta CDHU nº {{conta_cdhu}}; TAOPOC nº {{taopoc}}).</p>
+<p><b>Natureza:</b> cessão de direitos. Os CESSIONÁRIOS recebem direitos e posse, não a propriedade registrada; o imóvel não possui matrícula individualizada.</p>
+<p class="m n"><b>Financiamento:</b> em andamento junto à CDHU, com saldo devedor de R$ {{saldo}} e prestação mensal de R$ {{parcela_val}}; a transferência para o nome dos CESSIONÁRIOS depende de análise e aprovação da CDHU (Cláusulas 3ª e 4ª).</p>
+<p><b>Preço:</b> R$ {{preco}} ({{preco_ext}}).</p>
+<p><b>Forma de pagamento:</b> {{forma}}.</p>
+<p><b>Posse:</b> {{posse}}.</p>
+<p><b>Corretagem:</b> R$ {{corr_val}}, equivalente a {{corr_pct}}% do preço, a cargo dos {{corr_quem}}; valor não incluído no preço acima.</p>
+<p><b>Procuração, ITBI e registros:</b> a cargo dos CESSIONÁRIOS (Cláusula 8ª).</p>
+<p><b>Escritura definitiva:</b> não será lavrada agora; depende da CDHU e do cartório (Cláusulas 3ª e 6ª).</p>
+<p class="base">Base legal: CDC, arts. 6º, III, 31, 46 e 54, §4º (informação adequada e destaque); STJ, Tema Repetitivo 938 (destaque do valor da corretagem); CC, arts. 113 e 422.</p></div>
+
+<h2>Qualificação das Partes</h2>
+<p><b>CEDENTES (VENDEDORES):</b></p>
+<p>1. <b>{{c1_nome}}</b> (grafado também {{c1_alias}}), brasileiro(a), {{c1_civil}}, {{c1_prof}}, portador(a) do RG nº {{c1_rg}} e inscrito(a) no CPF/MF sob o nº {{c1_cpf}}, residente e domiciliado(a) na {{c1_end}};</p>
+<p>2. <b>{{c2_nome}}</b> (anteriormente {{c2_anterior}}), brasileiro(a), {{c2_civil}}, {{c2_prof}}, portador(a) do RG nº {{c2_rg}} e inscrito(a) no CPF/MF sob o nº {{c2_cpf}}, residente e domiciliado(a) na {{c2_end}}; com a anuência e a outorga conjugal de seu cônjuge <b>{{cj_nome}}</b>, brasileiro(a), {{cj_prof}}, portador(a) do RG nº {{cj_rg}} e inscrito(a) no CPF/MF sob o nº {{cj_cpf}}, casado sob o regime de {{cj_regime}} desde {{cj_data}}, residente e domiciliado no mesmo endereço.</p>
+<p><b>CESSIONÁRIOS (COMPRADORES):</b> <b>{{p1_nome}}</b>, brasileiro(a), {{p1_civil}} sob o regime de {{p1_regime}}, {{p1_prof}}, portador(a) do RG nº {{p1_rg}} e inscrito(a) no CPF/MF sob o nº {{p1_cpf}}, e seu(sua) cônjuge <b>{{p2_nome}}</b>, brasileiro(a), {{p2_prof}}, portador(a) de {{p2_doc}}, CPF/MF nº {{p2_cpf}}, ambos residentes e domiciliados na {{p1_end}}.</p>
+<p><b>INTERVENIENTE CORRETOR:</b> <b>{{cor_nome}}</b>, inscrito no CRECI/SP sob o nº {{cor_creci}} e no CPF/MF sob o nº {{cor_cpf}}.</p>
+<p class="base">Base legal: CC, art. 104 (agentes capazes) e art. 1.647, I (outorga conjugal); Lei nº 6.530/1978 (profissão de corretor de imóveis).</p>
+
+<h2>Considerandos</h2>
+<p>{{considerandos}}</p>
+<p class="base">Base legal: CC, arts. 319 e 320 (quitação), 422 (boa-fé) e 1.581 (divórcio sem prévia partilha de bens).</p>
+
+<h2>Cláusula 1ª — Do Objeto</h2>
+<p>1.1. Os CEDENTES cedem e transferem aos CESSIONÁRIOS, a título oneroso e em caráter definitivo, a totalidade dos direitos de aquisição, de posse e demais direitos e obrigações que detêm sobre a unidade habitacional residencial situada na {{imovel_end}}, Quadra {{imovel_quadra}}, Lote {{imovel_lote}}, Conjunto Habitacional {{imovel_conjunto}}, bairro {{imovel_bairro}}, {{imovel_cidade}}, CEP {{imovel_cep}}, Conta CDHU nº {{conta_cdhu}}, TAOPOC nº {{taopoc}} (“IMÓVEL”).</p>
+<p>1.2. A cessão é feita <i>ad corpus</i>: as áreas e medidas do IMÓVEL são meramente enunciativas.</p>
+<p>1.3. Os CEDENTES figuram como titulares da totalidade dos direitos, de forma conjunta e solidária, independentemente de qualquer divisão interna entre si.</p>
+<p class="base">Base legal: CC, arts. 104, 265, 425, 481 e 482, 500, §3º e 1.417 e 1.418; Lei nº 6.766/1979, art. 26 (no que couber).</p>
+
+<h2>Cláusula 2ª — Das Declarações dos Cedentes</h2>
+<p>2.1. Os CEDENTES declaram que: (a) são os únicos titulares dos direitos cedidos; (b) <span class="m q">o financiamento foi totalmente quitado e nada é devido à CDHU</span><span class="m n">o financiamento encontra-se em andamento junto à CDHU, com saldo devedor de R$ {{saldo}}, e todas as prestações vencidas até esta data estão pagas, sem inadimplência</span>; (c) o IMÓVEL está livre de ônus, penhoras, ações, locações, usufruto, dívidas e restrições, ressalvada a ausência de matrícula<span class="m n"> e o financiamento em andamento junto à CDHU</span>; (d) não cederam, prometeram ou alienaram os direitos a terceiros; (e) entregarão os documentos do Anexo I; (f) {{partilha}}.</p>
+<p>2.2. Declaração falsa sujeita o declarante a perdas e danos e à multa da Cláusula 12ª.</p>
+<p class="base">Base legal: CC, arts. 319 e 320, 389 e 422; Lei nº 4.380/1964; Leis estaduais (SP) nºs 12.276/2006 e 16.105/2016.</p>
+
+<h2>Cláusula 3ª — Da Natureza do Negócio e da Ciência dos Cessionários (Cláusula Destacada)</h2>
+<div class="box"><p>3.1. Os CESSIONÁRIOS declaram estar cientes, por informação clara e prévia, de que: (a) o IMÓVEL não possui matrícula individualizada, e a propriedade só se transfere com o registro do título no Cartório de Registro de Imóveis; (b) a CDHU emite o contrato de quitação (escritura) apenas para empreendimentos averbados e registrados no cartório, sem prazo garantido<span class="m n"> e somente após a quitação integral do financiamento</span>; (c) a CDHU não é parte neste instrumento e não prestou anuência<span class="m n">; a transferência do financiamento para o nome dos CESSIONÁRIOS depende de análise e aprovação da CDHU, que pode ser negada</span>; (d) {{ciencia_d}}; (e) o negócio é cessão de direitos, e não venda da propriedade registrada.</p>
+<p>3.2. Os CEDENTES não garantem o prazo nem a emissão da escritura pela CDHU, mas obrigam-se a colaborar (Cláusula 11ª).</p>
+<p>3.3. O preço leva em conta essa situação jurídica, o que os CESSIONÁRIOS reconhecem.</p>
+<p class="m n">3.4. Se a CDHU recusar a transferência do financiamento, as partes poderão, em até {{prazo_devol}} dias da recusa, optar por desfazer a cessão, restituindo os CEDENTES aos CESSIONÁRIOS os valores recebidos, corrigidos pelo IPCA, e devolvendo estes a posse do IMÓVEL, ou por manter o negócio na forma da Cláusula 4.6.</p></div>
+<p class="base">Base legal: CC, arts. 113, 422 e 1.245 e §1º; CDC, arts. 6º, III, 46 e 54, §4º.</p>
+
+<h2>Cláusula 4ª — Do Preço e do Pagamento</h2>
+<p>4.1. O preço da cessão é de R$ {{preco}} ({{preco_ext}}), a ser pago {{forma}}.</p>
+<p>4.2. Os pagamentos serão feitos por PIX ou TED em conta de titularidade dos CEDENTES: {{banco}}, e o comprovante vale como recibo do pagamento.</p>
+<p>4.3. A quitação plena e geral será dada apenas após o pagamento integral e a compensação.</p>
+<p>4.4. Em caso de atraso: multa moratória de 2% sobre o valor em atraso, juros de mora de 1% ao mês e correção monetária pelo IPCA, sem prejuízo da Cláusula 12ª.</p>
+<p class="m n">4.5. O saldo devedor do financiamento junto à CDHU é de R$ {{saldo}}, em prestações mensais de R$ {{parcela_val}}, com vencimento todo dia {{parcela_venc}}, estando pagas as prestações até {{ult_parcela_paga}}. Quanto ao preço: {{regra_saldo}}.</p>
+<p class="m n">4.6. As prestações vencidas até a entrega da posse são de responsabilidade dos CEDENTES; as vencidas depois, dos CESSIONÁRIOS, que as pagarão diretamente à CDHU, em dia, entregando o comprovante aos CEDENTES em até 5 dias. Enquanto a CDHU não transferir o financiamento, ele permanece em nome dos CEDENTES.</p>
+<p class="m n">4.7. Os CEDENTES requererão à CDHU, em até 10 dias da assinatura, a transferência do financiamento para o nome dos CESSIONÁRIOS, e os CESSIONÁRIOS fornecerão os documentos exigidos. Se os CESSIONÁRIOS atrasarem prestação, os CEDENTES poderão pagá-la e cobrar o valor com multa de 2% e juros de 1% ao mês, e os CESSIONÁRIOS respondem por qualquer consequência do atraso perante a CDHU.</p>
+<p class="base">Base legal: CC, arts. 315, 319 e 320, 389, parágrafo único, 406, 394 e 395; CDC, art. 52, §1º.<span class="m n"> Lei nº 8.004/1990, art. 1º (transferência de financiamento com interveniência do financiador), no que couber à CDHU.</span></p>
+
+<h2>Cláusula 5ª — Da Posse, da Entrega e do Estado do Imóvel</h2>
+<p>5.1. A posse será transmitida {{posse}}, mediante termo de entrega, com chaves e vistoria fotográfica assinados pelas partes.</p>
+<p>5.2. O IMÓVEL é entregue no estado em que se encontra, conhecido e vistoriado pelos CESSIONÁRIOS, livre de pessoas e coisas, com água, luz e gás quitados até a entrega.</p>
+<p>5.3. Os riscos do IMÓVEL correm por conta dos CEDENTES até a entrega da posse.</p>
+<p class="base">Base legal: CC, arts. 492, 502 e 1.204.</p>
+
+<h2>Cláusula 6ª — Da Procuração em Causa Própria e da Escritura Definitiva</h2>
+<p>6.1. No prazo de {{prazo_proc}} dias contados da assinatura, e como condição deste negócio bilateral, os CEDENTES (e o cônjuge anuente, se o tabelião exigir) outorgarão aos CESSIONÁRIOS, por escritura pública em Cartório de Notas, procuração em causa própria, irrevogável e irretratável, que não se extingue com a morte de qualquer das partes, com os poderes do Anexo II.</p>
+<p>6.2. A procuração descreverá o IMÓVEL com endereço, quadra, lote, TAOPOC e conta CDHU, com poderes especiais e expressos para alienar. Se a CDHU exigir, os CEDENTES fornecerão certidão atualizada da procuração, com menos de 12 meses.</p>
+<p>6.3. A procuração dispensa prestação de contas e autoriza os CESSIONÁRIOS a transferir para si o IMÓVEL, observadas as formalidades legais, mas não substitui a escritura nem o registro.</p>
+<p>6.4. <span class="m q">Emitido o contrato de quitação ou a escritura em favor dos CEDENTES,</span><span class="m n">Quitado o financiamento e emitido o contrato de quitação ou a escritura em favor dos CEDENTES (ou dos CESSIONÁRIOS, se a CDHU transferir o financiamento),</span> os CESSIONÁRIOS, por si ou por procurador, outorgarão a escritura em seu favor e promoverão o registro, por sua conta.</p>
+<p>6.5. Se os CEDENTES se recusarem ou não puderem assinar, inclusive por morte ou incapacidade, os CESSIONÁRIOS poderão valer-se da procuração e, se necessário, da adjudicação compulsória judicial ou extrajudicial.</p>
+<p>6.6. Falecendo qualquer das partes, este contrato e a procuração obrigam e beneficiam os herdeiros e sucessores, que se habilitarão quando necessário (inventário ou alvará).</p>
+<p class="base">Base legal: CC, arts. 108 e 215, 653 e 657, 661, §1º, 684 e 685, 1.245 e 1.417 a 1.418; Lei nº 6.015/1973, art. 216-B.</p>
+
+<h2>Cláusula 7ª — Da Anuência e Outorga Conjugal</h2>
+<p>7.1. {{cj_nome}}, cônjuge do(a) CEDENTE {{c2_nome}}, assina este instrumento para dar anuência e outorga ao negócio e à procuração, declarando conhecer e aceitar seus termos.</p>
+<p>7.2. Os CESSIONÁRIOS, casados, adquirem em conjunto, e ambos assinam este instrumento.</p>
+<p>7.3. Ambos os CEDENTES participam e respondem pelos direitos cedidos, e a cessão abrange a totalidade deles, na parte de cada um, qualquer que seja a forma de partilha.</p>
+<p class="base">Base legal: CC, arts. 1.647, I, e 1.649, 1.658 a 1.660 e 1.581.</p>
+
+<h2>Cláusula 8ª — Dos Débitos, Tributos e Despesas</h2>
+<p>8.1. Os CEDENTES respondem por todos os débitos do IMÓVEL (IPTU, água, luz, gás, multas e outros) até a entrega da posse; a partir daí, respondem os CESSIONÁRIOS.</p>
+<p>8.2. Os CEDENTES apresentarão certidão negativa de débitos de IPTU e declarações negativas de débito de água e luz.</p>
+<p>8.3. Ficam a cargo dos CESSIONÁRIOS: o ITBI sobre a cessão, a procuração pública, a escritura, os registros, as certidões e as taxas da CDHU, se houver.</p>
+<p>8.4. Os CEDENTES respondem por eventual imposto de renda sobre ganho de capital, observadas as isenções legais.</p>
+<p>8.5. Perante o Fisco, os débitos de IPTU acompanham o IMÓVEL e podem ser cobrados do adquirente, pois convenção particular não vale contra a Fazenda; fica assegurado o direito de regresso à parte que pagar o que era da outra.</p>
+<p class="base">Base legal: CC, arts. 490 e 502; CTN, arts. 35, III, 123 e 130; CF, art. 156, II; Leis nºs 7.713/1988, 9.250/1995 e 11.196/2005.</p>
+
+<h2>Cláusula 9ª — Da Corretagem</h2>
+<p>9.1. As partes declaram e reconhecem que a intermediação deste negócio foi realizada pelo corretor de imóveis interveniente, fixando-se a comissão em {{corr_pct}}% sobre o valor total da transação, perfazendo R$ {{corr_val}}.</p>
+<p>9.2. O valor será pago pelos {{corr_quem}} diretamente ao corretor, na forma e nas condições pactuadas entre as partes, e não integra o preço do IMÓVEL.</p>
+<p class="base">Base legal: CC, arts. 722 a 729; Lei nº 6.530/1978 e Decreto nº 81.871/1978; STJ, Tema Repetitivo 938.</p>
+
+<h2>Cláusula 10ª — Das Formalidades</h2>
+<p>10.1. Todas as assinaturas terão firma reconhecida em cartório e serão acompanhadas de duas testemunhas.</p>
+<p>10.2. O Quadro-Resumo e os Anexos I e II integram este instrumento para todos os fins, e as partes o assinam e rubricam todas as páginas, inclusive as dos anexos. Havendo divergência entre o Quadro-Resumo e as cláusulas, prevalece o texto das cláusulas.</p>
+<p class="base">Base legal: CC, art. 221; Lei nº 6.015/1973, art. 221, II; CPC, art. 784, III.</p>
+
+<h2>Cláusula 11ª — Da Colaboração dos Cedentes</h2>
+<p>11.1. Os CEDENTES obrigam-se a assinar, sem custo para si, todos os documentos, requerimentos e declarações que a CDHU, o tabelião ou o Cartório de Registro de Imóveis exigirem para a regularização, a quitação e a transferência do IMÓVEL, no prazo de {{prazo_colab}} dias contados do pedido.</p>
+<p class="base">Base legal: CC, arts. 422 e 247.</p>
+
+<h2>Cláusula 12ª — Da Multa</h2>
+<p>12.1. Em caso de desistência ou descumprimento, a parte infratora pagará à outra multa de {{multa_pct}}% do valor do negócio, além de perdas e danos.</p>
+<p class="base">Base legal: CC, arts. 408, 409, 412, 413 e 416; arts. 389 e 402 a 404; art. 475.</p>
+
+<h2>Cláusula 13ª — Do Foro</h2>
+<p>13.1. Fica eleito o foro da comarca de {{foro}}.</p>
+<p class="base">Base legal: CPC, art. 63 e art. 47 e §1º.</p>
+
+<p style="margin-top:20px">E, por estarem justas e contratadas, as partes assinam este instrumento em vias de igual teor, na presença de duas testemunhas.</p>
+<p>{{cidade_ass}}, {{data_ass}}.</p>
+<div class="assin">
+<div><b>{{c1_nome}}</b><br>CEDENTE · CPF {{c1_cpf}}</div>
+<div><b>{{c2_nome}}</b><br>CEDENTE · CPF {{c2_cpf}}</div>
+<div><b>{{cj_nome}}</b><br>Cônjuge anuente · CPF {{cj_cpf}}</div><div></div>
+<div><b>{{p1_nome}}</b><br>CESSIONÁRIO · CPF {{p1_cpf}}</div>
+<div><b>{{p2_nome}}</b><br>CESSIONÁRIO(A) · CPF {{p2_cpf}}</div>
+<div><b>{{cor_nome}}</b><br>CRECI/SP {{cor_creci}} · CPF {{cor_cpf}}</div><div></div>
+<div><b>Testemunha 1</b><br>Nome: ____________ CPF: ____________</div>
+<div><b>Testemunha 2</b><br>Nome: ____________ CPF: ____________</div>
+</div>
+
+<h2 class="pb">Anexo I — Documentos a Entregar pelos Cedentes</h2>
+<p><b>A) Dos CEDENTES e do cônjuge anuente:</b> RG e CPF; comprovante de residência recente; certidões de casamento com averbações (e de divórcio, se houver); cópia da sentença de divórcio e certidão de trânsito em julgado, se houver; regime de bens do casamento.</p>
+<p><b>B) Do IMÓVEL:</b> <span class="m q">Declaração de Quitação da CDHU (via atualizada) e ficha de financiamento</span><span class="m n">extrato atualizado do saldo devedor, ficha de financiamento e comprovantes das últimas 12 prestações pagas, com declaração de adimplência da CDHU</span>; Termo de Adesão ou contrato original com a CDHU; certidão negativa de débitos de IPTU; declarações negativas de débito de água e luz, com a última conta de cada uma; dados bancários dos CEDENTES para o recebimento do preço.</p>
+<p><b>C) Dos CESSIONÁRIOS:</b> RG (ou CIN) e CPF; certidão de casamento, com o regime de bens; comprovante de residência recente.</p>
+<h2>Anexo II — Poderes da Procuração em Causa Própria</h2>
+<p>Poderes especiais, expressos, irrevogáveis e irretratáveis, em causa própria, para os CESSIONÁRIOS: alienar, ceder e transferir a si mesmos o IMÓVEL descrito na Cláusula 1ª; receber o preço e dar quitação; requerer e receber da CDHU o contrato de quitação e a escritura; assinar escrituras, requerimentos e declarações; pagar impostos e taxas (ITBI, emolumentos); requerer matrícula, averbações e registros no Cartório de Registro de Imóveis; ingressar com adjudicação compulsória; representar os CEDENTES perante a CDHU, prefeitura, cartórios e demais órgãos; e substabelecer, com ou sem reserva de poderes. A procuração dispensa prestação de contas.</p>
+`;
+var L={},TA={};
+G.forEach(function(g){g[1].forEach(function(f){L[f[0]]=f[1];TA[f[0]]=f[2]=="t"})});
+var panel=document.getElementById("panel"),doc=document.getElementById("doc");
+G.forEach(function(g){var h=document.createElement("h3");h.textContent=g[0];panel.appendChild(h);
+ g[1].forEach(function(f){var l=document.createElement("label");l.textContent=f[1];var i=document.createElement(f[2]=="t"?"textarea":f[2]=="s"?"select":"input");i.id="f_"+f[0];if(f[2]=="s"){i.innerHTML='<option value="q">Quitado</option><option value="n">NÃO quitado (em andamento)</option>'}i.oninput=function(){setv(f[0],i.value)};panel.appendChild(l);panel.appendChild(i)})});
+doc.innerHTML=T.replace(/\{\{(\w+)\}\}/g,function(m,k){return '<span class="v empty" data-k="'+k+'">['+(L[k]||k)+']</span>'});
+if(SAVED){doc.innerHTML=SAVED.doc}
+function setv(k,v){if(k=="situacao"){doc.className=v=="n"?"mn":"mq";return}
+ document.querySelectorAll('.v[data-k="'+k+'"]').forEach(function(s){if(v.trim()){s.textContent=v;s.className="v"}else{s.textContent="["+L[k]+"]";s.className="v empty"}})}
+function preencher(d){Object.keys(L).forEach(function(k){var v=d[k]||(k=="situacao"?"q":"");document.getElementById("f_"+k).value=v;setv(k,v)})}
+function exemplo(){preencher(EX)}
+function limpar(){if(confirm("Apagar todos os dados preenchidos?"))preencher({})}
+function baixar(){var v={};Object.keys(L).forEach(function(k){v[k]=document.getElementById("f_"+k).value});
+ var c=document.documentElement.cloneNode(true);c.querySelector("#panel").innerHTML="";c.querySelector("#doc").innerHTML="";
+ var sc=c.querySelector("#main");var js=JSON.stringify({v:v,doc:doc.innerHTML}).replace(/</g,"\\u003c");
+ sc.textContent=sc.textContent.replace(/var SAVED=[\s\S]*?;\/\*S\*\//,function(){return "var SAVED="+js+";/*S*/"});
+ var a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["<!DOCTYPE html>\n"+c.outerHTML],{type:"text/html"}));a.download="contrato-cessao-preenchido.html";a.click()}
+if(!SAVED){exemplo()}
+if(SAVED){Object.keys(SAVED.v).forEach(function(k){document.getElementById("f_"+k).value=SAVED.v[k]})}
+setv("situacao",document.getElementById("f_situacao").value);
+</script></body></html>

@@ -68,6 +68,12 @@ kbd{font:600 12px 'DM Sans';padding:2px 8px;border-radius:7px;border:1px solid v
 .fav{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:38px;height:38px;border:0;border-radius:10px;background:none;color:var(--texto-muted);font-size:19px}
 .fav:hover,.fav.on{color:var(--am)}
 .mhead{display:flex;align-items:center;gap:14px;padding:20px 0 14px}
+.nivel{display:block;font:800 10.5px 'DM Sans',sans-serif;font-style:normal;letter-spacing:.16em;text-transform:uppercase;opacity:.75}
+.mhead .nivel{color:var(--c);margin-bottom:2px}
+.mhead h1{display:flex;align-items:center;gap:8px}
+.gtit .gtxt{flex:1;min-width:0}.gtit .gtxt .nivel{font-size:10px;font-weight:700;opacity:.7;margin-bottom:3px}
+.lapis{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--texto-muted);font-size:16px;cursor:pointer;opacity:.85}
+.lapis:hover,.lapis:focus-visible{color:var(--c,var(--or));border-color:var(--c,var(--or));opacity:1}
 .mhead>div{flex:1;min-width:0}.mhead h1{font:800 28px 'Sora',sans-serif;letter-spacing:-.02em}.mhead p{font-size:13px;color:var(--texto-muted)}
 .mh-ic{width:52px;height:52px;display:grid;place-items:center;border-radius:16px;font-size:28px;color:var(--onbrand);background:var(--c)}
 .pills{position:sticky;top:var(--hh);z-index:20;display:flex;gap:8px;overflow-x:auto;padding:8px 0;margin-bottom:10px;scrollbar-width:none;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(10px)}
@@ -471,7 +477,8 @@ var GRUPOS = {
     { id: "avaliacao",  n: "Avaliação e Vistoria",             i: "ti-home-search",      c: "--cy", s: "Preço, áreas e vistoria do imóvel" },
     { id: "calculos",   n: "Cálculos e Simulações",            i: "ti-calculator",       c: "--em", s: "Comissão, impostos, financiamento e valores" },
     { id: "contratos",  n: "Contratos e Autorizações",         i: "ti-file-certificate", c: "--vi", s: "Autorizações de venda e editor de contratos" },
-    { id: "documentos", n: "Documentação e Arquivos",          i: "ti-folders",          c: "--cy", s: "Checklists, orçamento de documentos, CDHU e meus arquivos" },
+    { id: "documentos", n: "Documentação e Arquivos",          i: "ti-folders",          c: "--cy", s: "Checklists, orçamento de documentos e meus arquivos" },
+    { id: "cdhu",       n: "CDHU: Cessão e Venda de Imóvel",   i: "ti-building-community", c: "--am", s: "Painel, guia, contratos de cessão e recibos de imóveis CDHU" },
     { id: "locacao",    n: "Locação: Recibos e Aluguéis",      i: "ti-key",              c: "--em", s: "Inquilinos, recibos, vencimentos e controle de aluguéis" },
     { id: "financas",   n: "Finanças e Metas",                 i: "ti-report-money",     c: "--or", s: "Controle financeiro e metas do mês" },
     { id: "ia",         n: "Inteligência Artificial e Estudo", i: "ti-brain",            c: "--ro", s: "Ferramentas de IA e guias" },
@@ -543,7 +550,11 @@ var FERRAMENTAS = [
   {m:"corretor", g:"locacao", t:"Recibos e Inquilinos", s:"Inquilinos cadastrados e histórico de recibos", i:"ti-receipt", h:"recibos.html", k:"recibos recibo inquilinos locatários aluguel mora multa juros imprimir pdf whatsapp", b:"Novo"},
   {m:"corretor", g:"consulta", t:"Consulta de Locatário", s:"Triagem completa do candidato: certidões e parecer final", i:"ti-user-search", h:"consulta_locatario.html", k:"consulta locatário inquilino análise ficha cadastro fiador locação aluguel", b:"Novo"},
   {m:"corretor", g:"consulta", t:"Análise de Cadastro", s:"Ficha do cliente, documentos, consultas e resultado com pontuação", i:"ti-clipboard-check", h:"analise-cadastro.html", k:"análise de cadastro ficha cliente locatário inquilino renda 3x fiador garantia documentos serasa spc protesto cpf pontuação aprovar", d:1, b:"Novo"},
-  {m:"corretor", g:"documentos", t:"CDHU — Painel do Corretor", s:"Requisitos, checklist, passo a passo e contrato de transferência", i:"ti-building-community", h:"cdhu-corretor.html", k:"cdhu painel corretor requisitos checklist gaveta transferência contrato procuração cpvc quitação dívidas apartamento casa habitacional", b:"Novo"},
+  {m:"corretor", g:"cdhu", t:"CDHU — Painel do Corretor", s:"Requisitos, checklist, passo a passo e contrato de transferência", i:"ti-building-community", h:"cdhu-corretor.html", k:"cdhu painel corretor requisitos checklist gaveta transferência contrato procuração cpvc quitação dívidas apartamento casa habitacional", b:"Novo"},
+  {m:"corretor", g:"cdhu", t:"Guia: Venda de Imóvel CDHU", s:"Passo a passo: quitado, financiado e documentos exigidos", i:"ti-route", h:"guia-venda-imovel-cdhu.html", k:"cdhu guia venda imóvel quitado financiado gaveta documentos passo a passo transferência", b:"Novo"},
+  {m:"corretor", g:"cdhu", t:"Modelo de Cessão de Direitos CDHU", s:"Contrato editável em branco, quitado ou financiado", i:"ti-file-text", h:"modelo-cessao-direitos-editavel.html", k:"cdhu modelo cessão de direitos contrato editável procuração causa própria cedente cessionário", b:"Novo"},
+  {m:"corretor", g:"cdhu", t:"Contrato de Cessão — Francisco Veloso, 19", s:"Contrato do imóvel de Itaim Paulista, pronto para conferir", i:"ti-file-certificate", h:"contrato-francisco-veloso-19-editavel.html", k:"cdhu contrato cessão francisco veloso 19 itaim paulista encosta norte", b:"Novo"},
+  {m:"corretor", g:"cdhu", t:"Recibos e Termos — Francisco Veloso, 19", s:"Quitação, entrega de posse, corretagem e entrega de documentos", i:"ti-receipt", h:"recibos-cessao-francisco-veloso-19.html", k:"cdhu recibo quitação entrega de posse corretagem documentos termo francisco veloso 19", b:"Novo"},
   {m:"corretor", g:"documentos", t:"Meus Documentos (Google Docs)", s:"Abrir meus arquivos no Google Docs", i:"ti-brand-google-drive", h:"https://docs.google.com/document/u/1/", k:"google docs meus documentos contratos drive"},
   {m:"corretor", g:"financas", t:"Controle Financeiro", s:"Receitas e despesas", i:"ti-report-money", h:"controle_fin.html", k:"controle financeiro receitas despesas", d:1, b:"Principal"},
   {m:"corretor", g:"financas", t:"Metas do Mês", s:"Leads, visitas e fechamentos", i:"ti-target-arrow", h:"metas.html", k:"metas do mês leads visitas fechamentos"},
@@ -859,7 +870,7 @@ var FERRAMENTAS = [
       gruposDoModo(m, itens).forEach(function (g) {
         var l = lista.filter(function (i) { return i._g === g; }).sort(porNome);
         if (g.oculta) return;
-        if (l.length) html += '<h3 class="gtit" style="--c:var(' + g.c + ')"><i class="ti ' + esc(g.i) + '"></i>' + esc(g.n) + '<em>' + l.length + '</em></h3><div class="lista">' + l.map(item).join('') + '</div>';
+        if (l.length) html += gtitHtml(g, l.length) + '<div class="lista">' + l.map(item).join('') + '</div>';
       });
     });
     var rap = function (ic, t, sub, attr, href) {
@@ -898,7 +909,8 @@ var FERRAMENTAS = [
 
   var edicao = false;
   function gtitHtml(g, n) {
-    return '<h3 class="gtit" style="--c:var(' + g.c + ')"><i class="ti ' + esc(g.i) + '"></i>' + esc(g.n) + '<em>' + n + '</em></h3>';
+    return '<h3 class="gtit" style="--c:var(' + g.c + ')"><i class="ti ' + esc(g.i) + '"></i><span class="gtxt"><small class="nivel">Categoria</small>' + esc(g.n) + '</span>' +
+      '<button type="button" class="lapis" data-ed="nome-g:' + esc(g.mo + '|' + g.id) + '" title="Mudar o nome desta categoria" aria-label="Renomear a categoria ' + esc(g.n) + '"><i class="ti ti-pencil"></i></button><em>' + n + '</em></h3>';
   }
   function opcoesMundos(sel) { return ORDEM.map(function (m) { return '<option value="' + esc(m) + '"' + (m === sel ? ' selected' : '') + '>' + esc(MUNDOS[m].n) + '</option>'; }).join(''); }
   function opcoesCats(sel) {
@@ -924,7 +936,7 @@ var FERRAMENTAS = [
   function htmlMundo(m) {
     var M = MUNDOS[m], itens = ligar(todosItens()), gs = gruposDoModo(m, itens);
     var lista = itens.filter(function (i) { return i.m === m; });
-    var cab = '<section class="mhead" style="--c:var(' + M.c + ')"><span class="mh-ic' + (m === 'corretor' ? ' logo' : '') + '">' + (m === 'corretor' ? '<img src="' + logoSrc() + '" alt="FCosta" />' : '<i class="ti ' + esc(M.i) + '"></i>') + '</span><div><h1>' + esc(M.n) + '</h1><p>' + esc(M.d) + '</p></div>' +
+    var cab = '<section class="mhead" style="--c:var(' + M.c + ')"><span class="mh-ic' + (m === 'corretor' ? ' logo' : '') + '">' + (m === 'corretor' ? '<img src="' + logoSrc() + '" alt="FCosta" />' : '<i class="ti ' + esc(M.i) + '"></i>') + '</span><div><small class="nivel">Aba</small><h1>' + esc(M.n) + '<button type="button" class="lapis" data-ed="nome-m:' + esc(m) + '" title="Mudar o nome desta aba" aria-label="Renomear a aba ' + esc(M.n) + '"><i class="ti ti-pencil"></i></button></h1><p>' + esc(M.d) + '</p></div>' +
       '<button type="button" class="btn-mini" data-ed="toggle"><i class="ti ti-' + (edicao ? 'check' : 'edit') + '"></i>' + (edicao ? 'Pronto' : 'Editar') + '</button></section>';
     var html = cab + (edicao ? '' : '<button type="button" class="busca-pill" data-open="busca" style="margin-bottom:6px"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button>');
     if (edicao) {
@@ -2050,8 +2062,13 @@ var FERRAMENTAS = [
       try { if (new URL(h, location.href).origin !== location.origin) return; } catch (err) { return; }
     }
     e.preventDefault();
-    var t = a.querySelector('.t');
-    abrir(h, (t ? t.textContent : a.textContent).trim());
+    var t = a.querySelector('.t'), nomeF = (t ? t.textContent : a.textContent).trim(), trilha = nomeF;
+    try {
+      var ab = document.querySelector('.mhead h1'), ls = a.closest('.lista'), gt = ls && ls.previousElementSibling;
+      var abN = ab && ab.firstChild ? ab.firstChild.textContent.trim() : '', ctN = gt && gt.classList.contains('gtit') ? gt.querySelector('.gtxt').lastChild.textContent.trim() : '';
+      if (abN && ctN) trilha = abN + ' › ' + ctN + ' › ' + nomeF;
+    } catch (err) {}
+    abrir(h, trilha);
   }, true);
 })();
 </script>

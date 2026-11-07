@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Guia: venda de imóvel CDHU — FCosta Corretor</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script>var t=null;try{t=JSON.parse(localStorage.getItem('painel_tema2'))}catch(e){}if(!t)t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.dataset.theme=t</script>
+<style>
+:root{--bg:#1f2a3d;--card:#283550;--line:rgba(255,255,255,.13);--tx:#eef2fa;--mut:#b3bfd6;--in:#1d283b;--brand:#8ab4ff;--onb:#10203f;--em:#6fd8ae;--am:#f4cd7a;--ro:#f5949f}
+[data-theme=light]{--bg:#f2f5fa;--card:#fff;--line:rgba(30,41,59,.1);--tx:#1e293b;--mut:#64748b;--in:#f3f6fb;--brand:#4c7ef3;--onb:#fff;--em:#2fa37a;--am:#d99a1c;--ro:#e0607a}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font:15px/1.5 'DM Sans',sans-serif;color:var(--tx);background:var(--bg);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+a{color:var(--brand)}button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:8px}
+.wrap{max-width:860px;margin:0 auto;padding:16px 16px 56px}
+.top{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+.top h1{font:700 21px/1.2 'Sora',sans-serif;flex:1}.top small{display:block;font:400 12.5px 'DM Sans';color:var(--mut)}
+.ib{height:42px;min-width:42px;padding:0 14px;display:grid;place-items:center;border-radius:12px;border:1px solid var(--line);background:var(--card);text-decoration:none;color:var(--tx);font-weight:600}
+.aviso{font-size:13px;color:var(--mut);background:var(--card);border:1px solid var(--line);border-left:4px solid var(--am);border-radius:12px;padding:10px 14px;margin-bottom:14px}
+.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.tab{text-align:left;padding:12px 14px;border-radius:14px;border:1px solid var(--line);background:var(--card)}
+.tab b{display:block;font:700 15px 'Sora',sans-serif}.tab span{font-size:12.5px;color:var(--mut)}
+.tab[aria-selected=true]{background:var(--brand);color:var(--onb);border-color:transparent}.tab[aria-selected=true] span{color:inherit;opacity:.85}
+.intro{margin:0 0 12px;color:var(--mut)}
+.step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:12px;break-inside:avoid}
+.step h3{display:flex;gap:10px;align-items:center;font:700 16px/1.3 'Sora',sans-serif;margin-bottom:8px}
+.n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--brand);color:var(--onb);display:grid;place-items:center;font-size:14px}
+.step ul{margin:0 0 8px 20px}.step li{margin:3px 0}
+.al{font-size:13.5px;border-radius:10px;padding:8px 12px;margin:8px 0;background:color-mix(in srgb,var(--am) 16%,transparent);border:1px solid color-mix(in srgb,var(--am) 40%,transparent)}
+.ls{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--mut)}
+.ls a{padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--in);text-decoration:none;font-size:12.5px;font-weight:600}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:20px}
+.box h2{font:700 16px 'Sora',sans-serif;margin-bottom:8px}.box .ls{border:0;padding:0;margin:0}
+.foot{margin-top:16px;font-size:12px;color:var(--mut)}
+.pane[hidden]{display:none}
+@media(max-width:520px){.tabs{grid-template-columns:1fr}}
+@media print{body{background:#fff;color:#000}.tabs,.ib{display:none}.pane[hidden]{display:block}.step,.box,.aviso{border-color:#999;background:#fff}.pane{break-before:page}.pane:first-of-type{break-before:auto}a{color:#000}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="top">
+    <a class="ib" href="index.html" aria-label="Voltar ao painel">←</a>
+    <h1>Venda de imóvel CDHU<small>Guia do corretor · FCosta Corretor · versão de 07/11/2026</small></h1>
+    <button class="ib" type="button" onclick="print()">Imprimir</button>
+  </div>
+  <p class="aviso">Guia prático montado a partir de pesquisa nas páginas da CDHU e em artigos e decisões publicados. Não substitui advogado. As exigências variam por gerência regional e mudam: confirme em cada caso antes de fechar.</p>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="t-quitado" aria-selected="true" data-k="quitado"><b>Quitado, sem matrícula</b><span>Só declaração de quitação</span></button>
+    <button class="tab" role="tab" id="t-financiado" aria-selected="false" data-k="financiado"><b>Financiado (não quitado)</b><span>Com prestações a pagar</span></button>
+    <button class="tab" role="tab" id="t-docs" aria-selected="false" data-k="docs"><b>Documentos exigidos</b><span>Vendedores e compradores</span></button>
+  </div>
+  <div id="out"></div>
+  <section class="box"><h2>Atalhos de consulta</h2><div class="ls" id="atalhos"></div></section>
+  <p class="foot">Fontes de 2016 a 2026. Páginas antigas podem estar desatualizadas: a página da CDHU e a gerência regional valem mais do que qualquer artigo.</p>
+</main>
+<script>
+var L={
+alo:['Alô CDHU 0800 000 2348','tel:08000002348'],
+age:['Agendar atendimento (gaveta)','https://operacoes.sp.gov.br/OperacoesWeb/redirectAgendarServico?tipoServico=72&idServicoCarta=81199F3E-9CE6-466E-A796-E6E2D312CFB2'],
+pos:['CDHU · Postos de atendimento','https://www.cdhu.sp.gov.br/web/guest/contato-localizacao/postos-de-atendimentos-e-nucleos-regionais'],
+faq:['CDHU · Perguntas Frequentes','https://www.cdhu.sp.gov.br/cdhu/Perguntas%20Frequentes'],
+gav:['Portal SP · Regularizar contrato de gaveta','https://servicos.sp.gov.br/fcarta/81199f3e-9ce6-466e-a796-e6e2d312cfb2'],
+qui:['Portal SP · Contrato de quitação','https://servicos.sp.gov.br/fcarta/378bd059-09fe-4a10-8e8c-ee8b1f4aafb5'],
+dec:['Portal SP · Declaração de quitação','https://servicos.sp.gov.br/fcarta/083a9de5-ab40-4d62-84ba-2f137b6ca886'],
+pir:['Documentos exigidos (Piracicaba/CDHU)','https://piracicaba.sp.gov.br/servicos/recebimento-de-documentacoes-para-pedidos-de-transferencia-termos-de-quitacao-e-exclusao-de-cota-parte-junto-a-cdhu/'],
+mig:['Migalhas · Gaveta na CDHU','https://www.migalhas.com.br/depeso/340875/o-contrato-de-gaveta-possui-validade-perante-a-cdhu'],
+rcc:['RCCIM · Gaveta e registro','https://rccim.com.br/cdhu-contrato-de-gaveta-e-o-registro-imobiliario'],
+con:['ConJur · Procuração em causa própria','https://conjur.com.br/2023-abr-17/procuracao-causa-propria-si-nao-transfere-propriedade/'],
+adj:['JusBrasil · Adjudicação compulsória','https://www.jusbrasil.com.br/artigos/voce-quitou-o-contrato-de-gaveta-mas-a-cdhu-se-nega-a-passar-a-escritura/1328903341'],
+ces:['JusBrasil · Cessão x compra e venda','https://www.jusbrasil.com.br/artigos/cessao-de-direitos-ou-contrato-de-compra-e-venda/1334596308'],
+cau:['JusBrasil · Procuração em causa própria','https://www.jusbrasil.com.br/artigos/o-que-fazer-se-no-momento-da-quitacao-de-um-imovel-nao-for-possivel-lavrar-a-escritura-de-compra-e-venda/1274922078'],
+nfi:['Advogados · CDHU não quitado','https://www.rodriguesefelix.adv.br/post/im%C3%B3vel-da-cdhu-nao-quitado-pode-ser-vendido'],
+coe:['Coelho Advogado · Regularizar gaveta','https://coelhoadvogado.com.br/como-regularizar-o-contrato-de-gaveta-na-cdhu/'],
+jur:['Jurisprudência · cessão sem anuência','https://www.jusbrasil.com.br/jurisprudencia/busca?q=cess%C3%A3o+sem+anu%C3%AAncia+da+cdhu+e+inadimplemento+das+presta%C3%A7%C3%B5es'],
+cc:['Código Civil (Planalto)','https://www.planalto.gov.br/ccivil_03/leis/2002/l10406compilada.htm'],
+onr:['ONR · Registro de Imóveis online','https://registradores.onr.org.br'],
+cnb:['Colégio Notarial SP · Cartórios de notas','https://www.cnbsp.org.br']
+};
+var D={
+quitado:{intro:'Imóvel quitado que tem só a Declaração de Quitação, sem matrícula nem escritura. O vendedor não é proprietário registral: o negócio é uma cessão de direitos. Se já houver matrícula em nome do mutuário, a venda é comum e a CDHU não participa.',p:[
+{t:'Triagem dos documentos',ul:['Termo de adesão ou promessa de compra e venda original','Declaração de Quitação da CDHU','Ficha de financiamento ou consulta de débitos atualizada','RG e CPF de todos os titulares: conferir se o nome está escrito igual em todos os papéis','Certidão de estado civil atualizada; se houve divórcio, sentença e partilha; se houve óbito, certidão e inventário','Certidão negativa de IPTU'],al:'A declaração só comprova a quitação. Ela não transfere propriedade e o texto costuma dizer que o instrumento definitivo sai depois de regularizado o empreendimento no cartório.',l:['dec','qui','faq']},
+{t:'Consultar a CDHU',ul:['A quitação consta atualizada no sistema?','O empreendimento já tem matrícula? Existe previsão de Termo de Quitação ou escritura para esse conjunto?','O empreendimento está averbado e registrado no cartório? Só assim a CDHU emite o contrato de quitação (escritura)','Qual a previsão e quais documentos, hoje? (o serviço de transferência de titularidade do Portal vale só para financiamento ativo)','Anotar data, atendente e protocolo'],l:['alo','gav','faq']},
+{t:'Quem precisa assinar',ul:['Todos os titulares do financiamento: mutuário e cônjuge da época do contrato','Divorciado: ver se o imóvel foi partilhado; se não foi, o ex-cônjuge também assina','Cônjuge atual do vendedor: em geral é exigida a anuência (art. 1.647 do Código Civil), salvo separação total de bens. Confirmar com o tabelião','Titular falecido: inventário ou alvará antes de qualquer negócio'],l:['pir','cc']},
+{t:'Escolher o caminho',ul:['<b>A) Já tem matrícula e Termo de Quitação averbado:</b> escritura e registro, como qualquer venda','<b>B) Contrato de quitação da CDHU:</b> só quando o empreendimento estiver averbado e registrado; depois, escritura e registro. A transferência de titularidade pela CDHU vale só para financiamento ativo','<b>C) Cessão de direitos + procuração pública em causa própria:</b> quando a escritura não está sendo liberada','<b>D) Titular sumiu ou faleceu:</b> adjudicação compulsória ou inventário (advogado)'],al:'Há decisões do TJ-SP entendendo que a CDHU não pode se opor à cessão depois de quitado o preço, mas depende do caso e não é garantia administrativa.',l:['rcc','cau','adj','jur']},
+{t:'Contrato de cessão de direitos',ul:['Partes qualificadas como no RG, com anuência dos cônjuges','Objeto: endereço, quadra, lote, conjunto, número do termo (TAOPOC) e conta CDHU','Declaração de que o financiamento está quitado, com a data','Preço, forma de pagamento e recibo; posse e entrega das chaves','Débitos anteriores (IPTU, contas) por conta do vendedor','Obrigação de assinar a escritura quando a CDHU liberar','Texto claro: o comprador adquire direitos, não a propriedade registrada'],l:['ces']},
+{t:'Procuração pública em causa própria',ul:['Irrevogável e irretratável; não se extingue com a morte','Descrever o imóvel com endereço, quadra, lote, TAOPOC e conta (a CDHU exige o imóvel caracterizado)','Poderes específicos: vender e ceder, assinar documentos da CDHU, transferir titularidade, assinar escritura, receber quitação, requerer registros, substabelecer','Incluir a anuência do cônjuge, quando for o caso','Procuração pública com mais de 1 ano costuma exigir certidão de validade'],al:'Segundo o STJ, a procuração em causa própria sozinha não transfere a propriedade: dá poder para fechar a escritura depois.',l:['cnb','con','cau','mig']},
+{t:'Fechamento e pós-venda',ul:['Pagamento rastreável (transferência ou PIX) e recibo','Guardar cópia de todos os documentos no seu arquivo','Entregar a posse e orientar o comprador sobre o que ele realmente adquiriu','Acompanhar se o conjunto ganha matrícula e se a CDHU libera o Termo de Quitação','Quando sair, lavrar a escritura com a procuração e registrar na matrícula'],al:'Não prometa escritura em data certa: quem decide é a CDHU e o cartório.',l:['onr','gav']}]},
+financiado:{intro:'Imóvel ainda com prestações a pagar. Aqui a venda depende da CDHU: a transferência do financiamento exige análise e parecer favorável dela. Venda por conta própria, sem a CDHU, é contrato de gaveta, e a CDHU não é obrigada a reconhecê-lo.',p:[
+{t:'Ver se o imóvel pode ser vendido',ul:['Prazo mínimo: 18 meses desde a assinatura do contrato de financiamento (Leis estaduais 12.276/2006 e 16.105/2016, segundo a CDHU)','Só é transferível o financiamento regido por CPVC, TAOPOC ou CCPPCVIA; contratos como o de Concessão Onerosa não permitem venda','As prestações precisam estar em dia','Enquanto houver saldo devedor, o imóvel não pode ser objeto de partilha, doação, venda ou usufruto por fora da CDHU'],al:'Se o financiamento não se enquadra, a CDHU não aprova a venda. Nunca faça contrato de gaveta com financiamento ativo: o comprador pode perder o imóvel.',l:['nfi','faq','mig']},
+{t:'Requisitos do comprador',ul:['Não ter outro imóvel nem financiamento de imóvel em andamento','Não ter sido atendido por programas habitacionais da CDHU ou de outros agentes','Família de uma só pessoa: a partir dos 30 anos','Comprovar a mesma capacidade de pagamento dos atuais participantes do financiamento','Limite de idade ao fim do prazo (a CDHU cita 80 anos e 6 meses; acima disso, amortização do saldo)','Todos os adquirentes com renda entregam comprovante (holerite ou declaração de IR)'],al:'Triar o comprador antes de negociar evita a venda travada na entrevista.',l:['coe','nfi','gav']},
+{t:'Situação do financiamento',ul:['Pedir o carnê e a ficha de financiamento atualizada','Prestações em dia, com prazo e saldo suficientes para concluir o processo','Comprovar que não há débito de condomínio','Certidão negativa de IPTU'],l:['alo','pir','gav']},
+{t:'Agendar o atendimento na CDHU',ul:['Agendamento prévio pelo Alô CDHU ou pela gerência regional','Entrevista socioeconômica do comprador','Documentos: RG e CPF, comprovante de endereço, carnê da CDHU, certidão de estado civil atualizada (até 1 ano), carteira de trabalho e holerites dos compradores, contrato particular de compra e venda','Procuração dos mutuários (pública, ou particular com firma reconhecida) ou a presença deles na entrevista'],l:['alo','age','pos','gav']},
+{t:'Contrato particular entre as partes',ul:['A CDHU não faz o contrato entre comprador e vendedor: quem faz é você, com apoio de advogado','Constar o endereço do imóvel','Segundo a lista da CDHU, o contrato é registrado em cartório com firma reconhecida dos participantes da renda, dos cônjuges e dos adquirentes','Deixar claro que o negócio depende da aprovação da CDHU e prever o que acontece se ela negar'],l:['mig','coe']},
+{t:'Análise e assinatura',ul:['A CDHU analisa a documentação; só a aprovação libera a transferência','Aprovado, ela convoca compradores e o procurador do mutuário para assinar o contrato de transferência','Procuração com poderes específicos de assinar tudo da CDHU, com o imóvel descrito e o endereço'],al:'A CDHU não é obrigada a transferir o financiamento. Se negar, o negócio cai: por isso a condição no contrato.',l:['gav','mig']},
+{t:'Depois da transferência',ul:['Carnê e seguro passam ao nome do novo mutuário','Comprador mantém as prestações em dia','Ao quitar, vale o caminho do imóvel quitado: Termo de Quitação, matrícula e escritura','Guardar no seu arquivo o contrato aprovado e o protocolo da CDHU'],l:['qui','onr']}]},
+docs:{intro:'Lista oficial da CDHU (Perguntas Frequentes e Portal de Serviços, atualizado em 02/2026) para transferir um financiamento ativo. A CDHU pode pedir mais documentos conforme o caso. O tipo de contrato e os requisitos do comprador são conferidos na pré-análise, antes dos demais documentos.',p:[
+{t:'Dos vendedores (mutuários)',ul:['RG e CPF, original e cópia (a cópia fica retida): dos participantes da renda do contrato atual, dos cônjuges ou do procurador','Boleto da prestação (original)','Contrato de gaveta (contrato particular de compra e venda), original e cópia, registrado em cartório com firma reconhecida dos participantes da renda, dos cônjuges e dos adquirentes, com o endereço do imóvel','Procuração, se não estiverem presentes: pública, ou particular com firma reconhecida do mutuário, local, data e qualificação das partes. Pública obrigatória se o mutuário for cego ou analfabeto','Na procuração: poderes específicos para assinar o que a CDHU exigir (transferência de titularidade, exclusão de cota de renda, regularização de débito), imóvel descrito com endereço e RG do procurador','Certidão negativa de débito de IPTU (original, 1 via)','Declaração negativa de débito de condomínio, com firma do síndico reconhecida (unidade vertical)','Declaração negativa de débito de água e luz da concessionária'],l:['faq','gav','age']},
+{t:'Dos compradores: documentos',ul:['RG e CPF, original e cópia (a cópia fica retida)','Carteira de trabalho original de todos os adquirentes, mesmo sem registro','Comprovante de renda dos 3 últimos meses de quem tem renda (holerite ou declaração de IR), original e cópia','Certidão de estado civil atualizada (até 1 ano)','Comprovante de endereço','Contrato de gaveta (o mesmo acima)','Presença na entrevista socioeconômica'],l:['gav','faq','age']},
+{t:'Dos compradores: exigências',ul:['Não ser proprietário de imóvel nem ter financiamento de imóvel no país','Não ter sido atendido por programas habitacionais da CDHU ou de outros agentes de habitação de interesse social','Comprovar a mesma capacidade de pagamento dos atuais participantes do financiamento','Família de uma só pessoa: somente a partir dos 30 anos','Se algum adquirente com renda tiver mais de 80 anos e 6 meses ao fim do prazo, o saldo devedor deve ser amortizado'],al:'Triar o comprador nestes pontos antes de negociar: é onde a transferência costuma travar.',l:['faq','nfi']},
+{t:'Exigências do imóvel e do financiamento',ul:['Prestações em dia, sem parcelas de acordo não pagas; acordo judicial em vigência deve ser quitado antes','Contrato regido por CPVC, TAOPOC ou CCPPCVIA','Mínimo de 18 meses entre o contrato de financiamento e o contrato de gaveta (regra desde fev/2006)','Quem pode pedir: um dos adquirentes, um dos participantes do contrato atual ou o procurador'],l:['faq','mig']},
+{t:'Se o imóvel já está quitado',ul:['O serviço de transferência de titularidade do Portal vale só para financiamento ativo','O contrato de quitação (escritura) só é emitido para empreendimentos averbados e registrados no cartório. Prazo informado: 120 dias','Documentos: RG e CPF, recibo de quitação, matrícula atualizada, comprovante de estado civil e, se for por procurador, procuração (certidão com menos de 12 meses)','Estado civil: casado, certidão de casamento (e pacto antenupcial, conforme o regime); divorciado, certidão com averbação e, se o divórcio foi depois do contrato, petição inicial e sentença; viúvo, certidão de óbito e formal de partilha, conforme o caso','Sem averbação, a CDHU emite só a Declaração de Quitação'],l:['qui','dec','faq']}]}
+};
+function rl(ks){return ks.map(function(k){var x=L[k];return '<a href="'+x[1]+'"'+(k==='alo'?'':' target="_blank" rel="noopener"')+'>'+x[0]+'</a>'}).join('')}
+function pane(k){var d=D[k];return '<section class="pane" id="p-'+k+'" role="tabpanel" aria-labelledby="t-'+k+'"'+(k==='quitado'?'':' hidden')+'><p class="intro">'+d.intro+'</p>'+d.p.map(function(s,i){
+return '<article class="step"><h3><span class="n">'+(i+1)+'</span>'+s.t+'</h3><ul>'+s.ul.map(function(u){return '<li>'+u+'</li>'}).join('')+'</ul>'+(s.al?'<div class="al">'+s.al+'</div>':'')+'<div class="ls">Onde consultar: '+rl(s.l)+'</div></article>'}).join('')+'</section>'}
+document.getElementById('out').innerHTML=pane('quitado')+pane('financiado')+pane('docs');
+document.getElementById('atalhos').innerHTML=rl(['alo','age','pos','faq','gav','qui','dec','onr','cnb','cc']);
+[].forEach.call(document.querySelectorAll('.tab'),function(b){b.onclick=function(){var k=b.dataset.k;
+[].forEach.call(document.querySelectorAll('.tab'),function(x){x.setAttribute('aria-selected',x===b)});
+['quitado','financiado','docs'].forEach(function(n){document.getElementById('p-'+n).hidden=n!==k})}});
+</script>
+</body>
+</html>
