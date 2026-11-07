@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Regras da CDHU-SP — Guia do corretor</title>
+<style>
+:root{--bg:#f2f5f6;--card:#fff;--ink:#14202a;--mut:#53626e;--acc:#0b5d5e;--acc2:#e3f0ef;--warn:#8a4b00;--warnbg:#fdf1de;--line:#d3dbe0}
+@media(prefers-color-scheme:dark){:root{--bg:#10171c;--card:#182229;--ink:#e6edf1;--mut:#9fb0ba;--acc:#5cc4c0;--acc2:#1c3335;--warn:#f0b866;--warnbg:#33260f;--line:#2c3a43}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{padding:22px 16px 10px;max-width:860px;margin:auto}
+h1{font:700 1.7rem/1.2 Georgia,"Times New Roman",serif;margin:0 0 6px}
+header p{margin:0;color:var(--mut);font-size:.92rem}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 16px;border-bottom:1px solid var(--line)}
+.bar>div{max-width:860px;margin:auto}
+input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink);font:inherit}
+input:focus,button:focus-visible,summary:focus-visible{outline:3px solid var(--acc);outline-offset:1px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:8px 0 2px}
+.chips button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:99px;font:inherit;font-size:.85rem;cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--acc);color:var(--bg);border-color:var(--acc)}
+main{max-width:860px;margin:auto;padding:14px 16px 60px}
+h2{font:700 1.15rem Georgia,serif;margin:26px 0 8px;color:var(--acc)}
+details{background:var(--card);border:1px solid var(--line);border-radius:8px;margin:0 0 8px}
+summary{cursor:pointer;padding:13px 14px;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:10px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--acc);font-weight:700}
+details[open] summary::after{content:"–"}
+details[open] summary{border-bottom:1px solid var(--line)}
+.b{padding:10px 14px 14px;max-width:70ch}
+.b p{margin:.5em 0}.b ul,.b ol{margin:.4em 0;padding-left:1.2em}.b li{margin:.2em 0}
+.aviso{background:var(--warnbg);color:var(--warn);border-left:4px solid var(--warn);padding:9px 12px;border-radius:4px;margin:.6em 0;font-size:.93rem}
+.fix{background:var(--acc2);padding:2px 8px;border-radius:4px;font-size:.88rem}
+.vazio{display:none;text-align:center;color:var(--mut);padding:30px 0}
+footer{max-width:860px;margin:auto;padding:0 16px 40px;color:var(--mut);font-size:.85rem}
+a{color:var(--acc);overflow-wrap:anywhere}
+.rapido{margin:10px 0 0;padding:10px 12px;background:var(--acc2);border-radius:8px;font-size:.92rem}
+@media print{.bar{display:none}details{break-inside:avoid}}
+</style>
+</head>
+<body>
+<header>
+<h1>Regras da CDHU-SP para venda, transferência e regularização</h1>
+<p>Resumo do FAQ da CDHU, do Portal de Serviços SP, do Poupatempo e da legislação (ALESP), consultados em 07/11/2026. Confirme sempre no posto de atendimento antes de fechar negócio.</p>
+<p class="rapido"><b>Alô CDHU:</b> <a href="tel:08000002348">0800 000 2348</a> (telefone e WhatsApp, gratuito). É por ele que se agenda o atendimento presencial. Endereços, links e e-mails na seção <b>Contatos e links</b>.</p>
+</header>
+<div class="bar"><div>
+<input id="q" type="search" placeholder="Buscar regra (ex.: gaveta, 18 meses, escritura)" aria-label="Buscar">
+<div class="chips" id="chips"></div>
+</div></div>
+<main id="m"></main>
+<p class="vazio" id="v">Nada encontrado. Tente outra palavra.</p>
+<footer>
+<p><b>Contatos:</b> Alô CDHU 0800 000 2348 · Ouvidoria (11) 2505-2863 · Postos de atendimento: cdhu.sp.gov.br (Contato e localização).</p>
+<p><b>Fontes:</b> FAQ da CDHU; Portal de Serviços SP e Poupatempo (cartas de serviço); Lei 12.276/2006 e Lei 16.105/2016; Decreto 51.241/2006 (ALESP); contrato-modelo CCA da CDHU. Artigos de advogados e blogs foram usados só para conferir, e os antigos trazem prazos já revogados.</p>
+<p><b>Limites:</b> o FAQ lido terminou em "cessão temporária" e pode faltar parte de "Obras"; do Poupatempo li a lista dos serviços, não a página de cada um; a íntegra do Decreto e das normas internas da CDHU (Legislação e Normativos) não foi lida. Este resumo não substitui a análise da CDHU nem orientação jurídica.</p>
+</footer>
+<script>
+const D=[
+["Venda e transferência","Posso vender um imóvel CDHU? Depois de quanto tempo?",
+`<p>Sim, depois de <b>18 meses</b> da assinatura do contrato de financiamento (Lei Estadual 12.276/2006, com redação da Lei 16.105/2016), na forma do Decreto 51.241/2006.</p>
+<p><b>Histórico do prazo:</b> 2 anos (lei de 2006) → 10 anos (Lei 14.672/2011) → 18 meses (Lei 16.105/2016, em vigor). Textos antigos que falam em 2 ou 10 anos estão desatualizados.</p>
+<p><b>Decreto 51.241/2006</b></p><ul>
+<li>O novo adquirente deve ser <b>pessoa física</b>, e as prestações vencidas devem estar pagas.</li>
+<li>A venda só pode ser formalizada com <b>anuência expressa da CDHU</b> (o decreto cita também a Lei federal 8.004/1990).</li>
+<li>Quem vende não pode adquirir diretamente outro imóvel financiado pela CDHU.</li>
+<li>Proibido comprar quem for proprietário ou tiver financiamento imobiliário em vigor no país.</li>
+<li>A CDHU indefere de plano o que não cumprir os requisitos e pode tomar medidas administrativas ou judiciais contra cessão a terceiro sem sua anuência.</li></ul>
+<p>O texto do decreto publicado na ALESP ainda mostra o prazo de 2 anos; vale a lei alterada, que é o que a CDHU aplica (18 meses).</p>
+<ul><li>Antes de negociar, vendedor e comprador devem ir a um posto da CDHU para saber se a transação é possível.</li><li>A CDHU não permite comercializar o imóvel sem autorização prévia.</li><li>Alguns contratos, como o <b>Contrato de Concessão Onerosa</b>, não permitem a venda em hipótese alguma.</li></ul>
+<div class="aviso">O blog da Serasa diz que não se pode vender até quitar. Isso conflita com a lei e com o FAQ oficial, que permitem a transferência do financiamento após 18 meses, com anuência da CDHU. Venda sem anuência vira contrato de gaveta, sem garantia de reconhecimento.</div>`],
+["Venda e transferência","Regularização de contrato de gaveta (transferência de titularidade)",
+`<p>A CDHU pode transferir o financiamento para quem comprou do mutuário ou de terceiros. <b>Não é obrigada a reconhecer</b> o contrato de gaveta: depende de análise e parecer.</p>
+<p><b>Pré-requisitos</b></p><ul>
+<li>Pedido feito por um dos novos adquirentes ou por um participante do contrato atual (ou procurador).</li>
+<li>Mínimo de 18 meses entre o contrato de financiamento e o de gaveta (regra a partir de fev/2006).</li>
+<li>Prestações em dia; sem parcelas de acordo atrasadas. Acordo judicial em vigor deve ser quitado antecipadamente.</li>
+<li>Adquirentes com a mesma capacidade de pagamento dos atuais.</li>
+<li>Pessoa que vive só: somente a partir de 30 anos.</li>
+<li>Contrato regido por CPVC, TAOPOC ou CCPPCVIA.</li>
+<li>Se o adquirente passar de 80 anos e 6 meses ao fim do prazo, o saldo devedor deve ser amortizado.</li>
+<li>Adquirentes não podem ter imóvel nem financiamento imobiliário no país, nem ter sido atendidos por programa habitacional (CDHU ou outro agente de interesse social).</li></ul>
+<p><b>Documentos</b> (a CDHU pode pedir outros)</p><ul>
+<li>RG e CPF de adquirentes, participantes de renda e cônjuges (original e cópia; a cópia fica retida).</li>
+<li>Boleto da prestação (original).</li>
+<li>Contrato de gaveta registrado em cartório, com firmas reconhecidas e endereço do imóvel.</li>
+<li>Carteira de trabalho de todos os adquirentes.</li>
+<li>Comprovante de renda dos 3 últimos meses (holerite, IR etc.).</li>
+<li>Certidão estado civil dos compradores.</li>
+<li>Certidão negativa de IPTU; declaração negativa de condomínio (firma reconhecida do síndico, se apartamento); declaração negativa de água e luz.</li>
+<li>Procuração, se necessário: específica para transferência, com o imóvel e o endereço descritos; pública se o mutuário for cego ou analfabeto; particular com firma reconhecida nos demais casos.</li></ul>
+<p><span class="fix">Taxa: não há</span> <span class="fix">Prazo: até 60 dias após entrevista e entrega de tudo</span></p>
+<p>Os documentos sobre CPVC/TAOPOC/CCPPCVIA e os de "não ter imóvel" são pedidos depois da pré-análise.</p>
+<p><b>Portal de Serviços SP (atualizado em 03/02/2026)</b></p><ol>
+<li>Agendamento prévio e presencial pelo Alô CDHU (0800 000 2348, também WhatsApp) ou gerência regional.</li>
+<li>Entrevista socioeconômica no posto (capital e Grande SP) ou na gerência regional.</li>
+<li>Análise da documentação completa; se aprovada, a CDHU convoca compradores e procurador do mutuário para assinar o contrato.</li></ol>
+<ul><li>Só financiamento <b>ativo</b> pode ser transferido, e o débito deve estar em dia, com prazo e saldo suficientes para concluir o processo.</li>
+<li>Documentos listados no portal: CPF, RG, comprovante de endereço, contrato particular de compra e venda, carnê da CDHU, <b>certidão de estado civil atualizada (até 1 ano)</b> dos compradores e <b>procuração pública</b> outorgada pelos mutuários vendedores. A procuração serve para o procurador assinar pelo mutuário se ele não for encontrado na assinatura.</li>
+<li>O FAQ aceita procuração particular em alguns casos; o portal pede pública. Na dúvida, faça pública.</li>
+<li>Para saber se o comprador já foi atendido ou tem imóvel, a CDHU consulta o Cadastro Nacional de Mutuários (CADMUT), seus bancos de mutuários, cartórios de registro e cadastros municipais.</li></ul>
+<p>Informações sobre um imóvel específico só são dadas ao mutuário ou ao procurador dele.</p>`],
+["Venda e transferência","Devolução, troca e valores pagos",
+`<ul><li>A CDHU <b>não tem permuta/troca</b> entre mutuários nem remanejamento de unidades.</li><li>Ao devolver o imóvel, não há devolução das prestações pagas nem ressarcimento de benfeitorias.</li><li><b>Devolução do imóvel (distrato):</b> sem débito de IPTU, luz, água, gás e condomínio; o imóvel deve estar vazio, sem móveis nem moradores; pode haver prestações da CDHU em aberto; o mutuário não pode ter sido acionado judicialmente pela CDHU.</li>
+<li>Documentos: RG/CPF e as 3 últimas contas de consumo.</li></ul>`],
+["Titularidade e separação","Exclusão de componente de renda (cessão de direitos)",
+`<p>Para tirar um dos nomes do financiamento por decisão própria (pai, mãe, irmão etc.). <b>Não vale para cônjuge.</b></p><ul>
+<li>Os remanescentes comprovam capacidade de pagar a prestação; financiamento em dia.</li>
+<li>Documentos: RG e CPF, declaração de cessão de direitos (em favor de quem e por quê), assinada pelo cedente e duas testemunhas com firmas reconhecidas, carteira de trabalho, 3 últimos holerites, comprovação de inexistência de débito de condomínio.</li></ul>
+<p><span class="fix">Sem taxa</span> <span class="fix">Até 60 dias</span></p>`],
+["Titularidade e separação","Separação, divórcio ou fim de união estável",
+`<ul><li>A CDHU muda a titularidade só depois de a separação ser <b>julgada e homologada</b>, ou por escritura pública de separação administrativa.</li>
+<li>Financiamento em dia, sem parcelas de acordo em atraso.</li>
+<li>A partilha deve dizer quem fica com os direitos e obrigações. Pelo SFH, o imóvel financiado não pode ser doado a filhos, partilhado com terceiros, vendido ou dado em usufruto até quitar o saldo devedor.</li>
+<li>Documentos: petição inicial, termo de audiência e sentença homologatória (ou escritura), certidão de casamento averbada, RG/CPF, carteira de trabalho, 3 holerites, certidões negativas de IPTU, condomínio e água/luz.</li></ul>
+<p>O serviço não termina no posto: o mutuário aguarda convocação por telefone ou carta. <span class="fix">Prazo de exclusão: até 60 dias</span></p>`],
+["Titularidade e separação","Atualização de dados do mutuário e do endereço do imóvel",
+`<ul><li><b>Dados do contrato</b> (nome errado, documento, nome social, estado civil): leve RG/CPF e o documento correto. Correção de nome ou número sai em até 30 dias. Alteração de estado civil só é feita na emissão do contrato de quitação.</li>
+<li><b>Endereço do imóvel</b> (mudou nome da rua ou numeração): certidão de logradouro da Prefeitura; confira no próximo carnê.</li>
+<li><b>Endereço do inscrito</b> (para correspondência): RG, CPF e comprovante com CEP; concluído na hora no posto.</li></ul>`],
+["Quitação e escritura","Contrato de quitação do financiamento",
+`<p>Disponível apenas para empreendimentos <b>averbados e registrados</b> no Cartório de Registro de Imóveis. O financiamento deve estar integralmente quitado.</p><ul>
+<li>Documentos: RG/CPF, cópia do recibo de quitação, comprovante de estado civil (casado: certidão e, se for o caso, pacto antenupcial registrado; divorciado: certidão averbada e petição/sentença se a separação foi depois do contrato; viúvo: certidões de casamento e óbito e formal de partilha; solteiro: certidão de nascimento), matrícula atualizada e procuração, se houver.</li></ul>
+<p><span class="fix">Sem taxa</span> <span class="fix">Pronto em 120 dias</span></p>`],
+["Quitação e escritura","Escritura, matrícula, registro e averbação",
+`<ul><li><b>Escritura pública:</b> feita no Cartório de Notas; transfere a propriedade (salvo instrumento particular com força de escritura, quando a lei permite).</li>
+<li><b>Matrícula:</b> "RG" do imóvel no Cartório de Registro de Imóveis (descrição, confrontações, ônus, proprietário, IPTU).</li>
+<li><b>Registro:</b> ato do CRI que lança o título na matrícula. "Quem não registra não é dono".</li>
+<li><b>Averbação:</b> registra mudanças no imóvel ou no proprietário (numeração, estado civil, construção).</li>
+<li>Para saber se o imóvel está irregular, procure o CRI do bairro (na capital, ARISP; no interior, ANOREG-SP).</li></ul>`],
+["Quitação e escritura","Imóvel, loteamento ou condomínio irregular",
+`<p>Há irregularidade quando o projeto não foi aprovado pela Prefeitura, o empreendimento não foi registrado no CRI, as obras de infraestrutura não foram concluídas ou, em condomínio, a conclusão da obra não foi averbada.</p>
+<p>Mesmo em área regular, o imóvel pode estar irregular se faltar título registrado, projeto aprovado, Habite-se ou averbação da construção. Se o loteamento está irregular, consulte a Prefeitura sobre o Programa Cidade Legal.</p>
+<p>A Lei 13.290/2008 reduziu emolumentos em cerca de 90% na regularização de imóveis de baixa renda (custo médio de R$ 730 para R$ 96 em imóveis CDHU, segundo o FAQ). Há reduções de 75% e 50% em atos de empreendimentos de interesse social.</p>`],
+["Prestações e carnê","Carnê, boletos e acordos",
+`<ul><li>As prestações vêm em carnê, uma folha por mês. Guarde e confira nome, contrato e sequência.</li>
+<li>O carnê respeita a <b>data-base</b> (mês de reajuste anual): pode vir com menos de 12 boletos; depois, sempre 12.</li>
+<li>Pode antecipar parcelas, mas <b>respeitando a ordem dos vencimentos</b>, para evitar cobrança.</li>
+<li>Pagamento até o vencimento em qualquer banco, lotérica ou correspondente; depois, só em lotérica ou Caixa, até 30 dias, com multa, juros e correção.</li>
+<li>Fez acordo ou alterou o contrato (FGTS, revisão, sinistro, dilatação de prazo)? Inutilize o carnê antigo; vem outro.</li>
+<li>Pagou em duplicidade: leve boletos autenticados ou comprovante a um posto para estorno.</li>
+<li>2ª via: site, app CDHU ou posto; só o mutuário ou representante legal.</li>
+<li>2ª via do contrato (cópia digitalizada): RG/CPF, entregue na hora, sem taxa.</li></ul>`],
+["Reforma e uso do imóvel","Reformas, reparos, planta e cessão temporária",
+`<ul><li><b>Reforma/ampliação:</b> exige projeto (croqui) e ART de profissional habilitado. Obra sem conhecimento da CDHU pode causar perda do seguro.</li>
+<li><b>Planta:</b> enviada por e-mail em PDF, em até 30 dias, se a CDHU tiver no arquivo.</li>
+<li><b>Reparo:</b> só para imóvel com menos de 5 anos de entrega e problema construtivo. Manutenção é do morador. Vazamento de gás é do morador (profissional habilitado).</li>
+<li><b>Cessão temporária:</b> por doença/mobilidade, segurança familiar ou mudança de emprego, com carta, comprovação e indicação de quem ficará no imóvel. Resposta em até 30 dias. Havendo subsídio, ele fica suspenso no período.</li>
+<li><b>Notificação extrajudicial:</b> leve a notificação, RG, boleto, comprovante de residência (e contrato de gaveta e renda, se o morador não for o mutuário) ao posto.</li>
+<li><b>Imóvel vago, alugado ou invadido:</b> denúncia pelo Alô CDHU ou Ouvidoria, pode ser anônima.</li></ul>`],
+["Reforma e uso do imóvel","Uso, ocupação, locação e comércio no imóvel",
+`<ul><li><b>Finalidade:</b> o imóvel é financiado para moradia do mutuário e da família. Nos contratos com alienação fiduciária (ex.: modelo CCA), dar outra destinação, vender ou prometer vender sem consentimento da CDHU é descumprimento do contrato, e mudança de estado civil deve ser comunicada de imediato.</li>
+<li><b>Locação:</b> em regra é vedada durante o financiamento (questão registrada na Assembleia Legislativa). Existe serviço específico <b>"Solicitar autorização para locação do imóvel da CDHU"</b>; não consegui ler as condições dele, confirme no posto.</li>
+<li><b>Uso não residencial e uso misto:</b> há serviço de informação sobre as regras. Comércio ou reunião religiosa no imóvel pode ser denunciado como uso irregular.</li>
+<li><b>Imóvel vago, alugado ou invadido:</b> denúncia pelo Alô CDHU, posto ou Ouvidoria (11) 2505-2863, inclusive anônima. Em ocupação irregular a CDHU aciona o jurídico.</li>
+<li><b>Como obter a informação oficial:</b> atendimento presencial agendado pelo Alô CDHU, gratuito, sem documentos. Dados de imóvel específico só vão ao mutuário ou procurador.</li></ul>`],
+["Inscrição e programas","Como adquirir imóvel novo da CDHU",
+`<ul><li>Não há cadastro permanente: aguarde abertura de inscrições no município, inscreva-se e participe do sorteio público.</li>
+<li>Reserva de 7% das moradias para famílias com pessoa com deficiência grave ou irreversível.</li>
+<li>Critérios do edital: renda compatível, não ter imóvel nem financiamento no país, tempo mínimo de moradia ou trabalho no município.</li>
+<li>A CDHU não faz atendimento emergencial a quem está sendo despejado.</li>
+<li>Entidades organizadoras: devem ter Certificado de Regularidade no CRCE e não estar irregulares no TCE.</li></ul>`],
+["Inscrição e programas","Auxílio moradia (AME e AMP)",
+`<ul><li><b>AME (emergencial):</b> famílias de baixa renda atingidas por chuva/enchente em município com emergência ou calamidade decretada. <b>AMP (provisório):</b> famílias removidas por intervenção do Governo do Estado.</li>
+<li>Não há inscrição. Renda até 5 salários mínimos (podendo chegar a 10). Não pode ter tido imóvel nem atendimento habitacional; o locatário não tem direito.</li>
+<li>Vigência em regra de 12 meses, prorrogável. Saque do 5º ao 10º dia útil, em caixa do Banco do Brasil; crédito disponível por 45 dias.</li>
+<li>Atualização cadastral anual presencial no mês de aniversário do titular. Falta suspende o pagamento; sem regularizar em 3 meses, cancela.</li>
+<li>Suspensão por: acúmulo de auxílios, morar em área de risco ou intervenção, residir fora de SP, não sacar por 3 meses, não atualizar cadastro, disputa de titularidade. Não há pagamento retroativo na reativação.</li>
+<li>Status e histórico: site do Bolsa do Povo (0800 7979 800).</li></ul>`],
+["Serviços e documentos","Serviços da CDHU no Poupatempo / Portal de Serviços",
+`<p>A CDHU tem cerca de 57 serviços no Poupatempo SP e no Portal de Serviços (servicos.sp.gov.br). Presenciais exigem agendamento. Os que mais interessam a quem negocia imóvel:</p><ul>
+<li>Regularizar contrato de gaveta (transferência de titularidade).</li>
+<li>Declaração de quitação do financiamento; quitação do saldo com FGTS; FGTS para abater prestação; quitação antecipada de acordo.</li>
+<li>Informação sobre a situação financeira do imóvel (débitos, acordos, saldo devedor); extrato de valores pagos; boleto agrupado; reimpressão de boleto; 2ª via de contrato.</li>
+<li>Declaração de situação cadastral do imóvel (para inventário, separação ou dissolução de união estável).</li>
+<li>Seguro habitacional: cobertura por morte (quitação).</li>
+<li>Conversão de contrato (Termo de Permissão Onerosa de Uso).</li>
+<li>Autorização para locação, para reforma e para cessão temporária; regularização de reforma; planta do imóvel.</li>
+<li>Informação sobre ação judicial (financeira ou contratual) e sobre notificação extrajudicial.</li>
+<li>Demonstrativo de pagamento para IRPF; ofício de tarifa social da Sabesp; lista de mutuários do conjunto; gestão condominial e áreas públicas.</li></ul>
+<p>Os detalhes de cada um não foram todos lidos; abra o serviço no portal para ver documentos e prazos atuais.</p>`],
+["Contatos e links","Telefones, WhatsApp, Ouvidoria e Fala SP",
+`<ul><li><b>Alô CDHU:</b> <a href="tel:08000002348">0800 000 2348</a>, telefone e WhatsApp, ligação gratuita. Agenda os atendimentos presenciais.</li>
+<li><b>Sede:</b> Rua Boa Vista, 170, Centro, São Paulo/SP.</li>
+<li><b>Ouvidoria CDHU:</b> <a href="tel:+551125052863">(11) 2505-2863</a>. <b>SIC (informação ao cidadão):</b> <a href="tel:+551125052735">(11) 2505-2735</a>. Ambos na Rua Boa Vista, 170, 7º andar, Bloco 5, Centro, CEP 01014-930; seg. a sex., 9h–12h30 e 14h–17h (dado de página antiga, confirme por telefone).</li>
+<li><b>Fala SP</b> (informação, solicitação, reclamação, denúncia, elogio, sugestão): <a href="https://fala.sp.gov.br" target="_blank" rel="noopener">fala.sp.gov.br</a>.</li>
+<li><b>Bolsa do Povo</b> (status do auxílio moradia): 0800 7979 800, WhatsApp (11) 98714-2645, <a href="http://www.bolsadopovo.sp.gov.br" target="_blank" rel="noopener">bolsadopovo.sp.gov.br</a>. O governo não liga nem manda link pedindo dados pessoais.</li></ul>`],
+["Contatos e links","Postos de atendimento na capital e Grande SP",
+`<p>Atendimento <b>somente com agendamento</b> pelo Alô CDHU (0800 000 2348).</p><ul>
+<li><b>Centro:</b> Rua XV de Novembro, 318, Centro, São Paulo. Seg. a sex., 8h30–16h30. Serviços: informações, acordo de prestações em atraso, <b>transferência de titularidade</b> etc. <a href="https://www.google.com/maps?q=Rua%20XV%20de%20Novembro%2C%20318%2C%20Centro%2C%20S%C3%A3o%20Paulo%20SP" target="_blank" rel="noopener">Mapa</a></li>
+<li><b>Itaquera (Poupatempo, Zona Leste):</b> Av. do Contorno, 60, Itaquera. Seg. a sex., 7h–19h; sáb., 7h–13h. Serviços: orientações, protocolo simples, informações sobre contratos e boletos. <a href="https://www.google.com/maps?q=Av.%20do%20Contorno%2C%2060%2C%20Itaquera%2C%20S%C3%A3o%20Paulo%20SP" target="_blank" rel="noopener">Mapa</a></li>
+<li><b>Santo Amaro (Poupatempo):</b> Rua Amador Bueno, 229, 2º andar, G, Mais Shopping, Santo Amaro (acesso pelo Metrô Largo Treze). Seg. a sex., 7h–19h; sáb., 7h–13h. Mesmos serviços de Itaquera. <a href="https://www.google.com/maps?q=Rua%20Amador%20Bueno%2C%20229%2C%20Santo%20Amaro%2C%20S%C3%A3o%20Paulo%20SP" target="_blank" rel="noopener">Mapa</a></li></ul>
+<div class="aviso">Listas antigas de sites de terceiros trazem outros endereços (ex.: Domingos de Morais, 2706). A página oficial atual lista só os três acima.</div>`],
+["Contatos e links","Gerências regionais (interior e litoral)",
+`<ul>
+<li><b>Araçatuba:</b> Rua Torres Homem, 722, Jd. Bandeirantes, CEP 16015-510 · (18) 3303-7500 · 8h–17h30 · gr-aracatuba-atendimento@cdhu.sp.gov.br</li>
+<li><b>Araraquara:</b> Av. Mariano Mingotti, 40, Vila Harmonia, CEP 14802-630 · (16) 2108-2662 · 8h–17h · gr-araraquara-atendimento@cdhu.sp.gov.br</li>
+<li><b>Bauru:</b> Av. Cruzeiro do Sul, 13-15, Jd. Carvalho, CEP 17030-743 · (14) 3878-4080 · 8h–17h</li>
+<li><b>Campinas:</b> Av. Profª Ana Maria Silvestre Adade, 449, Parque das Universidades, CEP 13086-130 · (19) 2138-0350 · 8h–17h · gr-campinas-atendimento@cdhu.sp.gov.br</li>
+<li><b>Marília:</b> Av. Santo Antônio, 636, Centro, CEP 17500-070 · (14) 2105-2999 · 8h–17h · gr-marilia-atendimento@cdhu.sp.gov.br</li>
+<li><b>Presidente Prudente:</b> Rua Laguna, 308, Vila Liberdade, CEP 19050-730 · (18) 3311-2333 · 8h–17h30 · gr-pprudente-atendimento@cdhu.sp.gov.br</li>
+<li><b>Ribeirão Preto:</b> Av. Castelo Branco, 2100, Nova Ribeirânia, CEP 14096-560 · (16) 3603-8729 · 8h–16h</li>
+<li><b>Santos:</b> Av. Pinheiro Machado, 796, Marapé, CEP 11075-002 · (13) 2104-6900 · 9h–17h, com agendamento · gr-santos-atendimento@cdhu.sp.gov.br</li>
+<li><b>São José do Rio Preto:</b> Av. Floriano André Cabrera, s/n, Jd. São Marcos (correspondência: Rua Amalia de Vasconcelos Augusto, 542, CEP 15081-450) · (17) 3218-8328 / 3218-8582 / 3218-8389 · 8h–16h · gr-sjrpreto-atendimento@cdhu.sp.gov.br</li>
+<li><b>São José dos Campos:</b> Rua Sebastião Humel, 268, Centro (Shopping BuscaBusca) · (12) 2123-0666 · 8h30–17h · gr-sjc-atendimento@cdhu.sp.gov.br</li>
+<li><b>Sorocaba:</b> Rua Comendador Antônio Soares Regal, 145, Jd. São Carlos, CEP 18046-360 · (15) 3412-0300 · 8h–17h · gr-sorocaba-atendimento@cdhu.sp.gov.br</li></ul>
+<p>Qual regional atende cada município: <a href="https://stor.cdhu.sp.gov.br/sites-portais/publico/DOCUMENTOS/atendimento/Regionaliza%C3%A7%C3%A3o%20CDHU%20e%20DAH.pdf" target="_blank" rel="noopener">lista em PDF da CDHU</a>.</p>`],
+["Contatos e links","Links oficiais de consulta",
+`<ul>
+<li><a href="https://www.cdhu.sp.gov.br/cdhu/Perguntas%20Frequentes" target="_blank" rel="noopener">FAQ da CDHU</a></li>
+<li><a href="https://www.cdhu.sp.gov.br/cdhu/Atendimento/atendimento%20presencial" target="_blank" rel="noopener">Atendimento presencial (postos e regionais)</a> e <a href="https://www.cdhu.sp.gov.br/cdhu/Atendimento" target="_blank" rel="noopener">canais de atendimento</a></li>
+<li><a href="https://cdhuonline.cdhu.sp.gov.br/" target="_blank" rel="noopener">CDHU Online (2ª via de boleto)</a></li>
+<li><a href="https://servicos.sp.gov.br/fcarta/81199f3e-9ce6-466e-a796-e6e2d312cfb2" target="_blank" rel="noopener">Portal de Serviços: regularizar contrato de gaveta</a> e <a href="https://operacoes.sp.gov.br/OperacoesWeb/redirectAgendarServico?tipoServico=72&amp;idServicoCarta=81199F3E-9CE6-466E-A796-E6E2D312CFB2" target="_blank" rel="noopener">agendar</a></li>
+<li><a href="https://servicos.sp.gov.br/fcarta/DB0FDE5D-FDF3-48EF-A576-2177AA9E5202" target="_blank" rel="noopener">Portal de Serviços: regras de uso e ocupação do imóvel</a></li>
+<li><a href="https://poupatempo.sp.gov.br/orgaos/98484/servicos/" target="_blank" rel="noopener">Todos os serviços da CDHU no Poupatempo</a></li>
+<li><a href="https://www.cdhu.sp.gov.br/cdhu/Transpar%C3%AAncia/Carta%20de%20Servi%C3%A7os" target="_blank" rel="noopener">Carta de Serviços da CDHU</a> e <a href="https://www.cdhu.sp.gov.br/cdhu/Programas%20Habitacionais/Ver%20todos%20os%20programas" target="_blank" rel="noopener">programas habitacionais</a></li>
+<li><a href="http://www.cdhu.sp.gov.br/web/guest/informacoes-cidadao/auxilio-moradia/beneficios-ativos-suspensos-e-cancelados" target="_blank" rel="noopener">Auxílio moradia: benefícios ativos, suspensos e cancelados</a></li>
+<li>Cartórios: <a href="https://www.arisp.com.br" target="_blank" rel="noopener">ARISP</a> (capital) e <a href="https://www.anoregsp.org.br" target="_blank" rel="noopener">ANOREG-SP</a> (interior), para descobrir o cartório de registro do imóvel.</li></ul>`],
+["Contatos e links","Links da legislação",
+`<ul>
+<li><a href="https://www.al.sp.gov.br/repositorio/legislacao/lei/2006/lei-12276-21.02.2006.html" target="_blank" rel="noopener">Lei 12.276/2006</a> (alienação de imóveis financiados pela CDHU, atualizada até a Lei 16.105/2016)</li>
+<li><a href="https://www.al.sp.gov.br/norma/?id=176976" target="_blank" rel="noopener">Lei 16.105/2016</a> (prazo de 18 meses)</li>
+<li><a href="https://www.al.sp.gov.br/repositorio/legislacao/decreto/2006/decreto-51241-03.11.2006.html" target="_blank" rel="noopener">Decreto 51.241/2006</a> (regulamenta a Lei 12.276)</li>
+<li><a href="https://www.cdhu.sp.gov.br/cdhu/Transpar%C3%AAncia/Legislacao%20e%20Normativos%20da%20CDHU" target="_blank" rel="noopener">Legislação e Normativos da CDHU</a> (leis, políticas internas e normas)</li></ul>`]
+];
+const m=document.getElementById('m'),chips=document.getElementById('chips'),q=document.getElementById('q'),v=document.getElementById('v');
+let cat='';const cats=[...new Set(D.map(d=>d[0]))];
+function chip(l,val){const b=document.createElement('button');b.textContent=l;b.setAttribute('aria-pressed',cat===val);b.onclick=()=>{cat=val;draw()};chips.appendChild(b)}
+function draw(){
+chips.innerHTML='';chip('Tudo','');cats.forEach(c=>chip(c,c));
+const t=q.value.trim().toLowerCase();let n=0,last='';m.innerHTML='';
+D.forEach(d=>{
+if(cat&&d[0]!==cat)return;
+if(t&&!(d[1]+' '+d[2]).toLowerCase().includes(t))return;
+if(d[0]!==last){const h=document.createElement('h2');h.textContent=d[0];m.appendChild(h);last=d[0]}
+const e=document.createElement('details');if(t)e.open=true;
+e.innerHTML='<summary>'+d[1]+'</summary><div class="b">'+d[2]+'</div>';
+m.appendChild(e);n++});
+v.style.display=n?'none':'block'}
+q.oninput=draw;draw();
+</script>
+</body>
+</html>
