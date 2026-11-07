@@ -29,6 +29,25 @@ body{margin:0;font-family:Arial,sans-serif;background:#e9ecef;color:#111}
 .pb{page-break-before:always}
 .dica{font-size:11px;color:#555;padding:6px 12px;background:#fff8d6}
 #doc.mq .m.n{display:none}#doc.mn .m.q{display:none}
+#dx{background:#eef4ff;border:1px solid #b8c6d6;border-radius:8px;padding:8px 10px;margin-bottom:10px}
+#dx>summary{cursor:pointer;font-weight:bold;font-size:13px;color:#1f3a5f}
+#dx .dxn{font-size:11.5px;color:#555;margin:6px 0}
+#dx .dxg{background:#fff;border:1px solid #d5dce6;border-radius:8px;padding:8px 10px;margin:8px 0}
+#dx h4{margin:0 0 6px;font-size:13px;color:#1f3a5f;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+#dx h4 small{font-weight:normal;font-size:11px;color:#2e7d4f;white-space:nowrap}
+#dx input[type=checkbox]{width:auto;margin:3px 0 0;flex:none}
+#dx label.dxi{display:flex;gap:7px;align-items:flex-start;font-size:12px;color:#222;margin:4px 0;line-height:1.35}
+#dx .dxp{border-top:1px dashed #ccd;margin-top:8px;padding-top:6px}
+#dx .dxp b{font-size:12px;display:block;margin-bottom:4px}
+#dx .dxp input[type=tel]{width:100%;padding:6px;border:1px solid #bbb;border-radius:4px;font-size:13px}
+#dx .dxb{display:flex;gap:6px;margin-top:6px}
+#dx .dxb button{flex:1;border:0;border-radius:6px;padding:8px;font-size:12.5px;font-weight:bold;cursor:pointer;background:#e3e9f2;color:#1f3a5f}
+#dx .dxb button[data-wa]{background:#25a05a;color:#fff}
+#dx textarea{width:100%;min-height:56px;padding:6px;border:1px solid #bbb;border-radius:4px;font-size:12.5px}
+#dx label.dxl{display:block;font-size:11.5px;color:#444;margin:8px 0 3px}
+#dx ul.dxc{margin:4px 0 6px 16px;padding:0;font-size:12px;line-height:1.4}#dx ul.dxc li{margin:2px 0}
+#dx .dxb button[data-wc]{background:#f2b705;color:#222}
+
 @media print{
  body{background:#fff}#bar,#panel,.dica{display:none}
  #wrap{display:block;padding:0}#doc{padding:0;border-radius:0}
@@ -217,9 +236,81 @@ function exemplo(){preencher(EX)}
 function limpar(){if(confirm("Apagar todos os dados preenchidos?"))preencher({})}
 function baixar(){var v={};Object.keys(L).forEach(function(k){v[k]=document.getElementById("f_"+k).value});
  var c=document.documentElement.cloneNode(true);c.querySelector("#panel").innerHTML="";c.querySelector("#doc").innerHTML="";
- var sc=c.querySelector("#main");var js=JSON.stringify({v:v,doc:doc.innerHTML}).replace(/</g,"\\u003c");
+ var sc=c.querySelector("#main");var js=JSON.stringify({v:v,doc:doc.innerHTML,ck:CK,tel:TEL,ex:EXTRA,inc:INC}).replace(/</g,"\\u003c");
  sc.textContent=sc.textContent.replace(/var SAVED=[\s\S]*?;\/\*S\*\//,function(){return "var SAVED="+js+";/*S*/"});
  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["<!DOCTYPE html>\n"+c.outerHTML],{type:"text/html"}));a.download="contrato-cessao-preenchido.html";a.click()}
 if(SAVED){Object.keys(SAVED.v).forEach(function(k){document.getElementById("f_"+k).value=SAVED.v[k]})}
 setv("situacao",document.getElementById("f_situacao").value);
+/* ===== valores e combinado + documentos exigidos + envio para cada parte ===== */
+var CK={},TEL={},EXTRA="",INC=true;
+if(SAVED){if(SAVED.ck)CK=SAVED.ck;if(SAVED.tel)TEL=SAVED.tel;if(typeof SAVED.ex=="string")EXTRA=SAVED.ex;if(typeof SAVED.inc=="boolean")INC=SAVED.inc}
+function sit(){var e=document.getElementById("f_situacao");return e&&e.value=="n"?"n":"q"}
+function fv(k){var e=document.getElementById("f_"+k);return e?e.value.trim():""}
+function escX(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+var D_PESS=["RG e CPF (ou CNH/CIN), frente e verso","Comprovante de residência recente (até 90 dias)","Profissão e estado civil atual","Telefone e e-mail para contato"];
+var D_CED=["Certidão de estado civil atualizada: casamento com todas as averbações. Se divorciado: certidão com a averbação do divórcio, cópia da sentença e certidão de trânsito em julgado. Se viúvo: certidão de óbito e inventário ou alvará","Informar se o imóvel foi partilhado no divórcio (e enviar a partilha, se houver)","Dados para receber o preço: titular, banco, agência, conta ou chave PIX"];
+var D_IMV_COM=["Imóvel: Termo de Adesão ou contrato original com a CDHU (com o nº do TAOPOC)","Imóvel: endereço completo, quadra, lote, conjunto, CEP e nº da conta CDHU","Imóvel: certidão negativa de débitos de IPTU","Imóvel: declarações negativas de débito de água e luz, com a última conta de cada","Imóvel: matrícula atualizada, se já existir"];
+var D_IMV_Q=["Imóvel: Declaração de Quitação da CDHU (via atualizada) e ficha de financiamento"];
+var D_IMV_N=["Imóvel: extrato atualizado do saldo devedor e ficha de financiamento","Imóvel: carnê ou boleto da prestação e comprovantes das últimas 12 prestações pagas","Imóvel: declaração de adimplência da CDHU (prestações em dia, sem acordo pendente)","Imóvel: declaração negativa de débito de condomínio, com firma do síndico reconhecida (se unidade vertical)"];
+var DXG=[
+{id:"ced",t:"Cedentes (vendedores)",ps:[["c1_nome","Cedente 1"],["c2_nome","Cedente 2"]],docs:function(s){return D_PESS.concat(D_CED,s=="n"?D_IMV_N:D_IMV_Q,D_IMV_COM)}},
+{id:"cj",t:"Cônjuge anuente do cedente 2",ps:[["cj_nome","Cônjuge anuente"]],docs:function(s){return D_PESS.concat(["Certidão de casamento, com a data e o regime de bens (e pacto antenupcial, se houver)"])}},
+{id:"ces",t:"Cessionários (compradores)",ps:[["p1_nome","Cessionário 1"],["p2_nome","Cessionário 2"]],docs:function(s){var l=D_PESS.concat(["Certidão de casamento, com o regime de bens (e pacto antenupcial, se houver)"]);if(s=="n")l=l.concat(["Carteira de trabalho original de todos os adquirentes, mesmo sem registro","Comprovante de renda dos 3 últimos meses de quem tem renda (holerite ou declaração de IR)","Declaração de que não possuem outro imóvel nem financiamento de imóvel no país, e não foram atendidos por programas habitacionais","Estar presentes na entrevista socioeconômica da CDHU"]);return l}}];
+var GL={ced:"c",cj:"k",ces:"p"};
+/* linhas do combinado: [quem recebe (c=cedentes, k=cônjuge, p=cessionários), texto] */
+function dxLinhas(){var s=sit(),L=[];function a(f,t){if(t)L.push([f,t])}
+a("ckp",fv("preco")?"Preço da cessão: R$ "+fv("preco")+(fv("preco_ext")?" ("+fv("preco_ext")+")":""):"");
+a("ckp",fv("forma")?"Forma de pagamento: "+fv("forma"):"");
+a("c",fv("banco")?"Conta que recebe o pagamento: "+fv("banco"):"");
+a("ckp",fv("posse")?"Entrega da posse: "+fv("posse"):"");
+if(fv("preco"))a("ckp","A quitação só vale depois do pagamento integral e da compensação");
+a("ckp",fv("corr_val")?"Corretagem: R$ "+fv("corr_val")+(fv("corr_pct")?" ("+fv("corr_pct")+"% do preço)":"")+(fv("corr_quem")?", paga pelos "+fv("corr_quem"):"")+", fora do preço da cessão":"");
+a("p","Por conta dos cessionários: ITBI, procuração pública, escritura, registros, certidões e taxas da CDHU");
+a("c","Por conta dos cedentes: débitos do imóvel (IPTU, água, luz e gás) até a entrega da posse e eventual imposto de renda sobre ganho de capital");
+a("p","Depois da entrega da posse, IPTU, água, luz e gás passam a ser dos cessionários");
+a("ckp","Procuração em causa própria, irrevogável, por escritura pública"+(fv("prazo_proc")?", em até "+fv("prazo_proc")+" dias da assinatura":""));
+a("k","Você assina para dar anuência e outorga conjugal ao negócio e à procuração");
+a("c",fv("prazo_colab")?"Os cedentes assinam o que a CDHU, o tabelião ou o cartório pedirem, em até "+fv("prazo_colab")+" dias do pedido":"");
+a("ckp",fv("multa_pct")?"Multa por desistência ou descumprimento: "+fv("multa_pct")+"% do valor do negócio, além de perdas e danos":"");
+if(s=="n"){a("ckp",fv("saldo")?"Saldo devedor na CDHU: R$ "+fv("saldo"):"");
+a("ckp",fv("parcela_val")?"Prestação mensal: R$ "+fv("parcela_val")+(fv("parcela_venc")?", vencimento dia "+fv("parcela_venc"):"")+(fv("ult_parcela_paga")?", paga até "+fv("ult_parcela_paga"):""):"");
+a("ckp",fv("regra_saldo")?"Saldo devedor e o preço: "+fv("regra_saldo"):"");
+a("ckp","Prestações vencidas até a entrega da posse são dos cedentes; as seguintes, dos cessionários");
+a("ckp",fv("prazo_devol")?"Se a CDHU recusar a transferência: as partes podem desfazer em até "+fv("prazo_devol")+" dias, com devolução dos valores corrigidos pelo IPCA":"")}
+a("ckp",fv("cidade_ass")||fv("data_ass")?"Assinatura: "+[fv("cidade_ass"),fv("data_ass")].filter(Boolean).join(", ")+", com firma reconhecida e duas testemunhas":"");
+EXTRA.split(/\n+/).forEach(function(x){x=x.trim();if(x)a("ckp",x)});
+return L}
+function dxComb(gid){var g=GL[gid],o=[];dxLinhas().forEach(function(l){if(l[0].indexOf(g)>-1)o.push("• "+l[1])});return o}
+function updateDXC(){var el=document.getElementById("dxc-list");if(!el)return;var L=dxLinhas();el.innerHTML=L.length?L.map(function(l){return"<li>"+escX(l[1])+"</li>"}).join(""):"<li>Preencha preço, forma de pagamento e demais campos do bloco Negócio.</li>"}
+function renderDX(){var h="",s=sit();
+h+='<div class="dxg"><h4><span>💰 Valores e combinado</span></h4><ul id="dxc-list" class="dxc"></ul><p class="dxn">Vem dos campos Negócio e Financiamento. Cada parte recebe só o que lhe diz respeito.</p>'+
+'<label class="dxi"><input type="checkbox" data-inc'+(INC?" checked":"")+'><span>Incluir os valores e o combinado na mensagem de documentos</span></label>'+
+'<label class="dxl">Outros combinados (acordos verbais, observações; uma linha por item)</label><textarea data-ex placeholder="Ex.: vendedores entregam o imóvel limpo; pagamento na assinatura do contrato">'+escX(EXTRA)+'</textarea></div>';
+DXG.forEach(function(g){var L=g.docs(s),n=0;L.forEach(function(x,i){if(CK[g.id+i])n++});
+h+='<div class="dxg"><h4><span>'+g.t+'</span><small>'+n+' de '+L.length+' recebidos</small></h4>';
+L.forEach(function(x,i){h+='<label class="dxi"><input type="checkbox" data-dx="'+g.id+i+'"'+(CK[g.id+i]?" checked":"")+'><span>'+escX(x)+'</span></label>'});
+g.ps.forEach(function(p){h+='<div class="dxp"><b>'+escX(fv(p[0])||p[1])+'</b><input type="tel" data-tel="'+p[0]+'" placeholder="WhatsApp: (11) 90000-0000" value="'+escX(TEL[p[0]]||"")+'"><div class="dxb"><button type="button" data-wa="'+g.id+"|"+p[0]+'">💬 Enviar no WhatsApp</button><button type="button" data-wc="'+g.id+"|"+p[0]+'">📝 Só o combinado</button><button type="button" data-cp="'+g.id+"|"+p[0]+'">Copiar</button></div></div>'});
+h+="</div>"});document.getElementById("dx-body").innerHTML=h;updateDXC()}
+function dxMsg(gid,pk,modo){var g=DXG.filter(function(x){return x.id==gid})[0],L=g.docs(sit()),f=[],comb=dxComb(gid);L.forEach(function(x,i){if(!CK[gid+i])f.push(x)});
+var nm=fv(pk),pn=nm?nm.split(/\s+/)[0].toLowerCase().replace(/^./,function(c){return c.toUpperCase()}):"";
+var imv=[fv("imovel_end"),fv("imovel_quadra")&&"Quadra "+fv("imovel_quadra"),fv("imovel_lote")&&"Lote "+fv("imovel_lote"),fv("imovel_conjunto")&&"Conjunto "+fv("imovel_conjunto")].filter(Boolean).join(", ");
+var ass=(fv("cor_nome")||"FCosta Corretor de Imóveis")+(fv("cor_creci")?" · CRECI/SP "+fv("cor_creci"):""),p=[];
+if(modo=="c"&&!comb.length)return"";
+if(modo=="c"||(INC&&comb.length))p.push("Segue o que ficou combinado para a cessão de direitos do imóvel CDHU"+(imv?" ("+imv+")":"")+":\n\n"+comb.join("\n")+"\n\nSe algo estiver diferente do que conversamos, me avise antes da assinatura.");
+if(modo!="c"){if(f.length){var t="Para preparar o contrato, preciso que você me envie os documentos abaixo, em foto nítida ou em PDF:\n\n";f.forEach(function(x,i){t+=(i+1)+". "+x+"\n"});p.push(t+"\nPode mandar por aqui mesmo.")}else p.push("Recebi todos os documentos necessários para o contrato. Obrigado!")}
+return"Olá"+(pn?", "+pn:"")+"! "+p.join("\n\n")+"\n\nObrigado!\n\n— "+ass}
+function dxFone(k){var d=(TEL[k]||"").replace(/\D/g,"");if(d.length==10||d.length==11)d="55"+d;return d}
+var dx=document.createElement("details");dx.id="dx";dx.open=true;
+dx.innerHTML='<summary>📋 Valores, combinado e documentos de cada parte</summary><p class="dxn">Marque o que já recebeu. O WhatsApp envia o combinado e só os documentos que ainda faltam, com o nome da parte. A lista muda ao escolher quitado ou financiado no campo abaixo.</p><div id="dx-body"></div>';
+panel.insertBefore(dx,panel.firstChild);
+dx.addEventListener("change",function(e){var k=e.target.getAttribute("data-dx");if(k){CK[k]=e.target.checked;renderDX()}if(e.target.hasAttribute("data-inc"))INC=e.target.checked});
+dx.addEventListener("input",function(e){var k=e.target.getAttribute("data-tel");if(k)TEL[k]=e.target.value;if(e.target.hasAttribute("data-ex")){EXTRA=e.target.value;updateDXC()}});
+dx.addEventListener("click",function(e){var b=e.target.closest("[data-wa],[data-wc],[data-cp]");if(!b)return;var w=b.getAttribute("data-wa"),c=b.getAttribute("data-wc"),a=(w||c||b.getAttribute("data-cp")).split("|"),m=dxMsg(a[0],a[1],c?"c":"");
+if(c&&!m){alert("Preencha o preço e os campos do bloco Negócio para montar o combinado.");return}
+if(w||c){window.open("https://wa.me/"+dxFone(a[1])+"?text="+encodeURIComponent(m),"_blank");return}
+var ok=function(){var o=b.textContent;b.textContent="✅ Copiado";setTimeout(function(){b.textContent=o},1500)};
+if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(m).then(ok,function(){prompt("Copie o texto:",m)});else prompt("Copie o texto:",m)});
+var _setv=setv;setv=function(k,v){_setv(k,v);if(/^(c1_nome|c2_nome|cj_nome|p1_nome|p2_nome|situacao|imovel_end|imovel_quadra|imovel_lote|imovel_conjunto)$/.test(k))renderDX();else if(/^(preco|preco_ext|forma|banco|posse|corr_val|corr_pct|corr_quem|prazo_proc|prazo_colab|multa_pct|cidade_ass|data_ass|saldo|parcela_val|parcela_venc|ult_parcela_paga|regra_saldo|prazo_devol)$/.test(k))updateDXC()};
+var sitSel=document.getElementById("f_situacao");if(sitSel)sitSel.addEventListener("change",renderDX);
+renderDX();
 </script></body></html>
