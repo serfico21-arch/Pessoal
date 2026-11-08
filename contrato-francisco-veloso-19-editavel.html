@@ -24,6 +24,11 @@ body{margin:0;font-family:Arial,sans-serif;background:#e9ecef;color:#111}
 .box{border:2px solid #111;padding:10px 14px;margin:14px 0;background:#f6f6f6}
 .v{white-space:pre-line}
 .v.empty{background:#fff176;padding:0 2px}
+.v.na{background:none}
+#panel label{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+#panel label .nad{font-size:11px;color:#666;white-space:nowrap;cursor:pointer;font-weight:normal}
+#panel label .nad input{width:auto;display:inline;margin:0 3px 0 0;vertical-align:middle}
+#panel select{width:100%;padding:6px;border:1px solid #bbb;border-radius:4px;font-size:13px}
 .assin{display:grid;grid-template-columns:1fr 1fr;gap:34px 30px;margin-top:30px;font-size:11pt}
 .assin div{border-top:1px solid #111;padding-top:4px;text-align:center}
 .pb{page-break-before:always}
@@ -58,10 +63,11 @@ body{margin:0;font-family:Arial,sans-serif;background:#e9ecef;color:#111}
 <div id="bar"><b>Contrato – Francisco Veloso, 19 (editável)</b>
 <button onclick="exemplo()">Carregar exemplo</button>
 <button onclick="limpar()">Limpar campos</button>
+<button id="btnNA" onclick="tirarAmarelos()">Tirar amarelos (sem dado)</button>
 <button onclick="document.querySelector('.sub').style.display=(document.querySelector('.sub').style.display=='none'?'':'none')">Mostrar/ocultar aviso de minuta</button>
 <button onclick="baixar()">Baixar este arquivo preenchido</button>
 <button class="p" onclick="window.print()">Imprimir / Salvar em PDF</button></div>
-<div class="dica">Preencha o formulário à esquerda e o contrato se atualiza. Você também pode clicar direto no texto do contrato e digitar para mudar qualquer frase. Campos em amarelo ainda estão vazios. Para gerar o PDF, use "Imprimir" e escolha "Salvar como PDF".</div>
+<div class="dica">Preencha o formulário à esquerda e o contrato se atualiza. Você também pode clicar direto no texto do contrato e digitar para mudar qualquer frase. Campos em amarelo ainda estão vazios. Se não tiver o dado em mãos, marque “sem dado” no campo (ou use o botão “Tirar amarelos”): o amarelo some e o contrato mostra uma linha em branco para preencher à mão. Em cada pessoa, escolha “CIN – número único (CPF)” quando o documento for a nova Carteira de Identidade Nacional, que não tem RG separado. Para gerar o PDF, use "Imprimir" e escolha "Salvar como PDF".</div>
 <div id="wrap"><div id="panel"></div><div id="doc" contenteditable="true" spellcheck="false"></div></div>
 
 <script id="main">
@@ -72,15 +78,15 @@ var G=[
 ["Imóvel",[
 ["imovel_end","Rua e número"],["imovel_quadra","Quadra"],["imovel_lote","Lote"],["imovel_conjunto","Conjunto habitacional"],["imovel_bairro","Bairro"],["imovel_cidade","Cidade/UF"],["imovel_cep","CEP"],["conta_cdhu","Conta CDHU nº"],["taopoc","TAOPOC nº"]]],
 ["Cedente 1 (vendedor)",[
-["c1_nome","Nome completo"],["c1_alias","Outra grafia do nome (se houver)"],["c1_civil","Estado civil"],["c1_prof","Profissão"],["c1_rg","RG"],["c1_cpf","CPF"],["c1_end","Endereço completo"]]],
+["c1_nome","Nome completo"],["c1_alias","Outra grafia do nome (se houver)"],["c1_civil","Estado civil"],["c1_prof","Profissão"],["c1_idm","Documento de identidade","i"],["c1_rg","RG"],["c1_cpf","CPF"],["c1_end","Endereço completo"]]],
 ["Cedente 2 (vendedor)",[
-["c2_nome","Nome completo"],["c2_anterior","Nome anterior (se houver)"],["c2_civil","Estado civil"],["c2_prof","Profissão"],["c2_rg","RG"],["c2_cpf","CPF"],["c2_end","Endereço completo"]]],
+["c2_nome","Nome completo"],["c2_anterior","Nome anterior (se houver)"],["c2_civil","Estado civil"],["c2_prof","Profissão"],["c2_idm","Documento de identidade","i"],["c2_rg","RG"],["c2_cpf","CPF"],["c2_end","Endereço completo"]]],
 ["Cônjuge anuente do cedente 2",[
-["cj_nome","Nome completo"],["cj_prof","Profissão"],["cj_rg","RG"],["cj_cpf","CPF"],["cj_regime","Regime de bens"],["cj_data","Data do casamento"]]],
+["cj_nome","Nome completo"],["cj_prof","Profissão"],["cj_idm","Documento de identidade","i"],["cj_rg","RG"],["cj_cpf","CPF"],["cj_regime","Regime de bens"],["cj_data","Data do casamento"]]],
 ["Cessionário 1 (comprador)",[
-["p1_nome","Nome completo"],["p1_civil","Estado civil"],["p1_regime","Regime de bens"],["p1_prof","Profissão"],["p1_rg","RG"],["p1_cpf","CPF"],["p1_end","Endereço completo"]]],
+["p1_nome","Nome completo"],["p1_civil","Estado civil"],["p1_regime","Regime de bens"],["p1_prof","Profissão"],["p1_idm","Documento de identidade","i"],["p1_rg","RG"],["p1_cpf","CPF"],["p1_end","Endereço completo"]]],
 ["Cessionário 2 (cônjuge)",[
-["p2_nome","Nome completo"],["p2_prof","Profissão"],["p2_doc","Documento (RG ou CIN nº)"],["p2_cpf","CPF"]]],
+["p2_nome","Nome completo"],["p2_prof","Profissão"],["p2_idm","Documento de identidade","i"],["p2_rg","RG"],["p2_cpf","CPF"]]],
 ["Corretor",[
 ["cor_nome","Nome / empresa"],["cor_creci","CRECI nº"],["cor_cpf","CPF"]]],
 ["Negócio",[
@@ -89,11 +95,11 @@ var G=[
 ["considerandos","Considerandos (origem do imóvel, quitação, divórcio etc.)","t"],["ciencia_d","Ciência dos cessionários – item (d), regras da CDHU","t"],["partilha","Item 2.1.f – situação de partilha","t"]]]
 ];
 var EX={situacao:"q",imovel_end:"Rua Padre Francisco Veloso, nº 19",imovel_quadra:"29",imovel_lote:"13",imovel_conjunto:"Encosta Norte",imovel_bairro:"Itaim Paulista",imovel_cidade:"São Paulo/SP",imovel_cep:"08131-180",conta_cdhu:"7216419",taopoc:"000486",
-c1_nome:"EDNALDO GRANEIRO",c1_alias:"EDNALDO GRANERO nos registros da CDHU",c1_civil:"divorciado",c1_prof:"aposentado",c1_rg:"15.270.272-6 SSP/SP",c1_cpf:"047.385.498-80",c1_end:"Praça Guamirim, nº 65, Cidade Nova São Miguel, CEP 08042-430, São Paulo/SP",
-c2_nome:"CELIA MARIA DOS SANTOS VENTURA",c2_anterior:"CELIA MARIA DOS SANTOS GRANEIRO",c2_civil:"casada",c2_prof:"diarista",c2_rg:"",c2_cpf:"103.987.568-80",c2_end:"",
-cj_nome:"JOSÉ ROBERTO VENTURA",cj_prof:"",cj_rg:"",cj_cpf:"",cj_regime:"",cj_data:"15/09/2017",
-p1_nome:"ALEXANDRE FERNANDES DA COSTA",p1_civil:"casado",p1_regime:"",p1_prof:"vigilante",p1_rg:"43.751.675 SSP/SP",p1_cpf:"351.502.858-70",p1_end:"Rua Dom Pedro I, nº 138, Cidade Kemel, CEP 08542-210, Ferraz de Vasconcelos/SP",
-p2_nome:"ADRIANA PINHEIRO DA COSTA",p2_prof:"comerciante",p2_doc:"Carteira de Identidade Nacional (CIN) nº 294.406.758-37",p2_cpf:"294.406.758-37",
+c1_nome:"EDNALDO GRANEIRO",c1_alias:"EDNALDO GRANERO nos registros da CDHU",c1_civil:"divorciado",c1_prof:"aposentado",c1_idm:"rg",c1_rg:"15.270.272-6 SSP/SP",c1_cpf:"047.385.498-80",c1_end:"Praça Guamirim, nº 65, Cidade Nova São Miguel, CEP 08042-430, São Paulo/SP",
+c2_nome:"CELIA MARIA DOS SANTOS VENTURA",c2_anterior:"CELIA MARIA DOS SANTOS GRANEIRO",c2_civil:"casada",c2_prof:"diarista",c2_idm:"rg",c2_rg:"",c2_cpf:"103.987.568-80",c2_end:"",
+cj_nome:"JOSÉ ROBERTO VENTURA",cj_prof:"",cj_idm:"rg",cj_rg:"",cj_cpf:"",cj_regime:"",cj_data:"15/09/2017",
+p1_nome:"ALEXANDRE FERNANDES DA COSTA",p1_civil:"casado",p1_regime:"",p1_prof:"vigilante",p1_idm:"rg",p1_rg:"43.751.675 SSP/SP",p1_cpf:"351.502.858-70",p1_end:"Rua Dom Pedro I, nº 138, Cidade Kemel, CEP 08542-210, Ferraz de Vasconcelos/SP",
+p2_nome:"ADRIANA PINHEIRO DA COSTA",p2_prof:"comerciante",p2_idm:"cin",p2_rg:"",p2_cpf:"294.406.758-37",
 cor_nome:"FCOSTA CORRETOR DE IMÓVEIS",cor_creci:"294791-F",cor_cpf:"022.478.348-33",
 preco:"200.000,00",preco_ext:"duzentos mil reais",forma:"à vista, em parcela única, no ato da assinatura deste instrumento",banco:"",posse:"com o pagamento integral do preço",corr_pct:"6",corr_val:"12.000,00",corr_quem:"CEDENTES",prazo_proc:"",prazo_colab:"10",multa_pct:"10",foro:"São Paulo",cidade_ass:"São Paulo",data_ass:"09 de novembro de 2026",
 considerandos:"A) Em 30/04/1989, o CEDENTE EDNALDO, casado com a CEDENTE CELIA sob o regime da comunhão parcial de bens (casamento de 07/01/1982), firmou com a Companhia de Desenvolvimento Habitacional do Estado de São Paulo (CDH, atual CDHU) o Termo de Adesão e Ocupação Provisória com Opção de Compra nº 000486, relativo ao imóvel objeto deste instrumento.\nB) O financiamento foi integralmente liquidado em 30/04/2014, conforme a Declaração de Quitação do Imóvel emitida pela CDHU e a ficha de financiamento (situação “quitado no prazo previsto”).\nC) A Declaração de Quitação informa que o instrumento de quitação será emitido oportunamente, após a regularização do empreendimento no Cartório de Registro de Imóveis. O imóvel ainda não possui matrícula individualizada.\nD) O casamento dos CEDENTES foi dissolvido por divórcio, decretado por sentença de 11/08/2016, transitada em julgado em 30/09/2016 (processo nº 1013888-48.2016.8.26.0005). Em 15/09/2017, a CEDENTE CELIA casou-se com JOSÉ ROBERTO VENTURA.\nE) Os CEDENTES desejam ceder, e os CESSIONÁRIOS desejam adquirir, os direitos sobre o imóvel, nos termos abaixo.",
@@ -116,9 +122,9 @@ var T=`
 
 <h2>Qualificação das Partes</h2>
 <p><b>CEDENTES (VENDEDORES):</b></p>
-<p>1. <b>{{c1_nome}}</b> (grafado também {{c1_alias}}), brasileiro(a), {{c1_civil}}, {{c1_prof}}, portador(a) do RG nº {{c1_rg}} e inscrito(a) no CPF/MF sob o nº {{c1_cpf}}, residente e domiciliado(a) na {{c1_end}};</p>
-<p>2. <b>{{c2_nome}}</b> (anteriormente {{c2_anterior}}), brasileiro(a), {{c2_civil}}, {{c2_prof}}, portador(a) do RG nº {{c2_rg}} e inscrito(a) no CPF/MF sob o nº {{c2_cpf}}, residente e domiciliado(a) na {{c2_end}}; com a anuência e a outorga conjugal de seu cônjuge <b>{{cj_nome}}</b>, brasileiro(a), {{cj_prof}}, portador(a) do RG nº {{cj_rg}} e inscrito(a) no CPF/MF sob o nº {{cj_cpf}}, casado sob o regime de {{cj_regime}} desde {{cj_data}}, residente e domiciliado no mesmo endereço.</p>
-<p><b>CESSIONÁRIOS (COMPRADORES):</b> <b>{{p1_nome}}</b>, brasileiro(a), {{p1_civil}} sob o regime de {{p1_regime}}, {{p1_prof}}, portador(a) do RG nº {{p1_rg}} e inscrito(a) no CPF/MF sob o nº {{p1_cpf}}, e seu(sua) cônjuge <b>{{p2_nome}}</b>, brasileiro(a), {{p2_prof}}, portador(a) de {{p2_doc}}, CPF/MF nº {{p2_cpf}}, ambos residentes e domiciliados na {{p1_end}}.</p>
+<p>1. <b>{{c1_nome}}</b> (grafado também {{c1_alias}}), brasileiro(a), {{c1_civil}}, {{c1_prof}}, <span class="idr" data-p="c1">portador(a) do RG nº {{c1_rg}} e inscrito(a) no CPF/MF sob o nº {{c1_cpf}}</span><span class="idc" data-p="c1">portador(a) da Carteira de Identidade Nacional (CIN), cujo número único é o CPF/MF nº {{c1_cpf}}</span>, residente e domiciliado(a) na {{c1_end}};</p>
+<p>2. <b>{{c2_nome}}</b> (anteriormente {{c2_anterior}}), brasileiro(a), {{c2_civil}}, {{c2_prof}}, <span class="idr" data-p="c2">portador(a) do RG nº {{c2_rg}} e inscrito(a) no CPF/MF sob o nº {{c2_cpf}}</span><span class="idc" data-p="c2">portador(a) da Carteira de Identidade Nacional (CIN), cujo número único é o CPF/MF nº {{c2_cpf}}</span>, residente e domiciliado(a) na {{c2_end}}; com a anuência e a outorga conjugal de seu cônjuge <b>{{cj_nome}}</b>, brasileiro(a), {{cj_prof}}, <span class="idr" data-p="cj">portador(a) do RG nº {{cj_rg}} e inscrito(a) no CPF/MF sob o nº {{cj_cpf}}</span><span class="idc" data-p="cj">portador(a) da Carteira de Identidade Nacional (CIN), cujo número único é o CPF/MF nº {{cj_cpf}}</span>, casado sob o regime de {{cj_regime}} desde {{cj_data}}, residente e domiciliado no mesmo endereço.</p>
+<p><b>CESSIONÁRIOS (COMPRADORES):</b> <b>{{p1_nome}}</b>, brasileiro(a), {{p1_civil}} sob o regime de {{p1_regime}}, {{p1_prof}}, <span class="idr" data-p="p1">portador(a) do RG nº {{p1_rg}} e inscrito(a) no CPF/MF sob o nº {{p1_cpf}}</span><span class="idc" data-p="p1">portador(a) da Carteira de Identidade Nacional (CIN), cujo número único é o CPF/MF nº {{p1_cpf}}</span>, e seu(sua) cônjuge <b>{{p2_nome}}</b>, brasileiro(a), {{p2_prof}}, <span class="idr" data-p="p2">portador(a) do RG nº {{p2_rg}} e inscrito(a) no CPF/MF sob o nº {{p2_cpf}}</span><span class="idc" data-p="p2">portador(a) da Carteira de Identidade Nacional (CIN), cujo número único é o CPF/MF nº {{p2_cpf}}</span>, ambos residentes e domiciliados na {{p1_end}}.</p>
 <p><b>INTERVENIENTE CORRETOR:</b> <b>{{cor_nome}}</b>, inscrito no CRECI/SP sob o nº {{cor_creci}} e no CPF/MF sob o nº {{cor_cpf}}.</p>
 <p class="base">Base legal: CC, art. 104 (agentes capazes) e art. 1.647, I (outorga conjugal); Lei nº 6.530/1978 (profissão de corretor de imóveis).</p>
 
@@ -219,39 +225,55 @@ var T=`
 </div>
 
 <h2 class="pb">Anexo I — Documentos a Entregar pelos Cedentes</h2>
-<p><b>A) Dos CEDENTES e do cônjuge anuente:</b> RG e CPF; comprovante de residência recente; certidões de casamento com averbações (e de divórcio, se houver); cópia da sentença de divórcio e certidão de trânsito em julgado, se houver; regime de bens do casamento.</p>
+<p><b>A) Dos CEDENTES e do cônjuge anuente:</b> CIN (ou RG e CPF); comprovante de residência recente; certidões de casamento com averbações (e de divórcio, se houver); cópia da sentença de divórcio e certidão de trânsito em julgado, se houver; regime de bens do casamento.</p>
 <p><b>B) Do IMÓVEL:</b> <span class="m q">Declaração de Quitação da CDHU (via atualizada) e ficha de financiamento</span><span class="m n">extrato atualizado do saldo devedor, ficha de financiamento e comprovantes das últimas 12 prestações pagas, com declaração de adimplência da CDHU</span>; Termo de Adesão ou contrato original com a CDHU; certidão negativa de débitos de IPTU; declarações negativas de débito de água e luz, com a última conta de cada uma; dados bancários dos CEDENTES para o recebimento do preço.</p>
 <p><b>C) Dos CESSIONÁRIOS:</b> RG (ou CIN) e CPF; certidão de casamento, com o regime de bens; comprovante de residência recente.</p>
 <h2>Anexo II — Poderes da Procuração em Causa Própria</h2>
 <p>Poderes especiais, expressos, irrevogáveis e irretratáveis, em causa própria, para os CESSIONÁRIOS: alienar, ceder e transferir a si mesmos o IMÓVEL descrito na Cláusula 1ª; receber o preço e dar quitação; requerer e receber da CDHU o contrato de quitação e a escritura; assinar escrituras, requerimentos e declarações; pagar impostos e taxas (ITBI, emolumentos); requerer matrícula, averbações e registros no Cartório de Registro de Imóveis; ingressar com adjudicação compulsória; representar os CEDENTES perante a CDHU, prefeitura, cartórios e demais órgãos; e substabelecer, com ou sem reserva de poderes. A procuração dispensa prestação de contas.</p>
 `;
-var L={},TA={};
+var L={},TA={},NA={};if(SAVED&&SAVED.na)NA=SAVED.na;
 G.forEach(function(g){g[1].forEach(function(f){L[f[0]]=f[1];TA[f[0]]=f[2]=="t"})});
 var panel=document.getElementById("panel"),doc=document.getElementById("doc");
 G.forEach(function(g){var h=document.createElement("h3");h.textContent=g[0];panel.appendChild(h);
- g[1].forEach(function(f){var l=document.createElement("label");l.textContent=f[1];var i=document.createElement(f[2]=="t"?"textarea":f[2]=="s"?"select":"input");i.id="f_"+f[0];if(f[2]=="s"){i.innerHTML='<option value="q">Quitado</option><option value="n">NÃO quitado (em andamento)</option>'}i.oninput=function(){setv(f[0],i.value)};panel.appendChild(l);panel.appendChild(i)})});
+ g[1].forEach(function(f){var l=document.createElement("label"),sl=f[2]=="s"||f[2]=="i";l.htmlFor="f_"+f[0];l.innerHTML='<span class="lt"></span>';l.firstChild.textContent=f[1];
+ if(!sl){var w=document.createElement("span");w.className="nad";w.innerHTML='<input type="checkbox" id="n_'+f[0]+'">sem dado';l.appendChild(w);w.firstChild.onchange=function(){NA[f[0]]=this.checked;setv(f[0],document.getElementById("f_"+f[0]).value)}}
+ var i=document.createElement(f[2]=="t"?"textarea":sl?"select":"input");i.id="f_"+f[0];
+ if(f[2]=="s"){i.innerHTML='<option value="q">Quitado</option><option value="n">NÃO quitado (em andamento)</option>'}
+ if(f[2]=="i"){i.innerHTML='<option value="rg">RG e CPF (documentos separados)</option><option value="cin">CIN – número único (CPF)</option>'}
+ i.oninput=function(){if(!sl&&i.value.trim()&&NA[f[0]]){NA[f[0]]=false;document.getElementById("n_"+f[0]).checked=false}setv(f[0],i.value)};panel.appendChild(l);panel.appendChild(i)})});
 doc.innerHTML=T.replace(/\{\{(\w+)\}\}/g,function(m,k){return '<span class="v empty" data-k="'+k+'">['+(L[k]||k)+']</span>'});
 if(SAVED){doc.innerHTML=SAVED.doc}
+function idm(k,v){var p=k.slice(0,-4),c=v=="cin";
+ document.querySelectorAll('.idr[data-p="'+p+'"]').forEach(function(s){s.style.display=c?"none":""});
+ document.querySelectorAll('.idc[data-p="'+p+'"]').forEach(function(s){s.style.display=c?"":"none"});
+ var r=document.getElementById("f_"+p+"_rg");if(r){r.style.display=c?"none":"";if(r.previousSibling)r.previousSibling.style.display=c?"none":""}
+ var q=document.getElementById("f_"+p+"_cpf");if(q&&q.previousSibling){var t=q.previousSibling.querySelector(".lt");if(t)t.textContent=c?"CPF (é o nº único da CIN)":L[p+"_cpf"]}}
 function setv(k,v){if(k=="situacao"){doc.className=v=="n"?"mn":"mq";return}
- document.querySelectorAll('.v[data-k="'+k+'"]').forEach(function(s){if(v.trim()){s.textContent=v;s.className="v"}else{s.textContent="["+L[k]+"]";s.className="v empty"}})}
-function preencher(d){Object.keys(L).forEach(function(k){var v=d[k]||(k=="situacao"?"q":"");document.getElementById("f_"+k).value=v;setv(k,v)})}
+ if(/_idm$/.test(k)){idm(k,v);return}
+ document.querySelectorAll('.v[data-k="'+k+'"]').forEach(function(s){if(v.trim()){s.textContent=v;s.className="v"}else if(NA[k]){s.textContent="____________";s.className="v na"}else{s.textContent="["+L[k]+"]";s.className="v empty"}})}
+function nad(k,on){NA[k]=on;var c=document.getElementById("n_"+k);if(c)c.checked=on;setv(k,document.getElementById("f_"+k).value)}
+function tirarAmarelos(){var emp=Object.keys(L).filter(function(k){var e=document.getElementById("f_"+k);return e&&e.tagName!="SELECT"&&!e.value.trim()});
+ if(emp.some(function(k){return !NA[k]})){emp.forEach(function(k){nad(k,true)})}else{Object.keys(NA).forEach(function(k){nad(k,false)})}
+ var b=document.getElementById("btnNA");if(b)b.textContent=emp.some(function(k){return NA[k]})?"Voltar amarelos":"Tirar amarelos (sem dado)"}
+function preencher(d){NA={};Object.keys(L).forEach(function(k){var v=d[k]||(k=="situacao"?"q":/_idm$/.test(k)?"rg":"");document.getElementById("f_"+k).value=v;var c=document.getElementById("n_"+k);if(c)c.checked=false;setv(k,v)});var b=document.getElementById("btnNA");if(b)b.textContent="Tirar amarelos (sem dado)"}
 function exemplo(){preencher(EX)}
 function limpar(){if(confirm("Apagar todos os dados preenchidos?"))preencher({})}
 function baixar(){var v={};Object.keys(L).forEach(function(k){v[k]=document.getElementById("f_"+k).value});
  var c=document.documentElement.cloneNode(true);c.querySelector("#panel").innerHTML="";c.querySelector("#doc").innerHTML="";
- var sc=c.querySelector("#main");var js=JSON.stringify({v:v,doc:doc.innerHTML,ck:CK,tel:TEL,ex:EXTRA,inc:INC}).replace(/</g,"\\u003c");
+ var sc=c.querySelector("#main");var js=JSON.stringify({v:v,doc:doc.innerHTML,ck:CK,tel:TEL,ex:EXTRA,inc:INC,na:NA}).replace(/</g,"\\u003c");
  sc.textContent=sc.textContent.replace(/var SAVED=[\s\S]*?;\/\*S\*\//,function(){return "var SAVED="+js+";/*S*/"});
  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["<!DOCTYPE html>\n"+c.outerHTML],{type:"text/html"}));a.download="contrato-cessao-preenchido.html";a.click()}
 if(!SAVED){exemplo()}
-if(SAVED){Object.keys(SAVED.v).forEach(function(k){document.getElementById("f_"+k).value=SAVED.v[k]})}
+if(SAVED){Object.keys(SAVED.v).forEach(function(k){var e=document.getElementById("f_"+k);if(e)e.value=SAVED.v[k]})}
 setv("situacao",document.getElementById("f_situacao").value);
+Object.keys(L).forEach(function(k){var c=document.getElementById("n_"+k);if(c&&NA[k])c.checked=true;if(/_idm$/.test(k)){var e=document.getElementById("f_"+k);if(!e.value)e.value="rg";setv(k,e.value)}});
 /* ===== valores e combinado + documentos exigidos + envio para cada parte ===== */
 var CK={},TEL={},EXTRA="",INC=true;
 if(SAVED){if(SAVED.ck)CK=SAVED.ck;if(SAVED.tel)TEL=SAVED.tel;if(typeof SAVED.ex=="string")EXTRA=SAVED.ex;if(typeof SAVED.inc=="boolean")INC=SAVED.inc}
 function sit(){var e=document.getElementById("f_situacao");return e&&e.value=="n"?"n":"q"}
 function fv(k){var e=document.getElementById("f_"+k);return e?e.value.trim():""}
 function escX(t){return String(t).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
-var D_PESS=["RG e CPF (ou CNH/CIN), frente e verso","Comprovante de residência recente (até 90 dias)","Profissão e estado civil atual","Telefone e e-mail para contato"];
+var D_PESS=["CIN (novo RG, que traz o CPF como número único) ou RG e CPF, ou CNH, frente e verso","Comprovante de residência recente (até 90 dias)","Profissão e estado civil atual","Telefone e e-mail para contato"];
 var D_CED=["Certidão de estado civil atualizada: casamento com todas as averbações. Se divorciado: certidão com a averbação do divórcio, cópia da sentença e certidão de trânsito em julgado. Se viúvo: certidão de óbito e inventário ou alvará","Informar se o imóvel foi partilhado no divórcio (e enviar a partilha, se houver)","Dados para receber o preço: titular, banco, agência, conta ou chave PIX"];
 var D_IMV_COM=["Imóvel: Termo de Adesão ou contrato original com a CDHU (com o nº do TAOPOC)","Imóvel: endereço completo, quadra, lote, conjunto, CEP e nº da conta CDHU","Imóvel: certidão negativa de débitos de IPTU","Imóvel: declarações negativas de débito de água e luz, com a última conta de cada","Imóvel: matrícula atualizada, se já existir"];
 var D_IMV_Q=["Imóvel: Declaração de Quitação da CDHU (via atualizada) e ficha de financiamento"];
