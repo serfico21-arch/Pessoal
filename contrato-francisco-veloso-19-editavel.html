@@ -59,15 +59,42 @@ body{margin:0;font-family:Arial,sans-serif;background:#e9ecef;color:#111}
  .v.empty{background:none}
  @page{size:A4;margin:20mm}
 }
-</style></head><body>
+</style><style id="oficial">
+#wrap{justify-content:center}
+#doc{flex:0 1 210mm;max-width:210mm;margin:0 auto;padding:25mm 20mm 25mm 25mm;box-shadow:0 2px 14px rgba(0,0,0,.2);border-radius:2px;font-family:"Times New Roman",Times,serif;font-size:12pt;line-height:1.5;color:#000;text-align:justify;hyphens:auto}
+#doc h1{font-size:14pt;font-weight:bold;letter-spacing:.3px;line-height:1.35;border-bottom:3px double #000;padding-bottom:10px;margin:0 0 10px}
+#doc h2{font-size:12pt;text-align:center;font-weight:bold;letter-spacing:.4px;margin:22px 0 8px;break-after:avoid;page-break-after:avoid}
+#doc p{margin:6px 0;orphans:3;widows:3}
+#doc .sub{font-size:9.5pt;font-style:italic;color:#444}
+#doc .box{background:#fff;border:1.5px solid #000;outline:1px solid #000;outline-offset:2px;padding:10px 14px;margin:16px 3px;break-inside:avoid}
+#doc .base{font-size:9.5pt;color:#333}
+#doc[data-nobase] .base{display:none}
+#doc .assin{break-inside:avoid;gap:48px 36px;margin-top:34px;font-size:11pt}
+#doc .assin div{border-top:1px solid #000;padding-top:4px;break-inside:avoid;line-height:1.35}
+body.final #panel,body.final .dica{display:none}
+body.final .v.empty{background:none}
+@media print{
+ @page{size:A4;margin:25mm 20mm 25mm 25mm;
+  @top-center{content:"INSTRUMENTO PARTICULAR DE CESSÃO DE DIREITOS · IMÓVEL CDHU";font:8pt "Times New Roman",serif;color:#444}
+  @bottom-left{content:"Rubricas: ________  ________";font:9pt "Times New Roman",serif}
+  @bottom-right{content:"Página " counter(page) " de " counter(pages);font:9pt "Times New Roman",serif}}
+ #doc{box-shadow:none;max-width:none;padding:0;margin:0;border-radius:0}
+ #doc .sub{display:none}
+ .v.empty{background:none}
+}
+</style>
+</head><body>
 <div id="bar"><b>Contrato – Francisco Veloso, 19 (editável)</b>
 <button onclick="exemplo()">Carregar exemplo</button>
 <button onclick="limpar()">Limpar campos</button>
 <button id="btnNA" onclick="tirarAmarelos()">Tirar amarelos (sem dado)</button>
 <button onclick="document.querySelector('.sub').style.display=(document.querySelector('.sub').style.display=='none'?'':'none')">Mostrar/ocultar aviso de minuta</button>
 <button onclick="baixar()">Baixar este arquivo preenchido</button>
-<button class="p" onclick="window.print()">Imprimir / Salvar em PDF</button></div>
-<div class="dica">Preencha o formulário à esquerda e o contrato se atualiza. Você também pode clicar direto no texto do contrato e digitar para mudar qualquer frase. Campos em amarelo ainda estão vazios. Se não tiver o dado em mãos, marque “sem dado” no campo (ou use o botão “Tirar amarelos”): o amarelo some e o contrato mostra uma linha em branco para preencher à mão. Em cada pessoa, escolha “CIN – número único (CPF)” quando o documento for a nova Carteira de Identidade Nacional, que não tem RG separado. Para gerar o PDF, use "Imprimir" e escolha "Salvar como PDF".</div>
+<button onclick="conferir()">Conferir pendências</button>
+<button id="btnVF" onclick="vistaFinal()">Ver como documento final</button>
+<button id="btnBL" onclick="bases()">Mostrar bases legais</button>
+<button class="p" onclick="imprimir()">Imprimir / Salvar em PDF</button></div>
+<div class="dica">Preencha o formulário à esquerda e o contrato se atualiza. Você também pode clicar direto no texto do contrato e digitar para mudar qualquer frase. Campos em amarelo ainda estão vazios. Se não tiver o dado em mãos, marque “sem dado” no campo (ou use o botão “Tirar amarelos”): o amarelo some e o contrato mostra uma linha em branco para preencher à mão. Em cada pessoa, escolha “CIN – número único (CPF)” quando o documento for a nova Carteira de Identidade Nacional, que não tem RG separado. Use “Conferir pendências” antes de imprimir e “Ver como documento final” para ver como vai sair no papel. Para gerar o PDF, use "Imprimir" e escolha "Salvar como PDF".</div>
 <div id="wrap"><div id="panel"></div><div id="doc" contenteditable="true" spellcheck="false"></div></div>
 
 <script id="main">
@@ -78,7 +105,7 @@ var G=[
 ["Imóvel",[
 ["imovel_end","Rua e número"],["imovel_quadra","Quadra"],["imovel_lote","Lote"],["imovel_conjunto","Conjunto habitacional"],["imovel_bairro","Bairro"],["imovel_cidade","Cidade/UF"],["imovel_cep","CEP"],["conta_cdhu","Conta CDHU nº"],["taopoc","TAOPOC nº"]]],
 ["Cedente 1 (vendedor)",[
-["c1_nome","Nome completo"],["c1_alias","Outra grafia do nome (se houver)"],["c1_civil","Estado civil"],["c1_prof","Profissão"],["c1_idm","Documento de identidade","i"],["c1_rg","RG"],["c1_cpf","CPF"],["c1_end","Endereço completo"]]],
+["c1_nome","Nome completo"],["c1_civil","Estado civil"],["c1_prof","Profissão"],["c1_idm","Documento de identidade","i"],["c1_rg","RG"],["c1_cpf","CPF"],["c1_end","Endereço completo"]]],
 ["Cedente 2 (vendedor)",[
 ["c2_nome","Nome completo"],["c2_anterior","Nome anterior (se houver)"],["c2_civil","Estado civil"],["c2_prof","Profissão"],["c2_idm","Documento de identidade","i"],["c2_rg","RG"],["c2_cpf","CPF"],["c2_end","Endereço completo"]]],
 ["Cônjuge anuente do cedente 2",[
@@ -95,7 +122,7 @@ var G=[
 ["considerandos","Considerandos (origem do imóvel, quitação, divórcio etc.)","t"],["ciencia_d","Ciência dos cessionários – item (d), regras da CDHU","t"],["partilha","Item 2.1.f – situação de partilha","t"]]]
 ];
 var EX={situacao:"q",imovel_end:"Rua Padre Francisco Veloso, nº 19",imovel_quadra:"29",imovel_lote:"13",imovel_conjunto:"Encosta Norte",imovel_bairro:"Itaim Paulista",imovel_cidade:"São Paulo/SP",imovel_cep:"08131-180",conta_cdhu:"7216419",taopoc:"000486",
-c1_nome:"EDNALDO GRANEIRO",c1_alias:"EDNALDO GRANERO nos registros da CDHU",c1_civil:"divorciado",c1_prof:"aposentado",c1_idm:"rg",c1_rg:"15.270.272-6 SSP/SP",c1_cpf:"047.385.498-80",c1_end:"Praça Guamirim, nº 65, Cidade Nova São Miguel, CEP 08042-430, São Paulo/SP",
+c1_nome:"EDNALDO GRANEIRO",c1_civil:"divorciado",c1_prof:"aposentado",c1_idm:"rg",c1_rg:"15.270.272-6 SSP/SP",c1_cpf:"047.385.498-80",c1_end:"Praça Guamirim, nº 65, Cidade Nova São Miguel, CEP 08042-430, São Paulo/SP",
 c2_nome:"CELIA MARIA DOS SANTOS VENTURA",c2_anterior:"CELIA MARIA DOS SANTOS GRANEIRO",c2_civil:"casada",c2_prof:"diarista",c2_idm:"rg",c2_rg:"",c2_cpf:"103.987.568-80",c2_end:"",
 cj_nome:"JOSÉ ROBERTO VENTURA",cj_prof:"",cj_idm:"rg",cj_rg:"",cj_cpf:"",cj_regime:"",cj_data:"15/09/2017",
 p1_nome:"ALEXANDRE FERNANDES DA COSTA",p1_civil:"casado",p1_regime:"",p1_prof:"vigilante",p1_idm:"rg",p1_rg:"43.751.675 SSP/SP",p1_cpf:"351.502.858-70",p1_end:"Rua Dom Pedro I, nº 138, Cidade Kemel, CEP 08542-210, Ferraz de Vasconcelos/SP",
@@ -122,7 +149,7 @@ var T=`
 
 <h2>Qualificação das Partes</h2>
 <p><b>CEDENTES (VENDEDORES):</b></p>
-<p>1. <b>{{c1_nome}}</b> (grafado também {{c1_alias}}), brasileiro(a), {{c1_civil}}, {{c1_prof}}, <span class="idr" data-p="c1">portador(a) do RG nº {{c1_rg}} e inscrito(a) no CPF/MF sob o nº {{c1_cpf}}</span><span class="idc" data-p="c1">portador(a) da Carteira de Identidade Nacional (CIN), cujo número único é o CPF/MF nº {{c1_cpf}}</span>, residente e domiciliado(a) na {{c1_end}};</p>
+<p>1. <b>{{c1_nome}}</b>, brasileiro(a), {{c1_civil}}, {{c1_prof}}, <span class="idr" data-p="c1">portador(a) do RG nº {{c1_rg}} e inscrito(a) no CPF/MF sob o nº {{c1_cpf}}</span><span class="idc" data-p="c1">portador(a) da Carteira de Identidade Nacional (CIN), cujo número único é o CPF/MF nº {{c1_cpf}}</span>, residente e domiciliado(a) na {{c1_end}};</p>
 <p>2. <b>{{c2_nome}}</b> (anteriormente {{c2_anterior}}), brasileiro(a), {{c2_civil}}, {{c2_prof}}, <span class="idr" data-p="c2">portador(a) do RG nº {{c2_rg}} e inscrito(a) no CPF/MF sob o nº {{c2_cpf}}</span><span class="idc" data-p="c2">portador(a) da Carteira de Identidade Nacional (CIN), cujo número único é o CPF/MF nº {{c2_cpf}}</span>, residente e domiciliado(a) na {{c2_end}}; com a anuência e a outorga conjugal de seu cônjuge <b>{{cj_nome}}</b>, brasileiro(a), {{cj_prof}}, <span class="idr" data-p="cj">portador(a) do RG nº {{cj_rg}} e inscrito(a) no CPF/MF sob o nº {{cj_cpf}}</span><span class="idc" data-p="cj">portador(a) da Carteira de Identidade Nacional (CIN), cujo número único é o CPF/MF nº {{cj_cpf}}</span>, casado sob o regime de {{cj_regime}} desde {{cj_data}}, residente e domiciliado no mesmo endereço.</p>
 <p><b>CESSIONÁRIOS (COMPRADORES):</b> <b>{{p1_nome}}</b>, brasileiro(a), {{p1_civil}} sob o regime de {{p1_regime}}, {{p1_prof}}, <span class="idr" data-p="p1">portador(a) do RG nº {{p1_rg}} e inscrito(a) no CPF/MF sob o nº {{p1_cpf}}</span><span class="idc" data-p="p1">portador(a) da Carteira de Identidade Nacional (CIN), cujo número único é o CPF/MF nº {{p1_cpf}}</span>, e seu(sua) cônjuge <b>{{p2_nome}}</b>, brasileiro(a), {{p2_prof}}, <span class="idr" data-p="p2">portador(a) do RG nº {{p2_rg}} e inscrito(a) no CPF/MF sob o nº {{p2_cpf}}</span><span class="idc" data-p="p2">portador(a) da Carteira de Identidade Nacional (CIN), cujo número único é o CPF/MF nº {{p2_cpf}}</span>, ambos residentes e domiciliados na {{p1_end}}.</p>
 <p><b>INTERVENIENTE CORRETOR:</b> <b>{{cor_nome}}</b>, inscrito no CRECI/SP sob o nº {{cor_creci}} e no CPF/MF sob o nº {{cor_cpf}}.</p>
@@ -131,6 +158,8 @@ var T=`
 <h2>Considerandos</h2>
 <p>{{considerandos}}</p>
 <p class="base">Base legal: CC, arts. 319 e 320 (quitação), 422 (boa-fé) e 1.581 (divórcio sem prévia partilha de bens).</p>
+
+<p>As partes acima qualificadas resolvem celebrar este instrumento particular, que se regerá pelas cláusulas e condições a seguir.</p>
 
 <h2>Cláusula 1ª — Do Objeto</h2>
 <p>1.1. Os CEDENTES cedem e transferem aos CESSIONÁRIOS, a título oneroso e em caráter definitivo, a totalidade dos direitos de aquisição, de posse e demais direitos e obrigações que detêm sobre a unidade habitacional residencial situada na {{imovel_end}}, Quadra {{imovel_quadra}}, Lote {{imovel_lote}}, Conjunto Habitacional {{imovel_conjunto}}, bairro {{imovel_bairro}}, {{imovel_cidade}}, CEP {{imovel_cep}}, Conta CDHU nº {{conta_cdhu}}, TAOPOC nº {{taopoc}} (“IMÓVEL”).</p>
@@ -141,13 +170,13 @@ var T=`
 <h2>Cláusula 2ª — Das Declarações dos Cedentes</h2>
 <p>2.1. Os CEDENTES declaram que: (a) são os únicos titulares dos direitos cedidos; (b) <span class="m q">o financiamento foi totalmente quitado e nada é devido à CDHU</span><span class="m n">o financiamento encontra-se em andamento junto à CDHU, com saldo devedor de R$ {{saldo}}, e todas as prestações vencidas até esta data estão pagas, sem inadimplência</span>; (c) o IMÓVEL está livre de ônus, penhoras, ações, locações, usufruto, dívidas e restrições, ressalvada a ausência de matrícula<span class="m n"> e o financiamento em andamento junto à CDHU</span>; (d) não cederam, prometeram ou alienaram os direitos a terceiros; (e) entregarão os documentos do Anexo I; (f) {{partilha}}.</p>
 <p>2.2. Declaração falsa sujeita o declarante a perdas e danos e à multa da Cláusula 12ª.</p>
-<p class="base">Base legal: CC, arts. 319 e 320, 389 e 422; Lei nº 4.380/1964; Leis estaduais (SP) nºs 12.276/2006 e 16.105/2016.</p>
+<p class="base">Base legal: CC, arts. 319 e 320, 389 e 422; Lei nº 4.380/1964; Lei estadual (SP) nº 12.276/2006 (com as alterações das Leis nºs 14.672/2011 e 16.105/2016) e Decreto estadual (SP) nº 51.241/2006.</p>
 
 <h2>Cláusula 3ª — Da Natureza do Negócio e da Ciência dos Cessionários (Cláusula Destacada)</h2>
-<div class="box"><p>3.1. Os CESSIONÁRIOS declaram estar cientes, por informação clara e prévia, de que: (a) o IMÓVEL não possui matrícula individualizada, e a propriedade só se transfere com o registro do título no Cartório de Registro de Imóveis; (b) a CDHU emite o contrato de quitação (escritura) apenas para empreendimentos averbados e registrados no cartório, sem prazo garantido<span class="m n"> e somente após a quitação integral do financiamento</span>; (c) a CDHU não é parte neste instrumento e não prestou anuência<span class="m n">; a transferência do financiamento para o nome dos CESSIONÁRIOS depende de análise e aprovação da CDHU, que pode ser negada</span>; (d) {{ciencia_d}}; (e) o negócio é cessão de direitos, e não venda da propriedade registrada.</p>
+<div class="box"><p>3.1. Os CESSIONÁRIOS declaram estar cientes, por informação clara e prévia, de que: (a) o IMÓVEL não possui matrícula individualizada, e a propriedade só se transfere com o registro do título no Cartório de Registro de Imóveis; (b) a CDHU emite o contrato de quitação (escritura) apenas para empreendimentos averbados e registrados no cartório, sem prazo garantido<span class="m n"> e somente após a quitação integral do financiamento</span>; (c) a CDHU não é parte neste instrumento e não prestou anuência<span class="m n">; a transferência do financiamento para o nome dos CESSIONÁRIOS depende de análise e aprovação da CDHU, que pode ser negada</span>; (d) {{ciencia_d}}; (e) o negócio é cessão de direitos, e não venda da propriedade registrada<span class="m n">; (f) nos termos do Decreto estadual nº 51.241/2006, a alienação de imóvel da CDHU durante o financiamento só pode ser formalizada após a anuência expressa da CDHU, que poderá adotar as medidas cabíveis em caso de cessão feita sem a sua prévia anuência</span>.</p>
 <p>3.2. Os CEDENTES não garantem o prazo nem a emissão da escritura pela CDHU, mas obrigam-se a colaborar (Cláusula 11ª).</p>
 <p>3.3. O preço leva em conta essa situação jurídica, o que os CESSIONÁRIOS reconhecem.</p>
-<p class="m n">3.4. Se a CDHU recusar a transferência do financiamento, as partes poderão, em até {{prazo_devol}} dias da recusa, optar por desfazer a cessão, restituindo os CEDENTES aos CESSIONÁRIOS os valores recebidos, corrigidos pelo IPCA, e devolvendo estes a posse do IMÓVEL, ou por manter o negócio na forma da Cláusula 4.6.</p></div>
+<p class="m n">3.4. Se a CDHU recusar a transferência do financiamento, as partes poderão, em até {{prazo_devol}} dias da recusa, optar por desfazer a cessão, restituindo os CEDENTES aos CESSIONÁRIOS os valores recebidos, corrigidos pelo IPCA, e devolvendo estes a posse do IMÓVEL, ou por manter o negócio na forma do item 4.6.</p></div>
 <p class="base">Base legal: CC, arts. 113, 422 e 1.245 e §1º; CDC, arts. 6º, III, 46 e 54, §4º.</p>
 
 <h2>Cláusula 4ª — Do Preço e do Pagamento</h2>
@@ -195,7 +224,7 @@ var T=`
 <p class="base">Base legal: CC, arts. 722 a 729; Lei nº 6.530/1978 e Decreto nº 81.871/1978; STJ, Tema Repetitivo 938.</p>
 
 <h2>Cláusula 10ª — Das Formalidades</h2>
-<p>10.1. Todas as assinaturas terão firma reconhecida em cartório e serão acompanhadas de duas testemunhas.</p>
+<p>10.1. Todas as assinaturas terão firma reconhecida por autenticidade em cartório e serão acompanhadas de duas testemunhas.</p>
 <p>10.2. O Quadro-Resumo e os Anexos I e II integram este instrumento para todos os fins, e as partes o assinam e rubricam todas as páginas, inclusive as dos anexos. Havendo divergência entre o Quadro-Resumo e as cláusulas, prevalece o texto das cláusulas.</p>
 <p class="base">Base legal: CC, art. 221; Lei nº 6.015/1973, art. 221, II; CPC, art. 784, III.</p>
 
@@ -210,6 +239,14 @@ var T=`
 <h2>Cláusula 13ª — Do Foro</h2>
 <p>13.1. Fica eleito o foro da comarca de {{foro}}.</p>
 <p class="base">Base legal: CPC, art. 63 e art. 47 e §1º.</p>
+
+<h2>Cláusula 14ª — Das Disposições Finais</h2>
+<p>14.1. A tolerância de uma parte quanto ao descumprimento de qualquer obrigação não implica novação nem renúncia, e não impede a exigência posterior.</p>
+<p>14.2. Qualquer alteração deste instrumento só valerá se feita por escrito e assinada por todas as partes.</p>
+<p>14.3. Se qualquer cláusula for considerada nula ou ineficaz, as demais continuam em vigor, aproveitando-se o negócio no que for possível.</p>
+<p>14.4. As partes autorizam o uso de seus dados pessoais, nos termos da Lei nº 13.709/2018 (LGPD), apenas para a celebração, a execução e o registro deste negócio, inclusive perante a CDHU, tabelionatos, cartórios e órgãos públicos, e para o cumprimento de obrigações legais.</p>
+<p>14.5. As partes declaram que leram e compreenderam este instrumento, que o assinam livremente, sem coação nem erro, e que tiveram a oportunidade de consultar advogado de sua confiança.</p>
+<p class="base">Base legal: CC, arts. 112, 113, 184, 330, 422 e 472; Lei nº 13.709/2018, art. 7º, II e V.</p>
 
 <p style="margin-top:20px">E, por estarem justas e contratadas, as partes assinam este instrumento em vias de igual teor, na presença de duas testemunhas.</p>
 <p>{{cidade_ass}}, {{data_ass}}.</p>
@@ -227,7 +264,7 @@ var T=`
 <h2 class="pb">Anexo I — Documentos a Entregar pelos Cedentes</h2>
 <p><b>A) Dos CEDENTES e do cônjuge anuente:</b> CIN (ou RG e CPF); comprovante de residência recente; certidões de casamento com averbações (e de divórcio, se houver); cópia da sentença de divórcio e certidão de trânsito em julgado, se houver; regime de bens do casamento.</p>
 <p><b>B) Do IMÓVEL:</b> <span class="m q">Declaração de Quitação da CDHU (via atualizada) e ficha de financiamento</span><span class="m n">extrato atualizado do saldo devedor, ficha de financiamento e comprovantes das últimas 12 prestações pagas, com declaração de adimplência da CDHU</span>; Termo de Adesão ou contrato original com a CDHU; certidão negativa de débitos de IPTU; declarações negativas de débito de água e luz, com a última conta de cada uma; dados bancários dos CEDENTES para o recebimento do preço.</p>
-<p><b>C) Dos CESSIONÁRIOS:</b> RG (ou CIN) e CPF; certidão de casamento, com o regime de bens; comprovante de residência recente.</p>
+<p><b>C) Dos CESSIONÁRIOS:</b> CIN (ou RG e CPF); certidão de casamento, com o regime de bens; comprovante de residência recente.</p>
 <h2>Anexo II — Poderes da Procuração em Causa Própria</h2>
 <p>Poderes especiais, expressos, irrevogáveis e irretratáveis, em causa própria, para os CESSIONÁRIOS: alienar, ceder e transferir a si mesmos o IMÓVEL descrito na Cláusula 1ª; receber o preço e dar quitação; requerer e receber da CDHU o contrato de quitação e a escritura; assinar escrituras, requerimentos e declarações; pagar impostos e taxas (ITBI, emolumentos); requerer matrícula, averbações e registros no Cartório de Registro de Imóveis; ingressar com adjudicação compulsória; representar os CEDENTES perante a CDHU, prefeitura, cartórios e demais órgãos; e substabelecer, com ou sem reserva de poderes. A procuração dispensa prestação de contas.</p>
 `;
@@ -260,7 +297,7 @@ function exemplo(){preencher(EX)}
 function limpar(){if(confirm("Apagar todos os dados preenchidos?"))preencher({})}
 function baixar(){var v={};Object.keys(L).forEach(function(k){v[k]=document.getElementById("f_"+k).value});
  var c=document.documentElement.cloneNode(true);c.querySelector("#panel").innerHTML="";c.querySelector("#doc").innerHTML="";
- var sc=c.querySelector("#main");var js=JSON.stringify({v:v,doc:doc.innerHTML,ck:CK,tel:TEL,ex:EXTRA,inc:INC,na:NA}).replace(/</g,"\\u003c");
+ var sc=c.querySelector("#main");var js=JSON.stringify({v:v,doc:doc.innerHTML,ck:CK,tel:TEL,ex:EXTRA,inc:INC,na:NA,nb:doc.hasAttribute("data-nobase")}).replace(/</g,"\\u003c");
  sc.textContent=sc.textContent.replace(/var SAVED=[\s\S]*?;\/\*S\*\//,function(){return "var SAVED="+js+";/*S*/"});
  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["<!DOCTYPE html>\n"+c.outerHTML],{type:"text/html"}));a.download="contrato-cessao-preenchido.html";a.click()}
 if(!SAVED){exemplo()}
@@ -339,4 +376,14 @@ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeT
 var _setv=setv;setv=function(k,v){_setv(k,v);if(/^(c1_nome|c2_nome|cj_nome|p1_nome|p2_nome|situacao|imovel_end|imovel_quadra|imovel_lote|imovel_conjunto)$/.test(k))renderDX();else if(/^(preco|preco_ext|forma|banco|posse|corr_val|corr_pct|corr_quem|prazo_proc|prazo_colab|multa_pct|cidade_ass|data_ass|saldo|parcela_val|parcela_venc|ult_parcela_paga|regra_saldo|prazo_devol)$/.test(k))updateDXC()};
 var sitSel=document.getElementById("f_situacao");if(sitSel)sitSel.addEventListener("change",renderDX);
 renderDX();
+
+/* ===== conferência, vista final e bases legais ===== */
+function pend(){var o=[];document.querySelectorAll("#doc .v.empty").forEach(function(s){var h=s.closest(".idr,.idc");if(h&&h.style.display=="none")return;var m=s.closest(".m");if(m&&getComputedStyle(m).display=="none")return;o.push(s.getAttribute("data-k"))});return o.filter(function(k,i){return o.indexOf(k)==i})}
+function conferir(){var p=pend();if(!p.length){alert("Nenhum campo pendente. O documento está pronto para imprimir.");return}
+ alert("Ainda faltam "+p.length+" dado(s):\n\n• "+p.map(function(k){return L[k]||k}).join("\n• ")+"\n\nPreencha, ou marque “sem dado” para deixar uma linha em branco para preencher à mão.")}
+function imprimir(){var p=pend();if(p.length&&!confirm("Ainda há "+p.length+" campo(s) em amarelo (por exemplo: "+p.slice(0,3).map(function(k){return L[k]||k}).join("; ")+").\n\nImprimir assim mesmo?"))return;window.print()}
+function vistaFinal(){var f=document.body.classList.toggle("final");document.getElementById("btnVF").textContent=f?"Voltar à edição":"Ver como documento final"}
+function bases(){var h=doc.hasAttribute("data-nobase");if(h)doc.removeAttribute("data-nobase");else doc.setAttribute("data-nobase","");document.getElementById("btnBL").textContent=h?"Ocultar bases legais":"Mostrar bases legais"}
+if(!(SAVED&&SAVED.nb===false))doc.setAttribute("data-nobase","");
+document.getElementById("btnBL").textContent=doc.hasAttribute("data-nobase")?"Mostrar bases legais":"Ocultar bases legais";
 </script></body></html>
