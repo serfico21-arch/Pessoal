@@ -368,7 +368,8 @@ function acharPapel(seg,lead){var m,r,g=null,res=null;
 
 /* ---------- análise do texto ---------- */
 function analisar(rawIn){
- var raw=norm(rawIn),t=flat(rawIn),R={pessoas:[],notas:[],cdhu:/CDHU/i.test(t)},m,i,k;
+ var raw=norm(rawIn),t=flat(rawIn),ants=[],R={pessoas:[],notas:[],cdhu:/CDHU/i.test(t)},m,i,k;
+ (function(){var re;while((re=/\s*\((?:anteriormente|antes|nome\s+de\s+solteira|solteira\s+de)\s*:?\s*([^)]{3,90})\)/i.exec(t))){ants.push({pos:re.index,nome:re[1].trim()});t=t.slice(0,re.index)+t.slice(re.index+re[0].length)}})();
 
  /* pessoas (achadas pelo CPF) */
  var re=/(^|[^\d])(\d{3}[.\s]?\d{3}[.\s]?\d{3}[-\s]?\d{2})(?!\d)/g,occ=[];
@@ -390,7 +391,7 @@ function analisar(rawIn){
   seg=t.slice(p.anchor,end),lead=t.slice(Math.max(0,p.ns-110),p.ns);
   if(p._np<0)seg=t.slice(Math.max(0,o.i-100),end);
   var mr=/(?:\bRG\b|R\.G\.?|Carteira\s+de\s+Identidade|C\.I\.|Registro\s+Geral|Identidade)\s*(?:n[ºo°.]*)?\s*[:\-]?\s*(\d[\d.\-]{4,13}[\dXx]?)(?:\s*[-–\/]?\s*((?:SSP|IFP|DETRAN|SJS|PC|PM|SESP|IIRGD|DIC|MTE)(?:\s*[\/\-]\s*[A-Z]{2})?))?/i.exec(seg);
-  if(mr)p.rg=(mr[1]+(mr[2]?" "+mr[2].replace(/\s+/g,""):"")).replace(/[-.]+$/,"");
+  if(mr)p.rg=(mr[1]+(mr[2]?" "+mr[2].replace(/\s+/g,""):"")).replace(/[-.]+$/,"");if(!p.rg&&/Identidade\s+Nacional|\bCIN\b/i.test(seg))p.cin=1;
   var mq=new RegExp("\\b("+NAC+")\\b([^]*?)(?=,?\\s*(?:portador|portadora|inscrit|RG\\b|R\\.G|CPF|C\\.P\\.F|titular|CNH|residente|domiciliad))","i").exec(seg);
   if(mq){var q=(mq[1]+mq[2]).replace(/\s+/g," ").replace(/[,\s]+$/,"");if(q.length<=120)p.qual=q}
   var ma=/(?:residente\s+e\s+domiciliad[oa]|domiciliad[oa]\s+e\s+residente|residente|domiciliad[oa])\s+(?:à|a|na|no|em)?\s*([^]{8,320})/i.exec(seg);
@@ -414,7 +415,7 @@ function analisar(rawIn){
  if(first.length==1){var mn=/\bNOME\b[^A-Za-zÀ-ÿ\n]{0,6}\n?\s*([A-ZÀ-Ý][A-ZÀ-Ý' ]{5,60})/.exec(raw);
   if(mn&&(!first[0].p.nome||/\n/.test(raw.slice(Math.max(0,raw.indexOf(mn[0])-1),raw.indexOf(mn[0])+mn[0].length+1))))first[0].p.nome=mn[1].replace(/\s+/g," ").trim();
   if(!first[0].p.rg){var mr2=/(?:REGISTRO GERAL|\bRG\b|IDENTIDADE)[^\d]{0,40}(\d[\d.\-]{5,13}[\dXx]?)/i.exec(raw);if(mr2)first[0].p.rg=mr2[1].replace(/[-.]+$/,"")}}
- first.forEach(function(o){if(o.p.nome||o.p.rg)R.pessoas.push({cpf:o.p.cpf,nome:o.p.nome,rg:o.p.rg,qual:o.p.qual,end:o.p.end,papel:o.p.papel,ordem:o.p.anchor});
+ first.forEach(function(o){if(o.p.nome||o.p.rg)R.pessoas.push(enr({cpf:o.p.cpf,nome:o.p.nome,rg:o.p.rg,qual:o.p.qual,end:o.p.end,papel:o.p.papel,ordem:o.p.anchor,cin:o.p.cin},ants));
   else R.notas.push("Achei o CPF "+o.p.cpf+" mas não consegui ler o nome.")});
  R.pessoas.sort(function(a,b){return a.ordem-b.ordem});
 
@@ -428,7 +429,7 @@ function analisar(rawIn){
   if(cc&&!/conta\s+CDHU/i.test(im))ex.push("Conta CDHU nº "+cc[1].replace(/[.\-]+$/,""));
   if(tp&&!/TAOPOC/i.test(im))ex.push("TAOPOC nº "+tp[1].replace(/[.\-]+$/,""));
   if(ex.length)im+=" ("+ex.join("; ")+")";
-  R.imovel=im}
+  R.imovel=im;R.imv=desImv(im)}
 
  /* título do contrato */
  var mt=/INSTRUMENTO\s+(?:PARTICULAR|P[ÚU]BLICO)\s+DE(?:\s+(?:[A-ZÇÃÕÁÉÍÓÚÂÊÔ]{2,}|E|DE|DA|DO))+/.exec(t);
@@ -487,16 +488,16 @@ function analisar(rawIn){
  if(ax){var rest=raw.slice(ax.index+ax[0].length).replace(/^[^\n]*\n/,""),e2=rest.search(/ANEXO\s+(?:II|2)\b/);if(e2>0)rest=rest.slice(0,e2);rest=rest.slice(0,2200);
   var lines=rest.split(/\n/).map(function(s){return s.trim()}).filter(function(s){return/^(?:\d+\s*[.)\-]|[a-z]\)|[-•–])/i.test(s)});
   if(lines.length>=2)R.docs=lines.map(function(s,n){return/^\d/.test(s)?s:(n+1)+". "+s.replace(/^(?:[a-z]\)|[-•–])\s*/i,"")}).join("\n")}
- return R}
+ sitCessao(R,t);return R}
 
 /* ---------- juntar vários arquivos ---------- */
 function juntar(lista){
- var E={pessoas:[],notas:[]},keys=["imovel","titulo","local","data","preco","entrada","n_parc","parc_val","venc1","comissao_val","comissao_pct","comissao_pagador","creci","forma","pix","banco","docs","foro"];
+ var E={pessoas:[],notas:[]},keys=["imovel","titulo","local","data","preco","entrada","n_parc","parc_val","venc1","comissao_val","comissao_pct","comissao_pagador","creci","forma","pix","banco","docs","foro","imv","entrada_data"];
  lista.forEach(function(r){
-  r.pessoas.forEach(function(p){var q=null;E.pessoas.forEach(function(x){if(x.cpf==p.cpf)q=x});
-   if(!q)E.pessoas.push({cpf:p.cpf,nome:p.nome,rg:p.rg,qual:p.qual,end:p.end,papel:p.papel});
-   else["nome","rg","qual","end","papel"].forEach(function(f){if(!q[f]&&p[f])q[f]=p[f]})});
-  keys.forEach(function(k){if((E[k]==null||E[k]==="")&&r[k]!=null&&r[k]!=="")E[k]=r[k]});
+  r.pessoas.forEach(function(p){var q=null;E.pessoas.forEach(function(x){if((x.cpf||x.nome)==(p.cpf||p.nome))q=x});
+   if(!q)E.pessoas.push(JSON.parse(JSON.stringify(p)));
+   else["nome","rg","qual","end","papel","civil","prof","regime","nac","anterior","cin","data_cas"].forEach(function(f){if(!q[f]&&p[f])q[f]=p[f]})});
+  keys.forEach(function(k){if((E[k]==null||E[k]==="")&&r[k]!=null&&r[k]!=="")E[k]=r[k]});if(r.x){E.x=E.x||{};Object.keys(r.x).forEach(function(f){E.x[f]=Object.assign({},r.x[f],E.x[f])})}
   if(r.cdhu)E.cdhu=true;r.notas.forEach(function(n){E.notas.push(n)})});
  E.de=function(papel){return E.pessoas.filter(function(p){return p.papel==papel})};
  return E}
@@ -531,26 +532,27 @@ function lerArquivo(f,st){var nome=(f.name||"").toLowerCase(),tipo=f.type||"";
  if(/\.docx$/.test(nome))return carregar(CDN.docx,"lr_docx").then(function(){return f.arrayBuffer()}).then(function(b){return mammoth.extractRawText({arrayBuffer:b})}).then(function(r){return r.value});
  if(/^image\//.test(tipo)||/\.(png|jpe?g|webp|bmp|gif)$/.test(nome)){st("Lendo a imagem (OCR)… pode levar um minuto.");return ocrImagem(f,st)}
  if(/\.doc$/.test(nome))return Promise.reject(new Error("Arquivo .doc antigo: salve como .docx ou PDF e envie de novo."));
- return f.text().then(function(s){return/\.html?$/.test(nome)?s.replace(/<[^>]+>/g," "):s})}
+ return f.text().then(function(s){return lerNativo(s,nome)})}
 
 /* ---------- tela ---------- */
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function montar(op){
- var bar=document.getElementById("bar"),dica=document.querySelector(".dica");if(!bar||!dica)return;
+ [].forEach.call(document.querySelectorAll("[data-lr]:not(script)"),function(n){if(n.parentNode)n.parentNode.removeChild(n)});var bar=document.getElementById("bar"),dica=document.querySelector(".dica");if(!bar||!dica)return;
  var css=document.createElement("style");css.setAttribute("data-lr","");
  css.textContent="#lr_btn{background:#f2b705!important}#lr_box{margin:8px 14px 0;background:#fff;border:1px solid #cfd6e2;border-left:5px solid #1f3a5f;border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.45}#lr_box.err{border-left-color:#c0392b}#lr_box.ok{border-left-color:#2e9e5b}#lr_box select{font-size:13px;padding:3px;margin-left:6px}#lr_box .pp{margin:4px 0}#lr_box pre{white-space:pre-wrap;max-height:200px;overflow:auto;background:#f6f6f6;padding:6px;font-size:11px}#panel .lido{background:#e7f6ec!important;border-color:#2e9e5b!important}@media print{#lr_box,#lr_btn{display:none}}";
  document.head.appendChild(css);
  var btn=document.createElement("button");btn.type="button";btn.id="lr_btn";btn.setAttribute("data-lr","");btn.textContent="📎 Subir contrato / documentos";
- var inp=document.createElement("input");inp.type="file";inp.multiple=true;inp.accept=".pdf,.docx,.txt,.html,image/*,application/pdf";inp.style.display="none";inp.setAttribute("data-lr","");
+ var inp=document.createElement("input");inp.type="file";inp.multiple=true;inp.accept=".pdf,.docx,.txt,.html,.htm,.json,image/*,application/pdf";inp.style.display="none";inp.setAttribute("data-lr","");
  bar.insertBefore(btn,bar.querySelector("button.p")||null);bar.appendChild(inp);
  var box=document.createElement("div");box.id="lr_box";box.setAttribute("data-lr","");box.style.display="none";dica.parentNode.insertBefore(box,dica.nextSibling);
  var E=null,nomes=[],textos="",filled=[];
  function st(msg){box.style.display="block";box.className="";box.innerHTML="⏳ "+esc(msg)}
  function S(id,v){if(v==null||String(v).trim()==="")return;var el=document.getElementById("f_"+id);if(!el)return;
-  el.value=v;el.classList.add("lido");el.dispatchEvent(new Event(el.tagName=="SELECT"?"change":"input",{bubbles:true}));
+  if(el.tagName=="SELECT"){var okk=[].some.call(el.options,function(o){return o.value==v});if(!okk)return}else if(soVazios&&el.value.trim())return;el.value=v;el.classList.add("lido");el.dispatchEvent(new Event("input",{bubbles:true}));if(el.tagName=="SELECT")el.dispatchEvent(new Event("change",{bubbles:true}));
   var lb=el.previousElementSibling;filled.push({id:id,label:lb?lb.textContent.replace(/\s*\(.*$/,""):id})}
  function aplicar(){filled=[];[].forEach.call(document.querySelectorAll("#panel .lido"),function(e){e.classList.remove("lido")});
-  op.aplicar(E,S,{fmt:fmt,ext:porExtenso,dataExt:dataExt});relatorio()}
+  var U0={fmt:fmt,ext:porExtenso,dataExt:dataExt};(op.aplicar||FAMS[op.familia].para)(E,S,U0);var xx=(E.x||{})[op.familia];if(xx)Object.keys(xx).forEach(function(k){S(k,xx[k])});relatorio();
+  if(E.pessoas.length||E.imovel||E.preco){var ok=salvar(E,nomes.join(", "),textos);box.insertAdjacentHTML("beforeend","<div class='pp'>"+(ok?"💾 Dados guardados no banco de contratos (botão 🗂 no alto), para aplicar em qualquer modelo.":"⚠ Não consegui guardar no navegador (espaço cheio). Use 🗂 › Exportar.")+"</div>");if(BK)BK.desenha()}}
  function relatorio(){
   var h="✅ <b>Li "+nomes.length+" arquivo(s):</b> "+esc(nomes.join(", "))+". ";
   h+=filled.length?"Preenchi <b>"+filled.length+" campo(s)</b> (marcados em verde no painel à esquerda). <b>Confira tudo antes de imprimir.</b>":"Não consegui identificar dados para preencher.";
@@ -559,24 +561,134 @@ function montar(op){
   if(falta.length)h+="<div class='pp'>Não encontrei: "+esc(falta.join("; "))+".</div>";
   var sem=E.pessoas.filter(function(p){return!p.papel});
   if(sem.length){h+="<div class='pp'><b>Quem é cada pessoa?</b> Escolha para eu preencher:</div>";
-   sem.forEach(function(p,n){h+="<div class='pp'>"+esc(p.nome||"(sem nome)")+" · CPF "+esc(p.cpf)+"<select data-p='"+esc(p.cpf)+"'><option value=''>— escolher —</option><option value='vend'>"+esc(op.rotulos.vend)+"</option><option value='comp'>"+esc(op.rotulos.comp)+"</option><option value='anu'>Cônjuge anuente</option><option value='test'>Testemunha</option><option value='x'>Ignorar</option></select></div>"})}
+   sem.forEach(function(p,n){h+="<div class='pp'>"+esc(p.nome||"(sem nome)")+" · CPF "+esc(p.cpf)+"<select data-p='"+esc(p.cpf||p.nome)+"'><option value=''>— escolher —</option><option value='vend'>"+esc(op.rotulos.vend)+"</option><option value='comp'>"+esc(op.rotulos.comp)+"</option><option value='anu'>Cônjuge anuente</option><option value='test'>Testemunha</option><option value='x'>Ignorar</option></select></div>"})}
   E.notas.forEach(function(n){h+="<div class='pp'>⚠ "+esc(n)+"</div>"});
   h+="<details><summary>Ver o texto que li</summary><pre>"+esc(textos.slice(0,8000))+"</pre></details>";
   box.className=filled.length?"ok":"";box.innerHTML=h;
-  [].forEach.call(box.querySelectorAll("select[data-p]"),function(s){s.onchange=function(){E.pessoas.forEach(function(p){if(p.cpf==s.getAttribute("data-p"))p.papel=s.value=="x"?"x":s.value});aplicar()}})}
+  [].forEach.call(box.querySelectorAll("select[data-p]"),function(s){s.onchange=function(){E.pessoas.forEach(function(p){if((p.cpf||p.nome)==s.getAttribute("data-p"))p.papel=s.value=="x"?"x":s.value});aplicar()}})}
  btn.onclick=function(){inp.value="";inp.click()};
- inp.onchange=function(){var fs=[].slice.call(inp.files||[]);if(!fs.length)return;nomes=fs.map(function(f){return f.name});textos="";
+ inp.onchange=function(){var fs=[].slice.call(inp.files||[]);if(!fs.length)return;curId=null;nomes=fs.map(function(f){return f.name});textos="";
   var res=[],p=Promise.resolve();
-  fs.forEach(function(f){p=p.then(function(){st("Abrindo "+f.name+"…");return lerArquivo(f,st)}).then(function(tx){textos+="=== "+f.name+" ===\n"+tx+"\n\n";var r=analisar(tx);if(!r.pessoas.length&&!r.imovel&&!r.preco)r.notas.push("Não achei dados úteis em "+f.name+(flat(tx).length<30?" (não consegui ler texto; se for foto, tente uma imagem mais nítida)":"")+".");res.push(r)})});
+  fs.forEach(function(f){p=p.then(function(){st("Abrindo "+f.name+"…");return lerArquivo(f,st)}).then(function(tx){var rn=lerResultado(tx,f.name);if(rn){textos+="=== "+f.name+" ===\n"+JSON.stringify({p:rn.pessoas,i:rn.imovel,v:rn.preco})+"\n"+(tx.texto||"")+"\n\n";res.push(rn);return}textos+="=== "+f.name+" ===\n"+tx+"\n\n";var r=analisar(tx);if(!r.pessoas.length&&!r.imovel&&!r.preco)r.notas.push("Não achei dados úteis em "+f.name+(flat(tx).length<30?" (não consegui ler texto; se for foto, tente uma imagem mais nítida)":"")+".");res.push(r)})});
   p.then(function(){E=juntar(res);aplicar()}).catch(function(e){box.style.display="block";box.className="err";box.innerHTML="❌ "+esc(e.message||e)})};
+ bancoUI(op,box,{set:function(e,n,t){E=e;nomes=n;textos=t;aplicar()}});
 }
-var API={analisar:analisar,juntar:juntar,montar:montar,porExtenso:porExtenso,dataExt:dataExt,fmt:fmt,_cpfOk:cpfOk};
+
+/* ===== BANCO DE CONTRATOS + FAMÍLIAS DE MODELO ===== */
+var KEY="fcosta_banco_contratos_v1",curId=null,soVazios=false,BK=null;
+function tr(s){return String(s==null?"":s).trim()}
+function mny(s){s=tr(s);return s?money(s):null}
+function desm(q){var o={};q=tr(q);if(!q)return o;var m=new RegExp("^("+NAC+")\\b[,\\s]*","i").exec(q);if(m){o.nac=m[1];q=q.slice(m[0].length)}
+ var r=/\bsob\s+o\s+regime\s+(?:da\s+|de\s+|do\s+)?([^,;]+)/i.exec(q);if(r){o.regime=r[1].replace(/\s+desde.*$/i,"").trim();q=q.replace(r[0],"")}
+ var c=/\b(casad[oa]|solteir[oa]|divorciad[oa]|vi[úu]v[oa]|separad[oa](?:\s+judicialmente)?|desquitad[oa]|em\s+uni[ãa]o\s+est[áa]vel|convivente)\b/i.exec(q);if(c){o.civil=c[1].toLowerCase();q=q.replace(c[0],"")}
+ var rs=q.split(/\s*,\s*/).map(tr).filter(function(x){return x&&!/^(maior|capaz|nascid)/i.test(x)});if(rs.length)o.prof=rs[0];return o}
+function qualDe(p){return[p.nac||"brasileiro(a)",(p.civil||"")+(p.regime?" sob o regime de "+p.regime:""),p.prof].map(tr).filter(Boolean).join(", ")}
+function enr(p,ants){if(p.rg&&p.cpf&&String(p.rg).replace(/\D/g,"")==String(p.cpf).replace(/\D/g,"")){p.rg="";p.cin=1}var d=desm(p.qual);["nac","civil","regime","prof"].forEach(function(k){if(!p[k]&&d[k])p[k]=d[k]});
+ (ants||[]).forEach(function(a){if(!p.anterior&&Math.abs(a.pos-p.ordem)<=4)p.anterior=a.nome});return p}
+function desImv(s){var o={};s=tr(s);if(!s)return o;var pa=/\(([^)]*)\)\s*$/.exec(s);
+ if(pa){var c=/CDHU\s*(?:n[ºo°.]*)?\s*([\d.\-]+)/i.exec(pa[1]),t=/TAOPOC\s*(?:n[ºo°.]*)?\s*([\d.\-]+)/i.exec(pa[1]);if(c)o.conta=c[1];if(t)o.taopoc=t[1];s=s.slice(0,pa.index)}
+ var st=s.search(/\b(?:Rua|Avenida|Av\.|Alameda|Travessa|Estrada|Rodovia|Pra[cç]a|Largo|Viela)\b/);if(st>0)s=s.slice(st);
+ s.split(/\s*,\s*/).forEach(function(k){k=tr(k);var m;if(!k)return;
+  if(m=/^quadra\s+(.+)/i.exec(k))o.quadra=m[1];else if(m=/^lote\s+(.+)/i.exec(k))o.lote=m[1];
+  else if(m=/^conjunto(?:\s+habitacional)?\s+(.+)/i.exec(k))o.conjunto=m[1];
+  else if(m=/^(?:CEP\s*)?(\d{5}-?\d{3})$/i.exec(k))o.cep=m[1];
+  else if(/^n[ºo°.]\s*\d/i.test(k)&&o.end)o.end+=", "+k;
+  else if(/[\/\-]\s*[A-Z]{2}$/.test(k)&&o.end)o.cidade=k;
+  else if(!o.end)o.end=k;else if(!o.bairro)o.bairro=k});return o}
+function compImv(o,cdhu){return(cdhu?"unidade habitacional CDHU, ":"")+[o.end,o.quadra&&"Quadra "+o.quadra,o.lote&&"Lote "+o.lote,o.conjunto&&"Conjunto "+o.conjunto,o.bairro,o.cidade,o.cep&&"CEP "+o.cep].filter(Boolean).join(", ")+((o.conta||o.taopoc)?" ("+[o.conta&&"Conta CDHU nº "+o.conta,o.taopoc&&"TAOPOC nº "+o.taopoc].filter(Boolean).join("; ")+")":"")}
+function sitCessao(R,t){var q=/financiamento[^.]{0,120}(?:liquidad|quitad)|(?:liquidad|quitad)[^.]{0,80}financiamento/i.test(t),n=/saldo\s+devedor[^.]{0,60}R\$/i.test(t);
+ if(q||n){R.x=R.x||{};R.x.cessao=R.x.cessao||{};R.x.cessao.situacao=n&&!q?"n":"q"}}
+
+/* cada família = um modelo: de(g) lê os campos do modelo; para(E,S,U) preenche o modelo */
+var XC=["situacao","saldo","parcela_val","parcela_venc","ult_parcela_paga","prazo_devol","regra_saldo","forma","posse","corr_quem","prazo_proc","prazo_colab","multa_pct","considerandos","ciencia_d","partilha","cor_nome","cor_cpf"];
+var XK=["tipo","contrato_desc","local","multa","juros_mora","juros_am","correcao","honor","venc_antecip","garantia","extras","cor_tel","cor_nome"];
+var FAMS={
+cessao:{test:function(v){return v.c1_nome!==undefined||v.p1_nome!==undefined||v.imovel_end!==undefined},
+ de:function(g){var R={pessoas:[],notas:[],x:{cessao:{}},titulo:"Instrumento Particular de Cessão e Transferência de Direitos sobre Imóvel CDHU"};
+  [["c1","vend"],["c2","vend"],["cj","anu"],["p1","comp"],["p2","comp"]].forEach(function(a){var q=a[0];if(!g(q+"_nome")&&!g(q+"_cpf"))return;var cin=g(q+"_idm")=="cin";
+   var p={papel:a[1],nome:g(q+"_nome"),cpf:g(q+"_cpf"),rg:cin?"":g(q+"_rg"),cin:cin?1:0,civil:g(q+"_civil"),prof:g(q+"_prof"),regime:g(q+"_regime"),anterior:g(q+"_anterior"),data_cas:g(q+"_data"),end:g(q+"_end")};p.qual=qualDe(p);R.pessoas.push(p)});
+  var im={end:g("imovel_end"),quadra:g("imovel_quadra"),lote:g("imovel_lote"),conjunto:g("imovel_conjunto"),bairro:g("imovel_bairro"),cidade:g("imovel_cidade"),cep:g("imovel_cep"),conta:g("conta_cdhu"),taopoc:g("taopoc")};
+  R.imv=im;R.cdhu=!!(im.conta||im.taopoc);R.imovel=compImv(im,R.cdhu);
+  R.preco=mny(g("preco"));R.comissao_val=mny(g("corr_val"));R.comissao_pct=mny(g("corr_pct"));R.comissao_pagador=papelDe(g("corr_quem"));
+  R.data=dataISO(g("data_ass"));R.local=g("cidade_ass");R.foro=g("foro");R.creci=g("cor_creci");R.banco=g("banco");
+  XC.forEach(function(k){if(g(k))R.x.cessao[k]=g(k)});return R},
+ para:function(E,S,U){var v=E.de("vend"),c=E.de("comp"),a=E.de("anu"),im=E.imv||desImv(E.imovel);
+  function pes(x,q){if(!x)return;S(q+"_nome",x.nome);S(q+"_civil",x.civil);S(q+"_prof",x.prof);S(q+"_idm",x.cin?"cin":x.rg?"rg":"");S(q+"_rg",x.rg);S(q+"_cpf",x.cpf);S(q+"_end",x.end);S(q+"_regime",x.regime);S(q+"_anterior",x.anterior);S(q+"_data",x.data_cas)}
+  pes(v[0],"c1");pes(v[1],"c2");pes(a[0],"cj");pes(c[0],"p1");pes(c[1],"p2");
+  S("imovel_end",im.end);S("imovel_quadra",im.quadra);S("imovel_lote",im.lote);S("imovel_conjunto",im.conjunto);S("imovel_bairro",im.bairro);S("imovel_cidade",im.cidade);S("imovel_cep",im.cep);S("conta_cdhu",im.conta);S("taopoc",im.taopoc);
+  if(E.preco){S("preco",U.fmt(E.preco));S("preco_ext",U.ext(E.preco))}
+  if(E.comissao_val)S("corr_val",U.fmt(E.comissao_val));if(E.comissao_pct)S("corr_pct",String(E.comissao_pct).replace(".",","));
+  S("corr_quem",E.comissao_pagador=="vend"?"CEDENTES":E.comissao_pagador=="comp"?"CESSIONÁRIOS":"");
+  S("banco",E.banco||(E.pix?"Chave PIX "+E.pix:""));S("cidade_ass",E.local);S("data_ass",U.dataExt(E.data));S("foro",E.foro);S("cor_creci",E.creci)}},
+carne:{test:function(v){return v.cr1_nome!==undefined||v.dv1_nome!==undefined},
+ de:function(g){var R={pessoas:[],notas:[],x:{carne:{}}};
+  [["cr1","vend"],["cr2","vend"],["dv1","comp"],["dv2","comp"],["t1","test"],["t2","test"]].forEach(function(a){var q=a[0];if(!g(q+"_nome")&&!g(q+"_cpf"))return;var rg=g(q+"_rg"),cin=/^CIN/i.test(rg);
+   R.pessoas.push(enr({papel:a[1],nome:g(q+"_nome"),cpf:g(q+"_cpf"),rg:cin?"":rg,cin:cin?1:0,qual:g(q+"_qual"),end:g(q+"_end")}))});
+  R.imovel=g("imovel");R.imv=desImv(R.imovel);R.cdhu=g("tipo")=="cdhu";R.preco=mny(g("total"));R.entrada=mny(g("entrada"));R.entrada_data=g("entrada_data");R.n_parc=+g("n_parc")||null;R.venc1=g("venc1");
+  R.forma=g("forma");R.banco=g("pag_dados");R.local=g("cidade_ass");R.data=g("data_ass");R.foro=g("foro");R.creci=g("cor_creci");
+  XK.forEach(function(k){if(g(k))R.x.carne[k]=g(k)});return R}}
+};
+function achaFam(v){var k;for(k in FAMS)if(v&&FAMS[k].test(v))return k;return null}
+
+/* leitura de HTML/JSON dos próprios modelos (dados exatos) */
+function lerNativo(s,nome){if(/\.json$/i.test(nome)){try{return{j:JSON.parse(s)}}catch(e){throw new Error("JSON inválido em "+nome)}}
+ if(!/\.html?$/i.test(nome))return s;
+ var m=/var SAVED=(\{[\s\S]*?\});\/\*S\*\//.exec(s),v=null;if(m){try{v=JSON.parse(m[1]).v}catch(e){}}
+ var d=new DOMParser().parseFromString(s,"text/html");[].forEach.call(d.querySelectorAll("script,style,#panel,#bar,.dica,[data-lr]"),function(n){n.parentNode.removeChild(n)});
+ var r=d.querySelector("#doc")||d.querySelector("#d0")||d.body;[].forEach.call(r.querySelectorAll("p,h1,h2,h3,div,li,br,tr"),function(n){n.insertAdjacentText("afterend","\n")});
+ var tx=r.textContent||"";return v&&Object.keys(v).length?{v:v,texto:tx}:tx}
+function lerResultado(tx,nome){if(!tx||typeof tx!="object")return null;var j=tx.j!==undefined?tx.j:null,v=tx.v||null,fam;
+ if(j){var arr=Array.isArray(j)?j:j.registros;if(arr){var n=bancoImportar(arr);return{pessoas:[],notas:["Banco importado: "+n+" contrato(s) novo(s). Abra 🗂 Banco de contratos para aplicar."]}}
+  if(j.E)return reviver(j.E);v=j.v||j}
+ fam=achaFam(v);if(!fam)return{pessoas:[],notas:["Não reconheci os campos de "+nome+"."]};
+ return FAMS[fam].de(function(k){var x=v[k];return x==null?"":String(x).trim()})}
+
+/* armazenamento (navegador) */
+function bancoLer(){try{var l=JSON.parse(localStorage.getItem(KEY)||"[]");return Array.isArray(l)?l:[]}catch(e){return[]}}
+function bancoGravar(l){try{localStorage.setItem(KEY,JSON.stringify(l));return true}catch(e){l.forEach(function(r){delete r.texto});try{localStorage.setItem(KEY,JSON.stringify(l));return true}catch(e2){return false}}}
+function hsh(s){var h=5381,i;for(i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return(h>>>0).toString(36)+"_"+s.length}
+function reviver(E){E=E||{};E.pessoas=(E.pessoas||[]).map(function(p){return enr(p)});E.notas=E.notas||[];E.de=function(pp){return E.pessoas.filter(function(p){return p.papel==pp})};return E}
+function salvar(E,nome,texto){var l=bancoLer(),id=curId||hsh(String(texto||"")||nome+JSON.stringify(E.pessoas)),r=null,i;
+ for(i=0;i<l.length;i++)if(l[i].id==id){r=l[i];break}
+ var d=JSON.parse(JSON.stringify(E));d.notas=[];
+ if(r){r.E=d;if(texto)r.texto=String(texto).slice(0,60000)}else l.unshift({id:id,nome:nome,em:new Date().toISOString(),E:d,texto:String(texto||"").slice(0,60000)});
+ curId=id;return bancoGravar(l)}
+function bancoImportar(arr){var l=bancoLer(),n=0;arr.forEach(function(r){if(!r||!r.id||!r.E)return;var i=-1;l.forEach(function(x,k){if(x.id==r.id)i=k});if(i<0){l.push(r);n++}else l[i]=r});bancoGravar(l);if(BK)BK.desenha();return n}
+
+/* tela do banco */
+function bancoUI(op,box,H){var wrap=document.createElement("div");wrap.id="lr_bank";wrap.setAttribute("data-lr","");wrap.style.display="none";box.parentNode.insertBefore(wrap,box.nextSibling);
+ var css=document.createElement("style");css.setAttribute("data-lr","");css.textContent="#lr_bank{margin:8px 14px 0;background:#fff;border:1px solid #cfd6e2;border-left:5px solid #f2b705;border-radius:8px;padding:10px 12px;font-size:13px}#lr_bank .bk-t{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}#lr_bank button{border:0;border-radius:6px;padding:7px 10px;font-size:12px;font-weight:bold;cursor:pointer;background:#e3e9f2;color:#1f3a5f}#lr_bank .bk-r{display:flex;gap:6px;align-items:center;border-top:1px solid #e3e6ec;padding:6px 0}#lr_bank .bk-r>div{flex:1;min-width:0}@media print{#lr_bank,#lr_bkbtn{display:none}}";document.head.appendChild(css);
+ var bar=document.getElementById("bar"),lb=document.getElementById("lr_btn"),b=document.createElement("button");b.type="button";b.id="lr_bkbtn";b.setAttribute("data-lr","");bar.insertBefore(b,lb.nextSibling);
+ function nm(E,pp){var x=(E.pessoas||[]).filter(function(p){return p.papel==pp})[0];return x&&x.nome||""}
+ function desenha(){var l=bancoLer(),h="";b.textContent="🗂 Banco de contratos ("+l.length+")";
+  h+='<div class="bk-t"><button type="button" data-a="sv">💾 Guardar o formulário atual</button><button type="button" data-a="ex">⬇ Exportar (.json)</button><label><input type="checkbox" data-a="sov"'+(soVazios?" checked":"")+'> só preencher campos vazios</label></div>';
+  if(!l.length)h+="<p>Nenhum contrato guardado ainda. Suba um arquivo em “📎 Subir contrato / documentos”: os dados ficam guardados aqui automaticamente, para aplicar em qualquer modelo.</p>";
+  l.forEach(function(r){var E=r.E||{};h+='<div class="bk-r"><div><b>'+esc(r.nome)+"</b><br><small>"+esc((r.em||"").slice(0,10).split("-").reverse().join("/"))+" · "+esc([nm(E,"vend")&&"Vend./credor: "+nm(E,"vend"),nm(E,"comp")&&"Comp./devedor: "+nm(E,"comp"),E.preco&&"R$ "+fmt(E.preco)].filter(Boolean).join(" · "))+'</small></div><button type="button" data-a="ap" data-id="'+esc(r.id)+'">Aplicar aqui</button><button type="button" data-a="rm" data-id="'+esc(r.id)+'">✕</button></div>'});
+  wrap.innerHTML=h}
+ wrap.onclick=function(e){var t=e.target.closest("[data-a]");if(!t)return;var a=t.getAttribute("data-a"),id=t.getAttribute("data-id"),l=bancoLer(),r=null;l.forEach(function(x){if(x.id==id)r=x});
+  if(a=="ap"&&r){curId=r.id;H.set(reviver(JSON.parse(JSON.stringify(r.E))),[r.nome],r.texto||"")}
+  else if(a=="rm"&&r){if(confirm("Excluir “"+r.nome+"” do banco?")){bancoGravar(l.filter(function(x){return x.id!=id}));if(curId==id)curId=null;desenha()}}
+  else if(a=="sov")soVazios=t.checked;
+  else if(a=="ex"){var u=document.createElement("a");u.href=URL.createObjectURL(new Blob([JSON.stringify({tipo:"fcosta-banco",versao:1,registros:l})],{type:"application/json"}));u.download="banco-contratos-fcosta.json";u.click()}
+  else if(a=="sv"){var E2=FAMS[op.familia].de(function(k){var el=document.getElementById("f_"+k);return el?tr(el.value):""});
+   if(!E2.pessoas.length&&!E2.imovel&&!E2.preco){alert("Preencha o formulário antes de guardar.");return}
+   var old=null;l.forEach(function(x){if(x.id==curId)old=x});
+   if(old){var O=old.E;E2.pessoas=E2.pessoas.concat((O.pessoas||[]).filter(function(p){return!E2.pessoas.some(function(q){return q.papel==p.papel})}));
+    E2.x=E2.x||{};Object.keys(O.x||{}).forEach(function(f){E2.x[f]=Object.assign({},O.x[f],E2.x[f])});
+    Object.keys(O).forEach(function(k){if((E2[k]==null||E2[k]==="")&&O[k]!=null&&k!="notas")E2[k]=O[k]})}
+   var v1=E2.pessoas.filter(function(p){return p.papel=="vend"})[0];
+   var ok=salvar(reviver(E2),old?old.nome:"Formulário · "+(v1&&v1.nome||"sem nome")+" · "+new Date().toLocaleDateString("pt-BR"),"");
+   desenha();wrap.insertAdjacentHTML("afterbegin","<p>"+(ok?"✅ Formulário guardado no banco.":"⚠ Não consegui guardar (espaço cheio no navegador). Use Exportar.")+"</p>")}};
+ b.onclick=function(){wrap.style.display=wrap.style.display=="none"?"block":"none";desenha()};
+ BK={desenha:desenha};desenha()}
+
+var API={FAMS:FAMS,desImv:desImv,compImv:compImv,desm:desm,analisar:analisar,juntar:juntar,montar:montar,porExtenso:porExtenso,dataExt:dataExt,fmt:fmt,_cpfOk:cpfOk};
 if(typeof module!=="undefined")module.exports=API;
 return API})();
 
 </script>
 <script id="leitor-map">
-LeitorDocs.montar({
+LeitorDocs.montar({familia:"carne",
  rotulos:{vend:"Credor (quem recebe)",comp:"Devedor (quem paga)"},
  importantes:[["imovel","imóvel"],["cr1_nome","credor"],["dv1_nome","devedor"],["total","preço total"],["entrada","entrada"],["n_parc","número de parcelas"],["venc1","vencimento da 1ª parcela"]],
  aplicar:function(E,S,U){
