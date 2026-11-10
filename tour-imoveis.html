@@ -770,6 +770,39 @@ audio{color-scheme:dark}
     </div>
   </div>
 
+  <div class="step" id="mdStep">
+    <div class="step-num">&#9733;</div>
+    <div class="step-body">
+      <h2>Modelo de vídeo (opcional)</h2>
+      <p>Aplique um dos 5 estilos às fotos acima. Os efeitos se somam à faixa de informações e valem para o vídeo gerado.</p>
+      <div class="card">
+        <div class="field-row">
+          <div class="field" style="flex:1 1 100%;">
+            <label for="mdSel">Modelo</label>
+            <select id="mdSel">
+              <option value="0">Nenhum (vídeo normal)</option>
+              <option value="1">1. Revelação vazio &rarr; mobiliado</option>
+              <option value="2">2. Marca d'água e metragem</option>
+              <option value="3">3. Troca de versões (mesmo ângulo)</option>
+              <option value="4">4. Tour contínuo de apartamento</option>
+              <option value="5">5. Hyperlapse épico de mansão</option>
+            </select>
+          </div>
+          <div class="field" data-m="1,2,3,4,5" style="flex:1 1 100%;"><label for="mdMarca">Marca d'água (texto)</label><input type="text" id="mdMarca" maxlength="60" value="FCosta Corretor | CRECI-SP 294791-F"></div>
+          <div class="field" data-m="1,2,3,4,5"><label for="mdPos">Posição da marca</label><select id="mdPos"><option value="top">Topo esquerdo</option><option value="bottom">Rodapé esquerdo (pode cobrir a faixa)</option></select></div>
+          <div class="field" data-m="1,2,3,4,5"><label for="mdOp">Opacidade da marca</label><input type="range" id="mdOp" min="20" max="100" step="5" value="85"></div>
+          <div class="field" data-m="2"><label for="mdMetr">Metragem / destaque</label><input type="text" id="mdMetr" maxlength="30" value="78 m² | 2 dorm."></div>
+          <div class="field" data-m="5" style="flex:1 1 100%;"><label for="mdNome">Nome do imóvel / rua (texto neon na 1ª foto)</label><input type="text" id="mdNome" maxlength="50" placeholder="Ex.: Rua das Acácias, 120"></div>
+          <div class="field" data-m="5"><label for="mdMet5">Metragem</label><input type="text" id="mdMet5" maxlength="12" placeholder="Ex.: 450"></div>
+          <div class="field" data-m="5"><label for="mdUn">Unidade</label><select id="mdUn"><option>m²</option><option>sqft</option></select></div>
+          <div class="field" data-m="5"><label for="mdEst">Efeito sazonal</label><select id="mdEst"><option>Nenhum</option><option>Halloween</option><option>Natal</option><option>Primavera</option><option>Verão</option></select></div>
+          <div class="field" data-m="5"><label for="mdNeon">Cor do neon</label><input type="color" id="mdNeon" value="#ff5fd2"></div>
+        </div>
+        <p class="hint" id="mdHint"></p>
+      </div>
+    </div>
+  </div>
+
   <div class="step">
     <div class="step-num">3</div>
     <div class="step-body">
@@ -1950,7 +1983,9 @@ window.FCBand = (function(){
           // desenha o último frame parado e encerra
           if(phone) statusText.textContent = 'Finalizando o vídeo... aguarde alguns segundos.';
           drawSlide(photos.length-1, perPhoto);
+          if(window.__fcModelo) window.__fcModelo('pre', ctx, W, H, totalDuration, photos.length-1, perPhoto, perPhoto, totalDuration, drawSlideRaw);
           drawOverlay(ctx, totalDuration);
+          if(window.__fcModelo) window.__fcModelo('post', ctx, W, H, totalDuration, photos.length-1, perPhoto, perPhoto, totalDuration, drawSlideRaw);
           const chunksBefore = chunks.length;
           setTimeout(()=>{
             try{ recorder.requestData(); }catch(e){}
@@ -2004,7 +2039,9 @@ window.FCBand = (function(){
         }
 
         // fora do efeito de transição das fotos: sempre visível, com opacidade cheia
+        if(window.__fcModelo) window.__fcModelo('pre', ctx, W, H, elapsed, idx, localT, perPhoto, totalDuration, drawSlideRaw);
         drawOverlay(ctx, elapsed);
+        if(window.__fcModelo) window.__fcModelo('post', ctx, W, H, elapsed, idx, localT, perPhoto, totalDuration, drawSlideRaw);
 
         requestAnimationFrame(render);
       }catch(err){
@@ -3084,6 +3121,48 @@ window.FCBand = (function(){
 <!-- fc-voltar-painel -->
 <style>#fc-voltar-painel{position:fixed!important;left:12px!important;bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;z-index:2147483000!important;display:inline-flex!important;align-items:center!important;gap:8px!important;min-height:46px!important;padding:0 20px!important;border-radius:999px!important;background:#22d3ee!important;color:#06101c!important;border:2px solid #06101c!important;font:800 16px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif!important;text-decoration:none!important;box-shadow:0 6px 20px rgba(0,0,0,.45)!important;-webkit-tap-highlight-color:transparent}#fc-voltar-painel:active{transform:scale(.96)}@media print{#fc-voltar-painel{display:none!important}}</style>
 <a id="fc-voltar-painel" href="index.html" aria-label="Voltar para o painel">&#8592; Voltar ao painel</a>
+<script>
+/* Modelos de vídeo (estúdio) integrados ao gerador de fotos */
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var HINT={1:'Envie as fotos em pares: a 1ª do cômodo vazio e a 2ª mobiliado. A mobília é revelada por uma linha dourada. Transição ajustada para corte.',
+    2:'Fotos em dissolve suave, com marca d\'água fixa e a metragem no topo direito.',
+    3:'Envie a mesma cena em versões diferentes (cores, acabamentos). Elas se dissolvem em sequência; use o nome da versão como nome do cômodo.',
+    4:'Fotos na ordem do tour, com giro 3D entre cômodos. Escreva o nome do cômodo na 1ª foto de cada ambiente.',
+    5:'Use a fachada como 1ª foto: o nome e a metragem aparecem em texto neon. O efeito sazonal cobre todo o vídeo.'};
+  var PRE={1:['cut',3],2:['fade',3],3:['fade',2.5],4:['cube',3.5],5:['cube',2.5]};
+  try{var l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap';document.head.appendChild(l);}catch(e){}
+  function sel(){return +($('mdSel')&&$('mdSel').value||0)}
+  function ui(){var m=sel();
+    document.querySelectorAll('#mdStep [data-m]').forEach(function(f){f.style.display=f.dataset.m.split(',').indexOf(String(m))>=0?'':'none'});
+    $('mdHint').textContent=m?HINT[m]:'';
+    if(m){var t=$('transition'),d=$('duration');if(t){t.value=PRE[m][0];t.dispatchEvent(new Event('change',{bubbles:true}))}
+      if(d){d.value=PRE[m][1];d.dispatchEvent(new Event('input',{bubbles:true}))}
+      try{document.fonts.load('40px "Great Vibes"')}catch(e){}}
+  }
+  $('mdSel').addEventListener('change',ui);ui();
+  function neon(g,W,H,k,txt,y,sz,cor){var f=sz*k;g.font=f+'px "Great Vibes",cursive';var w=g.measureText(txt).width;if(w>W-40*k){f*=(W-40*k)/w;g.font=f+'px "Great Vibes",cursive'}
+    g.fillStyle='#fff';g.shadowColor=cor;g.shadowBlur=30*k;g.fillText(txt,W/2,y);g.fillText(txt,W/2,y);g.shadowBlur=0}
+  window.__fcModelo=function(fase,g,W,H,t,i,lt,pp,tot,slide){
+    var m=sel();if(!m)return;var k=W/720;
+    if(fase==='pre'){
+      if(m===1&&i%2===1&&lt<0.9){var p=lt/0.9;g.save();g.beginPath();g.rect(W*p,0,W-W*p,H);g.clip();slide(i-1,pp);g.restore();g.fillStyle='#C5A059';g.fillRect(W*p-3*k,0,6*k,H)}
+      return}
+    g.save();
+    if(m===5){var e=$('mdEst').value;
+      if(e==='Verão'){var gr=g.createRadialGradient(W*.85,0,0,W*.85,0,W*.8);gr.addColorStop(0,'rgba(255,242,168,.8)');gr.addColorStop(1,'rgba(255,242,168,0)');g.fillStyle=gr;g.fillRect(0,0,W,H)}
+      else if(e!=='Nenhum'){g.fillStyle={Halloween:'#ff8a1f',Natal:'#fff',Primavera:'#ffb7d5'}[e];
+        for(var j=0;j<28;j++){var px=(j*137)%W,py=((j*97)+t*(160+(j%3)*70)*k)%(H+60)-30,r=(e==='Halloween'?11:5)*k*(1+j%3*.3);g.beginPath();g.arc(px,py,r,0,7);g.fill()}}
+      if(i===0){g.textAlign='center';var n=$('mdNome').value.trim(),mt=$('mdMet5').value.trim();
+        if(n)neon(g,W,H,k,n,H*.14,84,$('mdNeon').value);if(mt)neon(g,W,H,k,mt+' '+$('mdUn').value,H*.14+90*k,64,'#5fe0ff')}}
+    if(m===2){var b=$('mdMetr').value.trim();if(b){g.font='800 '+26*k+'px system-ui,sans-serif';var w=g.measureText(b).width+32*k;g.fillStyle='#C5A059';g.beginPath();if(g.roundRect)g.roundRect(W-w-20*k,22*k,w,48*k,8*k);else g.rect(W-w-20*k,22*k,w,48*k);g.fill();g.fillStyle='#0D1B2E';g.textAlign='left';g.fillText(b,W-w-4*k,56*k)}}
+    var mk=$('mdMarca').value.trim();
+    if(mk){g.globalAlpha=(+$('mdOp').value)/100;g.textAlign='left';g.font='700 '+24*k+'px system-ui,sans-serif';g.fillStyle='#fff';g.shadowColor='rgba(0,0,0,.65)';g.shadowBlur=8*k;
+      g.fillText(mk,24*k,$('mdPos').value==='bottom'?H-34*k:56*k)}
+    g.restore();
+  };
+})();
+</script>
 <script>try{if(window.self!==window.top)document.getElementById('fc-voltar-painel').style.display='none'}catch(e){}</script>
 <!-- /fc-voltar-painel -->
 <script>
