@@ -531,6 +531,18 @@
 .thumb .fields .fitrow{display:flex;align-items:center;gap:6px;font-size:13px;margin-top:6px;line-height:1.2}.thumb .fields .fitrow input{width:auto;margin:0}
 </style>
 <script src="fcosta-padrao.js" defer></script>
+<script id="fc-pos-store">
+/* Posições arrastadas (fração da largura/altura): valem em qualquer vídeo e resolução */
+(function(){
+  var K=['mine','theirs','band','cta'],S={};K.forEach(function(k){S[k]={x:0,y:0}});
+  try{var sv=JSON.parse(localStorage.getItem('fc-pos-global')||'null');if(sv)K.forEach(function(k){if(sv[k]&&isFinite(sv[k].x)&&isFinite(sv[k].y))S[k]={x:+sv[k].x,y:+sv[k].y}})}catch(e){}
+  function save(){try{localStorage.setItem('fc-pos-global',JSON.stringify(S))}catch(e){}}
+  window.FCPos={KEYS:K,get:function(k){return S[k]||{x:0,y:0}},set:function(k,x,y){S[k]={x:x,y:y};save()},reset:function(){K.forEach(function(k){S[k]={x:0,y:0}});save()}};
+  window.FCOX=function(k,W){var p=S[k];return p?p.x*W:0};
+  window.FCOY=function(k,H){var p=S[k];return p?p.y*H:0};
+})();
+</script>
+
 <!-- destaque piscante do zap: embutido no fim do arquivo -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -2321,10 +2333,10 @@ window.FCBand = (function(){
       }
     }
     const wmG = (window.FCLogo && !window.__fcHideMine()) ? window.FCLogo.build('lgG', W, H, bandLay.band ? bandLay.bandY : H) : null;
-    if(wmG) layers.push({ c: wmG.c, x: wmG.x, y: wmG.y, delay: 0.1, slide: 0 });
+    if(wmG) layers.push({ c: wmG.c, x: wmG.x + FCOX('mine', W), y: wmG.y + FCOY('mine', H), delay: 0.1, slide: 0 });
     const wmB = window.FCBuilderLogo ? window.FCBuilderLogo.build(W, H, wmG, bandLay.band ? bandLay.bandY : H) : null;
-    if(wmB) layers.push({ c: wmB.c, x: wmB.x, y: wmB.y, delay: 0.1, slide: 0 });
-    if(bandLay.band) layers.push({ c: bandLay.band, x: bandLay.bandX, y: bandLay.bandY, delay: 0.45, slide: Math.round(60*u) });
+    if(wmB) layers.push({ c: wmB.c, x: wmB.x + FCOX('theirs', W), y: wmB.y + FCOY('theirs', H), delay: 0.1, slide: 0 });
+    if(bandLay.band) layers.push({ c: bandLay.band, x: bandLay.bandX + FCOX('band', W), y: bandLay.bandY + FCOY('band', H), delay: 0.45, slide: Math.round(60*u) });
 
     function drawOverlay(ctx, t){
       for(const L of layers){
@@ -2702,7 +2714,17 @@ window.FCBand = (function(){
   }
   async function buildOverlay(){
     const full = { x: 0, y: 0, w: W, h: H };
-    if(!$('adpInfoOn').checked) return { canvas: null, area: full };
+    if(!$('adpInfoOn').checked){
+      /* faixa desligada: as logos continuam aparecendo */
+      let any = false; const c0 = document.createElement('canvas'); c0.width = W; c0.height = H; const g0 = c0.getContext('2d');
+      try{
+        const a0 = window.FCLogo ? window.FCLogo.build('lgG', W, H) : null;
+        if(a0){ g0.drawImage(a0.c, a0.x + FCOX('mine', W), a0.y + FCOY('mine', H)); any = true; }
+        const b0 = window.FCBuilderLogo ? window.FCBuilderLogo.build(W, H, a0) : null;
+        if(b0){ g0.drawImage(b0.c, b0.x + FCOX('theirs', W), b0.y + FCOY('theirs', H)); any = true; }
+      }catch(err){ console.error('Logos (faixa desligada):', err); }
+      return { canvas: any ? c0 : null, area: full };
+    }
     try{ await Promise.all([document.fonts.load('400 40px Inter'), document.fonts.load('700 40px Inter'), document.fonts.load('700 40px Fraunces')]); }catch(err){}
     if(logoImg.src && !logoImg.complete) await new Promise(r => { logoImg.onload = logoImg.onerror = r; });
     const c = document.createElement('canvas'); c.width = W; c.height = H;
@@ -2750,10 +2772,10 @@ window.FCBand = (function(){
       }
     }
     const wmA = window.FCLogo ? window.FCLogo.build('lgG', W, H) : null;
-    if(wmA) g.drawImage(wmA.c, wmA.x, wmA.y);
+    if(wmA) g.drawImage(wmA.c, wmA.x + FCOX('mine', W), wmA.y + FCOY('mine', H));
     const wmAB = window.FCBuilderLogo ? window.FCBuilderLogo.build(W, H, wmA) : null;
-    if(wmAB) g.drawImage(wmAB.c, wmAB.x, wmAB.y);
-    if(L.band) g.drawImage(L.band, L.bandX, L.bandY);
+    if(wmAB) g.drawImage(wmAB.c, wmAB.x + FCOX('theirs', W), wmAB.y + FCOY('theirs', H));
+    if(L.band) g.drawImage(L.band, L.bandX + FCOX('band', W), L.bandY + FCOY('band', H));
     return { canvas: c, area: L.area };
   }
   const pickMime = list_ => list_.find(t => MediaRecorder.isTypeSupported(t)) || '';
@@ -3898,7 +3920,7 @@ window.FCLogo = (function(){
       var c = compose(W, H, split); if(!c) return null;
       var w = split ? c.cw : c.width, h = split ? c.ch : c.height, base = Math.min(W, H);
       var m = Math.round(base * 0.04), r = H / W;
-      var y = r > 1.5 ? Math.round(H * 0.025) : (r > 1.2 ? Math.round(H * 0.05) : m);
+      var y = r > 1.5 ? Math.round(H * 0.12) : (r > 1.2 ? Math.round(H * 0.05) : m);
       var pos = g('Pos').value, px = m;
       if(pos === 'tc') px = Math.round((W - w) / 2); else if(pos === 'tr') px = W - w - m;
       if(pos === 'br'){ px = W - w - m; y = Math.round(H * (r > 1.5 ? (limitY != null ? 0.90 : 0.70) : 0.82)) - h; if(r <= 1.5) y = H - h - m; if(r > 1.5 && limitY != null) y = H - h - Math.round(H * 0.02); }
@@ -4860,7 +4882,7 @@ window.FCLogo = (function(){
     if(!S.wm) return;
     ['mine', 'theirs', 'proj'].forEach(function(k){
       var p = S.wm[k]; if(!p) return;
-      var o = OFFS(k), x = p.x + o.x * W, y = p.y + o.y * H;
+      var o = OFFS(k), gk = (k === 'proj' ? 'theirs' : k), x = p.x + o.x * W + FCOX(gk, W), y = p.y + o.y * H + FCOY(gk, H);
       g.drawImage(p.c, x, y); BOX(k, x, y, p.c.width, p.c.height);
     });
   }
@@ -5978,7 +6000,7 @@ if(document.readyState === 'loading') document.addEventListener('DOMContentLoade
     moderno:{nome:'Moderno / Lançamentos',bg:['#07142E','#0E7490'],fg:'#FFFFFF',line:'#22F0FF',glow:'34,240,255',
       big:"700 {s}px Oswald,Inter,sans-serif",sub:"600 {s}px Inter,Arial,sans-serif",track:.08,rad:.5,ico:'#22F0FF',icoFg:'#07142E'}
   };
-  var cfg={tema:'',pos:'topo'};
+  var lastBox=null;var cfg={tema:'',pos:'topo'};
   var sv=null;try{sv=localStorage.getItem('fcCtaTema');cfg.pos=localStorage.getItem('fcCtaPos')||'topo'}catch(e){}
   cfg.tema=(sv===null)?'oportunidade':sv;   // ligado por padrão; "Sem destaque" desliga
 
@@ -5992,8 +6014,8 @@ if(document.readyState === 'loading') document.addEventListener('DOMContentLoade
     // 9:16 (vertical): respeita a zona segura do app (~13% topo / ~18% base)
     // 1:1 (quadrado) e 16:9 (horizontal): margens menores, caixa mais compacta
     var fmt=W>=H*1.2?'h':(H>=W*1.2?'v':'q');
-    var L={v:{u:W/1080,big:76,sub:29,maxW:.92,top:.145,bot:.78},
-           q:{u:W/1080,big:56,sub:22,maxW:.90,top:.07,bot:.93},
+    var L={v:{u:W/1080,big:76,sub:29,maxW:.92,top:.27,bot:.78},
+           q:{u:W/1080,big:56,sub:22,maxW:.90,top:.27,bot:.93},
            h:{u:H/1080,big:60,sub:24,maxW:.55,top:.07,bot:.93}}[fmt];
     var u=L.u;
     var phase=(t%PERIODO)/PERIODO;
@@ -6007,6 +6029,8 @@ if(document.readyState === 'loading') document.addEventListener('DOMContentLoade
     var max=W*L.maxW;if(boxW>max){var s=max/boxW;bigPx*=s;subPx*=s;pad*=s;gap*=s;ico*=s;textW*=s;boxW=max}
     var boxH=Math.max(ico+pad*1.2,subPx*1.3+bigPx*1.05+pad*1.3);
     var x=(W-boxW)/2,y=cfg.pos==='base'?H*L.bot-boxH:H*L.top;
+    if(window.FCOX){x+=FCOX('cta',W);y+=FCOY('cta',H)}
+    x=Math.max(0,Math.min(W-boxW,x));y=Math.max(0,Math.min(H-boxH,y));lastBox=[x,y,boxW,boxH];
     var r=Math.min(boxH/2,boxH*T.rad*1.6);
     g.globalAlpha=k;
     // halo expandindo (pulso)
@@ -6038,7 +6062,7 @@ if(document.readyState === 'loading') document.addEventListener('DOMContentLoade
     return r;
   }
   Object.defineProperty(window,'__fcModelo',{configurable:true,get:function(){return wrapped},set:function(fn){orig=fn}});
-  window.FCCta={cfg:cfg,TEMAS:TEMAS,draw:cta,warm:function(){return warm()},setTxt:function(a,b){FRASE=a;FONE=b}};
+  window.FCCta={cfg:cfg,TEMAS:TEMAS,draw:cta,box:function(){return lastBox},warm:function(){return warm()},setTxt:function(a,b){FRASE=a;FONE=b}};
 
   // ── fontes + seletor no passo 2 ──
   var L=document.createElement('link');L.rel='stylesheet';
@@ -6136,7 +6160,7 @@ function go(){
   function setBg(c){BG=c.toLowerCase();ls('fcBg',BG);ci.value=BG;[].forEach.call(sw.querySelectorAll('button'),function(b){b.classList.toggle('on',b.dataset.c===BG)})}
   setBg(BG);
   /* ---- menu inicial + barra de abas ---- */
-  var V={padroes:{t:'⚙ Padrões',show:['pad','shared','audio']},
+  var V={padroes:{t:'⚙ Padrões',show:['pad','shared','audio','fotos','adapt']},
    fotos:{t:'📷 Vídeo de fotos',btn:'fotos',show:['fotos','ritmo','modelo','gerar'],d:'Monta o vídeo a partir das fotos, com 16 modelos de câmera e transição.'},
    cinema:{t:'🎬 Cinema',btn:'cinema',show:['fotos','ritmo'],d:'Estilo do vídeo de referência: câmera lenta, etiqueta do ambiente e tela final.'},
    passeio:{t:'🚶 Passeio virtual',btn:'passeio',show:['fotos','ritmo','gerar'],d:'A câmera caminha para dentro de cada cômodo.'},
@@ -6144,7 +6168,7 @@ function go(){
    virtual:{t:'🧭 Tour virtual interativo',btn:'virtual',show:['fotos','virt'],d:'Página para o cliente navegar sozinho pelos cômodos.'}};
   var nav=el('div');nav.id='fcNav';var home=el('div');home.id='fcHome';var sum=el('div');sum.id='fcSum';
   var nb=el('button','fcn on','🏠 Menu');nb.type='button';nb.onclick=function(){show('home')};nav.appendChild(nb);
-  var cards='<h2>O que você quer fazer?</h2><p class="fch-sub">Escolha um tipo de vídeo. Só aparece o que ele precisa.</p><div class="fch-how"><b>Como usar:</b> 1) abra <b>Padrões</b> uma vez (dados do imóvel, logos, música, narração, destaque piscante e cor de fundo); 2) escolha o tipo de vídeo abaixo; 3) suba as fotos e gere.</div>'+
+  var cards='<h2>O que você quer fazer?</h2><p class="fch-sub">Escolha um tipo de vídeo. Só aparece o que ele precisa.</p><div class="fch-how"><b>Como usar:</b> 1) abra <b>Padrões</b> uma vez (dados do imóvel, logos, posição dos itens, música, narração, destaque piscante, cor de fundo, fotos e vídeos); 2) escolha o tipo de vídeo abaixo; 3) suba as fotos e gere.</div>'+
    '<div class="fch-grid"><button type="button" class="fch-card pad" data-v="padroes"><b>⚙ Padrões (vale para todos)</b><span>Dados do imóvel, faixa, logos, música, narração, destaque piscante e cor de fundo. Faça uma vez só.</span></button></div><div class="fch-h">Tipos de vídeo</div><div class="fch-grid">';
   Object.keys(V).forEach(function(k){if(k==='padroes')return;cards+='<button type="button" class="fch-card" data-v="'+k+'"><b>'+V[k].t+'</b><span>'+V[k].d+'</span></button>'});
   home.innerHTML=cards+'</div>';
@@ -6168,6 +6192,196 @@ function go(){
   document.body.dataset.fcv='home';
 }
 if(document.readyState==='complete')go();else window.addEventListener('load',go);
+})();
+</script>
+
+<script id="fc-ver">
+/* VER / NÃO VER: controla o que aparece na faixa de dados do imóvel, em todos os vídeos */
+(function(){
+'use strict';
+var KEY='fc-band-show',st={show:true,price:true,facts:true,desc:true,contact:true,title:true};
+try{var sv=JSON.parse(localStorage.getItem(KEY)||'null');if(sv)Object.keys(st).forEach(function(k){if(typeof sv[k]==='boolean')st[k]=sv[k]})}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+window.FCBandVis={st:st};
+var B=window.FCBand;
+if(B&&!B.__vis){
+  var po=B.place;B.__vis=1;
+  B.place=function(o){
+    if(o&&o.opts){
+      var p=Object.assign({},o.opts);
+      if(!st.show){p.price='';p.desc='';p.contact='';p.title='';p.facts='';p.logo=null}
+      else{if(!st.price)p.price='';if(!st.facts)p.facts='';if(!st.desc)p.desc='';if(!st.contact)p.contact='';if(!st.title)p.title=''}
+      o=Object.assign({},o,{opts:p});
+    }
+    return po.call(this,o);
+  };
+}
+function mount(){
+  var card=document.getElementById('sharedCard');if(!card||document.getElementById('fcVerBox'))return false;
+  var d=document.createElement('div');d.id='fcVerBox';d.style.cssText='margin:0 0 16px;padding:14px;border:1px solid var(--rule,#444);border-radius:12px';
+  var items=[['price','Preço'],['facts','Características (m², quartos, vagas)'],['desc','Descrição'],['contact','Contato / WhatsApp'],['title','Título do imóvel']];
+  d.innerHTML='<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><strong>Faixa com os dados no vídeo:</strong>'+
+    '<button type="button" id="fcVerBtn" style="min-height:44px;padding:0 20px;border:0;border-radius:999px;font:800 15px Inter,sans-serif;cursor:pointer"></button></div>'+
+    '<div id="fcVerItems" style="margin-top:10px;display:flex;gap:6px 18px;flex-wrap:wrap">'+
+    items.map(function(it){return '<label style="display:flex;gap:6px;align-items:center;margin:0;cursor:pointer"><input type="checkbox" data-k="'+it[0]+'"> '+it[1]+'</label>'}).join('')+'</div>'+
+    '<p class="hint" style="margin:8px 0 0">VER mostra a faixa; NÃO VER tira a faixa de todos os vídeos (a logo e o destaque piscante continuam). Desmarque um item para escondê-lo só dele. Vale para vídeo de fotos, modelos, passeio, construtora e adaptar vídeo.</p>';
+  card.insertBefore(d,card.firstChild);
+  var btn=document.getElementById('fcVerBtn'),box=document.getElementById('fcVerItems');
+  function paint(){
+    btn.textContent=st.show?'👁 VER':'🚫 NÃO VER';
+    btn.style.background=st.show?'#25D366':'#d64545';btn.style.color='#fff';
+    box.style.display=st.show?'flex':'none';
+    [].forEach.call(box.querySelectorAll('input'),function(i){i.checked=!!st[i.dataset.k]});
+  }
+  btn.onclick=function(){st.show=!st.show;save();paint()};
+  box.addEventListener('change',function(e){var i=e.target;if(i.dataset&&i.dataset.k){st[i.dataset.k]=i.checked;save()}});
+  paint();return true;
+}
+function init(){var n=0,iv=setInterval(function(){if(mount()||++n>60)clearInterval(iv)},250)}
+if(document.readyState==='complete')init();else window.addEventListener('load',init);
+})();
+</script>
+
+<script id="fc-pos">
+/* Editor de posições (aba Padrões): arraste logos, faixa e destaque piscante. Vale para TODOS os vídeos. */
+(function(){
+'use strict';
+var $=function(i){return document.getElementById(i)};
+var v=function(i){var e=$(i);return e&&e.value!=null?String(e.value):''};
+var FM={portrait:{w:540,h:960,css:300,t:'9:16'},square:{w:720,h:720,css:400,t:'1:1'},landscape:{w:960,h:540,css:600,t:'16:9'}};
+var NAMES={mine:'Minha logo',theirs:'Logo da construtora + nome do projeto',band:'Faixa (preço e contato)',cta:'Destaque piscante'};
+var HIT=['cta','mine','theirs','band'];
+var fmt='portrait',bgImg=null,sel='',drag=null,boxes={},cache=null,cv,g,info,t0=performance.now();
+
+function clamp(x,a,b){return Math.max(a,Math.min(b,x))}
+function place(pos,w,h,W,H,topFrac){
+  var base=Math.min(W,H),m=Math.round(base*.04),r=H/W,y=r>1.5?Math.round(H*topFrac):(r>1.2?Math.round(H*.05):m),x=m;
+  if(pos==='tc')x=Math.round((W-w)/2);else if(pos==='tr')x=W-w-m;
+  if(pos==='br'){x=W-w-m;y=H-h-m}
+  return {x:x,y:y};
+}
+function mineBase(W,H){
+  var r=null;try{r=window.FCLogo&&FCLogo.build('lgG',W,H)}catch(e){}
+  if(r)return {c:r.c,x:r.x,y:r.y,w:r.c.width,h:r.c.height};
+  var S=Math.round(Math.min(W,H)*(+v('lgGSize')||20)/100),p=place(v('lgGPos')||'tl',S,S,W,H,.12);
+  return {x:p.x,y:p.y,w:S,h:S,label:'MINHA LOGO'};
+}
+function theirsBase(W,H,mine){
+  var prev=window.__fcBld,r=null;window.__fcBld=true;   /* mostra mesmo desmarcado, só para posicionar */
+  try{r=window.FCBuilderLogo&&FCBuilderLogo.build(W,H,mine&&!mine.label?{c:mine.c,x:mine.x,y:mine.y}:null)}catch(e){}
+  window.__fcBld=prev;
+  if(r&&r.c)return {c:r.c,x:r.x,y:r.y,w:r.c.width,h:r.c.height};
+  var S=Math.round(Math.min(W,H)*(+v('lgBSize')||18)/100),w=Math.round(S*1.5),h=Math.round(S*.9),p=place(v('lgBPos')||'tr',w,h,W,H,.12);
+  return {x:p.x,y:p.y,w:w,h:h,label:'LOGO CONSTRUTORA'};
+}
+function bandBase(W,H){
+  if(window.FCBandVis&&!FCBandVis.st.show)return null;
+  try{
+    var B=window.FCBand,land=fmt==='landscape',por=fmt==='portrait',u=land?H/1080:W/1080;
+    var mode=v('infoMode')==='over'?'over':'under',mx=land?Math.round(W*.03):Math.round(48*u),maxW=land?Math.round(W*(mode==='over'?.40:.70)):W-mx*2;
+    var facts=B.facts(v('dtArea'),v('dtQuartos'),v('dtSuites'),v('dtBanh'),v('dtVagas'));
+    if(!facts||(facts.length===0))facts=B.facts('120','3','1','2','2');
+    var o={price:B.formatPrice(v('propertyPrice'))||B.formatPrice('850000'),desc:v('propertyDesc'),contact:v('propertyContact')||'FCosta Corretor · WhatsApp (11) 99350-9109',facts:facts,bandKey:v('bandTheme'),bandColor:v('bandColor'),accentKey:v('accent')};
+    var L=B.place({W:W,H:H,u:u,mode:mode,scale:(+v('infoScale')||100)*(land?.82:1),pos:+v('infoPos')||0,topY:(mode==='under'&&por)?Math.round(H*.09):0,
+      bottomLimit:por?Math.round(H*.99):(land?H-Math.round(H*.02):H-Math.round(H*.012)),maxW:maxW,bandX:land?(mode==='over'?mx:Math.round((W-maxW)/2)):mx,maxFrac:land?.30:.42,opts:o});
+    if(L&&L.band)return {c:L.band,x:L.bandX,y:L.bandY,w:L.band.width,h:L.band.height};
+  }catch(e){}
+  var w=Math.round(W*.9),h=Math.round(H*.14);return {x:Math.round(W*.05),y:Math.round(H*.97-h),w:w,h:h,label:'FAIXA (PREÇO E CONTATO)'};
+}
+function bases(W,H){
+  var now=performance.now();
+  if(cache&&cache.f===fmt&&now-cache.t<700)return cache;
+  var m=mineBase(W,H);cache={f:fmt,t:now,mine:m,theirs:theirsBase(W,H,m),band:bandBase(W,H)};return cache;
+}
+function figure(W,H){
+  if(bgImg){var k=Math.max(W/bgImg.naturalWidth,H/bgImg.naturalHeight),w=bgImg.naturalWidth*k,h=bgImg.naturalHeight*k;g.drawImage(bgImg,(W-w)/2,(H-h)/2,w,h);return}
+  var s=g.createLinearGradient(0,0,0,H*.7);s.addColorStop(0,'#8fb8de');s.addColorStop(1,'#dcebf7');g.fillStyle=s;g.fillRect(0,0,W,H);
+  g.fillStyle='#7fae6b';g.fillRect(0,H*.66,W,H*.34);
+  var hw=Math.min(W*.62,H*.5),hh=hw*.5,hx=(W-hw)/2,hy=H*.66-hh;
+  g.fillStyle='#f1e8da';g.fillRect(hx,hy,hw,hh);g.fillStyle='#8a4b3a';g.beginPath();g.moveTo(hx-hw*.05,hy);g.lineTo(W/2,hy-hh*.55);g.lineTo(hx+hw*1.05,hy);g.closePath();g.fill();
+  g.fillStyle='#9cc4e4';[.14,.62].forEach(function(f){g.fillRect(hx+hw*f,hy+hh*.2,hw*.24,hh*.32)});
+  g.fillStyle='#6b4a32';g.fillRect(W/2-hw*.06,hy+hh*.4,hw*.12,hh*.6);
+  g.fillStyle='#ffd966';g.beginPath();g.arc(W*.82,H*.14,Math.min(W,H)*.06,0,7);g.fill();
+  g.fillStyle='rgba(0,0,0,.35)';g.font='700 '+Math.round(W*.035)+'px Inter,sans-serif';g.textAlign='center';g.fillText('FIGURA SIMULADA (só para posicionar)',W/2,H*.5);g.textAlign='left';
+}
+function ph(x,y,w,h,label){
+  g.save();g.fillStyle='rgba(255,255,255,.82)';g.strokeStyle='#0d1b2e';g.setLineDash([8,6]);g.lineWidth=3;
+  g.beginPath();if(g.roundRect)g.roundRect(x,y,w,h,12);else g.rect(x,y,w,h);g.fill();g.stroke();
+  g.setLineDash([]);g.fillStyle='#0d1b2e';g.font='700 '+Math.max(12,Math.round(Math.min(w,h)*.16))+'px Inter,sans-serif';g.textAlign='center';g.textBaseline='middle';
+  g.fillText(label,x+w/2,y+h/2,w-12);g.restore();
+}
+function draw(){
+  if(!cv||!cv.offsetParent)return;
+  var W=cv.width,H=cv.height;g.clearRect(0,0,W,H);figure(W,H);
+  var b=bases(W,H);boxes={};
+  ['band','theirs','mine'].forEach(function(k){
+    var it=b[k];if(!it)return;var x=it.x+FCOX(k,W),y=it.y+FCOY(k,H);
+    if(it.c)g.drawImage(it.c,x,y);else ph(x,y,it.w,it.h,it.label);
+    boxes[k]=[x,y,it.w,it.h];
+  });
+  if(window.FCCta){
+    var C=FCCta,was=C.cfg.tema;if(!was)C.cfg.tema='oportunidade';
+    try{C.draw(g,W,H,1.6+(performance.now()-t0)/1000);var bx=C.box&&C.box();if(bx)boxes.cta=bx.slice()}catch(e){}
+    C.cfg.tema=was;
+  }
+  if(fmt==='portrait'&&$('fcPosGuide')&&$('fcPosGuide').checked){   /* áreas tapadas pela interface do Reels/Stories */
+    g.save();g.fillStyle='rgba(220,40,40,.18)';g.fillRect(0,0,W,H*.13);g.fillRect(0,H*.82,W,H*.18);
+    g.fillStyle='rgba(255,255,255,.85)';g.font='600 '+Math.round(W*.028)+'px Inter,sans-serif';g.fillText('⛔ o app tapa aqui (nome do perfil e botões)',10,H*.13-8);g.fillText('⛔ o app tapa aqui (legenda, curtir, comentar)',10,H*.82+Math.round(W*.035));g.restore();
+  }
+  if(sel&&boxes[sel]){var q=boxes[sel];g.save();g.strokeStyle='#22c1ff';g.lineWidth=4;g.setLineDash([10,6]);g.strokeRect(q[0]-3,q[1]-3,q[2]+6,q[3]+6);g.restore()}
+  info.textContent=sel?('Selecionado: '+NAMES[sel]+' — arraste ou use as setas do teclado.'):'Toque/clique num item e arraste para o lugar que quiser.';
+}
+function pt(e){var r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)*cv.width/r.width,y:(e.clientY-r.top)*cv.height/r.height}}
+function moveTo(k,nx,ny,start){
+  var W=cv.width,H=cv.height,bx=start.b;
+  nx=clamp(nx,0,Math.max(0,W-bx[2]));ny=clamp(ny,0,Math.max(0,H-bx[3]));
+  FCPos.set(k,start.o.x+(nx-bx[0])/W,start.o.y+(ny-bx[1])/H);
+}
+function mount(){
+  var host=document.querySelector('#fcPad .step-body');if(!host||$('fcPosCard'))return false;
+  var d=document.createElement('div');d.className='card';d.id='fcPosCard';d.style.marginTop='14px';
+  d.innerHTML='<strong>🧩 Posicionar logos, faixa e destaque piscante</strong>'+
+   '<p class="hint" style="margin:0 0 10px">Arraste cada item sobre a figura. A posição vale para <b>todos os vídeos</b> (fotos, modelos, cinema, passeio, adaptar vídeo e construtora) e em <b>todos os formatos</b>.</p>'+
+   '<div class="fcsw" id="fcPosFmt" style="margin:0 0 10px"></div>'+
+   '<div style="text-align:center"><canvas id="fcPosCv" tabindex="0" style="max-width:100%;border-radius:12px;touch-action:none;cursor:grab;background:#222"></canvas></div>'+
+   '<div class="hint" id="fcPosInfo" style="margin:8px 0"></div>'+
+   '<label style="display:flex;gap:8px;align-items:flex-start;margin:0 0 10px;cursor:pointer"><input type="checkbox" id="fcPosGuide" checked style="margin-top:3px"><span><b>Mostrar as áreas vermelhas (9:16)</b><br><span class="hint">São as partes do vídeo vertical que o Instagram, TikTok e YouTube Shorts tapam com o nome do perfil, a legenda e os botões de curtir e comentar. Logo ou texto colocado ali pode ficar escondido; prefira deixar os itens na parte clara.</span></span></label>'+
+   '<div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="file-btn" id="fcPosReset">Restaurar posições originais</button>'+
+   '<label class="file-btn" style="margin:0">Usar minha foto como figura<input type="file" id="fcPosImg" accept="image/*" style="display:none"></label>'+
+   '<button type="button" class="file-btn" id="fcPosNoImg">Figura simulada</button></div>';
+  var after=$('fcPadCard');after?after.insertAdjacentElement('afterend',d):host.appendChild(d);
+  cv=$('fcPosCv');g=cv.getContext('2d');info=$('fcPosInfo');
+  var fb=$('fcPosFmt');
+  Object.keys(FM).forEach(function(k){var b=document.createElement('button');b.type='button';b.className='file-btn';b.textContent=FM[k].t;b.dataset.k=k;
+    b.onclick=function(){fmt=k;cache=null;size();sel=''};fb.appendChild(b)});
+  function size(){var f=FM[fmt];cv.width=f.w;cv.height=f.h;cv.style.width=f.css+'px';
+    [].forEach.call(fb.children,function(b){b.style.outline=b.dataset.k===fmt?'3px solid #22c1ff':'none'})}
+  size();
+  cv.addEventListener('pointerdown',function(e){
+    var p=pt(e),hit='';for(var i=0;i<HIT.length;i++){var b=boxes[HIT[i]];if(b&&p.x>=b[0]&&p.x<=b[0]+b[2]&&p.y>=b[1]&&p.y<=b[1]+b[3]){hit=HIT[i];break}}
+    sel=hit;if(!hit)return;var o=FCPos.get(hit);
+    drag={k:hit,px:p.x,py:p.y,b:boxes[hit].slice(),o:{x:o.x,y:o.y}};
+    try{cv.setPointerCapture(e.pointerId)}catch(x){}cv.style.cursor='grabbing';e.preventDefault();
+  });
+  cv.addEventListener('pointermove',function(e){if(!drag)return;var p=pt(e);moveTo(drag.k,drag.b[0]+p.x-drag.px,drag.b[1]+p.y-drag.py,drag);e.preventDefault()});
+  function end(){if(drag){drag=null;cv.style.cursor='grab'}}
+  cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',end);
+  cv.addEventListener('keydown',function(e){
+    if(!sel||!boxes[sel])return;var st=e.shiftKey?.02:.005,dx=0,dy=0;
+    if(e.key==='ArrowLeft')dx=-st;else if(e.key==='ArrowRight')dx=st;else if(e.key==='ArrowUp')dy=-st;else if(e.key==='ArrowDown')dy=st;else return;
+    var o=FCPos.get(sel),W=cv.width,H=cv.height,b=boxes[sel];
+    if(b[0]+dx*W<0||b[0]+b[2]+dx*W>W)dx=0;if(b[1]+dy*H<0||b[1]+b[3]+dy*H>H)dy=0;
+    FCPos.set(sel,o.x+dx,o.y+dy);e.preventDefault();
+  });
+  $('fcPosReset').onclick=function(){FCPos.reset();sel=''};
+  $('fcPosImg').onchange=function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var im=new Image();im.onload=function(){bgImg=im};im.src=URL.createObjectURL(f);e.target.value=''};
+  $('fcPosNoImg').onclick=function(){bgImg=null};
+  try{if(window.FCCta&&FCCta.warm)FCCta.warm();document.fonts.load('700 40px Inter');document.fonts.load('700 40px Fraunces')}catch(e){}
+  setInterval(draw,50);
+  return true;
+}
+function init(){var n=0,iv=setInterval(function(){if(mount()||++n>60)clearInterval(iv)},250)}
+if(document.readyState==='complete')init();else window.addEventListener('load',init);
 })();
 </script>
 
