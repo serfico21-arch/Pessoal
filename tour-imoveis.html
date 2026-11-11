@@ -773,8 +773,8 @@ audio{color-scheme:dark}
   <div class="step" id="mdStep">
     <div class="step-num">&#9733;</div>
     <div class="step-body">
-      <h2>Modelo de vídeo (opcional)</h2>
-      <p>Aplique um dos 5 estilos às fotos acima. Os efeitos se somam à faixa de informações e valem para o vídeo gerado.</p>
+      <h2>&#9733; MODELOS DE VÍDEO &#9733;</h2>
+      <p>Escolha um dos 16 estilos. Cada um tem câmera, transição e efeitos próprios. O vídeo sai sempre em 9:16, a foto ocupa a tela toda (sem fundo ofuscado) e a câmera passeia por ela, mostrando a foto inteira durante o movimento.</p>
       <div class="card">
         <div class="field-row">
           <div class="field" style="flex:1 1 100%;">
@@ -786,11 +786,23 @@ audio{color-scheme:dark}
               <option value="3">3. Troca de versões (mesmo ângulo)</option>
               <option value="4">4. Tour contínuo de apartamento</option>
               <option value="5">5. Hyperlapse épico de mansão</option>
+              <option value="6">6. Panorâmica cinematográfica (clarão de luz)</option>
+              <option value="7">7. Persianas (cortinas se abrindo)</option>
+              <option value="8">8. Esteira tripla (3 fotos de uma vez)</option>
+              <option value="9">9. Drone (a câmera se afasta e revela o cômodo)</option>
+              <option value="10">10. Cinema (faixas pretas e fusão suave)</option>
+              <option value="11">11. Portas duplas (se abrem do centro)</option>
+              <option value="12">12. Giro de página 3D</option>
+              <option value="13">13. Mergulho (zoom que atravessa a foto)</option>
+              <option value="14">14. Diagonal dourada</option>
+              <option value="15">15. Mosaico (a foto se monta em quadradinhos)</option>
+              <option value="16">16. Dupla (2 fotos, 2 sentidos)</option>
             </select>
           </div>
-          <div class="field" data-m="1,2,3,4,5" style="flex:1 1 100%;"><label for="mdMarca">Marca d'água (texto)</label><input type="text" id="mdMarca" maxlength="60" value="FCosta Corretor | CRECI-SP 294791-F"></div>
-          <div class="field" data-m="1,2,3,4,5"><label for="mdPos">Posição da marca</label><select id="mdPos"><option value="top">Topo esquerdo</option><option value="bottom">Rodapé esquerdo (pode cobrir a faixa)</option></select></div>
-          <div class="field" data-m="1,2,3,4,5"><label for="mdOp">Opacidade da marca</label><input type="range" id="mdOp" min="20" max="100" step="5" value="85"></div>
+          <div class="field" data-m="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" style="flex:1 1 100%;"><label for="mdVel">Velocidade dos movimentos</label><select id="mdVel"><option value="2.4">Bem suave (recomendado)</option><option value="1.7">Suave</option><option value="1.2">Normal</option></select></div>
+          <div class="field" data-m="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" style="flex:1 1 100%;"><label for="mdMarca">Marca d'água (texto)</label><input type="text" id="mdMarca" maxlength="60" value="FCosta Corretor | CRECI-SP 294791-F"></div>
+          <div class="field" data-m="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16"><label for="mdPos">Posição da marca</label><select id="mdPos"><option value="top">Topo esquerdo</option><option value="bottom">Rodapé esquerdo (pode cobrir a faixa)</option></select></div>
+          <div class="field" data-m="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16"><label for="mdOp">Opacidade da marca</label><input type="range" id="mdOp" min="20" max="100" step="5" value="85"></div>
           <div class="field" data-m="2"><label for="mdMetr">Metragem / destaque</label><input type="text" id="mdMetr" maxlength="30" value="78 m² | 2 dorm."></div>
           <div class="field" data-m="5" style="flex:1 1 100%;"><label for="mdNome">Nome do imóvel / rua (texto neon na 1ª foto)</label><input type="text" id="mdNome" maxlength="50" placeholder="Ex.: Rua das Acácias, 120"></div>
           <div class="field" data-m="5"><label for="mdMet5">Metragem</label><input type="text" id="mdMet5" maxlength="12" placeholder="Ex.: 450"></div>
@@ -1732,7 +1744,7 @@ window.FCBand = (function(){
       alert('Adicione pelo menos duas fotos para montar o tour.');
       return;
     }
-    if(isPhone() && photos.length > 12 && !confirm('Você está no modo Celular com ' + photos.length + ' fotos. Mais de 12 fotos pode travar o celular na hora de gerar. Continuar mesmo assim? (Para o máximo de fotos e qualidade, use o PC.)')){
+    if(isPhone() && photos.length > 40 && !confirm('Você está no modo Celular com ' + photos.length + ' fotos. Mais de 40 fotos pode travar o celular na hora de gerar. Continuar mesmo assim? (Para o máximo de fotos e qualidade, use o PC.)')){
       return;
     }
     if(!stage.captureStream || !window.MediaRecorder){
@@ -1801,7 +1813,7 @@ window.FCBand = (function(){
     const DIM = { portrait:[1080,1920], feed:[1080,1350], square:[1080,1080], landscape:[1920,1080] };
     const kDim = phone ? .4 : (leve ? .5 : 1);   // celular: quadro menor (432x768 no vertical)
     const W = Math.round(DIM[fmt][0] * kDim), H = Math.round(DIM[fmt][1] * kDim);
-    const MAX_DIM = phone ? 720 : (leve ? 1080 : 1920);
+    const MAX_DIM = phone ? (photos.length > 20 ? 560 : 720) : (leve ? 1080 : 1920);
     photos.forEach(p=>{
       const iw = p.img.naturalWidth, ih = p.img.naturalHeight;
       const scale = Math.min(1, MAX_DIM / Math.max(iw, ih));
@@ -3121,44 +3133,148 @@ window.FCBand = (function(){
 <!-- fc-voltar-painel -->
 <style>#fc-voltar-painel{position:fixed!important;left:12px!important;bottom:calc(12px + env(safe-area-inset-bottom,0px))!important;z-index:2147483000!important;display:inline-flex!important;align-items:center!important;gap:8px!important;min-height:46px!important;padding:0 20px!important;border-radius:999px!important;background:#22d3ee!important;color:#06101c!important;border:2px solid #06101c!important;font:800 16px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif!important;text-decoration:none!important;box-shadow:0 6px 20px rgba(0,0,0,.45)!important;-webkit-tap-highlight-color:transparent}#fc-voltar-painel:active{transform:scale(.96)}@media print{#fc-voltar-painel{display:none!important}}</style>
 <a id="fc-voltar-painel" href="index.html" aria-label="Voltar para o painel">&#8592; Voltar ao painel</a>
+<style>
+#mdStep .step-num{color:#ff2fa0!important}
+#mdStep h2{color:#ff6fc2!important;font-size:1.35em}
+#mdStep>.step-body>.card{border:2px solid #ff2fa0!important;background:linear-gradient(135deg,rgba(255,47,160,.16),rgba(122,44,255,.16))!important;box-shadow:0 0 28px rgba(255,47,160,.28)}
+#mdStep label[for=mdSel]{color:#ffd0ec!important;font-weight:800;font-size:15px}
+#mdSel{min-height:58px;font-size:18px;font-weight:800;color:#fff!important;background:linear-gradient(135deg,#ff2fa0,#7a2cff)!important;border:2px solid #fff!important;border-radius:14px;box-shadow:0 0 0 4px rgba(255,47,160,.35),0 10px 28px rgba(255,47,160,.5);animation:mdPulse 2.2s ease-in-out infinite;cursor:pointer}
+#mdSel option{background:#1d0a33;color:#fff;font-weight:700}
+@keyframes mdPulse{50%{box-shadow:0 0 0 8px rgba(255,47,160,.18),0 10px 34px rgba(122,44,255,.65)}}
+</style>
 <script>
-/* Modelos de vídeo (estúdio) integrados ao gerador de fotos */
+/* Modelos de vídeo: 5 estilos diferentes, sempre 9:16 e sem cortar a foto */
 (function(){
   var $=function(i){return document.getElementById(i)};
-  var HINT={1:'Envie as fotos em pares: a 1ª do cômodo vazio e a 2ª mobiliado. A mobília é revelada por uma linha dourada. Transição ajustada para corte.',
-    2:'Fotos em dissolve suave, com marca d\'água fixa e a metragem no topo direito.',
-    3:'Envie a mesma cena em versões diferentes (cores, acabamentos). Elas se dissolvem em sequência; use o nome da versão como nome do cômodo.',
-    4:'Fotos na ordem do tour, com giro 3D entre cômodos. Escreva o nome do cômodo na 1ª foto de cada ambiente.',
-    5:'Use a fachada como 1ª foto: o nome e a metragem aparecem em texto neon. O efeito sazonal cobre todo o vídeo.'};
-  var PRE={1:['cut',3],2:['fade',3],3:['fade',2.5],4:['cube',3.5],5:['cube',2.5]};
+  var HINT={1:'REVELAÇÃO: envie em pares (1ª vazio, 2ª mobiliado). Uma linha dourada varre a tela e revela a mobília, com as etiquetas VAZIO e MOBILIADO e câmera aproximando devagar.',
+    2:'MARCA D\'ÁGUA E METRAGEM: estilo anúncio de luxo. Moldura dourada fina, marca d\'água repetida na diagonal, selo grande de metragem e câmera subindo bem devagar.',
+    3:'TROCA DE VERSÕES: câmera 100% parada (mesmo ângulo). A nova versão abre como um círculo a partir do centro, com contador VERSÃO 1/2/3 e bolinhas embaixo. Use a mesma cena em cores diferentes.',
+    4:'TOUR CONTÍNUO: câmera "caminha" para dentro de cada cômodo, com brilho quente, barra de progresso no topo (uma parte por foto) e dissolve suave. Escreva o nome do cômodo na 1ª foto.',
+    5:'HYPERLAPSE ÉPICO: use a fachada como 1ª foto. Texto neon, giro 3D, tranco de câmera com rastro de movimento, cor cinematográfica e efeito sazonal em todo o vídeo.'};
+  var PRE={1:['cut',3.4],2:['cut',3.6],3:['cut',2.8],4:['cut',3.4],5:['cut',2.6],6:['cut',3.6],7:['cut',3.2],8:['cut',2.6]};
+  for(var q9=9;q9<=16;q9++)PRE[q9]=['cut',3.6];
+  for(var q8 in PRE)PRE[q8][1]=Math.max(PRE[q8][1],5);
+  HINT[9]='DRONE: a câmera começa bem perto e vai se afastando devagar, revelando o cômodo, com fusão suave entre as fotos.';
+  HINT[10]='CINEMA: faixas pretas de filme, câmera lenta varrendo a foto e fusão suave, visual de comercial.';
+  HINT[11]='PORTAS DUPLAS: a foto atual se divide ao meio e as duas metades abrem para os lados, revelando a próxima.';
+  HINT[12]='GIRO DE PÁGINA 3D: a foto vira de lado como uma página e mostra a próxima do outro lado.';
+  HINT[13]='MERGULHO: a câmera atravessa a foto atual com zoom e sai na próxima, que se acomoda suavemente.';
+  HINT[14]='DIAGONAL DOURADA: uma faixa dourada cruza a tela na diagonal e revela a próxima foto.';
+  HINT[15]='MOSAICO: a próxima foto se monta em quadradinhos que aparecem um a um.';
+  HINT[16]='DUPLA: a tela é dividida em duas faixas com fotos diferentes, que deslizam em sentidos opostos a cada troca.';
+  HINT[1]='REVELAÇÃO: envie em pares (1ª vazio, 2ª mobiliado). Uma linha dourada varre a tela e revela a mobília, com a câmera entrando devagar no ambiente.';
+  HINT[2]='LUXO: câmera varre a foto de um lado ao outro, moldura dourada, marca d\'água na diagonal e selo de metragem.';
+  HINT[3]='TROCA DE VERSÕES: câmera quase parada; a nova versão abre como uma íris a partir do centro, com contador e bolinhas.';
+  HINT[4]='CAMINHADA PELA PORTA: a câmera avança e a próxima foto se abre como uma porta, dando a sensação de passar de um cômodo para o outro. Barra de progresso no topo.';
+  HINT[5]='HYPERLAPSE ÉPICO: avanço rápido, giro de câmera lateral com rastro de movimento, cor cinematográfica, texto neon e efeito sazonal.';
+  HINT[6]='PANORÂMICA: a câmera varre a foto inteira como uma panorâmica de cinema; a troca acontece com um clarão de luz quente.';
+  HINT[7]='PERSIANAS: a próxima foto abre em tiras verticais, uma depois da outra, como cortinas se abrindo.';
+  HINT[8]='ESTEIRA TRIPLA: 3 fotos aparecem ao mesmo tempo, em faixas que deslizam como uma esteira e se movem em sentidos opostos. Ótimo para mostrar muitas fotos num vídeo curto.';
   try{var l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap';document.head.appendChild(l);}catch(e){}
   function sel(){return +($('mdSel')&&$('mdSel').value||0)}
+  var saved=null;
+  function ev(el,t){el.dispatchEvent(new Event(t,{bubbles:true}))}
   function ui(){var m=sel();
     document.querySelectorAll('#mdStep [data-m]').forEach(function(f){f.style.display=f.dataset.m.split(',').indexOf(String(m))>=0?'':'none'});
     $('mdHint').textContent=m?HINT[m]:'';
-    if(m){var t=$('transition'),d=$('duration');if(t){t.value=PRE[m][0];t.dispatchEvent(new Event('change',{bubbles:true}))}
-      if(d){d.value=PRE[m][1];d.dispatchEvent(new Event('input',{bubbles:true}))}
-      try{document.fonts.load('40px "Great Vibes"')}catch(e){}}
+    var fm=$('format'),fs=$('fillScreen');
+    if(m){
+      if(!saved)saved={f:fm.value,s:fs.checked};
+      fm.value='portrait';ev(fm,'change');          /* sempre 9:16 */
+      if(!fs.checked){fs.checked=true;ev(fs,'change')}   /* foto ocupa a tela toda, sem fundo ofuscado */
+      var t=$('transition'),d=$('duration');
+      if(t){t.value=PRE[m][0];ev(t,'change')}
+      if(d){d.value=PRE[m][1];ev(d,'input')}
+      try{document.fonts.load('40px "Great Vibes"')}catch(e){}
+    }else if(saved){fm.value=saved.f;ev(fm,'change');if(fs.checked!==saved.s){fs.checked=saved.s;ev(fs,'change')}saved=null}
   }
   $('mdSel').addEventListener('change',ui);ui();
+  var ez=function(t){t=Math.max(0,Math.min(1,t));return t*t*(3-2*t)};
+  var tmp=null;
+  /* câmera: copia o quadro e redesenha com zoom (sempre ≤ 100%, nada é cortado) e deslocamento */
+  function cam(g,W,H,sc,dx,dy,ghost){
+    if(!tmp||tmp.width!==W||tmp.height!==H){tmp=document.createElement('canvas');tmp.width=W;tmp.height=H}
+    var tg=tmp.getContext('2d');tg.clearRect(0,0,W,H);tg.drawImage(g.canvas,0,0);
+    g.save();g.fillStyle='#000';g.fillRect(0,0,W,H);
+    g.globalAlpha=.55;g.drawImage(tmp,-W*.06,-H*.06,W*1.12,H*1.12);g.globalAlpha=1;
+    var n=ghost||1;
+    for(var j=n-1;j>=0;j--){g.globalAlpha=j?0.35/j:1;var o=j*W*.035*(ghost?Math.sign(dx||1):0);
+      g.drawImage(tmp,W/2-W*sc/2+dx+o,H/2-H*sc/2+dy,W*sc,H*sc)}
+    g.restore();
+  }
+  function pill(g,x,y,w,h,r){g.beginPath();if(g.roundRect)g.roundRect(x,y,w,h,r);else g.rect(x,y,w,h)}
+  function tag(g,txt,cx,y,k,bg,fg,al){g.save();g.globalAlpha=al;g.font='800 '+26*k+'px system-ui,sans-serif';var w=g.measureText(txt).width+36*k;
+    g.fillStyle=bg;pill(g,cx-w/2,y,w,46*k,23*k);g.fill();g.fillStyle=fg;g.textAlign='center';g.fillText(txt,cx,y+32*k);g.restore()}
   function neon(g,W,H,k,txt,y,sz,cor){var f=sz*k;g.font=f+'px "Great Vibes",cursive';var w=g.measureText(txt).width;if(w>W-40*k){f*=(W-40*k)/w;g.font=f+'px "Great Vibes",cursive'}
     g.fillStyle='#fff';g.shadowColor=cor;g.shadowBlur=30*k;g.fillText(txt,W/2,y);g.fillText(txt,W/2,y);g.shadowBlur=0}
+  function vig(g,W,H,a){var r=g.createRadialGradient(W/2,H/2,H*.28,W/2,H/2,H*.75);r.addColorStop(0,'rgba(0,0,0,0)');r.addColorStop(1,'rgba(0,0,0,'+a+')');g.fillStyle=r;g.fillRect(0,0,W,H)}
+  function marca(g,W,H,k,mk,y,al,size){g.save();g.globalAlpha=al;g.textAlign='center';g.font='800 '+size*k+'px system-ui,sans-serif';g.fillStyle='#fff';g.shadowColor='rgba(0,0,0,.7)';g.shadowBlur=8*k;g.fillText(mk,W/2,y);g.restore()}
   window.__fcModelo=function(fase,g,W,H,t,i,lt,pp,tot,slide){
-    var m=sel();if(!m)return;var k=W/720;
+    var m=sel();if(!m)return;var k=W/720,N=Math.max(1,Math.round(tot/pp)),p=lt/pp,mk=$('mdMarca').value.trim(),op=(+$('mdOp').value)/100;
     if(fase==='pre'){
-      if(m===1&&i%2===1&&lt<0.9){var p=lt/0.9;g.save();g.beginPath();g.rect(W*p,0,W-W*p,H);g.clip();slide(i-1,pp);g.restore();g.fillStyle='#C5A059';g.fillRect(W*p-3*k,0,6*k,H)}
+      var PH=window.__fcPhotos?window.__fcPhotos():[],n=PH.length;if(!n)return;
+      var im=function(j){j=(j%n+n)%n;return PH[j]&&PH[j].renderImg};
+      var cov=function(im2,w,h,z,u,v,al,dx,dy){if(!im2)return;var sc=Math.max(w/im2.width,h/im2.height)*z,iw=im2.width*sc,ih=im2.height*sc;
+        g.globalAlpha=al==null?1:al;g.drawImage(im2,-(iw-w)*u+(dx||0),-(ih-h)*v+(dy||0),iw,ih);g.globalAlpha=1};
+      var path=function(j,q){var d=j%2?-1:1,e=ez(q),AM=VEL>=2?.4:VEL>=1.5?.65:1;
+        if(m===3)return{z:1+.03*e,u:.5,v:.5};if(m===9)return{z:1+.3*AM*(1-e),u:.5+d*.08*AM*(.5-e),v:.5};if(m===13)return{z:1.06+.04*AM*e,u:.5+d*.12*AM*(.5-e),v:.5};
+        if(m===4||m===5)return{z:1+(m===5?.18:.14)*AM*e,u:.5+d*.12*AM*(.5-e),v:.5};
+        var f=d>0?e:1-e;return{z:1.1+.05*AM*f,u:.5+(f-.5)*AM,v:.5+.08*AM*d*(.5-e)}};
+      var dr=function(j,q,al,zm,dx){var s2=path(j,q);cov(im(j),W,H,s2.z*(zm||1),s2.u,s2.v,al,dx)};
+      var VEL=+($('mdVel')&&$('mdVel').value||2.4),T=Math.min((m===1?1.6:m===5?.9:m===7?1.2:m===3?1:1.1)*VEL,pp*.6);
+      g.fillStyle='#000';g.fillRect(0,0,W,H);
+      if(m===16){var hh=H/2,k2=(i>0&&lt<T)?ez(lt/T):1;
+        for(var h=0;h<2;h++){var dd=h?1:-1;g.save();g.beginPath();g.rect(0,h*hh,W,hh);g.clip();
+          if(k2<1){cov(im(i-1+h),W,hh,1.15,.5,.5,1,dd*k2*W,h*hh);cov(im(i+h),W,hh,1.15,.5,.5,1,dd*W*(k2-1),h*hh)}
+          else cov(im(i+h),W,hh,1.15,.5+(h?1:-1)*.1*p,.5,1,0,h*hh);
+          g.restore();g.fillStyle='#000';g.fillRect(0,h*hh,W,3*k)}}
+      else if(m===8){var bh=H/3,off=i===0?1:ez(Math.min(1,lt/1));
+        for(var j=0;j<4;j++){var y=(j-off)*bh,ix=i-1+j,u2=.5+.5*Math.sin(t*.3+ix*1.7);
+          g.save();g.beginPath();g.rect(0,y,W,bh);g.clip();cov(im(ix),W,bh,1.15,u2,.5,1,0,y);g.restore();
+          g.fillStyle='#000';g.fillRect(0,y,W,3*k)}
+        vig(g,W,H,.35)}
+      else if(i>0&&lt<T&&(m!==1||i%2===1)){var kk=ez(lt/T),R=Math.hypot(W,H)/2*kk;
+        if(m===1){dr(i-1,1);var x=W*kk;g.save();g.beginPath();g.rect(0,0,x,H);g.clip();dr(i,p);g.restore();
+          var gr=g.createLinearGradient(x-60*k,0,x+60*k,0);gr.addColorStop(0,'rgba(197,160,89,0)');gr.addColorStop(.5,'rgba(255,230,160,.95)');gr.addColorStop(1,'rgba(197,160,89,0)');g.fillStyle=gr;g.fillRect(x-60*k,0,120*k,H);g.fillStyle='#C5A059';g.fillRect(x-3*k,0,6*k,H)}
+        else if(m===3){dr(i-1,1);g.save();g.beginPath();g.arc(W/2,H/2,R,0,7);g.clip();dr(i,p);g.restore();
+          g.save();g.strokeStyle='rgba(255,255,255,'+(1-kk)+')';g.lineWidth=8*k;g.beginPath();g.arc(W/2,H/2,R,0,7);g.stroke();g.restore()}
+        else if(m===4){dr(i-1,1,1,1+kk*.5);g.save();g.beginPath();g.arc(W/2,H/2,R,0,7);g.clip();dr(i,p,1,1.45-.45*kk);g.restore();
+          g.save();g.strokeStyle='rgba(255,236,190,'+(1-kk)*.9+')';g.lineWidth=7*k;g.shadowColor='#ffd27a';g.shadowBlur=24*k;g.beginPath();g.arc(W/2,H/2,R,0,7);g.stroke();g.restore()}
+        else if(m===5){for(var q=2;q>=0;q--){var ex=q*W*.05*kk*(1-kk)*4,al=q?.28:1;dr(i-1,1,al,1,-kk*W-ex);dr(i,p,al,1,W-kk*W-ex)}}
+        else if(m===7){dr(i-1,1);for(var sl=0;sl<8;sl++){var ks=ez(Math.max(0,Math.min(1,kk*1.9-sl*.12)));g.save();g.beginPath();g.rect(sl*W/8,0,W/8+1,H*ks);g.clip();dr(i,p);g.restore()}}
+        else if(m===11){dr(i,p);var hw=W/2*kk;g.save();g.beginPath();g.rect(0,0,W/2-hw,H);g.clip();dr(i-1,1,1,1,-hw);g.restore();
+          g.save();g.beginPath();g.rect(W/2+hw,0,W/2-hw,H);g.clip();dr(i-1,1,1,1,hw);g.restore()}
+        else if(m===12){var sx=Math.max(.02,Math.abs(1-2*kk));g.save();g.translate(W/2,0);g.scale(sx,1);g.translate(-W/2,0);if(kk<.5)dr(i-1,1);else dr(i,p);g.restore()}
+        else if(m===13){dr(i,p,1,1.4-.4*kk);dr(i-1,1,1-kk,1+kk*1.2)}
+        else if(m===14){var sk=H*.35,e2=(W+sk)*kk;dr(i-1,1);g.save();g.beginPath();g.moveTo(0,0);g.lineTo(e2,0);g.lineTo(e2-sk,H);g.lineTo(0,H);g.closePath();g.clip();dr(i,p);g.restore();
+          g.save();g.strokeStyle='rgba(255,215,120,'+(1-kk*.6)+')';g.lineWidth=10*k;g.shadowColor='#C5A059';g.shadowBlur=20*k;g.beginPath();g.moveTo(e2,0);g.lineTo(e2-sk,H);g.stroke();g.restore()}
+        else if(m===15){dr(i-1,1);var cw=W/6,ch=H/10;g.save();g.beginPath();for(var rr=0;rr<10;rr++)for(var cc=0;cc<6;cc++){var o=((cc*7+rr*13)%60)/60,ks2=Math.max(0,Math.min(1,(kk-o*.7)/.3));
+            if(ks2>0)g.rect(cc*cw+cw*(1-ks2)/2,rr*ch+ch*(1-ks2)/2,cw*ks2+1,ch*ks2+1)}g.clip();dr(i,p);g.restore()}
+        else{dr(i-1,1);dr(i,p,kk);if(m===6){g.save();g.globalCompositeOperation='lighter';g.fillStyle='rgba(255,215,150,'+Math.sin(kk*Math.PI)*.5+')';g.fillRect(0,0,W,H);g.restore()}}}
+      else dr(i,p);
+      if(m===1){if(i%2===0)tag(g,'VAZIO',W/2,H*.08,k,'rgba(0,0,0,.6)','#fff',1);else tag(g,'MOBILIADO',W/2,H*.08,k,'#C5A059','#0D1B2E',ez(lt/.8))}
+      if(m===2||m===6||m===9)vig(g,W,H,.4);if(m===10){g.fillStyle='#000';g.fillRect(0,0,W,H*.1);g.fillRect(0,H*.9,W,H*.1);vig(g,W,H,.45)}
+      if(m===4){var lg=g.createLinearGradient(0,0,W,H);lg.addColorStop(0,'rgba(255,200,120,.22)');lg.addColorStop(.5,'rgba(255,200,120,0)');lg.addColorStop(1,'rgba(255,170,90,.14)');g.fillStyle=lg;g.fillRect(0,0,W,H);vig(g,W,H,.3)}
+      if(m===5){g.save();g.globalCompositeOperation='overlay';g.fillStyle='rgba(0,150,190,.28)';g.fillRect(0,0,W,H/2);g.fillStyle='rgba(255,120,30,.3)';g.fillRect(0,H/2,W,H/2);g.restore();vig(g,W,H,.6)}
       return}
     g.save();
     if(m===5){var e=$('mdEst').value;
-      if(e==='Verão'){var gr=g.createRadialGradient(W*.85,0,0,W*.85,0,W*.8);gr.addColorStop(0,'rgba(255,242,168,.8)');gr.addColorStop(1,'rgba(255,242,168,0)');g.fillStyle=gr;g.fillRect(0,0,W,H)}
+      if(e==='Verão'){var gr2=g.createRadialGradient(W*.85,0,0,W*.85,0,W*.8);gr2.addColorStop(0,'rgba(255,242,168,.8)');gr2.addColorStop(1,'rgba(255,242,168,0)');g.fillStyle=gr2;g.fillRect(0,0,W,H)}
       else if(e!=='Nenhum'){g.fillStyle={Halloween:'#ff8a1f',Natal:'#fff',Primavera:'#ffb7d5'}[e];
         for(var j=0;j<28;j++){var px=(j*137)%W,py=((j*97)+t*(160+(j%3)*70)*k)%(H+60)-30,r=(e==='Halloween'?11:5)*k*(1+j%3*.3);g.beginPath();g.arc(px,py,r,0,7);g.fill()}}
       if(i===0){g.textAlign='center';var n=$('mdNome').value.trim(),mt=$('mdMet5').value.trim();
         if(n)neon(g,W,H,k,n,H*.14,84,$('mdNeon').value);if(mt)neon(g,W,H,k,mt+' '+$('mdUn').value,H*.14+90*k,64,'#5fe0ff')}}
-    if(m===2){var b=$('mdMetr').value.trim();if(b){g.font='800 '+26*k+'px system-ui,sans-serif';var w=g.measureText(b).width+32*k;g.fillStyle='#C5A059';g.beginPath();if(g.roundRect)g.roundRect(W-w-20*k,22*k,w,48*k,8*k);else g.rect(W-w-20*k,22*k,w,48*k);g.fill();g.fillStyle='#0D1B2E';g.textAlign='left';g.fillText(b,W-w-4*k,56*k)}}
-    var mk=$('mdMarca').value.trim();
-    if(mk){g.globalAlpha=(+$('mdOp').value)/100;g.textAlign='left';g.font='700 '+24*k+'px system-ui,sans-serif';g.fillStyle='#fff';g.shadowColor='rgba(0,0,0,.65)';g.shadowBlur=8*k;
-      g.fillText(mk,24*k,$('mdPos').value==='bottom'?H-34*k:56*k)}
+    if(m===2){
+      g.strokeStyle='#C5A059';g.lineWidth=5*k;g.strokeRect(16*k,16*k,W-32*k,H-32*k);
+      if(mk){g.save();g.globalAlpha=.16*op*1.2;g.fillStyle='#fff';g.font='700 '+30*k+'px system-ui,sans-serif';g.textAlign='center';g.rotate(-.5);
+        for(var yy=-H;yy<H*1.6;yy+=190*k)for(var xx=-W;xx<W*1.6;xx+=Math.max(W*.9,g.measureText(mk).width+80*k))g.fillText(mk,xx+((yy/(190*k))%2?W*.45:0),yy);g.restore()}
+      var b=$('mdMetr').value.trim();if(b){g.font='900 '+40*k+'px system-ui,sans-serif';var bw=g.measureText(b).width+48*k;g.fillStyle='#C5A059';pill(g,W-bw-34*k,H*.1,bw,72*k,14*k);g.fill();g.fillStyle='#0D1B2E';g.textAlign='center';g.fillText(b,W-bw/2-34*k,H*.1+51*k)}
+    }
+    if(m===3){tag(g,'VERSÃO '+(i+1)+' / '+N,W/2,H*.08,k,'rgba(0,0,0,.65)','#fff',1);
+      for(var d=0;d<N;d++){g.fillStyle=d===i?'#fff':'rgba(255,255,255,.4)';g.beginPath();g.arc(W/2+(d-(N-1)/2)*30*k,H*.13,(d===i?9:6)*k,0,7);g.fill()}}
+    if(m===4){var bw2=(W-60*k)/N;for(var s=0;s<N;s++){g.fillStyle='rgba(255,255,255,.3)';g.fillRect(30*k+s*bw2+2*k,H*.035,bw2-4*k,6*k);g.fillStyle='#fff';g.fillRect(30*k+s*bw2+2*k,H*.035,(bw2-4*k)*(s<i?1:s===i?p:0),6*k)}}
+    if(m===1&&mk)marca(g,W,H,k,mk,H*.5,.3*op,26);
+    if(m!==2&&m!==1&&mk){g.globalAlpha=op;g.textAlign='left';g.font='700 '+24*k+'px system-ui,sans-serif';g.fillStyle='#fff';g.shadowColor='rgba(0,0,0,.65)';g.shadowBlur=8*k;g.fillText(mk,24*k,$('mdPos').value==='bottom'?H-34*k:H*.075)}
     g.restore();
   };
 })();
@@ -3298,7 +3414,7 @@ window.FCLogo = (function(){
   var $ = function(id){ return document.getElementById(id); };
   var wrap = document.querySelector('.wrap'), header = wrap.querySelector('header');
   var steps = Array.prototype.slice.call(wrap.querySelectorAll(':scope > .step'));
-  var sFotos = steps[0], sRitmo = steps[1], sAudio = steps[2], sGerar = steps[3], sAdapt = steps[4], sVirt = steps[5];
+  var sFotos = steps[0], sRitmo = steps[1], sAudio = steps.filter(function(x){return x.querySelector('#audioInput')})[0], sGerar = steps.filter(function(x){return x.querySelector('#generateBtn')})[0], sAdapt = steps.filter(function(x){return x.querySelector('#adpFiles')})[0], sVirt = steps.filter(function(x){return x.querySelector('#tvBuild')})[0], sModelo = steps.filter(function(x){return x.id==='mdStep'})[0];
 
   /* bloco único: move os campos do passo 2 para um passo compartilhado */
   var row = $('propertyInfo').closest('.field-row');
@@ -3317,7 +3433,7 @@ window.FCLogo = (function(){
 
   /* seletor do tipo */
   var T = {
-    fotos:  { t:'Fotos → vídeo', d:'Monta um vídeo de tour a partir das fotos do imóvel.', show:[shared,sFotos,sRitmo,sAudio,sGerar] },
+    fotos:  { t:'Fotos → vídeo', d:'Monta um vídeo de tour a partir das fotos do imóvel.', show:[shared,sFotos,sRitmo,sModelo,sAudio,sGerar] },
     adapt:  { t:'Adaptar vídeo pronto', d:'Pega um vídeo que você já tem e põe em formato Reels, Stories, Feed ou PC.', show:[shared,sAdapt] },
     virtual:{ t:'Tour virtual interativo', d:'Página para o cliente navegar sozinho pelos cômodos (usa as fotos).', show:[shared,sFotos,sVirt] }
   };
@@ -3337,9 +3453,9 @@ window.FCLogo = (function(){
   function setType(k){
     if(!T[k]) k = 'fotos';
     var vis = T[k].show;
-    [shared,sFotos,sRitmo,sAudio,sGerar,sAdapt,sVirt].forEach(function(st){ st.classList.toggle('tt-hide', vis.indexOf(st) < 0); });
+    [shared,sFotos,sRitmo,sModelo,sAudio,sGerar,sAdapt,sVirt].forEach(function(st){ st.classList.toggle('tt-hide', vis.indexOf(st) < 0); });
     var n = 0;
-    [shared,sFotos,sRitmo,sAudio,sGerar,sAdapt,sVirt].forEach(function(st){ if(vis.indexOf(st) >= 0){ n++; st.querySelector('.step-num').textContent = n; } });
+    [shared,sFotos,sRitmo,sModelo,sAudio,sGerar,sAdapt,sVirt].forEach(function(st){ if(vis.indexOf(st) >= 0){ n++; st.querySelector('.step-num').textContent = n; } });
     document.body.classList.toggle('tt-virtual', k === 'virtual');
     Array.prototype.forEach.call(grid.children, function(b){ b.classList.toggle('on', b.dataset.k === k); });
     try{ localStorage.setItem('fcTourTipo', k); }catch(e){}
