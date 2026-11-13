@@ -59,7 +59,7 @@ kbd{font:600 12px 'DM Sans';padding:2px 8px;border-radius:7px;border:1px solid v
 .mq{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;font-weight:600;color:var(--c)}
 .lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
 .item{position:relative}
-.item-link{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 52px 10px 12px;border-radius:16px;border:1px solid var(--line);background:var(--card);transition:.15s}
+.item-link{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 92px 10px 12px;border-radius:16px;border:1px solid var(--line);background:var(--card);transition:.15s}
 .item-link:hover{border-color:var(--c,var(--ac));transform:translateY(-2px)}
 .ic{width:42px;height:42px;display:grid;place-items:center;border-radius:12px;font-size:21px;flex:none;color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent)}
 .tx{min-width:0;flex:1}.tx b,.tx small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -243,6 +243,18 @@ body[data-view=controle]{--ac:var(--cy)}
 .anel b{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:var(--card);font:800 19px 'JetBrains Mono',monospace;color:var(--c)}
 .saude h2{font:800 19px 'Sora',sans-serif;margin-bottom:3px}.saude p{font-size:13px;color:var(--texto-muted)}
 @media(max-width:899px){.mundos.mini{grid-template-columns:repeat(2,1fr)}.hero{padding:18px}.saude{padding:14px;gap:14px}}
+.como{position:absolute;right:46px;top:50%;transform:translateY(-50%);width:38px;height:38px;border:0;border-radius:10px;background:none;color:var(--texto-muted);font-size:20px;cursor:pointer}
+.como:hover,.como:focus-visible{color:var(--ac)}
+.como-corpo{display:flex;flex-direction:column;gap:10px;padding:22px 22px calc(22px + env(safe-area-inset-bottom))}
+.como-corpo h3{display:flex;align-items:center;gap:10px;font:700 19px 'Sora',sans-serif}
+.como-corpo h3 i{color:var(--ac)}
+.como-nome{font:700 15px 'DM Sans',sans-serif;color:var(--texto-muted)}
+.como-corpo h4{font:700 12px 'JetBrains Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--texto-muted);margin-top:6px}
+.como-corpo p,.como-corpo li{font-size:16px;line-height:1.55}
+.como-corpo ol{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.como-ext{font-size:13px!important;color:var(--texto-muted)}
+.como-corpo .dlg-acoes{margin-top:8px}
+.como-corpo a.btn-mini{text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .destaque{display:flex;align-items:center;gap:16px;margin:12px 0 6px;padding:20px;border-radius:24px;text-decoration:none;color:inherit;border:1px solid color-mix(in srgb,var(--am) 55%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--am) 22%,var(--card)),var(--card) 75%);box-shadow:0 8px 28px color-mix(in srgb,var(--am) 18%,transparent);transition:transform .15s}
 .destaque:hover{transform:translateY(-2px)}
 .destaque .dz-ic{width:62px;height:62px;border-radius:18px;flex:none;display:grid;place-items:center;font-size:32px;color:#fff;background:linear-gradient(135deg,var(--am),var(--or))}
@@ -367,6 +379,7 @@ body.arrastando{user-select:none;-webkit-user-select:none;cursor:grabbing}
       </div>
 
       </div></dialog>
+<dialog id="dlg-como" class="sheet" aria-label="Como funciona"></dialog>
 <dialog id="dlg-atalhos" class="sheet"><div class="sh"><button type="button" class="icon-btn x" data-fechar aria-label="Fechar"><i class="ti ti-x"></i></button><!-- Atalhos úteis -->
       <div class="mini-card">
         <h3><i class="ti ti-external-link"></i>Atalhos úteis</h3>
@@ -480,7 +493,9 @@ body.arrastando{user-select:none;-webkit-user-select:none;cursor:grabbing}
    ═══════════════════════════════════════════════════════════════════ */
 var GRUPOS = {
   corretor: [
-    { id: "anuncios",   n: "Divulgação e Anúncios",            i: "ti-speakerphone",     c: "--am", s: "Banners, textos, fotos, vídeos e redes sociais" },
+    { id: "anuncios",   n: "Divulgação e Anúncios",            i: "ti-speakerphone",     c: "--am", s: "Painel, publicar nos grupos, redes sociais e vitrine" },
+    { id: "agentes",    n: "FCosta Corretor: Agentes",         i: "ti-robot",            c: "--vi", s: "Os 13 agentes: mensagens, follow-up, roteiros e listas" },
+    { id: "criar",      n: "Criar Material de Divulgação",     i: "ti-photo-edit",       c: "--or", s: "Banner, texto, QR Code, vídeo, voz e logo nas fotos" },
     { id: "clientes",   n: "Clientes e Visitas",               i: "ti-users",            c: "--sk", s: "Leads, visitas e contato com o cliente" },
     { id: "consulta",   n: "Consultas: Imóvel e Locatário",    i: "ti-file-search",      c: "--or", s: "Matrícula, mapa, IPTU, cartórios e análise do locatário" },
     { id: "avaliacao",  n: "Avaliação e Vistoria",             i: "ti-home-search",      c: "--cy", s: "Preço, áreas e vistoria do imóvel" },
@@ -515,16 +530,19 @@ var GRUPOS = {
 var FERRAMENTAS = [
   {m:"corretor", g:"anuncios", t:"Anunciar", s:"Meus sites, redes sociais e portais", i:"ti-speakerphone", h:"anunciar.html", k:"anunciar divulgar anúncio sites redes sociais instagram tiktok facebook youtube", d:1, b:"Novo"},
   {m:"corretor", g:"anuncios", t:"Painel de Divulgação", s:"Plano do dia, textos por rede, imóveis e grupos", i:"ti-speakerphone", h:"painel-divulgacao.html", k:"divulgação divulgar publicação publicar postagem posts redes sociais grupos facebook imóveis plano do dia texto", b:"Novo"},
-  {m:"corretor", g:"anuncios", t:"Agentes FCosta", s:"Mensagens, follow-up, roteiros e listas, com voz", i:"ti-robot", h:"fcosta-corretor.html", k:"agentes fcosta corretor prospecção whatsapp follow-up roteiro ligação linkedin e-mail lista limpar mailchimp voz narração ia divulgação mensagens", b:"Novo"},
+  {m:"corretor", g:"agentes", t:"FCosta Corretor", s:"Página principal dos agentes: mensagens, follow-up, roteiros e listas", i:"ti-robot", h:"fcosta-corretor.html", k:"fcosta corretor agentes prospecção whatsapp follow-up roteiro ligação linkedin e-mail lista limpar mailchimp voz narração ia divulgação mensagens", b:"Novo", d:1},
+  {m:"corretor", g:"agentes", t:"Bancada de Agentes", s:"Abrir direto a bancada e usar os agentes", i:"ti-layout-dashboard", h:"fcosta-corretor.html#bancada", k:"bancada agentes fcosta corretor usar abrir"},
+  {m:"corretor", g:"agentes", t:"Os 13 Agentes", s:"Ver a lista completa dos agentes", i:"ti-users-group", h:"fcosta-corretor.html#agentes", k:"13 agentes lista fcosta corretor"},
+  {m:"corretor", g:"agentes", t:"Como Funciona", s:"Passo a passo dos agentes", i:"ti-help-circle", h:"fcosta-corretor.html#como", k:"como funciona agentes fcosta corretor passo a passo ajuda"},
   {m:"corretor", g:"anuncios", t:"Publicador de Grupos", s:"Textos prontos, grupos por dia, clientes, limpeza e portfólio", i:"ti-brand-whatsapp", h:"publicador-fcosta.html", k:"publicador grupos whatsapp facebook publicar textos imóveis clientes limpeza dias da semana portfólio portfolio vitrine fotos enviar link", b:"Novo"},
-  {m:"corretor", g:"anuncios", t:"Gerador de QR Code", s:"Para anúncios de imóveis", i:"ti-qrcode", h:"gerador-qrcode.html", k:"gerador qr code anúncio imóveis"},
-  {m:"corretor", g:"anuncios", t:"Descrição de Imóvel", s:"Gerar texto de anúncio", i:"ti-file-text", h:"descricao-imovel.html", k:"descrição de imóvel gerar texto anúncio"},
-  {m:"corretor", g:"anuncios", t:"Banner de Imóvel", s:"Anúncio com foto e preço", i:"ti-photo", h:"banner-imovel.html", k:"banner de imóvel anúncio foto preço stories"},
-  {m:"corretor", g:"anuncios", t:"Contador de Caracteres", s:"Para textos de anúncio", i:"ti-text-size", h:"contador-caracteres.html", k:"contador de caracteres olx instagram"},
-  {m:"corretor", g:"anuncios", t:"Texto em Voz", s:"Ouvir qualquer texto, com download", i:"ti-microphone", h:"texto-em-voz.html", k:"texto em voz narração áudio"},
-  {m:"corretor", g:"anuncios", t:"Tour de Imóveis", s:"Monte um vídeo do imóvel a partir das fotos", i:"ti-video", h:"tour-imoveis.html", k:"tour de imóveis vídeo fotos apresentação"},
-  {m:"corretor", g:"anuncios", t:"TV FCosta", s:"Imóveis em vídeo para exibir na TV", i:"ti-device-tv", h:"tv-fcosta.html", k:"tv fcosta televisão vídeo imóveis vitrine exibir"},
-  {m:"corretor", g:"anuncios", t:"Logo nas Fotos", s:"Coloca a logo nas fotos do celular ou do PC", i:"ti-photo", h:"logo-nas-fotos.html", k:"logo nas fotos marca d'água colocar logo em fotos imóveis"},
+  {m:"corretor", g:"criar", t:"Gerador de QR Code", s:"Para anúncios de imóveis", i:"ti-qrcode", h:"gerador-qrcode.html", k:"gerador qr code anúncio imóveis"},
+  {m:"corretor", g:"criar", t:"Descrição de Imóvel", s:"Gerar texto de anúncio", i:"ti-file-text", h:"descricao-imovel.html", k:"descrição de imóvel gerar texto anúncio"},
+  {m:"corretor", g:"criar", t:"Banner de Imóvel", s:"Anúncio com foto e preço", i:"ti-photo", h:"banner-imovel.html", k:"banner de imóvel anúncio foto preço stories"},
+  {m:"corretor", g:"criar", t:"Contador de Caracteres", s:"Para textos de anúncio", i:"ti-text-size", h:"contador-caracteres.html", k:"contador de caracteres olx instagram"},
+  {m:"corretor", g:"criar", t:"Texto em Voz", s:"Ouvir qualquer texto, com download", i:"ti-microphone", h:"texto-em-voz.html", k:"texto em voz narração áudio"},
+  {m:"corretor", g:"criar", t:"Tour de Imóveis", s:"Monte um vídeo do imóvel a partir das fotos", i:"ti-video", h:"tour-imoveis.html", k:"tour de imóveis vídeo fotos apresentação"},
+  {m:"corretor", g:"criar", t:"TV FCosta", s:"Imóveis em vídeo para exibir na TV", i:"ti-device-tv", h:"tv-fcosta.html", k:"tv fcosta televisão vídeo imóveis vitrine exibir"},
+  {m:"corretor", g:"criar", t:"Logo nas Fotos", s:"Coloca a logo nas fotos do celular ou do PC", i:"ti-photo", h:"logo-nas-fotos.html", k:"logo nas fotos marca d'água colocar logo em fotos imóveis"},
   {m:"corretor", g:"anuncios", t:"Portfólio cliente", s:"Vitrine para o cliente: imóveis à venda e panfletos", i:"ti-building-store", h:"portfolio.html", k:"portfólio portfolio vitrine imóveis catálogo cliente panfletos fcv fcp", b:"Novo"},
   {m:"corretor", g:"anuncios", t:"Portfólio editor", s:"Cadastrar e editar imóveis e exportar a vitrine", i:"ti-settings", h:"portfolio-admin.html", k:"portfólio portfolio painel admin cadastrar editar imóveis exportar vitrine"},
   {m:"corretor", g:"avaliacao", t:"Precificação", s:"Estimativa por comparáveis", i:"ti-tag", h:"precificacao-imovel.html", k:"precificação estimativa comparáveis laudo avaliação"},
@@ -775,8 +793,128 @@ var FERRAMENTAS = [
       '<span class="ic"><i class="ti ' + esc(it.i || 'ti-link') + '"></i></span>' +
       '<span class="tx"><b class="t">' + esc(it.t) + '</b><small>' + esc(it.s || '') + '</small></span>' +
       (it.b ? '<em class="tag">' + esc(it.b) + '</em>' : '') + '</a>' +
+      '<button type="button" class="como" data-como="' + esc(it.t) + '" data-ch="' + esc(it.h) + '" data-cs="' + esc(it.s || '') + '" aria-label="Como funciona: ' + esc(it.t) + '" title="Como funciona"><i class="ti ti-help-circle"></i></button>' +
       '<button type="button" class="fav' + (on ? ' on' : '') + '" data-fav="' + esc(chave(it)) + '" aria-pressed="' + on + '" aria-label="Favoritar ' + esc(it.t) + '"><i class="ti ti-star' + (on ? '-filled' : '') + '"></i></button></div>';
   }
+
+  /* ── COMO FUNCIONA: explicação simples de cada ferramenta (chave = nome do botão) ── */
+  var COMO = {
+    "Anunciar": ["Reúne os seus sites, redes sociais e portais de anúncio num só lugar.", ["Abra a página.", "Escolha onde quer anunciar: site, rede social ou portal.", "Toque no endereço para abrir e fazer a publicação."], "Para um plano pronto do dia, use o Painel de Divulgação."],
+    "Painel de Divulgação": ["Ajuda a divulgar um imóvel todo dia, sem esquecer nenhuma rede.", ["Escolha o imóvel que quer divulgar.", "Veja o texto pronto de cada rede (Instagram, Facebook, WhatsApp e outras) e ajuste se quiser.", "Toque para copiar e abrir a rede, cole o texto e publique.", "Volte e marque como publicado para saber o que já foi feito hoje."], "Instagram e Facebook têm duas contas cada. Troque de conta na rede antes de postar."],
+    "FCosta Corretor": ["Página principal dos 13 agentes, que ajudam a falar com clientes e a acompanhar cada contato.", ["Abra a página e leia o resumo no começo.", "Toque em “Abrir bancada” para usar os agentes.", "Escolha o agente do que você precisa: lista, primeiro contato ou follow-up."], "Se for a primeira vez, veja antes o “Como funciona” da própria página."],
+    "Bancada de Agentes": ["Abre direto a mesa de trabalho dos agentes.", ["Escolha o agente.", "Preencha o que ele pedir (nome, telefone, imóvel).", "Copie o resultado e use no WhatsApp, e-mail ou ligação."]],
+    "Os 13 Agentes": ["Mostra a lista completa dos agentes e para que serve cada um.", ["Leia o nome e a explicação de cada agente.", "Escolha o que combina com o seu momento: achar clientes, conversar ou acompanhar.", "Toque nele para usar."]],
+    "Como Funciona": ["Explica, passo a passo, como usar os agentes do FCosta Corretor.", ["Leia as etapas na ordem.", "Depois vá para a bancada e faça o primeiro teste com um contato."]],
+    "Publicador de Grupos": ["Organiza a divulgação nos grupos de WhatsApp: qual texto postar e em qual grupo, a cada dia.", ["Veja os grupos do dia.", "Escolha um texto pronto e copie.", "Abra o grupo, cole e envie.", "Marque o grupo como feito."], "Não poste o mesmo texto no mesmo dia em todos os grupos. Varie."],
+    "Gerador de QR Code": ["Cria um QR Code que leva a pessoa direto ao anúncio ou ao seu WhatsApp.", ["Cole o endereço (link) do anúncio ou do seu contato.", "Toque para gerar o QR Code.", "Baixe a imagem e coloque na placa, no banner ou no panfleto."], "Teste o QR Code com a câmera do celular antes de imprimir."],
+    "Descrição de Imóvel": ["Monta o texto de anúncio do imóvel para você.", ["Preencha os dados: tipo, bairro, quartos, metragem e preço.", "Toque para gerar o texto.", "Leia, ajuste o que quiser e copie para o anúncio."], "Confira sempre os números antes de publicar."],
+    "Banner de Imóvel": ["Faz uma imagem de anúncio com a foto e o preço do imóvel.", ["Escolha a foto do imóvel.", "Preencha o preço e os dados principais.", "Baixe a imagem pronta e publique nas redes ou no Stories."]],
+    "Contador de Caracteres": ["Conta as letras do texto para ele caber no limite de cada rede ou portal.", ["Cole ou escreva o texto.", "Veja o total de caracteres.", "Corte ou ajuste se passar do limite do lugar onde vai postar."]],
+    "Texto em Voz": ["Lê qualquer texto em voz alta e deixa você baixar o áudio.", ["Cole o texto.", "Toque para ouvir.", "Se gostar, baixe o áudio para usar em vídeos ou mensagens."]],
+    "Tour de Imóveis": ["Transforma as fotos do imóvel em um vídeo de apresentação.", ["Escolha as fotos, na ordem em que quer mostrar.", "Se quiser, coloque música.", "Gere o vídeo e baixe para enviar ao cliente ou postar."], "Use fotos na horizontal, bem claras e arrumadas."],
+    "TV FCosta": ["Mostra imóveis em vídeo, ideal para deixar rodando numa TV.", ["Abra a página na TV ou no celular.", "Escolha o vídeo ou a lista de imóveis.", "Toque para começar a exibir."]],
+    "Logo nas Fotos": ["Coloca a sua logo nas fotos, para ninguém usar sem sua marca.", ["Escolha uma ou várias fotos.", "Confira a posição e o tamanho da logo.", "Baixe as fotos prontas."]],
+    "Portfólio cliente": ["Vitrine para mostrar ao cliente os imóveis à venda, com opção de panfleto.", ["Abra a vitrine.", "Escolha o imóvel que combina com o cliente.", "Mostre na tela ou envie o link ou panfleto."]],
+    "Portfólio editor": ["Aqui você cadastra, corrige e tira imóveis da vitrine.", ["Cadastre o imóvel com fotos, preço e descrição.", "Corrija o que mudou quando preciso.", "Exporte a vitrine para o cliente ver a versão nova."], "Mantenha os preços sempre atualizados."],
+    "Precificação": ["Ajuda a estimar quanto vale o imóvel comparando com outros parecidos.", ["Coloque o valor e a metragem de alguns imóveis parecidos.", "Informe os dados do imóvel que você está avaliando.", "Veja a estimativa e converse com o proprietário."], "É uma estimativa, não substitui laudo de avaliação."],
+    "Checklist de Vistoria": ["Lista do que olhar no imóvel antes de fechar negócio.", ["Vá marcando cada item durante a visita.", "Anote o que estiver com problema.", "Use as anotações para negociar ou pedir conserto."]],
+    "Conversor de Área": ["Troca medidas de área, como m², hectare e alqueire.", ["Escolha a medida de origem.", "Digite o valor.", "Veja o resultado nas outras medidas."], "Alqueire muda de região. Confirme qual é o usado no lugar."],
+    "Guia de Áreas do Imóvel": ["Explica, em linguagem simples, a diferença entre área útil, privativa, construída, comum, total e fração ideal.", ["Procure o nome da área que apareceu no documento.", "Leia a explicação.", "Use para conferir o anúncio, a matrícula e o contrato."]],
+    "Vistoria": ["Faz a vistoria do imóvel com fotos, vídeo e laudo em PDF.", ["Cadastre o imóvel e os dados da vistoria.", "Tire fotos ou grave vídeo de cada cômodo e anote o estado.", "Gere o PDF e envie às partes."], "Faça a vistoria com o inquilino ou proprietário presente."],
+    "Matrícula": ["Abre o site do RI Digital para pedir a certidão de matrícula do imóvel.", ["Toque para abrir o site.", "Entre com sua conta e informe o imóvel.", "Faça o pedido e pague. A certidão chega pelo próprio site."], "Pegue a matrícula atualizada antes de fechar qualquer venda."],
+    "Geo Sampa": ["Mapa da cidade de São Paulo, com dados de ruas, lotes e zoneamento.", ["Toque para abrir o mapa.", "Procure o endereço ou lote.", "Ligue as camadas que quiser ver."]],
+    "Prefeitura — IPTU": ["Abre o site da Fazenda de São Paulo para consultar o IPTU.", ["Toque para abrir o site.", "Procure a consulta de IPTU.", "Informe o número do contribuinte ou o endereço."], "Peça ao proprietário o número do contribuinte, que fica no carnê."],
+    "Cartórios — Serviços": ["Reúne os serviços online dos cartórios de São Paulo.", ["Toque para abrir o site.", "Escolha o serviço: certidão, escritura ou outro.", "Siga os passos e faça o pedido."]],
+    "Kit do Corretor": ["Nove ferramentas de uso diário numa página só: financiamento, custas, comissão, locação, clientes, imóveis, visitas, meta e resumo.", ["Abra a página.", "Toque na ferramenta que precisa.", "Preencha e veja o resultado na hora."]],
+    "Comissão": ["Calcula quanto você ganha de corretagem numa venda.", ["Digite o valor do imóvel.", "Digite a porcentagem combinada.", "Veja o valor da comissão."]],
+    "Financiamento SAC": ["Simula parcelas de financiamento pelo sistema SAC, em que as parcelas começam maiores e vão diminuindo.", ["Informe o valor do imóvel e da entrada.", "Escolha o prazo e o juros.", "Veja a primeira parcela e o total pago."], "Os bancos podem cobrar taxas extras. Confirme com o banco."],
+    "ITBI": ["Calcula o imposto que se paga na compra do imóvel.", ["Digite o valor do imóvel.", "Informe a porcentagem da cidade.", "Veja o valor do imposto."], "A porcentagem e a base de cálculo mudam por cidade. Confira na prefeitura."],
+    "Custo Total de Aquisição": ["Soma tudo o que o comprador paga além do preço: ITBI, escritura e registro.", ["Digite o valor do imóvel.", "Confira os valores de cada custo.", "Veja o total para o cliente se planejar."]],
+    "Alugar x Financiar": ["Compara se compensa mais alugar ou financiar.", ["Preencha o preço do imóvel e o aluguel.", "Informe o prazo e a entrada.", "Veja a comparação e converse com o cliente."]],
+    "Valor por Extenso": ["Escreve o valor em letras, como se faz em contratos e recibos.", ["Digite o valor em números.", "Copie o texto por extenso.", "Cole no contrato ou recibo."], "Sempre confira se o número e o extenso batem."],
+    "Simulador de Financiamento": ["Compara o financiamento pelo MCMV e pelo SBPE, com sistema Price ou SAC.", ["Informe o valor, a entrada e o prazo.", "Ajuste as taxas, se precisar.", "Veja lado a lado qual cabe melhor no bolso do cliente."], "É simulação. O banco dá o valor final."],
+    "Tabela de Honorários": ["Mostra os valores de corretagem, estruturador e perícia.", ["Procure o serviço.", "Veja o valor ou a porcentagem.", "Use na conversa com o cliente."]],
+    "Link WhatsApp": ["Cria um link que abre o WhatsApp do cliente já com a mensagem pronta.", ["Digite o número com DDD.", "Escreva a mensagem.", "Copie o link ou toque para abrir."]],
+    "Gestor de Leads": ["Organiza os contatos de clientes interessados.", ["Cadastre o nome, telefone e o que a pessoa procura.", "Marque em que ponto está a conversa.", "Volte sempre para ver quem precisa de retorno."]],
+    "Agentes de Contato": ["Agentes que ajudam no primeiro contato, no follow-up, em quem não respondeu e nas visitas.", ["Abra a página dos agentes.", "Escolha o agente do seu caso.", "Copie a mensagem e envie pelo WhatsApp."]],
+    "Agenda de Visitas": ["Organiza os horários de visita aos imóveis.", ["Crie a visita com cliente, imóvel e horário.", "Veja a agenda do dia.", "Ajuste se alguém remarcar."]],
+    "Central FCosta": ["Controle de clientes e imóveis num só lugar.", ["Cadastre o cliente ou o imóvel.", "Ligue um ao outro quando houver interesse.", "Consulte quando precisar retomar a conversa."]],
+    "Documentação Imobiliária": ["Lista dos documentos que cada tipo de negócio exige.", ["Escolha o tipo: compra, venda ou locação.", "Marque os documentos que já chegaram.", "Cobre o que está faltando."]],
+    "Orçamento de Documentos": ["Calcula quanto cobrar pelo levantamento dos documentos.", ["Marque os documentos que precisam ser levantados.", "Veja o valor somado.", "Passe o orçamento ao cliente."]],
+    "Documentos para Comprar Imóvel": ["Os 9 documentos que o comprador precisa e onde tirar cada um.", ["Leia a lista.", "Veja onde tirar cada documento.", "Envie a lista ao cliente."]],
+    "Autorização de Venda — Exclusiva": ["Documento em que o dono autoriza só você a vender o imóvel.", ["Preencha os dados do imóvel e do proprietário.", "O proprietário confere e assina no celular.", "Guarde ou envie o documento pronto."], "Leia as cláusulas com o proprietário antes de assinar."],
+    "Autorização de Venda — Sem exclusividade": ["Documento em que o dono autoriza você a vender, mas outros corretores também podem.", ["Preencha os dados do imóvel e do proprietário.", "O proprietário confere e assina no celular.", "Guarde ou envie o documento pronto."]],
+    "Contratos Modelo CRECI-SP": ["Abre a área do CRECI-SP com modelos oficiais de documentos.", ["Toque para abrir o site.", "Entre com seu login do CRECI-SP.", "Escolha o modelo e baixe."]],
+    "Contratos CRECI": ["Um editor só para locação, venda, autorizações e acordo particular.", ["Escolha o tipo de contrato.", "Preencha os dados das partes e do imóvel.", "Revise e gere o documento."], "Releia tudo antes de colher as assinaturas."],
+    "Meus Arquivos": ["Guarda aqui as pastas e arquivos que você sobe do computador.", ["Suba os arquivos ou pastas.", "Organize como preferir.", "Abra quando precisar."]],
+    "Recibos e Inquilinos": ["Cadastro dos inquilinos e histórico dos recibos.", ["Cadastre o inquilino e o imóvel.", "Gere o recibo do mês.", "Envie por WhatsApp e guarde o histórico."]],
+    "Consulta de Locatário": ["Ajuda a avaliar quem quer alugar: certidões e parecer final.", ["Preencha os dados do candidato.", "Faça cada consulta pedida e anote o resultado.", "Veja o parecer final antes de aprovar."], "Faça a análise só com a autorização da pessoa."],
+    "Análise de Cadastro": ["Ficha do cliente com documentos, consultas e um resultado com pontuação.", ["Preencha a ficha.", "Marque os documentos e consultas feitas.", "Veja o resultado e decida."]],
+    "CDHU — Painel do Corretor": ["Reúne requisitos, checklist, passo a passo e contrato de transferência de imóveis CDHU.", ["Veja os requisitos do caso.", "Siga o checklist e o passo a passo.", "Gere o contrato quando estiver tudo certo."]],
+    "Guia: Venda de Imóvel CDHU": ["Passo a passo para vender imóvel CDHU, quitado ou financiado, e os documentos exigidos.", ["Escolha se o imóvel é quitado ou financiado.", "Siga as etapas na ordem.", "Junte os documentos da lista."]],
+    "Regras da CDHU-SP": ["Resumo das regras da CDHU sobre venda, gaveta, quitação, uso do imóvel, contatos e postos.", ["Procure o assunto.", "Leia a regra.", "Use para orientar o cliente."]],
+    "Modelo de Cessão de Direitos CDHU": ["Contrato de cessão que você edita: em branco, quitado ou financiado.", ["Escolha o modelo do caso.", "Preencha os dados de quem cede e de quem recebe.", "Revise e gere o documento."]],
+    "Contrato de Cessão — Francisco Veloso, 19": ["Contrato pronto do imóvel da Rua Padre Francisco Veloso, 19, para conferir.", ["Leia o contrato com atenção.", "Corrija o que for preciso.", "Gere o documento final."]],
+    "Recibos e Termos — Francisco Veloso, 19": ["Recibos e termos do imóvel da Rua Padre Francisco Veloso, 19: quitação, posse, corretagem e entrega de documentos.", ["Escolha o termo.", "Confira os valores e datas.", "Gere e colha as assinaturas."]],
+    "Termo de Parcelamento e Carnê": ["Faz o termo de parcelamento, o cronograma e o carnê com recibo.", ["Informe o valor, o número de parcelas e as datas.", "Confira o cronograma.", "Gere o termo e o carnê."]],
+    "Meus Documentos (Google Docs)": ["Abre os seus arquivos no Google Docs.", ["Toque para abrir.", "Entre na sua conta Google, se pedir.", "Escolha o documento."]],
+    "Controle Financeiro": ["Anota o que entra e o que sai de dinheiro.", ["Lance cada receita e cada despesa.", "Veja o saldo.", "Revise no fim do mês."]],
+    "Metas do Mês": ["Acompanha as metas de leads, visitas e fechamentos.", ["Defina quanto quer alcançar.", "Atualize os números ao longo do mês.", "Veja quanto falta."]],
+    "Controle de Aluguéis": ["Controla os locatários, os recibos e os vencimentos.", ["Cadastre o aluguel.", "Gere o recibo no mês.", "Envie por WhatsApp para o locatário."]],
+    "Modelo I.A": ["Cria uma modelo virtual: imagem, voz, vídeo e avatar falando.", ["Crie ou escolha a imagem da modelo.", "Escreva o que ela vai falar.", "Gere o vídeo e baixe."]],
+    "Academy": ["Dicas para corretores aprenderem e venderem mais.", ["Escolha um assunto.", "Leia ou assista.", "Aplique uma dica por dia."]],
+    "Tijolo.IA": ["Site externo que automatiza posts e grupos no Facebook e monta vitrine de imóveis.", ["Toque para abrir o site.", "Entre com seu acesso.", "Siga as opções da própria ferramenta."]],
+    "Abrir CORRETOR.IA": ["Painel completo de ferramentas com inteligência artificial (site externo, plano premium).", ["Toque para abrir o site.", "Entre com seu acesso.", "Escolha a ferramenta."]],
+    "Vídeos Automáticos": ["Gera vídeos com inteligência artificial (site externo).", ["Toque para abrir.", "Entre com seu acesso.", "Escolha a opção de vídeo e siga os passos."]],
+    "Assistente Virtual": ["Atendimento com inteligência artificial (site externo).", ["Toque para abrir.", "Entre com seu acesso.", "Configure o atendimento e teste."]],
+    "Imagens 2.0": ["Gera imagens com inteligência artificial, na versão nova (site externo).", ["Toque para abrir.", "Descreva a imagem que quer.", "Baixe o resultado."]],
+    "Imagens 1.0": ["Versão antiga do gerador de imagens (site externo).", ["Toque para abrir.", "Descreva a imagem.", "Baixe o resultado."], "Se puder, use a Imagens 2.0."],
+    "Guia de IAs Gratuitas": ["Lista de inteligências artificiais gratuitas, como Qwen, Kimi, MiniMax e DeepSeek.", ["Leia a descrição de cada uma.", "Escolha a que serve para o seu caso.", "Abra e teste."]],
+    "Gerador de Senhas": ["Cria senhas fortes e deixa você guardar.", ["Escolha o tamanho da senha.", "Gere.", "Copie e guarde num lugar seguro."], "Nunca use a mesma senha em dois lugares."],
+    "Assinatura Profissional": ["Assinatura pronta para colocar no e-mail.", ["Confira os seus dados.", "Copie a assinatura.", "Cole nas configurações do seu e-mail."]],
+    "Site FCosta": ["Abre o seu site fcostacorretor.com.", ["Toque para abrir.", "Confira se está tudo atualizado."]],
+    "Contrato Residencial": ["Contrato de aluguel de casa ou apartamento, que você edita, com a base legal de cada cláusula.", ["Preencha os dados do imóvel, locador e locatário.", "Leia as cláusulas e ajuste.", "Gere o contrato e colha as assinaturas."]],
+    "Contrato Comercial": ["Contrato de aluguel de ponto comercial, com renovatória e base legal.", ["Preencha os dados das partes e do ponto.", "Leia as cláusulas e ajuste.", "Gere o contrato."]],
+    "Contrato de Temporada": ["Aluguel de até 90 dias, com a lista dos móveis.", ["Preencha as datas e as partes.", "Liste os móveis e o estado deles.", "Gere o contrato."]],
+    "Contrato de Garagem": ["Contrato de vaga de garagem e estacionamento.", ["Preencha os dados da vaga e das partes.", "Leia as cláusulas.", "Gere o contrato."]],
+    "Contratos CRECI (editor único)": ["Um editor só para locação, venda, autorizações e acordo particular.", ["Escolha o tipo de contrato.", "Preencha os dados.", "Revise e gere o documento."]],
+    "Modelos CRECI-SP": ["Abre a área do CRECI-SP com modelos oficiais de documentos.", ["Toque para abrir o site.", "Entre com seu login.", "Escolha o modelo e baixe."]],
+    "Agenda Pessoal": ["Agenda para compromissos e eventos.", ["Crie o compromisso com dia e hora.", "Veja o que tem para hoje.", "Ajuste quando mudar."]],
+    "Bloco de Notas": ["Para anotações rápidas.", ["Escreva a anotação.", "Salve.", "Volte quando precisar ler."]],
+    "Manutenção do Idea": ["Plano de manutenção do Fiat Idea Adventure 2012.", ["Digite os quilômetros atuais do carro.", "Veja o que está perto de trocar.", "Marque quando fizer."]],
+    "Manual do Proprietário": ["Manual do Fiat Idea Adventure 1.8 16V (2012) para consulta.", ["Procure o assunto.", "Leia a orientação.", "Se tiver dúvida, fale com a oficina."]],
+    "Site OBPC": ["Abre o site da OBPC São Fernando.", ["Toque para abrir.", "Confira os avisos e conteúdos."]],
+    "Financeiro OBPC (Pix)": ["Controle financeiro dos Pix da igreja.", ["Lance as entradas e saídas.", "Confira o período.", "Guarde um backup de vez em quando."]],
+    "ChurchSoftware": ["Abre o login do sistema da igreja.", ["Toque para abrir.", "Entre com seu usuário e senha."]],
+    "Gerador de Esboços": ["Monta o esboço de um sermão a partir de uma palavra-chave.", ["Digite a palavra-chave ou o texto bíblico.", "Gere o esboço.", "Leia, ajuste e use na pregação."], "O esboço é um ponto de partida. Revise com a Bíblia aberta."],
+    "Gravador com Teleprompter": ["Grava vídeo enquanto você lê o roteiro na tela.", ["Cole o roteiro.", "Ajuste a velocidade da leitura.", "Toque para gravar e depois baixe o vídeo."]],
+    "Bíblia Explicada FCosta": ["Explica livros, capítulos e versículos para ajudar no sermão.", ["Escolha o livro, o capítulo ou o versículo.", "Peça a explicação.", "Leia e use no preparo."], "Confira sempre o texto na Bíblia."],
+    "Simulado": ["Perguntas para treinar o conteúdo da palestra: Ministério e Família.", ["Responda cada pergunta.", "Veja o que acertou e errou.", "Estude o que errou e tente de novo."]]
+  };
+
+  function comoHtml(t, h, sub) {
+    var c = COMO[t], ext = /^https?:\/\//i.test(h);
+    var para = c ? c[0] : (sub || 'Ferramenta do seu painel.');
+    var passos = c ? c[1] : ['Toque em “Abrir ferramenta”.', 'Preencha ou escolha o que a página pedir.', 'Confira o resultado antes de usar ou enviar.'];
+    var dica = c && c[2] ? c[2] : '';
+    return '<div class="como-corpo"><h3><i class="ti ti-help-circle"></i>Como funciona</h3>' +
+      '<div class="como-nome">' + esc(t) + '</div>' +
+      '<h4>Para que serve</h4><p>' + esc(para) + '</p>' +
+      '<h4>Passo a passo</h4><ol>' + passos.map(function (p) { return '<li>' + esc(p) + '</li>'; }).join('') + '</ol>' +
+      (dica ? '<h4>Dica</h4><p>' + esc(dica) + '</p>' : '') +
+      (ext ? '<p class="como-ext">Abre em outra aba, num site fora do seu painel.</p>' : '') +
+      '<div class="dlg-acoes"><a class="btn-mini" href="' + esc(h) + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '><i class="ti ti-player-play"></i>Abrir ferramenta</a>' +
+      '<button type="button" class="btn-sec" data-fechar><i class="ti ti-x"></i>Fechar</button></div></div>';
+  }
+
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-como]');
+    if (!b) return;
+    e.preventDefault();
+    var d = document.getElementById('dlg-como');
+    d.innerHTML = '<div class="sh">' + comoHtml(b.getAttribute('data-como'), b.getAttribute('data-ch') || '#', b.getAttribute('data-cs') || '') + '</div>';
+    abrirDlg(d);
+  });
 
   function htmlInicio() {
     var itens = ligar(todosItens());
