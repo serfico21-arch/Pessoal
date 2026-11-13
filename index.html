@@ -243,6 +243,15 @@ body[data-view=controle]{--ac:var(--cy)}
 .anel b{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:var(--card);font:800 19px 'JetBrains Mono',monospace;color:var(--c)}
 .saude h2{font:800 19px 'Sora',sans-serif;margin-bottom:3px}.saude p{font-size:13px;color:var(--texto-muted)}
 @media(max-width:899px){.mundos.mini{grid-template-columns:repeat(2,1fr)}.hero{padding:18px}.saude{padding:14px;gap:14px}}
+.destaque{display:flex;align-items:center;gap:16px;margin:12px 0 6px;padding:20px;border-radius:24px;text-decoration:none;color:inherit;border:1px solid color-mix(in srgb,var(--am) 55%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--am) 22%,var(--card)),var(--card) 75%);box-shadow:0 8px 28px color-mix(in srgb,var(--am) 18%,transparent);transition:transform .15s}
+.destaque:hover{transform:translateY(-2px)}
+.destaque .dz-ic{width:62px;height:62px;border-radius:18px;flex:none;display:grid;place-items:center;font-size:32px;color:#fff;background:linear-gradient(135deg,var(--am),var(--or))}
+.destaque .dz-tx{flex:1;min-width:0}
+.destaque .dz-tag{display:inline-block;font:700 11px 'Sora',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--am);margin-bottom:3px}
+.destaque h2{font:800 clamp(19px,4vw,24px)/1.15 'Sora',sans-serif;margin:0 0 3px}
+.destaque p{font-size:13px;color:var(--texto-muted);margin:0}
+.destaque .dz-go{flex:none;display:flex;align-items:center;gap:6px;padding:11px 16px;border-radius:14px;font-weight:700;font-size:14px;color:#fff;background:var(--am)}
+@media(max-width:899px){.destaque{padding:16px;gap:12px}.destaque .dz-ic{width:50px;height:50px;font-size:26px}.destaque .dz-go span{display:none}.destaque .dz-go{padding:11px}}
 /* abas: arrastar, mover e criar */
 .grip{width:30px;height:30px;display:grid;place-items:center;border-radius:9px;border:1px solid transparent;background:none;color:var(--texto-muted);cursor:grab;touch-action:none;flex:none;padding:0}
 .grip:hover,.grip:focus-visible{color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);border-color:color-mix(in srgb,var(--c) 35%,transparent)}
@@ -505,7 +514,7 @@ var GRUPOS = {
 
 var FERRAMENTAS = [
   {m:"corretor", g:"anuncios", t:"Anunciar", s:"Meus sites, redes sociais e portais", i:"ti-speakerphone", h:"anunciar.html", k:"anunciar divulgar anúncio sites redes sociais instagram tiktok facebook youtube", d:1, b:"Novo"},
-  {m:"corretor", g:"anuncios", t:"Painel de Publicação", s:"Plano do dia, textos por rede, imóveis e grupos", i:"ti-send", h:"publicacao.html", k:"publicação publicar postagem posts redes sociais grupos facebook imóveis plano do dia texto", b:"Novo"},
+  {m:"corretor", g:"anuncios", t:"Painel de Divulgação", s:"Plano do dia, textos por rede, imóveis e grupos", i:"ti-speakerphone", h:"painel-divulgacao.html", k:"divulgação divulgar publicação publicar postagem posts redes sociais grupos facebook imóveis plano do dia texto", b:"Novo"},
   {m:"corretor", g:"anuncios", t:"Publicador de Grupos", s:"Textos prontos, grupos por dia, clientes, limpeza e portfólio", i:"ti-brand-whatsapp", h:"publicador-fcosta.html", k:"publicador grupos whatsapp facebook publicar textos imóveis clientes limpeza dias da semana portfólio portfolio vitrine fotos enviar link", b:"Novo"},
   {m:"corretor", g:"anuncios", t:"Gerador de QR Code", s:"Para anúncios de imóveis", i:"ti-qrcode", h:"gerador-qrcode.html", k:"gerador qr code anúncio imóveis"},
   {m:"corretor", g:"anuncios", t:"Descrição de Imóvel", s:"Gerar texto de anúncio", i:"ti-file-text", h:"descricao-imovel.html", k:"descrição de imóvel gerar texto anúncio"},
@@ -777,6 +786,10 @@ var FERRAMENTAS = [
       ['atalhos', 'ti-bolt', 'Atalhos', '--am'], ['novo', 'ti-pencil', 'Edição', '--vi']];
     var html = '<section class="hero"><p class="eyebrow">' + esc(data) + '</p><h1>' + saud + ', <span class="grad">Sérgio</span></h1>' +
       '<button type="button" class="busca-pill" data-open="busca"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button></section>';
+    var pdv = pubResumo();
+    html += '<a class="destaque" href="painel-divulgacao.html"><span class="dz-ic"><i class="ti ti-speakerphone"></i></span><span class="dz-tx"><span class="dz-tag">Em destaque</span><h2>Painel de Divulgação</h2>' +
+      '<p>Plano do dia, textos por rede, imóveis e grupos' + (pdv ? ' · ' + pdv.hoje + (pdv.hoje === 1 ? ' divulgação hoje' : ' divulgações hoje') : '') + '</p></span>' +
+      '<span class="dz-go"><span>Abrir</span><i class="ti ti-arrow-right"></i></span></a>';
     html += '<div class="acoes">' + acoes.map(function (a) {
       return '<button type="button" class="acao" style="--c:var(' + a[3] + ')" data-open="' + a[0] + '"><i class="ti ' + a[1] + '"></i>' + a[2] + '</button>';
     }).join('') + '</div>';
@@ -1255,17 +1268,13 @@ var FERRAMENTAS = [
     return ch && ch.r ? Object.keys(ch.r).filter(function (h) { return ch.r[h].s === '404' || ch.r[h].s === 'off' || ch.r[h].s === 'erro'; }).length : 0;
   }
 
-  /* dados do Painel de Publicação (mesmo navegador) */
+  /* dados do Painel de Divulgação (mesmo navegador) */
   function pubResumo() {
-    var p = lerStorage('painel_corretor_v1', null);
-    if (!p || typeof p !== 'object') return null;
-    var im = Array.isArray(p.imoveis) ? p.imoveis : [], d = new Date();
-    var k = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
-    return {
-      total: im.length,
-      disp: im.filter(function (i) { return !i.vendido && (!i.lockedUntil || i.lockedUntil < Date.now()); }).length,
-      hoje: (p.dias && p.dias[k]) || 0, lim: (p.cfg && p.cfg.limite) || 20
-    };
+    var lg = lerStorage('fcdv_log', null);
+    if (!Array.isArray(lg)) return null;
+    var d = new Date(), p = function (n) { return n < 10 ? '0' + n : '' + n; };
+    var k = d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+    return { hoje: lg.filter(function (x) { return x && x.d === k; }).length };
   }
 
   /* avisos que merecem atenção */
@@ -1302,7 +1311,7 @@ var FERRAMENTAS = [
       bk = lerStorage('painel_ultimo_backup', 0), pub = pubResumo();
     function k(c, n, t, go) { return '<button type="button" class="kpi" style="--c:var(' + c + ')" data-ct="ir:' + go + '"><b>' + n + '</b><span>' + t + '</span></button>'; }
     return '<div class="ct-kpis faixa">' + k('--sk', leads, leads === 1 ? 'lead novo' : 'leads novos', 'leads') + k('--or', tar, tar === 1 ? 'pendência' : 'pendências', 'tarefas') +
-      (pub ? '<a class="kpi" style="--c:var(--em)" href="publicacao.html"><b>' + pub.hoje + '/' + pub.lim + '</b><span>postagens hoje</span></a>' : '') +
+      (pub ? '<a class="kpi" style="--c:var(--em)" href="painel-divulgacao.html"><b>' + pub.hoje + '</b><span>divulgações hoje</span></a>' : '') +
       k(!bk || diasDesde(bk) >= 7 ? '--am' : '--cy', bk ? (diasDesde(bk) === 0 ? 'hoje' : diasDesde(bk) + ' d') : 'nunca', 'último backup', 'backup') + '</div>';
   }
   /* nota de saúde do painel (Central de Controle) */
@@ -1353,7 +1362,7 @@ var FERRAMENTAS = [
       k('--vi', custom, 'criados ou editados', 'botoes') + k('--sk', leads.length, 'leads · ' + novos + ' novos', 'leads', novos > 0) +
       k('--or', tar, 'pendências abertas', 'tarefas') + k(ruins ? '--ro' : '--cy', ch ? ruins : '—', ch ? 'links com problema' : 'links não verificados', 'links', ruins > 0) +
       k(bkRuim ? '--am' : '--em', bkTxt, 'último backup', 'backup', bkRuim) +
-      (pub ? '<a class="kpi" style="--c:var(--brand)" href="publicacao.html"><b>' + pub.hoje + '/' + pub.lim + '</b><span>postagens hoje · ' + pub.disp + ' imóveis livres</span></a>' : '') + '</div>';
+      (pub ? '<a class="kpi" style="--c:var(--brand)" href="painel-divulgacao.html"><b>' + pub.hoje + '</b><span>divulgações hoje</span></a>' : '') + '</div>';
     var al = ctAlertas();
     h += '<h2 class="sec">Precisa de atenção</h2>' + (al.length ? '<div class="alertas" style="margin:0">' + al.map(function (x) {
       return '<button type="button" class="alerta" style="--c:var(' + x.c + ')" data-ct="aba:' + x.go + '"><i class="ti ' + x.i + '"></i><span><b>' + esc(x.t) + '</b><small>' + esc(x.s) + '</small></span><i class="ti ti-chevron-right"></i></button>';
@@ -1363,7 +1372,7 @@ var FERRAMENTAS = [
       '<button type="button" class="acao" style="--c:var(--em)" data-ct="bk-baixar"><i class="ti ti-download"></i>Fazer backup</button>' +
       '<button type="button" class="acao" style="--c:var(--sk)" data-open="lead"><i class="ti ti-user-plus"></i>Novo lead</button>' +
       '<button type="button" class="acao" style="--c:var(--vi)" data-ct="novo"><i class="ti ti-plus"></i>Novo botão</button>' +
-      '<a class="acao" style="--c:var(--am)" href="publicacao.html"><i class="ti ti-send"></i>Publicação</a>' +
+      '<a class="acao" style="--c:var(--am)" href="painel-divulgacao.html"><i class="ti ti-speakerphone"></i>Divulgação</a>' +
       '<a class="acao" style="--c:var(--or)" href="repositorios-github.html"><i class="ti ti-brand-github"></i>Repositórios</a>' +
       '<a class="acao" style="--c:var(--ro)" href="construtoras.html"><i class="ti ti-building-factory-2"></i>Construtoras</a>' +
       '<button type="button" class="acao" style="--c:var(--brand)" data-ct="aba:sites"><i class="ti ti-world"></i>Sites no ar</button></div>';
@@ -1861,7 +1870,7 @@ var FERRAMENTAS = [
     Object.keys(d).forEach(function (k) { kb += (k.length + String(d[k]).length) * 2; });
     kb = Math.max(1, Math.round(kb / 1024));
     var bk = lerStorage('painel_ultimo_backup', 0), aj = Object.keys(lerAjustes()).length;
-    return '<div class="ct-card" style="margin-bottom:12px"><h3><i class="ti ti-database"></i>O que está guardado neste navegador</h3><p class="gdesc" style="margin:0"><strong>' + n + '</strong> itens · cerca de <strong>' + kb + ' KB</strong> (botões, favoritos, leads, pendências, imóveis da Publicação e dados das outras ferramentas). Último backup: <strong>' +
+    return '<div class="ct-card" style="margin-bottom:12px"><h3><i class="ti ti-database"></i>O que está guardado neste navegador</h3><p class="gdesc" style="margin:0"><strong>' + n + '</strong> itens · cerca de <strong>' + kb + ' KB</strong> (botões, favoritos, leads, pendências, dados do Painel de Divulgação e dados das outras ferramentas). Último backup: <strong>' +
       (bk ? dataBR(bk) + ' (há ' + diasDesde(bk) + (diasDesde(bk) === 1 ? ' dia' : ' dias') + ')' : 'nunca') + '</strong>.</p></div>' +
       '<div class="ct-grid2"><div class="ct-card"><h3><i class="ti ti-download"></i>Fazer backup</h3><p class="gdesc" style="margin:0">Guarda tudo num arquivo. Faça toda semana e envie para o seu e-mail ou Google Drive.</p>' +
       '<button type="button" class="btn-mini" data-ct="bk-baixar"><i class="ti ti-download"></i>Baixar arquivo de backup</button>' +
