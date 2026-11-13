@@ -5928,62 +5928,172 @@ if(document.readyState === 'loading') document.addEventListener('DOMContentLoade
 })();
 </script>
 
-<!-- FCOSTA: após baixar um vídeo, leva para o site (GitHub) -->
+<!-- FCOSTA: vídeos do Tour -> aba "Tour" do site (destaque + compartilhar) -->
 <script>
 (function(){
   /* ENDEREÇO DO SEU SITE: se mudar o domínio, troque só esta linha */
   var FC_SITE='https://serfico21-arch.github.io/Pessoal/tv-fcosta.html';
-  var FC_ABRIR_SOZINHO=true;      /* true = abre o site sozinho depois do download */
-  var FC_ENVIAR_TV=true;        /* true = oferece "Enviar para a TV" */
-  var base=FC_SITE.replace(/[^\/]*$/,'');
-  var noSite=location.href.indexOf(base)===0;           /* já estou dentro do site */
+  var FC_TOUR='https://fcostacorretor.com/#tour';
+  var FC_ABRIR_SOZINHO=false;   /* true = depois de baixar, abre a aba Tour do site sozinha */
   var mesmoSite=location.protocol.indexOf('http')===0 && location.origin===new URL(FC_SITE).origin;
   var ultimo=0, box=null, tmr=null;
 
   var css=document.createElement('style');
-  css.textContent='#fcdl{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2147483000;max-width:min(520px,calc(100vw - 24px));width:max-content;background:#1b1b1b;color:#fff;border:1px solid #FFD400;border-radius:14px;padding:12px 14px;box-shadow:0 8px 28px rgba(0,0,0,.45);font:500 14px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:none}#fcdl.on{display:block}#fcdl b{display:block;margin-bottom:8px}#fcdl .r{display:flex;flex-wrap:wrap;gap:8px}#fcdl a,#fcdl button{font:600 13px system-ui,sans-serif;border-radius:9px;padding:9px 13px;border:0;cursor:pointer;text-decoration:none;display:inline-block}#fcdl .p{background:#FFD400;color:#000}#fcdl .s{background:#333;color:#fff}';
+  css.textContent='#fcdl{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:2147483000;max-width:min(520px,calc(100vw - 24px));width:max-content;background:#1b1b1b;color:#fff;border:1px solid #FFD400;border-radius:14px;padding:12px 14px;box-shadow:0 8px 28px rgba(0,0,0,.45);font:500 14px/1.4 system-ui,sans-serif;display:none}#fcdl.on{display:block}#fcdl .r{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}#fcdl a,#fcdl button{font:700 13px/1 system-ui,sans-serif;border-radius:9px;padding:10px 12px;border:1px solid #444;background:#2a2a2a;color:#fff;text-decoration:none;cursor:pointer}#fcdl .p{background:#FFD400;color:#000;border-color:#FFD400}'+
+    '.fc-tour-btn{display:block;width:100%;margin-top:10px;padding:14px 16px;border-radius:12px;border:1px solid #FFD400;background:linear-gradient(135deg,#FFD400,#E0AA47);color:#000;font:800 15px/1.2 system-ui,sans-serif;cursor:pointer;box-shadow:0 6px 20px rgba(255,212,0,.25)}.fc-tour-btn:disabled{opacity:.65;cursor:wait}.fc-tour-hint{font:500 12px/1.4 system-ui,sans-serif;color:#8a8a8a;margin:6px 2px 0}';
   document.head.appendChild(css);
 
-  function mostrar(blobUrl){
-    if(!box){box=document.createElement('div');box.id='fcdl';box.setAttribute('role','status');document.body.appendChild(box);}
-    box.innerHTML='<b>✅ Vídeo baixado!</b><div class="r"></div>';
-    var r=box.querySelector('.r');
-    var a=document.createElement('a');a.className='p';a.href=FC_SITE;a.target='_blank';a.rel='noopener';a.textContent='🌐 Abrir meu site FCosta';r.appendChild(a);
-    if(FC_ENVIAR_TV && mesmoSite && blobUrl){
-      var b=document.createElement('button');b.className='s';b.type='button';b.textContent='📺 Enviar este vídeo para a TV';
-      b.onclick=function(){enviarTV(blobUrl,b);};r.appendChild(b);
-    }
-    var x=document.createElement('button');x.className='s';x.type='button';x.textContent='Fechar';x.onclick=function(){box.classList.remove('on');};r.appendChild(x);
-    box.classList.add('on');clearTimeout(tmr);tmr=setTimeout(function(){box.classList.remove('on');},20000);
-  }
+  function eVideo(a){ return a && a.getAttribute && /\.(mp4|webm|mov)$/i.test(a.getAttribute('download')||''); }
+  function val(id){ var e=document.getElementById(id); return e ? (e.value||'').trim() : ''; }
 
-  /* entrega o vídeo na "caixa de entrada" da TV (mesmo site) e abre a TV */
-  function enviarTV(url,btn){
-    btn.disabled=true;btn.textContent='Enviando…';
-    fetch(url).then(function(r){return r.blob();}).then(function(bl){
+  /* grava o vídeo na caixa de entrada da aba Tour (só funciona no mesmo site) */
+  function abrirDB(){
+    return new Promise(function(res,rej){
       var q=indexedDB.open('tvfc',1);
-      q.onupgradeneeded=function(){q.result.createObjectStore('vid');};
-      q.onerror=function(){btn.textContent='Não deu para enviar';};
-      q.onsuccess=function(){
-        var tx=q.result.transaction('vid','readwrite');tx.objectStore('vid').put(bl,'inbox');
-        tx.oncomplete=function(){btn.textContent='Enviado ✔';window.open(FC_SITE,'_blank');};
-        tx.onerror=tx.onabort=function(){btn.textContent='Não deu para enviar';};
-      };
-    }).catch(function(){btn.textContent='Não deu para enviar';});
+      q.onupgradeneeded=function(){ if(!q.result.objectStoreNames.contains('vid')) q.result.createObjectStore('vid'); };
+      q.onsuccess=function(){res(q.result);}; q.onerror=function(){rej(q.error);};
+    });
+  }
+  function enviar(url,nome){
+    if(!mesmoSite) return Promise.resolve(false);
+    return fetch(url).then(function(r){return r.blob();}).then(function(bl){
+      return abrirDB().then(function(db){
+        return new Promise(function(res,rej){
+          var tx=db.transaction('vid','readwrite'), st=tx.objectStore('vid');
+          var titulo=val('propertyInfo'); if(/construtora/i.test(nome||'') && titulo) titulo+=' (construtora)';
+          st.put({blob:bl,name:nome||'tour.mp4',title:titulo,price:val('propertyPrice'),ts:Date.now()},'tourinbox:'+Date.now());
+          /* guarda só os 5 mais recentes */
+          var ks=[], c=(st.openKeyCursor?st.openKeyCursor():st.openCursor());
+          c.onsuccess=function(){var k=c.result; if(!k){ks.sort(); while(ks.length>5) st.delete(ks.shift()); return;} if(typeof k.key==='string'&&k.key.indexOf('tourinbox:')===0) ks.push(k.key); k.continue();};
+          tx.oncomplete=function(){ try{ var bc=new BroadcastChannel('tvfc-tour'); bc.postMessage('novo'); setTimeout(function(){bc.close();},500); }catch(e){} res(true); };
+          tx.onerror=tx.onabort=function(){rej(tx.error);};
+        });
+      });
+    });
   }
 
+  /* botão "Ver no site do Tour" colado em cada link de download de vídeo (qualquer tipo gerado) */
+  function injetar(){
+    [].forEach.call(document.querySelectorAll('a[download]'),function(a){
+      if(!eVideo(a) || a.dataset.fcTour) return;
+      a.dataset.fcTour='1';
+      var b=document.createElement('button'); b.type='button'; b.className='fc-tour-btn'; b.textContent='🎬 Ver no site do Tour';
+      b.onclick=function(){ver(a,b);};
+      a.insertAdjacentElement('afterend',b);
+      var h=document.createElement('div'); h.className='fc-tour-hint'; h.textContent='Publica este vídeo na aba Tour do seu site (fcostacorretor.com), em destaque e pronto para compartilhar.';
+      b.insertAdjacentElement('afterend',h);
+    });
+  }
+  var t0=null; function agendar(){ clearTimeout(t0); t0=setTimeout(injetar,400); }
+  try{ new MutationObserver(agendar).observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['download','href']}); }catch(e){}
+  document.addEventListener('DOMContentLoaded',injetar); injetar();
+
+  function verLegado(a,b){
+    var url=a.href;
+    if(!url || url.indexOf('blob:')!==0){ alert('Gere o vídeo primeiro e depois toque aqui.'); return; }
+    var w=null; try{ w=window.open('about:blank','_blank'); }catch(e){}
+    var txt=b.textContent; b.disabled=true; b.textContent='Enviando para o site…';
+    var nome=a.getAttribute('download')||'tour.mp4';
+    enviar(url,nome).then(function(ok){
+      if(!ok){ try{ a.click(); }catch(e){} }   /* fora do site: baixa o arquivo para você adicionar lá */
+      go(w,FC_TOUR);
+      if(!ok) aviso('Vídeo baixado. Como esta página não está no seu site, no Tour toque em ＋ Adicionar e escolha o arquivo baixado.');
+    }).catch(function(){
+      go(w,FC_TOUR); aviso('Não consegui enviar. Baixe o vídeo e adicione no Tour do site.');
+    }).then(function(){ b.disabled=false; b.textContent=txt; });
+  }
+  /* ===== publicar o vídeo direto na aba Tour do site (Firebase: fcosta_tour) ===== */
+  var FC_WEB='https://fcostacorretor.com/';
+  var FBCFG={apiKey:'AIzaSyBo3zQ-yUNJ2Zk9d6jkEpslF-bsrFcRu8I',authDomain:'fcosta2026-847c3.firebaseapp.com',databaseURL:'https://fcosta2026-847c3-default-rtdb.firebaseio.com',projectId:'fcosta2026-847c3',storageBucket:'fcosta2026-847c3.firebasestorage.app',messagingSenderId:'131225040087',appId:'1:131225040087:web:d468aad3d80bd26aaa2c92'};
+  var jaPub={};
+  function fbdb(){ try{ if(!window.firebase||!firebase.database) return null; if(!firebase.apps.length) firebase.initializeApp(FBCFG); return firebase.database(); }catch(e){ return null; } }
+  function infoLinha(){
+    var p=[],a=val('dtArea'),q=val('dtQuartos'),s=val('dtSuites'),b=val('dtBanh'),g=val('dtVagas');
+    if(a) p.push(a+' m²'); if(q) p.push(q+(q==='1'?' quarto':' quartos')); if(s) p.push(s+(s==='1'?' suíte':' suítes'));
+    if(b) p.push(b+(b==='1'?' banheiro':' banheiros')); if(g) p.push(g+(g==='1'?' vaga':' vagas'));
+    return p.join(' · ');
+  }
+  function medirVert(url){
+    return new Promise(function(res){
+      var v=document.createElement('video'),ok=false; function f(x){ if(ok) return; ok=true; res(x); }
+      v.preload='metadata'; v.muted=true; v.onloadedmetadata=function(){ f(v.videoHeight>v.videoWidth); }; v.onerror=function(){ f(false); };
+      setTimeout(function(){ f(false); },4000); v.src=url;
+    });
+  }
+  function subirCloud(blob,nome,onp){
+    return new Promise(function(ok,fail){
+      var ext=/webm/i.test(blob.type||nome)?'webm':'mp4', fd=new FormData();
+      fd.append('file',blob,'tour_'+Date.now()+'.'+ext); fd.append('upload_preset','fcosta_videos');
+      var x=new XMLHttpRequest(); x.open('POST','https://api.cloudinary.com/v1_1/dvtfxqw66/video/upload');
+      x.upload.onprogress=function(ev){ if(ev.lengthComputable) onp(Math.round(100*ev.loaded/ev.total)); };
+      x.onerror=function(){ fail(new Error('Cloudinary: sem conexão ou bloqueado pelo navegador.')); };
+      x.ontimeout=function(){ fail(new Error('Cloudinary: tempo esgotado.')); };
+      x.onload=function(){
+        var r={}; try{ r=JSON.parse(x.responseText); }catch(e){}
+        if(x.status>=200&&x.status<300&&r.secure_url) ok(r.secure_url.replace(/\.[a-z0-9]+$/i,'.mp4'));
+        else fail(new Error('Cloudinary: '+((r.error&&r.error.message)||('erro '+x.status))));
+      };
+      x.send(fd);
+    });
+  }
+  function ver(a,b){
+    var url=a.href;
+    if(!url || url.indexOf('blob:')!==0){ alert('Gere o vídeo primeiro e depois toque aqui.'); return; }
+    var db=fbdb();
+    if(!db){ verLegado(a,b); return; }
+    var w=null; try{ w=window.open('about:blank','_blank'); }catch(e){}
+    var txt=b.textContent, nome=a.getAttribute('download')||'tour.mp4';
+    function fim(){ b.disabled=false; b.textContent=txt; }
+    if(jaPub[url]){ go(w,FC_WEB+'#tour-'+jaPub[url]); return; }
+    b.disabled=true; b.textContent='Preparando vídeo…';
+    fetch(url).then(function(r){ return r.blob(); }).then(function(bl){
+      return medirVert(url).then(function(vert){
+        b.textContent='Enviando… 0%';
+        return subirCloud(bl,nome,function(p){ b.textContent='Enviando… '+p+'%'; }).then(function(link){
+          b.textContent='Publicando no site…';
+          var ref=db.ref('fcosta_tour').push();
+          return ref.set({titulo:val('propertyInfo')||'Tour do imóvel',preco:val('propertyPrice'),info:infoLinha(),url:link,vert:!!vert,ts:firebase.database.ServerValue.TIMESTAMP}).then(function(){ return ref.key; });
+        });
+      });
+    }).then(function(id){
+      jaPub[url]=id; go(w,FC_WEB+'#tour-'+id);
+      aviso('✅ Vídeo publicado na aba Tour do site! Aparece em destaque e já dá para compartilhar o link.');
+      b.textContent='✅ Publicado no site'; setTimeout(fim,2500);
+    }).catch(function(e){
+      try{ if(w&&!w.closed) w.close(); }catch(_){}
+      var m=(e&&(e.code||e.message))||String(e);
+      if(/permission|denied/i.test(m)) m='O Firebase bloqueou a gravação. No console: Realtime Database → Regras → libere "fcosta_tour" (leitura para todos). Detalhe: '+m;
+      else if(/preset/i.test(m)) m+=' — crie o preset "fcosta_videos" (Unsigned) no Cloudinary.';
+      aviso('Não consegui publicar: '+m+' Enquanto isso, baixe o vídeo normalmente.');
+      fim();
+    });
+  }
+  function go(w,u){ if(w && !w.closed){ w.location.href=u; } else { try{ window.open(u,'_blank'); }catch(e){} } }
+  function aviso(msg){
+    if(!box){box=document.createElement('div');box.id='fcdl';box.setAttribute('role','status');document.body.appendChild(box);}
+    box.innerHTML='<div></div><div class="r"></div>'; box.firstChild.textContent=msg;
+    var x=document.createElement('button');x.type='button';x.textContent='Fechar';x.onclick=function(){box.classList.remove('on');};box.lastChild.appendChild(x);
+    box.classList.add('on'); clearTimeout(tmr); tmr=setTimeout(function(){box.classList.remove('on');},15000);
+  }
+
+  /* ao baixar um vídeo: entrega na aba Tour e (se ligado) abre o site sozinho */
   document.addEventListener('click',function(e){
     var a=e.target&&e.target.closest?e.target.closest('a[download]'):null;
-    if(!a)return;
-    var nome=(a.getAttribute('download')||'').toLowerCase();
-    if(!/\.(mp4|webm|mov)$/.test(nome))return;          /* só vídeos */
-    var href=a.href;
+    if(!a || !eVideo(a)) return;
+    var href=a.href, nome=a.getAttribute('download');
     setTimeout(function(){
-      var agora=Date.now();
-      if(agora-ultimo<30000)return; ultimo=agora;        /* evita abrir várias abas seguidas */
-      if(noSite){ return; }                               /* na própria TV não precisa sair da página */
-      mostrar(href);
-      if(FC_ABRIR_SOZINHO){try{window.open(FC_SITE,'_blank');}catch(_){}}
+      var agora=Date.now(); if(agora-ultimo<30000) return; ultimo=agora;
+      if(!box){box=document.createElement('div');box.id='fcdl';box.setAttribute('role','status');document.body.appendChild(box);}
+      box.innerHTML='<b>✅ Vídeo baixado!</b><div class="r"></div>';
+      var r=box.querySelector('.r');
+      var v=document.createElement('button'); v.type='button'; v.className='p'; v.textContent='🎬 Ver no site do Tour';
+      v.onclick=function(){ ver(a,v); box.classList.remove('on'); }; r.appendChild(v);
+      var s=document.createElement('a'); s.href=FC_SITE; s.target='_blank'; s.rel='noopener'; s.textContent='🌐 Abrir meu site'; r.appendChild(s);
+      var x=document.createElement('button'); x.type='button'; x.textContent='Fechar'; x.onclick=function(){box.classList.remove('on');}; r.appendChild(x);
+      box.classList.add('on'); clearTimeout(tmr); tmr=setTimeout(function(){box.classList.remove('on');},20000);
+      if(FC_ABRIR_SOZINHO && mesmoSite && href && href.indexOf('blob:')===0){
+        enviar(href,nome).then(function(ok){ if(ok){ try{ window.open(FC_TOUR,'_blank'); }catch(_){} } }).catch(function(){});
+      } else if(FC_ABRIR_SOZINHO){ try{ window.open(FC_TOUR,'_blank'); }catch(_){} }
     },1200);
   },true);
 })();
