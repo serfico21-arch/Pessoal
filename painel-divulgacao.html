@@ -137,8 +137,10 @@ var A={fmt:'feed',foto:0,extra:'',dev:null},gtipo='Novidade',tel='';
 var CANAIS=[
  {k:'whatsapp',n:'WhatsApp',ic:'💬',fm:'quad',hint:'Cole no zap de clientes e grupos. A arte vai junto pelo botão Compartilhar.'},
  {k:'status',n:'Status / Stories',ic:'⭕',fm:'story',hint:'Toque em Compartilhar → WhatsApp → “Meu status”. A arte já sai no formato vertical.'},
- {k:'instagram',n:'Instagram',ic:'📸',fm:'feed',max:2200,hint:'Compartilhar → Instagram (Feed ou Stories). O texto já fica copiado: cole na legenda.'},
- {k:'facebook',n:'Facebook',ic:'📘',fm:'quad',hint:'Abre o Facebook com o link do imóvel. Cole o texto e poste na página e nos grupos.'},
+ {k:'instagram',n:'Instagram — conta 1',ic:'📸',fm:'feed',max:2200,hint:'Compartilhar → Instagram (Feed ou Stories). O texto já fica copiado: cole na legenda.'},
+ {k:'instagram2',n:'Instagram — conta 2',ic:'📸',fm:'feed',max:2200,hint:'Mesmo texto para a segunda conta. Troque de conta no Instagram antes de postar e cole na legenda.'},
+ {k:'facebook',n:'Facebook — conta 1',ic:'📘',fm:'quad',hint:'Abre o Facebook com o link do imóvel. Cole o texto e poste na página e nos grupos.'},
+ {k:'facebook2',n:'Facebook — conta 2',ic:'📘',fm:'quad',hint:'Mesmo texto para a segunda conta. Troque de conta no Facebook antes de postar e cole o texto.'},
  {k:'marketplace',n:'Marketplace / OLX',ic:'🛒',fm:'quad',hint:'Copie o título e a descrição nos campos do anúncio. Renove a cada 7 dias.'},
  {k:'tiktok',n:'TikTok / Reels / Kwai',ic:'🎵',fm:'story',max:2200,hint:'Suba o vídeo do Tour (gerador) e use esta legenda curta.'},
  {k:'youtube',n:'YouTube',ic:'▶️',fm:'thumb',hint:'Título e descrição prontos. Use a arte como miniatura.'},
@@ -202,12 +204,12 @@ function gerar(c){
   var hook=pick(HOOK[tom][st]),L=link(p,c),cs=carac(p),loc=[p.bairro,p.cidade].filter(Boolean).join(' — ');
   var pr=p.preco?(st==='aluguel'&&!/m[eê]s/i.test(p.preco)?p.preco+'/mês':p.preco):'';
   var assin=NOME+' · FCosta Corretor · '+CRECI,cod=p.cod?'Código '+p.cod:'';
-  var d=resumo(p.desc,c==='instagram'?420:280),T=p.titulo,nl='\n';
+  var d=resumo(p.desc,(c==='instagram'||c==='instagram2')?420:280),T=p.titulo,nl='\n';
   switch(c){
   case 'whatsapp':return hook+nl+nl+'🏠 *'+T+'*'+nl+(loc?'📍 '+loc+nl:'')+(cs.length?cs.join(' · ')+nl:'')+(pr?'💰 *'+pr+'*'+nl:'')+nl+(d?d+nl+nl:'')+'👉 Fotos e vídeo: '+L+nl+nl+assin;
   case 'status':return hook+nl+'🏠 '+T+nl+(loc?'📍 '+loc+nl:'')+(pr?'💰 '+pr+nl:'')+nl+'💬 Chame no zap: '+FONE_F;
-  case 'instagram':return hook+nl+nl+'🏠 '+T+nl+(loc?'📍 '+loc+nl:'')+nl+cs.join(nl)+(cs.length?nl+nl:'')+(pr?'💰 '+pr+nl+nl:'')+(d?d+nl+nl:'')+'📲 Link na bio ou chame no WhatsApp '+FONE_F+nl+assin+nl+nl+tags(p,15);
-  case 'facebook':return hook+nl+nl+'🏠 '+T+nl+(loc?'📍 '+loc+nl:'')+(cs.length?cs.join(' · ')+nl:'')+(pr?'💰 '+pr+nl:'')+nl+(d?d+nl+nl:'')+'👉 Veja fotos e detalhes: '+L+nl+'💬 WhatsApp: '+FONE_F+nl+assin;
+  case 'instagram':case 'instagram2':return hook+nl+nl+'🏠 '+T+nl+(loc?'📍 '+loc+nl:'')+nl+cs.join(nl)+(cs.length?nl+nl:'')+(pr?'💰 '+pr+nl+nl:'')+(d?d+nl+nl:'')+'📲 Link na bio ou chame no WhatsApp '+FONE_F+nl+assin+nl+nl+tags(p,15);
+  case 'facebook':case 'facebook2':return hook+nl+nl+'🏠 '+T+nl+(loc?'📍 '+loc+nl:'')+(cs.length?cs.join(' · ')+nl:'')+(pr?'💰 '+pr+nl:'')+nl+(d?d+nl+nl:'')+'👉 Veja fotos e detalhes: '+L+nl+'💬 WhatsApp: '+FONE_F+nl+assin;
   case 'marketplace':return 'TÍTULO (campo título):'+nl+[p.tipo,p.q?p.q+' dorm.':'',p.bairro,pr,st==='venda'?'À venda':(st==='aluguel'?'Aluguel':'Lançamento')].filter(Boolean).join(' · ').slice(0,100)+nl+nl+'DESCRIÇÃO:'+nl+T+nl+(loc?'Local: '+loc+nl:'')+(cs.length?cs.join(' · ')+nl:'')+(pr?'Valor: '+pr+nl:'')+(cod?cod+nl:'')+(d?nl+d+nl:'')+nl+'Mais fotos e vídeo: '+L+nl+'Contato: '+NOME+' — WhatsApp '+FONE_F+' — '+CRECI;
   case 'tiktok':return (hook+' '+T+(p.bairro?' em '+p.bairro:'')+(pr?' · '+pr:'')+' 📲 '+FONE_F).slice(0,200)+nl+nl+tags(p,7);
   case 'youtube':return 'TÍTULO (até 100 caracteres):'+nl+(T+(p.bairro?' em '+p.bairro:'')+' | '+(st==='aluguel'?'Aluguel':'À venda')+(pr?' '+pr:'')+' | FCosta Corretor').slice(0,100)+nl+nl+'DESCRIÇÃO:'+nl+hook+nl+nl+T+nl+(loc?'📍 '+loc+nl:'')+(cs.length?cs.join(' · ')+nl:'')+(pr?'💰 '+pr+nl:'')+nl+(d?d+nl+nl:'')+'🌐 Mais imóveis: '+SITE+nl+'💬 WhatsApp: https://wa.me/'+FONE+nl+assin+nl+nl+tags(p,12);
@@ -226,7 +228,8 @@ function urlRede(c){
   case 'whatsapp':return 'https://wa.me/?text='+T;
   case 'status':return 'https://wa.me/?text='+T;
   case 'instagram':return (links.instagram||DEF.instagram.u);
-  case 'facebook':return 'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(L);
+  case 'instagram2':return (links.instagram2||DEF.instagram2.u||'https://www.instagram.com/');
+  case 'facebook':case 'facebook2':return 'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(L);
   case 'marketplace':return 'https://www.facebook.com/marketplace/create/';
   case 'tiktok':return 'https://www.tiktok.com/upload';
   case 'youtube':return 'https://www.youtube.com/upload';
@@ -296,8 +299,10 @@ var DEF={
  alugar:{n:'Alugar (FCA)',ic:'🔑',u:SITE+'alugar.html'},
  lanc:{n:'Lançamentos (FCL)',ic:'🏗️',u:SITE+'lancamentos.html'},
  panf:{n:'Panfletos (FCP)',ic:'📄',u:SITE+'panfletos.html'},
- instagram:{n:'Instagram',ic:'📸',u:'https://www.instagram.com/f.cost.a_corretor/'},
- facebook:{n:'Facebook',ic:'📘',u:'https://www.facebook.com/SergioCostaRCM'},
+ instagram:{n:'Instagram — conta 1',ic:'📸',u:'https://www.instagram.com/f.cost.a_corretor/'},
+ instagram2:{n:'Instagram — conta 2',ic:'📸',u:''},
+ facebook:{n:'Facebook — conta 1',ic:'📘',u:'https://www.facebook.com/SergioCostaRCM'},
+ facebook2:{n:'Facebook — conta 2',ic:'📘',u:''},
  youtube:{n:'YouTube',ic:'▶️',u:'https://www.youtube.com/@fcostacorretor'},
  tiktok:{n:'TikTok',ic:'🎵',u:'https://www.tiktok.com/@fcosta.corretor'},
  linkedin:{n:'LinkedIn',ic:'💼',u:'https://www.linkedin.com/in/sergio-costa-corretor-b6a984371/'},
@@ -337,7 +342,7 @@ function rHoje(){
   var nh=log.filter(function(l){return l.d===h;}).length,n7=log.filter(function(l){return now-l.ts<7*dia;}).length;
   var par=imoveis.map(function(i){return {i:i,t:lastTs(i.id)};}).filter(function(x){return now-x.t>7*dia;}).sort(function(a,b){return a.t-b.t;});
   var s=par[0],r=rot[h]||{};
-  var ROT=['Postar 1 imóvel no Instagram (Feed) e Stories','Publicar 3 imóveis no Status do WhatsApp','Postar no Facebook e nos grupos da região','Publicar no Google Meu Negócio (2 vezes por semana)','Renovar anúncios no Marketplace / OLX','Responder mensagens, comentários e avaliações','Pedir 1 avaliação no Google a um cliente atendido'];
+  var ROT=['Postar 1 imóvel nas 2 contas do Instagram (Feed) e Stories','Publicar 3 imóveis no Status do WhatsApp','Postar nas 2 contas do Facebook e nos grupos da região','Publicar no Google Meu Negócio (2 vezes por semana)','Renovar anúncios no Marketplace / OLX','Responder mensagens, comentários e avaliações','Pedir 1 avaliação no Google a um cliente atendido'];
   var d=new Date().toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'});
   var o='<div class="mut" style="margin:0 2px 10px;text-transform:capitalize">'+esc(d)+'</div>';
   o+='<div class="nums"><div class="num"><b>'+imoveis.length+'</b><span>imóveis ativos</span></div><div class="num"><b>'+nh+'</b><span>divulgações hoje</span></div><div class="num"><b>'+n7+'</b><span>nos últimos 7 dias</span></div><div class="num"><b>'+par.length+'</b><span>sem divulgar há 7+ dias</span></div></div>';
