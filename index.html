@@ -50,6 +50,12 @@ kbd{font:600 12px 'DM Sans';padding:2px 8px;border-radius:7px;border:1px solid v
 .acoes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 6px}
 .acao{display:flex;align-items:center;gap:10px;min-height:52px;padding:0 14px;border-radius:14px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:14px}
 .acao i{color:var(--c);font-size:20px}.acao:hover{border-color:var(--c)}
+.wa-btn{display:flex;align-items:center;gap:14px;margin:14px 0 0;padding:16px 20px;border-radius:20px;background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;text-decoration:none;box-shadow:0 8px 24px rgba(37,211,102,.38);border:0;transition:transform .15s,box-shadow .15s}
+.wa-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(37,211,102,.5)}
+.wa-btn .wa-ic{display:grid;place-items:center;width:52px;height:52px;border-radius:16px;background:rgba(255,255,255,.2);font-size:32px;flex:none}
+.wa-btn .wa-tx{flex:1;min-width:0}.wa-btn h2{margin:0;font:800 20px 'Sora',sans-serif;letter-spacing:-.01em;color:#fff}.wa-btn p{margin:2px 0 0;font-size:13px;opacity:.92;color:#fff}
+.wa-btn .wa-go{display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px;background:#fff;color:#128C7E;padding:9px 14px;border-radius:12px;flex:none}
+@media(max-width:520px){.wa-btn .wa-go span{display:none}.wa-btn h2{font-size:18px}}
 .sec{font:800 16px 'Sora',sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--tx);margin:34px 0 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
 .mundos{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .mundo{position:relative;overflow:hidden;text-align:left;display:flex;flex-direction:column;gap:4px;min-height:170px;padding:20px;border-radius:24px;border:1px solid color-mix(in srgb,var(--c) 35%,var(--line));background:linear-gradient(150deg,color-mix(in srgb,var(--c) 13%,var(--card)),var(--card) 70%);transition:.2s}
@@ -928,6 +934,8 @@ var FERRAMENTAS = [
       ['atalhos', 'ti-bolt', 'Atalhos', '--am'], ['novo', 'ti-pencil', 'Edição', '--vi']];
     var html = '<section class="hero"><p class="eyebrow">' + esc(data) + '</p><h1>' + saud + ', <span class="grad">Sérgio</span></h1>' +
       '<button type="button" class="busca-pill" data-open="busca"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button></section>';
+    var mobWa = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    html += '<a class="wa-btn" href="' + (mobWa ? 'whatsapp://send' : 'https://web.whatsapp.com') + '"' + (mobWa ? '' : ' target="_blank" rel="noopener"') + '><span class="wa-ic"><i class="ti ti-brand-whatsapp"></i></span><span class="wa-tx"><h2>WhatsApp Business</h2><p>Abrir conversas e clientes agora</p></span><span class="wa-go"><span>Abrir</span><i class="ti ti-arrow-right"></i></span></a>';
     var pdv = pubResumo();
     html += '<a class="destaque" href="painel-divulgacao.html"><span class="dz-ic"><i class="ti ti-speakerphone"></i></span><span class="dz-tx"><span class="dz-tag">Em destaque</span><h2>Painel de Divulgação</h2>' +
       '<p>Plano do dia, textos por rede, imóveis e grupos' + (pdv ? ' · ' + pdv.hoje + (pdv.hoje === 1 ? ' divulgação hoje' : ' divulgações hoje') : '') + '</p></span>' +
