@@ -494,6 +494,10 @@ footer strong{font-family:'Sora',sans-serif;letter-spacing:.14em;color:var(--gol
  .dock{border-radius:22px;background:color-mix(in srgb,var(--card) 92%,transparent);box-shadow:0 18px 44px -16px rgba(0,0,0,.55)}
  #visor-voltar{padding:0 14px}
 }
+
+/* aba Redes */
+.vazio-rede{border-style:dashed!important;background:transparent!important;box-shadow:none!important;opacity:.82}
+.vazio-rede:hover{opacity:1}
 </style>
 </head>
 <body data-view="inicio">
@@ -513,6 +517,7 @@ footer strong{font-family:'Sora',sans-serif;letter-spacing:.14em;color:var(--gol
   <button type="button" data-go="pastor" style="--c:var(--pk)"><i class="ti ti-book-2"></i>Pastor</button>
   <span id="dock-extra" style="display:contents"></span>
   <a href="construtoras.html" style="--c:var(--ro)"><i class="ti ti-building-factory-2"></i>Construtoras</a>
+  <button type="button" data-go="redes" style="--c:var(--sk)"><i class="ti ti-share"></i>Redes</button>
   <button type="button" data-go="favoritos" style="--c:var(--am)"><i class="ti ti-star"></i>Favoritos</button>
   <button type="button" data-go="sumario" style="--c:var(--or)"><i class="ti ti-list-letters"></i>Sumário</button>
   <button type="button" data-go="mapa" style="--c:var(--li)"><i class="ti ti-sitemap"></i>Mapa</button>
@@ -648,6 +653,20 @@ footer strong{font-family:'Sora',sans-serif;letter-spacing:.14em;color:var(--gol
     </div>
 
     <div class="dlg-acoes"><button type="button" class="btn-sec" id="nv-fechar" style="flex:1"><i class="ti ti-x"></i>Fechar</button></div>
+  </div>
+</dialog>
+
+<dialog id="dlg-rede" class="sheet" aria-labelledby="rede-tit">
+  <div class="dlg-corpo">
+    <h3><i class="ti ti-share"></i><span id="rede-tit">Rede social</span></h3>
+    <div class="campo" id="rede-nome-wrap" hidden><label for="rede-nome">Nome da rede</label><input type="text" id="rede-nome" maxlength="40" placeholder="Ex.: Kwai" autocomplete="off" /></div>
+    <div class="campo"><label for="rede-url">Endereço (link do perfil)</label><input type="text" id="rede-url" placeholder="https://www.instagram.com/seuperfil" autocapitalize="none" autocomplete="off" inputmode="url" /></div>
+    <p class="dlg-dica">Cole o link do perfil. Para WhatsApp pode digitar só o número com DDD. Fica salvo neste navegador; o backup da aba Controle não inclui as redes, então anote os links em algum lugar.</p>
+    <div class="dlg-acoes">
+      <button type="button" class="btn-mini" data-rede="salvar"><i class="ti ti-device-floppy"></i>Salvar</button>
+      <button type="button" class="btn-sec" id="rede-limpar" data-rede="limpar"><i class="ti ti-trash"></i>Remover</button>
+      <button type="button" class="btn-sec" data-fechar><i class="ti ti-x"></i>Cancelar</button>
+    </div>
   </div>
 </dialog>
 
@@ -941,7 +960,7 @@ var FERRAMENTAS = [
   /* abas principais criadas por você (guardadas no navegador) */
   function lerMundosExtra() { var l = lerStorage('painel_mundos', []); return Array.isArray(l) ? l.filter(function (x) { return x && x.id && x.n; }) : []; }
   var MUNDOS_ORIG = {}; Object.keys(MUNDOS).forEach(function (k) { MUNDOS_ORIG[k] = { n: MUNDOS[k].n, i: MUNDOS[k].i }; });
-  var DOCK_ABAS = [['inicio', 'Início'], ['controle', 'Controle'], ['favoritos', 'Favoritos'], ['sumario', 'Sumário'], ['mapa', 'Mapa'], ['construtoras', 'Construtoras']];
+  var DOCK_ABAS = [['inicio', 'Início'], ['controle', 'Controle'], ['favoritos', 'Favoritos'], ['sumario', 'Sumário'], ['mapa', 'Mapa'], ['redes', 'Redes'], ['construtoras', 'Construtoras']];
   /* nomes que você mudou: {"m:corretor":"…", "g:origem|id":"…", "d:mapa":"…"} */
   function lerNomes() { var o = lerStorage('painel_nomes', {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
   function nomeDock(k) { var p = DOCK_ABAS.filter(function (x) { return x[0] === k; })[0]; return lerNomes()['d:' + k] || (p ? p[1] : k); }
@@ -978,7 +997,7 @@ var FERRAMENTAS = [
   };
   var vistaEl = document.getElementById('vista');
   var modo = lerStorage('painel_vista', 'inicio');
-  if (modo !== 'inicio' && modo !== 'favoritos' && modo !== 'mapa' && modo !== 'sumario' && modo !== 'controle' && !MUNDOS[modo]) modo = 'inicio';
+  if (modo !== 'inicio' && modo !== 'favoritos' && modo !== 'mapa' && modo !== 'sumario' && modo !== 'controle' && modo !== 'redes' && !MUNDOS[modo]) modo = 'inicio';
   var aba = null;
   var favs = lerStorage('painel_favs', null);
   if (!Array.isArray(favs)) {
@@ -1239,7 +1258,7 @@ var FERRAMENTAS = [
       return href ? '<a class="item-link" style="--c:var(--or)" href="' + href + '"' + (ext ? ' target="_blank" rel="noopener"' : '') + '>' + inner + '</a>'
         : '<button type="button" class="item-link" style="--c:var(--or);width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer" ' + attr + '>' + inner + '</button>';
     };
-    html += '<h2 class="sec">Áreas do painel · ' + (10 + ORDEM.length - ORDEM_BASE.length) + '</h2><div class="lista">' +
+    html += '<h2 class="sec">Áreas do painel · ' + (11 + ORDEM.length - ORDEM_BASE.length) + '</h2><div class="lista">' +
       rap('ti-layout-dashboard', esc(nomeDock('inicio')), 'Saudação, atalhos rápidos e novidades', 'data-go="inicio"') +
       rap('ti-adjustments-horizontal', esc(nomeDock('controle')), 'Botões, links, sites, leads, pendências e backup', 'data-go="controle"') +
       rap('ti-building-skyscraper', esc(MUNDOS.corretor.n), MUNDOS.corretor.d, 'data-go="corretor"') +
@@ -1248,6 +1267,7 @@ var FERRAMENTAS = [
       rap('ti-book-2', esc(MUNDOS.pastor.n), MUNDOS.pastor.d, 'data-go="pastor"') +
       ORDEM.slice(ORDEM_BASE.length).map(function (m) { return rap(esc(MUNDOS[m].i), esc(MUNDOS[m].n), esc(MUNDOS[m].d), 'data-go="' + esc(m) + '"'); }).join('') +
       rap('ti-building-factory-2', esc(nomeDock('construtoras')), 'Tabelões, empreendimentos, e-books e simulador por construtora', '', 'construtoras.html') +
+      rap('ti-share', esc(nomeDock('redes')), 'Instagram, Facebook, YouTube, TikTok, WhatsApp e site num lugar só', 'data-go="redes"') +
       rap('ti-star-filled', esc(nomeDock('favoritos')), 'Suas ferramentas fixadas com ★', 'data-go="favoritos"') +
       rap('ti-list-letters', esc(nomeDock('sumario')) + ' A–Z', 'Todas as ferramentas em ordem alfabética', 'data-go="sumario"') +
       rap('ti-sitemap', esc(nomeDock('mapa')), 'Esta página, com todos os botões', 'data-go="mapa"') + '</div>';
@@ -1318,11 +1338,117 @@ var FERRAMENTAS = [
     return html;
   }
 
+  /* ── REDES SOCIAIS (aba "Redes") ─────────── */
+  /* Os endereços ficam salvos neste navegador. Para já vir preenchido, ponha o link em u:'…' abaixo. */
+  var REDES = [
+    { g: 'FCOSTA · Corretor', l: [
+      { id: 'site', n: 'Site FCOSTA', i: 'ti-world', c: '--am', u: 'https://fcostacorretor.com' },
+      { id: 'whatsapp', n: 'WhatsApp', i: 'ti-brand-whatsapp', c: '--em', u: 'https://wa.me/5511993509109' },
+      { id: 'instagram', n: 'Instagram', i: 'ti-brand-instagram', c: '--pk' },
+      { id: 'facebook', n: 'Facebook', i: 'ti-brand-facebook', c: '--sk' },
+      { id: 'youtube', n: 'YouTube', i: 'ti-brand-youtube', c: '--ro' },
+      { id: 'tiktok', n: 'TikTok', i: 'ti-brand-tiktok', c: '--sl' },
+      { id: 'linkedin', n: 'LinkedIn', i: 'ti-brand-linkedin', c: '--brand' },
+      { id: 'threads', n: 'Threads', i: 'ti-brand-threads', c: '--vi' },
+      { id: 'x', n: 'X (Twitter)', i: 'ti-brand-x', c: '--sl' },
+      { id: 'pinterest', n: 'Pinterest', i: 'ti-brand-pinterest', c: '--ro' },
+      { id: 'telegram', n: 'Telegram', i: 'ti-brand-telegram', c: '--cy' },
+      { id: 'google', n: 'Google Meu Negócio', i: 'ti-map-pin', c: '--or' }
+    ] },
+    { g: 'Igreja · OBPC São Fernando', l: [
+      { id: 'ob_instagram', n: 'Instagram da igreja', i: 'ti-brand-instagram', c: '--pk' },
+      { id: 'ob_facebook', n: 'Facebook da igreja', i: 'ti-brand-facebook', c: '--sk' },
+      { id: 'ob_youtube', n: 'YouTube da igreja', i: 'ti-brand-youtube', c: '--ro' }
+    ] }
+  ];
+  var redeAtual = null;
+  function redesDados() { var o = lerStorage('painel_redes', {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
+  function redesExtra() { var l = lerStorage('painel_redes_extra', []); return Array.isArray(l) ? l.filter(function (x) { return x && x.id && x.n; }) : []; }
+  function redesGrupos() {
+    var g = REDES.slice(), ex = redesExtra();
+    if (ex.length) g.push({ g: 'Outras redes', l: ex.map(function (x) { return { id: x.id, n: x.n, i: 'ti-link', c: '--sl', custom: 1 }; }) });
+    return g;
+  }
+  function redeUrl(r, d) { return Object.prototype.hasOwnProperty.call(d, r.id) ? d[r.id] : (r.u || ''); }
+  function redeAcha(id) { var f = null; redesGrupos().forEach(function (g) { g.l.forEach(function (r) { if (r.id === id) f = r; }); }); return f; }
+  function redeCurto(u) { return String(u).replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, ''); }
+  function redeNormaliza(v) {
+    v = String(v || '').trim(); if (!v) return '';
+    if (/^[\d\s()+-]{8,}$/.test(v)) { var n = v.replace(/\D/g, ''); if (n.length <= 11) n = '55' + n; return 'https://wa.me/' + n; }
+    if (!/^https?:\/\//i.test(v)) v = 'https://' + v.replace(/^\/+/, '');
+    return v;
+  }
+  function htmlRedes() {
+    var d = redesDados(), gr = redesGrupos(), total = 0, ok = 0, body = '';
+    gr.forEach(function (g) {
+      body += '<h2 class="sec">' + esc(g.g) + '</h2><div class="lista">';
+      g.l.forEach(function (r) {
+        var u = redeUrl(r, d), ic = '<span class="ic"><i class="ti ' + esc(r.i) + '"></i></span>'; total++;
+        if (u) {
+          ok++;
+          body += '<div class="item"><a class="item-link" style="--c:var(' + r.c + ')" href="' + esc(u) + '" target="_blank" rel="noopener">' + ic +
+            '<span class="tx"><b class="t">' + esc(r.n) + '</b><small>' + esc(redeCurto(u)) + '</small></span></a>' +
+            '<button type="button" class="como" data-rede="copiar:' + esc(r.id) + '" aria-label="Copiar link de ' + esc(r.n) + '" title="Copiar link"><i class="ti ti-copy"></i></button>' +
+            '<button type="button" class="fav" data-rede="editar:' + esc(r.id) + '" aria-label="Editar ' + esc(r.n) + '" title="Editar endereço"><i class="ti ti-pencil"></i></button></div>';
+        } else {
+          body += '<div class="item"><button type="button" class="item-link vazio-rede" style="--c:var(' + r.c + ');width:100%;text-align:left;font:inherit;color:inherit" data-rede="editar:' + esc(r.id) + '">' + ic +
+            '<span class="tx"><b class="t">' + esc(r.n) + '</b><small>Toque para colar o endereço</small></span><i class="ti ti-plus" style="color:var(--texto-muted)"></i></button></div>';
+        }
+      });
+      body += '</div>';
+    });
+    return '<section class="mhead" style="--c:var(--sk)"><span class="mh-ic"><i class="ti ti-share"></i></span><div><span class="nivel">Presença digital</span><h1>' + esc(nomeDock('redes')) + '</h1><p>' +
+      ok + ' de ' + total + (total === 1 ? ' rede preenchida' : ' redes preenchidas') + ' · toque para abrir, copie ou edite o endereço</p></div></section>' +
+      '<div class="dlg-acoes" style="margin:6px 0 4px"><button type="button" class="btn-sec" data-rede="copiartudo"><i class="ti ti-copy"></i>Copiar todos os links</button>' +
+      '<button type="button" class="btn-mini" data-rede="nova"><i class="ti ti-plus"></i>Adicionar outra rede</button></div>' + body;
+  }
+  function redeCopia(txt, msg) {
+    var f = function () { var t = document.createElement('textarea'); t.value = txt; t.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } catch (e) { } document.body.removeChild(t); avisar(msg); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(function () { avisar(msg); }, f); else f();
+  }
+  function redeAbreEditor(id) {
+    var d = document.getElementById('dlg-rede'), nv = id === 'nova', r = nv ? null : redeAcha(id);
+    if (!nv && !r) return; redeAtual = id;
+    document.getElementById('rede-tit').textContent = nv ? 'Nova rede social' : r.n;
+    document.getElementById('rede-nome-wrap').hidden = !nv;
+    document.getElementById('rede-nome').value = '';
+    document.getElementById('rede-url').value = nv ? '' : redeUrl(r, redesDados());
+    document.getElementById('rede-limpar').hidden = nv;
+    abrirDlg(d); setTimeout(function () { try { document.getElementById(nv ? 'rede-nome' : 'rede-url').focus(); } catch (e) { } }, 60);
+  }
+  function redeSalvar() {
+    var d = redesDados(), url = redeNormaliza(document.getElementById('rede-url').value), id = redeAtual;
+    if (id === 'nova') {
+      var nm = document.getElementById('rede-nome').value.trim(); if (!nm || !url) { avisar('Preencha o nome e o endereço.'); return; }
+      var ex = redesExtra(); id = 'x_' + Date.now().toString(36); ex.push({ id: id, n: nm }); gravarStorage('painel_redes_extra', ex);
+    }
+    d[id] = url; gravarStorage('painel_redes', d); fecharDlg(document.getElementById('dlg-rede')); render(); avisar('Endereço salvo.');
+  }
+  function redeLimpar() {
+    var r = redeAcha(redeAtual); if (!r) return; var d = redesDados();
+    if (r.custom) { gravarStorage('painel_redes_extra', redesExtra().filter(function (x) { return x.id !== r.id; })); delete d[r.id]; } else d[r.id] = '';
+    gravarStorage('painel_redes', d); fecharDlg(document.getElementById('dlg-rede')); render(); avisar('Removido.');
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-rede]'); if (!b) return;
+    var a = b.getAttribute('data-rede').split(':'), id = a[1];
+    if (a[0] === 'editar') redeAbreEditor(id);
+    else if (a[0] === 'nova') redeAbreEditor('nova');
+    else if (a[0] === 'copiar') { var r = redeAcha(id); if (r) redeCopia(redeUrl(r, redesDados()), 'Link de ' + r.n + ' copiado.'); }
+    else if (a[0] === 'copiartudo') {
+      var d = redesDados(), t = []; redesGrupos().forEach(function (g) { g.l.forEach(function (r) { var u = redeUrl(r, d); if (u) t.push(r.n + ': ' + u); }); });
+      if (t.length) redeCopia(t.join('\n'), 'Todos os links copiados.'); else avisar('Nenhum endereço preenchido ainda.');
+    }
+    else if (a[0] === 'salvar') redeSalvar();
+    else if (a[0] === 'limpar') redeLimpar();
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target && e.target.id === 'rede-url') { e.preventDefault(); redeSalvar(); } });
+
   function render() {
     document.body.setAttribute('data-view', modo);
     [].forEach.call(document.querySelectorAll('.dock [data-go]'), function (b) { b.classList.toggle('on', b.getAttribute('data-go') === modo); });
     vistaEl.classList.toggle('edmode', !!edicao && !!MUNDOS[modo]);
-    vistaEl.innerHTML = modo === 'inicio' ? htmlInicio() : modo === 'controle' ? htmlControle() : modo === 'favoritos' ? htmlFavoritos() : modo === 'mapa' ? htmlMapa() : modo === 'sumario' ? htmlSumario() : htmlMundo(modo);
+    vistaEl.innerHTML = modo === 'inicio' ? htmlInicio() : modo === 'controle' ? htmlControle() : modo === 'favoritos' ? htmlFavoritos() : modo === 'mapa' ? htmlMapa() : modo === 'sumario' ? htmlSumario() : modo === 'redes' ? htmlRedes() : htmlMundo(modo);
     if (modo === 'controle' && ctAba === 'sites') setTimeout(function () { ctTestarSites(); }, 60);
   }
   function aplicarModo(m) {
