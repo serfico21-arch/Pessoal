@@ -70,9 +70,9 @@ function txt(i,n){
 function copy(s,cb){
  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(s).then(cb,function(){fb(s,cb)})}else fb(s,cb)}
 function fb(s,cb){var t=document.createElement("textarea");t.value=s;document.body.appendChild(t);t.select();try{document.execCommand("copy")}catch(e){}t.remove();if(cb)cb()}
-var TABS=["Imóveis","Grupos","Textos","Publicar","Status","Clientes","Limpeza","Portfólio","Ajuda"],tab=0;
+var TABS=["Imóveis","Grupos","Textos","Publicar","Status","Clientes","Limpeza","Portfólio","Tour","Ajuda"],tab=0;
 function nav(){$("nav").innerHTML=TABS.map(function(t,i){return '<button class="'+(i==tab?"on":"")+'" onclick="go('+i+')">'+t+'</button>'}).join("")}
-function go(i){tab=i;nav();[vImo,vGru,vTex,vPub,vSta,vCli,vLim,vPor,vAju][i]()}
+function go(i){tab=i;nav();[vImo,vGru,vTex,vPub,vSta,vCli,vLim,vPor,vTou,vAju][i]()}
 function opts(sel){return act().map(function(i){return '<option value="'+i.c+'"'+(i.c==sel?" selected":"")+'>'+i.c+' · '+esc(i.t)+' · '+esc(i.b)+' · R$ '+i.p+'</option>'}).join("")}
 /* IMÓVEIS */
 function vImo(){
@@ -80,7 +80,7 @@ function vImo(){
 function lstImo(){
  var q=($("q").value||"").toLowerCase();
  $("l").innerHTML=act().filter(function(i){return (i.c+i.t+i.b+i.ci).toLowerCase().indexOf(q)>-1}).map(function(i){
-  return '<div class="card"><div class="row"><b>'+i.c+'</b><span class="tag">'+esc(i.t)+'</span><span class="m">'+esc(i.b)+' · '+esc(i.ci)+'</span><b style="margin-left:auto">R$ '+i.p+'</b></div><small>'+esc(specs(i))+'</small>'+strip(i.c)+'<div>'+esc(i.d)+'</div><div class="row" style="margin-top:8px"><button class="b g" onclick="addF(\''+i.c+'\')">Fotos</button><button class="b" onclick="S.sel=\''+i.c+'\';save();go(2)">Gerar textos</button></div></div>'}).join("")}
+  return '<div class="card"><div class="row"><b>'+i.c+'</b><span class="tag">'+esc(i.t)+'</span>'+(i.tm?'<span class="tag">🎬 Tour</span>':'')+'<span class="m">'+esc(i.b)+' · '+esc(i.ci)+'</span><b style="margin-left:auto">R$ '+i.p+'</b></div><small>'+esc(specs(i))+'</small>'+strip(i.c)+'<div>'+esc(i.d)+'</div><div class="row" style="margin-top:8px"><button class="b g" onclick="addF(\''+i.c+'\')">Fotos</button><button class="b" onclick="S.sel=\''+i.c+'\';save();go(2)">Gerar textos</button></div></div>'}).join("")}
 /* GRUPOS */
 var CQ={},CQE=0,Q=null,QT=null;
 function isFb(g){return /facebook|fb\.com|fb\.watch|fb\.me/i.test(g.l||"")}
@@ -93,7 +93,7 @@ function cq(){jget("cliques").then(function(d){CQ={};Object.keys(d||{}).forEach(
 function vGru(){
  var dd=DIAS.map(function(d,i){return '<label class="d"><input type="checkbox" class="dk" value="'+i+'" checked>'+d+'</label>'}).join("");
  $("app").innerHTML='<div id="fila"></div><div id="pn"></div>'
- +'<div class="card"><h3>Publicar nos grupos</h3><div class="row"><select id="fi2" style="flex:1" onchange="if(this.value!=\'auto\'){S.sel=this.value;save()}">'+opts(S.sel)+'<option value="auto">🔄 Rodízio automático (melhor imóvel p/ cada grupo)</option></select><select id="fv"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option><option value="3">Variar estilos</option></select></div>'
+ +'<div class="card"><h3>Publicar nos grupos</h3><div class="row"><select id="fi2" style="flex:1" onchange="if(this.value!=\'auto\'){S.sel=this.value;save()}">'+opts(S.sel)+'<option value="auto">🔄 Rodízio automático (melhor imóvel p/ cada grupo)</option></select><select id="fv"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option><option value="3">Variar estilos</option></select><select id="fmd"><option value="0">Mídia: foto</option><option value="1">Mídia: vídeo do tour</option></select></div>'
  +'<div class="row" style="margin-top:8px">Limite de posts no Facebook por dia <input type="number" id="fm" min="1" value="'+(S.maxd||10)+'" style="width:70px"> Intervalo entre grupos <input type="number" id="fe" min="15" value="'+(S.esp||45)+'" style="width:70px"> s <label style="display:flex;gap:6px;align-items:center"><input type="checkbox"'+(S.lk?' checked':'')+' onchange="S.lk=this.checked;save()"> Incluir link no texto</label></div>'
  +'<p class="m" style="margin:8px 0">1) Escolha o imóvel. 2) Marque os grupos abaixo. 3) Toque em Publicar: abre um grupo por vez com o texto e a foto copiados, você cola e publica, e toca em Publicado ✓. Copia o texto com link rastreado e espera o intervalo definido entre um grupo e outro. O Facebook não permite postar sozinho nem abrir vários grupos de uma vez, e não divulga um limite oficial de postagens; por isso o padrão é 10 por dia no Facebook. Ajuste ao seu caso.</p><button class="b g" style="font-size:17px;padding:13px 20px" onclick="iniFila()">▶ Publicar nos grupos marcados</button></div>'
  +'<div class="card"><h3>Novo grupo</h3><div class="row"><input id="gn" placeholder="Nome do grupo"><input id="gl" placeholder="Link do grupo" style="flex:1"></div><p class="m" style="margin:8px 0 4px">Dias em que você posta:</p>'+dd
@@ -134,40 +134,42 @@ function lstG(){pnG();
  if($("cqm"))$("cqm").textContent=CQE?"Contador de cliques indisponível (veja Ajuda › Cliques).":"";
  $("l").innerHTML=S.g.length?S.g.map(function(g,ix){var c=CQ[g.id]||0;return '<div class="card"><div class="row"><label style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox"'+(isSel(g)?' checked':'')+' onchange="selG('+g.id+',this.checked)"><b>'+esc(g.n)+'</b></label>'+(isFb(g)?'<span class="tag">Facebook</span>':'')+pubTag(g)+'<span class="m">'+g.ds.map(function(d){return DIAS[d]}).join(", ")+'</span></div><div class="row" style="margin-top:6px"><span class="tag">'+g.posts+' posts</span><span class="tag">'+(g.opens||0)+' aberturas</span><span class="tag">'+(CQE?"— cliques":c+" cliques no link")+'</span><span class="tag">'+g.leads+' clientes</span><span style="margin-left:auto" class="row">'+(g.l?'<button class="b s" onclick="abreG('+g.id+')">Abrir</button>':'')+'<button class="b r" onclick="if(confirm(\'Remover?\')){S.g.splice('+ix+',1);save();lstG()}">Remover</button></span></div></div>'}).join(""):'<p class="m">Nenhum grupo ainda.</p>'}
 function abreG(id){var g=gid(id);if(isFb(g)&&pausado()&&!confirm("Pausa de segurança ativa por alerta do Facebook. Abrir mesmo assim?"))return;window.open(g.l,"_blank");reg(g);save();lstG()}
-function iniFila(){S.maxd=+$("fm").value||10;S.esp=Math.max(15,+$("fe").value||45);save();Q={ids:S.g.filter(function(g){return isSel(g)&&!feitoHoje(g.id)}).map(function(g){return g.id}),i:$("fi2").value,v:+$("fv").value,w:0,op:0,pm:{}};rdQ()}
+function iniFila(){S.maxd=+$("fm").value||10;S.esp=Math.max(15,+$("fe").value||45);save();Q={ids:S.g.filter(function(g){return isSel(g)&&!feitoHoje(g.id)}).map(function(g){return g.id}),i:$("fi2").value,v:+$("fv").value,md:+$("fmd").value,w:0,op:0,pm:{}};rdQ()}
 function rdQ(){
  var el=$("fila");if(!el)return;if(!Q){el.innerHTML="";return}
  var g=gid(Q.ids[0]);
  if(!g){el.innerHTML='<div class="card"><b>Fila concluída ✓</b><p class="m" style="margin:6px 0">Posts no Facebook hoje: '+hojeFb()+'/'+(S.maxd||10)+'</p>'+pubLista()+'<button class="b" onclick="qFim()">Fechar</button></div>';return}
- var lim=isFb(g)&&(hojeFb()>=(S.maxd||10)||pausado()),h='<div class="card" style="border-color:var(--p)"><div class="row"><span class="tag">Restam '+Q.ids.length+'</span><span class="tag">Facebook hoje: '+hojeFb()+'/'+(S.maxd||10)+'</span></div><h3 style="margin-top:8px">'+esc(g.n)+'</h3><div class="m" style="margin-bottom:6px">Imóvel: <b>'+qi(g)+'</b> · '+esc(find(qi(g)).t)+' · '+esc(find(qi(g)).b)+'</div>';
+ var lim=isFb(g)&&(hojeFb()>=(S.maxd||10)||pausado()),h='<div class="card" style="border-color:var(--p)"><div class="row"><span class="tag">Restam '+Q.ids.length+'</span><span class="tag">Facebook hoje: '+hojeFb()+'/'+(S.maxd||10)+'</span></div><h3 style="margin-top:8px">'+esc(g.n)+'</h3><div class="m" style="margin-bottom:6px">Imóvel: <b>'+qi(g)+'</b> · '+esc(find(qi(g)).t)+' · '+esc(find(qi(g)).b)+'</div>',vd=Q.md==1&&find(qi(g)).tm;
  if(lim)h+='<p class="m">'+(pausado()?'Pausa de segurança ativa por alerta do Facebook. Não publique em grupos do Facebook até acabar.':'Limite diário do Facebook atingido. Pare por hoje para evitar bloqueio, ou pule este grupo.')+'</p><div class="row"><button class="b s" onclick="qPula()">Pular</button><button class="b r" onclick="qFim()">Encerrar</button></div>';
- else h+=(Q.op?'<div class="card" style="border-color:var(--g);background:rgba(25,135,84,.12)"><b>Grupo aberto.</b> '+(Q.im?'Texto e foto foram copiados juntos: cole (Ctrl+V) no post. Se entrar só a foto ou só o texto, use os botões de baixo.':'Texto copiado. Cole no post e anexe a foto com os botões de baixo.')+' Depois de publicar, volte aqui e toque em <b>Publicado ✓</b>.</div>':'')+'<div class="row">'+(Q.op?'<button class="b g" style="font-size:18px;padding:14px 22px;flex:1" onclick="qOk()">Publicado ✓</button><button class="b s" onclick="qAbrir()">Abrir de novo</button>':'<button class="b" style="font-size:18px;padding:14px 22px;flex:1" onclick="qAbrir()"'+(Q.w>0?' disabled':'')+'>'+(Q.w>0?'Aguarde '+Q.w+'s':'📤 Publicar neste grupo')+'</button>')+'<button class="b s" onclick="qPula()">Pular</button><button class="b r" onclick="qFim()">Encerrar</button></div><div class="row" style="margin-top:8px"><button class="b" onclick="imgCopia(qi(gid(Q.ids[0])),this)">Copiar só a imagem</button><button class="b s" onclick="imgShare(qi(gid(Q.ids[0])),this,qt(gid(Q.ids[0])))">Compartilhar foto + texto</button><button class="b s" onclick="imgBaixa(qi(gid(Q.ids[0])),this)">Baixar imagem</button></div>';
+ else h+=(Q.op?'<div class="card" style="border-color:var(--g);background:rgba(25,135,84,.12)"><b>Grupo aberto.</b> '+(vd?'Texto copiado. Cole no post e anexe o vídeo do tour com o botão de baixo.':Q.im?'Texto e foto foram copiados juntos: cole (Ctrl+V) no post. Se entrar só a foto ou só o texto, use os botões de baixo.':'Texto copiado. Cole no post e anexe a foto com os botões de baixo.')+' Depois de publicar, volte aqui e toque em <b>Publicado ✓</b>.'+(Q.pr?'<div style="margin-top:6px"><b>'+esc(Q.pr)+'</b></div>':'')+'</div>':'')+'<div class="row">'+(Q.op?'<button class="b g" style="font-size:18px;padding:14px 22px;flex:1" onclick="qOk()">Publicado ✓</button><button class="b s" onclick="qAbrir()">Abrir de novo</button>':'<button class="b" style="font-size:18px;padding:14px 22px;flex:1" onclick="qAbrir()"'+(Q.w>0?' disabled':'')+'>'+(Q.w>0?'Aguarde '+Q.w+'s':'📤 Publicar neste grupo')+'</button>')+'<button class="b s" onclick="qPula()">Pular</button><button class="b r" onclick="qFim()">Encerrar</button></div><div class="row" style="margin-top:8px"><button class="b" onclick="imgCopia(qi(gid(Q.ids[0])),this)">Copiar só a imagem</button><button class="b s" onclick="imgShare(qi(gid(Q.ids[0])),this,qt(gid(Q.ids[0])))">Compartilhar foto + texto</button><button class="b s" onclick="imgBaixa(qi(gid(Q.ids[0])),this)">Baixar imagem</button></div>'+(vd?'<div class="row" style="margin-top:8px"><button class="b g" data-vu="'+esc(vd)+'" onclick="qVid()">'+vLab(vd)+'</button><a class="b s" style="text-decoration:none" target="_blank" href="'+esc(vd)+'">Abrir vídeo</a></div>':'');
  el.innerHTML=h+'</div>'}
-function qAbrir(){var g=gid(Q.ids[0]),c=qi(g),i=find(c);if(g.l)window.open(g.l,"_blank");reg(g);Q.op=1;Q.im=0;save();copiaTudo(tx(g,i,qv(g,i)),c,function(ok){Q.im=ok;if(!g.l)alert("Texto copiado. Este grupo não tem link cadastrado.");rdQ()});rdQ()}
+function qAbrir(){var g=gid(Q.ids[0]),c=qi(g),vd=Q.md==1&&find(c).tm;if(g.l)window.open(g.l,"_blank");reg(g);Q.op=1;Q.im=0;Q.pr="";save();if(vd)preparaV(vd);copiaTudo(function(){return textoVivo(c,function(i){return tx(g,i,qv(g,i))})},c,function(ok){Q.im=ok;Q.pr=pvMsg(c)+(Q.md==1&&!find(c).tm?" · Este imóvel não tem vídeo do tour: usei a foto.":"");if(!g.l)alert("Texto copiado. Este grupo não tem link cadastrado.");rdQ()},!!vd);rdQ()}
 function qOk(){var g=gid(Q.ids[0]);g.posts++;S.log.push({g:g.id,i:qi(g),t:Date.now()});save();Q.ids.shift();Q.op=0;Q.w=(isFb(g)?(S.esp||45):25);clearInterval(QT);QT=setInterval(function(){if(Q&&Q.w>0){Q.w--;rdQ()}else clearInterval(QT)},1000);rdQ()}
 function qPula(){Q.ids.shift();Q.op=0;rdQ()}
 function qFim(){Q=null;clearInterval(QT);rdQ();if($("l"))lstG()}
-function copiaTudo(t,c,cb){var f=(fts(c)||[])[0];
- if(f&&window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){navigator.clipboard.write([new ClipboardItem({"text/plain":new Blob([t],{type:"text/plain"}),"image/png":imgPng(f)})]).then(function(){cb(1)},function(){copy(t,function(){cb(0)})})}
- else copy(t,function(){cb(0)})}
+function copiaTudo(t,c,cb,so){var f=so?null:(fts(c)||[])[0],tp=typeof t=="function"?t():Promise.resolve(t);
+ if(window.ClipboardItem&&navigator.clipboard&&navigator.clipboard.write){var it={"text/plain":tp.then(function(x){return new Blob([x],{type:"text/plain"})})};if(f)it["image/png"]=imgPng(f);
+  navigator.clipboard.write([new ClipboardItem(it)]).then(function(){cb(f?1:0)},function(){tp.then(function(x){copy(x,function(){cb(0)})})})}
+ else tp.then(function(x){copy(x,function(){cb(0)})})}
 function ultPub(g){var r=S.log.filter(function(x){return x.g==g.id&&hojeS(x)});return r.length?r[r.length-1]:null}
 function hh(t){var d=new Date(t);return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2)}
 function pubTag(g){var r=ultPub(g);return r?'<span class="tag" style="background:var(--g);color:#fff;border-color:var(--g)">✓ Publicado hoje '+hh(r.t)+' · '+esc(r.i)+'</span>':''}
 function pubLista(){var a=S.g.map(function(g){return{g:g,r:ultPub(g)}}).filter(function(x){return x.r});return a.length?'<div style="margin:8px 0"><b>Publicados hoje</b>'+a.map(function(x){return '<div class="row" style="padding:3px 0"><span>✓ '+esc(x.g.n)+'</span><span class="tag">'+esc(x.r.i)+' · '+hh(x.r.t)+'</span>'+(x.g.l?'<a class="b s" style="text-decoration:none;border-radius:8px;padding:5px 10px;color:#fff;margin-left:auto" target="_blank" href="'+esc(x.g.l)+'">Ver no grupo</a>':'')+'</div>'}).join('')+'</div>':''}
 /* TEXTOS */
 function vTex(){
- $("app").innerHTML='<div class="card"><div class="row"><select id="si" onchange="S.sel=this.value;save();genT()" style="flex:1">'+opts(S.sel)+'</select><select id="sv" onchange="genT()"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select></div><label style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox"'+(S.lk?' checked':'')+' onchange="S.lk=this.checked;save();genT()"> Incluir link do imóvel no texto</label></div><div class="card"><div id="fp"></div></div><div class="card"><textarea id="tx"></textarea><div class="row" style="margin-top:8px"><button class="b g" onclick="cp(this)">Copiar texto</button><button class="b" onclick="comp(this)">Compartilhar com fotos</button><button class="b s" onclick="baixar(this)">Baixar fotos</button><button class="b" onclick="imgCopia(\'si\',this)">Copiar imagem</button></div></div>';genT();carregar()}
-function genT(){var i=find($("si").value);$("tx").value=txt(i,+$("sv").value);fotosT()}
+ $("app").innerHTML='<div class="card"><div class="row"><select id="si" onchange="S.sel=this.value;save();genT()" style="flex:1">'+opts(S.sel)+'</select><select id="sv" onchange="genT()"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select></div><label style="display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox"'+(S.lk?' checked':'')+' onchange="S.lk=this.checked;save();genT()"> Incluir link do imóvel no texto</label></div><div class="card"><div id="fp"></div><div id="pvt" class="m" style="margin-top:6px"></div></div><div class="card"><textarea id="tx"></textarea><div class="row" style="margin-top:8px"><button class="b g" onclick="cp(this)">Copiar texto</button><button class="b" onclick="comp(this)">Compartilhar com fotos</button><button class="b s" onclick="baixar(this)">Baixar fotos</button><button class="b" onclick="imgCopia(\'si\',this)">Copiar imagem</button></div></div>';genT();carregar()}
+function genT(){var c=$("si").value,i=find(c);TXG=txt(i,+$("sv").value);$("tx").value=TXG;fotosT();
+ precoAgora(c).then(function(){if(!$("tx")||$("si").value!=c)return;var n=txt(find(c),+$("sv").value);if($("tx").value==TXG){TXG=n;$("tx").value=n}if($("pvt"))$("pvt").textContent=pvMsg(c)})}
 /* PUBLICAR */
 function vPub(){
  var h=new Date().getDay();
- $("app").innerHTML='<div class="card"><div class="row"><select id="pi" style="flex:1">'+opts(S.sel)+'</select><select id="pv"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select><select id="pd">'+DIAS.map(function(d,i){return '<option value="'+i+'"'+(i==h?" selected":"")+'>'+d+'</option>'}).join("")+'</select></div><p class="m">Toque em "Abrir e copiar": o texto vai para a área de transferência e o grupo abre. Cole e clique em Publicar. Depois marque como publicado.</p><div class="row"><button class="b" onclick="imgCopia(\'pi\',this)">Copiar imagem</button><button class="b s" onclick="imgShare(\'pi\',this)">Compartilhar imagem</button><button class="b s" onclick="imgBaixa(\'pi\',this)">Baixar imagem</button></div></div><div id="l"></div>';
+ $("app").innerHTML='<div class="card"><div class="row"><select id="pi" style="flex:1">'+opts(S.sel)+'</select><select id="pv"><option value="0">Curto</option><option value="1">Completo</option><option value="2">Convite</option></select><select id="pd">'+DIAS.map(function(d,i){return '<option value="'+i+'"'+(i==h?" selected":"")+'>'+d+'</option>'}).join("")+'</select></div><p class="m">Toque em "Abrir e copiar": o texto vai para a área de transferência e o grupo abre. Cole e clique em Publicar. Depois marque como publicado.</p><div class="row"><button class="b" onclick="imgCopia(\'pi\',this)">Copiar imagem</button><button class="b s" onclick="imgShare(\'pi\',this)">Compartilhar imagem</button><button class="b s" onclick="imgBaixa(\'pi\',this)">Baixar imagem</button></div><div id="pvm" class="m" style="margin-top:6px"></div></div><div id="l"></div>';
  $("pi").onchange=$("pv").onchange=$("pd").onchange=lstP;lstP()}
 function lstP(){
  var d=+$("pd").value,gs=S.g.filter(function(g){return g.ds.indexOf(d)>-1});
  $("l").innerHTML=gs.length?gs.map(function(g){return '<div class="card"><div class="row"><b>'+esc(g.n)+'</b>'+pubTag(g)+'<span class="tag">'+g.posts+' posts</span><span style="margin-left:auto" class="row"><button class="b" onclick="openG('+g.id+')">Abrir e copiar</button><button class="b g" onclick="done('+g.id+')">Publicado</button></span></div></div>'}).join(""):'<p class="m">Nenhum grupo marcado para este dia. Cadastre em Grupos.</p>'}
 function gid(id){return S.g.filter(function(g){return g.id==id})[0]}
-function openG(id){var g=gid(id),c=$("pi").value,i=find(c);if(g.l)window.open(g.l,"_blank");reg(g);save();copiaTudo(tx(g,i,+$("pv").value),c,function(ok){if(!g.l)alert("Texto copiado. Este grupo não tem link cadastrado.")})}
+function openG(id){var g=gid(id),c=$("pi").value,n=+$("pv").value;if(g.l)window.open(g.l,"_blank");reg(g);save();copiaTudo(function(){return textoVivo(c,function(i){return tx(g,i,n)})},c,function(ok){if(!g.l)alert("Texto copiado. Este grupo não tem link cadastrado.");if($("pvm"))$("pvm").textContent=pvMsg(c)})}
 function done(id){var g=gid(id);g.posts++;S.log.push({g:id,i:$("pi").value,t:Date.now()});save();lstP()}
 /* CLIENTES */
 function vCli(){
@@ -306,9 +308,8 @@ function lstPor(){
   return '<div class="pc"><div class="pim" onclick="'+(a&&a.length?"lb(\''+i.c+'\',0)":"addF(\''+i.c+'\')")+'">'+im+'<span class="rf">'+i.c+'</span>'+(a&&a.length>1?'<span class="nf">'+a.length+' fotos</span>':'')+'</div><div class="pbd"><div class="ppr">R$ '+esc(i.p)+'</div><b>'+esc(i.t)+'</b><small class="m">'+esc(loc)+'</small><small class="m">'+esc(sp)+'</small><p>'+esc(i.d)+'</p><div class="pbt"><button class="b" onclick="envP(\''+i.c+'\')">Enviar</button><button class="b g" onclick="imgCopia(\''+i.c+'\',this)">Copiar imagem</button><a class="b s" style="border-radius:8px;padding:9px 13px;color:#fff" target="_blank" href="'+esc(SITE+i.k)+'">Site</a></div></div></div>'}).join(""):'<p class="m">Nenhum imóvel encontrado.</p>'}
 function envP(c){
  var i=c&&find(c);
- if(i){var t="🏡 "+i.t+" – "+i.b+" | R$ "+i.p+"\n🔖 Ref: "+i.c+"\n📲 WhatsApp: (11) 99350-9109";
-  if(semFoto(c))return;
-  blobs(c,function(f){if(f&&navigator.canShare&&navigator.canShare({files:f}))navigator.share({files:f,text:t}).catch(function(){});else copy(t,function(){alert("Seu aparelho não envia a imagem direto. O texto foi copiado. Use Copiar imagem ou Baixar imagem.")})},1);return}
+ if(i){if(semFoto(c))return;precoAgora(c).then(function(){var i=find(c),t="🏡 "+i.t+" – "+i.b+" | R$ "+i.p+"\n🔖 Ref: "+i.c+"\n📲 WhatsApp: (11) 99350-9109";
+  blobs(c,function(f){if(f&&navigator.canShare&&navigator.canShare({files:f}))navigator.share({files:f,text:t}).catch(function(){});else copy(t,function(){alert("Seu aparelho não envia a imagem direto. O texto foi copiado. Use Copiar imagem ou Baixar imagem.")})},1)});return}
  var u=lkP(""),t2="Portfólio de imóveis – FCosta Corretor";
  if(navigator.share)navigator.share({title:"Portfólio de imóveis",text:t2,url:u}).catch(function(){});
  else copy(t2+"\n"+u,function(){alert("Texto e link copiados.")})}
@@ -339,6 +340,8 @@ d("Cliques (uma vez só)","Para o contador de cliques funcionar, no Firebase (pr
  d("Seus dados e cópia de segurança","Grupos, clientes e contagens ficam guardados <b>só neste aparelho e neste navegador</b>. Se trocar de celular ou limpar os dados do navegador, perde tudo. Por isso, de vez em quando toque em <b>Salvar cópia</b>. Para recuperar, use <b>Restaurar cópia</b>.<div class='row' style='margin-top:8px'><button class='b g' onclick='bk()'>Salvar cópia</button><label class='b s' style='cursor:pointer'>Restaurar cópia<input type='file' accept='.json' style='display:none' onchange='rs(this)'></label></div>")+
  d("Aba Portfólio","Mostra a vitrine dos imóveis como o cliente vê, com foto, preço e descrição. <b>Enviar</b> manda o link do imóvel (portfolio-fcosta.html#código) pelo WhatsApp ou outro app. <b>Copiar link</b> copia o mesmo link. Toque na foto para ampliar. <b>Abrir página do cliente</b> abre a página pública.")+
  d("Portfólio compartilhável","O portfólio é uma página para mandar ao cliente: <b>portfolio-fcosta.html</b>. Ele mostra todos os imóveis com fotos, botão de WhatsApp e botão Compartilhar (cada imóvel tem seu próprio link). Ele lê o seu site em tempo real: imóvel novo, preço ou foto alterados no painel aparecem sozinhos, sem exportar nada. Basta subir o portfolio-fcosta.html no GitHub uma única vez.")+
+ d("Preço sempre do site","Na hora de publicar (fila de grupos, aba Publicar, Textos, Portfólio e Tour) o Publicador lê o preço atual do imóvel direto no site e monta o texto com ele. Aparece a mensagem <b>✅ Preço confirmado no site agora</b>. Se faltar internet, aparece <b>⚠ Não consegui confirmar</b> e ele usa o último preço salvo.")+
+ d("Aba Tour","Mostra os vídeos que você gerou no Tour de Imóveis e publicou pelo botão <b>Compartilhar no site</b>. Toque em <b>Preparar vídeo</b>; quando carregar, toque em <b>Compartilhar vídeo + texto</b> e escolha WhatsApp, Facebook ou Status. Na aba Grupos, escolha <b>Mídia: vídeo do tour</b> para a fila copiar o texto e trazer o botão do vídeo em cada grupo.")+
  d("Dicas","<ul><li>Não poste o mesmo imóvel em todos os grupos no mesmo dia. Alterne os estilos de texto.</li><li>Grupos com muitas postagens e nenhum cliente: use a aba Limpeza.</li><li>Poste com foto: chama muito mais atenção que só o link.</li><li>Fale comigo (WhatsApp (11) 99350-9109) se aparecer algum erro.</li></ul>")}
 function limpaFT(){FT={};NONE={};RT=null;try{localStorage.removeItem("pubft3");localStorage.removeItem("pubft")}catch(e){}}
 function atuF(b){limpaFT();b.textContent="Buscando…";carregar();setTimeout(function(){b.textContent="Atualizar fotos"},2500)}
@@ -379,13 +382,13 @@ function mapR(k,o){
  if(/^\d+([.,]\d+)?$/.test(a))a=a+"m²";
  var fin=nk(fx(f,["finalidade","negocio","operacao","transacao"]));
  var r={k:k,c:c,t:String(t||"Imóvel"),b:String(b||""),ci:String(fx(f,["cidade","city","municipio"])||b),p:p,d:resumo(fx(f,["descricaocurta","descricao","desc","description","detalhes","texto"]))||(String(t||"Imóvel")+" em "+String(b||fx(f,["cidade","city"]))),ph:ph,off:off,al:/alug|locac/.test(fin)||/^FCA/.test(c)};
- if(q)r.q=q;if(v)r.v=v;if(a)r.a=a;return r}
+ if(q)r.q=q;if(v)r.v=v;if(a)r.a=a;var tm=String(fx(f,["tourmp4","tourvideo"])||"");if(/^https?:\/\//.test(tm))r.tm=tm;return r}
 function mesclar(d,seed){
  var bk={},live=[],out=[],ph={},used={},mx=0;
  Object.keys(d||{}).forEach(function(k){var o=d[k];if(o&&typeof o=="object"&&!Array.isArray(o)){var m=mapR(k,o);if(m){bk[k]=m;live.push(m)}}});
  var sd=0;
  seed.forEach(function(l){var m=bk[l.k],x=Object.assign({},l);used[l.c]=1;var n=+l.c.slice(3);if(n>mx)mx=n;
-  if(!m)x.gone=1;else{sd++;if(m.p)x.p=m.p;if(m.off)x.gone=1;if(m.ph.length)ph[l.c]=m.ph}out.push(x)});
+  if(!m)x.gone=1;else{sd++;if(m.p)x.p=m.p;x.tm=m.tm||"";if(m.off)x.gone=1;if(m.ph.length)ph[l.c]=m.ph}out.push(x)});
  var sk={};seed.forEach(function(l){sk[l.k]=1});
  live.filter(function(m){return !sk[m.k]}).sort(function(a,b){return a.k<b.k?-1:a.k>b.k?1:0}).forEach(function(m){
   if(m.off)return;var c=m.c;
@@ -407,12 +410,81 @@ function sync(f){
   var nv=IM.length-IM0.length,gn=IM.filter(function(i){return i.gone}).length;
   stSy("✓ Site sincronizado às "+new Date().toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+" · "+act().length+" imóveis"+(nv>0?" · "+nv+" novo(s)":"")+(gn?" · "+gn+" fora do ar":""));
   ["fi2","si","pi"].forEach(function(id){var e=$(id);if(e){var v=e.value,au=id=="fi2"?'<option value="auto">🔄 Rodízio automático (melhor imóvel p/ cada grupo)</option>':"";e.innerHTML=au+opts(v);e.value=v}});
-  atualizar();carregarOld()
+  atualizar();carregarOld();if(tab==8&&$("tl")&&![].some.call(document.querySelectorAll("#tl video"),function(v){return !v.paused}))lstTou()
  }).catch(function(){SYN=0;stSy("Sem conexão com o site — usando os últimos dados salvos")})}
 function carregar(){sync()}
+/* ===== PREÇO AO VIVO: na hora de publicar, lê o preço atual direto do site ===== */
+var PVS={},TXG="";
+function precoAgora(c){
+ var i=find(c);if(!i||!i.k)return Promise.resolve(false);
+ var lim=new Promise(function(ok){setTimeout(function(){ok(false)},5000)});
+ var job=descobre().then(function(r){if(!r)return false;return jget(r+"/"+encodeURIComponent(i.k))}).then(function(d){
+  if(!d||typeof d!="object")return false;
+  var m=mapR(i.k,d);if(!m||!m.p)return false;
+  i.p=m.p;i.tm=m.tm||"";PVS[c]={ok:true,off:!!m.off,t:Date.now()};
+  try{localStorage.setItem("pubim",JSON.stringify({im:IM,t:Date.now()}))}catch(e){}
+  return true},function(){return false});
+ return Promise.race([job,lim]).then(function(ok){if(!ok)PVS[c]={ok:false,t:Date.now()};return ok})}
+function textoVivo(c,mk){return precoAgora(c).then(function(){return mk(find(c))})}
+function pvMsg(c){var p=PVS[c],i=find(c);if(!p||!i)return "";
+ return p.ok?"✅ Preço confirmado no site agora: R$ "+i.p+(p.off?" · ⚠ este imóvel consta como indisponível no site":""):"⚠ Não consegui confirmar o preço no site agora. Usei o último salvo: R$ "+i.p}
+/* ===== VÍDEOS DO TOUR (publicados no site pelo Tour de Imóveis) ===== */
+var VB={},TS=null,TSE=0,FT_="\n\n📲 WhatsApp: (11) 99350-9109\nFCosta Corretor · CRECI-SP 294791-F | CNAI 52708";
+function vOk(v){return v&&v!=="L"&&v!=="E"}
+function vLab(u){var v=VB[u];return v==="L"?"Carregando vídeo…":v==="E"?"Falhou · tentar de novo":v?"🎬 Compartilhar vídeo + texto":"🎬 Preparar vídeo"}
+function vRe(){
+ if(Q&&$("fila"))rdQ();
+ [].forEach.call(document.querySelectorAll("[data-vu]"),function(b){b.textContent=vLab(b.getAttribute("data-vu"))});
+ [].forEach.call(document.querySelectorAll("[data-pc]"),function(e){e.textContent=pvMsg(e.getAttribute("data-pc"))})}
+function preparaV(u){
+ if(!u)return;var v=VB[u];if(vOk(v)||v==="L")return;
+ Object.keys(VB).forEach(function(x){if(x!=u&&vOk(VB[x]))delete VB[x]});
+ VB[u]="L";vRe();
+ fetch(u).then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(b){VB[u]=b},function(){VB[u]="E"}).then(vRe)}
+function vEnvia(u,nome,t){
+ var v=VB[u];if(!vOk(v))return false;
+ var f=new File([v],nome+".mp4",{type:v.type||"video/mp4"});
+ if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f],text:t}).catch(function(){});
+ else copy(t,function(){alert("Seu aparelho não envia o vídeo direto. O texto foi copiado. Use Abrir vídeo, baixe e anexe no post.")});
+ return true}
+function qVid(){var g=gid(Q.ids[0]),c=qi(g),i=find(c);if(!i.tm)return;if(!vEnvia(i.tm,c+"-tour",qt(g)))preparaV(i.tm)}
+function tDados(k){
+ if(k.slice(0,2)=="t:"){var id=k.slice(2),o=(TS||[]).filter(function(x){return x.id==id})[0];if(!o)return null;var c=(S.tv||{})[id]||"";
+  return{u:o.url,c:c,n:"tour-"+id,t:function(){var i=c&&find(c);if(i)return txt(i,0);return "🎬 "+(o.titulo||"Tour do imóvel")+(o.info?"\n📐 "+o.info:"")+(o.preco?"\n💰 "+(/R\$/.test(o.preco)?"":"R$ ")+o.preco:"")+FT_}}}
+ var i=find(k);if(!i||!i.tm)return null;
+ return{u:i.tm,c:k,n:k+"-tour",t:function(){return txt(find(k),0)}}}
+function tClick(k,b){var d=tDados(k);if(!d)return;
+ if(vOk(VB[d.u])){
+  var p=PVS[d.c];
+  if(d.c&&(!p||Date.now()-p.t>120000)){b.textContent="Conferindo preço no site…";precoAgora(d.c).then(vRe);return}
+  vEnvia(d.u,d.n,d.t());return}
+ if(d.c)precoAgora(d.c).then(vRe);preparaV(d.u)}
+function tCopia(k){var d=tDados(k);if(!d)return;
+ copiaTudo(function(){return d.c?textoVivo(d.c,function(){return d.t()}):Promise.resolve(d.t())},d.c||"",function(){vRe()},true)}
+function tLink(k){var d=tDados(k);if(d)copy(d.u,function(){alert("Link do vídeo copiado.")})}
+function tVinc(id,v){S.tv=S.tv||{};S.tv[id]=v;save();lstTou()}
+function cardV(k,tit,pr){var d=tDados(k);if(!d)return "";
+ return '<div class="card"><div class="row"><b>'+esc(tit[0])+'</b><span class="m">'+esc(tit[1])+'</span>'+(pr?'<b style="margin-left:auto">'+esc(pr)+'</b>':'')+'</div>'
+ +'<video src="'+esc(d.u)+'" controls playsinline preload="metadata" style="width:100%;max-height:320px;border-radius:8px;margin:8px 0;background:#000"></video>'
+ +(k.slice(0,2)=="t:"?'<div class="row" style="margin-bottom:8px"><span class="m">Texto do imóvel:</span><select onchange="tVinc(\''+esc(k.slice(2))+'\',this.value)" style="flex:1"><option value="">Usar os dados do próprio tour</option>'+opts(d.c)+'</select></div>':'')
+ +'<div class="row"><button class="b g" data-vu="'+esc(d.u)+'" onclick="tClick(\''+esc(k)+'\',this)">'+vLab(d.u)+'</button><button class="b" onclick="tCopia(\''+esc(k)+'\')">Copiar texto</button><button class="b s" onclick="tLink(\''+esc(k)+'\')">Copiar link</button><a class="b s" style="text-decoration:none" target="_blank" href="'+esc(d.u)+'">Abrir vídeo</a></div>'
+ +(d.c?'<div class="m" data-pc="'+esc(d.c)+'" style="margin-top:6px">'+esc(pvMsg(d.c))+'</div>':'')+'</div>'}
+function lstTou(){var el=$("tl");if(!el)return;
+ var A=act().filter(function(i){return i.tm}),h='<h3>Vídeos dos imóveis</h3>';
+ h+=A.length?A.map(function(i){return cardV(i.c,[i.c,i.t+" · "+i.b],"R$ "+i.p)}).join(""):'<p class="m">Nenhum imóvel com vídeo ainda. No Tour de Imóveis, toque em “Compartilhar no site”, escolha o imóvel e publique: o vídeo aparece aqui sozinho.</p>';
+ h+='<h3 style="margin-top:16px">Vídeos soltos do Tour</h3>';
+ if(TS===null)h+='<p class="m">Carregando…</p>';
+ else if(TSE)h+='<p class="m">Não consegui ler os vídeos soltos do site (regras do Firebase).</p>';
+ else h+=TS.length?TS.map(function(o){var d=tDados("t:"+o.id);return cardV("t:"+o.id,["Tour",o.titulo||"Tour do imóvel"],d&&d.c?"R$ "+find(d.c).p:(o.preco||""))}).join(""):'<p class="m">Nenhum vídeo solto publicado.</p>';
+ el.innerHTML=h}
+function carTou(f){if(TS&&!f)return;
+ jget("fcosta_tour").then(function(d){TSE=0;TS=Object.keys(d||{}).map(function(k){return Object.assign({id:k},d[k])}).filter(function(x){return x&&x.url}).sort(function(a,b){return (b.ts||0)-(a.ts||0)}).slice(0,30);lstTou()},function(){TSE=1;TS=[];lstTou()})}
+function vTou(){
+ $("app").innerHTML='<div class="row" style="margin-bottom:10px"><button class="b g" onclick="sync(1);carTou(1)">↻ Buscar vídeos do Tour</button><span class="m" id="sy2"></span></div><p class="m" style="margin:0 0 10px">Vídeos gerados no Tour de Imóveis e publicados no site. Toque em Preparar vídeo e depois em Compartilhar: o texto sai com o preço do site na hora.</p><div id="tl"></div>';
+ lstTou();carregar();carTou()}
 /* rodízio automático */
 function proxI(g){
- var L=act().filter(function(i){return (fts(i.c)||[]).length});if(!L.length)L=act();
+ var L=act().filter(function(i){return (fts(i.c)||[]).length});if(!L.length)L=act();if(Q.md==1){var LT=act().filter(function(i){return i.tm});if(LT.length)L=LT}
  var u={};Object.keys(Q.pm).forEach(function(k){var c=Q.pm[k];u[c]=(u[c]||0)+1});
  var sc=L.map(function(i){var lt=0,tt=0;S.log.forEach(function(x){if(x.i==i.c){tt++;if(x.g==g.id&&x.t>lt)lt=x.t}});return{c:i.c,lt:lt,u:u[i.c]||0,tt:tt,r:Math.random()}});
  sc.sort(function(a,b){return a.lt-b.lt||a.u-b.u||a.tt-b.tt||a.r-b.r});return sc[0].c}
