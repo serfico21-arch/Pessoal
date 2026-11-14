@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Central de Tráfego Pago - Corretor de Imóveis</title>
+<style>
+  :root{--bg:#0f172a;--card:#1e293b;--line:#334155;--txt:#f1f5f9;--mut:#94a3b8;--ok:#22c55e;--bad:#ef4444;--warn:#f59e0b;--acc:#38bdf8}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--txt);padding:14px 14px 60px}
+  .wrap{max-width:980px;margin:0 auto}
+  h1{font-size:1.35rem;margin:0 0 2px}
+  .sub{color:var(--mut);margin:0 0 14px;font-size:.88rem}
+  nav{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;position:sticky;top:0;background:var(--bg);z-index:5;padding-top:6px}
+  nav button{flex:0 0 auto;background:var(--card);color:var(--mut);border:1px solid var(--line);padding:9px 13px;border-radius:999px;font-size:.88rem;cursor:pointer;white-space:nowrap}
+  nav button.on{background:var(--acc);color:#04202e;border-color:var(--acc);font-weight:700}
+  section{display:none}section.on{display:block}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:15px}
+  .card h2{font-size:1rem;margin:0 0 10px;color:var(--acc)}
+  .full{grid-column:1/-1}
+  label{display:block;font-size:.78rem;color:var(--mut);margin:10px 0 4px}
+  input,select,textarea{width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:#0b1220;color:var(--txt);font-size:1rem;font-family:inherit}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--acc)}
+  .hint{font-size:.72rem;color:var(--mut);margin-top:2px}
+  .row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.93rem}
+  .row:last-child{border:0}
+  .row b{font-variant-numeric:tabular-nums;text-align:right}
+  .big{font-size:1.4rem;font-weight:700;margin:2px 0 8px}
+  .ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+  .verdict{padding:13px;border-radius:10px;font-size:.93rem;line-height:1.45}
+  .v-ok{background:#14532d55;border:1px solid var(--ok)}
+  .v-bad{background:#7f1d1d55;border:1px solid var(--bad)}
+  .v-warn{background:#78350f55;border:1px solid var(--warn)}
+  ul{margin:8px 0 0;padding-left:18px;color:var(--mut);font-size:.85rem;line-height:1.55}
+  button.btn{background:var(--acc);color:#04202e;border:0;padding:10px 14px;border-radius:8px;font-weight:700;font-size:.92rem;cursor:pointer}
+  button.btn.sec{background:transparent;color:var(--acc);border:1px solid var(--acc)}
+  button.btn.del{background:transparent;color:var(--bad);border:1px solid var(--bad);padding:6px 9px;font-size:.78rem}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .out{background:#0b1220;border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:10px;font-size:.9rem;line-height:1.5;white-space:pre-wrap}
+  .out h3{margin:0 0 6px;font-size:.85rem;color:var(--acc)}
+  .chk{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);font-size:.92rem}
+  .chk input{width:20px;height:20px;margin-top:1px;flex:0 0 auto}
+  .chk.done span{color:var(--mut);text-decoration:line-through}
+  .grp{margin:14px 0 2px;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--warn)}
+  .bar{height:10px;background:#0b1220;border-radius:6px;overflow:hidden;margin-top:6px}
+  .bar i{display:block;height:100%;background:var(--acc)}
+  table{width:100%;border-collapse:collapse;font-size:.84rem}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--mut);font-weight:600}
+  .lead{border:1px solid var(--line);border-radius:10px;padding:11px;margin-top:9px;background:#0b1220}
+  .lead .t{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+  .lead .n{font-weight:700}
+  .lead .m{color:var(--mut);font-size:.8rem;margin-top:3px}
+  .lead .a{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
+  .lead select{width:auto;padding:6px;font-size:.82rem}
+  .lead a{color:var(--ok);font-size:.82rem;text-decoration:none;border:1px solid var(--ok);padding:5px 9px;border-radius:8px}
+  .tag{font-size:.7rem;background:var(--line);padding:2px 8px;border-radius:999px;color:var(--txt)}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:6px}
+  .kpi{background:#0b1220;border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+  .kpi b{display:block;font-size:1.25rem}
+  .kpi span{font-size:.72rem;color:var(--mut)}
+  .note{font-size:.75rem;color:var(--mut);margin-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📈 Central de Tráfego Pago</h1>
+  <p class="sub">Para corretor de imóveis: simule, planeje, crie anúncios e controle seus leads em um só lugar.</p>
+
+  <nav id="tabs">
+    <button data-t="calc" class="on">Calculadora</button>
+    <button data-t="orc">Orçamento</button>
+    <button data-t="txt">Textos</button>
+    <button data-t="leads">Meus leads</button>
+    <button data-t="chk">Checklist</button>
+    <button data-t="guia">Guia</button>
+  </nav>
+
+  <!-- CALCULADORA -->
+  <section id="calc" class="on">
+    <div class="grid">
+      <div class="card">
+        <h2>Seus números</h2>
+        <label>Investimento mensal em anúncios (R$)</label>
+        <input type="number" id="invest" value="1500" min="0" step="50">
+        <label>Custo por lead (R$)</label>
+        <input type="number" id="cpl" value="25" min="0.01" step="1">
+        <div class="hint">Imóveis: costuma ficar entre R$ 15 e R$ 50.</div>
+        <label>Leads que respondem e são qualificados (%)</label>
+        <input type="number" id="qual" value="40" min="0" max="100" step="1">
+        <label>Leads qualificados que agendam visita (%)</label>
+        <input type="number" id="visita" value="30" min="0" max="100" step="1">
+        <label>Visitas que viram venda (%)</label>
+        <input type="number" id="venda" value="8" min="0" max="100" step="0.5">
+        <label>Valor médio do imóvel (R$)</label>
+        <input type="number" id="vgv" value="400000" min="0" step="10000">
+        <label>Comissão (%)</label>
+        <input type="number" id="com" value="5" min="0" max="100" step="0.5">
+        <div class="hint">Se divide com imobiliária/parceiro, use a sua parte.</div>
+        <label>Outros custos por venda (R$)</label>
+        <input type="number" id="outros" value="0" min="0" step="100">
+      </div>
+      <div class="card">
+        <h2>Resultado estimado (mês)</h2>
+        <div class="row"><span>Leads gerados</span><b id="r-leads">-</b></div>
+        <div class="row"><span>Leads qualificados</span><b id="r-qual">-</b></div>
+        <div class="row"><span>Visitas agendadas</span><b id="r-vis">-</b></div>
+        <div class="row"><span>Vendas</span><b id="r-vendas">-</b></div>
+        <div class="row"><span>Custo por visita</span><b id="r-cpv">-</b></div>
+        <div class="row"><span>Custo por venda (CPA)</span><b id="r-cpa">-</b></div>
+        <div class="row"><span>Comissão líquida por venda</span><b id="r-comv">-</b></div>
+        <div class="row"><span>Receita líquida estimada</span><b id="r-rec">-</b></div>
+        <div class="row"><span>Lucro (receita − anúncios)</span><b id="r-lucro">-</b></div>
+        <div class="row"><span>ROAS</span><b id="r-roas">-</b></div>
+        <div class="row"><span>Leads necessários p/ 1 venda</span><b id="r-l1">-</b></div>
+        <div class="row"><span>Custo máx. por lead (equilíbrio)</span><b id="r-be">-</b></div>
+      </div>
+      <div class="card full">
+        <div class="big" id="vt"></div>
+        <div class="verdict" id="vd"></div>
+        <h2 style="margin-top:14px">Como melhorar</h2>
+        <ul id="dicas"></ul>
+        <p class="note">Imóvel tem ciclo de venda longo: avalie resultados em janelas de 3 a 6 meses, não só no mês.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORÇAMENTO -->
+  <section id="orc">
+    <div class="grid">
+      <div class="card">
+        <h2>Divisão da verba</h2>
+        <label>Verba mensal total (R$)</label>
+        <input type="number" id="o-total" value="2000" min="0" step="100">
+        <label>Meta Ads (Instagram/Facebook): <span id="o-pm-v">60</span>%</label>
+        <input type="range" id="o-pm" min="0" max="100" value="60">
+        <label>Google Ads (Pesquisa): <span id="o-pg-v">30</span>%</label>
+        <input type="range" id="o-pg" min="0" max="100" value="30">
+        <label>Portais / outros: <span id="o-pp-v">10</span>%</label>
+        <input type="range" id="o-pp" min="0" max="100" value="10" disabled>
+        <div class="hint">O portal recebe o que sobrar para completar 100%.</div>
+        <label>Custo por lead estimado - Meta (R$)</label>
+        <input type="number" id="o-cm" value="25" min="1">
+        <label>Custo por lead estimado - Google (R$)</label>
+        <input type="number" id="o-cg" value="45" min="1">
+        <label>Leads/mês estimados do portal</label>
+        <input type="number" id="o-lp" value="8" min="0">
+      </div>
+      <div class="card">
+        <h2>Plano</h2>
+        <div id="o-out"></div>
+        <p class="note">Meta: cerca de R$ 30 a R$ 50/dia por campanha dá volume para o algoritmo aprender. Os custos por lead são estimativas, ajuste com seus dados reais.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEXTOS -->
+  <section id="txt">
+    <div class="grid">
+      <div class="card">
+        <h2>Dados do imóvel</h2>
+        <label>Tipo</label>
+        <select id="t-tipo"><option>Apartamento</option><option>Casa</option><option>Casa em condomínio</option><option>Cobertura</option><option>Terreno</option><option>Sala comercial</option><option>Lançamento</option></select>
+        <label>Bairro / cidade</label>
+        <input id="t-bairro" value="Centro" placeholder="Ex.: Jardins, São Paulo">
+        <label>Quartos</label>
+        <input type="number" id="t-q" value="3" min="0">
+        <label>Preço (R$)</label>
+        <input type="number" id="t-preco" value="450000" min="0" step="1000">
+        <label>Diferencial</label>
+        <input id="t-dif" value="2 vagas, lazer completo e perto do metrô" placeholder="Ex.: vista livre, aceita financiamento">
+        <label>Seu nome</label>
+        <input id="t-nome" value="" placeholder="Seu nome e CRECI">
+        <div class="btns"><button class="btn" id="t-gerar">Gerar textos</button></div>
+      </div>
+      <div class="card">
+        <h2>Textos prontos</h2>
+        <div id="t-out"><div class="hint">Preencha os dados e clique em "Gerar textos".</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEADS -->
+  <section id="leads">
+    <div class="card">
+      <h2>Painel</h2>
+      <div class="kpis" id="l-kpis"></div>
+      <label>Investimento do mês para calcular custo real (R$)</label>
+      <input type="number" id="l-inv" value="0" min="0" step="50">
+      <div class="hint" id="l-cpl"></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h2>Novo lead</h2>
+      <div class="grid">
+        <div><label>Nome</label><input id="l-nome"></div>
+        <div><label>WhatsApp (com DDD)</label><input id="l-tel" inputmode="tel" placeholder="11999998888"></div>
+        <div><label>Imóvel de interesse</label><input id="l-imo"></div>
+        <div><label>Origem</label>
+          <select id="l-ori"><option>Instagram</option><option>Facebook</option><option>Google</option><option>Portal</option><option>Indicação</option><option>Outro</option></select>
+        </div>
+      </div>
+      <div class="btns"><button class="btn" id="l-add">Adicionar</button><button class="btn sec" id="l-csv">Exportar CSV</button></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <h2>Funil</h2>
+      <div id="l-list"></div>
+      <p class="note">Os dados ficam salvos só neste navegador/aparelho. Exporte o CSV para ter backup.</p>
+    </div>
+  </section>
+
+  <!-- CHECKLIST -->
+  <section id="chk">
+    <div class="card">
+      <h2>Checklist de campanha</h2>
+      <div class="bar"><i id="c-bar" style="width:0"></i></div>
+      <div class="hint" id="c-txt"></div>
+      <div id="c-list"></div>
+      <div class="btns"><button class="btn sec" id="c-reset">Limpar marcações</button></div>
+    </div>
+  </section>
+
+  <!-- GUIA -->
+  <section id="guia">
+    <div class="grid">
+      <div class="card full">
+        <h2>Onde anunciar (valores aproximados no Brasil)</h2>
+        <table>
+          <tr><th>Canal</th><th>Custo estimado</th><th>Melhor para</th></tr>
+          <tr><td>Meta Ads</td><td>Lead R$ 15–50<br>Mín. R$ 6/dia (ideal R$ 30–50)</td><td>Gerar demanda, WhatsApp, lançamentos</td></tr>
+          <tr><td>Google Ads</td><td>Clique ~R$ 5–15</td><td>Quem já procura imóvel</td></tr>
+          <tr><td>Portais (ZAP, Viva Real, OLX)</td><td>Plano proprietário a partir de ~R$ 90/mês; corretor costuma pagar mais (consulte)</td><td>Vitrine com muita busca</td></tr>
+          <tr><td>Instagram orgânico</td><td>Grátis</td><td>Autoridade, Reels, relacionamento</td></tr>
+          <tr><td>Google Meu Negócio</td><td>Grátis</td><td>Aparecer na busca local</td></tr>
+        </table>
+        <p class="note">Valores são estimativas de mercado e variam por cidade, época e concorrência. Confirme nas plataformas.</p>
+      </div>
+      <div class="card">
+        <h2>Ferramentas gratuitas</h2>
+        <ul>
+          <li><b>Agendor</b> e <b>Zoho CRM</b>: CRM com plano gratuito</li>
+          <li><b>Canva</b> e <b>CapCut</b>: artes e vídeos</li>
+          <li><b>WhatsApp Business</b>: respostas rápidas e etiquetas</li>
+          <li><b>Meta Business Suite</b>: gerenciar posts e anúncios</li>
+          <li><b>Planejador de Palavras-chave</b> (Google): estimar CPC</li>
+          <li><b>Google Analytics / Looker Studio</b>: métricas e painéis</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Métricas-chave</h2>
+        <ul>
+          <li><b>CTR</b> acima de 1,5% = criativo atrai</li>
+          <li><b>CPL</b> abaixo do ponto de equilíbrio</li>
+          <li><b>Taxa de resposta</b> do lead em até 5 min</li>
+          <li><b>Custo por visita</b> e <b>custo por venda</b></li>
+          <li><b>ROAS</b> = receita ÷ investimento</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const num = id => parseFloat($(id).value) || 0;
+const brl = v => isFinite(v) ? v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : '—';
+const dec = (v,d=1) => isFinite(v) ? v.toLocaleString('pt-BR',{maximumFractionDigits:d}) : '—';
+const esc = s => String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function store(k,v){try{if(v===undefined){const r=localStorage.getItem(k);return r?JSON.parse(r):null}localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}}
+
+/* Abas */
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  document.querySelectorAll('section').forEach(s=>s.classList.toggle('on',s.id===b.dataset.t));
+  window.scrollTo(0,0);
+});
+
+/* Calculadora */
+function calc(){
+  const invest=num('invest'),cpl=num('cpl'),qual=num('qual')/100,visita=num('visita')/100,venda=num('venda')/100;
+  const vgv=num('vgv'),com=num('com')/100,outros=num('outros');
+  const leads=cpl>0?invest/cpl:0,lq=leads*qual,vis=lq*visita,vendas=vis*venda;
+  const comV=vgv*com-outros,rec=vendas*comV,lucro=rec-invest;
+  const cpv=vis>0?invest/vis:Infinity,cpa=vendas>0?invest/vendas:Infinity,roas=invest>0?rec/invest:0;
+  const l1=(qual*visita*venda)>0?1/(qual*visita*venda):Infinity;
+  const be=comV>0?comV*qual*visita*venda:0;
+  $('r-leads').textContent=dec(leads);$('r-qual').textContent=dec(lq);$('r-vis').textContent=dec(vis);
+  $('r-vendas').textContent=dec(vendas,2);$('r-cpv').textContent=brl(cpv);$('r-cpa').textContent=brl(cpa);
+  $('r-comv').textContent=brl(comV);$('r-rec').textContent=brl(rec);
+  $('r-lucro').textContent=brl(lucro);$('r-lucro').className=lucro>=0?'ok':'bad';
+  $('r-roas').textContent=dec(roas)+'x';$('r-l1').textContent=dec(l1);$('r-be').textContent=brl(be);
+  let cls,t,m;
+  if(vendas<1){cls='v-warn';t='⚠️ Menos de 1 venda por mês';m=`Você fecharia cerca de ${dec(vendas,2)} venda(s) por mês. Em média, são ${dec(l1)} leads para 1 venda. Pense em janelas de 3 a 6 meses.`}
+  else if(lucro>0&&roas>=3){cls='v-ok';t='✅ Muito bom';m=`Cada R$ 1 investido retorna cerca de ${dec(roas)}x. Aumente a verba aos poucos (até 20% por vez) e acompanhe se o custo por lead se mantém.`}
+  else if(lucro>0){cls='v-ok';t='✅ Lucrativo, margem curta';m=`Lucro de ${brl(lucro)}/mês, mas qualquer queda nas taxas pode virar prejuízo. Foque em atendimento e qualificação.`}
+  else{cls='v-bad';t='❌ Prejuízo na simulação';m=`O custo por lead precisaria ser de no máximo ${brl(be)} para empatar; hoje está em ${brl(cpl)}. Ajuste público, criativos ou as taxas de visita e venda.`}
+  $('vt').textContent=t;$('vd').className='verdict '+cls;$('vd').textContent=m;
+  const d=[];
+  if(cpl>be&&be>0)d.push(`Seu custo por lead (${brl(cpl)}) está acima do equilíbrio (${brl(be)}). Teste vídeos novos e público mais segmentado.`);
+  if(qual<0.4)d.push('Qualificação baixa: use perguntas no formulário (faixa de valor, financiamento ou à vista, prazo).');
+  if(visita<0.3)d.push('Poucas visitas: responda em até 5 minutos e ofereça dois horários de visita.');
+  if(venda<0.1)d.push('Poucas vendas: alinhe o imóvel ao perfil de quem chega e faça follow-up após a visita.');
+  d.push('Faça remarketing para quem viu seu vídeo ou visitou sua página.');
+  d.push('Concentre a verba em 1 ou 2 imóveis ou regiões por vez.');
+  $('dicas').innerHTML=d.map(x=>`<li>${esc(x)}</li>`).join('');
+}
+['invest','cpl','qual','visita','venda','vgv','com','outros'].forEach(i=>$(i).addEventListener('input',calc));
+calc();
+
+/* Orçamento */
+function orc(){
+  const total=num('o-total');
+  let pm=+$('o-pm').value,pg=+$('o-pg').value;
+  if(pm+pg>100){pg=100-pm;$('o-pg').value=pg}
+  const pp=100-pm-pg;
+  $('o-pm-v').textContent=pm;$('o-pg-v').textContent=pg;$('o-pp-v').textContent=pp;$('o-pp').value=pp;
+  const vm=total*pm/100,vg=total*pg/100,vp=total*pp/100;
+  const lm=num('o-cm')>0?vm/num('o-cm'):0,lg=num('o-cg')>0?vg/num('o-cg'):0,lp=vp>0?num('o-lp'):0;
+  const tl=lm+lg+lp;
+  const linha=(n,v,dia,l)=>`<div class="row"><span>${n}</span><b>${brl(v)}${dia?`<br><small>${brl(v/30)}/dia</small>`:''}<br><small>${dec(l)} leads</small></b></div>`;
+  $('o-out').innerHTML=linha('Meta Ads',vm,true,lm)+linha('Google Ads',vg,true,lg)+linha('Portais / outros',vp,false,lp)+
+    `<div class="row"><span><b>Total</b></span><b>${brl(total)}<br><small>${dec(tl)} leads/mês</small></b></div>`+
+    `<div class="row"><span>Custo médio por lead</span><b>${tl>0?brl(total/tl):'—'}</b></div>`;
+}
+['o-total','o-pm','o-pg','o-cm','o-cg','o-lp'].forEach(i=>$(i).addEventListener('input',orc));
+orc();
+
+/* Textos */
+function copiar(id,btn){
+  const t=$(id).innerText;
+  const ok=()=>{btn.textContent='Copiado ✓';setTimeout(()=>btn.textContent='Copiar',1500)};
+  if(navigator.clipboard)navigator.clipboard.writeText(t).then(ok).catch(()=>fb(t,ok));else fb(t,ok);
+}
+function fb(t,ok){const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');ok()}catch(e){}a.remove()}
+$('t-gerar').onclick=()=>{
+  const tipo=$('t-tipo').value,b=$('t-bairro').value.trim()||'sua região',q=num('t-q'),p=num('t-preco'),d=$('t-dif').value.trim(),n=$('t-nome').value.trim();
+  const qt=q>0?` de ${q} quarto${q>1?'s':''}`:'';
+  const pr=p>0?brl(p):'';
+  const ass=n?`\n\n${n}`:'';
+  const v=[
+    {h:'Anúncio direto (preço)',tx:`🏡 ${tipo}${qt} em ${b}${pr?` por ${pr}`:''}\n\n${d?`✔ ${d}\n`:''}✔ Agende sua visita\n\n👉 Toque em "Enviar mensagem" e receba fotos e condições agora.${ass}`},
+    {h:'Anúncio de benefício',tx:`Procurando ${tipo.toLowerCase()}${qt} em ${b}?\n\nEste${d?`: ${d}.`:' imóvel pode ser o certo para você.'}\n${pr?`Valor: ${pr}.\n`:''}\nChame no WhatsApp e veja se ele cabe no seu orçamento e no financiamento.${ass}`},
+    {h:'Anúncio de urgência',tx:`Poucas unidades assim em ${b} ⏳\n\n${tipo}${qt}${pr?` | ${pr}`:''}${d?`\n${d}`:''}\n\nQuem chega primeiro, escolhe melhor. Fale comigo agora e marque a visita.${ass}`}
+  ];
+  const hl=[`${tipo}${qt} em ${b}`,pr?`A partir de ${pr}`:'Agende sua visita','Fale no WhatsApp agora'];
+  const wa=`Olá! Vi o anúncio do ${tipo.toLowerCase()}${qt} em ${b} e gostaria de mais informações.`;
+  const resp=`Olá! Que bom ter você por aqui 😊 Para eu te mostrar as melhores opções, me conta: 1) Qual a faixa de valor? 2) Pretende financiar ou pagar à vista? 3) Para quando pretende mudar?`;
+  let html='';
+  v.forEach((x,i)=>{html+=`<div class="out"><h3>${esc(x.h)}</h3><div id="tx${i}">${esc(x.tx)}</div><div class="btns"><button class="btn sec" onclick="copiar('tx${i}',this)">Copiar</button></div></div>`});
+  html+=`<div class="out"><h3>Títulos curtos</h3><div id="txh">${esc(hl.join('\n'))}</div><div class="btns"><button class="btn sec" onclick="copiar('txh',this)">Copiar</button></div></div>`;
+  html+=`<div class="out"><h3>Mensagem pré-pronta do WhatsApp (botão do anúncio)</h3><div id="txw">${esc(wa)}</div><div class="btns"><button class="btn sec" onclick="copiar('txw',this)">Copiar</button></div></div>`;
+  html+=`<div class="out"><h3>Resposta de qualificação (envie em até 5 min)</h3><div id="txr">${esc(resp)}</div><div class="btns"><button class="btn sec" onclick="copiar('txr',this)">Copiar</button></div></div>`;
+  $('t-out').innerHTML=html;
+};
+
+/* Leads */
+const ST=['Novo','Em contato','Visita agendada','Visitou','Proposta','Vendido','Perdido'];
+let leads=store('trafego_leads')||[];
+function salvar(){store('trafego_leads',leads)}
+function renderLeads(){
+  const c=s=>leads.filter(l=>l.st===s).length;
+  const tot=leads.length,vis=leads.filter(l=>['Visita agendada','Visitou','Proposta','Vendido'].includes(l.st)).length,ven=c('Vendido');
+  $('l-kpis').innerHTML=[['Leads',tot],['Em contato',c('Em contato')],['Visitas',vis],['Vendas',ven],['Conv. lead→venda',tot?dec(ven/tot*100)+'%':'—']]
+    .map(([n,v])=>`<div class="kpi"><b>${v}</b><span>${n}</span></div>`).join('');
+  const inv=num('l-inv');
+  $('l-cpl').textContent=inv>0&&tot>0?`Custo real por lead: ${brl(inv/tot)}${vis?` | por visita: ${brl(inv/vis)}`:''}${ven?` | por venda: ${brl(inv/ven)}`:''}`:'Informe o investimento para ver o custo real.';
+  if(!leads.length){$('l-list').innerHTML='<div class="hint">Nenhum lead ainda. Adicione o primeiro acima.</div>';return}
+  $('l-list').innerHTML=leads.map((l,i)=>{
+    const tel=(l.tel||'').replace(/\D/g,'');
+    const wa=tel?`https://wa.me/${tel.length<=11?'55'+tel:tel}`:'';
+    return `<div class="lead"><div class="t"><span class="n">${esc(l.nome||'Sem nome')}</span><span class="tag">${esc(l.ori)}</span></div>
+    <div class="m">${esc(l.imo||'—')} • ${esc(l.tel||'sem telefone')} • ${esc(l.data)}</div>
+    <div class="a"><select onchange="mudar(${i},this.value)">${ST.map(s=>`<option${s===l.st?' selected':''}>${s}</option>`).join('')}</select>
+    ${wa?`<a href="${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}
+    <button class="btn del" onclick="remover(${i})">Excluir</button></div></div>`}).join('');
+}
+window.mudar=(i,s)=>{leads[i].st=s;salvar();renderLeads()};
+window.remover=i=>{if(confirm('Excluir este lead?')){leads.splice(i,1);salvar();renderLeads()}};
+$('l-add').onclick=()=>{
+  const nome=$('l-nome').value.trim();
+  if(!nome&&!$('l-tel').value.trim()){alert('Informe ao menos nome ou telefone.');return}
+  leads.unshift({nome,tel:$('l-tel').value.trim(),imo:$('l-imo').value.trim(),ori:$('l-ori').value,st:'Novo',data:new Date().toLocaleDateString('pt-BR')});
+  salvar();['l-nome','l-tel','l-imo'].forEach(i=>$(i).value='');renderLeads();
+};
+$('l-inv').addEventListener('input',renderLeads);
+$('l-csv').onclick=()=>{
+  if(!leads.length){alert('Sem leads para exportar.');return}
+  const q=v=>'"'+String(v||'').replace(/"/g,'""')+'"';
+  const csv='\ufeffNome,Telefone,Imovel,Origem,Status,Data\n'+leads.map(l=>[l.nome,l.tel,l.imo,l.ori,l.st,l.data].map(q).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='leads.csv';a.click();
+};
+renderLeads();
+
+/* Checklist */
+const CK=[
+ ['Antes de anunciar',['Definir meta: quanto posso pagar por venda (comissão líquida × margem)','Escolher 1 ou 2 imóveis/regiões para focar','Ter fotos e vídeo de boa qualidade do imóvel','Preparar WhatsApp Business com mensagem de boas-vindas','Criar conta no Meta Business Suite (Instagram + página vinculados)','Separar a verba mensal e o limite diário']],
+ ['Montar a campanha',['Objetivo: Leads ou Mensagens (WhatsApp)','Público: cidade/raio de 10–15 km, 28–55 anos, sem excesso de interesses','Subir 3 a 5 criativos diferentes (vídeo, carrossel, foto)','Colocar preço, bairro e diferencial no texto','Formulário com perguntas de qualificação (valor, financiamento, prazo)','Configurar mensagem pré-pronta no botão de WhatsApp']],
+ ['Primeiros 7 dias',['Não mexer nas campanhas nos 3 primeiros dias','Responder todo lead em até 5 minutos','Registrar cada lead na aba "Meus leads"','Conferir CTR (meta acima de 1,5%) e custo por lead','Pausar criativos sem resultado após volume suficiente de dados']],
+ ['Otimizar e escalar',['Aumentar verba em até 20% do que funciona','Criar remarketing para quem viu o vídeo ou visitou a página','Fazer follow-up após a visita','Pedir indicação e depoimento de clientes','Revisar custo por visita e por venda todo mês']]
+];
+let ck=store('trafego_ck')||{};
+function renderCk(){
+  let tot=0,ok=0,h='';
+  CK.forEach((g,gi)=>{h+=`<div class="grp">${esc(g[0])}</div>`;g[1].forEach((t,ti)=>{
+    const k=gi+'-'+ti;tot++;if(ck[k])ok++;
+    h+=`<label class="chk${ck[k]?' done':''}" style="margin:0"><input type="checkbox" ${ck[k]?'checked':''} onchange="marcar('${k}',this.checked)"><span>${esc(t)}</span></label>`})});
+  $('c-list').innerHTML=h;
+  $('c-bar').style.width=(ok/tot*100)+'%';
+  $('c-txt').textContent=`${ok} de ${tot} concluídos`;
+}
+window.marcar=(k,v)=>{ck[k]=v;store('trafego_ck',ck);renderCk()};
+$('c-reset').onclick=()=>{ck={};store('trafego_ck',ck);renderCk()};
+renderCk();
+</script>
+</body>
+</html>
