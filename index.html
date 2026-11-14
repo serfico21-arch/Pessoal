@@ -24,7 +24,7 @@ body{font:15px/1.45 'DM Sans',sans-serif;color:var(--tx);background:var(--bg);mi
 .glow{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(700px 420px at 15% -8%,color-mix(in srgb,var(--ac) 12%,transparent),transparent 65%),radial-gradient(600px 400px at 100% 0,color-mix(in srgb,var(--vi) 8%,transparent),transparent 60%)}
 a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:pointer}
 :focus-visible{outline:2px solid var(--ac);outline-offset:2px;border-radius:10px}
-.top{position:sticky;top:0;z-index:30;height:var(--hh);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 28px;background:color-mix(in srgb,var(--bg) 78%,transparent);backdrop-filter:blur(14px)}
+.top{position:sticky;top:var(--fh,0px);z-index:30;height:var(--hh);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 28px;background:color-mix(in srgb,var(--bg) 78%,transparent);backdrop-filter:blur(14px)}
 .brand{display:flex;align-items:center;gap:12px;background:none;border:0;text-align:left}
 .selo{width:40px;height:40px;border-radius:50%;overflow:hidden;background:#000;flex:none;box-shadow:0 0 0 2px var(--ac)}
 .selo img{width:100%;height:100%;object-fit:cover;display:block}
@@ -33,7 +33,7 @@ a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:po
 .relogio{font-size:13px;color:var(--texto-muted);margin-right:8px;text-transform:capitalize;white-space:nowrap}.relogio strong{color:var(--tx);font-size:16px}
 .icon-btn{width:42px;height:42px;display:grid;place-items:center;flex:none;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:19px}
 .icon-btn:hover{border-color:var(--ac)}
-.dock{position:fixed;z-index:40;left:0;top:0;bottom:0;width:var(--dock);display:flex;flex-direction:column;align-items:center;justify-content:safe center;overflow-y:auto;scrollbar-width:none;gap:8px;border-right:1px solid var(--line);background:color-mix(in srgb,var(--bg) 70%,transparent);backdrop-filter:blur(14px)}
+.dock{position:fixed;z-index:40;left:0;top:var(--fh,0px);bottom:0;width:var(--dock);display:flex;flex-direction:column;align-items:center;justify-content:safe center;overflow-y:auto;scrollbar-width:none;gap:8px;border-right:1px solid var(--line);background:color-mix(in srgb,var(--bg) 70%,transparent);backdrop-filter:blur(14px)}
 .dock button,.dock a{width:70px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0;border-radius:16px;border:1px solid transparent;background:none;font-size:11.5px;font-weight:600;color:var(--texto-muted);transition:.18s}
 .dock button i,.dock a i{font-size:24px}
 .dock button:hover,.dock a:hover{color:var(--tx);background:color-mix(in srgb,var(--c) 10%,transparent)}
@@ -156,9 +156,9 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
 .meu-item .mi-txt{flex:1;min-width:0}.meu-item small{display:block;color:var(--texto-muted);font-size:11.5px}
 .meu-item button{width:38px;height:38px;border:0;border-radius:10px;cursor:pointer;font-size:17px;background:rgba(251,113,133,.13);color:var(--ro)}
 .dlg-sep{font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--texto-muted);padding-top:4px}
-#visor{position:fixed;inset:0;z-index:9999;display:none;flex-direction:column;background:var(--bg)}
+#visor{position:fixed;top:var(--fh,0px);left:0;right:0;bottom:0;z-index:9999;display:none;flex-direction:column;background:var(--bg)}
 #visor.aberto{display:flex}
-#visor-bar{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top,0px));background:var(--in);border-bottom:2px solid var(--brand)}
+#visor-bar{position:fixed;top:0;left:0;right:0;z-index:10000;display:none;flex-wrap:wrap;align-items:center;gap:6px 8px;padding:6px 10px;box-shadow:0 6px 20px -10px rgba(0,0,0,.55);padding-top:calc(8px + env(safe-area-inset-top,0px));background:var(--in);border-bottom:2px solid var(--brand)}
 #visor-voltar{display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 20px;border:0;border-radius:12px;background:var(--brand);color:var(--onbrand);font:800 16px 'Sora','DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 14px -6px var(--brand)}
 #visor-voltar i{font-size:22px}
 #visor-voltar:active{transform:scale(.96)}
@@ -169,7 +169,16 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
 .btn-sair i{font-size:19px}.btn-sair:hover{background:#b8231a}.btn-sair:active{transform:scale(.95)}
 #visor-cheia{display:inline-grid;place-items:center;flex:none;width:46px;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--tx);font-size:20px;cursor:pointer}
 #visor-bar .btn-sair{min-height:46px}
-@media(max-width:480px){.btn-sair span{display:none}.btn-sair{padding:0 13px}}
+@media(max-width:480px){.btn-sair span,.btn-wa span{display:none}.btn-sair{padding:0 13px}.btn-wa{padding:0 13px}}
+body.com-faixa #visor-bar{display:flex}
+body.com-faixa{padding-top:var(--fh,0px)}
+body.com-faixa .top .btn-sair,body.com-faixa .top [data-tela-cheia]{display:none}
+body:not(.visor-on) #visor-externo{display:none}
+#visor-bar #visor-voltar,#visor-bar #visor-menu,#visor-bar #visor-externo,#visor-bar #visor-cheia,#visor-bar .btn-sair,#visor-bar .btn-wa{min-height:42px}
+#visor-bar #visor-menu,#visor-bar #visor-cheia{width:42px;height:42px}
+.btn-wa{display:inline-flex;align-items:center;justify-content:center;gap:7px;flex:none;padding:0 14px;border-radius:12px;background:#25D366;color:#fff;font:800 14px 'Sora','DM Sans',sans-serif;text-decoration:none;box-shadow:0 4px 14px -5px rgba(37,211,102,.75)}
+.btn-wa i{font-size:21px}.btn-wa:hover{background:#1ebe5b}.btn-wa:active{transform:scale(.95)}
+.vchip.on{border-color:var(--c,var(--brand));background:color-mix(in srgb,var(--c,var(--brand)) 18%,var(--card));font-weight:800}
 #visor-menu{display:inline-grid;place-items:center;flex:none;width:46px;height:46px;border:1.5px solid var(--brand);border-radius:12px;background:transparent;color:var(--brand);font-size:26px;cursor:pointer}
 #visor-menu:active{transform:scale(.94)}
 #visor-chips{order:5;flex:0 0 100%;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 0 4px}
@@ -177,7 +186,7 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
 .vchip{flex:none;display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--tx);font:600 13px 'DM Sans',sans-serif;cursor:pointer;white-space:nowrap}
 .vchip i{color:var(--c,var(--brand));font-size:17px}.vchip:hover{border-color:var(--c,var(--brand))}
 .vchip.add{border-style:dashed;color:var(--brand)}.vchip.add i{color:var(--brand)}
-#vg{position:absolute;left:0;right:0;bottom:0;z-index:5;display:none;background:rgba(0,0,0,.5)}
+#vg{position:fixed;left:0;right:0;bottom:0;top:var(--fh,0px);z-index:10001;display:none;background:rgba(0,0,0,.5)}
 #vg.on{display:block}
 #vg-box{width:min(430px,94vw);height:100%;display:flex;flex-direction:column;background:var(--bg);border-right:2px solid var(--brand);box-shadow:8px 0 30px -10px rgba(0,0,0,.5)}
 #vg-top{flex:none;padding:12px;display:flex;gap:8px;border-bottom:1px solid var(--line)}
@@ -191,7 +200,7 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
 .vg-it:hover{border-color:var(--c,var(--brand))}.vg-it>i{font-size:20px;color:var(--c,var(--brand));flex:none}
 .vg-it b{display:block;font:600 14px 'DM Sans',sans-serif}.vg-it small{display:block;font-size:12px;color:var(--texto-muted)}
 .vg-vazio{padding:24px 6px;color:var(--texto-muted)}
-#vm{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:14px}
+#vm{position:fixed;inset:0;z-index:10002;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:14px}
 #vm.on{display:flex}
 #vm-box{width:min(460px,100%);max-height:100%;overflow-y:auto;padding:18px;border-radius:18px;background:var(--bg);border:2px solid var(--brand);color:var(--tx)}
 #vm-box h3{margin:0 0 10px;font:800 17px 'Sora',sans-serif}#vm-box h4{margin:16px 0 6px;font:700 13px 'DM Sans',sans-serif}
@@ -2233,7 +2242,7 @@ var FERRAMENTAS = [
   /* link para outro site sem nova aba: abre em nova aba, o painel não sai do lugar */
   document.addEventListener('click', function (e) {
     if (e.defaultPrevented || e.button) return;
-    var a = e.target.closest && e.target.closest('a[href]'); if (!a || a.hasAttribute('download') || a.target === '_blank') return;
+    var a = e.target.closest && e.target.closest('a[href]'); if (!a || a.hasAttribute('download') || (a.target && !/^_(self|top|parent)$/.test(a.target))) return;
     var h = a.getAttribute('href') || ''; if (!/^(https?:)?\/\//i.test(h)) return;
     var ext; try { ext = new URL(h, location.href).origin !== location.origin; } catch (x) { return; }
     if (!ext) return;
@@ -2258,17 +2267,16 @@ var FERRAMENTAS = [
 })();
 </script>
 <!-- VISOR DE FERRAMENTAS: abre as páginas locais com botão fixo para voltar ao painel -->
-<div id="visor" role="dialog" aria-label="Ferramenta aberta">
-  <div id="visor-bar">
+<div id="visor-bar">
     <button type="button" id="visor-menu" aria-label="Menu com todas as ferramentas" title="Todas as ferramentas"><i class="ti ti-menu-2"></i></button>
     <button type="button" id="visor-voltar" aria-label="Voltar para o painel"><i class="ti ti-arrow-left"></i>Voltar ao painel</button>
     <div id="visor-titulo"></div>
     <a id="visor-externo" target="_blank" rel="noopener"><i class="ti ti-external-link"></i><span>Nova aba</span></a>
     <button type="button" id="visor-cheia" data-tela-cheia="1" aria-label="Tela cheia" title="Tela cheia"><i class="ti ti-arrows-maximize"></i></button>
+    <a id="visor-wa" class="btn-wa" href="https://web.whatsapp.com" target="whatsapp_web" rel="noopener" title="Abrir WhatsApp Web"><i class="ti ti-brand-whatsapp"></i><span>WhatsApp</span></a>
     <button type="button" class="btn-sair" data-sair="1" aria-label="Sair do painel" title="Sair do painel"><i class="ti ti-power"></i><span>Sair</span></button>
     <div id="visor-chips" role="navigation" aria-label="Áreas do painel"></div>
   </div>
-  <iframe id="visor-frame" title="Ferramenta" allow="camera; microphone; clipboard-read; clipboard-write; fullscreen; geolocation; autoplay"></iframe>
   <div id="vg" aria-label="Todas as ferramentas"><div id="vg-box">
     <div id="vg-top"><input id="vg-busca" type="search" placeholder="Buscar ferramenta…" autocomplete="off" aria-label="Buscar ferramenta"><button type="button" id="vg-x" aria-label="Fechar menu"><i class="ti ti-x"></i></button></div>
     <div id="vg-lista"></div>
@@ -2282,6 +2290,8 @@ var FERRAMENTAS = [
     <h4>Atalhos que você adicionou</h4><div id="vm-lista"></div>
     <p style="font-size:12px;color:var(--texto-muted);margin:10px 0 0">Áreas novas criadas em Edição aparecem sozinhas na faixa.</p>
   </div></div>
+<div id="visor" role="dialog" aria-label="Ferramenta aberta">
+  <iframe id="visor-frame" title="Ferramenta" allow="camera; microphone; clipboard-read; clipboard-write; fullscreen; geolocation; autoplay"></iframe>
 </div>
 <script>
 (function () {
@@ -2294,15 +2304,16 @@ var FERRAMENTAS = [
     document.getElementById('visor-externo').href = href;
     visor.classList.add('aberto');
     document.body.style.overflow = 'hidden';
-    faixaMontar();
+    faixaAtualiza();
   }
   function fechar() {
     gFechar(); mFechar();
     visor.classList.remove('aberto');
     frame.src = 'about:blank';
     document.body.style.overflow = '';
+    faixaAtualiza();
   }
-  document.getElementById('visor-voltar').addEventListener('click', fechar);
+  document.getElementById('visor-voltar').addEventListener('click', function () { if (visor.classList.contains('aberto')) fechar(); else if (window.__painel) window.__painel.ir('inicio'); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && visor.classList.contains('aberto')) { if (vM.classList.contains('on')) mFechar(); else if (vG.classList.contains('on')) gFechar(); else fechar(); } });
   /* se alguma ferramenta tiver link para o próprio painel, apenas fecha o visor */
   frame.addEventListener('load', function () {
@@ -2352,7 +2363,9 @@ var FERRAMENTAS = [
     var o = '';
     [].forEach.call(document.querySelectorAll('.dock button[data-go], .dock a[href]'), function (b) {
       var ic = b.querySelector('i'), st = b.getAttribute('style') || '', cm = st.match(/--c:\s*var\((--[\w-]+)\)/), go = b.getAttribute('data-go'), hr = b.getAttribute('href');
-      o += '<button type="button" class="vchip" style="--c:var(' + (cm ? cm[1] : '--brand') + ')" ' + (go ? 'data-go="' + hx(go) + '"' : 'data-h="' + hx(hr) + '"') + ' data-n="' + hx((b.textContent || '').trim()) + '"><i class="' + hx(ic ? ic.className : 'ti ti-star') + '"></i>' + hx((b.textContent || '').trim()) + '</button>';
+      var ativo = go && !visor.classList.contains('aberto') && go === (document.body.getAttribute('data-view') || 'inicio');
+      if (ativo) titulo.textContent = (b.textContent || '').trim();
+      o += '<button type="button" class="vchip' + (ativo ? ' on' : '') + '" style="--c:var(' + (cm ? cm[1] : '--brand') + ')" ' + (go ? 'data-go="' + hx(go) + '"' : 'data-h="' + hx(hr) + '"') + ' data-n="' + hx((b.textContent || '').trim()) + '"><i class="' + hx(ic ? ic.className : 'ti ti-star') + '"></i>' + hx((b.textContent || '').trim()) + '</button>';
     });
     lerFaixa().forEach(function (x) {
       o += '<button type="button" class="vchip" data-h="' + hx(x.h) + '" data-n="' + hx(x.n) + '"><i class="ti ti-star"></i>' + hx(x.n) + '</button>';
@@ -2360,6 +2373,19 @@ var FERRAMENTAS = [
     o += '<button type="button" class="vchip add" data-add="1" title="Adicionar atalho"><i class="ti ti-plus"></i>Adicionar</button>';
     vChips.innerHTML = o;
   }
+  /* a faixa fica fixa no topo em TODAS as telas, menos no painel principal (Início) */
+  function faixaAtualiza() {
+    var aberto = visor.classList.contains('aberto'), vista = document.body.getAttribute('data-view') || 'inicio', mostra = aberto || vista !== 'inicio';
+    document.body.classList.toggle('com-faixa', mostra);
+    document.body.classList.toggle('visor-on', aberto);
+    if (mostra) faixaMontar();
+    document.documentElement.style.setProperty('--fh', (mostra ? vBar.offsetHeight : 0) + 'px');
+    if (mostra) setTimeout(function () { document.documentElement.style.setProperty('--fh', vBar.offsetHeight + 'px'); }, 60);
+  }
+  if (window.ResizeObserver) new ResizeObserver(function () { if (document.body.classList.contains('com-faixa')) document.documentElement.style.setProperty('--fh', vBar.offsetHeight + 'px'); }).observe(vBar);
+  new MutationObserver(faixaAtualiza).observe(document.body, { attributes: true, attributeFilter: ['data-view'] });
+  window.addEventListener('resize', function () { if (document.body.classList.contains('com-faixa')) document.documentElement.style.setProperty('--fh', vBar.offsetHeight + 'px'); });
+  (function () { var wa = document.getElementById('visor-wa'); if (wa && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) { wa.href = 'whatsapp://send'; wa.removeAttribute('target'); } })();
   vChips.addEventListener('click', function (e) {
     var b = e.target.closest('.vchip'); if (!b) return;
     if (b.hasAttribute('data-add')) { mAbrir(); return; }
@@ -2367,7 +2393,7 @@ var FERRAMENTAS = [
     irLink(b.getAttribute('data-h'), b.getAttribute('data-n'));
   });
   /* menu hambúrguer: todas as ferramentas, por área e categoria */
-  function gAbrir() { vG.style.top = vBar.offsetHeight + 'px'; vG.classList.add('on'); vGBusca.value = ''; gDesenha(); setTimeout(function () { try { vGBusca.focus(); } catch (e) { } }, 60); }
+  function gAbrir() { vG.classList.add('on'); vGBusca.value = ''; gDesenha(); setTimeout(function () { try { vGBusca.focus(); } catch (e) { } }, 60); }
   function gFechar() { vG.classList.remove('on'); }
   function gDesenha() {
     var api = window.__painel; if (!api) { vGLista.innerHTML = '<p class="vg-vazio">Lista indisponível. Volte ao painel e abra de novo.</p>'; return; }
@@ -2425,6 +2451,7 @@ var FERRAMENTAS = [
   document.getElementById('vm-x').addEventListener('click', mFechar);
   document.getElementById('vm-area').addEventListener('click', function () { fechar(); if (window.__painel) window.__painel.novaArea(); });
   vM.addEventListener('click', function (e) { if (e.target === vM) mFechar(); });
+  faixaAtualiza();
 })();
 </script>
 <script>
