@@ -158,13 +158,45 @@ dialog.sheet{width:100vw;max-width:100vw;margin:auto 0 0;border-radius:24px 24px
 .dlg-sep{font:600 10.5px 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--texto-muted);padding-top:4px}
 #visor{position:fixed;inset:0;z-index:9999;display:none;flex-direction:column;background:var(--bg)}
 #visor.aberto{display:flex}
-#visor-bar{flex:none;display:flex;align-items:center;gap:12px;padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top,0px));background:var(--in);border-bottom:2px solid var(--brand)}
+#visor-bar{flex:none;display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top,0px));background:var(--in);border-bottom:2px solid var(--brand)}
 #visor-voltar{display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 20px;border:0;border-radius:12px;background:var(--brand);color:var(--onbrand);font:800 16px 'Sora','DM Sans',sans-serif;cursor:pointer;box-shadow:0 4px 14px -6px var(--brand)}
 #visor-voltar i{font-size:22px}
 #visor-voltar:active{transform:scale(.96)}
 #visor-titulo{min-width:0;flex:1;font:600 14px 'DM Sans',sans-serif;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #visor-externo{display:inline-flex;align-items:center;gap:6px;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--brand);color:var(--brand);text-decoration:none;font:700 14px 'Sora','DM Sans',sans-serif}
 #visor-frame{flex:1;width:100%;border:0;background:#fff}
+#visor-menu{display:inline-grid;place-items:center;flex:none;width:46px;height:46px;border:1.5px solid var(--brand);border-radius:12px;background:transparent;color:var(--brand);font-size:26px;cursor:pointer}
+#visor-menu:active{transform:scale(.94)}
+#visor-chips{order:5;flex:0 0 100%;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 0 4px}
+#visor-chips::-webkit-scrollbar{display:none}
+.vchip{flex:none;display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--tx);font:600 13px 'DM Sans',sans-serif;cursor:pointer;white-space:nowrap}
+.vchip i{color:var(--c,var(--brand));font-size:17px}.vchip:hover{border-color:var(--c,var(--brand))}
+.vchip.add{border-style:dashed;color:var(--brand)}.vchip.add i{color:var(--brand)}
+#vg{position:absolute;left:0;right:0;bottom:0;z-index:5;display:none;background:rgba(0,0,0,.5)}
+#vg.on{display:block}
+#vg-box{width:min(430px,94vw);height:100%;display:flex;flex-direction:column;background:var(--bg);border-right:2px solid var(--brand);box-shadow:8px 0 30px -10px rgba(0,0,0,.5)}
+#vg-top{flex:none;padding:12px;display:flex;gap:8px;border-bottom:1px solid var(--line)}
+#vg-busca{flex:1;min-width:0;min-height:44px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--tx);font:500 15px 'DM Sans',sans-serif}
+#vg-x{width:44px;height:44px;flex:none;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--tx);font-size:20px;cursor:pointer}
+#vg-lista{flex:1;overflow-y:auto;padding:4px 12px 24px}
+#vg-lista h3{display:flex;align-items:center;gap:8px;margin:18px 0 6px;font:800 14px 'Sora',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--c)}
+#vg-lista h3 small{font:600 11px 'DM Sans',sans-serif;color:var(--texto-muted)}
+#vg-lista h4{margin:10px 0 4px;font:700 12px 'DM Sans',sans-serif;color:var(--texto-muted)}
+.vg-it{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;margin-bottom:4px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--tx);text-align:left;cursor:pointer}
+.vg-it:hover{border-color:var(--c,var(--brand))}.vg-it>i{font-size:20px;color:var(--c,var(--brand));flex:none}
+.vg-it b{display:block;font:600 14px 'DM Sans',sans-serif}.vg-it small{display:block;font-size:12px;color:var(--texto-muted)}
+.vg-vazio{padding:24px 6px;color:var(--texto-muted)}
+#vm{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);padding:14px}
+#vm.on{display:flex}
+#vm-box{width:min(460px,100%);max-height:100%;overflow-y:auto;padding:18px;border-radius:18px;background:var(--bg);border:2px solid var(--brand);color:var(--tx)}
+#vm-box h3{margin:0 0 10px;font:800 17px 'Sora',sans-serif}#vm-box h4{margin:16px 0 6px;font:700 13px 'DM Sans',sans-serif}
+#vm-box label{display:block;margin:10px 0 3px;font-size:12px;color:var(--texto-muted)}
+#vm-box input,#vm-box select{width:100%;min-height:42px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--tx);font:500 14px 'DM Sans',sans-serif}
+.vm-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.vm-row button{min-height:42px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--tx);font:700 14px 'DM Sans',sans-serif;cursor:pointer}
+.vm-row button.pri{background:var(--brand);border-color:var(--brand);color:var(--onbrand)}
+.vm-it{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}.vm-it span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vm-it button{border:0;background:transparent;color:#d33;font-size:18px;cursor:pointer}
 @media(max-width:480px){#visor-titulo{display:none}#visor-voltar{flex:1;justify-content:center}#visor-externo span{display:none}#visor-externo{padding:0 14px}}
 .gtit{display:flex;align-items:center;gap:12px;margin:36px 0 14px;padding:12px 16px;font:800 25px/1.15 'Sora',sans-serif;letter-spacing:-.01em;color:var(--c);border-left:6px solid var(--c);border-radius:8px 18px 18px 8px;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 16%,transparent),transparent 85%)}.gtit>i{font-size:32px;flex:none}.gtit em{margin-left:auto;flex:none;font-style:normal;font-size:14px;font-weight:800;padding:3px 12px;border-radius:99px;background:color-mix(in srgb,var(--c) 20%,transparent)}
 /* Sumário A–Z */
@@ -781,6 +813,13 @@ var FERRAMENTAS = [
     }).join('');
   }
   carregarMundos(); montarDock();
+  /* ponte usada pela faixa do visor (menu hambúrguer + atalhos) */
+  window.__painel = {
+    mundos: function () { return ORDEM.map(function (m) { return { id: m, n: MUNDOS[m].n, i: MUNDOS[m].i, c: MUNDOS[m].c }; }); },
+    itens: function () { return ligar(todosItens()).map(function (x) { return { m: x.m, t: x.t, s: x.s || '', i: x.i || 'ti-link', h: x.h, g: x._g ? x._g.n : '' }; }); },
+    ir: function (m) { aplicarModo(m); },
+    novaArea: function () { abrirDialogo('abas'); }
+  };
   var vistaEl = document.getElementById('vista');
   var modo = lerStorage('painel_vista', 'inicio');
   if (modo !== 'inicio' && modo !== 'favoritos' && modo !== 'mapa' && modo !== 'sumario' && modo !== 'controle' && !MUNDOS[modo]) modo = 'inicio';
@@ -2179,11 +2218,26 @@ var FERRAMENTAS = [
 <!-- VISOR DE FERRAMENTAS: abre as páginas locais com botão fixo para voltar ao painel -->
 <div id="visor" role="dialog" aria-label="Ferramenta aberta">
   <div id="visor-bar">
+    <button type="button" id="visor-menu" aria-label="Menu com todas as ferramentas" title="Todas as ferramentas"><i class="ti ti-menu-2"></i></button>
     <button type="button" id="visor-voltar" aria-label="Voltar para o painel"><i class="ti ti-arrow-left"></i>Voltar ao painel</button>
     <div id="visor-titulo"></div>
     <a id="visor-externo" target="_blank" rel="noopener"><i class="ti ti-external-link"></i><span>Nova aba</span></a>
+    <div id="visor-chips" role="navigation" aria-label="Áreas do painel"></div>
   </div>
   <iframe id="visor-frame" title="Ferramenta" allow="camera; microphone; clipboard-read; clipboard-write; fullscreen; geolocation; autoplay"></iframe>
+  <div id="vg" aria-label="Todas as ferramentas"><div id="vg-box">
+    <div id="vg-top"><input id="vg-busca" type="search" placeholder="Buscar ferramenta…" autocomplete="off" aria-label="Buscar ferramenta"><button type="button" id="vg-x" aria-label="Fechar menu"><i class="ti ti-x"></i></button></div>
+    <div id="vg-lista"></div>
+  </div></div>
+  <div id="vm"><div id="vm-box">
+    <h3><i class="ti ti-plus"></i> Adicionar atalho na faixa</h3>
+    <label for="vm-sel">Escolher uma ferramenta do painel</label><select id="vm-sel"></select>
+    <label for="vm-n">Nome do botão</label><input id="vm-n" placeholder="Ex.: Recibos" autocomplete="off">
+    <label for="vm-h">Link (arquivo .html do painel ou https://…)</label><input id="vm-h" placeholder="Ex.: recibos.html" autocomplete="off">
+    <div class="vm-row"><button type="button" class="pri" id="vm-ok">Adicionar</button><button type="button" id="vm-area">Criar nova área (aba)</button><button type="button" id="vm-x">Fechar</button></div>
+    <h4>Atalhos que você adicionou</h4><div id="vm-lista"></div>
+    <p style="font-size:12px;color:var(--texto-muted);margin:10px 0 0">Áreas novas criadas em Edição aparecem sozinhas na faixa.</p>
+  </div></div>
 </div>
 <script>
 (function () {
@@ -2196,14 +2250,16 @@ var FERRAMENTAS = [
     document.getElementById('visor-externo').href = href;
     visor.classList.add('aberto');
     document.body.style.overflow = 'hidden';
+    faixaMontar();
   }
   function fechar() {
+    gFechar(); mFechar();
     visor.classList.remove('aberto');
     frame.src = 'about:blank';
     document.body.style.overflow = '';
   }
   document.getElementById('visor-voltar').addEventListener('click', fechar);
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && visor.classList.contains('aberto')) fechar(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && visor.classList.contains('aberto')) { if (vM.classList.contains('on')) mFechar(); else if (vG.classList.contains('on')) gFechar(); else fechar(); } });
   /* se alguma ferramenta tiver link para o próprio painel, apenas fecha o visor */
   frame.addEventListener('load', function () {
     if (!visor.classList.contains('aberto')) return;
@@ -2233,6 +2289,98 @@ var FERRAMENTAS = [
     } catch (err) {}
     abrir(h, trilha);
   }, true);
+
+  /* ===== FAIXA: menu hambúrguer + atalhos das áreas (aparece em todas as ferramentas) ===== */
+  var vBar = document.getElementById('visor-bar'), vChips = document.getElementById('visor-chips'),
+      vG = document.getElementById('vg'), vGBusca = document.getElementById('vg-busca'), vGLista = document.getElementById('vg-lista'),
+      vM = document.getElementById('vm');
+  function hx(t) { return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function nrm(t) { return String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+  function lerFaixa() { try { var l = JSON.parse(localStorage.getItem('painel_faixa') || '[]'); return Array.isArray(l) ? l.filter(function (x) { return x && x.n && x.h; }) : []; } catch (e) { return []; } }
+  function gravaFaixa(l) { try { localStorage.setItem('painel_faixa', JSON.stringify(l)); } catch (e) { } }
+  function mesmaOrigem(h) { try { return new URL(h, location.href).origin === location.origin; } catch (e) { return false; } }
+  function irLink(h, n) {
+    h = String(h || '').trim(); if (!h || /^javascript:/i.test(h)) return;
+    if (/^(mailto:|tel:|sms:|whatsapp:)/i.test(h) || (/^(https?:)?\/\//i.test(h) && !mesmaOrigem(h))) { window.open(h, '_blank', 'noopener'); return; }
+    abrir(h, n);
+  }
+  function faixaMontar() {
+    var o = '';
+    [].forEach.call(document.querySelectorAll('.dock button[data-go], .dock a[href]'), function (b) {
+      var ic = b.querySelector('i'), st = b.getAttribute('style') || '', cm = st.match(/--c:\s*var\((--[\w-]+)\)/), go = b.getAttribute('data-go'), hr = b.getAttribute('href');
+      o += '<button type="button" class="vchip" style="--c:var(' + (cm ? cm[1] : '--brand') + ')" ' + (go ? 'data-go="' + hx(go) + '"' : 'data-h="' + hx(hr) + '"') + ' data-n="' + hx((b.textContent || '').trim()) + '"><i class="' + hx(ic ? ic.className : 'ti ti-star') + '"></i>' + hx((b.textContent || '').trim()) + '</button>';
+    });
+    lerFaixa().forEach(function (x) {
+      o += '<button type="button" class="vchip" data-h="' + hx(x.h) + '" data-n="' + hx(x.n) + '"><i class="ti ti-star"></i>' + hx(x.n) + '</button>';
+    });
+    o += '<button type="button" class="vchip add" data-add="1" title="Adicionar atalho"><i class="ti ti-plus"></i>Adicionar</button>';
+    vChips.innerHTML = o;
+  }
+  vChips.addEventListener('click', function (e) {
+    var b = e.target.closest('.vchip'); if (!b) return;
+    if (b.hasAttribute('data-add')) { mAbrir(); return; }
+    if (b.hasAttribute('data-go')) { var k = b.getAttribute('data-go'); fechar(); if (window.__painel) window.__painel.ir(k); return; }
+    irLink(b.getAttribute('data-h'), b.getAttribute('data-n'));
+  });
+  /* menu hambúrguer: todas as ferramentas, por área e categoria */
+  function gAbrir() { vG.style.top = vBar.offsetHeight + 'px'; vG.classList.add('on'); vGBusca.value = ''; gDesenha(); setTimeout(function () { try { vGBusca.focus(); } catch (e) { } }, 60); }
+  function gFechar() { vG.classList.remove('on'); }
+  function gDesenha() {
+    var api = window.__painel; if (!api) { vGLista.innerHTML = '<p class="vg-vazio">Lista indisponível. Volte ao painel e abra de novo.</p>'; return; }
+    var q = nrm(vGBusca.value.trim()), itens = api.itens(), html = '';
+    api.mundos().forEach(function (m) {
+      var l = itens.filter(function (i) { return i.m === m.id && (!q || nrm(i.t + ' ' + i.s + ' ' + i.g + ' ' + m.n).indexOf(q) > -1); });
+      if (!l.length) return;
+      var gs = [], mp = {}; l.forEach(function (i) { if (!mp[i.g]) { mp[i.g] = []; gs.push(i.g); } mp[i.g].push(i); });
+      html += '<h3 style="--c:var(' + hx(m.c) + ')"><i class="ti ' + hx(m.i) + '"></i>' + hx(m.n) + ' <small>' + l.length + '</small></h3>';
+      gs.forEach(function (g) {
+        html += '<h4>' + hx(g) + '</h4>';
+        mp[g].forEach(function (i) { html += '<button type="button" class="vg-it" style="--c:var(' + hx(m.c) + ')" data-h="' + hx(i.h) + '" data-n="' + hx(i.t) + '"><i class="ti ' + hx(i.i) + '"></i><span><b>' + hx(i.t) + '</b><small>' + hx(i.s) + '</small></span></button>'; });
+      });
+    });
+    var fx = lerFaixa().filter(function (x) { return !q || nrm(x.n).indexOf(q) > -1; });
+    if (fx.length) { html += '<h3 style="--c:var(--brand)"><i class="ti ti-star"></i>Meus atalhos <small>' + fx.length + '</small></h3>'; fx.forEach(function (x) { html += '<button type="button" class="vg-it" data-h="' + hx(x.h) + '" data-n="' + hx(x.n) + '"><i class="ti ti-star"></i><span><b>' + hx(x.n) + '</b><small>' + hx(x.h) + '</small></span></button>'; }); }
+    vGLista.innerHTML = html || '<p class="vg-vazio">Nenhuma ferramenta encontrada.</p>';
+  }
+  document.getElementById('visor-menu').addEventListener('click', function () { if (vG.classList.contains('on')) gFechar(); else gAbrir(); });
+  document.getElementById('vg-x').addEventListener('click', gFechar);
+  vGBusca.addEventListener('input', gDesenha);
+  vG.addEventListener('click', function (e) {
+    if (e.target === vG) { gFechar(); return; }
+    var b = e.target.closest('.vg-it'); if (!b) return;
+    gFechar(); irLink(b.getAttribute('data-h'), b.getAttribute('data-n'));
+  });
+  /* adicionar / remover atalhos da faixa */
+  function mLista() {
+    var l = lerFaixa(), box = document.getElementById('vm-lista');
+    box.innerHTML = l.length ? l.map(function (x, i) { return '<div class="vm-it"><span><b>' + hx(x.n) + '</b> · ' + hx(x.h) + '</span><button type="button" data-del="' + i + '" aria-label="Remover ' + hx(x.n) + '">×</button></div>'; }).join('') : '<p style="font-size:13px;color:var(--texto-muted);margin:0">Nenhum ainda.</p>';
+  }
+  function mAbrir() {
+    var sel = document.getElementById('vm-sel'), api = window.__painel, o = '<option value="">— escolher (opcional) —</option>';
+    if (api) { var its = api.itens(); api.mundos().forEach(function (m) { var l = its.filter(function (i) { return i.m === m.id; }); if (!l.length) return; o += '<optgroup label="' + hx(m.n) + '">' + l.map(function (i) { return '<option value="' + hx(i.h) + '" data-n="' + hx(i.t) + '">' + hx(i.t) + '</option>'; }).join('') + '</optgroup>'; }); }
+    sel.innerHTML = o; document.getElementById('vm-n').value = ''; document.getElementById('vm-h').value = '';
+    mLista(); vM.classList.add('on');
+  }
+  function mFechar() { vM.classList.remove('on'); }
+  document.getElementById('vm-sel').addEventListener('change', function () {
+    var op = this.options[this.selectedIndex]; if (!this.value) return;
+    document.getElementById('vm-h').value = this.value; document.getElementById('vm-n').value = op.getAttribute('data-n') || op.textContent;
+  });
+  document.getElementById('vm-ok').addEventListener('click', function () {
+    var n = document.getElementById('vm-n').value.trim(), h = document.getElementById('vm-h').value.trim();
+    if (!n || !h) { alert('Preencha o nome e o link (ou escolha uma ferramenta na lista).'); return; }
+    if (/^javascript:/i.test(h)) { alert('Link não permitido.'); return; }
+    var l = lerFaixa(); l.push({ n: n, h: h }); gravaFaixa(l);
+    document.getElementById('vm-n').value = ''; document.getElementById('vm-h').value = ''; document.getElementById('vm-sel').value = '';
+    mLista(); faixaMontar();
+  });
+  document.getElementById('vm-lista').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-del]'); if (!b) return;
+    var l = lerFaixa(); l.splice(+b.getAttribute('data-del'), 1); gravaFaixa(l); mLista(); faixaMontar();
+  });
+  document.getElementById('vm-x').addEventListener('click', mFechar);
+  document.getElementById('vm-area').addEventListener('click', function () { fechar(); if (window.__painel) window.__painel.novaArea(); });
+  vM.addEventListener('click', function (e) { if (e.target === vM) mFechar(); });
 })();
 </script>
 <script>
