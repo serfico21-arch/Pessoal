@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Aniversariantes — FCosta</title>
+<style>
+:root{--bg:#f2f5fa;--card:#fff;--line:rgba(30,41,59,.12);--tx:#1e293b;--mu:#64748b;--in:#f3f6fb;--br:#4c7ef3;--on:#fff;--ok:#2fa37a;--ruim:#e0607a;--am:#d99a1c}
+@media(prefers-color-scheme:dark){:root{--bg:#1f2a3d;--card:#283550;--line:rgba(255,255,255,.14);--tx:#eef2fa;--mu:#b3bfd6;--in:#1d283b;--br:#8ab4ff;--on:#10203f;--ok:#6fd8ae;--ruim:#f5949f;--am:#f4cd7a}}
+*{box-sizing:border-box;margin:0}body{font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--tx);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.w{max-width:820px;margin:0 auto;padding:14px}a{color:var(--br)}
+header{display:flex;align-items:center;gap:10px;margin-bottom:12px}header h1{font-size:20px;flex:1}header small{display:block;color:var(--mu);font-size:13px;font-weight:400}
+.b{border:0;border-radius:10px;padding:10px 14px;font:600 14px inherit;background:var(--br);color:var(--on);cursor:pointer;text-decoration:none;display:inline-block}.b.s{background:var(--in);color:var(--tx);border:1px solid var(--line)}.b.p{padding:6px 10px;font-size:13px}
+.c{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}.f .l{grid-column:1/-1}
+label{font-size:12px;color:var(--mu);font-weight:600;display:block;margin-bottom:3px}
+input,select,textarea{width:100%;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--in);color:var(--tx);font:inherit}textarea{min-height:64px}
+.k{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.k div{flex:1;min-width:120px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}.k b{display:block;font-size:19px}.k span{font-size:12px;color:var(--mu)}
+.r{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}.r h3{font-size:16px}.r p{font-size:13px;color:var(--mu);margin-top:2px;white-space:pre-wrap}
+.t{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--in);border:1px solid var(--line)}.t.x{color:var(--ruim);border-color:var(--ruim)}.t.o{color:var(--ok);border-color:var(--ok)}.t.a{color:var(--am);border-color:var(--am)}
+.ac{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.v{text-align:center;color:var(--mu);padding:24px}
+</style></head><body><div class="w">
+<header><a class="b s p" href="index.html">← Painel</a><h1>Aniversariantes<small>Família, membros, amigos e clientes: nunca esqueça uma data</small></h1></header>
+<div class="k" id="k"></div>
+<div class="c"><form id="fm" onsubmit="return false"><div class="f" id="cp"></div>
+<div class="ac"><button class="b" id="sv">Salvar</button><button class="b s" id="cn" type="button" hidden>Cancelar edição</button></div></form></div>
+<div class="c"><div class="f"><div><label>Buscar</label><input id="q" placeholder="Digite para filtrar…"></div><div id="fw"></div></div>
+<div class="ac"><button class="b s p" id="csv">Baixar planilha (CSV)</button></div></div>
+<div id="ls"></div>
+<p class="v" style="font-size:12px">Os dados ficam salvos só neste navegador. Faça o backup na aba Controle do painel.</p>
+</div><script>
+var CFG={id:'aniv',tel:'tel',nota:'obs',
+campos:[{k:'nome',n:'Nome'},{k:'tel',n:'Telefone (WhatsApp)',t:'tel'},{k:'nasc',n:'Data de nascimento',t:'data'},
+{k:'rel',n:'Relação',t:'sel',filtro:1,o:['Família','Membro da igreja','Amigo','Cliente','Outro']},{k:'obs',n:'Observação',t:'area'}],
+ordem:function(o){var d=prox(o);return d==null?9e6:d},
+info:function(o){var d=prox(o),n=anos(o),t=null;if(d!=null)t=d==0?['Hoje! 🎉','a']:d<=7?['Em '+d+' d','a']:['Em '+d+' d','o'];
+ return{linha:[o.rel,o.nasc?br(o.nasc).slice(0,5)+(n!=null?' · fará '+n+' anos':''):''].filter(Boolean),tag:t}},
+msg:function(o){return 'Parabéns, '+o.nome.split(' ')[0]+'! Que Deus abençoe grandemente a sua vida neste dia. Feliz aniversário! 🎂'},
+kpis:function(D){var m=D.filter(function(o){var d=prox(o);return d!=null&&d<=30}).length,h=D.filter(function(o){return prox(o)==0}).length;return[['Cadastrados',D.length],['Hoje',h],['Nos próximos 30 dias',m]]}};
+
+function venc(s){var d=dd(s);return d?Math.round((d-hoje())/864e5):null}
+function prox(o){var d=dd(o.nasc);if(!d)return null;var h=hoje(),n=new Date(h.getFullYear(),d.getMonth(),d.getDate());if(n<h)n=new Date(h.getFullYear()+1,d.getMonth(),d.getDate());return Math.round((n-h)/864e5)}
+function anos(o){var d=dd(o.nasc);if(!d)return null;var h=hoje(),a=h.getFullYear()-d.getFullYear();if(prox(o)>0&&new Date(h.getFullYear(),d.getMonth(),d.getDate())>h)return a;return prox(o)==0?a:a+1}
+var K='fc_'+CFG.id,D=[],ed=null;
+try{D=JSON.parse(localStorage.getItem(K)||'[]');if(!Array.isArray(D))D=[]}catch(e){D=[]}
+function gr(){try{localStorage.setItem(K,JSON.stringify(D))}catch(e){alert('Não foi possível salvar neste navegador.')}}
+function E(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function N(v){v=parseFloat(String(v).replace(/\./g,'').replace(',','.'));return isNaN(v)?0:v}
+function M(n){return n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function hoje(){var d=new Date();d.setHours(0,0,0,0);return d}
+function dd(s){if(!s)return null;var p=s.split('-');return new Date(+p[0],+p[1]-1,+p[2])}
+function br(s){return s?s.split('-').reverse().join('/'):''}
+function tel(s){var n=String(s||'').replace(/\D/g,'');if(n.length<10)return '';return 'https://wa.me/'+(n.length<=11?'55'+n:n)}
+var ID=function(f){return 'f_'+f.k};
+document.getElementById('cp').innerHTML=CFG.campos.map(function(f){
+ var h='<div class="'+(f.t=='area'?'l':'')+'"><label for="'+ID(f)+'">'+E(f.n)+'</label>';
+ if(f.t=='sel')h+='<select id="'+ID(f)+'">'+f.o.map(function(o){return'<option>'+E(o)+'</option>'}).join('')+'</select>';
+ else if(f.t=='area')h+='<textarea id="'+ID(f)+'"></textarea>';
+ else h+='<input id="'+ID(f)+'" type="'+(f.t=='tel'?'tel':f.t=='data'?'date':f.t=='num'?'text':'text')+'"'+(f.t=='num'?' inputmode="decimal"':'')+(f.ph?' placeholder="'+E(f.ph)+'"':'')+'>';
+ return h+'</div>'}).join('');
+var fs=CFG.campos.filter(function(f){return f.t=='sel'&&f.filtro})[0];
+if(fs)document.getElementById('fw').innerHTML='<label>'+E(fs.n)+'</label><select id="fl"><option value="">Todos</option>'+fs.o.map(function(o){return'<option>'+E(o)+'</option>'}).join('')+'</select>';
+function lim(){CFG.campos.forEach(function(f){var e=document.getElementById(ID(f));e.value=f.t=='sel'?f.o[0]:(f.pad||'')});ed=null;document.getElementById('cn').hidden=true;document.getElementById('sv').textContent='Salvar'}
+lim();
+document.getElementById('sv').onclick=function(){
+ var o={};CFG.campos.forEach(function(f){o[f.k]=document.getElementById(ID(f)).value.trim()});
+ if(!o[CFG.campos[0].k]){alert('Preencha: '+CFG.campos[0].n);return}
+ if(ed==null){o.id=Date.now();D.unshift(o)}else{o.id=D[ed].id;D[ed]=o}
+ gr();lim();pinta()};
+document.getElementById('cn').onclick=lim;
+function pinta(){
+ var q=document.getElementById('q').value.toLowerCase(),fl=(document.getElementById('fl')||{}).value||'';
+ var L=D.map(function(o,i){return{o:o,i:i}}).filter(function(x){
+  if(fl&&x.o[fs.k]!==fl)return false;
+  return !q||JSON.stringify(x.o).toLowerCase().indexOf(q)>-1});
+ if(CFG.ordem)L.sort(function(a,b){return CFG.ordem(a.o)-CFG.ordem(b.o)});
+ document.getElementById('k').innerHTML=CFG.kpis(D).map(function(k){return'<div><b>'+E(k[1])+'</b><span>'+E(k[0])+'</span></div>'}).join('');
+ document.getElementById('ls').innerHTML=L.length?L.map(function(x){var o=x.o,s=CFG.info(o),w=tel(o[CFG.tel]);
+  return'<div class="c"><div class="r"><div><h3>'+E(o[CFG.campos[0].k])+'</h3><p>'+s.linha.map(E).join(' · ')+(o[CFG.nota]?'\n'+E(o[CFG.nota]):'')+'</p></div>'+(s.tag?'<span class="t '+s.tag[1]+'">'+E(s.tag[0])+'</span>':'')+'</div>'
+  +'<div class="ac">'+(w?'<a class="b p" target="_blank" rel="noopener" href="'+w+(CFG.msg?'?text='+encodeURIComponent(CFG.msg(o)):'')+'">WhatsApp</a>':'')
+  +(CFG.fim?'<button class="b s p" onclick="fim('+x.i+')">'+E(CFG.fim.n)+'</button>':'')
+  +'<button class="b s p" onclick="edi('+x.i+')">Editar</button><button class="b s p" onclick="exc('+x.i+')">Excluir</button></div></div>'}).join(''):'<p class="v">Nada cadastrado ainda.</p>'}
+function edi(i){ed=i;CFG.campos.forEach(function(f){document.getElementById(ID(f)).value=D[i][f.k]||''});document.getElementById('cn').hidden=false;document.getElementById('sv').textContent='Salvar alteração';scrollTo(0,0)}
+function exc(i){if(confirm('Excluir "'+D[i][CFG.campos[0].k]+'"?')){D.splice(i,1);gr();pinta()}}
+function fim(i){D[i][CFG.fim.k]=CFG.fim.v;gr();pinta()}
+document.getElementById('q').oninput=pinta;if(fs)document.getElementById('fl').onchange=pinta;
+document.getElementById('csv').onclick=function(){
+ var c=CFG.campos.map(function(f){return f.n}),t=[c].concat(D.map(function(o){return CFG.campos.map(function(f){return o[f.k]||''})}));
+ var s='\ufeff'+t.map(function(r){return r.map(function(v){return'"'+String(v).replace(/"/g,'""')+'"'}).join(';')}).join('\r\n');
+ var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([s],{type:'text/csv'}));a.download=CFG.id+'.csv';a.click()};
+pinta();
+</script></body></html>
