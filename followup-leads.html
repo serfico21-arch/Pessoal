@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="utf-8">
+<script>try{document.documentElement.setAttribute('data-theme',JSON.parse(localStorage.getItem('painel_tema2'))||'light')}catch(e){}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Follow-up de Clientes | FCosta Corretor</title>
+<style>
+:root{--bg:#0e1525;--card:#161f35;--card2:#1b2540;--line:rgba(255,255,255,.09);--tx:#eef1f8;--mu:#9aa6c0;--in:#121a2e;--inb:rgba(255,255,255,.16);--brand:#9db8f0;--onb:#0e1a36;--gold:#e0b25a;--wa:#5fd98f;--ro:#f08a9b;--am:#e0b25a;--cy:#62cfe0;--sombra:0 10px 28px -18px rgba(0,0,0,.65)}
+[data-theme=light]{--bg:#f5f3ee;--card:#fff;--card2:#fff;--line:rgba(20,33,61,.09);--tx:#14213d;--mu:#6b7385;--in:#f6f4ef;--inb:rgba(20,33,61,.16);--brand:#1f3a6e;--onb:#fff;--gold:#b8892b;--wa:#12864a;--ro:#c2455e;--am:#b8892b;--cy:#1b8a9e;--sombra:0 12px 28px -20px rgba(20,33,61,.28)}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 "DM Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh;-webkit-font-smoothing:antialiased;padding:env(safe-area-inset-top,0px) 0 calc(80px + env(safe-area-inset-bottom,0px))}
+.glow{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(760px 440px at 12% -10%,color-mix(in srgb,var(--gold) 11%,transparent),transparent 65%),radial-gradient(620px 420px at 100% 0,color-mix(in srgb,var(--brand) 10%,transparent),transparent 62%)}
+::selection{background:color-mix(in srgb,var(--gold) 35%,transparent)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+header h1,h2,.card .n{font-family:"Sora","DM Sans",sans-serif}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:12px 14px}
+header h1{font-size:17px;margin:0;flex:1}header h1 small{display:block;color:var(--gold);font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+main{max-width:760px;margin:0 auto;padding:14px}
+button,input,select,textarea{font:inherit;color:inherit}
+.btn{border:1px solid var(--b,var(--brand));color:var(--b,var(--brand));background:transparent;border-radius:12px;min-height:40px;padding:0 14px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-size:14px}
+.btn.f{background:var(--b,var(--brand));color:var(--onb)}
+.btn.wa{--b:var(--wa)}.btn.ro{--b:var(--ro)}.btn.go{--b:var(--gold)}
+input,select,textarea{width:100%;background:var(--in);border:1px solid var(--inb);border-radius:12px;padding:10px 12px;min-height:42px}
+label{display:block;font-size:12px;color:var(--mu);margin:10px 0 4px;font-weight:600}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.num{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 6px;text-align:center;box-shadow:var(--sombra)}
+.num b{display:block;font-size:24px}.num span{font-size:11px;color:var(--mu)}
+h2{font-size:13px;color:var(--gold);text-transform:uppercase;letter-spacing:.08em;margin:20px 0 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px;margin-bottom:10px;box-shadow:var(--sombra)}
+.card .t{display:flex;gap:8px;align-items:center;justify-content:space-between}
+.card .n{font-weight:800;font-size:16px}
+.chip{font-size:11px;font-weight:700;border:1px solid var(--gold);color:var(--gold);border-radius:99px;padding:2px 9px;white-space:nowrap}
+.mu{color:var(--mu);font-size:13px}.late{color:var(--ro);font-weight:700}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.etp{display:flex;justify-content:space-between;align-items:center;width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.etp b{font-size:18px;color:var(--brand)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));z-index:6}
+nav button{flex:1;background:none;border:0;color:var(--mu);font-size:12px;font-weight:700;padding:6px 0;cursor:pointer}
+nav button.on{color:var(--gold)}nav button i{display:block;font-style:normal;font-size:20px}
+dialog{border:1px solid var(--line);background:var(--card);color:var(--tx);width:min(560px,94vw);max-height:92dvh;border-radius:22px;padding:16px}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+.tl{border-left:2px solid var(--line);margin-left:6px;padding-left:12px}.tl div{margin-bottom:8px;font-size:13px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fil{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px}.fil button{white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<header>
+  <a class="btn" href="index.html" aria-label="Voltar ao painel">←</a>
+  <h1><small>FCosta Corretor</small>Follow-up de Clientes</h1>
+  <button class="btn go" onclick="tema()" aria-label="Tema">◐</button>
+  <button class="btn f" onclick="ficha()">+ Cliente</button>
+</header>
+<main id="app"></main>
+<nav id="nav"></nav>
+<dialog id="dlg"></dialog>
+
+<script>
+var K='fcosta_followup_v1';
+var ETAPAS=['Novo','Em contato','Visita marcada','Proposta','Negociação','Fechado','Desistiu'];
+var FINAIS=['Fechado','Desistiu'];
+var QUER=['Comprar','Alugar','Vender','Avaliar imóvel'];
+var D=carregar(), aba='hoje', filtro='', busca='';
+salvar();
+
+function carregar(){var x=carregar0();migrar(x);return x}
+function migrar(d){
+  if(d.mig)return;d.mig=1;
+  try{var M={Contatado:'Em contato',Visita:'Visita marcada',Perdido:'Desistiu'};
+    JSON.parse(localStorage.getItem('painel_leads')||'[]').forEach(function(l,i){
+      d.c.push({id:'m'+i+Date.now().toString(36),nome:l.nome||'Sem nome',tel:l.tel||'',email:'',quer:['Comprar','Alugar','Vender'].indexOf(l.interesse)>=0?l.interesse:'Comprar',bairro:'',valor:'',etapa:M[l.status]||l.status||'Novo',ret:'',visita:'',vlocal:'',obs:l.obs||'',h:[{d:'—',t:'Trazido do painel antigo'+(l.interesse?' (interesse: '+l.interesse+')':'')}]})})
+  }catch(e){}
+}
+function carregar0(){
+  try{var x=JSON.parse(localStorage.getItem(K));if(x&&x.c)return x}catch(e){}
+  return {c:[],cfg:{ass:'F. Costa — Corretor e Avaliador de Imóveis',msgs:[
+    {n:'Primeiro contato',t:'Olá {nome}, tudo bem? Aqui é o F. Costa, corretor. Vi seu interesse e queria entender melhor o que você procura.'},
+    {n:'Retorno',t:'Olá {nome}, tudo bem? Passando para saber se você ainda tem interesse. Posso te ajudar com algo?'},
+    {n:'Confirmar visita',t:'Olá {nome}! Confirmando nossa visita. Está tudo certo para o horário combinado?'}]}};
+}
+function salvar(){try{localStorage.setItem(K,JSON.stringify(D))}catch(e){alert('Não consegui salvar neste navegador.')}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
+function hoje(){return new Date().toLocaleDateString('sv')}
+function fmtD(s){if(!s)return'';var p=s.slice(0,10).split('-');return p[2]+'/'+p[1]+(s.length>10?' às '+s.slice(11,16):'')}
+function ativo(c){return FINAIS.indexOf(c.etapa)<0&&!c.del}
+function get(id){return D.c.filter(function(c){return c.id===id})[0]}
+function log(c,t){c.h=c.h||[];c.h.push({d:new Date().toLocaleString('pt-BR').slice(0,16),t:t})}
+function tema(){var h=document.documentElement;h.dataset.theme=h.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('painel_tema2',JSON.stringify(h.dataset.theme))}catch(e){}}
+
+function fone(c){var n=String(c.tel||'').replace(/\D/g,'');if(!n)return'';return n.length<=11?'55'+n:n}
+function msgPronta(c,i){var m=D.cfg.msgs[i];return m?m.t.replace(/\{nome\}/g,(c.nome||'').split(' ')[0]):''}
+
+/* ---------- WhatsApp, e-mail, agenda ---------- */
+function zap(id,i){
+  var c=get(id);if(!fone(c))return alert('Cadastre o telefone do cliente.');
+  var t=msgPronta(c,i==null?-1:i);
+  log(c,'WhatsApp aberto'+(t?': '+t.slice(0,60):''));salvar();
+  window.open('https://wa.me/'+fone(c)+(t?'?text='+encodeURIComponent(t):''),'_blank');
+}
+function mail(id,i,gmail){
+  var c=get(id);if(!c.email)return alert('Cadastre o e-mail do cliente.');
+  var t=msgPronta(c,i==null?-1:i),corpo=(t?t+'\n\n':'')+D.cfg.ass,assunto='Contato - F. Costa Corretor';
+  log(c,'E-mail aberto');salvar();
+  window.open(gmail?'https://mail.google.com/mail/?view=cm&to='+encodeURIComponent(c.email)+'&su='+encodeURIComponent(assunto)+'&body='+encodeURIComponent(corpo)
+    :'mailto:'+c.email+'?subject='+encodeURIComponent(assunto)+'&body='+encodeURIComponent(corpo),'_blank');
+}
+function fim(c){var d=new Date(c.visita);d.setHours(d.getHours()+1);var p=function(n){return String(n).padStart(2,'0')};
+  return d.getFullYear()+p(d.getMonth()+1)+p(d.getDate())+'T'+p(d.getHours())+p(d.getMinutes())+'00'}
+function agendaLink(id){
+  var c=get(id);if(!c.visita)return alert('Marque a data da visita primeiro.');
+  var ini=c.visita.replace(/[-:]/g,'').slice(0,13)+'00';
+  var det='Cliente: '+c.nome+'\nTelefone: '+(c.tel||'')+'\nInteresse: '+(c.quer||'')+' '+(c.bairro||'');
+  window.open('https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent('Visita - '+c.nome)+'&dates='+ini+'/'+fim(c)+'&details='+encodeURIComponent(det)+'&location='+encodeURIComponent(c.vlocal||'')+(c.email?'&add='+encodeURIComponent(c.email):''),'_blank');
+}
+function baixarIcs(id){
+  var c=get(id);if(!c.visita)return alert('Marque a data da visita primeiro.');
+  var ini=c.visita.replace(/[-:]/g,'').slice(0,13)+'00';
+  var s='BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:'+c.id+'@fcosta\r\nDTSTART:'+ini+'\r\nDTEND:'+fim(c)+'\r\nSUMMARY:Visita - '+c.nome+'\r\nLOCATION:'+(c.vlocal||'')+'\r\nBEGIN:VALARM\r\nTRIGGER:-PT1H\r\nACTION:DISPLAY\r\nDESCRIPTION:Visita\r\nEND:VALARM\r\nEND:VEVENT\r\nEND:VCALENDAR';
+  baixar('visita-'+c.nome.replace(/\W+/g,'-')+'.ics',s,'text/calendar');
+}
+function baixar(nome,txt,tipo){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:tipo}));a.download=nome;a.click()}
+
+/* ---------- telas ---------- */
+function cartao(c){
+  var atr=c.ret&&c.ret<hoje()&&ativo(c);
+  return '<div class="card"><div class="t"><span class="n" onclick="ficha(\''+c.id+'\')" style="cursor:pointer">'+esc(c.nome)+'</span><span class="chip">'+esc(c.etapa)+'</span></div>'+
+  '<div class="mu">'+esc([c.quer,c.bairro,c.valor].filter(Boolean).join(' · '))+'</div>'+
+  (c.ret?'<div class="'+(atr?'late':'mu')+'">Retornar: '+fmtD(c.ret)+(atr?' (atrasado)':'')+'</div>':'')+
+  (c.visita?'<div class="mu">Visita: '+fmtD(c.visita)+'</div>':'')+
+  '<div class="row"><button class="btn wa" onclick="zap(\''+c.id+'\')">WhatsApp</button>'+
+  (c.email?'<button class="btn" onclick="mail(\''+c.id+'\',null,true)">E-mail</button>':'')+
+  (c.tel?'<a class="btn" href="tel:'+esc(c.tel)+'">Ligar</a>':'')+
+  '<button class="btn f" onclick="jaFalei(\''+c.id+'\')">Já falei ✓</button></div></div>';
+}
+function vHoje(){
+  var h=hoje(),at=D.c.filter(function(c){return ativo(c)});
+  var atr=at.filter(function(c){return c.ret&&c.ret<h}),hj=at.filter(function(c){return c.ret===h});
+  var vis=at.filter(function(c){return c.visita&&c.visita.slice(0,10)>=h});
+  var s='<div class="grid4"><div class="num"><b style="color:var(--ro)">'+atr.length+'</b><span>Atrasados</span></div><div class="num"><b>'+hj.length+'</b><span>Hoje</span></div><div class="num"><b>'+vis.length+'</b><span>Visitas</span></div><div class="num"><b>'+at.length+'</b><span>Clientes</span></div></div>';
+  s+='<h2>Etapas</h2>'+ETAPAS.map(function(e){var n=D.c.filter(function(c){return c.etapa===e&&!c.del}).length;
+    return '<button class="etp" onclick="filtro=\''+e+'\';ir(\'clientes\')"><span>'+e+'</span><b>'+n+'</b></button>'}).join('');
+  var lista=atr.concat(hj);
+  s+='<h2>Para retornar agora</h2>'+(lista.length?lista.map(cartao).join(''):'<p class="mu">Nenhum retorno para hoje. 🙌</p>');
+  return s;
+}
+function vClientes(){
+  var q=busca.toLowerCase(),l=D.c.filter(function(c){return !c.del&&(!filtro||c.etapa===filtro)&&
+    (!q||[c.nome,c.tel,c.email,c.bairro,c.quer].join(' ').toLowerCase().indexOf(q)>=0)});
+  l.sort(function(a,b){return (a.ret||'9')<(b.ret||'9')?-1:1});
+  var s='<input id="bq" placeholder="Buscar por nome, telefone ou bairro" value="'+esc(busca)+'" oninput="busca=this.value;pintaLista()">';
+  s+='<div class="fil" style="margin-top:8px"><button class="btn'+(filtro?'':' f')+'" onclick="filtro=\'\';ir(\'clientes\')">Todos</button>'+
+    ETAPAS.map(function(e){return '<button class="btn'+(filtro===e?' f':'')+'" onclick="filtro=\''+e+'\';ir(\'clientes\')">'+e+'</button>'}).join('')+'</div>';
+  s+='<div id="lista">'+(l.length?l.map(cartao).join(''):'<p class="mu">Nenhum cliente aqui.</p>')+'</div>';
+  s+='<h2>Buscar clientes</h2><div class="row"><button class="btn go" onclick="buscarGoogle(\'contatos\')">Contatos do Google</button><button class="btn go" onclick="buscarGoogle(\'agenda\')">Da minha agenda</button><button class="btn go" onclick="buscarGoogle(\'gmail\')">Do meu Gmail</button><button class="btn wa" onclick="colarZap()">Colar do WhatsApp</button></div>';
+  s+='<div class="row"><button class="btn" onclick="importarContatos()">Importar dos contatos</button><label class="btn" style="margin:0">Importar .vcf<input type="file" accept=".vcf,text/vcard" hidden onchange="importarVcf(this)"></label></div>';
+  return s;
+}
+function pintaLista(){
+  var q=busca.toLowerCase(),l=D.c.filter(function(c){return !c.del&&(!filtro||c.etapa===filtro)&&(!q||[c.nome,c.tel,c.email,c.bairro,c.quer].join(' ').toLowerCase().indexOf(q)>=0)});
+  document.getElementById('lista').innerHTML=l.length?l.map(cartao).join(''):'<p class="mu">Nenhum cliente aqui.</p>';
+}
+function vAgenda(){
+  var l=D.c.filter(function(c){return ativo(c)&&c.visita}).sort(function(a,b){return a.visita<b.visita?-1:1});
+  var s='<h2>Visitas marcadas</h2>'+(l.length?l.map(function(c){
+    return '<div class="card"><div class="n">'+esc(c.nome)+'</div><div class="mu">'+fmtD(c.visita)+(c.vlocal?' · '+esc(c.vlocal):'')+'</div>'+
+    '<div class="row"><button class="btn go" onclick="agendaLink(\''+c.id+'\')">Google Agenda</button><button class="btn" onclick="baixarIcs(\''+c.id+'\')">Baixar .ics</button><button class="btn wa" onclick="zap(\''+c.id+'\',2)">Confirmar</button></div></div>'}).join(''):'<p class="mu">Nenhuma visita marcada.</p>');
+  return s+'<a class="btn" target="_blank" href="https://calendar.google.com/calendar/u/0/r/agenda">Ver minha agenda do Google</a>';
+}
+function vConfig(){
+  var s='<h2>Mensagens do WhatsApp e e-mail</h2>'+D.cfg.msgs.map(function(m,i){
+    return '<div class="card"><label>Nome</label><input value="'+esc(m.n)+'" onchange="D.cfg.msgs['+i+'].n=this.value;salvar()"><label>Texto (use {nome} para o nome do cliente)</label><textarea rows="3" onchange="D.cfg.msgs['+i+'].t=this.value;salvar()">'+esc(m.t)+'</textarea><div class="row"><button class="btn ro" onclick="D.cfg.msgs.splice('+i+',1);salvar();ir(\'config\')">Remover</button></div></div>'}).join('');
+  s+='<button class="btn" onclick="D.cfg.msgs.push({n:\'Nova mensagem\',t:\'Olá {nome}, \'});salvar();ir(\'config\')">+ Mensagem</button>';
+  s+='<h2>Assinatura do e-mail</h2><input value="'+esc(D.cfg.ass)+'" onchange="D.cfg.ass=this.value;salvar()">';
+  s+='<h2>Conexão com o Google</h2><div class="card"><div class="mu">Para buscar contatos, agenda e Gmail. Só precisa fazer uma vez:<br>1) Entre em console.cloud.google.com e crie um projeto.<br>2) Ative as APIs: People, Google Calendar e Gmail.<br>3) Crie um "ID do cliente OAuth" do tipo Aplicativo da Web e, em "Origens autorizadas", coloque o endereço do seu site (https).<br>4) Em "Tela de permissão", adicione seu e-mail como usuário de teste.<br>5) Cole o ID do cliente aqui:</div><label>ID do cliente Google</label><input value="'+esc(D.cfg.gid||'')+'" placeholder="123456-abc.apps.googleusercontent.com" onchange="D.cfg.gid=this.value.trim();salvar()"><div class="mu" style="margin-top:6px">Só funciona com a página no seu site (https). A conexão vale 1 hora.</div></div>';
+  s+='<h2>Cópia dos dados</h2><div class="row"><button class="btn go" onclick="baixar(\'followup-copia-\'+hoje()+\'.json\',JSON.stringify(D),\'application/json\')">Salvar cópia</button>'+
+    '<label class="btn" style="margin:0">Restaurar cópia<input type="file" accept=".json" hidden onchange="restaurar(this)"></label>'+
+    '<button class="btn" onclick="planilha()">Baixar planilha</button></div>';
+  var ex=D.c.filter(function(c){return c.del});
+  s+='<h2>Clientes excluídos ('+ex.length+')</h2>'+ex.map(function(c){return '<div class="card"><div class="t"><span>'+esc(c.nome)+'</span><button class="btn" onclick="get(\''+c.id+'\').del=0;salvar();ir(\'config\')">Restaurar</button></div></div>'}).join('');
+  return s;
+}
+function ir(a){aba=a;if(a!=='clientes'&&a!=='x'){}render()}
+function render(){
+  var V={hoje:vHoje,clientes:vClientes,agenda:vAgenda,config:vConfig};
+  document.getElementById('app').innerHTML=V[aba]();
+  var N=[['hoje','🏠','Hoje'],['clientes','👥','Clientes'],['agenda','📅','Agenda'],['config','⚙️','Configurar']];
+  document.getElementById('nav').innerHTML=N.map(function(n){return '<button class="'+(aba===n[0]?'on':'')+'" onclick="'+(n[0]!=='clientes'?'filtro=\'\';':'')+'ir(\''+n[0]+'\')"><i>'+n[1]+'</i>'+n[2]+'</button>'}).join('');
+  window.scrollTo(0,0);
+}
+
+/* ---------- ficha do cliente ---------- */
+function ficha(id){
+  var c=id?get(id):{id:'',nome:'',tel:'',email:'',quer:'Comprar',bairro:'',valor:'',etapa:'Novo',ret:'',visita:'',vlocal:'',obs:'',h:[]};
+  var o=function(a,v){return a.map(function(x){return '<option'+(x===v?' selected':'')+'>'+x+'</option>'}).join('')};
+  var d=document.getElementById('dlg');
+  d.innerHTML='<h2 style="margin-top:0">'+(id?'Ficha do cliente':'Novo cliente')+'</h2>'+
+  '<label>Nome</label><input id="f_nome" value="'+esc(c.nome)+'">'+
+  '<div class="two"><div><label>Telefone (WhatsApp)</label><input id="f_tel" type="tel" value="'+esc(c.tel)+'"></div><div><label>E-mail</label><input id="f_email" type="email" value="'+esc(c.email)+'"></div></div>'+
+  '<div class="two"><div><label>O que quer</label><select id="f_quer">'+o(QUER,c.quer)+'</select></div><div><label>Etapa</label><select id="f_etapa">'+o(ETAPAS,c.etapa)+'</select></div></div>'+
+  '<div class="two"><div><label>Bairro ou região</label><input id="f_bairro" value="'+esc(c.bairro)+'"></div><div><label>Valor que procura</label><input id="f_valor" value="'+esc(c.valor)+'"></div></div>'+
+  '<div class="two"><div><label>Quando retornar</label><input id="f_ret" type="date" value="'+esc(c.ret)+'"></div><div><label>Visita (dia e hora)</label><input id="f_visita" type="datetime-local" value="'+esc(c.visita)+'"></div></div>'+
+  '<label>Local da visita</label><input id="f_vlocal" value="'+esc(c.vlocal)+'">'+
+  '<label>Observações</label><textarea id="f_obs" rows="2">'+esc(c.obs)+'</textarea>'+
+  (id?'<label>Mensagem pronta</label><select id="f_msg">'+D.cfg.msgs.map(function(m,i){return '<option value="'+i+'">'+esc(m.n)+'</option>'}).join('')+'</select>'+
+  '<div class="row"><button class="btn wa" onclick="gravar(\''+id+'\');zap(\''+id+'\',+document.getElementById(\'f_msg\').value)">WhatsApp</button>'+
+  '<button class="btn" onclick="gravar(\''+id+'\');mail(\''+id+'\',+document.getElementById(\'f_msg\').value,true)">Abrir no Gmail</button>'+
+  '<button class="btn go" onclick="gravar(\''+id+'\');agendaLink(\''+id+'\')">Marcar horário</button></div>'+
+  '<h2>Evolução do negócio</h2><div class="tl">'+(c.h||[]).slice().reverse().map(function(x){return '<div><b>'+esc(x.d)+'</b><br>'+esc(x.t)+'</div>'}).join('')+'</div>':'')+
+  '<div class="row" style="justify-content:space-between"><button class="btn f" onclick="gravar(\''+id+'\',1)">Salvar</button><button class="btn" onclick="dlg.close()">Fechar</button>'+
+  (id?'<button class="btn ro" onclick="if(confirm(\'Excluir este cliente?\')){get(\''+id+'\').del=1;salvar();dlg.close();render()}">Excluir</button>':'')+'</div>';
+  d.showModal();
+}
+function gravar(id,fechar){
+  var v=function(k){return document.getElementById('f_'+k).value.trim()};
+  if(!v('nome'))return alert('Digite o nome do cliente.');
+  var c=id?get(id):{id:'c'+Date.now().toString(36),h:[]};
+  if(!id){D.c.push(c);log(c,'Cliente cadastrado')}
+  if(id&&c.etapa!==v('etapa'))log(c,'Etapa: '+c.etapa+' → '+v('etapa'));
+  if(v('visita')&&c.visita!==v('visita'))log(c,'Visita marcada para '+fmtD(v('visita')));
+  ['nome','tel','email','quer','etapa','bairro','valor','ret','visita','vlocal','obs'].forEach(function(k){c[k]=v(k)});
+  if(!id)c.etapa=c.etapa||'Novo';
+  salvar();if(fechar){document.getElementById('dlg').close();render()}
+  return c;
+}
+function jaFalei(id){
+  var c=get(id),n=prompt('Já falei ✓\nO que foi conversado? (opcional)','');if(n===null)return;
+  var r=prompt('Retornar em quantos dias? (0 = não agendar)','3');if(r===null)return;
+  log(c,'Conversa: '+(n||'contato feito'));
+  if(+r>0){var d=new Date();d.setDate(d.getDate()+(+r));c.ret=d.toLocaleDateString('sv')}else c.ret='';
+  if(c.etapa==='Novo')c.etapa='Em contato';
+  salvar();render();
+}
+
+/* ---------- contatos, cópia e planilha ---------- */
+function addContato(n,t,e){
+  if(!n&&!t)return 0;
+  var dig=String(t||'').replace(/\D/g,'');
+  if(dig&&D.c.some(function(c){return String(c.tel).replace(/\D/g,'')===dig}))return 0;
+  var c={id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),nome:n||'Sem nome',tel:t||'',email:e||'',quer:'Comprar',etapa:'Novo',h:[]};
+  log(c,'Importado dos contatos');D.c.push(c);return 1;
+}
+async function importarContatos(){
+  if(!(navigator.contacts&&navigator.contacts.select))return alert('Este navegador não abre os contatos. No Android (Chrome, com https) funciona. Em outros aparelhos, use "Importar .vcf".');
+  try{var r=await navigator.contacts.select(['name','tel','email'],{multiple:true}),n=0;
+    r.forEach(function(x){n+=addContato((x.name||[])[0],(x.tel||[])[0],(x.email||[])[0])});
+    salvar();render();alert(n+' cliente(s) importado(s).')}catch(e){}
+}
+function importarVcf(inp){
+  var f=inp.files[0];if(!f)return;var r=new FileReader();
+  r.onload=function(){var n=0;String(r.result).split(/BEGIN:VCARD/i).slice(1).forEach(function(b){
+    var g=function(k){var m=b.match(new RegExp('^'+k+'[^:\\n]*:(.*)$','im'));return m?m[1].trim():''};
+    n+=addContato(g('FN'),g('TEL'),g('EMAIL'))});
+    salvar();render();alert(n+' cliente(s) importado(s).')};
+  r.readAsText(f);inp.value='';
+}
+function restaurar(inp){
+  var f=inp.files[0];if(!f)return;var r=new FileReader();
+  r.onload=function(){try{var x=JSON.parse(r.result);if(!x.c)throw 0;if(confirm('Substituir os dados atuais pela cópia?')){D=x;salvar();render()}}catch(e){alert('Arquivo inválido.')}};
+  r.readAsText(f);inp.value='';
+}
+function planilha(){
+  var cab=['Nome','Telefone','E-mail','O que quer','Bairro','Valor','Etapa','Retornar','Visita','Observações'];
+  var q=function(s){return '"'+String(s||'').replace(/"/g,'""')+'"'};
+  var l=D.c.filter(function(c){return !c.del}).map(function(c){return [c.nome,c.tel,c.email,c.quer,c.bairro,c.valor,c.etapa,c.ret,c.visita,c.obs].map(q).join(';')});
+  baixar('clientes-'+hoje()+'.csv','\uFEFF'+cab.join(';')+'\n'+l.join('\n'),'text/csv');
+}
+/* ---------- buscar clientes: Google, Gmail, Agenda, WhatsApp ---------- */
+var ESC_G='https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/gmail.readonly';
+function carregaGsi(cb){
+  if(window.google&&google.accounts)return cb&&cb();
+  var s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=function(){cb&&cb()};
+  s.onerror=function(){alert('Sem internet para falar com o Google.')};document.head.appendChild(s);
+}
+if(D.cfg.gid)carregaGsi();
+function gtoken(){return new Promise(function(ok,no){
+  if(!D.cfg.gid)return no('coloque o ID do Google em Configurar');
+  if(window._gt&&window._gt.exp>Date.now())return ok(window._gt.t);
+  if(!(window.google&&google.accounts)){carregaGsi();return no('o Google ainda estava carregando, toque de novo')}
+  google.accounts.oauth2.initTokenClient({client_id:D.cfg.gid,scope:ESC_G,callback:function(r){
+    if(r.error)return no(r.error);window._gt={t:r.access_token,exp:Date.now()+3500000};ok(r.access_token)}}).requestAccessToken();
+})}
+function gget(u){return gtoken().then(function(t){return fetch(u,{headers:{Authorization:'Bearer '+t}}).then(function(r){if(!r.ok)throw 'erro '+r.status;return r.json()})})}
+function buscarGoogle(tipo){
+  var p;
+  if(tipo==='contatos')p=gget('https://people.googleapis.com/v1/people/me/connections?personFields=names,phoneNumbers,emailAddresses&pageSize=1000').then(function(j){
+    return (j.connections||[]).map(function(x){return{n:((x.names||[])[0]||{}).displayName,t:((x.phoneNumbers||[])[0]||{}).value,e:((x.emailAddresses||[])[0]||{}).value}})});
+  else if(tipo==='agenda'){var a=new Date(Date.now()-30*864e5).toISOString(),b=new Date(Date.now()+60*864e5).toISOString();
+    p=gget('https://www.googleapis.com/calendar/v3/calendars/primary/events?singleEvents=true&maxResults=250&timeMin='+encodeURIComponent(a)+'&timeMax='+encodeURIComponent(b)).then(function(j){
+      var r=[];(j.items||[]).forEach(function(ev){(ev.attendees||[]).forEach(function(x){if(!x.self&&x.email)r.push({n:x.displayName,e:x.email})})});return r})}
+  else p=gget('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=40&q='+encodeURIComponent('in:inbox -category:promotions -category:social')).then(function(j){
+    return Promise.all((j.messages||[]).map(function(m){return gget('https://gmail.googleapis.com/gmail/v1/users/me/messages/'+m.id+'?format=metadata&metadataHeaders=From')}))}).then(function(ms){
+      return ms.map(function(m){var h=((m.payload||{}).headers||[])[0];var v=h?h.value:'';var x=v.match(/^\s*"?([^"<]*?)"?\s*<([^>]+)>/);return x?{n:x[1].trim(),e:x[2]}:{e:v.trim()}})});
+  p.then(function(l){mostrarCand(l,tipo)}).catch(function(e){alert('Não deu certo: '+e+'. Confira o ID do Google em Configurar e se a página está no seu site (https).')});
+}
+function colarZap(){
+  var d=document.getElementById('dlg');
+  d.innerHTML='<h2 style="margin-top:0">Colar do WhatsApp</h2><p class="mu">Cole aqui números ou nomes com números (um por linha). Pode copiar da lista de contatos ou de uma conversa.</p><textarea id="zt" rows="8"></textarea><div class="row"><button class="btn f" onclick="lerZap()">Buscar números</button><button class="btn" onclick="dlg.close()">Fechar</button></div>';
+  d.showModal();
+}
+function lerZap(){
+  var l=[];document.getElementById('zt').value.split('\n').forEach(function(x){var m=x.match(/\+?\d[\d\s().-]{8,}\d/);
+    if(m)l.push({n:x.replace(m[0],'').replace(/[:\-–,;]+/g,' ').trim(),t:m[0].trim()})});
+  mostrarCand(l,'whatsapp');
+}
+function mostrarCand(l,tipo){
+  var tels={},mails={};D.c.forEach(function(c){if(c.tel)tels[String(c.tel).replace(/\D/g,'')]=1;if(c.email)mails[c.email.toLowerCase()]=1});
+  var out=[];l.forEach(function(x){var t=String(x.t||'').replace(/\D/g,''),e=(x.e||'').toLowerCase();
+    if(!x.n&&!t&&!e)return;if((t&&tels[t])||(e&&mails[e]))return;if(t)tels[t]=1;if(e)mails[e]=1;out.push(x)});
+  window._cand=out;
+  var d=document.getElementById('dlg');
+  d.innerHTML='<h2 style="margin-top:0">Achei '+out.length+' novo(s)</h2><div class="mu">Marque quem você quer cadastrar como cliente.</div>'+
+    '<div class="row"><button class="btn" onclick="document.querySelectorAll(\'.cb\').forEach(function(i){i.checked=true})">Marcar todos</button></div>'+
+    '<div style="max-height:50dvh;overflow:auto;margin-top:8px">'+out.slice(0,300).map(function(x,i){
+      return '<label style="display:flex;gap:10px;align-items:center;margin:0;padding:8px 0;border-bottom:1px solid var(--line);color:var(--tx)"><input class="cb" type="checkbox" data-i="'+i+'" style="width:20px;min-height:20px"><span>'+esc(x.n||x.e||x.t)+'<br><span class="mu">'+esc([x.t,x.e].filter(Boolean).join(' · '))+'</span></span></label>'}).join('')+'</div>'+
+    '<div class="row"><button class="btn f" onclick="importarSel(\''+tipo+'\')">Cadastrar marcados</button><button class="btn" onclick="dlg.close()">Fechar</button></div>';
+  if(!d.open)d.showModal();
+}
+function importarSel(tipo){
+  var n=0,orig={contatos:'contatos do Google',agenda:'agenda do Google',gmail:'Gmail',whatsapp:'WhatsApp'}[tipo];
+  document.querySelectorAll('.cb:checked').forEach(function(i){var x=window._cand[+i.dataset.i];
+    var c={id:'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),nome:x.n||(x.e||x.t||'Sem nome'),tel:x.t||'',email:x.e||'',quer:'Comprar',etapa:'Novo',h:[]};
+    log(c,'Cadastrado a partir de: '+orig);D.c.push(c);n++});
+  salvar();document.getElementById('dlg').close();filtro='';render();alert(n+' cliente(s) cadastrado(s).');
+}
+render();
+</script>
+</body>
+</html>
