@@ -160,6 +160,17 @@ ol.msg{padding-left:20px;line-height:1.5}
     </div>
 
     <div class="card">
+      <h2>Enviar ao imóvel do painel</h2>
+      <select id="imovelFt" aria-label="Imóvel do painel"><option value="">Entre no painel para ver os imóveis</option></select>
+      <div class="row" style="margin-top:10px">
+        <button id="bEnviarFt" disabled>Enviar ao imóvel</button>
+        <button class="sec peq hide" id="bIrLogin" type="button">Entrar no painel</button>
+      </div>
+      <div class="msg" id="stEnvioFt"></div>
+      <div class="msg">As fotos vão já com a(s) logo(s) como estão na prévia e entram na galeria do imóvel (até 30). Para um imóvel novo, cadastre-o na aba Book 9:16. Não envie as mesmas fotos de novo pelo Painel ADM, para a logo não ficar duas vezes.</div>
+    </div>
+
+    <div class="card">
       <details>
         <summary>Google Drive (configuração única)</summary>
         <ol class="msg">
@@ -202,10 +213,31 @@ ol.msg{padding-left:20px;line-height:1.5}
     </div>
 
     <div class="card">
-      <h2>2. Imóvel (FCL – Lançamento)</h2>
+      <h2>2. Imóvel</h2>
       <select id="imovel" aria-label="Imóvel"><option value="">Entre no painel para ver os imóveis</option></select>
-      <label class="chk"><input type="checkbox" id="todosSt"> Mostrar também FCV, FCA e FCP</label>
+      <label class="chk"><input type="checkbox" id="todosSt" checked> Mostrar também venda, aluguel e panfleto (FCV, FCA, FCP)</label>
       <div class="msg" id="stImovel"></div>
+      <div class="row" style="margin-top:10px"><button class="sec peq" id="bNovoEmp" type="button" disabled>+ Cadastrar novo imóvel</button></div>
+      <div id="novoEmp" class="hide">
+        <label for="neStatus">Tipo de cadastro</label>
+        <select id="neStatus">
+          <option value="lancamento">Lançamento / empreendimento de construtora (FCL)</option>
+          <option value="venda">À venda (FCV)</option>
+          <option value="aluguel">Aluguel (FCA)</option>
+        </select>
+        <label for="neNome">Nome ou título do imóvel</label>
+        <input class="campo" id="neNome" maxlength="80" placeholder="Ex.: Residencial Vila Nova ou Casa 3 quartos Mooca">
+        <label for="neBairro">Bairro (opcional)</label>
+        <input class="campo" id="neBairro" maxlength="60">
+        <label for="neCidade">Cidade (opcional)</label>
+        <input class="campo" id="neCidade" maxlength="60" value="São Paulo">
+        <div class="row" style="margin-top:10px">
+          <button id="bCriarEmp" type="button">Criar e selecionar</button>
+          <button class="sec peq" id="bCancelarEmp" type="button">Cancelar</button>
+        </div>
+        <div class="msg">Cria o cadastro já com o próximo código livre do tipo escolhido. Ele fica oculto no site até você completar preço, tipo e descrição no Painel ADM (Editar) e publicar.</div>
+        <div class="msg" id="stNovoEmp"></div>
+      </div>
     </div>
 
     <div class="card">
@@ -430,6 +462,7 @@ ol.msg{padding-left:20px;line-height:1.5}
     msg('status',fotos.length?fotos.length+' foto(s) pronta(s).':'Nenhuma foto escolhida.');
     var t=!fotos.length;
     ['bTodas','bLimpar','bPasta','bShare','bDriveEnviar'].forEach(function(id){$(id).disabled=t});
+    try{checarEnvioFt()}catch(e){}
   }
 
   function nomeSaida(f){return f.nome.replace(/\.[^.]+$/,'')+'-logo.jpg'}
@@ -624,8 +657,9 @@ ol.msg{padding-left:20px;line-height:1.5}
         auth.onAuthStateChanged(function(u){
           $('loginForm').classList.toggle('hide',!!u);
           $('logado').classList.toggle('hide',!u);
+          $('bNovoEmp').disabled=!u;
           if(u){$('quem').textContent='Conectado: '+u.email;msg('stLogin','');carregarImoveis()}
-          else{msg('stLogin','');imoveis=[];montarSelect()}
+          else{msg('stLogin','');imoveis=[];montarSelect();$('novoEmp').classList.add('hide');$('bNovoEmp').classList.remove('hide')}
         });
       })
       .catch(function(e){libs=null;msg('stLogin','Não carregou: '+e.message+'. Verifique a internet e abra a aba de novo.','er')});
@@ -654,6 +688,50 @@ ol.msg{padding-left:20px;line-height:1.5}
       montarSelect();
     }).catch(function(e){msg('stImovel','Não consegui ler os imóveis: '+e.message,'er')});
   }
+  function slugificar(t){return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')}
+  var SLUGPAG={venda:'comprar',aluguel:'alugar',lancamento:'lancamento'};
+  function proxNumSt(st){
+    var sig=SG[st]||'FCV',usados={};
+    imoveis.forEach(function(i){
+      if((SG[i.status]||'FCV')!==sig)return;
+      var n=parseInt(i.numeroCodigo);
+      if(!n||isNaN(n))n=parseInt(String(i.codigo||'').replace(/[^0-9]/g,''));
+      if(n&&!isNaN(n))usados[n]=1;
+    });
+    var p=1;while(usados[p])p++;
+    return String(p).padStart(3,'0');
+  }
+  $('bNovoEmp').addEventListener('click',function(){$('novoEmp').classList.remove('hide');$('bNovoEmp').classList.add('hide');$('neNome').focus()});
+  $('bCancelarEmp').addEventListener('click',function(){$('novoEmp').classList.add('hide');$('bNovoEmp').classList.remove('hide');msg('stNovoEmp','')});
+  $('bCriarEmp').addEventListener('click',function(){
+    var nome=$('neNome').value.trim(),bairro=$('neBairro').value.trim(),cidade=$('neCidade').value.trim();
+    if(!auth||!auth.currentUser){msg('stNovoEmp','Entre no painel primeiro.','er');return}
+    if(!nome){msg('stNovoEmp','Escreva o nome do empreendimento.','er');$('neNome').focus();return}
+    var btn=$('bCriarEmp');btn.disabled=true;msg('stNovoEmp','Conferindo os códigos…');
+    db.ref('fcosta_imoveis').once('value').then(function(sn){
+      var d=sn.val()||{};
+      imoveis=Object.keys(d).map(function(k){var o=d[k];o.id=k;return o}).filter(function(o){return o&&o._del!==true&&o._excluido!==true});
+      var rep=imoveis.find(function(i){return (i.titulo||'').trim().toLowerCase()===nome.toLowerCase()});
+      if(rep&&!confirm('Já existe “'+rep.titulo+'” ('+cod(rep)+'). Criar mesmo assim outro cadastro?')){btn.disabled=false;msg('stNovoEmp','Cancelado. Escolha o existente na lista acima.');return Promise.reject('cancel')}
+      var st=$('neStatus').value,num=proxNumSt(st),codigo=(SG[st]||'FCV')+num;
+      var partes=[SLUGPAG[st]||st];if(bairro)partes.push(slugificar(bairro));partes.push(codigo.toLowerCase());
+      var agora=new Date().toISOString();
+      var ref=db.ref('fcosta_imoveis').push();
+      var dados={titulo:nome,status:st,numeroCodigo:num,codigo:codigo,tipo:'',preco:'',area:'',quartos:0,banheiros:0,vagas:0,bairro:bairro,cidade:cidade,endereco:'',descricao:'',video:null,videoMp4:null,tourMp4:'',destaque:false,publicado:false,slug:('/'+partes.join('-')).slice(0,90),seoTitle:'',seoDesc:'',fotos:[],fotoDestaque:'',criado:agora,atualizado:agora};
+      return ref.set(dados).then(function(){return {id:ref.key,dados:dados,codigo:codigo}});
+    }).then(function(r){
+      r.dados.id=r.id;imoveis.push(r.dados);
+      $('todosSt').checked=true;montarSelect();$('imovel').value=r.id;
+      $('imovel').dispatchEvent(new Event('change'));
+      $('neNome').value='';$('neBairro').value='';
+      $('novoEmp').classList.add('hide');$('bNovoEmp').classList.remove('hide');
+      msg('stNovoEmp','');msg('stImovel','Criado e selecionado: '+r.codigo+' — '+r.dados.titulo+'. Ele fica oculto no site até você publicar no Painel ADM.','ok');
+      btn.disabled=false;
+    }).catch(function(e){
+      btn.disabled=false;if(e==='cancel')return;
+      msg('stNovoEmp','Não consegui criar: '+(e&&e.message||e),'er');
+    });
+  });
   function montarSelect(){
     var todos=$('todosSt').checked,s=$('imovel'),atual=s.value;
     var lista=imoveis.filter(function(i){return todos||i.status==='lancamento'});
@@ -661,7 +739,9 @@ ol.msg{padding-left:20px;line-height:1.5}
     s.innerHTML='<option value="">— escolha o imóvel —</option>'+lista.map(function(i){
       return '<option value="'+i.id+'">'+cod(i)+' — '+(i.titulo||'sem título').replace(/</g,'&lt;')+'</option>'}).join('');
     if(atual&&lista.some(function(i){return i.id===atual}))s.value=atual;
-    msg('stImovel',lista.length?lista.length+' imóvel(is) na lista.':(auth&&auth.currentUser?'Nenhum imóvel FCL. Marque a caixa acima para ver os outros.':''));
+    var s2=$('imovelFt'),a2=s2.value;s2.innerHTML=s.innerHTML;
+    if(a2&&lista.some(function(i){return i.id===a2}))s2.value=a2;
+    msg('stImovel',lista.length?lista.length+' imóvel(is) na lista.':(auth&&auth.currentUser?'Nenhum imóvel na lista. Cadastre um novo acima.':''));
     checarEnvio();
   }
   $('todosSt').addEventListener('change',montarSelect);
@@ -845,7 +925,54 @@ ol.msg{padding-left:20px;line-height:1.5}
     $('bEnviar').textContent=n?'Enviar '+n+' foto(s) ao imóvel':'Enviar ao imóvel';
     $('bkLimpar').disabled=!itens.length;
     $('bkTodas').disabled=$('bkNenhuma').disabled=!itens.length;
+    checarEnvioFt();
   }
+
+  function checarEnvioFt(){
+    var ok=!!(auth&&auth.currentUser),id=$('imovelFt').value;
+    $('bEnviarFt').disabled=!(ok&&id&&fotos.length);
+    $('bEnviarFt').textContent=fotos.length?'Enviar '+fotos.length+' foto(s) ao imóvel':'Enviar ao imóvel';
+    $('bIrLogin').classList.toggle('hide',ok);
+    var st=$('stEnvioFt');
+    if(!ok)msg('stEnvioFt','Para enviar ao imóvel, entre no painel.');
+    else if(st.textContent==='Para enviar ao imóvel, entre no painel.')msg('stEnvioFt','');
+  }
+  $('imovelFt').addEventListener('change',checarEnvioFt);
+  $('bIrLogin').addEventListener('click',function(){abrirAba('book')});
+  $('bEnviarFt').addEventListener('click',async function(){
+    var id=$('imovelFt').value,im=imoveis.find(function(x){return x.id===id});
+    if(!id||!fotos.length||!auth||!auth.currentUser)return;
+    $('bEnviarFt').disabled=true;
+    var urls=[],falhas=0;
+    for(var i=0;i<fotos.length;i++){
+      msg('stEnvioFt','Enviando '+(i+1)+' de '+fotos.length+'…');
+      try{
+        var blob=await blobDe(fotos[i]);
+        var base=fotos[i].nome.replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9._-]/g,'_');
+        var caminho='imoveis/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'_'+base+'.jpg';
+        var r=await sb.storage.from(SB_BUCKET).upload(caminho,blob,{cacheControl:'3600',upsert:false,contentType:'image/jpeg'});
+        if(r.error)throw r.error;
+        urls.push(sb.storage.from(SB_BUCKET).getPublicUrl(caminho).data.publicUrl);
+      }catch(e){falhas++;console.error(e)}
+    }
+    if(!urls.length){msg('stEnvioFt','Nenhuma foto foi enviada. Tente de novo.','er');checarEnvioFt();return}
+    try{
+      msg('stEnvioFt','Ligando ao imóvel…');
+      var snap=await db.ref('fcosta_imoveis/'+id).once('value');
+      var cur=snap.val()||{},v=cur.fotos;
+      var atual=!v?[]:(Array.isArray(v)?v:Object.values(v)).filter(Boolean);
+      var todas=atual.concat(urls).slice(0,30),cortadas=atual.length+urls.length-todas.length;
+      var upd={fotos:todas,fotoDestaque:cur.fotoDestaque||todas[0]||'',atualizado:new Date().toISOString()};
+      var aviso2='';
+      if(!atual.length||cur.logoVersao===2){upd.logoAplicada=true;upd.logoVersao=2}
+      else aviso2=' Atenção: esse imóvel já tinha fotos sem a logo. Se usar “Logo nas fotos antigas” no Painel ADM, as novas podem ficar com a logo duas vezes.';
+      await db.ref('fcosta_imoveis/'+id).update(upd);
+      msg('stEnvioFt','Pronto! '+urls.length+' foto(s) no imóvel '+cod(im||{})+'. Agora ele tem '+todas.length+' foto(s).'+(cortadas?' O limite é 30: '+cortadas+' ficaram de fora.':'')+(falhas?' '+falhas+' falharam; envie de novo só essas.':'')+aviso2,'ok');
+    }catch(e){
+      msg('stEnvioFt','As fotos subiram, mas não consegui ligar ao imóvel: '+e.message,'er');
+    }
+    checarEnvioFt();
+  });
 
   function blobC(c){return new Promise(function(ok,no){c.toBlob(function(b){b?ok(b):no(new Error('falha ao gerar a imagem'))},'image/jpeg',0.88)})}
   $('bEnviar').addEventListener('click',async function(){
@@ -880,7 +1007,7 @@ ol.msg{padding-left:20px;line-height:1.5}
 
   /* começa na aba pedida pelo endereço (#book) */
   atualizarGrade();desenharGradeBk();
-  if(location.hash==='#book')abrirAba('book');
+  if(location.hash==='#book')abrirAba('book');else iniciarBook();
 })();
 </script>
 <!-- fc-voltar-painel -->
