@@ -310,6 +310,21 @@ ol.msg{padding-left:20px;line-height:1.5}
     </div>
 
     <div class="card">
+      <h2>Baixar as páginas</h2>
+      <div class="row">
+        <button id="bBkBaixar" disabled>Baixar marcadas</button>
+        <button class="sec" id="bBkPasta" disabled>Salvar numa pasta</button>
+        <button class="sec" id="bBkShare" disabled>Compartilhar</button>
+      </div>
+      <label for="bkFmt">Formato do arquivo</label>
+      <select id="bkFmt">
+        <option value="jpg" selected>JPG: leve, bom para postar e mandar no zap</option>
+        <option value="png">PNG: sem perda, arquivo maior</option>
+      </select>
+      <div class="msg" id="stBaixar">Cada página sai individual, em 1080×1920, do jeito que aparece na miniatura (com a faixa, se estiver ligada). Só as marcadas são baixadas; o botão “Baixar” em cada miniatura baixa só aquela.</div>
+    </div>
+
+    <div class="card">
       <h2>Enviar para o painel</h2>
       <div class="row"><button id="bEnviar" disabled>Enviar ao imóvel</button></div>
       <div class="msg" id="stEnvio"></div>
@@ -970,7 +985,8 @@ ol.msg{padding-left:20px;line-height:1.5}
     var g=$('gridBk');g.innerHTML='';
     itens.forEach(function(it,i){
       var d=document.createElement('div');d.className='item '+(it.sel?'on':'off');d.id='it'+it.id;
-      d.innerHTML='<canvas width="270" height="480"></canvas><div class="ck">'+(it.sel?'✓':'')+'</div><div class="n"><span>'+(i+1)+'</span><span>'+(it.tipo==='pdf'?'pág. '+it.num:'foto')+'</span></div>';
+      d.innerHTML='<canvas width="270" height="480"></canvas><div class="ck">'+(it.sel?'✓':'')+'</div><div class="n"><span>'+(i+1)+'</span><span>'+(it.tipo==='pdf'?'pág. '+it.num:'foto')+'</span></div><div class="bt"><button type="button" class="sec peq">Baixar</button></div>';
+      d.querySelector('.bt button').addEventListener('click',function(e){e.stopPropagation();baixarUmBk(it,i,this)});
       d.addEventListener('click',function(){it.sel=!it.sel;d.className='item '+(it.sel?'on':'off');d.querySelector('.ck').textContent=it.sel?'✓':'';checarEnvio()});
       g.appendChild(d);pintar(it);
     });
@@ -990,12 +1006,86 @@ ol.msg{padding-left:20px;line-height:1.5}
   $('bkNenhuma').addEventListener('click',function(){itens.forEach(function(i){i.sel=false});desenharGradeBk();refazerMiniaturas()});
   $('bkLimpar').addEventListener('click',function(){itens=[];desenharGradeBk();msg('stArq','Lista limpa.')});
 
+  /* ===== baixar páginas do book em PNG ou JPG ===== */
+  try{var fbk=localStorage.getItem('fcosta_book_fmt');if(fbk)$('bkFmt').value=fbk}catch(e){}
+  $('bkFmt').addEventListener('change',function(){try{localStorage.setItem('fcosta_book_fmt',$('bkFmt').value)}catch(e){}});
+  function fmBk(){return $('bkFmt').value==='png'?'png':'jpg'}
+  function nomeBk(it,i){
+    var base=String(it.nome||'pagina').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9._-]+/g,'_').replace(/^_+|_+$/g,'')||'pagina';
+    return String(i+1).padStart(3,'0')+'_'+base+'-book.'+fmBk();
+  }
+  function blobBk(c){
+    return new Promise(function(ok,no){
+      var png=fmBk()==='png';
+      c.toBlob(function(b){b?ok(b):no(new Error('falha ao gerar a imagem'))},png?'image/png':'image/jpeg',png?undefined:0.92);
+    });
+  }
+  function salvarBlob(b,nome){
+    return new Promise(function(ok){
+      var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=nome;
+      document.body.appendChild(a);a.click();a.remove();
+      setTimeout(function(){URL.revokeObjectURL(a.href);ok()},400);
+    });
+  }
+  async function baixarUmBk(it,i,btn){
+    var t=btn?btn.textContent:'';
+    if(btn){btn.disabled=true;btn.textContent='…'}
+    try{await salvarBlob(await blobBk(await compor(it,W,H)),nomeBk(it,i))}
+    catch(e){msg('stBaixar','Não deu certo: '+(e&&e.message||e),'er')}
+    if(btn){btn.disabled=false;btn.textContent=t}
+  }
+  function marcadasBk(){var r=[];itens.forEach(function(it,i){if(it.sel)r.push({it:it,i:i})});return r}
+  $('bBkBaixar').addEventListener('click',async function(){
+    var lista=marcadasBk(),b=$('bBkBaixar');if(!lista.length)return;
+    b.disabled=true;
+    try{
+      for(var k=0;k<lista.length;k++){
+        msg('stBaixar','Baixando '+(k+1)+' de '+lista.length+'…');
+        await salvarBlob(await blobBk(await compor(lista[k].it,W,H)),nomeBk(lista[k].it,lista[k].i));
+      }
+      msg('stBaixar','Pronto! '+lista.length+' arquivo(s) '+fmBk().toUpperCase()+' baixados. Se faltar algum, permita baixar vários arquivos no navegador.','ok');
+    }catch(e){msg('stBaixar','Não deu certo: '+(e&&e.message||e),'er')}
+    checarEnvio();
+  });
+  if(!window.showDirectoryPicker)$('bBkPasta').classList.add('hide');
+  $('bBkPasta').addEventListener('click',async function(){
+    var lista=marcadasBk();if(!lista.length)return;
+    try{
+      var d=await window.showDirectoryPicker({mode:'readwrite'});
+      for(var k=0;k<lista.length;k++){
+        msg('stBaixar','Salvando '+(k+1)+' de '+lista.length+'…');
+        var b=await blobBk(await compor(lista[k].it,W,H));
+        var h=await d.getFileHandle(nomeBk(lista[k].it,lista[k].i),{create:true});
+        var w=await h.createWritable();await w.write(b);await w.close();
+      }
+      msg('stBaixar','Pronto! '+lista.length+' arquivo(s) salvos na pasta escolhida.','ok');
+    }catch(e){if(e.name!=='AbortError')msg('stBaixar','Não deu certo: '+(e&&e.message||e),'er')}
+  });
+  var podeShBk=false;
+  try{podeShBk=!!(navigator.canShare&&navigator.canShare({files:[new File(['x'],'a.png',{type:'image/png'})]}))}catch(e){}
+  if(!podeShBk)$('bBkShare').classList.add('hide');
+  $('bBkShare').addEventListener('click',async function(){
+    var lista=marcadasBk();if(!lista.length)return;
+    try{
+      var arq=[];
+      for(var k=0;k<lista.length;k++){
+        msg('stBaixar','Preparando '+(k+1)+' de '+lista.length+'…');
+        var b=await blobBk(await compor(lista[k].it,W,H));
+        arq.push(new File([b],nomeBk(lista[k].it,lista[k].i),{type:b.type}));
+      }
+      msg('stBaixar','');
+      await navigator.share({files:arq,title:'Book'});
+    }catch(e){if(e.name!=='AbortError')msg('stBaixar','Não deu certo: '+(e&&e.message||e),'er')}
+  });
+
   function checarEnvio(){
     var n=itens.filter(function(i){return i.sel}).length;
     $('bEnviar').disabled=!(n&&$('imovel').value&&auth&&auth.currentUser);
     $('bEnviar').textContent=n?'Enviar '+n+' foto(s) ao imóvel':'Enviar ao imóvel';
     $('bkLimpar').disabled=!itens.length;
     $('bkTodas').disabled=$('bkNenhuma').disabled=!itens.length;
+    $('bBkBaixar').disabled=$('bBkPasta').disabled=$('bBkShare').disabled=!n;
+    $('bBkBaixar').textContent=n?'Baixar '+n+' marcada(s)':'Baixar marcadas';
     checarEnvioFt();
   }
 
