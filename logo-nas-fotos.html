@@ -154,8 +154,14 @@ ol.msg{padding-left:20px;line-height:1.5}
         <button class="sec" id="bShare" disabled>Compartilhar</button>
         <button class="sec" id="bDriveEnviar" disabled>Enviar ao Drive</button>
       </div>
+      <label for="fmt">Formato do arquivo</label>
+      <select id="fmt">
+        <option value="auto" selected>Automático (recomendado): foto vira JPG, PNG continua PNG</option>
+        <option value="jpg">JPG: leve, melhor para fotos de imóveis</option>
+        <option value="png">PNG: sem perda, melhor para imagens com texto, desenho ou fundo transparente (arquivo maior)</option>
+      </select>
       <div class="msg" id="status2"></div>
-      <div class="msg">As fotos novas saem em JPG com o final “-logo”. No celular, se o navegador pedir, permita baixar vários arquivos.</div>
+      <div class="msg">As fotos novas saem com o final “-logo” no formato escolhido acima. No celular, se o navegador pedir, permita baixar vários arquivos.</div>
       <div class="grid" id="grid"></div>
     </div>
 
@@ -465,8 +471,22 @@ ol.msg{padding-left:20px;line-height:1.5}
     try{checarEnvioFt()}catch(e){}
   }
 
-  function nomeSaida(f){return f.nome.replace(/\.[^.]+$/,'')+'-logo.jpg'}
-  function blobDe(f){return new Promise(function(ok){desenharFoto(f.img,0).toBlob(ok,'image/jpeg',.92)})}
+  function fmtDe(f){var v=$('fmt').value;if(v==='auto')return /\.png$/i.test(f.nome)?'png':'jpg';return v}
+  function nomeSaida(f){return f.nome.replace(/\.[^.]+$/,'')+'-logo.'+fmtDe(f)}
+  function mimeDe(f){return fmtDe(f)==='png'?'image/png':'image/jpeg'}
+  /* fm: força o formato (o envio ao painel usa sempre JPG) */
+  function blobDe(f,fm){
+    fm=fm||fmtDe(f);
+    return new Promise(function(ok){
+      var c=desenharFoto(f.img,0);
+      if(fm==='png'){c.toBlob(ok,'image/png');return}
+      var c2=document.createElement('canvas');c2.width=c.width;c2.height=c.height;
+      var x=c2.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c2.width,c2.height);x.drawImage(c,0,0);
+      c2.toBlob(ok,'image/jpeg',.92);
+    });
+  }
+  try{var fmSalvo=localStorage.getItem('fcosta_fmt');if(fmSalvo)$('fmt').value=fmSalvo}catch(e){}
+  $('fmt').addEventListener('change',function(){cacheShare=null;try{localStorage.setItem('fcosta_fmt',$('fmt').value)}catch(e){}});
   function aviso(t){msg('status2',t)}
   function erro(e){aviso('Não deu certo: '+(e&&e.message?e.message:e))}
 
@@ -504,16 +524,16 @@ ol.msg{padding-left:20px;line-height:1.5}
   /* compartilhar (celular; dá para escolher o Drive na lista) */
   var cacheShare=null,chaveShare='';
   var podeShare=false;
-  try{podeShare=!!(navigator.canShare&&navigator.canShare({files:[new File(['x'],'a.jpg',{type:'image/jpeg'})]}))}catch(e){}
+  try{podeShare=!!(navigator.canShare&&navigator.canShare({files:[new File(['x'],'a.png',{type:'image/png'})]}))}catch(e){}
   if(!podeShare)$('bShare').classList.add('hide');
   $('bShare').addEventListener('click',async function(){
     try{
-      var chave=fotos.length+'|'+['pos','size','op','mar'].map(function(id){return $(id).value}).join('|');
+      var chave=fotos.length+'|'+['pos','size','op','mar','fmt'].map(function(id){return $(id).value}).join('|');
       if(!cacheShare||chave!==chaveShare){
         var arq=[];
         for(var i=0;i<fotos.length;i++){
           aviso('Preparando '+(i+1)+' de '+fotos.length+'…');
-          arq.push(new File([await blobDe(fotos[i])],nomeSaida(fotos[i]),{type:'image/jpeg'}));
+          arq.push(new File([await blobDe(fotos[i])],nomeSaida(fotos[i]),{type:mimeDe(fotos[i])}));
         }
         cacheShare=arq;chaveShare=chave;
       }
@@ -947,7 +967,7 @@ ol.msg{padding-left:20px;line-height:1.5}
     for(var i=0;i<fotos.length;i++){
       msg('stEnvioFt','Enviando '+(i+1)+' de '+fotos.length+'…');
       try{
-        var blob=await blobDe(fotos[i]);
+        var blob=await blobDe(fotos[i],'jpg');
         var base=fotos[i].nome.replace(/\.[^.]+$/,'').replace(/[^a-zA-Z0-9._-]/g,'_');
         var caminho='imoveis/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'_'+base+'.jpg';
         var r=await sb.storage.from(SB_BUCKET).upload(caminho,blob,{cacheControl:'3600',upsert:false,contentType:'image/jpeg'});
