@@ -173,7 +173,7 @@ ol.msg{padding-left:20px;line-height:1.5}
         <button class="sec peq hide" id="bIrLogin" type="button">Entrar no painel</button>
       </div>
       <div class="msg" id="stEnvioFt"></div>
-      <div class="msg">As fotos vão já com a(s) logo(s) como estão na prévia e entram na galeria do imóvel (até 30). Para um imóvel novo, cadastre-o na aba Book 9:16. Não envie as mesmas fotos de novo pelo Painel ADM, para a logo não ficar duas vezes.</div>
+      <div class="msg">As fotos vão já com a(s) logo(s) como estão na prévia e entram na galeria do imóvel (até 30). Toque em “Capa” na miniatura para escolher a foto que aparece no card do site; sem escolher, vale a atual ou a primeira. Para um imóvel novo, cadastre-o na aba Book 9:16. Não envie as mesmas fotos de novo pelo Painel ADM, para a logo não ficar duas vezes.</div>
     </div>
 
     <div class="card">
@@ -237,11 +237,12 @@ ol.msg{padding-left:20px;line-height:1.5}
         <input class="campo" id="neBairro" maxlength="60">
         <label for="neCidade">Cidade (opcional)</label>
         <input class="campo" id="neCidade" maxlength="60" value="São Paulo">
+        <label class="chk"><input type="checkbox" id="neNoSite" checked> Já aparecer no site (o card ganha a foto assim que você enviar)</label>
         <div class="row" style="margin-top:10px">
           <button id="bCriarEmp" type="button">Criar e selecionar</button>
           <button class="sec peq" id="bCancelarEmp" type="button">Cancelar</button>
         </div>
-        <div class="msg">Cria o cadastro já com o próximo código livre do tipo escolhido. Ele fica oculto no site até você completar preço, tipo e descrição no Painel ADM (Editar) e publicar.</div>
+        <div class="msg">Cria o cadastro já com o próximo código livre do tipo escolhido (lançamento de construtora = FCL). Ele aparece no site se a caixa “Já aparecer no site” estiver marcada.</div>
         <div class="msg" id="stNovoEmp"></div>
       </div>
     </div>
@@ -463,7 +464,10 @@ ol.msg{padding-left:20px;line-height:1.5}
       var b1=document.createElement('button');b1.className='sec';b1.textContent='Baixar';b1.onclick=function(){baixar(f)};
       var b2=document.createElement('button');b2.className='sec';b2.textContent='Tirar';
       b2.onclick=function(){URL.revokeObjectURL(f.url);fotos.splice(i,1);cacheShare=null;atualizarGrade()};
-      bt.appendChild(b1);bt.appendChild(b2);d.appendChild(bt);g.appendChild(d);
+      var b3=document.createElement('button');b3.className=f.capa?'':'sec';b3.textContent=f.capa?'★ Capa':'Capa';
+      b3.title='Foto que aparece no card do site';
+      b3.onclick=function(){var era=!!f.capa;fotos.forEach(function(x){x.capa=false});f.capa=!era;atualizarGrade()};
+      bt.appendChild(b1);bt.appendChild(b3);bt.appendChild(b2);d.appendChild(bt);g.appendChild(d);
     });
     msg('status',fotos.length?fotos.length+' foto(s) pronta(s).':'Nenhuma foto escolhida.');
     var t=!fotos.length;
@@ -737,7 +741,7 @@ ol.msg{padding-left:20px;line-height:1.5}
       var partes=[SLUGPAG[st]||st];if(bairro)partes.push(slugificar(bairro));partes.push(codigo.toLowerCase());
       var agora=new Date().toISOString();
       var ref=db.ref('fcosta_imoveis').push();
-      var dados={titulo:nome,status:st,numeroCodigo:num,codigo:codigo,tipo:'',preco:'',area:'',quartos:0,banheiros:0,vagas:0,bairro:bairro,cidade:cidade,endereco:'',descricao:'',video:null,videoMp4:null,tourMp4:'',destaque:false,publicado:false,slug:('/'+partes.join('-')).slice(0,90),seoTitle:'',seoDesc:'',fotos:[],fotoDestaque:'',criado:agora,atualizado:agora};
+      var dados={titulo:nome,status:st,numeroCodigo:num,codigo:codigo,tipo:'',preco:'',area:'',quartos:0,banheiros:0,vagas:0,bairro:bairro,cidade:cidade,endereco:'',descricao:'',video:null,videoMp4:null,tourMp4:'',destaque:false,publicado:$('neNoSite').checked,slug:('/'+partes.join('-')).slice(0,90),seoTitle:'',seoDesc:'',fotos:[],fotoDestaque:'',criado:agora,atualizado:agora};
       return ref.set(dados).then(function(){return {id:ref.key,dados:dados,codigo:codigo}});
     }).then(function(r){
       r.dados.id=r.id;imoveis.push(r.dados);
@@ -963,7 +967,7 @@ ol.msg{padding-left:20px;line-height:1.5}
     var id=$('imovelFt').value,im=imoveis.find(function(x){return x.id===id});
     if(!id||!fotos.length||!auth||!auth.currentUser)return;
     $('bEnviarFt').disabled=true;
-    var urls=[],falhas=0;
+    var urls=[],falhas=0,capaUrl='';
     for(var i=0;i<fotos.length;i++){
       msg('stEnvioFt','Enviando '+(i+1)+' de '+fotos.length+'…');
       try{
@@ -972,7 +976,8 @@ ol.msg{padding-left:20px;line-height:1.5}
         var caminho='imoveis/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'_'+base+'.jpg';
         var r=await sb.storage.from(SB_BUCKET).upload(caminho,blob,{cacheControl:'3600',upsert:false,contentType:'image/jpeg'});
         if(r.error)throw r.error;
-        urls.push(sb.storage.from(SB_BUCKET).getPublicUrl(caminho).data.publicUrl);
+        var pu=sb.storage.from(SB_BUCKET).getPublicUrl(caminho).data.publicUrl;
+        urls.push(pu);if(fotos[i].capa)capaUrl=pu;
       }catch(e){falhas++;console.error(e)}
     }
     if(!urls.length){msg('stEnvioFt','Nenhuma foto foi enviada. Tente de novo.','er');checarEnvioFt();return}
@@ -982,7 +987,8 @@ ol.msg{padding-left:20px;line-height:1.5}
       var cur=snap.val()||{},v=cur.fotos;
       var atual=!v?[]:(Array.isArray(v)?v:Object.values(v)).filter(Boolean);
       var todas=atual.concat(urls).slice(0,30),cortadas=atual.length+urls.length-todas.length;
-      var upd={fotos:todas,fotoDestaque:cur.fotoDestaque||todas[0]||'',atualizado:new Date().toISOString()};
+      var temCapa=typeof cur.fotoDestaque==='string'&&cur.fotoDestaque.indexOf('http')===0;
+      var upd={fotos:todas,fotoDestaque:capaUrl||(temCapa?cur.fotoDestaque:(todas[0]||'')),atualizado:new Date().toISOString()};
       var aviso2='';
       if(!atual.length||cur.logoVersao===2){upd.logoAplicada=true;upd.logoVersao=2}
       else aviso2=' Atenção: esse imóvel já tinha fotos sem a logo. Se usar “Logo nas fotos antigas” no Painel ADM, as novas podem ficar com a logo duas vezes.';
@@ -1014,11 +1020,16 @@ ol.msg{padding-left:20px;line-height:1.5}
     if(!urls.length){msg('stEnvio','Nenhuma foto foi enviada. Tente de novo.','er');checarEnvio();return}
     try{
       msg('stEnvio','Ligando ao imóvel…');
-      var snap=await db.ref('fcosta_imoveis/'+id+'/bookFotos').once('value');
-      var v=snap.val(),atual=!v?[]:(Array.isArray(v)?v:Object.values(v)).filter(Boolean);
+      var snap=await db.ref('fcosta_imoveis/'+id).once('value');
+      var cur=snap.val()||{},v=cur.bookFotos,atual=!v?[]:(Array.isArray(v)?v:Object.values(v)).filter(Boolean);
       var novo=$('como').value==='sub'?urls:atual.concat(urls);
-      await db.ref('fcosta_imoveis/'+id).update({bookFotos:novo,atualizado:new Date().toISOString()});
-      msg('stEnvio','Pronto! '+urls.length+' foto(s) no imóvel '+cod(im||{})+'. Agora o book tem '+novo.length+' foto(s).'+(falhas?' '+falhas+' falharam; envie de novo só essas.':''),'ok');
+      var upd={bookFotos:novo,atualizado:new Date().toISOString()};
+      var temCapa=typeof cur.fotoDestaque==='string'&&cur.fotoDestaque.indexOf('http')===0;
+      var temFotos=cur.fotos&&Object.keys(cur.fotos).length;
+      var capaNova=!temCapa&&!temFotos;
+      if(capaNova)upd.fotoDestaque=urls[0];
+      await db.ref('fcosta_imoveis/'+id).update(upd);
+      msg('stEnvio','Pronto! '+urls.length+' foto(s) no imóvel '+cod(im||{})+'. Agora o book tem '+novo.length+' foto(s).'+(capaNova?' A primeira virou a capa do card no site.':'')+(falhas?' '+falhas+' falharam; envie de novo só essas.':''),'ok');
     }catch(e){
       msg('stEnvio','As fotos subiram, mas não consegui ligar ao imóvel: '+e.message,'er');
     }
