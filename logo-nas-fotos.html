@@ -32,6 +32,13 @@ input[type=range]{width:100%}
 .msg.ok{color:var(--ok)}.msg.er{color:var(--er)}
 .logo-prev{height:56px;max-width:160px;object-fit:contain;border:1px dashed var(--bd);border-radius:8px;padding:4px;background:repeating-conic-gradient(#8883 0 25%,transparent 0 50%) 50%/14px 14px}
 .hide{display:none!important}
+#neDest{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.destb{background:transparent;color:var(--tx);border:2px solid var(--bd);border-radius:12px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;font-weight:600}
+.destb b{font-size:1.05rem;letter-spacing:.03em}
+.destb span{font-size:.72rem;color:var(--mut);font-weight:500}
+.destb em{font-style:normal;font-size:.72rem;color:var(--ok);font-weight:700;margin-top:2px}
+.destb.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 14%,transparent)}
+.destb.on b{color:var(--ac)}
 
 /* duas colunas no PC: ajustes à esquerda, fotos à direita */
 .wrap{display:grid;grid-template-columns:1fr;gap:0 18px}
@@ -225,12 +232,12 @@ ol.msg{padding-left:20px;line-height:1.5}
       <div class="msg" id="stImovel"></div>
       <div class="row" style="margin-top:10px"><button class="sec peq" id="bNovoEmp" type="button" disabled>+ Cadastrar novo imóvel</button></div>
       <div id="novoEmp" class="hide">
-        <label for="neStatus">Tipo de cadastro</label>
-        <select id="neStatus">
-          <option value="lancamento">Lançamento / empreendimento de construtora (FCL)</option>
-          <option value="venda">À venda (FCV)</option>
-          <option value="aluguel">Aluguel (FCA)</option>
-        </select>
+        <label>Destino da publicação</label>
+        <input type="hidden" id="neStatus" value="lancamento">
+        <div id="neDest"></div>
+        <label for="neNum">Número do código (automático)</label>
+        <input class="campo" id="neNum" inputmode="numeric" maxlength="6" placeholder="Automático">
+        <div class="msg" id="neNumHint"></div>
         <label for="neNome">Nome ou título do imóvel</label>
         <input class="campo" id="neNome" maxlength="80" placeholder="Ex.: Residencial Vila Nova ou Casa 3 quartos Mooca">
         <label for="neBairro">Bairro (opcional)</label>
@@ -242,7 +249,7 @@ ol.msg{padding-left:20px;line-height:1.5}
           <button id="bCriarEmp" type="button">Criar e selecionar</button>
           <button class="sec peq" id="bCancelarEmp" type="button">Cancelar</button>
         </div>
-        <div class="msg">Cria o cadastro já com o próximo código livre do tipo escolhido (lançamento de construtora = FCL). Ele aparece no site se a caixa “Já aparecer no site” estiver marcada.</div>
+        <div class="msg">O código já vem com o próximo número livre do destino escolhido (construtora = FCL) e é conferido de novo na hora de criar, para não duplicar. Ele aparece no site se a caixa “Já aparecer no site” estiver marcada.</div>
         <div class="msg" id="stNovoEmp"></div>
       </div>
     </div>
@@ -725,7 +732,39 @@ ol.msg{padding-left:20px;line-height:1.5}
     var p=1;while(usados[p])p++;
     return String(p).padStart(3,'0');
   }
-  $('bNovoEmp').addEventListener('click',function(){$('novoEmp').classList.remove('hide');$('bNovoEmp').classList.add('hide');$('neNome').focus()});
+  var neAuto=true;
+  function achaNum(st,num){
+    var sig=SG[st]||'FCV',n0=parseInt(num);
+    return imoveis.find(function(i){
+      if((SG[i.status]||'FCV')!==sig)return false;
+      var n=parseInt(i.numeroCodigo);
+      if(!n||isNaN(n))n=parseInt(String(i.codigo||'').replace(/[^0-9]/g,''));
+      return n===n0;
+    })||null;
+  }
+  function atualizarNumHint(){
+    var st=$('neStatus').value,sig=SG[st]||'FCV',h=$('neNumHint'),v=$('neNum').value.trim();
+    h.className='msg';
+    if(neAuto){h.textContent='Automático: próximo número livre de '+sig+'. Se você trocar, eu aviso se já existir.';return}
+    if(!/^[0-9]{1,6}$/.test(v)){h.textContent='Digite só números.';h.className='msg er';return}
+    var c=achaNum(st,v);
+    if(c){h.textContent=sig+v.padStart(3,'0')+' já existe: '+(c.titulo||'sem título')+'. Próximo livre: '+sig+proxNumSt(st)+'.';h.className='msg er'}
+    else{h.textContent=sig+v.padStart(3,'0')+' está livre.';h.className='msg ok'}
+  }
+  function renderNeDest(){
+    var box=$('neDest');if(!box)return;
+    var sel=$('neStatus').value;
+    var op=[['lancamento','FCL','Lançamento'],['venda','FCV','À venda'],['aluguel','FCA','Aluguel']];
+    box.innerHTML=op.map(function(o){
+      return '<button type="button" class="destb'+(sel===o[0]?' on':'')+'" data-st="'+o[0]+'"><b>'+o[1]+'</b><span>'+o[2]+'</span><em>próximo '+o[1]+proxNumSt(o[0])+'</em></button>';
+    }).join('');
+    Array.prototype.forEach.call(box.querySelectorAll('.destb'),function(b){
+      b.addEventListener('click',function(){$('neStatus').value=b.getAttribute('data-st');neAuto=true;$('neNum').value=proxNumSt(b.getAttribute('data-st'));renderNeDest();atualizarNumHint()});
+    });
+    if(neAuto)$('neNum').value=proxNumSt(sel);
+  }
+  $('neNum').addEventListener('input',function(){this.value=this.value.replace(/[^0-9]/g,'');neAuto=false;atualizarNumHint()});
+  $('bNovoEmp').addEventListener('click',function(){$('novoEmp').classList.remove('hide');$('bNovoEmp').classList.add('hide');neAuto=true;renderNeDest();atualizarNumHint();$('neNome').focus()});
   $('bCancelarEmp').addEventListener('click',function(){$('novoEmp').classList.add('hide');$('bNovoEmp').classList.remove('hide');msg('stNovoEmp','')});
   $('bCriarEmp').addEventListener('click',function(){
     var nome=$('neNome').value.trim(),bairro=$('neBairro').value.trim(),cidade=$('neCidade').value.trim();
@@ -737,7 +776,14 @@ ol.msg{padding-left:20px;line-height:1.5}
       imoveis=Object.keys(d).map(function(k){var o=d[k];o.id=k;return o}).filter(function(o){return o&&o._del!==true&&o._excluido!==true});
       var rep=imoveis.find(function(i){return (i.titulo||'').trim().toLowerCase()===nome.toLowerCase()});
       if(rep&&!confirm('Já existe “'+rep.titulo+'” ('+cod(rep)+'). Criar mesmo assim outro cadastro?')){btn.disabled=false;msg('stNovoEmp','Cancelado. Escolha o existente na lista acima.');return Promise.reject('cancel')}
-      var st=$('neStatus').value,num=proxNumSt(st),codigo=(SG[st]||'FCV')+num;
+      var st=$('neStatus').value,num;
+      if(neAuto||!$('neNum').value.trim())num=proxNumSt(st);
+      else{
+        num=$('neNum').value.trim().padStart(3,'0');
+        var ocupado=achaNum(st,num);
+        if(ocupado){btn.disabled=false;renderNeDest();atualizarNumHint();msg('stNovoEmp',(SG[st]||'FCV')+num+' já existe ('+(ocupado.titulo||'sem título')+'). Escolha outro número ou deixe automático.','er');return Promise.reject('cancel')}
+      }
+      var codigo=(SG[st]||'FCV')+num;
       var partes=[SLUGPAG[st]||st];if(bairro)partes.push(slugificar(bairro));partes.push(codigo.toLowerCase());
       var agora=new Date().toISOString();
       var ref=db.ref('fcosta_imoveis').push();
@@ -747,9 +793,9 @@ ol.msg{padding-left:20px;line-height:1.5}
       r.dados.id=r.id;imoveis.push(r.dados);
       $('todosSt').checked=true;montarSelect();$('imovel').value=r.id;
       $('imovel').dispatchEvent(new Event('change'));
-      $('neNome').value='';$('neBairro').value='';
+      $('neNome').value='';$('neBairro').value='';neAuto=true;
       $('novoEmp').classList.add('hide');$('bNovoEmp').classList.remove('hide');
-      msg('stNovoEmp','');msg('stImovel','Criado e selecionado: '+r.codigo+' — '+r.dados.titulo+'. Ele fica oculto no site até você publicar no Painel ADM.','ok');
+      msg('stNovoEmp','');msg('stImovel','Criado e selecionado: '+r.codigo+' — '+r.dados.titulo+'. '+(r.dados.publicado?'Ele já aparece no site; complete preço e descrição no Painel ADM.':'Ele fica oculto no site até você publicar no Painel ADM.'),'ok');
       btn.disabled=false;
     }).catch(function(e){
       btn.disabled=false;if(e==='cancel')return;
@@ -767,6 +813,7 @@ ol.msg{padding-left:20px;line-height:1.5}
     if(a2&&lista.some(function(i){return i.id===a2}))s2.value=a2;
     msg('stImovel',lista.length?lista.length+' imóvel(is) na lista.':(auth&&auth.currentUser?'Nenhum imóvel na lista. Cadastre um novo acima.':''));
     checarEnvio();
+    try{if(!$('novoEmp').classList.contains('hide')){renderNeDest();atualizarNumHint()}}catch(e){}
   }
   $('todosSt').addEventListener('change',montarSelect);
   $('imovel').addEventListener('change',checarEnvio);
