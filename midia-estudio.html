@@ -1,0 +1,1492 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Estúdio de Mídia — OBPC</title>
+<meta name="theme-color" content="#0F4A34">
+<link rel="manifest" href="manifest-midia.json">
+<link rel="apple-touch-icon" href="icone-midia-180.png">
+<link rel="icon" type="image/png" href="icone-midia-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="OBPC São Fernando">
+<meta name="mobile-web-app-capable" content="yes">
+<style>
+:root{--verde:#0F4A34;--verde2:#14573C;--ouro:#F5C842;--ouro2:#E0961E;--bg:#F3F6F4;--card:#fff;--ink:#14221C;--muted:#5B6B62;--line:#D6E0DA;--ok:#1E8E4E;--erro:#C0392B;--rec:#E02424;
+box-sizing:border-box}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(78px + env(safe-area-inset-bottom)) env(safe-area-inset-left)}
+header{background:linear-gradient(135deg,var(--verde),var(--verde2));color:#fff;padding:14px 16px 12px}
+header .e{font-size:11px;letter-spacing:.1em;text-transform:uppercase;opacity:.8;font-weight:700}
+header h1{margin:2px 0 0;font-size:22px}
+main{max-width:620px;margin:0 auto;padding:14px 14px 20px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+h2{margin:0 0 8px;font-size:15px;color:var(--verde)}
+.note{font-size:13px;color:var(--muted);margin:0}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:24px;padding:9px 16px;font:inherit;font-weight:700;color:var(--muted);cursor:pointer;min-height:44px}
+.chip.on{background:var(--verde);border-color:var(--verde);color:#fff}
+.grid4{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.big{border:1.5px solid var(--line);background:#fff;border-radius:16px;padding:18px 8px;font:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink);min-height:112px}
+.big .i{font-size:34px;line-height:1}.big b{font-size:15px}.big small{color:var(--muted);font-size:12px}
+.big:active{background:#EAF3EE}
+.btn{font:inherit;font-weight:700;min-height:48px;padding:0 18px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+.btn.pri{background:var(--verde);border-color:var(--verde);color:#fff}
+.btn.ouro{background:var(--ouro);border-color:var(--ouro2);color:#3A2A00}
+.btn.perigo{color:var(--erro);border-color:#E7B9B3}
+.btn:disabled{opacity:.5}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 120px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700;color:var(--muted)}
+input[type=text],textarea,select{font:inherit;font-weight:400;color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:11px;width:100%;background:#fff}
+textarea{min-height:72px;resize:vertical}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid var(--ouro2);outline-offset:1px}
+.stack{display:flex;flex-direction:column;gap:10px}
+[hidden]{display:none!important}
+/* visor */
+.visor{position:relative;background:#000;border-radius:16px;overflow:hidden;aspect-ratio:9/12;max-height:62vh;width:100%}
+.visor video{width:100%;height:100%;object-fit:cover;background:#000}
+.visor .tempo{position:absolute;top:10px;left:10px;background:rgba(0,0,0,.6);color:#fff;border-radius:20px;padding:4px 12px;font-variant-numeric:tabular-nums;font-weight:700;display:flex;gap:7px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;background:#888}.gravando .dot{background:var(--rec);animation:pisca 1s infinite}
+@keyframes pisca{50%{opacity:.2}}
+.visor .virar{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.55);border:0;color:#fff;border-radius:50%;width:44px;height:44px;font-size:20px}
+.audio{background:linear-gradient(135deg,var(--verde),var(--verde2));border-radius:16px;color:#fff;padding:26px 14px;text-align:center}
+.audio .mic{font-size:54px}.audio .tempo{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;margin:4px 0 12px}
+.nivel{display:flex;gap:4px;justify-content:center;align-items:flex-end;height:44px}
+.nivel i{width:8px;background:var(--ouro);border-radius:4px;height:6px;transition:height .08s}
+.ctl{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:12px}
+.rec{width:78px;height:78px;border-radius:50%;border:5px solid #fff;background:var(--rec);box-shadow:0 0 0 3px var(--rec);cursor:pointer;position:relative}
+.rec.on::after{content:"";position:absolute;inset:20px;background:#fff;border-radius:6px}
+.mini{width:56px;height:56px;border-radius:50%;border:1.5px solid var(--line);background:#fff;font-size:22px;cursor:pointer}
+.cap .lin{margin-top:10px}.cap .lin:first-of-type{margin-top:4px}
+.cap .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;font-weight:700;color:var(--ink)}
+.cap .top span{font-weight:800;font-variant-numeric:tabular-nums}
+.cap .bar i{background:var(--ok)}.cap .lin.amar .bar i{background:var(--ouro2)}.cap .lin.verm .bar i{background:var(--erro)}
+.cap .lin.amar .top span{color:#8A5A00}.cap .lin.verm .top span{color:var(--erro)}
+.cap .alerta{margin-top:10px;border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600}
+.cap .alerta.amar{background:#FFF7DB;border:1px solid #F0DB8A;color:#5A4600}
+.cap .alerta.verm{background:#FBE0DC;border:1px solid #E7B9B3;color:#8E2418}
+.aviso{background:#FFF7DB;border:1px solid #F0DB8A;border-radius:12px;padding:10px 12px;font-size:13px;color:#5A4600}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.thumb{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:#ddd}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb button{position:absolute;top:4px;right:4px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;font-size:15px}
+.rot{margin:0;padding-left:22px;font-size:15px}.rot li{margin:6px 0}
+.rot .pq{display:list-item}.rot .pq .pt{cursor:pointer;font-weight:600}.rot .pq.feita .pt{text-decoration:line-through;opacity:.5}
+.rot .px{border:0;background:none;color:#a0305a;font-size:15px;padding:2px 8px;margin-left:6px;cursor:pointer}
+.item{display:flex;gap:10px;align-items:center}
+.item .mini-img{width:62px;height:62px;border-radius:10px;background:#E4ECE7;display:flex;align-items:center;justify-content:center;font-size:26px;flex:none;overflow:hidden}
+.item .mini-img img{width:100%;height:100%;object-fit:cover}
+.item .t{font-weight:700;font-size:14px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.item .m{font-size:12px;color:var(--muted)}
+.tag{display:inline-block;font-size:11px;font-weight:800;border-radius:10px;padding:2px 8px;margin-right:4px;background:#E4ECE7;color:var(--verde)}
+.tag.ok{background:#DDF3E4;color:var(--ok)}.tag.pend{background:#FFF0C7;color:#8A5A00}.tag.err{background:#FBE0DC;color:var(--erro)}
+.acoes{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.acoes .btn{min-height:40px;padding:0 12px;font-size:13px;flex:1 1 auto}
+.bar{height:10px;border-radius:6px;background:#E4ECE7;overflow:hidden}.bar i{display:block;height:100%;width:0;background:var(--ouro2);transition:width .2s}
+nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:20}
+nav button{flex:1;border:0;background:none;font:inherit;font-size:12px;font-weight:700;color:var(--muted);padding:10px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:60px}
+nav button span{font-size:22px;line-height:1}nav button.on{color:var(--verde);box-shadow:inset 0 3px 0 var(--ouro2)}
+/* folha */
+.folha-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;align-items:flex-end;justify-content:center}
+.folha-bg.show{display:flex}
+.folha{background:#fff;width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:16px 16px calc(24px + env(safe-area-inset-bottom))}
+.folha .al{width:38px;height:4px;border-radius:4px;background:#ccd;margin:0 auto 12px}
+.folha h3{margin:0 0 10px;text-align:center;color:var(--verde);text-transform:uppercase;letter-spacing:.05em;font-size:15px}
+.prev{display:flex;gap:10px;align-items:center;background:#F3F6F4;border:1px solid var(--line);border-radius:12px;padding:8px;margin-bottom:12px}
+.prev img{width:96px;height:64px;object-fit:cover;border-radius:8px;background:#ddd}
+.prev b{display:block;font-size:14px}.prev small{color:var(--verde2);word-break:break-all;font-weight:700}
+.prevg{position:relative;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#06281C,#14573C);margin-bottom:12px;aspect-ratio:16/9;box-shadow:0 8px 22px rgba(6,40,28,.25)}
+.prevg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.prevg-t{position:absolute;left:0;right:0;bottom:0;padding:30px 12px 10px;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff}
+.prevg-t b{display:block;font-size:14px;line-height:1.25}.prevg-t small{font-size:11px;opacity:.85}
+.redes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.rede{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:10px 2px;font:inherit;font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+.rede span{font-size:24px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#14221C;color:#fff;padding:10px 16px;border-radius:24px;font-size:14px;z-index:99;max-width:90%;text-align:center;display:none}
+.passos{margin:0;padding-left:20px;font-size:14px}.passos li{margin:6px 0}
+video.pv,audio.pv{width:100%;border-radius:12px;background:#000}
+
+/* ===== VITRAL (2026-11-16h): luz de vitral sobre pedra clara, botões de porcelana 3D. Só aparência; nenhuma função mexida ===== */
+:root{--serif:Georgia,"Times New Roman",serif;--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--bg:#EAF0EC;
+--face:linear-gradient(180deg,#ffffff 0,#f3f7f4 52%,#e2ebe5 100%);
+--borda:0 1px 0 #cfdbd3,0 2px 0 #c4d2c9,0 3px 0 #b9c9be,0 4px 0 #adbfb3,0 5px 0 #a1b5a8;
+--sombraB:0 14px 14px -5px rgba(15,74,52,.36),0 5px 4px -2px rgba(15,74,52,.22);
+--topo:inset 0 1.5px 0 #fff,inset 0 -2px 3px rgba(15,74,52,.10);
+--aperta:0 1px 0 #a1b5a8,0 4px 6px -2px rgba(15,74,52,.30),inset 0 3px 7px rgba(15,74,52,.22)}
+*{-webkit-font-smoothing:antialiased}
+body{font:16px/1.45 var(--sans);color:var(--ink);padding-bottom:calc(112px + env(safe-area-inset-bottom));
+background:radial-gradient(110% 55% at 50% -12%,rgba(248,224,138,.55),transparent 62%),linear-gradient(#EEF4F0,#E1EAE4);background-attachment:fixed}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+background:conic-gradient(from 158deg at 50% -8%,transparent 0 5deg,rgba(255,255,255,.55) 9deg,transparent 15deg 21deg,rgba(255,236,170,.45) 26deg,transparent 32deg 39deg,rgba(255,255,255,.5) 45deg,transparent 51deg 360deg);
+-webkit-mask-image:linear-gradient(#000,transparent 70%);mask-image:linear-gradient(#000,transparent 70%)}
+
+/* ---- cabeçalho ---- */
+header{display:grid;grid-template-columns:1fr auto;column-gap:14px;align-items:center;
+padding:22px max(20px,calc((100% - 620px)/2 + 20px)) 26px;border-radius:0 0 34px 34px;color:#fff;
+background:radial-gradient(120% 90% at 85% -20%,rgba(245,200,66,.28),transparent 55%),linear-gradient(160deg,#0A3526,#14573C 65%,#1C6E4C);
+box-shadow:0 3px 0 #E0961E,0 4px 0 #F8D860,0 22px 30px -10px rgba(10,53,38,.6)}
+header .e{grid-column:1/-1;font:600 13px/1.2 var(--sans);letter-spacing:.02em;text-transform:none;opacity:1;color:#F8E08A;margin-bottom:6px}
+header h1{grid-column:1;margin:0;font:700 31px/1.08 var(--serif);letter-spacing:.005em;color:#fff;text-shadow:0 2px 0 rgba(0,0,0,.25)}
+#oi{grid-column:1;color:#DDEFE5;font-weight:500;margin-top:8px!important}
+.hw{grid-column:2;grid-row:2/4;display:flex;flex-direction:column;align-items:center;gap:9px;margin:0}
+.vu{position:relative;width:118px;aspect-ratio:120/70;border-radius:14px;border:5px solid transparent;overflow:hidden;
+background:radial-gradient(130% 150% at 50% 115%,#fff8de,#f6d98c) padding-box,conic-gradient(from 20deg,#F8E08A,#B57A14,#F6D56A,#8E5A0A,#F8E08A) border-box;
+box-shadow:0 4px 0 #7d520a,0 12px 14px -2px rgba(0,0,0,.45),inset 0 3px 8px rgba(80,40,0,.4)}
+.vu svg{display:block;width:100%;height:100%}
+.vu::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,.55) 0 26%,rgba(255,255,255,0) 26.4%),linear-gradient(rgba(255,255,255,.2),transparent 40%)}
+.needle{transform-origin:60px 58px;transform:rotate(-48deg)}
+.kns,.lamp.pw{display:none}
+.lamps{display:flex}
+.lamp{display:flex;flex-direction:row;align-items:center;gap:8px}
+.lamp small{font:700 12px/1 var(--sans);color:#DDEFE5;letter-spacing:.02em}
+.lamp i{display:block;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#7fa593,#2c4f40);box-shadow:0 0 0 2px #0A3526,0 0 0 3px rgba(255,255,255,.55),inset 0 1px 2px #000}
+.lamp.air.on i{background:radial-gradient(circle at 32% 28%,#fff 0 12%,#ff8aa8 30%,#e0123f 72%,#7a0020);box-shadow:0 0 0 2px #0A3526,0 0 0 3px rgba(255,255,255,.55),0 0 16px 4px #ff2d5f}
+
+/* ---- corpo ---- */
+main{width:100%;max-width:620px;margin:0 auto;padding:22px 16px 26px;gap:20px;background:none;box-shadow:none;border-radius:0}
+.stack{gap:16px}.row,.acoes{gap:14px}.chips{gap:14px}.grid4{gap:18px}
+.card{background:#fff;border:1px solid rgba(15,74,52,.08);border-radius:22px;padding:18px 16px;box-shadow:inset 0 1px 0 #fff,0 2px 0 rgba(15,74,52,.05),0 18px 30px -16px rgba(15,74,52,.40)}
+h2{margin:0 0 10px;font:700 19px/1.2 var(--serif);color:var(--verde);letter-spacing:0;text-transform:none;display:block;padding:0}
+h2::before,h2::after{content:none}
+.note{font-size:14px;color:var(--muted)}
+label.f{font:700 13px/1.2 var(--sans);color:var(--verde);text-transform:none;letter-spacing:0;gap:6px}
+#rev-cons-l{font-size:14px;font-weight:600;color:var(--ink)}
+input[type=text],input[type=password],textarea,select{font:400 16px/1.4 var(--sans);color:var(--ink);background:#F6F9F7;border:0;border-radius:13px;padding:13px 14px;
+box-shadow:inset 0 2px 5px rgba(15,74,52,.18),inset 0 0 0 1px #cfdcd4,0 1px 0 #fff}
+input::placeholder,textarea::placeholder{color:#8fa399}
+
+/* ---- etapas ---- */
+.etapas{display:flex;gap:10px}
+.etapas div{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:9px 4px 10px;border-radius:16px;font:700 12px/1.2 var(--sans);color:var(--muted);
+background:var(--face);box-shadow:0 3px 0 #c2d1c8,0 10px 12px -6px rgba(15,74,52,.3),inset 0 1px 0 #fff}
+.etapas div b{font:700 20px/1 var(--serif);color:#9bb0a4}
+.etapas .on{color:#4a2e00;background:linear-gradient(#FDE98C,#F2B52E);box-shadow:0 3px 0 #b87810,0 10px 14px -6px rgba(184,120,16,.55),inset 0 1.5px 0 rgba(255,255,255,.8)}
+.etapas .on b{color:#4a2e00}
+.etapas .feito{color:#fff;background:linear-gradient(#2f9a6a,#14573C);box-shadow:0 3px 0 #0a3526,0 10px 12px -6px rgba(15,74,52,.5),inset 0 1.5px 0 rgba(255,255,255,.35)}
+.etapas .feito b{color:#F8E08A}
+
+/* ---- botões de porcelana ---- */
+.btn,.chip,.mini,.rede,nav button,.visor .virar{border:0;color:#17402F;text-shadow:0 1px 0 #fff;background:var(--face);box-shadow:var(--borda),var(--sombraB),var(--topo);transform:none;filter:none;transition:transform .08s,box-shadow .08s}
+.btn:active,.chip:active,.mini:active,.rede:active,nav button:active,.visor .virar:active{transform:translateY(5px);box-shadow:var(--aperta);filter:none}
+.btn{font:700 16px/1.1 var(--sans);letter-spacing:0;text-transform:none;min-height:52px;padding:0 18px;border-radius:15px;margin:2px 0 7px}
+.btn.pri{color:#fff;text-shadow:0 -1px 0 rgba(0,40,20,.5);background:linear-gradient(180deg,#34a373 0,#14573C 58%,#0F4A34 100%);
+box-shadow:0 1px 0 #0b3a29,0 2px 0 #0a3526,0 3px 0 #092f21,0 4px 0 #082a1d,0 5px 0 #072518,var(--sombraB),inset 0 1.5px 0 rgba(255,255,255,.4),inset 0 -2px 3px rgba(0,0,0,.2)}
+.btn.ouro{color:#4a2e00;text-shadow:0 1px 0 rgba(255,255,255,.6);background:linear-gradient(180deg,#FDEC96 0,#F5C233 55%,#E3A01C 100%);
+box-shadow:0 1px 0 #cf8d18,0 2px 0 #c18013,0 3px 0 #b3740f,0 4px 0 #a5690b,0 5px 0 #975e08,var(--sombraB),inset 0 1.5px 0 rgba(255,255,255,.85),inset 0 -2px 3px rgba(150,90,0,.2)}
+.btn.pri:active{box-shadow:0 1px 0 #072518,0 4px 6px -2px rgba(15,74,52,.4),inset 0 3px 7px rgba(0,0,0,.35)}
+.btn.ouro:active{box-shadow:0 1px 0 #975e08,0 4px 6px -2px rgba(150,90,0,.4),inset 0 3px 7px rgba(120,60,0,.3)}
+.btn.perigo{color:#B3261E}
+.btn:disabled{opacity:.55}
+.chip{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 24px;border-radius:999px;font:700 17px/1 var(--sans);margin:2px 0 7px}
+.chip.on{color:#fff;text-shadow:0 -1px 0 rgba(0,40,20,.5);background:linear-gradient(180deg,#2f9a6a,#14573C 60%,#0F4A34);transform:translateY(3px);
+box-shadow:0 2px 0 #072518,0 6px 8px -3px rgba(15,74,52,.4),inset 0 3px 7px rgba(0,0,0,.3),inset 0 0 0 2px rgba(248,224,138,.55)}
+.mini{width:56px;height:56px;border-radius:50%;font-size:22px;color:#14573C;display:flex;align-items:center;justify-content:center;margin:4px 0 8px}
+.mini.mudo-on{color:#fff;background:linear-gradient(#ff9aa8,#d9264f);transform:translateY(3px);box-shadow:0 2px 0 #8a1531,0 5px 7px -3px rgba(138,21,49,.5),inset 0 3px 7px rgba(90,0,20,.3)}
+.visor .virar{width:46px;height:46px;border-radius:50%;font-size:22px;color:#14573C;display:flex;align-items:center;justify-content:center}
+
+/* ---- pads de vitral ---- */
+.big{--a:#37d6a1;--b:#0c7a58;--e:#075a40;position:relative;overflow:hidden;border:0;border-radius:22px;min-height:142px;gap:6px;color:#fff;margin-bottom:9px;
+background:radial-gradient(90% 70% at 28% 12%,rgba(255,255,255,.6),rgba(255,255,255,0) 62%),linear-gradient(160deg,var(--a),var(--b));
+box-shadow:0 1px 0 var(--e),0 2px 0 var(--e),0 3px 0 var(--e),0 4px 0 var(--e),0 5px 0 var(--e),0 6px 0 var(--e),0 7px 0 var(--e),0 8px 0 var(--e),0 20px 18px -6px rgba(15,74,52,.45),inset 0 2px 1px rgba(255,255,255,.75),inset 0 -10px 18px rgba(0,0,0,.14);
+transition:transform .08s,box-shadow .08s}
+.big::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(45deg,transparent 0 24px,rgba(255,255,255,.18) 24px 25.5px),repeating-linear-gradient(-45deg,transparent 0 24px,rgba(0,0,0,.11) 24px 25.5px)}
+.big>*{position:relative;z-index:1}
+.big[data-ir=culto]{--a:#3fe0aa;--b:#0c7a58;--e:#075a40}
+.big[data-ir=foto]{--a:#ff86b4;--b:#c0245e;--e:#8b1944}
+.big[data-ir=podcast]{--a:#86adff;--b:#2c56c8;--e:#1d3e92}
+.big[data-ir=entrevista]{--a:#ffd96e;--b:#e48c12;--e:#a8620a;color:#4a2800}
+.big .i{display:flex;font-size:44px;color:#fff;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25))}
+.big[data-ir=entrevista] .i{color:#4a2800;filter:drop-shadow(0 1px 0 rgba(255,255,255,.5))}
+.big b{font:800 17px/1.1 var(--sans);letter-spacing:0;text-transform:none;text-shadow:0 -1px 0 rgba(0,0,0,.25);color:inherit}
+.big[data-ir=entrevista] b{text-shadow:0 1px 0 rgba(255,255,255,.5)}
+.big small{font:600 12px/1 var(--sans);letter-spacing:0;text-transform:none;color:inherit;opacity:.92}
+.big:active{transform:translateY(8px);box-shadow:0 1px 0 var(--e),0 5px 8px -3px rgba(15,74,52,.4),inset 0 4px 10px rgba(0,0,0,.28)}
+
+/* ---- gravação ---- */
+.visor{border:9px solid transparent;border-radius:28px;background:linear-gradient(#000,#000) padding-box,conic-gradient(from 30deg,#F8E08A,#B57A14,#F6D56A,#8E5A0A,#F8E08A) border-box;
+box-shadow:0 5px 0 #7d520a,0 20px 28px -6px rgba(10,53,38,.55),inset 0 0 0 2px #000}
+.visor::after{content:"";position:absolute;inset:0;border-radius:18px;pointer-events:none;background:linear-gradient(112deg,rgba(255,255,255,.13) 0 24%,rgba(255,255,255,0) 24.3%)}
+.visor .tempo{top:50%;left:50%;transform:translate(-50%,-50%);font-size:34px;white-space:nowrap;padding:8px 26px;background:rgba(0,0,0,.4);border-radius:40px;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+.visor .tempo .dot{width:16px;height:16px}
+.minuto{height:8px;width:180px;border-radius:6px;background:rgba(255,255,255,.3);overflow:hidden}
+.minuto i{display:block;height:100%;width:0;background:var(--ouro)}
+.visor .minuto{position:absolute;left:50%;top:calc(50% + 48px);transform:translateX(-50%)}
+.audio .minuto{margin:0 auto 14px}
+.audio{border-radius:24px;padding:26px 14px;background:radial-gradient(90% 60% at 50% 0,rgba(248,224,138,.25),transparent 70%),linear-gradient(160deg,#1C6E4C,#0A3526);
+box-shadow:0 0 0 2px #F8E08A,0 5px 0 2px #B57A14,0 22px 26px -6px rgba(10,53,38,.55),inset 0 2px 0 rgba(255,255,255,.2)}
+.audio .mic{font-size:48px;display:flex;justify-content:center;color:var(--ouro)}
+.audio .tempo{font-size:38px;font-weight:800;font-variant-numeric:tabular-nums;color:#fff}
+.nivel i{border-radius:3px;background:linear-gradient(var(--ouro),var(--ouro2))}
+.ctl{display:flex;gap:8px;justify-content:center;align-items:center;margin:22px 0 14px}
+.ctl .mini{width:52px;height:52px}
+.cb{display:flex;flex-direction:column;align-items:center;gap:1px;flex:none}
+.cb small{font:700 11px/1 var(--sans);color:var(--verde)}
+.rec{width:94px;height:94px;border-radius:50%;border:8px solid transparent;cursor:pointer;position:relative;
+background:radial-gradient(circle at 35% 25%,#ffa3ae,#e02424 46%,#9c0f1f) padding-box,conic-gradient(#fff,#b9c6be,#fff,#a8b8ae,#fff) border-box;
+box-shadow:0 0 0 3px rgba(15,74,52,.14),0 8px 0 2px #a1b5a8,0 20px 22px 0 rgba(15,74,52,.4),inset 0 5px 8px rgba(255,255,255,.55),inset 0 -8px 12px rgba(90,0,10,.45);transition:transform .08s,box-shadow .08s}
+.rec:active{transform:translateY(6px);box-shadow:0 0 0 3px rgba(15,74,52,.14),0 2px 0 2px #a1b5a8,0 8px 10px 0 rgba(15,74,52,.4),inset 0 5px 8px rgba(255,255,255,.45),inset 0 -8px 12px rgba(90,0,10,.45)}
+.rec.on{box-shadow:0 0 0 3px rgba(15,74,52,.14),0 8px 0 2px #a1b5a8,0 0 32px 8px rgba(224,36,36,.6),inset 0 5px 8px rgba(255,255,255,.55),inset 0 -8px 12px rgba(90,0,10,.45)}
+.rec.on::after{inset:23px;border-radius:6px;background:#fff}
+.aviso{background:#FFF6D6;border:1px solid #EBD487;border-radius:14px;color:#5A4600;font-size:13px;font-weight:600;box-shadow:0 8px 14px -10px rgba(150,100,0,.5)}
+.rot{margin:0;padding-left:24px;font-size:15px}.rot li{margin:7px 0}
+.rot .pq{display:list-item}.rot .pq .pt{cursor:pointer;font-weight:600}.rot .pq.feita .pt{text-decoration:line-through;opacity:.5}
+.rot .px{border:0;background:none;color:#B3261E;font-size:15px;padding:2px 8px;margin-left:6px;cursor:pointer}
+
+/* ---- espaço no site ---- */
+.cap .top{font:700 13px/1.2 var(--sans)}
+.bar{height:14px;border-radius:8px;background:#dbe6df;box-shadow:inset 0 2px 4px rgba(15,74,52,.25),0 1px 0 #fff}
+.bar i{border-radius:8px;box-shadow:inset 0 2px 0 rgba(255,255,255,.4)}
+.cap .bar i{background:linear-gradient(#3ccf8a,#1E8E4E)}.cap .lin.amar .bar i{background:linear-gradient(#FBD65A,#E0961E)}.cap .lin.verm .bar i{background:linear-gradient(#ff7a85,#C0392B)}
+
+/* ---- miniaturas, etiquetas ---- */
+.item .mini-img{border-radius:14px;background:linear-gradient(#e3ede7,#f4f8f5);box-shadow:inset 0 2px 5px rgba(15,74,52,.2),0 1px 0 #fff;color:#6b8577;font:700 11px/1 var(--sans)}
+.tag{font:700 11px/1.2 var(--sans);letter-spacing:0;text-transform:none;border-radius:10px;padding:3px 9px}
+.thumb{border-radius:14px;box-shadow:0 0 0 3px #fff,0 6px 0 2px #c4d2c9,0 12px 14px -4px rgba(15,74,52,.35)}
+
+/* ---- barra de baixo: dock flutuante ---- */
+nav{left:50%;right:auto;bottom:calc(10px + env(safe-area-inset-bottom));width:min(596px,calc(100% - 20px));transform:translateX(-50%);gap:9px;padding:9px;border:1px solid rgba(255,255,255,.9);border-radius:28px;
+background:rgba(255,255,255,.78);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:0 22px 34px -10px rgba(10,53,38,.55),0 2px 0 rgba(15,74,52,.08),inset 0 1px 0 #fff}
+nav button{font:700 12px/1 var(--sans);letter-spacing:0;text-transform:none;min-height:62px;padding:8px 4px;border-radius:18px;margin:0 0 5px;gap:4px;color:#3b6552}
+nav button::before{content:none}
+nav button span{font-size:23px;display:flex}
+nav button.on{color:#fff;text-shadow:0 -1px 0 rgba(0,40,20,.5);background:linear-gradient(180deg,#2f9a6a,#14573C 60%,#0F4A34);transform:translateY(3px);box-shadow:0 2px 0 #072518,0 6px 8px -3px rgba(15,74,52,.4),inset 0 3px 7px rgba(0,0,0,.3)}
+nav button.on span{color:#F8E08A;filter:none}
+nav button.on b{color:#F8E08A!important}
+
+/* ---- folhas (revisar / compartilhar) ---- */
+.folha-bg{background:rgba(10,53,38,.55)}
+.folha{background:linear-gradient(#ffffff,#f1f6f3);border-radius:30px 30px 0 0;box-shadow:0 -4px 0 #F8E08A,0 -22px 40px rgba(10,53,38,.4)}
+.folha .al{width:48px;height:6px;background:#c8d6ce}
+.folha h3{font:700 20px/1.2 var(--serif);letter-spacing:0;text-transform:none;color:var(--verde)}
+.prev{background:#F3F7F4;border:1px solid var(--line);border-radius:14px}
+.prevg{border-radius:18px;box-shadow:0 0 0 3px #fff,0 6px 0 3px #c4d2c9,0 16px 20px -4px rgba(15,74,52,.4)}
+.redes{gap:12px}
+.rede{border-radius:16px;font:700 12px/1.2 var(--sans);letter-spacing:0;text-transform:none;color:#17402F;padding:12px 2px;margin-bottom:7px}
+.rede small{color:var(--muted);font-size:10px;font-weight:600}
+.rede .lg{display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;font:800 13px/1 var(--sans);color:#fff;text-shadow:0 -1px 0 rgba(0,0,0,.3);
+background:radial-gradient(circle at 35% 25%,#c9b4ff,#7c5cd6 70%);box-shadow:0 0 0 2px #fff,0 3px 0 2px rgba(15,74,52,.28),inset 0 2px 2px rgba(255,255,255,.5),inset 0 -3px 4px rgba(0,0,0,.2)}
+.rede[data-r=wpp] .lg,.rede[data-r=o-grupo] .lg{background:radial-gradient(circle at 35% 25%,#8dffb5,#1fb85a 70%)}
+.rede[data-r=face] .lg,.rede[data-r=o-face] .lg{background:radial-gradient(circle at 35% 25%,#9cc4ff,#1b6fe6 70%)}
+.rede[data-r=tele] .lg{background:radial-gradient(circle at 35% 25%,#a5e3ff,#1fa0e6 70%)}
+.rede[data-r=insta] .lg,.rede[data-r=o-insta] .lg{background:radial-gradient(circle at 30% 20%,#ffd08a,#ff4f9a 55%,#9b4fe0 100%)}
+video.pv,audio.pv{border-radius:14px;box-shadow:0 0 0 2px #cfdcd4}
+.toast{bottom:110px;background:#0F4A34;color:#fff;border-radius:16px;font-weight:600;box-shadow:0 0 0 2px #F8E08A,0 14px 24px rgba(10,53,38,.5)}
+.conta{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;font-size:42vmin;font-weight:700;cursor:pointer;background:rgba(10,53,38,.88);color:#F8E08A;font-family:var(--serif);text-shadow:0 8px 0 rgba(0,0,0,.25)}
+.conta[hidden]{display:none!important}
+#diag{background:#F3F6F4!important;color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="e">OBPC Jardim São Fernando</div>
+  <h1>Estúdio de Mídia</h1>
+  <p id="oi" style="margin:6px 0 0;font-size:15px"></p>
+  <div class="hw" aria-hidden="true"><div class="vu"><svg viewBox="0 0 120 70" aria-hidden="true" preserveAspectRatio="xMidYMid slice"><path d="M24.8 28.4 A46 46 0 0 1 95.2 28.4" fill="none" stroke="#3a2a20" stroke-width="1.2"/><path d="M75.7 14.8 A46 46 0 0 1 95.2 28.4" fill="none" stroke="#d8264f" stroke-width="3.2"/><line x1="24.8" y1="28.4" x2="29.4" y2="32.3" stroke="#3a2a20" stroke-width="1.2"/><line x1="33.6" y1="20.3" x2="37.1" y2="25.2" stroke="#3a2a20" stroke-width="1.2"/><line x1="44.3" y1="14.8" x2="46.3" y2="20.4" stroke="#3a2a20" stroke-width="1.2"/><line x1="56.0" y1="12.2" x2="56.5" y2="18.2" stroke="#3a2a20" stroke-width="1.2"/><line x1="68.0" y1="12.7" x2="66.9" y2="18.6" stroke="#3a2a20" stroke-width="1.2"/><line x1="75.7" y1="14.8" x2="73.7" y2="20.4" stroke="#d8264f" stroke-width="1.2"/><line x1="83.0" y1="18.2" x2="80.0" y2="23.4" stroke="#d8264f" stroke-width="1.2"/><line x1="89.6" y1="22.8" x2="85.7" y2="27.4" stroke="#d8264f" stroke-width="1.2"/><line x1="95.2" y1="28.4" x2="90.6" y2="32.3" stroke="#d8264f" stroke-width="1.2"/><text x="60" y="44" text-anchor="middle" font-family="Trebuchet MS,Arial" font-weight="900" font-size="10" fill="#3a2a20" letter-spacing="1">VU</text><g class="needle"><line x1="60" y1="58" x2="60" y2="16" stroke="#d8264f" stroke-width="1.6" stroke-linecap="round"/></g><path d="M42 70 A18 18 0 0 1 78 70Z" fill="#35204f"/></svg></div><div class="lamps"><span class="lamp air" id="lamp-air"><i></i><small>no ar</small></span></div></div>
+</header>
+<main>
+
+<!-- ============ CAPACIDADE DO SITE ============ -->
+<div class="card cap" id="cap" aria-live="polite">
+  <h2>Espaço no site</h2>
+  <p class="note" id="cap-st">Verificando o site…</p>
+  <div id="cap-lin"></div>
+  <div id="cap-al"></div>
+</div>
+
+<!-- ============ ABA GRAVAR ============ -->
+<section id="aba-gravar" class="stack">
+  <div class="etapas"><div id="e1"><b>01</b>Seu nome</div><div id="e2"><b>02</b>Escolha</div><div id="e3"><b>03</b>Gravar</div></div>
+
+  <div class="card">
+    <h2>Quem é você?</h2>
+    <div class="chips" id="quem"></div>
+  </div>
+
+  <div id="tela-inicio" class="stack">
+    <div class="card">
+      <h2>O que vamos gravar?</h2>
+      <div class="grid4">
+        <button class="big" data-ir="culto"><span class="i"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="12" height="12" rx="2"/><path d="M15 10.5l6-3.5v10l-6-3.5"/></svg></span><b>Gravar culto</b><small>vídeo</small></button>
+        <button class="big" data-ir="foto"><span class="i"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg></span><b>Fotos</b><small>momentos</small></button>
+        <button class="big" data-ir="podcast"><span class="i"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3M8 21h8"/></svg></span><b>Podcast</b><small>só áudio</small></button>
+        <button class="big" data-ir="entrevista"><span class="i"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H10l-4 4v-4H4z"/><path d="M8 9.5h8M8 12.5h5"/></svg></span><b>Entrevista</b><small>vídeo ou áudio</small></button>
+      </div>
+    </div>
+    <a class="btn ouro" id="b-ver-site" href="https://obpcsaofernando199-sudo.github.io/Obpc/" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;text-align:center"><svg viewBox="0 0 24 24" width="1.2em" height="1.2em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>Ver no site</a>
+    <button type="button" class="btn perigo" id="b-apagar-site" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%">🗑 Apagar no site</button>
+    <div class="aviso" id="aviso-recup" hidden></div>
+    <p class="note">Tudo o que você grava fica salvo no seu celular primeiro. Se faltar internet, é só enviar depois, na aba <b>Minhas</b>.</p>
+    <p class="note" id="nota-regra" style="font-weight:700;color:var(--verde)"></p>
+  </div>
+
+  <!-- gravação de vídeo/áudio -->
+  <div id="tela-rec" class="stack" hidden>
+    <div class="row" style="align-items:center">
+      <button class="btn" id="rec-voltar" style="flex:0 0 auto">← Voltar</button>
+      <b id="rec-titulo" style="flex:1;color:var(--verde)"></b>
+    </div>
+    <div id="bloco-ent" class="card stack" hidden>
+      <div class="chips" id="ent-modo">
+        <button class="chip on" data-m="video">Vídeo</button>
+        <button class="chip" data-m="audio">Só áudio</button>
+      </div>
+      <label class="f">Nome do entrevistado<input type="text" id="ent-nome" autocomplete="off"></label>
+      <label class="f">Perguntas da entrevista
+        <span class="row" style="flex-wrap:nowrap;gap:8px"><input type="text" id="perg-nova" autocomplete="off" placeholder="Escreva uma pergunta" style="flex:1 1 auto"><button class="btn pri" id="perg-add" style="flex:0 0 auto;min-height:50px;margin:0;padding:0 14px">Adicionar</button></span>
+      </label>
+      <ol class="rot" id="rot"></ol>
+      <p class="note" id="perg-dica">Nenhuma pergunta ainda. Escreva acima as perguntas que você quer fazer. Durante a gravação, toque na pergunta para marcar como feita.</p>
+      <button class="btn" id="perg-limpar" hidden>Limpar todas as perguntas</button>
+    </div>
+    <div class="visor" id="visor" hidden>
+      <video id="cam" playsinline muted autoplay></video>
+      <div class="tempo"><i class="dot"></i><span id="t-video">00:00</span></div>
+      <div class="minuto"><i></i></div>
+      <button class="virar" id="virar" aria-label="Virar câmera"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 00-14-4M4 4v4h4M4 13a8 8 0 0014 4M20 20v-4h-4"/></svg></button>
+    </div>
+    <div class="audio" id="painel-audio" hidden>
+      <div class="mic"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3M8 21h8"/></svg></div><div class="tempo" id="t-audio">00:00</div><div class="minuto"><i></i></div>
+      <div class="nivel" id="nivel"></div>
+    </div>
+    <div class="ctl" id="ctl" hidden>
+      <span class="cb"><button class="mini" id="b-mudo" aria-label="Silenciar microfone"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3M8 21h8"/></svg></button><small>MUDO</small></span>
+      <button class="mini" id="b-pausa" aria-label="Pausar" hidden>⏸</button>
+      <button class="rec" id="b-rec" aria-label="Gravar"></button>
+      <span class="cb" id="cb-virar"><button class="mini" id="b-virar" aria-label="Virar câmera (frente / trás)"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><path d="M9.5 13a2.6 2.6 0 014.4-1.8M14.5 13a2.6 2.6 0 01-4.4 1.8M13.9 9.6v1.8h-1.8M10.1 16.4v-1.8h1.8" stroke-width="1.4"/></svg></button><small>VIRAR</small></span>
+    </div>
+    <p class="note" id="rec-dica" style="text-align:center"></p>
+    <div class="aviso">Deixe a tela do celular ligada e não troque de aplicativo enquanto grava. Coloque o celular na tomada se o culto for longo.</div>
+    <label class="btn" id="nativo-wrap" style="text-align:center;line-height:48px" hidden>Usar a câmera do celular (se esta tela não funcionar)<input type="file" id="f-nativo" accept="video/*" capture style="display:none"></label>
+  </div>
+
+  <!-- fotos -->
+  <div id="tela-foto" class="stack" hidden>
+    <div class="row" style="align-items:center">
+      <button class="btn" id="foto-voltar" style="flex:0 0 auto">← Voltar</button>
+      <b style="flex:1;color:var(--verde)">Fotos do momento</b>
+    </div>
+    <div class="card stack">
+      <div class="row">
+        <label class="btn pri" style="text-align:center;line-height:48px">Tirar foto<input type="file" id="f-cam" accept="image/*" capture="environment" style="display:none"></label>
+        <label class="btn" style="text-align:center;line-height:48px">Da galeria<input type="file" id="f-gal" accept="image/*" multiple style="display:none"></label>
+      </div>
+      <div class="thumbs" id="thumbs"></div>
+      <label class="f">Legenda (opcional)<input type="text" id="foto-leg" placeholder="Ex.: Culto de domingo — louvor"></label>
+      <button class="btn ouro" id="foto-enviar" disabled>Enviar e publicar no site</button>
+      <button class="btn" id="foto-salvar" disabled>Só guardar no celular</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ABA MINHAS ============ -->
+<section id="aba-minhas" class="stack" hidden>
+  <div class="card"><h2>Minhas gravações</h2><p class="note">O que foi gravado neste celular. Toque em Publicar para mandar para o site.</p></div>
+  <div id="lista" class="stack"></div>
+  <div id="lista-site" class="stack"></div>
+</section>
+
+<!-- ============ ABA INSTALAR ============ -->
+<!-- ============ ABA PASTOR ============ -->
+<section id="aba-pastor" class="stack" hidden>
+  <div class="card stack" id="p-pin">
+    <h2>Painel do Pastor</h2>
+    <p class="note">Área do pastor e da liderança. Digite a senha para entrar.</p>
+    <input type="password" id="p-senha" inputmode="numeric" autocomplete="off" placeholder="Senha">
+    <button class="btn pri" id="p-entrar">Entrar</button>
+  </div>
+  <div id="p-area" class="stack" hidden>
+    <div class="card"><h2>Resumo do site</h2><div id="p-res"></div></div>
+    <div class="chips" id="p-filtro"><button class="chip on" data-f="videos">Vídeos e áudios</button><button class="chip" data-f="galeria">Fotos</button></div>
+    <div id="p-lista" class="stack"></div>
+    <div class="row"><button class="btn" id="p-atualiza">Atualizar</button><button class="btn" id="p-sair">Trancar</button></div>
+  </div>
+</section>
+
+<section id="aba-instalar" class="stack" hidden>
+  <div class="card stack">
+    <h2>Colocar o Estúdio no seu celular</h2>
+    <p class="note" id="inst-st" hidden></p>
+    <button class="btn pri" id="b-instalar" hidden>Instalar agora</button>
+    <button class="btn" id="b-convite">Enviar convite de instalação (WhatsApp)</button>
+    <p class="note"><b>Android (Chrome):</b></p>
+    <ol class="passos"><li>Abra esta página no Chrome.</li><li>Toque nos três pontinhos, no canto de cima.</li><li>Toque em <b>Instalar aplicativo</b> ou <b>Adicionar à tela inicial</b>.</li></ol>
+    <p class="note"><b>iPhone (Safari):</b></p>
+    <ol class="passos"><li>Abra esta página no Safari.</li><li>Toque no botão de compartilhar (quadrado com seta).</li><li>Toque em <b>Adicionar à Tela de Início</b>.</li></ol>
+    <p class="note">Depois disso, o Estúdio abre como um aplicativo e funciona mesmo com internet fraca. Na primeira vez, aceite o uso da câmera e do microfone.</p>
+  </div>
+  <div class="card stack">
+    <h2>Se algo não funcionar</h2>
+    <p class="note">Toque em enviar e mande o relatório para quem cuida do site: ele mostra a versão, o navegador e os últimos problemas deste celular.</p>
+    <pre id="diag" style="margin:0;white-space:pre-wrap;word-break:break-word;font-size:12px;background:#F3F6F4;border:1px solid var(--line);border-radius:10px;padding:10px"></pre>
+    <div class="row"><button class="btn" id="b-diag-copiar">Copiar relatório</button><button class="btn" id="b-diag-wpp">Enviar (WhatsApp)</button></div>
+  </div>
+  <div class="card stack">
+    <h2>Espaço no celular</h2>
+    <p class="note" id="espaco">Calculando…</p>
+    <button class="btn" id="b-liberar">Apagar do celular o que já foi publicado</button>
+  </div>
+</section>
+
+</main>
+
+<nav>
+  <button data-aba="gravar" class="on"><span><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="12" height="12" rx="2"/><path d="M15 10.5l6-3.5v10l-6-3.5"/></svg></span>Gravar</button>
+  <button data-aba="minhas"><span><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h6l2 2h10v11H3z"/></svg></span>Minhas <b id="cont" style="color:var(--ouro2)"></b></button>
+  <button data-aba="instalar"><span><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2"/><path d="M12 7v7m-3-3l3 3 3-3"/></svg></span>Instalar</button>
+  <button data-aba="pastor"><span><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span>Pastor</button>
+</nav>
+
+<!-- folha: revisar e publicar -->
+<div class="folha-bg" id="f-rev"><div class="folha">
+  <div class="al"></div><h3 id="rev-h">Revisar</h3>
+  <div id="rev-pv" style="margin-bottom:10px"></div>
+  <div class="stack">
+    <label class="f">Título<input type="text" id="rev-tit"></label>
+    <label class="f">Descrição (opcional)<textarea id="rev-desc"></textarea></label>
+    <label class="f" id="rev-ent-l" hidden>Entrevistado<input type="text" id="rev-ent"></label>
+    <label class="f" id="rev-cons-l" hidden style="flex-direction:row;gap:10px;align-items:flex-start;font-weight:600;color:var(--ink)"><input type="checkbox" id="rev-cons" style="width:22px;height:22px;margin-top:2px"><span>O entrevistado autorizou a publicação (e o responsável, se for menor de idade).</span></label>
+    <p class="note" id="rev-valid" style="text-align:center"></p>
+    <div id="rev-prog" hidden><div class="bar"><i id="rev-bar"></i></div><p class="note" id="rev-st" style="margin-top:6px;text-align:center"></p></div>
+    <button class="btn ouro" id="rev-pub">Enviar e publicar no site</button>
+    <button class="btn" id="rev-guardar">Guardar no celular e decidir depois</button>
+    <button class="btn perigo" id="rev-desc-btn">Descartar</button>
+  </div>
+</div></div>
+
+<!-- folha: compartilhar -->
+<div class="folha-bg" id="f-share"><div class="folha">
+  <div class="al"></div><h3>Compartilhar</h3>
+  <div class="prevg"><img id="sh-img" alt=""><div class="prevg-t"><b id="sh-tit"></b><small id="sh-st"></small></div></div>
+  <div class="redes">
+    <button class="rede" data-r="wpp"><span class="lg">WA</span>WhatsApp</button>
+    <button class="rede" data-r="face"><span class="lg">FB</span>Facebook</button>
+    <button class="rede" data-r="tele"><span class="lg">TG</span>Telegram</button>
+    <button class="rede" data-r="insta"><span class="lg">IG</span>Instagram</button>
+  </div>
+  <p class="note" style="margin:6px 0"><b>Redes oficiais da OBPC</b></p>
+  <div class="redes" style="grid-template-columns:repeat(3,1fr)">
+    <button class="rede" data-r="o-face"><span class="lg">FB</span>Página OBPC<small>Facebook</small></button>
+    <button class="rede" data-r="o-insta"><span class="lg">IG</span>Instagram OBPC<small>@obpc.saofernando</small></button>
+    <button class="rede" data-r="o-grupo"><span class="lg">WA</span>Grupo OBPC<small>WhatsApp</small></button>
+  </div>
+  <div class="row">
+    <button class="btn" data-r="copiar">Copiar link</button>
+    <button class="btn" data-r="arquivo">Enviar o arquivo</button>
+    <button class="btn" data-r="mais">Mais opções</button>
+  </div>
+  <p class="note" style="margin-top:10px">No WhatsApp, escolha o grupo da igreja. A foto do vídeo ou da foto vai junto com a mensagem.</p>
+  <button class="btn" id="sh-fechar" style="width:100%;margin-top:10px">Fechar</button>
+</div></div>
+
+<div class="conta" id="conta" hidden></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+/* ---------- CONFIGURAÇÃO (mesma do site) ---------- */
+var CFG={
+  cloud:'dm0egn0ks', preset:'obpc_media',
+  fb:'https://obpc-saofernando-1d6f3-default-rtdb.firebaseio.com/obpc',
+  worker:'https://obpc-og.obpcsaofernando199.workers.dev',
+  /* Worker que apaga do Cloudinary o que saiu do site (cloudinary-apagar-worker.js). Vazio = não apaga. */
+  apagar:'https://obpc-apagar.corretorfcosta.workers.dev',
+  site:'https://obpcsaofernando199-sudo.github.io/Obpc/',
+  /* REDES OFICIAIS DA OBPC — confira/preencha aqui. grupo = link de convite do grupo de WhatsApp (https://chat.whatsapp.com/XXXX). Vazio = o WhatsApp abre a lista para escolher o grupo. */
+  redes:{face:'https://www.facebook.com/share/1CUnTyavtD/',insta:'https://www.instagram.com/obpc.saofernando/',grupo:''},
+  /* LIMITES DO SITE (iguais aos do index.html): passou disso, as publicações mais antigas saem do site. */
+  lim:{galeria:30,videos:12},
+  /* TEMPO MÁXIMO de cada gravação, em segundos (a gravação para sozinha). Culto = momentos curtos. 0 = sem limite. */
+  maxSeg:{culto:60,video:300,audio:1800},
+  /* QUANTAS HORAS o que for publicado fica no site/nuvem/celular antes de apagar sozinho. 0 = nunca apaga. */
+  validadeH:24,
+  limiteMB:100, /* maior vídeo que o Cloudinary GRATUITO aceita (acima disso o envio falha). Se o plano for pago, aumente. */
+  pin:'102030', /* senha do painel do pastor: TROQUE por outra */
+  aviso:3 /* alerta amarelo quando restarem este tanto de vagas ou menos */
+};
+var EQUIPE=['Julia','Giovana','Eliza'];
+var VERSAO='2026-11-16m';
+/* perguntas da entrevista: escritas pela equipe, sem perguntas padrão. Ficam guardadas neste celular. */
+var PERGUNTAS=[];
+try{var _p=JSON.parse(localStorage.getItem('midia_perguntas')||'[]');if(Array.isArray(_p))PERGUNTAS=_p.filter(function(x){return typeof x==='string'&&x.trim()}).slice(0,30)}catch(e){}
+var FEITAS={};
+var $=function(s,r){return (r||document).querySelector(s)};
+var $$=function(s,r){return [].slice.call((r||document).querySelectorAll(s))};
+
+/* ---------- utilidades ---------- */
+function toast(m,ms){var t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(function(){t.style.display='none'},ms||2800)}
+function pad(n){return (n<10?'0':'')+n}
+function fmt(ms){var s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60);s=s%60;return (h?h+':'+pad(m):pad(m))+':'+pad(s)}
+function hojeBR(){return new Date().toLocaleDateString('pt-BR')}
+function diaSemana(){return new Date().toLocaleDateString('pt-BR',{weekday:'long'})}
+function mb(b){return b>1e9?(b/1e9).toFixed(1)+' GB':(b/1e6).toFixed(b>1e7?0:1)+' MB'}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+/* ---------- registro de problemas (ajuda a descobrir o que falhou em cada celular) ---------- */
+function logErr(onde,e){
+  try{
+    var l=JSON.parse(localStorage.getItem('midia_log')||'[]');
+    l.push({t:new Date().toISOString(),onde:onde,msg:String(e&&(e.name?e.name+': ':'')+((e&&e.message)||(typeof e==='string'?e:''))||'?').slice(0,300)});
+    localStorage.setItem('midia_log',JSON.stringify(l.slice(-40)));
+  }catch(x){}
+}
+function msgErro(e){return String((e&&e.message)||e||'erro desconhecido').slice(0,200)}
+function explicaErro(e){
+  var m=msgErro(e);
+  if(/too large|Maximum is|file size/i.test(m))return 'o arquivo é maior do que o Cloudinary aceita (plano gratuito: 100 MB por vídeo).';
+  if(/sem rede|Failed to fetch|NetworkError|Load failed/i.test(m))return 'sem internet, ou internet muito fraca.';
+  if(/(gravação|leitura) 40[13]/i.test(m))return 'o site recusou a gravação (regras do banco de dados). Avise quem cuida do site.';
+  return m;
+}
+window.addEventListener('error',function(ev){logErr('js',ev.error||ev.message)});
+window.addEventListener('unhandledrejection',function(ev){logErr('promessa',ev.reason)});
+function ext(mime){mime=mime||'';if(/mp4/.test(mime))return /^audio/.test(mime)?'m4a':'mp4';if(/webm/.test(mime))return 'webm';if(/ogg/.test(mime))return 'ogg';if(/jpeg|jpg/.test(mime))return 'jpg';if(/png/.test(mime))return 'png';if(/quicktime/.test(mime))return 'mov';return 'bin'}
+
+/* ---------- banco local (IndexedDB) ---------- */
+var _db=null;
+function db(){return _db?Promise.resolve(_db):new Promise(function(ok,no){
+  var r=indexedDB.open('obpc_midia_estudio',1);
+  r.onupgradeneeded=function(e){var d=e.target.result;d.createObjectStore('itens',{keyPath:'id'});var p=d.createObjectStore('pedacos',{autoIncrement:true});p.createIndex('rid','rid')};
+  r.onsuccess=function(e){_db=e.target.result;ok(_db)};r.onerror=function(){no(r.error)};
+})}
+function tx(store,mode,fn){return db().then(function(d){return new Promise(function(ok,no){
+  var t=d.transaction(store,mode),s=t.objectStore(store),out=fn(s);
+  t.oncomplete=function(){ok(out&&out.result!==undefined?out.result:undefined)};t.onerror=t.onabort=function(){no(t.error)};
+})})}
+function putItem(it){return tx('itens','readwrite',function(s){s.put(it)})}
+function delItem(id){return tx('itens','readwrite',function(s){s.delete(id)})}
+function allItens(){return tx('itens','readonly',function(s){return s.getAll()}).then(function(l){return (l||[]).sort(function(a,b){return b.criado-a.criado})})}
+function getItem(id){return tx('itens','readonly',function(s){return s.get(id)})}
+function addPedaco(rid,blob){return tx('pedacos','readwrite',function(s){s.add({rid:rid,blob:blob})})}
+function pedacosDe(rid){return tx('pedacos','readonly',function(s){return s.index('rid').getAll(rid)}).then(function(l){return (l||[]).map(function(x){return x.blob})})}
+function limparPedacos(rid){return db().then(function(d){return new Promise(function(ok){
+  var t=d.transaction('pedacos','readwrite'),i=t.objectStore('pedacos').index('rid').openKeyCursor(IDBKeyRange.only(rid));
+  i.onsuccess=function(){var c=i.result;if(c){t.objectStore('pedacos').delete(c.primaryKey);c.continue()}};t.oncomplete=ok;t.onerror=ok;
+})})}
+
+/* ---------- quem grava ---------- */
+var quem=localStorage.getItem('midia_quem')||'';
+if(quem==='Elisa'){quem='Eliza';try{localStorage.setItem('midia_quem',quem)}catch(e){}} /* nome corrigido: troca o que já estava salvo no celular */
+(function(){var he=document.querySelector('header .e');if(he)he.textContent+=' · v'+VERSAO})();
+function desenhaQuem(){passo();
+  $('#quem').innerHTML=EQUIPE.map(function(n){return '<button class="chip'+(quem===n?' on':'')+'" data-q="'+n+'">'+n+'</button>'}).join('');
+  $$('#quem .chip').forEach(function(b){b.onclick=function(){quem=b.dataset.q;localStorage.setItem('midia_quem',quem);desenhaQuem()}});
+}
+desenhaQuem();
+
+/* ---------- passos e boas-vindas ---------- */
+var telaAtual='inicio';
+function passo(){
+  var p=!quem?1:(telaAtual==='rec'||telaAtual==='foto')?3:2;
+  [1,2,3].forEach(function(n){var e=$('#e'+n);if(e)e.className=n<p?'feito':n===p?'on':''});
+  var o=$('#oi');if(o)o.textContent=quem?'Oi, '+quem+'! Tudo pronto para gravar':'Toque no seu nome para começar';
+}
+passo();
+
+/* ---------- abas ---------- */
+function aba(n){
+  if(n!=='gravar'&&telaAtual==='rec'&&!(rec&&rec.estado!=='parado')){cancelaContagem();tentaMidia++;fechaCamera();tela('inicio')}
+  ['gravar','minhas','instalar','pastor'].forEach(function(a){$('#aba-'+a).hidden=a!==n});
+  $$('nav button').forEach(function(b){b.classList.toggle('on',b.dataset.aba===n)});
+  if(n==='minhas')desenhaLista();if(n==='instalar'){espaco();desenhaDiag()}if(n==='pastor')painel();
+  window.scrollTo(0,0);
+}
+$$('nav button').forEach(function(b){b.onclick=function(){if(rec&&rec.estado!=='parado'){toast('Termine a gravação antes de sair desta tela.');return}aba(b.dataset.aba)}});
+
+/* ---------- navegação interna do Gravar ---------- */
+var modo='culto';
+function tela(n){telaAtual=n;passo();['inicio','rec','foto'].forEach(function(t){$('#tela-'+t).hidden=t!==n})}
+$$('[data-ir]').forEach(function(b){b.onclick=function(){
+  if(!quem){toast('Escolha primeiro quem está gravando.');$('#quem').scrollIntoView({block:'center'});return}
+  modo=b.dataset.ir;
+  if(modo==='foto'){tela('foto');return}
+  abrirGravador();
+}});
+$('#foto-voltar').onclick=function(){fotos=[];desenhaFotos();tela('inicio')};
+$('#rec-voltar').onclick=function(){if(rec&&rec.estado!=='parado'){toast('Termine a gravação primeiro.');return}cancelaContagem();tentaMidia++;fechaCamera();tela('inicio')};
+
+/* ---------- gravador ---------- */
+var rec=null, stream=null, facing='environment', wake=null, entModo='video', actx=null, raf=0;
+var TIPOS={culto:'Culto',podcast:'Podcast',entrevista:'Entrevista'};
+function escolheMime(audio){
+  var l=audio?['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus']:
+    ['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+  if(!window.MediaRecorder)return '';
+  for(var i=0;i<l.length;i++){if(MediaRecorder.isTypeSupported(l[i]))return l[i]}
+  return '';
+}
+function salvaPerguntas(){try{localStorage.setItem('midia_perguntas',JSON.stringify(PERGUNTAS))}catch(e){}}
+function desenhaPerguntas(){
+  $('#rot').innerHTML=PERGUNTAS.map(function(q,i){
+    return '<li class="pq'+(FEITAS[i]?' feita':'')+'" data-i="'+i+'"><span class="pt">'+esc(q)+'</span><button class="px" data-x="'+i+'" aria-label="Remover pergunta">✕</button></li>';
+  }).join('');
+  $('#perg-dica').hidden=PERGUNTAS.length>0;$('#perg-limpar').hidden=!PERGUNTAS.length;
+  $$('#rot .pt').forEach(function(s){s.onclick=function(){var i=+s.parentNode.dataset.i;FEITAS[i]=!FEITAS[i];desenhaPerguntas()}});
+  $$('#rot .px').forEach(function(b){b.onclick=function(){var i=+b.dataset.x;PERGUNTAS.splice(i,1);FEITAS={};salvaPerguntas();desenhaPerguntas()}});
+}
+function addPergunta(){
+  var el=$('#perg-nova'),t=el.value.trim();if(!t)return;
+  if(PERGUNTAS.length>=30){toast('Limite de 30 perguntas.');return}
+  PERGUNTAS.push(t.slice(0,200));salvaPerguntas();el.value='';desenhaPerguntas();el.focus();
+}
+$('#perg-add').onclick=addPergunta;
+$('#perg-nova').onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();addPergunta()}};
+$('#perg-limpar').onclick=function(){if(!confirm('Apagar todas as perguntas?'))return;PERGUNTAS=[];FEITAS={};salvaPerguntas();desenhaPerguntas()};
+function soAudio(){return modo==='podcast'||(modo==='entrevista'&&entModo==='audio')}
+function abrirGravador(){
+  tela('rec');
+  $('#rec-titulo').textContent=modo==='culto'?'Gravar culto':modo==='podcast'?'Gravar podcast':'Gravar entrevista';
+  $('#bloco-ent').hidden=modo!=='entrevista';
+  if(modo==='entrevista'){FEITAS={};desenhaPerguntas()}
+  $('#nativo-wrap').hidden=true;
+  preparaMidia();
+}
+$$('#ent-modo .chip').forEach(function(b){b.onclick=function(){
+  if(rec&&rec.estado!=='parado')return;
+  entModo=b.dataset.m;$$('#ent-modo .chip').forEach(function(x){x.classList.toggle('on',x===b)});preparaMidia();
+}});
+function fechaCamera(){
+  if(stream){stream.getTracks().forEach(function(t){t.stop()});stream=null}
+  cancelAnimationFrame(raf);if(actx){try{actx.close()}catch(e){}actx=null}
+  $('#cam').srcObject=null;
+}
+function emAppInterno(){return /FBAN|FBAV|Instagram|WhatsApp|Line\/|TikTok|; wv\)/i.test(navigator.userAgent||'')}
+function textoErroMidia(e,audio){
+  var alvo=audio?'o microfone':'a câmera ou o microfone',n=(e&&e.name)||'',t;
+  if(n==='NotAllowedError'||n==='SecurityError')t='O celular bloqueou '+alvo+'. Toque no cadeado ao lado do endereço do site, permita câmera e microfone e abra o Estúdio de novo.';
+  else if(n==='NotFoundError'||n==='OverconstrainedError')t='Este celular não encontrou '+alvo+'.';
+  else if(n==='NotReadableError'||n==='AbortError')t='Outro aplicativo está usando '+alvo+'. Feche os outros aplicativos (câmera, WhatsApp, chamadas) e tente de novo.';
+  else t='Não consegui abrir '+alvo+(n?' ('+n+')':'')+'.';
+  if(emAppInterno())t+=' Você abriu por dentro de outro aplicativo (WhatsApp, Instagram, Facebook): toque nos três pontinhos e escolha “Abrir no navegador”.';
+  return t;
+}
+/* abre câmera/microfone; se o pedido completo falhar (celulares antigos), tenta o pedido mais simples */
+function abreMidia(audio){
+  /* captação de áudio: culto = som do salão (sem filtros que "engolem" louvor e pregação distante, com ganho automático);
+     podcast/entrevista = voz perto do microfone (corta ruído de fundo, sem cancelar eco porque o celular não toca som) */
+  var culto=modo==='culto';
+  var aud={echoCancellation:{ideal:false},noiseSuppression:{ideal:!culto},autoGainControl:{ideal:true},sampleRate:{ideal:48000},channelCount:{ideal:1}};
+  return navigator.mediaDevices.getUserMedia({audio:aud,video:audio?false:{facingMode:facing,width:{ideal:1280},height:{ideal:720}}}).catch(function(e){
+    logErr('getUserMedia',e);
+    if(e&&(e.name==='NotAllowedError'||e.name==='SecurityError'))throw e;
+    return navigator.mediaDevices.getUserMedia({audio:true,video:!audio});
+  });
+}
+function avisoRec(m){var d=$('#rec-dica');d.textContent=m;d.style.color='#C0392B';d.style.fontWeight='800';toast(m,8000)}
+var tentaMidia=0;
+function preparaMidia(){
+  fechaCamera();
+  var audio=soAudio(),minha=++tentaMidia,dica=$('#rec-dica');
+  dica.style.color='';dica.style.fontWeight='';
+  $('#visor').hidden=audio;$('#painel-audio').hidden=!audio;$('#ctl').hidden=true;
+  dica.textContent='Abrindo '+(audio?'o microfone':'a câmera')+'…';
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){
+    var porque=!window.isSecureContext?'A página precisa abrir pelo endereço seguro (https).':!window.MediaRecorder?'O navegador deste celular é antigo e não grava por aqui (atualize o navegador).':'Este celular não deixa o navegador usar a câmera.';
+    logErr('sem-suporte',porque);
+    dica.textContent=porque+(emAppInterno()?' Você abriu por dentro de outro aplicativo: toque nos três pontinhos e escolha “Abrir no navegador”.':'');
+    $('#nativo-wrap').hidden=audio;if(audio)toast('Use um celular com navegador mais novo para gravar áudio.');return;
+  }
+  abreMidia(audio).then(function(s){
+    if(minha!==tentaMidia||telaAtual!=='rec'){s.getTracks().forEach(function(t){t.stop()});return} /* saiu da tela antes de abrir: não deixa a câmera ligada */
+    stream=s;mudo=false;$('#b-mudo').classList.remove('mudo-on');
+    if(!audio){var v=$('#cam');v.srcObject=s;v.play().catch(function(){})}
+    medidor(s); /* também no vídeo: o ponteiro VU do painel mexe com a voz */
+    $('#cb-virar').hidden=audio;
+    $('#ctl').hidden=false;$('#b-pausa').hidden=true;
+    dica.textContent='Toque no botão vermelho para começar.';
+  }).catch(function(e){
+    if(minha!==tentaMidia)return;
+    logErr('abrir-midia',e);
+    dica.textContent=textoErroMidia(e,audio);
+    $('#nativo-wrap').hidden=audio;
+  });
+}
+function viraCamera(){if(rec&&rec.estado!=='parado')return toast('Pare a gravação para virar a câmera.');facing=facing==='environment'?'user':'environment';toast(facing==='user'?'Câmera da frente':'Câmera de trás',1500);preparaMidia()}
+$('#virar').onclick=viraCamera;$('#b-virar').onclick=viraCamera;
+var mudo=false;
+$('#b-mudo').onclick=function(){
+  if(!stream)return;
+  mudo=!mudo;stream.getAudioTracks().forEach(function(t){t.enabled=!mudo});
+  this.classList.toggle('mudo-on',mudo);
+  toast(mudo?'Microfone SILENCIADO (a gravação continua sem som)':'Microfone ligado',mudo?3500:1500);
+};
+/* vibração curtinha ao apertar as teclas (só nos celulares que permitem) */
+document.addEventListener('click',function(e){if(navigator.vibrate&&e.target.closest&&e.target.closest('.btn,.chip,.big,.mini,.rec,.rede,nav button'))try{navigator.vibrate(10)}catch(x){}},true);
+function medidor(s){
+  var nv=$('#nivel');if(!nv.children.length)for(var i=0;i<14;i++)nv.appendChild(document.createElement('i'));
+  try{
+    var AC=window.AudioContext||window.webkitAudioContext;actx=new AC();var src=actx.createMediaStreamSource(s),an=actx.createAnalyser();an.fftSize=64;src.connect(an);
+    var d=new Uint8Array(an.frequencyBinCount),td=new Uint8Array(an.fftSize),jan=Date.now(),pico=0;
+    (function tick(){an.getByteFrequencyData(d);for(var i=0;i<nv.children.length;i++){nv.children[i].style.height=Math.max(6,d[i%d.length]/255*44)+'px'}
+      /* confere o volume da voz durante a gravação e avisa se está baixo demais ou estourando */
+      if(rec&&rec.estado==='gravando'&&!mudo){
+        an.getByteTimeDomainData(td);for(var k=0;k<td.length;k++){var v=Math.abs(td[k]-128)/128;if(v>pico)pico=v}
+        if(Date.now()-jan>6000){
+          var dc=$('#rec-dica'),msg=pico<0.03?'🔈 Som muito baixo: aproxime o celular de quem fala.':pico>0.97?'🔊 Som estourando: afaste um pouco o celular.':'';
+          if(!rec.falhas){
+            if(msg){if(!rec.dicaBase)rec.dicaBase=dc.textContent;dc.textContent=msg;dc.style.color='#C0392B';dc.style.fontWeight='800'}
+            else if(rec.dicaBase){dc.textContent=rec.dicaBase;dc.style.color='';dc.style.fontWeight='';rec.dicaBase=''}
+          }
+          jan=Date.now();pico=0;
+        }
+      }else{jan=Date.now();pico=0}
+      raf=requestAnimationFrame(tick)})();
+  }catch(e){}
+}
+/* tempo máximo (ms) de uma gravação: culto = CFG.maxSeg.culto; outros vídeos = .video; áudio = .audio. 0 = sem limite */
+function limiteMs(tipo,audio){var m=CFG.maxSeg||{},s=tipo==='culto'?m.culto:audio?m.audio:m.video;return (s||0)*1000}
+function textoDuracao(s){return s%60===0?(s/60)+(s===60?' minuto':' minutos'):s+' segundos'}
+function tempoTick(){
+  if(!rec)return;
+  var ms=rec.ms+(rec.estado==='gravando'?Date.now()-rec.t0:0),lim=rec.lim||0,t=fmt(ms)+(lim?' / '+fmt(lim):'');
+  $$('.minuto i').forEach(function(b){b.style.width=(lim?Math.min(100,ms/lim*100):(ms/1000%60/60*100))+'%'});
+  $('#t-video').textContent=t;$('#t-audio').textContent=t;
+  if(lim&&ms>=lim&&rec.estado!=='parado'){toast('Chegou ao tempo máximo ('+textoDuracao(lim/1000)+'). Gravação salva!',5000);parar()}
+}
+/* contagem 3-2-1 no centro antes de gravar */
+var contando=false,contIv=0;
+function cancelaContagem(){clearInterval(contIv);contIv=0;contando=false;var el=$('#conta');if(el)el.hidden=true}
+function contagem(){
+  if(contando)return;contando=true;var n=3,el=$('#conta');el.hidden=false;el.textContent=n;
+  contIv=setInterval(function(){n--;if(n>0)el.textContent=n;else{cancelaContagem();comecar()}},1000);
+}
+$('#conta').onclick=function(){cancelaContagem();toast('Contagem cancelada.',1500)};
+$('#b-rec').onclick=function(){if(!rec||rec.estado==='parado')contagem();else parar()};
+$('#b-pausa').onclick=function(){
+  if(!rec)return;
+  if(rec.estado==='gravando'){rec.mr.pause();rec.ms+=Date.now()-rec.t0;rec.estado='pausado';$('#b-pausa').textContent='▶';$('#visor').classList.remove('gravando')}
+  else if(rec.estado==='pausado'){rec.mr.resume();rec.t0=Date.now();rec.estado='gravando';$('#b-pausa').textContent='⏸';$('#visor').classList.add('gravando')}
+};
+function comecar(){
+  if(!stream)return preparaMidia();
+  var audio=soAudio(),mime=escolheMime(audio),id='r'+uid(),opt={};
+  if(mime)opt.mimeType=mime;if(!audio)opt.videoBitsPerSecond=1500000;opt.audioBitsPerSecond=160000;
+  var mr;try{mr=new MediaRecorder(stream,opt)}catch(e){try{mr=new MediaRecorder(stream);mime=mr.mimeType||mime}catch(e2){toast('Não foi possível iniciar a gravação.');return}}
+  rec={id:id,mr:mr,mime:mr.mimeType||mime||(audio?'audio/webm':'video/webm'),audio:audio,t0:Date.now(),ms:0,estado:'gravando',tipo:modo,tam:0,falhas:0,escondida:false,lim:limiteMs(modo,audio),fila:Promise.resolve()};
+  try{localStorage.setItem('midia_rec_atual',JSON.stringify({id:id,tipo:modo,mime:rec.mime,audio:audio,quem:quem,ent:$('#ent-nome').value||'',ini:Date.now()}))}catch(e){}
+  var r0=rec;
+  mr.ondataavailable=function(e){if(e.data&&e.data.size){r0.tam+=e.data.size;r0.fila=r0.fila.then(function(){return addPedaco(id,e.data)}).catch(function(err){
+    /* antes isto era engolido em silêncio: se o celular ficasse sem espaço, a gravação seguia "normal" mas perdia pedaços */
+    r0.falhas++;logErr('salvar-pedaco',err);
+    if(rec===r0)avisoRec('⚠ O celular não conseguiu guardar um pedaço da gravação (pouco espaço livre?). Toque no quadrado para terminar agora e libere espaço.');
+  })}};
+  mr.onstop=function(){
+    if(rec!==r0)return;
+    if(r0.estado!=='parado'){ /* parou sozinha: outro app tomou a câmera, tela bloqueou, ligação… */
+      if(r0.estado==='gravando')r0.ms+=Date.now()-r0.t0;
+      r0.estado='parado';clearInterval(r0.timer);
+      if(wake){try{wake.release()}catch(e){}wake=null}
+      $('#b-rec').classList.remove('on');$('#visor').classList.remove('gravando');$('#b-pausa').hidden=true;
+      logErr('parou-sozinha','a gravação foi interrompida pelo celular');
+      toast('A gravação parou sozinha (outro aplicativo usou a câmera ou a tela bloqueou). O que foi gravado está guardado.',9000);
+    }
+    r0.fila.then(function(){return finaliza(r0)});
+  };
+  mr.onerror=function(ev){logErr('mediarecorder',ev&&ev.error);toast('A gravação teve um problema. O que já foi gravado está guardado.',6000)};
+  stream.getTracks().forEach(function(t){t.addEventListener('ended',function(){if(rec===r0&&r0.estado!=='parado')avisoRec('⚠ A câmera ou o microfone foi interrompido pelo celular. Toque no quadrado para terminar e guardar o que foi gravado.')})});
+  mr.start(4000);
+  $('#b-rec').classList.add('on');$('#b-pausa').hidden=false;$('#b-pausa').textContent='⏸';
+  $('#visor').classList.add('gravando');$('#rec-dica').textContent='Gravando… toque no quadrado para terminar'+(rec.lim?' (para sozinho em '+textoDuracao(rec.lim/1000)+').':'.');
+  rec.timer=setInterval(tempoTick,500);tempoTick();
+  if(navigator.wakeLock){navigator.wakeLock.request('screen').then(function(w){wake=w}).catch(function(){})}
+}
+document.addEventListener('visibilitychange',function(){
+  if(!rec||rec.estado==='parado')return;
+  if(document.visibilityState==='hidden'){rec.escondida=true;return}
+  if(navigator.wakeLock){navigator.wakeLock.request('screen').then(function(w){wake=w}).catch(function(){})}
+  if(rec.escondida){rec.escondida=false;logErr('tela-saiu','o Estúdio saiu da tela durante a gravação');avisoRec('⚠ O Estúdio saiu da tela durante a gravação. No celular isso pode ter parado a imagem. Mantenha a tela ligada nesta página até terminar.')}
+});
+window.addEventListener('beforeunload',function(e){if(rec&&rec.estado!=='parado'){e.preventDefault();e.returnValue=''}});
+function parar(){
+  if(!rec)return;
+  if(rec.estado==='gravando')rec.ms+=Date.now()-rec.t0;
+  rec.estado='parado';clearInterval(rec.timer);
+  try{rec.mr.stop()}catch(e){}
+  if(wake){try{wake.release()}catch(e){}wake=null}
+  $('#b-rec').classList.remove('on');$('#visor').classList.remove('gravando');$('#b-pausa').hidden=true;
+  $('#rec-dica').textContent='Salvando…';
+}
+function falhaSalvar(err){
+  logErr('finaliza',err);
+  var d=$('#rec-dica');d.style.color='#C0392B';d.style.fontWeight='800';
+  d.textContent='⚠ Não consegui salvar no celular ('+msgErro(err)+'). Os pedaços da gravação ficaram guardados: feche e abra o Estúdio de novo que eu recupero.';
+  toast('Não consegui salvar no celular. Verifique o espaço livre.',9000);
+}
+function finaliza(r){
+  return pedacosDe(r.id).then(function(parts){
+    if(!parts.length){toast('Nada foi gravado.');$('#rec-dica').textContent='Nada foi gravado. Toque no botão vermelho para tentar de novo.';return}
+    var blob=new Blob(parts,{type:r.mime});
+    var meta={};try{meta=JSON.parse(localStorage.getItem('midia_rec_atual')||'{}')}catch(e){}
+    var it={id:r.id,tipo:r.tipo,audio:r.audio,mime:r.mime,blob:blob,tam:blob.size,dur:r.ms,
+      titulo:tituloPadrao(r.tipo),desc:'',ent:meta.ent||$('#ent-nome').value||'',quem:meta.quem||quem,
+      status:'local',criado:Date.now()};
+    return putItem(it).then(function(){return limparPedacos(r.id)}).then(function(){
+      localStorage.removeItem('midia_rec_atual');
+      rec=null;fechaCamera();tela('inicio');abrirRevisao(it);cont();
+    });
+  }).catch(falhaSalvar);
+}
+function tituloPadrao(t){
+  var d=hojeBR();
+  if(t==='culto')return 'Culto de '+diaSemana()+' — '+d;
+  if(t==='podcast')return 'Podcast OBPC — '+d;
+  if(t==='entrevista')return 'Entrevista OBPC — '+d;
+  return 'Momento OBPC — '+d;
+}
+/* recupera gravação interrompida (celular travou, bateria acabou, etc.) */
+function recupera(){
+  /* procura TODAS as gravações que ficaram pela metade (antes só achava a última) */
+  var m=null;try{m=JSON.parse(localStorage.getItem('midia_rec_atual')||'null')}catch(e){}
+  Promise.all([tx('pedacos','readonly',function(s){return s.getAll()}),allItens()]).then(function(r){
+    var por={},ordem=[],tem={};
+    (r[0]||[]).forEach(function(p){if(!por[p.rid]){por[p.rid]=[];ordem.push(p.rid)}por[p.rid].push(p.blob)});
+    (r[1]||[]).forEach(function(i){tem[i.id]=1});
+    ordem.filter(function(id){return tem[id]}).forEach(function(id){limparPedacos(id)}); /* sobras de gravações que já viraram item */
+    var novos=ordem.filter(function(id){return !tem[id]&&!(rec&&rec.id===id)});
+    if(!novos.length){localStorage.removeItem('midia_rec_atual');return}
+    return novos.reduce(function(p,id){return p.then(function(){
+      var parts=por[id],mm=(m&&m.id===id)?m:{},mime=mm.mime||(parts[0]&&parts[0].type)||'video/webm',blob=new Blob(parts,{type:mime});
+      var audio=mm.audio!==undefined?mm.audio:/^audio/.test(mime),tipo=mm.tipo||'culto';
+      var it={id:id,tipo:tipo,audio:audio,mime:mime,blob:blob,tam:blob.size,dur:0,titulo:tituloPadrao(tipo)+' (recuperado)',desc:'',ent:mm.ent||'',quem:mm.quem||'',status:'local',criado:mm.ini||Date.now()};
+      return putItem(it).then(function(){return limparPedacos(id)});
+    })},Promise.resolve()).then(function(){
+      localStorage.removeItem('midia_rec_atual');cont();
+      var a=$('#aviso-recup');a.hidden=false;a.innerHTML='Encontrei '+novos.length+' gravação(ões) que ficou(ficaram) pela metade e guardei o que deu. Veja na aba <b>Minhas</b>.';
+    });
+  }).catch(function(e){logErr('recupera',e)});
+}
+
+/* ---------- câmera nativa (reserva) ---------- */
+$('#f-nativo').onchange=function(e){
+  var f=e.target.files[0];if(!f)return;
+  var it={id:'r'+uid(),tipo:modo,audio:false,mime:f.type||'video/mp4',blob:f,tam:f.size,dur:0,titulo:tituloPadrao(modo),desc:'',ent:$('#ent-nome').value||'',quem:quem,status:'local',criado:Date.now()};
+  putItem(it).then(function(){tela('inicio');abrirRevisao(it);cont()});e.target.value='';
+};
+
+/* ---------- fotos ---------- */
+var fotos=[];
+function reduz(file){
+  return new Promise(function(ok){
+    function fim(canvas){canvas.toBlob(function(b){ok(b||file)},'image/jpeg',0.86)}
+    function desenha(src,w,h){var m=2000,k=Math.min(1,m/Math.max(w,h)),c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);c.getContext('2d').drawImage(src,0,0,c.width,c.height);fim(c)}
+    if(window.createImageBitmap){
+      createImageBitmap(file,{imageOrientation:'from-image'}).then(function(b){desenha(b,b.width,b.height)}).catch(function(){ok(file)});
+    }else{
+      var img=new Image(),u=URL.createObjectURL(file);img.onload=function(){desenha(img,img.naturalWidth,img.naturalHeight);URL.revokeObjectURL(u)};img.onerror=function(){ok(file)};img.src=u;
+    }
+  });
+}
+function addFotos(list){
+  var arr=[].slice.call(list||[]).filter(function(f){return /^image\//.test(f.type)});
+  if(!arr.length)return;toast('Preparando fotos…',1200);
+  arr.reduce(function(p,f){return p.then(function(){return reduz(f).then(function(b){fotos.push({blob:b,url:URL.createObjectURL(b)})})})},Promise.resolve()).then(desenhaFotos);
+}
+$('#f-cam').onchange=function(e){addFotos(e.target.files);e.target.value=''};
+$('#f-gal').onchange=function(e){addFotos(e.target.files);e.target.value=''};
+function desenhaFotos(){
+  $('#thumbs').innerHTML=fotos.map(function(f,i){return '<div class="thumb"><img src="'+f.url+'" alt=""><button data-x="'+i+'" aria-label="Remover">✕</button></div>'}).join('');
+  $$('#thumbs button').forEach(function(b){b.onclick=function(){URL.revokeObjectURL(fotos[b.dataset.x].url);fotos.splice(b.dataset.x,1);desenhaFotos()}});
+  $('#foto-enviar').disabled=$('#foto-salvar').disabled=!fotos.length;
+}
+function fotosParaItens(){
+  var leg=$('#foto-leg').value.trim()||('Momento OBPC — '+hojeBR());
+  var base=Date.now();
+  return Promise.all(fotos.map(function(f,i){
+    var it={id:'f'+uid()+i,tipo:'foto',audio:false,mime:'image/jpeg',blob:f.blob,tam:f.blob.size,dur:0,titulo:leg,desc:'',ent:'',quem:quem,status:'local',criado:base+i};
+    return putItem(it).then(function(){return it});
+  }));
+}
+$('#foto-salvar').onclick=function(){fotosParaItens().then(function(l){toast(l.length+' foto(s) guardada(s) no celular.');fotos=[];desenhaFotos();$('#foto-leg').value='';tela('inicio');cont()})};
+$('#foto-enviar').onclick=function(){
+  var btn=this;btn.disabled=true;
+  confirmaLimite('galeria',fotos.length).then(function(vai){
+   if(!vai){btn.disabled=false;toast('Envio cancelado. As fotos continuam aqui.');return}
+   fotosParaItens().then(function(itens){
+    fotos=[];desenhaFotos();$('#foto-leg').value='';cont();
+    var ok=0,falhou=0,ultimo=null,i=0,motivo='';
+    function prox(){
+      if(i>=itens.length){
+        btn.disabled=false;tela('inicio');
+        if(ultimo)abrirShare(ultimo);
+        toast(ok+' foto(s) no site'+(falhou?' · '+falhou+' falharam ('+motivo+'). Estão em Minhas.':''),falhou?9000:4000);
+        setTimeout(posPublicacao,4200);return;
+      }
+      var it=itens[i++];btn.textContent='Enviando foto '+i+' de '+itens.length+'…';
+      publicar(it,function(){}).then(function(r){ok++;ultimo=r}).catch(function(e){falhou++;motivo=explicaErro(e);logErr('foto',e)}).then(prox);
+    }
+    prox();
+   });
+  });
+};
+
+/* ---------- revisão (depois de gravar) ---------- */
+var atual=null;
+function abrirRevisao(it){
+  atual=it;
+  $('#rev-h').textContent=(TIPOS[it.tipo]||'Gravação')+' pronto';
+  var url=URL.createObjectURL(it.blob);
+  $('#rev-pv').innerHTML=(it.audio?'<audio class="pv" controls src="'+url+'"></audio>':'<video class="pv" controls playsinline src="'+url+'" style="max-height:34vh"></video>')+'<p class="note" style="margin-top:6px;text-align:center">'+mb(it.tam||(it.blob&&it.blob.size)||0)+(it.dur?' · '+fmt(it.dur):'')+'</p>';
+  $('#rev-pub').textContent='Enviar e publicar no site';
+  $('#rev-valid').textContent=CFG.validadeH?'Depois de publicado, fica no site por '+(CFG.validadeH===24?'1 dia':CFG.validadeH+' horas')+' e some sozinho.':'';
+  $('#rev-tit').value=it.titulo;$('#rev-desc').value=it.desc||'';
+  var ent=it.tipo==='entrevista';
+  $('#rev-ent-l').hidden=!ent;$('#rev-cons-l').hidden=!ent;$('#rev-ent').value=it.ent||'';$('#rev-cons').checked=false;
+  $('#rev-prog').hidden=true;$('#rev-bar').style.width='0';
+  ['rev-pub','rev-guardar','rev-desc-btn'].forEach(function(i){$('#'+i).disabled=false});
+  $('#f-rev').classList.add('show');
+}
+function fechaRevisao(){$('#f-rev').classList.remove('show');$('#rev-pv').innerHTML='';atual=null}
+function lerForm(){
+  atual.titulo=$('#rev-tit').value.trim()||tituloPadrao(atual.tipo);atual.desc=$('#rev-desc').value.trim();
+  if(atual.tipo==='entrevista'){atual.ent=$('#rev-ent').value.trim();atual.titulo=atual.titulo}
+  return putItem(atual);
+}
+$('#rev-guardar').onclick=function(){lerForm().then(function(){toast('Guardado no celular. Envie quando quiser, na aba Minhas.');fechaRevisao()})};
+$('#rev-desc-btn').onclick=function(){if(!confirm('Descartar esta gravação? Ela será apagada do celular.'))return;var id=atual.id;fechaRevisao();delItem(id).then(cont)};
+$('#rev-pub').onclick=function(){
+  if(atual.tipo==='entrevista'&&!$('#rev-cons').checked){toast('Marque que o entrevistado autorizou a publicação.');return}
+  var it=atual;
+  var jaNoSite=it.siteOk;
+  /* arquivo maior que o limite do Cloudinary: avisa ANTES, em vez de falhar depois de minutos de envio */
+  if(it.blob&&!it.urlCloud&&it.blob.size>CFG.limiteMB*1e6&&!confirm('Este arquivo tem '+mb(it.blob.size)+'. O Cloudinary gratuito só aceita até '+CFG.limiteMB+' MB por vídeo, então o envio provavelmente vai falhar.\n\nEnviar mesmo assim?\n\n(Se cancelar, ele continua guardado no celular. Na aba Minhas, toque em “Salvar no celular” para pegar o arquivo.)'))return;
+  (jaNoSite?Promise.resolve(true):confirmaLimite(LISTA_DE(it),1)).then(function(vai){
+   if(!vai){toast('Publicação cancelada. Continua guardada no celular.');return}
+   lerForm().then(function(){
+    ['rev-pub','rev-guardar','rev-desc-btn'].forEach(function(i){$('#'+i).disabled=true});
+    $('#rev-prog').hidden=false;
+    publicar(it,function(p,txt){$('#rev-bar').style.width=Math.round(p*100)+'%';$('#rev-st').textContent=txt||''}).then(function(r){
+      fechaRevisao();abrirShare(r);posPublicacao();
+    }).catch(function(e){
+      ['rev-pub','rev-guardar','rev-desc-btn'].forEach(function(i){$('#'+i).disabled=false});
+      logErr('publicar',e);
+      $('#rev-st').textContent='Não deu para enviar: '+explicaErro(e)+' O vídeo continua guardado no celular (aba Minhas).';
+      $('#rev-pub').textContent='Tentar enviar de novo';
+    });
+   });
+  });
+};
+
+/* ---------- envio ao Cloudinary ---------- */
+function xhrEnvia(url,fd,headers,onp){
+  return new Promise(function(ok,no){
+    var x=new XMLHttpRequest();x.open('POST',url);
+    Object.keys(headers||{}).forEach(function(k){x.setRequestHeader(k,headers[k])});
+    x.upload.onprogress=function(e){if(e.lengthComputable&&onp)onp(e.loaded)};
+    x.onload=function(){var j=null;try{j=JSON.parse(x.responseText)}catch(e){}if(x.status>=200&&x.status<300&&j)ok(j);else no(new Error((j&&j.error&&j.error.message)||('HTTP '+x.status)))};
+    x.onerror=function(){no(new Error('sem rede'))};x.ontimeout=x.onerror;x.send(fd);
+  });
+}
+function cloudinary(blob,it,onp){
+  var recurso=/^image\//.test(blob.type)?'image':'video';
+  var url='https://api.cloudinary.com/v1_1/'+CFG.cloud+'/'+recurso+'/upload';
+  var pasta='obpc_midia/'+(it.tipo||'geral');
+  var total=blob.size,LIM=40*1e6;
+  function campos(parte,nome){var fd=new FormData();fd.append('file',parte,nome);fd.append('upload_preset',CFG.preset);fd.append('folder',pasta);return fd}
+  var nome=(it.id||'midia')+'.'+ext(blob.type);
+  if(total<=LIM)return xhrEnvia(url,campos(blob,nome),{},function(l){onp(l/total)});
+  /* arquivo grande: envio em pedaços (aguenta culto inteiro) */
+  var CH=20*1024*1024,uidc=uid()+uid(),ini=0,res=null;
+  function pedaco(){
+    if(ini>=total)return Promise.resolve(res);
+    var fim=Math.min(ini+CH,total),parte=blob.slice(ini,fim),tent=0;
+    function vai(){
+      return xhrEnvia(url,campos(parte,nome),{'X-Unique-Upload-Id':uidc,'Content-Range':'bytes '+ini+'-'+(fim-1)+'/'+total},function(l){onp((ini+l)/total)}).then(function(j){res=j;ini=fim;return pedaco()},function(e){if(++tent<4)return new Promise(function(r){setTimeout(r,1500*tent)}).then(vai);throw e});
+    }
+    return vai();
+  }
+  return pedaco();
+}
+
+/* ---------- publicar no site (Firebase) ---------- */
+/* ---------- capacidade do site (limite de publicações) ---------- */
+var LISTA_DE=function(it){return it.tipo==='foto'?'galeria':'videos'};
+function normLista(d){return !d?[]:Array.isArray(d)?d.filter(Boolean):Object.keys(d).map(function(k){return d[k]}).filter(Boolean)}
+function fbLer(nome){
+  return fetch(CFG.fb+'/'+nome+'.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('leitura '+r.status);return r.json()}).then(normLista);
+}
+function tituloItem(x){return String((x&&(x.titulo||x.tit))||'sem título').replace(/\*\*/g,'').slice(0,60)}
+var capEstado=null; /* {galeria:n, videos:n} publicados agora no site */
+function capacidade(){
+  return Promise.all([fbLer('galeria'),fbLer('videos')]).then(function(r){
+    capEstado={galeria:r[0].length,videos:r[1].length,listas:{galeria:r[0],videos:r[1]}};return capEstado;
+  });
+}
+function desenhaCap(){
+  var st=$('#cap-st'),lin=$('#cap-lin'),al=$('#cap-al');
+  if(!capEstado){st.textContent='Sem conexão para ver o espaço do site. Tente de novo com internet.';lin.innerHTML='';al.innerHTML='';return}
+  st.textContent='Cada postagem ocupa uma vaga. Passou do limite, a mais antiga sai do site sozinha, para ele não pesar.';
+  var nomes={galeria:'Fotos',videos:'Vídeos e áudios'},cheio=[],quase=[];
+  lin.innerHTML=['galeria','videos'].map(function(k){
+    var lim=CFG.lim[k],usado=capEstado[k],resta=Math.max(0,lim-usado),pct=Math.round(resta/lim*100);
+    var cls=resta===0?'verm':resta<=CFG.aviso?'amar':'';
+    if(resta===0)cheio.push(k);else if(resta<=CFG.aviso)quase.push(k);
+    return '<div class="lin '+cls+'"><div class="top"><b>'+nomes[k]+'</b><span>'+(resta===0?'LIMITE ATINGIDO':'restam '+resta+' de '+lim)+'</span></div><div class="bar"><i style="width:'+pct+'%"></i></div></div>';
+  }).join('');
+  var h='';
+  if(cheio.length)h='<div class="alerta verm">⛔ Limite atingido em '+cheio.map(function(k){return k==='galeria'?'fotos':'vídeos/áudios'}).join(' e ')+'. A próxima publicação apaga do site a mais antiga.</div>';
+  else if(quase.length)h='<div class="alerta amar">⚠️ Quase no limite de '+quase.map(function(k){return k==='galeria'?'fotos':'vídeos/áudios'}).join(' e ')+'. Faltam poucas vagas.</div>';
+  al.innerHTML=h;
+}
+function atualizaCap(){return capacidade().then(desenhaCap,function(){capEstado=null;desenhaCap()})}
+/* Antes de publicar: avisa se vai sobrar gente para fora do site. Resolve true (pode seguir) ou false (cancelou). */
+function confirmaLimite(nome,qtd){
+  return fbLer(nome).then(function(lista){
+    var lim=CFG.lim[nome],sai=lista.length+qtd-lim;
+    if(sai<=0)return true;
+    var antigas=lista.slice(Math.max(0,lista.length-sai)).reverse().slice(0,3).map(tituloItem);
+    var msg='⛔ LIMITE DO SITE ATINGIDO ('+(nome==='galeria'?'fotos':'vídeos/áudios')+': '+lim+').\n\nPara o site não pesar, ao publicar '+(qtd>1?'estas '+qtd:'esta')+' serão apagadas do site '+Math.min(sai,lista.length)+' publicação(ões) mais antiga(s):\n• '+antigas.join('\n• ')+(sai>3?'\n• …':'')+'\n\nPublicar mesmo assim?';
+    return confirm(msg);
+  },function(){return true}); /* sem rede: o envio vai falhar sozinho e ficar guardado */
+}
+var ultimaLimpeza=[];
+/* apaga do Cloudinary os arquivos que saíram do site (o Worker só apaga o que não está mais em uso) */
+function apagarCloud(rem){
+  var urls=(rem||[]).map(function(x){return x&&x.url}).filter(Boolean);
+  if(!urls.length||!CFG.apagar)return Promise.resolve();
+  return fetch(CFG.apagar,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({urls:urls})}).catch(function(){});
+}
+function marcaRemovidos(rem){
+  if(!rem.length)return Promise.resolve();
+  var urls=rem.map(function(x){return x.url});
+  return allItens().then(function(l){
+    return Promise.all(l.filter(function(i){return i.urlSite&&urls.indexOf(i.urlSite)>-1&&!i.removido}).map(function(i){i.removido=true;delete i.urlCloud;return putItem(i)}));
+  });
+}
+
+/* ---------- publicar no site (Firebase) ---------- */
+function fbLista(nome,novo){
+  var u=CFG.fb+'/'+nome+'.json',lim=CFG.lim[nome]||50;
+  function tenta(n){
+    return fetch(u,{headers:{'X-Firebase-ETag':'true'},cache:'no-store'}).catch(function(){return fetch(u,{cache:'no-store'})}).then(function(r){
+      if(!r.ok)throw new Error('leitura '+r.status);
+      var etag=r.headers.get('ETag');
+      return r.json().then(function(d){
+        var arr=normLista(d);
+        arr.unshift(novo);
+        var removidos=arr.slice(lim);arr=arr.slice(0,lim); /* só as mais novas ficam; as antigas saem */
+        var h={'Content-Type':'application/json'};if(etag)h['if-match']=etag;
+        return fetch(u,{method:'PUT',headers:h,body:JSON.stringify(arr)}).then(function(w){
+          if(w.ok){
+            var fim=function(){ultimaLimpeza=ultimaLimpeza.concat(removidos);apagarCloud(removidos);return marcaRemovidos(removidos)};
+            if(etag)return fim();
+            /* sem ETag o servidor não avisa se duas pessoas gravarem juntas: confere se a nossa entrada ficou e, se outra gravação a atropelou, refaz */
+            return fetch(u,{cache:'no-store'}).then(function(v){return v.json()}).then(function(d2){
+              var existe=normLista(d2).some(function(x){return x&&x.url===novo.url});
+              if(existe||n>=3)return fim();
+              logErr('publicacao-atropelada','refazendo a gravacao na lista');
+              return tenta(n+1);
+            },function(){return fim()});
+          }
+          if(w.status===412&&n<3)return tenta(n+1);throw new Error('gravação '+w.status);
+        });
+      });
+    });
+  }
+  return tenta(0);
+}
+function urlSite(it,u){
+  if(it.tipo==='foto')return u;
+  if(it.audio)return u.replace('/upload/','/upload/').replace(/\.[a-z0-9]+(\?.*)?$/i,'.mp3');
+  if(/\.mp4(\?|$)/i.test(u))return u;
+  return u.replace('/video/upload/','/video/upload/f_mp4,vc_h264/').replace(/\.[a-z0-9]+(\?.*)?$/i,'.mp4');
+}
+function imgPrevia(it,u){
+  if(it.tipo==='foto')return u.replace('/image/upload/','/image/upload/c_limit,w_1200,q_auto,f_jpg/');
+  if(it.audio)return it.capaUrl||CFG.site+'og-banner.png';
+  return u.replace('/video/upload/','/video/upload/so_2,w_1200,q_auto/').replace(/\.[a-z0-9]+(\?.*)?$/i,'.jpg');
+}
+function publicar(it,onp){
+  return getItem(it.id).then(function(cur){
+    it=cur||it;
+    var passo=it.urlCloud?Promise.resolve({secure_url:it.urlCloud}):(onp(0,'Enviando… 0%'),cloudinary(it.blob,it,function(p){onp(p*0.9,'Enviando… '+Math.round(p*100)+'%')}));
+    return passo.then(function(j){
+      it.urlCloud=j.secure_url;it.status='enviado';return putItem(it).then(function(){
+        onp(0.92,'Publicando no site…');
+        var u=urlSite(it,it.urlCloud),dataISO=new Date().toISOString().slice(0,10);
+        if(!it.siteOk)it.expira=CFG.validadeH?Date.now()+CFG.validadeH*36e5:0; /* hora em que some sozinho do site, da nuvem e do celular */
+        var jaPub=it.siteOk?Promise.resolve():(it.tipo==='foto'
+          ?fbLista('galeria',{url:u,tp:'img',tit:it.titulo,titulo:it.titulo,data:dataISO,autor:it.quem||'',expira:it.expira||null})
+          :fbLista('videos',{url:u,titulo:it.titulo,tit:it.titulo,cat:it.tipo==='culto'?'Culto':it.tipo==='podcast'?'Podcast':'Entrevista',plat:'OBPC',desc:it.desc||'',entrevistado:it.ent||'',data:dataISO,autor:it.quem||'',expira:it.expira||null}));
+        return jaPub.then(function(){
+          it.siteOk=true;it.status='publicado';it.urlSite=u;it.previa=imgPrevia(it,it.urlCloud);
+          return garantePrevia(it).then(function(){return putItem(it)});
+        }).then(function(){onp(1,'Pronto!');return it});
+      });
+    });
+  });
+}
+
+/* ---------- cartão do áudio (imagem bonita para compartilhar) ---------- */
+function cartaoAudioCanvas(titulo,rotulo,ent){
+  var W=1200,H=630,c=document.createElement('canvas');c.width=W;c.height=H;var g=c.getContext('2d');
+  var FN='system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif';
+  function rr(x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
+  var f=g.createLinearGradient(0,0,W,H);f.addColorStop(0,'#06281C');f.addColorStop(.55,'#0F4A34');f.addColorStop(1,'#1E7A52');
+  g.fillStyle=f;g.fillRect(0,0,W,H);
+  var r=g.createRadialGradient(W*.84,H*.12,10,W*.84,H*.12,560);r.addColorStop(0,'rgba(245,200,66,.40)');r.addColorStop(1,'rgba(245,200,66,0)');
+  g.fillStyle=r;g.fillRect(0,0,W,H);
+  g.strokeStyle='rgba(245,200,66,.15)';g.lineWidth=2;
+  [170,250,330,410].forEach(function(R){g.beginPath();g.arc(W*.86,H*.18,R,0,Math.PI*2);g.stroke()});
+  /* ondas de som na base */
+  var s=7;String(titulo).split('').forEach(function(ch){s=(s*31+ch.charCodeAt(0))%9973});
+  function rnd(){s=(s*9301+49297)%233280;return s/233280}
+  for(var i=0;i<60;i++){var h=14+Math.pow(rnd(),1.4)*86,x=i*20+4;
+    var bg=g.createLinearGradient(0,H-h,0,H);bg.addColorStop(0,'rgba(245,200,66,.75)');bg.addColorStop(1,'rgba(245,200,66,.12)');
+    g.fillStyle=bg;rr(x,H-h,12,h,6);g.fill()}
+  /* selo do tipo */
+  var rot=String(rotulo||'Podcast').toUpperCase();
+  g.font='bold 26px '+FN;var tw=g.measureText(rot).width+56;
+  g.fillStyle='#F5C842';rr(70,56,tw,50,25);g.fill();
+  g.fillStyle='#14221C';g.textBaseline='middle';g.fillText(rot,98,82);
+  /* microfone */
+  var cx=150,cy=300;
+  g.fillStyle='rgba(245,200,66,.14)';g.beginPath();g.arc(cx,cy,82,0,Math.PI*2);g.fill();
+  g.strokeStyle='#F5C842';g.lineWidth=4;g.beginPath();g.arc(cx,cy,82,0,Math.PI*2);g.stroke();
+  g.fillStyle='#F5C842';rr(cx-17,cy-48,34,60,17);g.fill();
+  g.lineWidth=7;g.lineCap='round';g.beginPath();g.arc(cx,cy-2,31,0.05*Math.PI,0.95*Math.PI);g.stroke();
+  g.beginPath();g.moveTo(cx,cy+29);g.lineTo(cx,cy+52);g.moveTo(cx-19,cy+52);g.lineTo(cx+19,cy+52);g.stroke();
+  /* título */
+  var texto=String(titulo||'OBPC').replace(/\s+/g,' ').trim(),tam=64,linhas;
+  function quebra(max,n){var w=texto.split(' '),l=[],cur='';w.forEach(function(p){var x=cur?cur+' '+p:p;if(g.measureText(x).width>max&&cur){l.push(cur);cur=p}else cur=x});if(cur)l.push(cur);if(l.length>n){l=l.slice(0,n);l[n-1]=l[n-1].replace(/\s*\S*$/,'')+'…'}return l}
+  for(;;){g.font='bold '+tam+'px '+FN;linhas=quebra(840,3);if(linhas.length<=3&&linhas.join(' ').indexOf('…')<0||tam<=44)break;tam-=8}
+  var lh=Math.round(tam*1.16),bloco=linhas.length*lh,y0=300-bloco/2+lh/2-(ent?18:0);
+  g.fillStyle='#fff';g.textBaseline='middle';
+  linhas.forEach(function(t,i){g.fillText(t,270,y0+i*lh)});
+  if(ent){g.font='bold 34px '+FN;g.fillStyle='#F5C842';g.fillText('com '+String(ent).slice(0,40),270,y0+linhas.length*lh+8)}
+  /* rodapé */
+  g.font='bold 28px '+FN;g.fillStyle='rgba(255,255,255,.82)';g.fillText('OBPC Jardim São Fernando',70,H-132);
+  var o='Ouça agora';g.font='bold 26px '+FN;var ow=g.measureText(o).width+88;
+  g.fillStyle='rgba(255,255,255,.14)';rr(W-70-ow,H-160,ow,56,28);g.fill();
+  g.fillStyle='#F5C842';g.beginPath();g.moveTo(W-70-ow+24,H-146);g.lineTo(W-70-ow+24,H-118);g.lineTo(W-70-ow+46,H-132);g.closePath();g.fill();
+  g.fillStyle='#fff';g.fillText(o,W-70-ow+58,H-131);
+  return c;
+}
+function semCapa(it){return !it.previa||it.previa.indexOf('og-banner')>-1}
+/* áudio não tem imagem: desenha o cartão, sobe para o Cloudinary e usa como prévia (a logo não é mais usada) */
+function garantePrevia(it){
+  if(!it.audio||!semCapa(it))return Promise.resolve(it);
+  return new Promise(function(ok){cartaoAudioCanvas(it.titulo,TIPOS[it.tipo]||'Podcast',it.tipo==='entrevista'?it.ent:'').toBlob(ok,'image/jpeg',.88)})
+    .then(function(b){return cloudinary(b,{id:'capa-'+it.id,tipo:'capas'},function(){})})
+    .then(function(j){it.capaUrl=j.secure_url.replace('/image/upload/','/image/upload/c_limit,w_1200,q_auto,f_jpg/');it.previa=it.capaUrl;it.link='';return it},function(){return it});
+}
+
+/* ---------- link curto (igual ao do site) ---------- */
+function hash(str){
+  var h1=0xdeadbeef,h2=0x41c6ce57;
+  for(var i=0;i<str.length;i++){var ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677)}
+  h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);
+  h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+  return (4294967296*(2097151&h2)+(h1>>>0)).toString(36);
+}
+function linkCurto(it){
+  if(it.link)return Promise.resolve(it.link);
+  var rec={s:it.tipo==='foto'?'galeria':'video'};
+  if(it.tipo!=='foto')rec.id='0';
+  rec.t=String(it.titulo||'OBPC').replace(/\*\*/g,'').slice(0,120);
+  rec.d=(it.tipo==='foto'?'Veja os momentos da nossa igreja!':(it.desc||'Assista na OBPC Jardim São Fernando')).replace(/\s+/g,' ').slice(0,220);
+  if(it.previa)rec.i=it.previa;
+  var code=hash(JSON.stringify(rec));
+  return fetch(CFG.fb+'/links/'+code+'.json',{method:'PUT',body:JSON.stringify(rec)}).then(function(r){
+    if(!r.ok)throw new Error('link');
+    it.link=CFG.worker+'/'+code;return putItem(it).then(function(){return it.link});
+  });
+}
+
+/* ---------- compartilhar ---------- */
+var sh=null;
+function copiaTxt(t){return (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).catch(function(){var x=document.createElement('textarea');x.value=t;document.body.appendChild(x);x.select();try{document.execCommand('copy')}catch(e){}x.remove()})}
+function posPublicacao(){
+  var n=ultimaLimpeza.length;ultimaLimpeza=[];
+  atualizaCap().then(function(){if(n)toast('🧹 '+n+' publicação(ões) antiga(s) saiu(ram) do site para não pesar.',5000)});
+}
+function fotoPronta(it){
+  if(!it.previa||semCapa(it))return Promise.resolve(null);
+  return fetch(it.previa).then(function(r){return r.blob()}).then(function(b){
+    var f=new File([b],'foto-obpc.jpg',{type:b.type&&b.type.indexOf('image/')===0?b.type:'image/jpeg'});
+    return navigator.canShare&&navigator.canShare({files:[f]})?f:null;
+  }).catch(function(){return null});
+}
+function abrirShare(it){
+  var meu=sh={it:it,link:'',arq:null,prontoOk:false};
+  $('#sh-tit').textContent=it.titulo;$('#sh-st').textContent='Preparando a foto…';
+  $('#sh-img').removeAttribute('src');
+  $('#f-share').classList.add('show');
+  meu.pronto=garantePrevia(it).then(function(){return putItem(it)}).then(function(){
+    if(sh!==meu)return;
+    if(it.previa)$('#sh-img').src=it.previa;
+    return linkCurto(it).then(function(l){meu.link=l;return fotoPronta(it)}).then(function(f){
+      meu.arq=f;meu.prontoOk=true;
+      if(sh===meu)$('#sh-st').textContent=f?'📷 Foto pronta para enviar':'Este aparelho envia só o link';
+    });
+  }).catch(function(){meu.prontoOk=true;if(sh===meu)$('#sh-st').textContent='Não foi possível preparar. Veja sua internet.'});
+}
+/* manda a foto + título + link pelo menu do celular (igual ao Index); sem suporte, cai no plano B */
+function enviaFoto(it,txt,plano){
+  var f=sh&&sh.arq;
+  if(f&&navigator.share&&navigator.canShare&&navigator.canShare({files:[f]})){
+    navigator.share({files:[f],text:txt}).catch(function(e){if(e&&e.name==='AbortError')return;plano()});
+  }else plano();
+}
+$('#sh-fechar').onclick=function(){$('#f-share').classList.remove('show');desenhaLista()};
+function arquivoDe(it){return new File([it.blob],(it.titulo||'obpc').replace(/[^\w\- ]+/g,'').slice(0,40).trim()+'.'+ext(it.mime),{type:it.mime})}
+function baixa(it){var a=document.createElement('a');a.href=URL.createObjectURL(it.blob);a.download=arquivoDe(it).name;document.body.appendChild(a);a.click();setTimeout(function(){a.remove()},500)}
+$$('#f-share [data-r]').forEach(function(b){b.onclick=function(){
+  if(!sh)return;var it=sh.it,l=sh.link,r=b.dataset.r,enc=encodeURIComponent;
+  if(r==='o-insta'){ /* Instagram não aceita postar por link: copia a legenda e abre o menu do celular com o arquivo */
+    copiaTxt(it.titulo+(l?'\n'+l:''));
+    toast('Legenda copiada. No Instagram, escolha a conta da OBPC (@obpc.saofernando) e cole a legenda.',7000);r='insta';
+  }
+  if(!l&&r!=='arquivo'&&r!=='insta')return toast('Aguarde o link ficar pronto.');
+  if(sh.pronto&&!sh.prontoOk&&(r==='wpp'||r==='mais'||r==='o-grupo')){var rr0=r;sh.pronto.then(function(){var bt=document.querySelector('#f-share [data-r="'+rr0+'"]');if(bt)bt.click()});return}
+  var txt='*'+it.titulo+'*\n'+(it.desc&&it.tipo!=='foto'?String(it.desc).replace(/\s+/g,' ').slice(0,300)+'\n':'')+l;
+  if(r==='o-face'){window.open('https://www.facebook.com/sharer/sharer.php?u='+enc(l),'_blank');toast('No Facebook, toque em “Compartilhar em uma Página que você administra” e escolha a página da OBPC.',7000);return}
+  if(r==='o-grupo'){if(CFG.redes.grupo){copiaTxt(txt);window.open(CFG.redes.grupo,'_blank');toast('Texto copiado. Cole no grupo da OBPC.',6000)}else{enviaFoto(it,txt,function(){window.open('https://wa.me/?text='+enc(txt),'_blank')});toast('No WhatsApp, escolha o grupo da OBPC.',5000)}return}
+  if(r==='wpp')enviaFoto(it,txt,function(){window.open('https://wa.me/?text='+enc(txt),'_blank')});
+  else if(r==='face')window.open('https://www.facebook.com/sharer/sharer.php?u='+enc(l),'_blank');
+  else if(r==='tele')window.open('https://t.me/share/url?url='+enc(l)+'&text='+enc(it.titulo),'_blank');
+  else if(r==='copiar'){(navigator.clipboard?navigator.clipboard.writeText(l):Promise.reject()).then(function(){toast('Link copiado!')}).catch(function(){var t=document.createElement('textarea');t.value=l;document.body.appendChild(t);t.select();try{document.execCommand('copy');toast('Link copiado!')}catch(e){}t.remove()})}
+  else if(r==='mais'){if(navigator.share)enviaFoto(it,txt,function(){navigator.share({title:it.titulo,text:it.titulo,url:l}).catch(function(){})});else toast('Use o botão Copiar link.')}
+  else{ /* arquivo / instagram: manda o arquivo pelo menu do celular */
+    if(!it.blob){toast('O arquivo não está mais neste celular. Use o link.');return}
+    var f=arquivoDe(it);
+    if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:it.titulo,text:it.titulo+(l?'\n'+l:'')}).catch(function(e){if(e&&e.name!=='AbortError')toast('Não deu para abrir o menu de envio.')})}
+    else{baixa(it);toast(r==='insta'?'Arquivo salvo no celular. Abra o Instagram e escolha da galeria.':'Arquivo salvo no celular.',4500)}
+  }
+}});
+
+/* ---------- aba Minhas ---------- */
+var urlsTmp=[];
+function cont(){allItens().then(function(l){var p=l.filter(function(i){return i.status!=='publicado'}).length;$('#cont').textContent=p?'('+p+')':''})}
+function desenhaLista(){
+  desenhaSite();
+  urlsTmp.forEach(function(u){URL.revokeObjectURL(u)});urlsTmp=[];
+  allItens().then(function(l){
+    var box=$('#lista');
+    if(!l.length){box.innerHTML='<div class="card"><p class="note">Nada gravado ainda neste celular.</p></div>';return}
+    box.innerHTML=l.map(function(it){
+      var st=it.removido?'<span class="tag err">Saiu do site (limite)</span>':it.status==='publicado'?'<span class="tag ok">No site</span>':it.status==='enviado'?'<span class="tag pend">Enviado, falta publicar</span>':'<span class="tag pend">Só no celular</span>';
+      var th=it.tipo==='foto'&&it.blob?(function(){var u=URL.createObjectURL(it.blob);urlsTmp.push(u);return '<img src="'+u+'" alt="">'})():(it.previa&&!semCapa(it)?'<img src="'+esc(it.previa)+'" alt="">':(it.audio?'ÁUDIO':'VÍDEO'));
+      var info=[TIPOS[it.tipo]||'Foto',it.dur?fmt(it.dur):'',mb(it.tam||0),it.quem||'',new Date(it.criado).toLocaleDateString('pt-BR')].filter(Boolean).join(' · ');
+      var ex=(it.expira&&it.status==='publicado'&&!it.removido)?'<span class="tag">Some '+restaTxt(it.expira)+'</span>':'';
+      return '<div class="card" data-id="'+it.id+'"><div class="item"><div class="mini-img">'+th+'</div><div style="min-width:0"><div class="t">'+esc(it.titulo)+'</div><div class="m">'+esc(info)+'</div><div>'+st+ex+(it.blob?'':'<span class="tag">Arquivo liberado</span>')+'</div></div></div>'+
+      '<div class="acoes">'+((it.status!=='publicado'||it.removido)&&it.blob?'<button class="btn pri" data-a="pub">'+(it.removido?'Publicar de novo':'Publicar')+'</button>':'')+
+      (it.status==='publicado'&&!it.removido?'<button class="btn ouro" data-a="share">Compartilhar</button>':'')+
+      (it.blob?'<button class="btn" data-a="ver">Ver</button><button class="btn" data-a="baixar">Salvar no celular</button>':'')+
+      '<button class="btn perigo" data-a="del">Apagar</button></div></div>';
+    }).join('');
+    $$('#lista [data-a]').forEach(function(b){b.onclick=function(){
+      var id=b.closest('.card').dataset.id,a=b.dataset.a;
+      getItem(id).then(function(it){
+        if(!it)return;
+        if(a==='pub'){if(it.removido){it.siteOk=false;it.removido=false;it.status='enviado'}if(it.tipo==='entrevista'&&!it.consentiu){if(!confirm('O entrevistado autorizou a publicação (e o responsável, se for menor)?'))return;it.consentiu=true}abrirRevisao(it)}
+        else if(a==='share')abrirShare(it);
+        else if(a==='baixar')baixa(it);
+        else if(a==='ver')abrirRevisao(it);
+        else if(a==='del'){var noSite=it.status==='publicado'&&!it.removido&&it.urlSite;if(!confirm('Apagar esta gravação?\n\n'+(noSite?'Ela vai sair do site e do celular. Não dá para desfazer.':'Ela vai sair do celular. Não dá para desfazer.')))return;if(noSite){retirarSite(it.tipo==='foto'?'galeria':'videos',{url:it.urlSite},function(){delItem(id).then(function(){desenhaLista();cont()})},true)}else{var sob=[];if(it.urlCloud)sob.push({url:it.urlCloud});if(it.capaUrl)sob.push({url:it.capaUrl});apagaLink(it);apagarCloud(sob);delItem(id).then(function(){desenhaLista();cont()})}}
+      });
+    }});
+  });
+}
+function relatorio(){
+  var l=[];try{l=JSON.parse(localStorage.getItem('midia_log')||'[]')}catch(e){}
+  var s=['Estúdio de Mídia v'+VERSAO,'Quem: '+(quem||'-'),'Navegador: '+(navigator.userAgent||'?'),
+    'Endereço seguro (https): '+(window.isSecureContext?'sim':'NÃO'),
+    'Câmera/microfone: '+((navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)?'sim':'NÃO'),
+    'Gravador: '+(window.MediaRecorder?'sim':'NÃO'),
+    'Formato de vídeo: '+(escolheMime(false)||'(nenhum)'),'Formato de áudio: '+(escolheMime(true)||'(nenhum)'),
+    'Aberto dentro de outro app: '+(emAppInterno()?'SIM':'não'),
+    'Problemas recentes:'];
+  if(!l.length)s.push('  (nenhum)');
+  l.slice(-15).forEach(function(x){s.push('  '+x.t.slice(5,16).replace('T',' ')+' · '+x.onde+' · '+x.msg)});
+  return s.join('\n');
+}
+function desenhaDiag(){var d=$('#diag');if(d)d.textContent=relatorio()}
+$('#b-diag-copiar').onclick=function(){copiaTxt(relatorio());toast('Relatório copiado.')};
+$('#b-diag-wpp').onclick=function(){window.open('https://wa.me/?text='+encodeURIComponent(relatorio()),'_blank')};
+function espaco(){
+  var el=$('#espaco');
+  if(navigator.storage&&navigator.storage.estimate){navigator.storage.estimate().then(function(e){el.textContent='Usado pelo Estúdio: '+mb(e.usage||0)+(e.quota?' de cerca de '+mb(e.quota)+' disponíveis.':'.')})}
+  else el.textContent='Não consegui medir o espaço neste celular.';
+}
+$('#b-liberar').onclick=function(){
+  allItens().then(function(l){
+    var pub=l.filter(function(i){return i.status==='publicado'&&i.blob});
+    if(!pub.length)return toast('Não há nada publicado para apagar.');
+    if(!confirm('Apagar do celular '+pub.length+' arquivo(s) já publicado(s)? Eles continuam no site.'))return;
+    Promise.all(pub.map(function(i){delete i.blob;return putItem(i)})).then(function(){toast('Espaço liberado.');espaco();desenhaLista()});
+  });
+};
+
+/* ---------- painel do pastor ---------- */
+var pOk=false,pFiltro='videos',pDados={videos:[],galeria:[]};
+function painel(){$('#p-pin').hidden=pOk;$('#p-area').hidden=!pOk;if(pOk)pCarrega()}
+$('#p-entrar').onclick=function(){if($('#p-senha').value.trim()===CFG.pin){pOk=true;$('#p-senha').value='';painel()}else toast('Senha incorreta.')};
+$('#p-senha').onkeydown=function(e){if(e.key==='Enter')$('#p-entrar').click()};
+$('#p-sair').onclick=function(){pOk=false;painel()};
+$('#p-atualiza').onclick=function(){pCarrega()};
+$$('#p-filtro .chip').forEach(function(b){b.onclick=function(){pFiltro=b.dataset.f;$$('#p-filtro .chip').forEach(function(x){x.classList.toggle('on',x===b)});pDesenha()}});
+function pCarrega(){
+  $('#p-lista').innerHTML='<div class="card"><p class="note">Carregando…</p></div>';
+  Promise.all([fbLer('videos'),fbLer('galeria')]).then(function(r){pDados={videos:r[0],galeria:r[1]};pDesenha()},function(){$('#p-lista').innerHTML='<div class="card"><p class="note">Sem conexão com o site. Tente de novo.</p></div>'});
+}
+function pDesenha(){
+  var por={};
+  ['videos','galeria'].forEach(function(k){pDados[k].forEach(function(x){var a=x.autor||'Outros';por[a]=por[a]||{v:0,f:0};por[a][k==='videos'?'v':'f']++})});
+  $('#p-res').innerHTML='<p class="note">Vídeos e áudios no site: <b>'+pDados.videos.length+' de '+CFG.lim.videos+'</b><br>Fotos no site: <b>'+pDados.galeria.length+' de '+CFG.lim.galeria+'</b></p><p class="note" style="margin-top:8px"><b>Quem publicou:</b></p>'+
+    (Object.keys(por).map(function(a){return '<p class="note">• '+esc(a)+': '+por[a].v+' vídeo(s)/áudio(s) e '+por[a].f+' foto(s)</p>'}).join('')||'<p class="note">Nada publicado ainda.</p>');
+  var l=pDados[pFiltro];
+  $('#p-lista').innerHTML=l.length?l.map(function(x,i){
+    var th=pFiltro==='galeria'&&x.url?'<img src="'+esc(x.url.replace('/image/upload/','/image/upload/c_fill,w_160,h_160,q_auto,f_jpg/'))+'" alt="">':(/\.mp3(\?|$)/i.test(x.url||'')?'ÁUDIO':'VÍDEO');
+    var info=[x.cat||'',x.autor||'',x.data||'',x.entrevistado?'com '+x.entrevistado:'',x.expira?'some '+restaTxt(x.expira):''].filter(Boolean).join(' · ');
+    return '<div class="card"><div class="item"><div class="mini-img">'+th+'</div><div style="min-width:0"><div class="t">'+esc(tituloItem(x))+'</div><div class="m">'+esc(info)+'</div></div></div><div class="acoes">'+(x.url?'<a class="btn" style="text-align:center;line-height:40px;text-decoration:none" href="'+esc(x.url)+'" target="_blank" rel="noopener">Abrir</a>':'')+'<button class="btn perigo" data-i="'+i+'">Retirar do site</button></div></div>';
+  }).join(''):'<div class="card"><p class="note">Nada publicado nesta lista.</p></div>';
+  $$('#p-lista [data-i]').forEach(function(b){b.onclick=function(){pRetirar(pFiltro,+b.dataset.i)}});
+}
+function pRetirar(k,i){retirarSite(k,pDados[k][i],function(){pCarrega()})}
+/* retira do site (Firebase) e manda apagar do Cloudinary; usado pelo painel do pastor e por cada pessoa da equipe */
+function retirarSite(k,x,depois,sem){
+  if(!x)return;
+  if(!x.url){toast('Este item não tem link; retire pelo painel do site.');return}
+  if(!sem&&!confirm('Retirar do site?\n\n'+tituloItem(x)+'\n\nO arquivo também será apagado do Cloudinary. Não dá para desfazer.'))return;
+  var u=CFG.fb+'/'+k+'.json';
+  (function tenta(n){
+    fetch(u,{headers:{'X-Firebase-ETag':'true'},cache:'no-store'}).then(function(r){
+      if(!r.ok)throw new Error('leitura');var et=r.headers.get('ETag');
+      return r.json().then(function(d){
+        var arr=normLista(d).filter(function(y){return y.url!==x.url});
+        var h={'Content-Type':'application/json'};if(et)h['if-match']=et;
+        return fetch(u,{method:'PUT',headers:h,body:JSON.stringify(arr)}).then(function(w){
+          if(w.ok){var lr=limpaRastros(x);toast('Retirado do site.');atualizaCap();if(depois)Promise.resolve(lr).then(depois,depois);return}
+          if(w.status===412&&n<3)return tenta(n+1);throw new Error('gravação');
+        });
+      });
+    }).catch(function(){toast('Não consegui retirar agora. Tente de novo.')});
+  })(0);
+}
+/* apaga tudo o que sobra de uma publicação: arquivo e capa no Cloudinary, link curto no Firebase e marca no celular */
+function apagaLink(it){
+  if(!it||!it.link)return;
+  var code=String(it.link).split('/').pop();
+  if(code)fetch(CFG.fb+'/links/'+code+'.json',{method:'DELETE'}).catch(function(){});
+}
+function limpaRastros(x){
+  return allItens().then(function(l){
+    var it=l.filter(function(i){return i.urlSite===x.url})[0],lista=[x];
+    if(it&&it.capaUrl)lista.push({url:it.capaUrl});
+    apagaLink(it);apagarCloud(lista);
+    return marcaRemovidos([x]);
+  },function(){apagarCloud([x])});
+}
+/* aba Minhas: o que a pessoa publicou no site, com botão para retirar (some do site e do Cloudinary) */
+function desenhaSite(){
+  var box=$('#lista-site');if(!box)return;
+  if(!quem){box.innerHTML='';return}
+  Promise.all([fbLer('videos'),fbLer('galeria')]).then(function(r){
+    var its=[];
+    r[0].forEach(function(x){if(x&&x.autor===quem)its.push({k:'videos',x:x})});
+    r[1].forEach(function(x){if(x&&x.autor===quem)its.push({k:'galeria',x:x})});
+    if(!its.length){box.innerHTML='';return}
+    box.innerHTML='<div class="card"><h2>Minhas publicações no site</h2><p class="note">Se não gostar de alguma, toque em Retirar do site. Ela some do site e do Cloudinary.</p></div>'+its.map(function(o,i){
+      var x=o.x,th=o.k==='galeria'&&x.url?'<img src="'+esc(x.url.replace('/image/upload/','/image/upload/c_fill,w_160,h_160,q_auto,f_jpg/'))+'" alt="">':(/\.mp3(\?|$)/i.test(x.url||'')?'ÁUDIO':'VÍDEO');
+      var info=[x.cat||'',x.data||'',x.expira?'some '+restaTxt(x.expira):''].filter(Boolean).join(' · ');
+      return '<div class="card"><div class="item"><div class="mini-img">'+th+'</div><div style="min-width:0"><div class="t">'+esc(tituloItem(x))+'</div><div class="m">'+esc(info)+'</div></div></div><div class="acoes"><button class="btn perigo" data-s="'+i+'">Retirar do site</button></div></div>';
+    }).join('');
+    $$('#lista-site [data-s]').forEach(function(b){b.onclick=function(){var o=its[+b.dataset.s];retirarSite(o.k,o.x,function(){desenhaSite();desenhaLista()})}});
+  },function(){box.innerHTML=''});
+}
+
+/* ---------- instalar ---------- */
+var evInst=null;
+window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();evInst=e;$('#b-instalar').hidden=false});
+$('#b-instalar').onclick=function(){if(!evInst)return;evInst.prompt();evInst.userChoice.then(function(){evInst=null;$('#b-instalar').hidden=true})};
+/* convite + avisos de instalação */
+(function(){
+  var ua=navigator.userAgent||'',ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  var emApp=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+  var dentro=/FBAN|FBAV|Instagram|WhatsApp|Line\/|TikTok|; wv\)/i.test(ua);
+  var st=$('#inst-st'),msg='';
+  if(emApp)msg='✅ Você já está usando o aplicativo instalado.';
+  else if(dentro)msg='⚠ Você abriu por dentro de outro aplicativo (WhatsApp, Instagram…). Para instalar, toque nos três pontinhos e escolha “Abrir no navegador” (Chrome no Android, Safari no iPhone).';
+  else if(ios)msg='📱 iPhone: siga os passos do Safari logo abaixo (o botão “Instalar agora” só existe no Android).';
+  if(msg){st.textContent=msg;st.hidden=false}
+  window.addEventListener('appinstalled',function(){$('#b-instalar').hidden=true;st.textContent='✅ Instalado! Procure o ícone do Estúdio na tela do celular.';st.hidden=false});
+  $('#b-convite').onclick=function(){
+    var url=location.origin+location.pathname;
+    var txt='Instale o Estúdio de Mídia no seu celular: '+url+'\n\nAndroid: abra no Chrome > três pontinhos > Instalar aplicativo.\niPhone: abra no Safari > Compartilhar > Adicionar à Tela de Início.';
+    if(navigator.share){navigator.share({title:'Estúdio de Mídia — OBPC',text:txt}).catch(function(){})}
+    else window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');
+  };
+})();
+if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw-midia.js').catch(function(){})}catch(e){}}
+if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(function(){})}
+
+/* ---------- apagar sozinho depois de CFG.validadeH horas ---------- */
+function restaTxt(t){var m=Math.max(0,Math.round((t-Date.now())/60000));return m<60?'em '+m+' min':'em '+Math.round(m/60)+' h'}
+var limpando=false;
+/* tira do site (e manda apagar do Cloudinary) só o que tem "expira" vencido; o que não tem fica como está */
+function varrer(nome,agora){
+  var u=CFG.fb+'/'+nome+'.json';
+  function tenta(n){
+    return fetch(u,{headers:{'X-Firebase-ETag':'true'},cache:'no-store'}).catch(function(){return fetch(u,{cache:'no-store'})}).then(function(r){
+      if(!r.ok)throw new Error('leitura '+r.status);
+      var et=r.headers.get('ETag');
+      return r.json().then(function(d){
+        var arr=normLista(d),venc=arr.filter(function(x){return x&&x.expira&&x.expira<=agora});
+        if(!venc.length)return 0;
+        var resto=arr.filter(function(x){return !(x&&x.expira&&x.expira<=agora)});
+        var h={'Content-Type':'application/json'};if(et)h['if-match']=et;
+        return fetch(u,{method:'PUT',headers:h,body:JSON.stringify(resto)}).then(function(w){
+          if(w.ok){apagarCloud(venc);return venc.length}
+          if(w.status===412&&n<3)return tenta(n+1);
+          throw new Error('gravação '+w.status);
+        });
+      });
+    });
+  }
+  return tenta(0);
+}
+/* no celular: só apaga o que JÁ foi publicado e venceu; gravação ainda não publicada nunca é apagada sozinha */
+function limpaCelular(agora){
+  return allItens().then(function(l){
+    var venc=l.filter(function(i){return i.expira&&i.expira<=agora&&(i.status==='publicado'||i.removido)});
+    if(!venc.length)return 0;
+    venc.forEach(apagaLink);apagarCloud(venc.filter(function(i){return i.capaUrl}).map(function(i){return {url:i.capaUrl}}));
+    return Promise.all(venc.map(function(i){return delItem(i.id)})).then(function(){return venc.length});
+  });
+}
+function limpaSite(){
+  if(!CFG.validadeH||limpando||(rec&&rec.estado!=='parado'))return Promise.resolve();
+  limpando=true;var agora=Date.now();
+  return Promise.all([varrer('videos',agora),varrer('galeria',agora)]).catch(function(e){logErr('limpeza-site',e);return [0,0]})
+    .then(function(r){return limpaCelular(agora).then(function(m){return [r[0]+r[1],m]},function(e){logErr('limpeza-celular',e);return [r[0]+r[1],0]})})
+    .then(function(x){
+      if(x[0]||x[1]){toast('🧹 Passou de 1 dia: '+(x[0]?x[0]+' saiu do site. ':'')+(x[1]?x[1]+' liberado(s) do celular.':''),6000);cont();atualizaCap();if(!$('#aba-minhas').hidden)desenhaLista()}
+    }).then(function(){limpando=false},function(){limpando=false});
+}
+(function(){
+  var p=$('#nota-regra');if(!p)return;var s=[];
+  if(CFG.maxSeg&&CFG.maxSeg.culto)s.push('Cada vídeo do culto grava até '+textoDuracao(CFG.maxSeg.culto)+'.');
+  if(CFG.validadeH)s.push('O que for publicado some do site, da nuvem e do celular depois de '+(CFG.validadeH===24?'1 dia':CFG.validadeH+' horas')+'.');
+  p.textContent=s.join(' ');
+})();
+
+$('#b-apagar-site').onclick=function(){aba('minhas');setTimeout(function(){var e=$('#lista-site');if(e&&e.children.length)e.scrollIntoView({behavior:'smooth',block:'start'});else toast('Você não tem nada publicado no site agora.')},700)};
+(function(){var a=$('#b-ver-site');if(a&&CFG.site)a.href=CFG.site})();
+cont();recupera();atualizaCap();limpaSite();
+setInterval(limpaSite,10*60*1000);
+window.addEventListener('online',function(){atualizaCap();limpaSite()});
+document.addEventListener('visibilitychange',function(){if(!document.hidden){atualizaCap();limpaSite()}});
+})();
+</script>
+<script>
+/* ponteiro do VU e lâmpada AIR: só visual, leem o que o Estúdio já faz */
+(function(){try{var nd=document.querySelector('.needle'),nv=document.getElementById('nivel'),vz=document.getElementById('visor'),lp=document.getElementById('lamp-air'),cur=-48;
+setInterval(function(){var m=6,k=nv?nv.children:[];for(var i=0;i<k.length;i++){var h=parseFloat(k[i].style.height);if(h>m)m=h}
+var t=-48+Math.min(1,(m-6)/38)*96;cur+=(t-cur)*.4;if(nd)nd.style.transform='rotate('+cur.toFixed(1)+'deg)';
+if(lp&&vz)lp.classList.toggle('on',vz.classList.contains('gravando'))},60)}catch(e){}})();
+</script>
+</body>
+</html>
