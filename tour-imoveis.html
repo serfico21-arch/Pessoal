@@ -1757,6 +1757,7 @@ window.FCBand = (function(){
   const generateBldBtn = document.getElementById('generateBldBtn');
   const bldContactInput = document.getElementById('bldContact');
   window.__fcHideMine = () => !!window.__fcBld && !document.getElementById('bldMine').checked;
+  window.__fcNoLogo = () => !!(window.FCLogo && window.FCLogo.removed && window.FCLogo.removed()); /* "Tirar logo" da logo padrão: sem logo em lugar nenhum */
   const contactVal = () => {
     if(!window.__fcBld) return propertyContactInput.value.trim();
     const b = bldContactInput.value.trim();
@@ -2226,7 +2227,7 @@ window.FCBand = (function(){
     // Faixa de título (vertical): logo + título em até 2 linhas
     function buildHeader(maxW, maxH){
       const title = propertyInfoInput.value.trim();
-      const hasLogo = brokerLogo.naturalWidth > 0 && !window.__fcHideMine();
+      const hasLogo = brokerLogo.naturalWidth > 0 && !window.__fcHideMine() && !window.__fcNoLogo();
       if(!title && !hasLogo) return null;
       const c = newLayer(maxW, maxH);
       const g = c.getContext('2d');
@@ -2277,7 +2278,7 @@ window.FCBand = (function(){
     }
 
     function buildLogo(size){
-      if(!brokerLogo.naturalWidth || window.__fcHideMine()) return null;
+      if(!brokerLogo.naturalWidth || window.__fcHideMine() || window.__fcNoLogo()) return null;
       const c = newLayer(size, size);
       const g = c.getContext('2d');
       g.globalAlpha = 0.9;
@@ -2296,7 +2297,7 @@ window.FCBand = (function(){
       facts: window.FCBand.facts(dtAreaInput.value, dtQuartosInput.value, dtSuitesInput.value, dtBanhInput.value, dtVagasInput.value),
       bandKey: bandThemeSelect.value, bandColor: bandColorInput.value, accentKey: accentSelect.value
     };
-    if(infoMode === 'under' || fillScreen){ base.title = propertyInfoInput.value.trim(); base.logo = (window.__fcHideMine() || (window.FCLogo && window.FCLogo.on('lgG'))) ? null : brokerLogo; }
+    if(infoMode === 'under' || fillScreen){ base.title = propertyInfoInput.value.trim(); base.logo = (window.__fcHideMine() || window.__fcNoLogo() || (window.FCLogo && window.FCLogo.on('lgG'))) ? null : brokerLogo; }
     const maxWI = landscape ? Math.round(W * (infoMode === 'over' ? 0.40 : 0.70)) : W - mxI*2;
     let reserveR = 0;
     if(portrait){
@@ -2742,7 +2743,7 @@ window.FCBand = (function(){
       bandKey: $('bandTheme').value, bandColor: $('bandColor').value, accentKey: $('accent').value
     };
     const clean = mode === 'over' && modeSel.value === 'fill';
-    if(mode === 'under' || clean){ opts.title = title; opts.logo = (window.FCLogo && window.FCLogo.on('lgG')) ? null : logoImg; }
+    if(mode === 'under' || clean){ opts.title = title; opts.logo = (window.__fcNoLogo() || (window.FCLogo && window.FCLogo.on('lgG'))) ? null : logoImg; }
     const L = B.place({
       W, H, u, mode, scale: (+$('infoScale').value || 100) * (land ? 0.82 : 1), pos: +$('infoPos').value || 0,
       topY: (mode === 'under' && portrait) ? Math.round(H * 0.09) : 0,
@@ -2755,7 +2756,7 @@ window.FCBand = (function(){
     if(mode === 'over' && !clean){
       const headTop = portrait ? Math.round(H * 0.13) : Math.round(H * 0.04);
       const logoS = Math.round(104 * u); let tx = mx;
-      if(logoImg.naturalWidth){
+      if(logoImg.naturalWidth && !window.__fcNoLogo()){
         g.save(); g.globalAlpha = 0.95; g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 18;
         g.drawImage(logoImg, mx, headTop, logoS, logoS); g.restore();
         tx = mx + logoS + Math.round(22 * u);
@@ -3186,7 +3187,7 @@ window.FCBand = (function(){
     let logo = '';
     try{
       const lsrc = window.__brokerLogoSrc;
-      if(lsrc){
+      if(lsrc && !window.__fcNoLogo()){
         const li = new Image(); li.src = lsrc;
         await new Promise(r => { if(li.complete) r(); else li.onload = li.onerror = r; });
         if(li.naturalWidth){ const lc = document.createElement('canvas'); lc.width = lc.height = 120; lc.getContext('2d').drawImage(li, 0, 0, 120, 120); logo = lc.toDataURL('image/png'); }
@@ -3446,14 +3447,14 @@ window.FCBand = (function(){
 <script>
 /* Logo na tela (marca d'água) com posição, tamanho e barra de opacidade — gerador (lgG) e adaptador (lgA) */
 window.FCLogo = (function(){
-  var custom = null, defImg = null;
+  var custom = null, defImg = null, removed = false;
   function def(){
     if(!defImg && window.__brokerLogoSrc){ defImg = new Image(); defImg.src = window.__brokerLogoSrc; }
     return defImg;
   }
   function img(){ return (custom && custom.naturalWidth) ? custom : def(); }
   function g(p, k){ return document.getElementById(p + k); }
-  function on(p){ var e = g(p, 'On'); return !!(e && e.checked); }
+  function on(p){ var e = g(p, 'On'); return !removed && !!(e && e.checked); }
   function build(p, W, H, limitY){
     if(!on(p)) return null;
     var im = img(); if(!im || !im.naturalWidth) return null;
@@ -3475,10 +3476,12 @@ window.FCLogo = (function(){
     var host = document.getElementById(p + 'Host'); if(!host) return;
     host.innerHTML =
       '<div class="time-box" style="margin-top:0;">' +
-      '<div class="time-head"><strong>Minha logo na tela</strong>' +
+      '<div class="time-head"><strong>Minha logo (padrão)</strong>' +
       '<span style="display:inline-flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
       '<label class="file-btn" style="margin:0;">Trocar logo<input type="file" id="'+p+'File" accept="image/*" style="display:none;"></label>' +
-      '<button type="button" class="file-btn" id="'+p+'Reset">Logo padrão</button></span></div>' +
+      '<button type="button" class="file-btn" id="'+p+'Reset">Logo padrão</button>' +
+      '<button type="button" class="file-btn" id="'+p+'Hide">Tirar logo</button></span></div>' +
+      '<div class="audio-name" id="'+p+'Name" style="margin:6px 0;">Logo padrão FCOSTA em uso.</div>' +
       '<div class="toggle-row" style="margin:6px 0 4px;"><input type="checkbox" id="'+p+'On" checked><label for="'+p+'On" style="margin:0;">Mostrar a logo no vídeo</label></div>' +
       '<label class="sl" for="'+p+'Pos">Posição</label>' +
       '<select id="'+p+'Pos"><option value="tl" selected>Canto superior esquerdo</option><option value="tc">Topo, centralizada</option><option value="tr">Canto superior direito</option><option value="br">Canto inferior direito</option></select>' +
@@ -3486,15 +3489,22 @@ window.FCLogo = (function(){
       '<input type="range" id="'+p+'Size" min="8" max="40" step="1" value="20"><div class="time-scale"><span>Menor</span><span>Maior</span></div>' +
       '<label class="sl" for="'+p+'Op">Opacidade da logo: <span id="'+p+'OpV">85</span>%</label>' +
       '<input type="range" id="'+p+'Op" min="10" max="100" step="5" value="85"><div class="time-scale"><span>Transparente</span><span>Sólida</span></div>' +
-      '<div class="time-read ok" style="font-weight:400;color:var(--ink-soft);">Com a logo ligada, ela sai da faixa de baixo e aparece só aqui. No formato 9:16 o topo fica abaixo da área coberta pelo app.</div></div>';
+      '<div class="time-read ok" style="font-weight:400;color:var(--ink-soft);">Com a logo ligada, ela sai da faixa de baixo e aparece só aqui. Se desmarcar, ela volta para a faixa. Para ficar <strong>sem a minha logo em lugar nenhum</strong>, use “Tirar logo” (e “Colocar logo” para ela voltar). No formato 9:16 o topo fica abaixo da área coberta pelo app.</div></div>';
+    function st(){
+      var b = g(p,'Hide'), n = g(p,'Name'), box = host.firstChild;
+      if(b) b.textContent = removed ? 'Colocar logo' : 'Tirar logo';
+      if(n) n.textContent = removed ? 'Sem a minha logo no vídeo (toque em “Colocar logo” para ela voltar).' : (custom ? 'Logo escolhida por você em uso.' : 'Logo padrão FCOSTA em uso.');
+      if(box && box.style) box.style.opacity = removed ? '.75' : '';
+    }
+    g(p,'Hide').addEventListener('click', function(){ removed = !removed; st(); });
     g(p,'Op').addEventListener('input', function(){ g(p,'OpV').textContent = this.value; });
     g(p,'File').addEventListener('change', function(e){
       var f = e.target.files && e.target.files[0]; if(!f) return;
       var u = URL.createObjectURL(f), i = new Image();
-      i.onload = function(){ custom = i; }; i.onerror = function(){ alert('Não foi possível abrir esta imagem.'); };
+      i.onload = function(){ custom = i; removed = false; st(); }; i.onerror = function(){ alert('Não foi possível abrir esta imagem.'); };
       i.src = u; e.target.value = '';
     });
-    g(p,'Reset').addEventListener('click', function(){ custom = null; });
+    g(p,'Reset').addEventListener('click', function(){ custom = null; removed = false; st(); });
   }
   mount('lgG');
   function dims(p, W, H, posReq){
@@ -3503,7 +3513,7 @@ window.FCLogo = (function(){
     var S = Math.round(Math.min(W, H) * (+g(p,'Size').value || 20) / 100), k = S / Math.max(im.naturalWidth, im.naturalHeight);
     return { w: Math.max(1, Math.round(im.naturalWidth * k)), h: Math.max(1, Math.round(im.naturalHeight * k)) };
   }
-  return { build: build, on: on, dims: dims };
+  return { build: build, on: on, dims: dims, removed: function(){ return removed; } };
 })();
 </script>
 <script>
@@ -3850,7 +3860,7 @@ window.FCLogo = (function(){
 
   /* ---------- logo da construtora ---------- */
   window.FCBuilderLogo = (function(){
-    var img = null;
+    var img = null, hid = false;
     function g(k){ return $('lgB' + k); }
     // Monta a imagem: logo da construtora + nome do projeto (ao lado ou, se faltar espaço, embaixo). Nunca corta o nome.
     function wrapFit(probe, text, maxW, maxLines){
@@ -3881,9 +3891,10 @@ window.FCLogo = (function(){
       return c;
     }
     function compose(W, H, split){
-      var e = g('On'), on = !!(e && (e.checked || window.__fcBld));
-      var pj = g('Proj'), proj = ((pj && pj.value) || '').trim(), hasImg = !!(img && img.naturalWidth);
-      if(!on || (!hasImg && !proj)) return null;
+      var e = g('On'), onL = !!(e && (e.checked || window.__fcBld)) && !hid;   /* logo da construtora: liga/desliga e Tirar/Colocar só dela */
+      var ne = g('NOn'), onN = !ne || !!(ne.checked || window.__fcBld);         /* nome do projeto: liga/desliga só dele */
+      var pj = g('Proj'), proj = onN ? ((pj && pj.value) || '').trim() : '', hasImg = !!(img && img.naturalWidth) && onL;
+      if(!hasImg && !proj) return null;
       var base = Math.min(W, H), S = Math.round(base * (+g('Size').value || 18) / 100), mg = Math.round(base * .04);
       var lw = 0, lh = 0;
       if(hasImg){ var k = S / Math.max(img.naturalWidth, img.naturalHeight); lw = Math.max(1, Math.round(img.naturalWidth * k)); lh = Math.max(1, Math.round(img.naturalHeight * k)); }
@@ -3946,9 +3957,10 @@ window.FCLogo = (function(){
       '<div class="time-head"><strong>Logo da construtora</strong>' +
       '<span style="display:inline-flex;gap:8px;flex-wrap:wrap;align-items:center;">' +
       '<label class="file-btn" style="margin:0;">Escolher logo<input type="file" id="lgBFile" accept="image/*" style="display:none;"></label>' +
-      '<button type="button" class="file-btn" id="lgBReset">Remover</button></span></div>' +
+      '<button type="button" class="file-btn" id="lgBReset">Tirar logo</button></span></div>' +
       '<div class="audio-name" id="lgBName" style="margin:6px 0;">Nenhuma logo da construtora (envie um PNG com fundo transparente, se tiver).</div>' +
-      '<div class="toggle-row" style="margin:6px 0 4px;"><input type="checkbox" id="lgBOn" checked><label for="lgBOn" style="margin:0;">Mostrar a logo e o nome do projeto no vídeo</label></div>' +
+      '<div class="toggle-row" style="margin:6px 0 4px;"><input type="checkbox" id="lgBOn" checked><label for="lgBOn" style="margin:0;">Mostrar a logo da construtora no vídeo</label></div>' +
+      '<div class="toggle-row" style="margin:0 0 4px;"><input type="checkbox" id="lgBNOn" checked><label for="lgBNOn" style="margin:0;">Mostrar o nome do projeto no vídeo</label></div>' +
       '<label class="sl" for="lgBProj">Nome do projeto (aparece separado, embaixo da logo)</label>' +
       '<div class="field" style="margin:0 0 4px;"><input type="text" id="lgBProj" maxlength="50" placeholder="Ex.: Residencial Vista Verde"></div>' +
       '<label class="sl" for="lgBNSize">Tamanho do nome do projeto</label>' +
@@ -3964,11 +3976,16 @@ window.FCLogo = (function(){
     g('File').addEventListener('change', function(e){
       var f = e.target.files && e.target.files[0]; if(!f) return;
       var u = URL.createObjectURL(f), i = new Image();
-      i.onload = function(){ img = i; g('Name').textContent = 'Logo: ' + f.name; };
+      i.onload = function(){ img = i; hid = false; nome = f.name; st(); };
       i.onerror = function(){ alert('Não foi possível abrir esta imagem.'); };
       i.src = u; e.target.value = '';
     });
-    g('Reset').addEventListener('click', function(){ img = null; g('Name').textContent = 'Nenhuma logo da construtora (envie um PNG com fundo transparente, se tiver).'; });
+    var nome = '';
+    function st(){
+      g('Reset').textContent = hid ? 'Colocar logo' : 'Tirar logo';
+      g('Name').textContent = !img ? 'Nenhuma logo da construtora (envie um PNG com fundo transparente, se tiver).' : (hid ? 'Logo tirada do vídeo (guardada: toque em “Colocar logo” para ela voltar).' : 'Logo: ' + nome);
+    }
+    g('Reset').addEventListener('click', function(){ if(!img){ st(); return; } hid = !hid; st(); });
     function dims(W, H, posReq){
       if(!g('Pos') || g('Pos').value !== posReq) return null;
       var c = compose(W, H); return c ? { w: c.width, h: c.height } : null;
@@ -4991,8 +5008,8 @@ window.FCLogo = (function(){
   var say = function(m){ st.textContent = m || ''; };
   function updLogoSt(){
     var el = $('cnLogoSt'); if(!el) return;
-    var mineOn = !!(window.FCLogo && window.FCLogo.on('lgG')), hasB = !!(window.FCBuilderLogo && window.FCBuilderLogo.has && window.FCBuilderLogo.has()), pj = projName();
-    el.innerHTML = '<strong>Logos neste vídeo:</strong> minha logo ' + (mineOn ? '<b>ligada</b>' : '<b>desligada</b> (marque “Mostrar a logo no vídeo” em “Minha logo na tela”)') +
+    var mineOff = !!(window.FCLogo && window.FCLogo.removed && window.FCLogo.removed()), mineOn = !!(window.FCLogo && window.FCLogo.on('lgG')), hasB = !!(window.FCBuilderLogo && window.FCBuilderLogo.has && window.FCBuilderLogo.has()), pj = projName();
+    el.innerHTML = '<strong>Logos neste vídeo:</strong> minha logo ' + (mineOn ? '<b>ligada</b>' : mineOff ? '<b>tirada</b> (use “Colocar logo” em “Minha logo (padrão)”)' : '<b>desligada</b> (marque “Mostrar a logo no vídeo” em “Minha logo (padrão)”)') +
       ' · construtora ' + (hasB ? '<b>logo enviada</b>' : '<b>sem logo</b> (envie em “Logo da construtora”)') + (pj ? ' · projeto “' + pj.replace(/</g, '&lt;') + '”' : '') +
       '. Posição, tamanho e opacidade ficam em “Dados do imóvel e faixa”.' +
       (function(){ var A = (window.__fcGetAudio && window.__fcGetAudio()) || {}, X = window.__fcExtraAudio || {}, ai = $('audioInput'), m = A.music || (ai && ai.files && ai.files[0]) || X.music, n = A.narr || X.narr;
