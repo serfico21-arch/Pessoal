@@ -283,7 +283,7 @@ ol.msg{padding-left:20px;line-height:1.5}
       </select>
     </div>
 
-    <div class="card">
+    <div class="card hide" id="cardConsBook">
       <h2>4. Logo da construtora</h2>
       <div class="row">
         <label class="btn sec" for="fCons" style="margin:0">Escolher logo</label>
@@ -299,13 +299,13 @@ ol.msg{padding-left:20px;line-height:1.5}
     </div>
 
     <div class="card">
-      <h2>5. Faixa do pé do quadro</h2>
-      <label class="chk"><input type="checkbox" id="bkFaixa" checked> Colocar a faixa (as 2 logos e o contato)</label>
+      <h2>4. Faixa do pé do quadro</h2>
+      <label class="chk"><input type="checkbox" id="bkFaixa" checked> Colocar a faixa (somente o contato)</label>
       <label for="bkTxt">Frase</label>
       <input class="campo" id="bkTxt" value="Fale comigo no zap" maxlength="40">
       <label for="bkNum">Número</label>
       <input class="campo" id="bkNum" value="11 99350-9109" maxlength="20" inputmode="tel">
-      <div class="msg">A faixa fica embaixo, fora da foto: a página do book é encaixada no espaço de cima, sem nada por cima dela. Cada logo liga e desliga sozinha (botões “Tirar” na etapa 4).</div>
+      <div class="msg">A faixa fica embaixo, fora da foto: a página do book é encaixada no espaço de cima, sem nada por cima dela. Ela leva só a frase e o número, sem logos.</div>
     </div>
   </div>
 
@@ -1009,34 +1009,23 @@ ol.msg{padding-left:20px;line-height:1.5}
   /* a sua logo oficial é fixa no book, mesmo que você troque a da outra aba */
   var logoOficial=new Image();logoOficial.src=LOGO_PADRAO;
 
-  /* faixa do pé: sua logo | fale comigo + número | logo da construtora */
+  /* faixa do pé: somente o contato (frase + número), centralizado */
   function desenharFaixa(x,w,h,fh){
     var s=w/1080,y=h-fh;
     x.save();
     x.fillStyle='#0b0b0b';x.fillRect(0,y,w,fh);
     var gl=x.createLinearGradient(0,0,w,0);gl.addColorStop(0,'#b88a2e');gl.addColorStop(.5,'#f1d27a');gl.addColorStop(1,'#b88a2e');
     x.fillStyle=gl;x.fillRect(0,y,w,6*s);
-    var area=fh-6*s,ld=area-28*s,lx=26*s,ly=y+6*s+(area-ld)/2;
-    var minha=minhaOff?null:((logoOficial.complete&&logoOficial.naturalWidth)?logoOficial:logoImg);
-    if(minha)x.drawImage(minha,lx,ly,ld,ld);
-    var right=w-26*s;
-    if(consImg&&!consOff){
-      var pd=14*s,mw=300*s-2*pd,mh=area-28*s-2*pd;
-      var k=Math.min(mw/consImg.naturalWidth,mh/consImg.naturalHeight),iw=consImg.naturalWidth*k,ih=consImg.naturalHeight*k;
-      var pw=iw+2*pd,ph=ih+2*pd,px=w-26*s-pw,py=y+6*s+(area-ph)/2;
-      x.fillStyle='#ffffff';caixa(x,px,py,pw,ph,18*s);x.fill();
-      x.drawImage(consImg,px+pd,py+pd,iw,ih);
-      right=px-24*s;
-    }
-    var tx=minha?lx+ld+26*s:lx,max=right-tx;
+    /* faixa só com o contato, centralizado (sem logos) */
+    var lx=26*s,tx=w/2,max=w-2*lx;
     var t1=($('bkTxt').value||'').trim().toUpperCase(),t2=($('bkNum').value||'').trim();
-    x.textBaseline='alphabetic';x.textAlign='left';
+    x.textBaseline='alphabetic';x.textAlign='center';
     function ajustar(txt,tam,peso,cor,base){
       var f=tam*s,fam=peso+' '+f+'px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif';x.font=fam;
       var m=x.measureText(txt).width;if(m>max){f=f*max/m;x.font=peso+' '+f+'px system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif'}
       x.fillStyle=cor;x.fillText(txt,tx,base);
     }
-    if(t1&&t2){ajustar(t1,36,'700','#ffffff',y+86*s);ajustar(t2,72,'800','#f1d27a',y+158*s)}
+    if(t1&&t2){ajustar(t1,42,'700','#ffffff',y+84*s);ajustar(t2,84,'800','#f1d27a',y+160*s)}
     else if(t1||t2){ajustar(t1||t2,66,'800','#f1d27a',y+fh/2+24*s)}
     x.restore();
   }
