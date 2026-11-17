@@ -337,7 +337,12 @@ body.arrastando{user-select:none;-webkit-user-select:none;cursor:grabbing}
 .ab-linha select{flex:0 1 150px;min-width:0;max-width:44%}
 .ab-linha button{width:34px;height:34px;flex:none;display:grid;place-items:center;border-radius:10px;border:1px solid var(--line);background:none;color:var(--texto-muted);cursor:pointer}
 #vista.edmode .item-link{pointer-events:none}
-.item-ed{display:flex;flex-direction:column;gap:4px;min-width:0}
+.item-ed{display:flex;flex-direction:column;gap:4px;min-width:0;border-radius:16px}
+.item-ed.arrastado{opacity:.35}
+.item-ed.drop-cima{box-shadow:0 -5px 0 var(--brand)}.item-ed.drop-baixo{box-shadow:0 5px 0 var(--brand)}
+.item-ed.drop-esq{box-shadow:-5px 0 0 var(--brand)}.item-ed.drop-dir{box-shadow:5px 0 0 var(--brand)}
+.cat-ed.drop-cat,.gvazio.drop-cat{outline:2px dashed var(--brand);outline-offset:3px}
+.item-ed .ib .grip{padding:0;width:34px;height:34px;justify-content:center}
 .item-ed .ib{display:flex;gap:6px;align-items:center;padding:0 2px}
 .item-ed .ib button{display:flex;align-items:center;gap:5px;flex:none;padding:7px 11px;border-radius:10px;border:1px solid var(--line);background:none;color:var(--tx);font:600 12.5px 'DM Sans',sans-serif;cursor:pointer}
 .item-ed .ib select{flex:1;min-width:0;font-size:12.5px;padding:7px 8px}
@@ -706,7 +711,7 @@ footer strong{font-family:'Sora',sans-serif;letter-spacing:.14em;color:var(--gol
 var GRUPOS = {
   corretor: [
     { id: "anuncios",   n: "Divulgação e Anúncios",            i: "ti-speakerphone",     c: "--am", s: "Painel, publicar nos grupos, redes sociais e vitrine" },
-    { id: "agentes",    n: "FCosta Corretor: Agentes",         i: "ti-robot",            c: "--vi", s: "Os 13 agentes: mensagens, follow-up, roteiros e listas" },
+    { id: "agentes",    n: "Atendimento FCosta: Agentes",         i: "ti-robot",            c: "--vi", s: "Os 17 agentes: atendimento, mensagens, follow-up, roteiros e listas" },
     { id: "criar",      n: "Criar Material de Divulgação",     i: "ti-photo-edit",       c: "--or", s: "Banner, texto, QR Code, vídeo, voz e foto editor" },
     { id: "clientes",   n: "Clientes e Visitas",               i: "ti-users",            c: "--sk", s: "Leads, visitas e contato com o cliente" },
     { id: "consulta",   n: "Consultas: Imóvel e Locatário",    i: "ti-file-search",      c: "--or", s: "Matrícula, mapa, IPTU, cartórios e análise do locatário" },
@@ -745,10 +750,10 @@ var FERRAMENTAS = [
   {m:"corretor", g:"anuncios", t:"Anunciar", s:"Meus sites, redes sociais e portais", i:"ti-speakerphone", h:"anunciar.html", k:"anunciar divulgar anúncio sites redes sociais instagram tiktok facebook youtube", d:1, b:"Novo"},
   {m:"corretor", g:"anuncios", t:"Painel de Divulgação", s:"Plano do dia, textos por rede, imóveis e grupos", i:"ti-speakerphone", h:"painel-divulgacao.html", k:"divulgação divulgar publicação publicar postagem posts redes sociais grupos facebook imóveis plano do dia texto", b:"Novo"},
   {m:"corretor", g:"anuncios", t:"Central de Tráfego Pago", s:"Calculadora, orçamento, textos de anúncio, leads e checklist", i:"ti-chart-line", h:"trafego.html", k:"tráfego pago trafego anúncios meta ads google ads calculadora cpl roas orçamento leads checklist instagram facebook", d:1, b:"Novo"},
-  {m:"corretor", g:"agentes", t:"FCosta Corretor", s:"Página principal dos agentes: mensagens, follow-up, roteiros e listas", i:"ti-robot", h:"fcosta-corretor.html", k:"fcosta corretor agentes prospecção whatsapp follow-up roteiro ligação linkedin e-mail lista limpar mailchimp voz narração ia divulgação mensagens", b:"Novo", d:1},
-  {m:"corretor", g:"agentes", t:"Bancada de Agentes", s:"Abrir direto a bancada e usar os agentes", i:"ti-layout-dashboard", h:"fcosta-corretor.html#bancada", k:"bancada agentes fcosta corretor usar abrir"},
-  {m:"corretor", g:"agentes", t:"Os 13 Agentes", s:"Ver a lista completa dos agentes", i:"ti-users-group", h:"fcosta-corretor.html#agentes", k:"13 agentes lista fcosta corretor"},
-  {m:"corretor", g:"agentes", t:"Como Funciona", s:"Passo a passo dos agentes", i:"ti-help-circle", h:"fcosta-corretor.html#como", k:"como funciona agentes fcosta corretor passo a passo ajuda"},
+  {m:"corretor", g:"agentes", t:"Atendimento FCosta", s:"Página principal dos agentes: atendimento a novos clientes, mensagens, follow-up, áudio no WhatsApp e listas", i:"ti-robot", h:"atendimento-fcosta.html", k:"atendimento fcosta corretor agentes novo cliente áudio weseller prospecção whatsapp follow-up roteiro ligação linkedin e-mail lista limpar mailchimp voz narração ia divulgação mensagens", b:"Novo", d:1},
+  {m:"corretor", g:"agentes", t:"Bancada de Agentes", s:"Abrir direto a bancada e usar os agentes", i:"ti-layout-dashboard", h:"atendimento-fcosta.html#bancada", k:"bancada agentes fcosta corretor usar abrir"},
+  {m:"corretor", g:"agentes", t:"Os 17 Agentes", s:"Ver a lista completa dos agentes", i:"ti-users-group", h:"atendimento-fcosta.html#agentes", k:"17 agentes lista atendimento fcosta corretor"},
+  {m:"corretor", g:"agentes", t:"Como Funciona", s:"Passo a passo dos agentes", i:"ti-help-circle", h:"atendimento-fcosta.html#como", k:"como funciona agentes fcosta corretor passo a passo ajuda"},
   {m:"corretor", g:"anuncios", t:"Publicador de Grupos", s:"Textos prontos, grupos por dia, clientes, limpeza e portfólio", i:"ti-brand-whatsapp", h:"publicador-fcosta.html", k:"publicador grupos whatsapp facebook publicar textos imóveis clientes limpeza dias da semana portfólio portfolio vitrine fotos enviar link", b:"Novo"},
   {m:"corretor", g:"criar", t:"Gerador de QR Code", s:"Para anúncios de imóveis", i:"ti-qrcode", h:"gerador-qrcode.html", k:"gerador qr code anúncio imóveis"},
   {m:"corretor", g:"criar", t:"Descrição de Imóvel", s:"Gerar texto de anúncio", i:"ti-file-text", h:"descricao-imovel.html", k:"descrição de imóvel gerar texto anúncio"},
@@ -1024,7 +1029,7 @@ var FERRAMENTAS = [
       '<span class="ic"><i class="ti ' + esc(it.i || 'ti-link') + '"></i></span>' +
       '<span class="tx"><b class="t">' + esc(it.t) + '</b><small>' + esc(it.s || '') + '</small></span>' +
       (it.b ? '<em class="tag">' + esc(it.b) + '</em>' : '') + '</a>' +
-      '<button type="button" class="como" data-como="' + esc(it.t) + '" data-ch="' + esc(it.h) + '" data-cs="' + esc(it.s || '') + '" aria-label="Como funciona: ' + esc(it.t) + '" title="Como funciona"><i class="ti ti-help-circle"></i></button>' +
+      '<button type="button" class="como" data-como="' + esc(it.t) + '" data-co="' + esc(/^x\d+$/.test(it._orig || '') || !it._orig ? it.t : it._orig.slice(it._orig.indexOf('|') + 1)) + '" data-ch="' + esc(it.h) + '" data-cs="' + esc(it.s || '') + '" aria-label="Como funciona: ' + esc(it.t) + '" title="Como funciona"><i class="ti ti-help-circle"></i></button>' +
       '<button type="button" class="fav' + (on ? ' on' : '') + '" data-fav="' + esc(chave(it)) + '" aria-pressed="' + on + '" aria-label="Favoritar ' + esc(it.t) + '"><i class="ti ti-star' + (on ? '-filled' : '') + '"></i></button></div>';
   }
 
@@ -1033,10 +1038,10 @@ var FERRAMENTAS = [
     "Anunciar": ["Reúne os seus sites, redes sociais e portais de anúncio num só lugar.", ["Abra a página.", "Escolha onde quer anunciar: site, rede social ou portal.", "Toque no endereço para abrir e fazer a publicação."], "Para um plano pronto do dia, use o Painel de Divulgação."],
     "Painel de Divulgação": ["Ajuda a divulgar um imóvel todo dia, sem esquecer nenhuma rede.", ["Escolha o imóvel que quer divulgar.", "Veja o texto pronto de cada rede (Instagram, Facebook, WhatsApp e outras) e ajuste se quiser.", "Toque para copiar e abrir a rede, cole o texto e publique.", "Volte e marque como publicado para saber o que já foi feito hoje."], "Instagram e Facebook têm duas contas cada. Troque de conta na rede antes de postar."],
     "Central de Tráfego Pago": ["Simula quanto rende o dinheiro investido em anúncios e organiza campanhas, textos e leads.", ["Abra a Calculadora e coloque verba, custo por lead e taxas.", "Veja lucro e ROAS estimados.", "Use Textos para gerar anúncios e Leads para acompanhar contatos."], "Imóvel tem ciclo longo: avalie em 3 a 6 meses."],
-    "FCosta Corretor": ["Página principal dos 13 agentes, que ajudam a falar com clientes e a acompanhar cada contato.", ["Abra a página e leia o resumo no começo.", "Toque em “Abrir bancada” para usar os agentes.", "Escolha o agente do que você precisa: lista, primeiro contato ou follow-up."], "Se for a primeira vez, veja antes o “Como funciona” da própria página."],
+    "Atendimento FCosta": ["Página principal dos 17 agentes, que ajudam a falar com clientes e a acompanhar cada contato.", ["Abra a página e leia o resumo no começo.", "Toque em “Abrir bancada” para usar os agentes.", "Escolha o agente do que você precisa: lista, primeiro contato ou follow-up."], "Se for a primeira vez, veja antes o “Como funciona” da própria página."],
     "Bancada de Agentes": ["Abre direto a mesa de trabalho dos agentes.", ["Escolha o agente.", "Preencha o que ele pedir (nome, telefone, imóvel).", "Copie o resultado e use no WhatsApp, e-mail ou ligação."]],
     "Os 13 Agentes": ["Mostra a lista completa dos agentes e para que serve cada um.", ["Leia o nome e a explicação de cada agente.", "Escolha o que combina com o seu momento: achar clientes, conversar ou acompanhar.", "Toque nele para usar."]],
-    "Como Funciona": ["Explica, passo a passo, como usar os agentes do FCosta Corretor.", ["Leia as etapas na ordem.", "Depois vá para a bancada e faça o primeiro teste com um contato."]],
+    "Como Funciona": ["Explica, passo a passo, como usar os agentes do Atendimento FCosta.", ["Leia as etapas na ordem.", "Depois vá para a bancada e faça o primeiro teste com um contato."]],
     "Publicador de Grupos": ["Organiza a divulgação nos grupos de WhatsApp: qual texto postar e em qual grupo, a cada dia.", ["Veja os grupos do dia.", "Escolha um texto pronto e copie.", "Abra o grupo, cole e envie.", "Marque o grupo como feito."], "Não poste o mesmo texto no mesmo dia em todos os grupos. Varie."],
     "Gerador de QR Code": ["Cria um QR Code que leva a pessoa direto ao anúncio ou ao seu WhatsApp.", ["Cole o endereço (link) do anúncio ou do seu contato.", "Toque para gerar o QR Code.", "Baixe a imagem e coloque na placa, no banner ou no panfleto."], "Teste o QR Code com a câmera do celular antes de imprimir."],
     "Descrição de Imóvel": ["Monta o texto de anúncio do imóvel para você.", ["Preencha os dados: tipo, bairro, quartos, metragem e preço.", "Toque para gerar o texto.", "Leia, ajuste o que quiser e copie para o anúncio."], "Confira sempre os números antes de publicar."],
@@ -1123,8 +1128,8 @@ var FERRAMENTAS = [
     "Simulado": ["Perguntas para treinar o conteúdo da palestra: Ministério e Família.", ["Responda cada pergunta.", "Veja o que acertou e errou.", "Estude o que errou e tente de novo."]]
   };
 
-  function comoHtml(t, h, sub) {
-    var c = COMO[t], ext = /^https?:\/\//i.test(h);
+  function comoHtml(t, h, sub, orig) {
+    var c = COMO[orig || t], ext = /^https?:\/\//i.test(h);
     var para = c ? c[0] : (sub || 'Ferramenta do seu painel.');
     var passos = c ? c[1] : ['Toque em “Abrir ferramenta”.', 'Preencha ou escolha o que a página pedir.', 'Confira o resultado antes de usar ou enviar.'];
     var dica = c && c[2] ? c[2] : '';
@@ -1143,7 +1148,7 @@ var FERRAMENTAS = [
     if (!b) return;
     e.preventDefault();
     var d = document.getElementById('dlg-como');
-    d.innerHTML = '<div class="sh">' + comoHtml(b.getAttribute('data-como'), b.getAttribute('data-ch') || '#', b.getAttribute('data-cs') || '') + '</div>';
+    d.innerHTML = '<div class="sh">' + comoHtml(b.getAttribute('data-como'), b.getAttribute('data-ch') || '#', b.getAttribute('data-cs') || '', b.getAttribute('data-co') || '') + '</div>';
     abrirDlg(d);
   });
 
@@ -1173,7 +1178,7 @@ var FERRAMENTAS = [
       return '<button type="button" class="mundo" style="--c:var(' + M.c + ')" data-go="' + m + '"><i class="ti ' + M.i + ' big"></i>' +
         '<span class="mn">' + M.n + '</span><span class="md">' + M.d + '</span>' +
         '<span class="mq">' + q + (q === 1 ? ' ferramenta' : ' ferramentas') + ' <i class="ti ti-arrow-right"></i></span></button>';
-    }).join('') + '</div><h2 class="sec">Ferramentas do painel</h2><div class="mundos mini">' + cardControle() + '<a class="mundo" style="--c:var(--em)" href="trafego.html"><i class="ti ti-chart-line big"></i><span class="mn">Central de Tráfego</span><span class="md">Calculadora de anúncios, textos, leads e checklist</span><span class="mq">Abrir <i class="ti ti-arrow-right"></i></span></a><a class="mundo" style="--c:var(--vi)" href="fcosta-corretor.html"><i class="ti ti-robot big"></i><span class="mn">FCosta Corretor</span><span class="md">13 agentes: mensagens, follow-up e roteiros</span><span class="mq">Abrir <i class="ti ti-arrow-right"></i></span></a><a class="mundo" style="--c:var(--ro)" href="construtoras.html"><i class="ti ti-building-factory-2 big"></i>' +
+    }).join('') + '</div><h2 class="sec">Ferramentas do painel</h2><div class="mundos mini">' + cardControle() + '<a class="mundo" style="--c:var(--em)" href="trafego.html"><i class="ti ti-chart-line big"></i><span class="mn">Central de Tráfego</span><span class="md">Calculadora de anúncios, textos, leads e checklist</span><span class="mq">Abrir <i class="ti ti-arrow-right"></i></span></a><a class="mundo" style="--c:var(--vi)" href="atendimento-fcosta.html"><i class="ti ti-robot big"></i><span class="mn">Atendimento FCosta</span><span class="md">17 agentes: atendimento, mensagens, follow-up e roteiros</span><span class="mq">Abrir <i class="ti ti-arrow-right"></i></span></a><a class="mundo" style="--c:var(--ro)" href="construtoras.html"><i class="ti ti-building-factory-2 big"></i>' +
       '<span class="mn">' + esc(nomeDock('construtoras')) + '</span><span class="md">Tabelões, empreendimentos e e-books de cada construtora</span>' +
       '<span class="mq">Abrir <i class="ti ti-arrow-right"></i></span></a>' + (function () {
       var n = favs.map(function (k) { return itens.filter(function (i) { return chave(i) === k; })[0]; }).filter(Boolean).length;
@@ -1257,7 +1262,7 @@ var FERRAMENTAS = [
       var M = MUNDOS[m], lista = itens.filter(function (i) { return i.m === m; });
       html += '<h2 class="sec">' + esc(M.n) + ' · ' + lista.length + '</h2>';
       gruposDoModo(m, itens).forEach(function (g) {
-        var l = lista.filter(function (i) { return i._g === g; }).sort(porNome);
+        var l = ordenarPorVoce(lista.filter(function (i) { return i._g === g; }).sort(porNome), g);
         if (g.oculta) return;
         if (l.length) html += gtitHtml(g, l.length) + '<div class="lista">' + l.map(item).join('') + '</div>';
       });
@@ -1309,13 +1314,25 @@ var FERRAMENTAS = [
       return gs.length ? '<optgroup label="' + esc(MUNDOS[m].n) + '">' + gs.map(function (g) { return '<option value="' + esc(g.mo + '|' + g.id) + '"' + (g === sel ? ' selected' : '') + '>' + esc(g.n) + '</option>'; }).join('') + '</optgroup>' : '';
     }).join('');
   }
+  function lerOrdem() { var o = lerStorage('painel_ordem', {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
+  function ordenarPorVoce(l, g) {
+    var arr = lerOrdem()[g.mo + '|' + g.id]; if (!Array.isArray(arr) || !arr.length) return l;
+    return l.slice().sort(function (a, b) {
+      var x = arr.indexOf(a._orig), y = arr.indexOf(b._orig);
+      if (x < 0 && y < 0) return 0; if (x < 0) return 1; if (y < 0) return -1; return x - y;
+    });
+  }
   function itemEd(it) {
-    return '<div class="item-ed">' + item(it) + '<div class="ib"><button type="button" data-ed="botao:' + esc(it._orig) + '"><i class="ti ti-pencil"></i>Editar</button>' +
+    var gk = it._g.mo + '|' + it._g.id;
+    return '<div class="item-ed" data-orig="' + esc(it._orig) + '" data-gk="' + esc(gk) + '">' + item(it) + '<div class="ib">' +
+      '<button type="button" class="grip" data-gripb="' + esc(it._orig) + '" style="--c:var(' + it._g.c + ')" title="Segure e arraste para mudar a ordem ou a categoria" aria-label="Arrastar o botão ' + esc(it.t) + '"><i class="ti ti-grip-vertical"></i></button>' +
+      '<button type="button" data-ed="nome-b:' + esc(it._orig) + '" title="Mudar o nome deste botão" aria-label="Renomear o botão ' + esc(it.t) + '"><i class="ti ti-letter-case"></i>Nome</button>' +
+      '<button type="button" data-ed="botao:' + esc(it._orig) + '"><i class="ti ti-pencil"></i>Editar</button>' +
       '<select data-edmv="' + esc(it._orig) + '" aria-label="Mudar este botão de categoria">' + opcoesCats(it._g) + '</select></div></div>';
   }
   function catEdHtml(g, n) {
     var k = g.mo + '|' + g.id;
-    return '<div class="cat-ed' + (g.oculta ? ' off' : '') + '" style="--c:var(' + g.c + ')">' +
+    return '<div class="cat-ed' + (g.oculta ? ' off' : '') + '" data-gk="' + esc(k) + '" style="--c:var(' + g.c + ')">' +
       '<button type="button" class="grip" data-grip="' + esc(k) + '" data-gname="' + esc(g.n) + '" title="Segure e arraste para outra aba" aria-label="Arrastar a categoria ' + esc(g.n) + ' para outra aba"><i class="ti ti-grip-vertical"></i></button>' +
       '<button type="button" class="cat-ic" data-ed="icone-g:' + esc(k) + '" title="Mudar o ícone" aria-label="Mudar o ícone"><i class="ti ' + esc(g.i) + '"></i></button>' +
       '<button type="button" class="cat-n" data-ed="nome-g:' + esc(k) + '" title="Mudar o nome">' + esc(g.n) + '<small>' + n + (n === 1 ? ' botão' : ' botões') + (g.oculta ? ' · escondida' : '') + ' · toque para renomear</small></button>' +
@@ -1330,7 +1347,8 @@ var FERRAMENTAS = [
       '<button type="button" class="btn-mini" data-ed="toggle"><i class="ti ti-' + (edicao ? 'check' : 'edit') + '"></i>' + (edicao ? 'Pronto' : 'Editar') + '</button></section>';
     var html = cab + (edicao ? '' : '<button type="button" class="busca-pill" data-open="busca" style="margin-bottom:6px"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button>');
     if (edicao) {
-      html += '<div class="ed-topo" style="--c:var(' + M.c + ')"><span class="et">Modo editar: <b>' + esc(M.n) + '</b>. Toque no que quiser mudar. Quando terminar, toque em <b>Pronto</b>.</span>' +
+      html += '<div class="ed-topo" style="--c:var(' + M.c + ')"><span class="et">Modo editar: <b>' + esc(M.n) + '</b>. Toque no que quiser mudar. Para mudar a ordem, segure o ⋮⋮ de um botão e arraste (pode soltar em outra categoria). Quando terminar, toque em <b>Pronto</b>.</span>' +
+        '<button type="button" data-ed="zerar-ordem"><i class="ti ti-sort-ascending-letters"></i>Ordem alfabética</button>' +
         '<button type="button" data-ed="nome-m:' + esc(m) + '"><i class="ti ti-pencil"></i>Nome da aba</button>' +
         '<button type="button" data-ed="icone-m:' + esc(m) + '"><i class="ti ' + esc(M.i) + '"></i>Ícone da aba</button>' +
         '<button type="button" data-ed="nova-cat:' + esc(m) + '"><i class="ti ti-plus"></i>Nova categoria</button>' +
@@ -1338,9 +1356,9 @@ var FERRAMENTAS = [
         (M.custom ? '<button type="button" class="danger" data-ed="excluir-m:' + esc(m) + '"><i class="ti ti-trash"></i>Excluir esta aba</button>' : '') + '</div>';
     }
     gs.forEach(function (g) {
-      var l = lista.filter(function (i) { return i._g === g; }).sort(porNome);
+      var l = ordenarPorVoce(lista.filter(function (i) { return i._g === g; }).sort(porNome), g);
       if (edicao) {
-        html += catEdHtml(g, l.length) + (l.length ? '<div class="lista">' + l.map(itemEd).join('') + '</div>' : '<p class="gvazio">Categoria vazia.</p>') +
+        html += catEdHtml(g, l.length) + (l.length ? '<div class="lista">' + l.map(itemEd).join('') + '</div>' : '<p class="gvazio" data-gk="' + esc(g.mo + '|' + g.id) + '">Categoria vazia. Arraste um botão para cá.</p>') +
           '<button type="button" class="btn-sec" style="margin-top:8px" data-ed="novobotao:' + esc(g.mo + '|' + g.id) + '"><i class="ti ti-plus"></i>Novo botão aqui</button>';
       } else if (!g.oculta && l.length) html += gtitHtml(g, l.length) + '<div class="lista">' + l.map(item).join('') + '</div>';
     });
@@ -1850,7 +1868,7 @@ var FERRAMENTAS = [
       '<a class="acao" style="--c:var(--or)" href="repositorios-github.html"><i class="ti ti-brand-github"></i>Repositórios</a>' +
       '<a class="acao" style="--c:var(--ro)" href="construtoras.html"><i class="ti ti-building-factory-2"></i>Construtoras</a>' +
       '<a class="acao" style="--c:var(--em)" href="trafego.html"><i class="ti ti-chart-line"></i>Tráfego</a>' +
-      '<a class="acao" style="--c:var(--vi)" href="fcosta-corretor.html"><i class="ti ti-robot"></i>FCosta</a>' +
+      '<a class="acao" style="--c:var(--vi)" href="atendimento-fcosta.html"><i class="ti ti-robot"></i>FCosta</a>' +
       '<button type="button" class="acao" style="--c:var(--brand)" data-ct="aba:sites"><i class="ti ti-world"></i>Sites no ar</button></div>';
     h += '<h2 class="sec">Botões por área</h2><div class="ct-card">' + ORDEM.map(function (m) {
       var n = todos.filter(function (i) { return i.m === m && !i.oculto; }).length, pc = ativos ? Math.round(n / ativos * 100) : 0;
@@ -2015,6 +2033,8 @@ var FERRAMENTAS = [
     else if (a === 'icone-m') pedirIcone(MUNDOS[k].i, function (ic) { var nm = lerNomes(); nm['mi:' + k] = ic; gravarStorage('painel_nomes', nm); abRefresh(); });
     else if (a === 'excluir-m') abExcluirMundo(k);
     else if (a === 'nome-d') { var nd = window.prompt('Novo nome desta aba do menu (deixe vazio para voltar ao original):', nomeDock(k)); if (nd === null) return; var po = DOCK_ABAS.filter(function (x) { return x[0] === k; })[0]; guardarNome('d:' + k, nd, po ? po[1] : k); abRefresh(); }
+    else if (a === 'nome-b') renomearBotao(k);
+    else if (a === 'zerar-ordem') { if (!confirm('Voltar todos os botões para a ordem alfabética?')) return; try { localStorage.removeItem('painel_ordem'); } catch (x) {} avisar('Ordem alfabética de volta.'); render(); }
     else if (a === 'botao') abrirEdicao(k);
     else if (a === 'novobotao') { g = grupoDe(k); if (!g) return; abrirEdicao(null); edM.value = g.m; edGrupos(); edG.value = g.n; }
   });
@@ -2054,6 +2074,64 @@ var FERRAMENTAS = [
     }
     function soltar(ev) { fim(ev, true); }
     function cancelar(ev) { fim(ev, false); }
+    window.addEventListener('pointermove', mover); window.addEventListener('pointerup', soltar); window.addEventListener('pointercancel', cancelar);
+    mover(e);
+  });
+
+  /* renomear qualquer botão com um toque (vale para os do painel e para os que você criou) */
+  function renomearBotao(orig) {
+    var at = achar(orig); if (!at) return;
+    var extra = ehExtra(orig), original = extra ? at.t : orig.slice(orig.indexOf('|') + 1);
+    var nv = window.prompt(extra ? 'Novo nome do botão:' : 'Novo nome do botão (deixe vazio para voltar a "' + original + '"):', at.t);
+    if (nv === null) return; nv = nv.trim();
+    if (!nv && extra) { avisar('O nome não pode ficar vazio.'); return; }
+    var novoT = nv || original, antiga = chave(at);
+    if (extra) { var ex = lerExtras(), n = parseInt(orig.slice(1), 10); if (!ex[n]) return; ex[n].t = novoT; gravarStorage('painel_extras', ex); }
+    else {
+      var aj = lerAjustes(), a = Object.assign({}, aj[orig] || {});
+      if (!nv || norm(nv) === norm(original)) delete a.t; else a.t = nv;
+      if (Object.keys(a).length) aj[orig] = a; else delete aj[orig];
+      gravarStorage('painel_ajustes', aj);
+    }
+    migrarFav(antiga, at.m + '|' + novoT);
+    avisar('Botão agora se chama "' + novoT + '".'); aposMudarBotoes();
+  }
+  /* arrastar um botão (mouse ou dedo): muda a ordem e, se soltar em outra categoria, muda de categoria */
+  document.addEventListener('pointerdown', function (e) {
+    var gp = e.target.closest('[data-gripb]'); if (!gp || (e.button != null && e.button > 0)) return;
+    e.preventDefault();
+    var orig = gp.getAttribute('data-gripb'), src = gp.closest('.item-ed'), at = achar(orig); if (!at || !src) return;
+    var alvo = null, catAlvo = null, antes = true, y = e.clientY, srcK = src.getAttribute('data-gk');
+    var ghost = document.createElement('div'); ghost.className = 'drag-ghost'; ghost.textContent = at.t; document.body.appendChild(ghost);
+    document.body.classList.add('arrastando'); src.classList.add('arrastado');
+    function limpar() { [].forEach.call(document.querySelectorAll('.drop-cima,.drop-baixo,.drop-esq,.drop-dir,.drop-cat'), function (x) { x.classList.remove('drop-cima', 'drop-baixo', 'drop-esq', 'drop-dir', 'drop-cat'); }); }
+    var rolar = setInterval(function () { if (y < 90) window.scrollBy(0, -14); else if (y > window.innerHeight - 90) window.scrollBy(0, 14); }, 30);
+    function mover(ev) {
+      y = ev.clientY; ghost.style.left = ev.clientX + 'px'; ghost.style.top = ev.clientY + 'px';
+      limpar(); alvo = null; catAlvo = null;
+      var el = document.elementFromPoint(ev.clientX, ev.clientY), t = el && el.closest('.item-ed');
+      if (t && t !== src) {
+        var r = t.getBoundingClientRect(), uma = r.width > t.parentNode.clientWidth * 0.7;
+        antes = uma ? ev.clientY < r.top + r.height / 2 : ev.clientX < r.left + r.width / 2; alvo = t;
+        t.classList.add(uma ? (antes ? 'drop-cima' : 'drop-baixo') : (antes ? 'drop-esq' : 'drop-dir'));
+      } else if (!t) {
+        var c = el && el.closest('.cat-ed,.gvazio'); if (c && c.getAttribute('data-gk')) { catAlvo = c; c.classList.add('drop-cat'); }
+      }
+    }
+    function fim(ok) {
+      window.removeEventListener('pointermove', mover); window.removeEventListener('pointerup', soltar); window.removeEventListener('pointercancel', cancelar);
+      clearInterval(rolar); if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+      document.body.classList.remove('arrastando'); src.classList.remove('arrastado');
+      var a = alvo, c = catAlvo, ant = antes; limpar(); if (!ok || (!a && !c)) return;
+      var destK = (a || c).getAttribute('data-gk');
+      var ordem = [].filter.call(document.querySelectorAll('.item-ed'), function (x) { return x.getAttribute('data-gk') === destK; })
+        .map(function (x) { return x.getAttribute('data-orig'); }).filter(function (o) { return o !== orig; });
+      if (a) { var p = ordem.indexOf(a.getAttribute('data-orig')); ordem.splice(ant ? p : p + 1, 0, orig); } else ordem.push(orig);
+      var o = lerOrdem(); Object.keys(o).forEach(function (k) { if (Array.isArray(o[k])) o[k] = o[k].filter(function (x) { return x !== orig; }); });
+      o[destK] = ordem; gravarStorage('painel_ordem', o);
+      if (destK !== srcK) moverBotao(orig, destK); else { avisar('Ordem salva.'); render(); }
+    }
+    function soltar() { fim(true); } function cancelar() { fim(false); }
     window.addEventListener('pointermove', mover); window.addEventListener('pointerup', soltar); window.addEventListener('pointercancel', cancelar);
     mover(e);
   });
