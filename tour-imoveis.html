@@ -5294,7 +5294,7 @@ window.FCLogo = (function(){
   <p>O vídeo vai para a aba Tour do imóvel no seu index.</p>
   <label>Imóvel</label>
   <select id="pubImovel"><option value="">Carregando imóveis…</option></select>
-  <div class="pubNovoRow"><button type="button" id="pubNovoBtn">➕ Criar novo imóvel</button><a id="pubPainel" href="index.html" target="_blank" rel="noopener">Abrir painel (cadastro completo)</a></div>
+  <div class="pubNovoRow"><button type="button" id="pubNovoBtn">➕ Novo imóvel (pelo Painel ADM)</button><a id="pubPainel" href="https://fcostacorretor.com/painel_adm.html" target="_blank" rel="noopener">Abrir Painel ADM (cadastro completo)</a></div>
   <div id="pubNovo">
     <label>Título</label><input type="text" id="pubNTitulo" maxlength="80" placeholder="Ex.: Apto 3 dorms · 92 m² · Vila Mariana">
     <label>Bairro</label><input type="text" id="pubNBairro" maxlength="60">
@@ -5302,8 +5302,8 @@ window.FCLogo = (function(){
     <label>Preço</label><input type="text" id="pubNPreco" maxlength="30" placeholder="Ex.: 850.000">
     <label>Tipo</label>
     <select id="pubNStatus"><option value="venda">Venda</option><option value="aluguel">Aluguel</option><option value="lancamento">Lançamento</option></select>
-    <button type="button" id="pubNCriar">Criar e selecionar</button>
-    <div class="pubNaviso">Cria o imóvel só com esses dados. Depois complete fotos, descrição e o resto pelo painel.</div>
+    <button type="button" id="pubNCriar">Enviar ao Painel ADM</button>
+    <div class="pubNaviso">Abre o Painel ADM do site com estes dados e o vídeo já anexado. Lá você completa fotos e descrição e toca em Salvar.</div>
   </div>
   <div id="pubRef"></div>
   <button type="button" id="pubDel">🗑 Apagar tour deste imóvel do site</button>
@@ -5462,34 +5462,42 @@ window.FCLogo = (function(){
       $('pubNTitulo').focus();
     }
   }
+  function subeCloud(blob,onp){
+    return new Promise(function(ok,fail){
+      var ext=/webm/i.test(blob.type||'')?'webm':'mp4', fd=new FormData();
+      fd.append('file',blob,'tour_'+Date.now()+'.'+ext); fd.append('upload_preset',CLOUD_PRESET);
+      var x=new XMLHttpRequest(); x.open('POST','https://api.cloudinary.com/v1_1/'+CLOUD_NAME+'/video/upload');
+      x.upload.onprogress=function(ev){ if(ev.lengthComputable) onp(Math.round(100*ev.loaded/ev.total)); };
+      x.onerror=function(){ fail(new Error('Cloudinary: sem conexão ou bloqueado pelo navegador.')); };
+      x.ontimeout=function(){ fail(new Error('Cloudinary: tempo esgotado.')); };
+      x.onload=function(){
+        var r={}; try{ r=JSON.parse(x.responseText); }catch(e){}
+        if(x.status>=200&&x.status<300&&r.secure_url) ok(r.secure_url.replace(/\.[a-z0-9]+$/i,'.mp4'));
+        else fail(new Error('Cloudinary: '+((r.error&&r.error.message)||('erro '+x.status))));
+      };
+      x.send(fd);
+    });
+  }
+  /* Imóvel novo NÃO é criado aqui: sobe o vídeo e abre o Painel ADM do site com tudo preenchido */
   async function criaNovo(){
     if(busy) return;
-    if(!init()){ msg('Firebase não carregou.','err'); return; }
     var titulo=$('pubNTitulo').value.trim();
     if(!titulo){ msg('Digite o título do novo imóvel.','err'); return; }
-    busy=true; $('pubNCriar').disabled=true; $('pubGo').disabled=true; msg('Criando imóvel…','');
+    var w=null; try{ w=window.open('about:blank','_blank'); }catch(e){}
+    busy=true; $('pubNCriar').disabled=true; $('pubGo').disabled=true; msg('Preparando vídeo…','');
     try{
-      var status=$('pubNStatus').value, pre=SG[status]||'FCV', max=0;
-      Object.keys(imoveis).forEach(function(k){
-        var i=imoveis[k]||{}; if((SG[i.status]||'FCV')===pre){ var n=parseInt(i.numeroCodigo,10); if(n>max) max=n; }
-      });
-      var agora=new Date().toISOString();
-      var sl=function(t){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-')},pg={venda:'comprar',aluguel:'alugar',lancamento:'lancamento'}[status]||status,cd=pre+String(max+1).padStart(3,'0'),bn=$('pubNBairro').value.trim();
-      var dados={titulo:titulo,bairro:bn,cidade:$('pubNCidade').value.trim(),preco:$('pubNPreco').value.trim(),status:status,numeroCodigo:max+1,codigo:cd,slug:('/'+[pg,sl(bn),cd.toLowerCase()].filter(Boolean).join('-')).slice(0,90),fotos:[],publicado:true,criado:agora,atualizado:agora};
-      var ref=db.ref('fcosta_imoveis').push();
-      await ref.set(dados);
-      imoveis[ref.key]=dados;
-      $('pubNovo').classList.remove('on');
-      await new Promise(function(r){ carregaImoveis(true); setTimeout(r,0); });
-      var sel=$('pubImovel'),tent=0;
-      (function pega(){
-        if(sel.querySelector('option[value="'+ref.key+'"]')){ sel.value=ref.key; mostraRef(); }
-        else if(tent++<20) setTimeout(pega,250);
-      })();
-      msg('✅ Imóvel criado ('+cod(Object.assign({id:ref.key},dados))+'). Agora escolha o vídeo e toque em Compartilhar. Complete o cadastro depois pelo painel.','ok');
+      var blob=await pegaBlob();
+      if(!blob||!blob.size){ throw new Error('Escolha o vídeo gerado (ou um arquivo) antes de enviar ao Painel ADM.'); }
+      var bar=$('pubBar'); bar.style.display='block'; bar.firstChild.style.width='0%';
+      var link=await subeCloud(blob,function(p){ bar.firstChild.style.width=p+'%'; msg('Enviando vídeo… '+p+'%',''); });
+      var q='?novo=1&video='+encodeURIComponent(link)+'&titulo='+encodeURIComponent(titulo)+'&bairro='+encodeURIComponent($('pubNBairro').value.trim())+'&cidade='+encodeURIComponent($('pubNCidade').value.trim())+'&preco='+encodeURIComponent($('pubNPreco').value.trim())+'&status='+encodeURIComponent($('pubNStatus').value);
+      var u=PAINEL+q;
+      if(w&&!w.closed){ w.location.href=u; } else { try{ window.open(u,'_blank'); }catch(e){} }
+      msg('✅ Vídeo enviado! O Painel ADM abriu com o vídeo anexado. PRÓXIMO PASSO: confira os dados lá e toque em Salvar.','ok');
     }catch(e){
+      try{ if(w&&!w.closed) w.close(); }catch(_){}
       var m=(e&&(e.code||e.message))||String(e);
-      msg(/permission|denied/i.test(m)?'O Firebase bloqueou a criação (regras do Realtime Database). Crie o imóvel pelo painel. Detalhe: '+m:'Erro: '+m,'err');
+      msg(/preset/i.test(m)?m+' — crie o preset "'+CLOUD_PRESET+'" (Unsigned) no Cloudinary.':'Erro: '+m,'err');
     }finally{ busy=false; $('pubNCriar').disabled=false; $('pubGo').disabled=false; }
   }
   $('pubNovoBtn').addEventListener('click',abreNovo);
@@ -6000,10 +6008,10 @@ if(document.readyState === 'loading') document.addEventListener('DOMContentLoade
     [].forEach.call(document.querySelectorAll('a[download]'),function(a){
       if(!eVideo(a) || a.dataset.fcTour) return;
       a.dataset.fcTour='1';
-      var b=document.createElement('button'); b.type='button'; b.className='fc-tour-btn'; b.textContent='🎬 Ver no site do Tour';
+      var b=document.createElement('button'); b.type='button'; b.className='fc-tour-btn'; b.textContent='🎬 Enviar ao imóvel (Painel ADM)';
       b.onclick=function(){ver(a,b);};
       a.insertAdjacentElement('afterend',b);
-      var h=document.createElement('div'); h.className='fc-tour-hint'; h.textContent='Publica este vídeo na aba Tour do seu site (fcostacorretor.com), em destaque e pronto para compartilhar.';
+      var h=document.createElement('div'); h.className='fc-tour-hint'; h.textContent='Envia o vídeo ao Painel ADM do site: imóvel novo abre com título, preço e vídeo preenchidos. Depois é só salvar.';
       b.insertAdjacentElement('afterend',h);
     });
   }
@@ -6059,35 +6067,29 @@ if(document.readyState === 'loading') document.addEventListener('DOMContentLoade
       x.send(fd);
     });
   }
+  function urlPainelNovo(link){
+    return FC_WEB+'painel_adm.html?novo=1&video='+encodeURIComponent(link)+'&titulo='+encodeURIComponent(val('propertyInfo'))+'&preco='+encodeURIComponent(val('propertyPrice'));
+  }
   function ver(a,b){
     var url=a.href;
     if(!url || url.indexOf('blob:')!==0){ alert('Gere o vídeo primeiro e depois toque aqui.'); return; }
-    var db=fbdb();
-    if(!db){ verLegado(a,b); return; }
     var w=null; try{ w=window.open('about:blank','_blank'); }catch(e){}
     var txt=b.textContent, nome=a.getAttribute('download')||'tour.mp4';
     function fim(){ b.disabled=false; b.textContent=txt; }
-    if(jaPub[url]){ go(w,FC_WEB+'#tour-'+jaPub[url]); return; }
+    if(jaPub[url]){ go(w,urlPainelNovo(jaPub[url])); return; }
     b.disabled=true; b.textContent='Preparando vídeo…';
     fetch(url).then(function(r){ return r.blob(); }).then(function(bl){
-      return medirVert(url).then(function(vert){
-        b.textContent='Enviando… 0%';
-        return subirCloud(bl,nome,function(p){ b.textContent='Enviando… '+p+'%'; }).then(function(link){
-          b.textContent='Publicando no site…';
-          var ref=db.ref('fcosta_tour').push();
-          return ref.set({titulo:val('propertyInfo')||'Tour do imóvel',preco:val('propertyPrice'),info:infoLinha(),url:link,vert:!!vert,ts:firebase.database.ServerValue.TIMESTAMP}).then(function(){ return ref.key; });
-        });
-      });
-    }).then(function(id){
-      jaPub[url]=id; go(w,FC_WEB+'#tour-'+id);
-      aviso('✅ Vídeo publicado na aba Tour do site! Aparece em destaque e já dá para compartilhar o link.');
-      b.textContent='✅ Publicado no site'; setTimeout(fim,2500);
+      b.textContent='Enviando… 0%';
+      return subirCloud(bl,nome,function(p){ b.textContent='Enviando… '+p+'%'; });
+    }).then(function(link){
+      jaPub[url]=link; go(w,urlPainelNovo(link));
+      aviso('✅ Vídeo enviado! O Painel ADM abriu com o vídeo anexado. PRÓXIMO PASSO: confira os dados e toque em Salvar. Se o imóvel já existe, use o botão "Compartilhar no site" e escolha o imóvel.');
+      b.textContent='✅ Enviado ao painel'; setTimeout(fim,2500);
     }).catch(function(e){
       try{ if(w&&!w.closed) w.close(); }catch(_){}
       var m=(e&&(e.code||e.message))||String(e);
-      if(/permission|denied/i.test(m)) m='O Firebase bloqueou a gravação. No console: Realtime Database → Regras → libere "fcosta_tour" (leitura para todos). Detalhe: '+m;
-      else if(/preset/i.test(m)) m+=' — crie o preset "fcosta_videos" (Unsigned) no Cloudinary.';
-      aviso('Não consegui publicar: '+m+' Enquanto isso, baixe o vídeo normalmente.');
+      if(/preset/i.test(m)) m+=' — crie o preset "fcosta_videos" (Unsigned) no Cloudinary.';
+      aviso('Não consegui enviar: '+m+' Enquanto isso, baixe o vídeo normalmente.');
       fim();
     });
   }
@@ -6109,7 +6111,7 @@ if(document.readyState === 'loading') document.addEventListener('DOMContentLoade
       if(!box){box=document.createElement('div');box.id='fcdl';box.setAttribute('role','status');document.body.appendChild(box);}
       box.innerHTML='<b>✅ Vídeo baixado!</b><div class="r"></div>';
       var r=box.querySelector('.r');
-      var v=document.createElement('button'); v.type='button'; v.className='p'; v.textContent='🎬 Ver no site do Tour';
+      var v=document.createElement('button'); v.type='button'; v.className='p'; v.textContent='🎬 Enviar ao imóvel (Painel ADM)';
       v.onclick=function(){ ver(a,v); box.classList.remove('on'); }; r.appendChild(v);
       var s=document.createElement('a'); s.href=FC_SITE; s.target='_blank'; s.rel='noopener'; s.textContent='🌐 Abrir meu site'; r.appendChild(s);
       var x=document.createElement('button'); x.type='button'; x.textContent='Fechar'; x.onclick=function(){box.classList.remove('on');}; r.appendChild(x);
