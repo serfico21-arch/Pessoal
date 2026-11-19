@@ -5320,7 +5320,7 @@ window.FCLogo = (function(){
   var CFG={apiKey:'AIzaSyBo3zQ-yUNJ2Zk9d6jkEpslF-bsrFcRu8I',authDomain:'fcosta2026-847c3.firebaseapp.com',databaseURL:'https://fcosta2026-847c3-default-rtdb.firebaseio.com',projectId:'fcosta2026-847c3',storageBucket:'fcosta2026-847c3.firebasestorage.app',messagingSenderId:'131225040087',appId:'1:131225040087:web:d468aad3d80bd26aaa2c92'};
   var $=function(id){return document.getElementById(id);};
   var CLOUD_NAME='dvtfxqw66', CLOUD_PRESET='fcosta_videos';
-  var db=null,st=null,imoveis={},busy=false;
+  var db=null,st=null,imoveis={},busy=false,PAINEL='https://fcostacorretor.com/painel_adm.html',PRE=new URLSearchParams(location.search).get('imovel')||'';
   var SG={venda:'FCV',aluguel:'FCA',lancamento:'FCL',panfleto:'FCP',vendido:'FCV'};
   function cod(i){ if(i.codigo) return i.codigo; var n=i.numeroCodigo?String(i.numeroCodigo).padStart(3,'0'):((String(i.id||'').slice(-3).replace(/[^0-9]/g,'').padStart(3,'0'))||'001'); return (SG[i.status]||'FCV')+n; }
   function mostraRef(){
@@ -5400,7 +5400,7 @@ window.FCLogo = (function(){
         o.textContent=c+' · '+(i.titulo||'Imóvel')+(i.bairro?' — '+i.bairro:'')+(i.tourMp4?'  (já tem tour)':'');
         sel.appendChild(o);
       });
-      if(antes) sel.value=antes;
+      if(antes) sel.value=antes; else if(PRE&&sel.querySelector('option[value="'+PRE+'"]')){sel.value=PRE;PRE='';}
       mostraRef();
     }).catch(function(e){ sel.innerHTML='<option value="">Erro ao listar imóveis</option>'; msg('Erro ao listar imóveis: '+(e&&e.message||e),'err'); });
   }
@@ -5442,7 +5442,7 @@ window.FCLogo = (function(){
       });
       msg('Gravando no imóvel…','');
       await db.ref('fcosta_imoveis/'+id).update({tourMp4:url});
-      msg('✅ Publicado! O tour já aparece na aba Tour do imóvel no index.','ok');
+      msg('✅ Publicado! O tour já está no cadastro do imóvel. ','ok');$('pubMsg').insertAdjacentHTML('beforeend','<a href="'+PAINEL+'?editar='+encodeURIComponent(id)+'" target="_blank" rel="noopener" style="color:#FFD400">Abrir no Painel ADM e publicar no site →</a>');
       if(imoveis[id]) imoveis[id].tourMp4=url;
       mostraRef(); carregaImoveis(true);
     }catch(e){
@@ -5474,7 +5474,8 @@ window.FCLogo = (function(){
         var i=imoveis[k]||{}; if((SG[i.status]||'FCV')===pre){ var n=parseInt(i.numeroCodigo,10); if(n>max) max=n; }
       });
       var agora=new Date().toISOString();
-      var dados={titulo:titulo,bairro:$('pubNBairro').value.trim(),cidade:$('pubNCidade').value.trim(),preco:$('pubNPreco').value.trim(),status:status,numeroCodigo:max+1,publicado:true,criado:agora,atualizado:agora};
+      var sl=function(t){return String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-')},pg={venda:'comprar',aluguel:'alugar',lancamento:'lancamento'}[status]||status,cd=pre+String(max+1).padStart(3,'0'),bn=$('pubNBairro').value.trim();
+      var dados={titulo:titulo,bairro:bn,cidade:$('pubNCidade').value.trim(),preco:$('pubNPreco').value.trim(),status:status,numeroCodigo:max+1,codigo:cd,slug:('/'+[pg,sl(bn),cd.toLowerCase()].filter(Boolean).join('-')).slice(0,90),fotos:[],publicado:true,criado:agora,atualizado:agora};
       var ref=db.ref('fcosta_imoveis').push();
       await ref.set(dados);
       imoveis[ref.key]=dados;
@@ -5494,6 +5495,7 @@ window.FCLogo = (function(){
   $('pubNovoBtn').addEventListener('click',abreNovo);
   $('pubNCriar').addEventListener('click',criaNovo);
   $('pubBtn').addEventListener('click',abrir);
+  if(PRE) setTimeout(abrir,900);
   $('pubX').addEventListener('click',fechar);
   $('pubGo').addEventListener('click',publicar);
   $('pubDel').addEventListener('click',apagar);
