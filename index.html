@@ -750,7 +750,7 @@ var FERRAMENTAS = [
   {m:"corretor", g:"criar", t:"Banner de Imóvel", s:"Anúncio com foto e preço", i:"ti-photo", h:"banner-imovel.html", k:"banner de imóvel anúncio foto preço stories"},
   {m:"corretor", g:"criar", t:"Contador de Caracteres", s:"Para textos de anúncio", i:"ti-text-size", h:"contador-caracteres.html", k:"contador de caracteres olx instagram"},
   {m:"corretor", g:"criar", t:"Texto em Voz", s:"Ouvir qualquer texto, com download", i:"ti-microphone", h:"texto-em-voz.html", k:"texto em voz narração áudio"},
-  {m:"corretor", g:"anuncios", t:"Central do Publicador", s:"Publicar imóveis, textos por rede, grupos, plano do dia e ferramentas de divulgação", i:"ti-send", h:"https://serfico21-arch.github.io/publicador_fcosta/", k:"publicações publicacao publicador central divulgação divulgar anunciar tráfego tour foto editor tv kit portfólio painel adm redes sociais grupos", d:1, b:"Novo"},
+  {m:"corretor", g:"anuncios", t:"Central do Publicador", s:"Publicar imóveis, textos por rede, grupos, plano do dia e ferramentas de divulgação", i:"ti-send", h:"divulgacao.html", k:"publicações publicacao publicador central divulgação divulgar anunciar tráfego tour foto editor tv kit portfólio painel adm redes sociais grupos", d:1, b:"Novo"},
   {m:"corretor", g:"anuncios", t:"Portfólio editor", s:"Cadastrar e editar imóveis e exportar a vitrine", i:"ti-settings", h:"portfolio-admin.html", k:"portfólio portfolio painel admin cadastrar editar imóveis exportar vitrine"},
   {m:"corretor", g:"avaliacao", t:"Precificação", s:"Estimativa por comparáveis", i:"ti-tag", h:"precificacao-imovel.html", k:"precificação estimativa comparáveis laudo avaliação"},
   {m:"corretor", g:"avaliacao", t:"Checklist de Vistoria", s:"Antes de fechar negócio", i:"ti-clipboard-check", h:"checklist-vistoria.html", k:"checklist de vistoria"},
@@ -1152,7 +1152,7 @@ var FERRAMENTAS = [
     var mobWa = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     html += '<a class="wa-btn" href="' + (mobWa ? 'whatsapp://send' : 'https://web.whatsapp.com') + '"' + (mobWa ? '' : ' target="_blank" rel="noopener"') + '><span class="wa-ic"><i class="ti ti-brand-whatsapp"></i></span><span class="wa-tx"><h2>WhatsApp Business</h2><p>Abrir conversas e clientes agora</p></span><span class="wa-go"><span>Abrir</span><i class="ti ti-arrow-right"></i></span></a>';
     var pdv = pubResumo();
-    html += '<a class="destaque" href="https://serfico21-arch.github.io/publicador_fcosta/" target="_blank" rel="noopener"><span class="dz-ic"><i class="ti ti-speakerphone"></i></span><span class="dz-tx"><span class="dz-tag">Em destaque</span><h2>Central do Publicador</h2>' +
+    html += '<a class="destaque" href="divulgacao.html"><span class="dz-ic"><i class="ti ti-speakerphone"></i></span><span class="dz-tx"><span class="dz-tag">Em destaque</span><h2>Central do Publicador</h2>' +
       '<p>Publicar imóveis, textos por rede, grupos e plano do dia' + (pdv ? ' · ' + pdv.hoje + (pdv.hoje === 1 ? ' divulgação hoje' : ' divulgações hoje') : '') + '</p></span>' +
       '<span class="dz-go"><span>Abrir</span><i class="ti ti-arrow-right"></i></span></a>';
     html += '<div class="acoes">' + acoes.map(function (a) {
@@ -1780,7 +1780,7 @@ var FERRAMENTAS = [
       bk = lerStorage('painel_ultimo_backup', 0), pub = pubResumo();
     function k(c, n, t, go) { return '<button type="button" class="kpi" style="--c:var(' + c + ')" data-ct="ir:' + go + '"><b>' + n + '</b><span>' + t + '</span></button>'; }
     return '<div class="ct-kpis faixa">' + k('--or', tar, tar === 1 ? 'pendência' : 'pendências', 'tarefas') +
-      (pub ? '<a class="kpi" style="--c:var(--em)" href="https://serfico21-arch.github.io/publicador_fcosta/" target="_blank" rel="noopener"><b>' + pub.hoje + '</b><span>divulgações hoje</span></a>' : '') +
+      (pub ? '<a class="kpi" style="--c:var(--em)" href="divulgacao.html"><b>' + pub.hoje + '</b><span>divulgações hoje</span></a>' : '') +
       k(!bk || diasDesde(bk) >= 7 ? '--am' : '--cy', bk ? (diasDesde(bk) === 0 ? 'hoje' : diasDesde(bk) + ' d') : 'nunca', 'último backup', 'backup') + '</div>';
   }
   /* nota de saúde do painel (Central de Controle) */
@@ -1828,7 +1828,7 @@ var FERRAMENTAS = [
       k('--vi', custom, 'criados ou editados', 'botoes') + 
       k('--or', tar, 'pendências abertas', 'tarefas') + k(ruins ? '--ro' : '--cy', ch ? ruins : '—', ch ? 'links com problema' : 'links não verificados', 'links', ruins > 0) +
       k(bkRuim ? '--am' : '--em', bkTxt, 'último backup', 'backup', bkRuim) +
-      (pub ? '<a class="kpi" style="--c:var(--brand)" href="https://serfico21-arch.github.io/publicador_fcosta/" target="_blank" rel="noopener"><b>' + pub.hoje + '</b><span>divulgações hoje</span></a>' : '') + '</div>';
+      (pub ? '<a class="kpi" style="--c:var(--brand)" href="divulgacao.html"><b>' + pub.hoje + '</b><span>divulgações hoje</span></a>' : '') + '</div>';
     var al = ctAlertas();
     h += '<h2 class="sec">Precisa de atenção</h2>' + (al.length ? '<div class="alertas" style="margin:0">' + al.map(function (x) {
       return '<button type="button" class="alerta" style="--c:var(' + x.c + ')" data-ct="aba:' + x.go + '"><i class="ti ' + x.i + '"></i><span><b>' + esc(x.t) + '</b><small>' + esc(x.s) + '</small></span><i class="ti ti-chevron-right"></i></button>';
@@ -1838,7 +1838,7 @@ var FERRAMENTAS = [
       '<button type="button" class="acao" style="--c:var(--em)" data-ct="bk-baixar"><i class="ti ti-download"></i>Fazer backup</button>' +
       '<a class="acao" style="--c:var(--sk)" href="followup-leads.html"><i class="ti ti-users"></i>Follow-up</a>' +
       '<button type="button" class="acao" style="--c:var(--vi)" data-ct="novo"><i class="ti ti-plus"></i>Novo botão</button>' +
-      '<a class="acao" style="--c:var(--am)" href="https://serfico21-arch.github.io/publicador_fcosta/" target="_blank" rel="noopener"><i class="ti ti-send"></i>Publicações</a>' +
+      '<a class="acao" style="--c:var(--am)" href="divulgacao.html"><i class="ti ti-send"></i>Publicações</a>' +
       '<a class="acao" style="--c:var(--or)" href="repositorios-github.html"><i class="ti ti-brand-github"></i>Repositórios</a>' +
       '<a class="acao" style="--c:var(--ro)" href="construtoras.html"><i class="ti ti-building-factory-2"></i>Construtoras</a>' +
       '<a class="acao" style="--c:var(--vi)" href="atendimento-fcosta.html"><i class="ti ti-robot"></i>FCosta</a>' +

@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Central de Publicação — Controle Geral FCosta</title>
+<style>
+:root{--bg:#f3f6fb;--c:#fff;--tx:#0b1424;--m:#5b6784;--l:rgba(11,20,36,.16);--v:#c8182a;--ok:#0a7d3b;--er:#b42318;--am:#b45309}
+@media(prefers-color-scheme:dark){:root{--bg:#070d18;--c:#0f1729;--tx:#eaf0ff;--m:#93a0bd;--l:rgba(148,163,184,.28);--ok:#4ade80;--er:#f87171;--am:#fbbf24}}
+*{box-sizing:border-box;margin:0}html,body{height:100%}body{font:17px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--tx);display:flex;flex-direction:column}
+header{padding:10px 12px;background:var(--c);border-bottom:1px solid var(--l)}
+.top{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.top h1{font-size:18px;flex:1 1 200px}
+.b{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--l);background:var(--bg);color:var(--tx);font:700 15px system-ui,sans-serif;text-decoration:none;cursor:pointer}
+.b.p{background:var(--v);border-color:var(--v);color:#fff}
+:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
+.st{display:flex;gap:6px 14px;flex-wrap:wrap;margin-top:8px;font-size:14px;color:var(--m)}
+.st b{font-weight:700}.ok{color:var(--ok)}.er{color:var(--er)}.am{color:var(--am)}
+#aviso{display:none;margin:12px;padding:14px;border:1px solid var(--er);border-radius:12px;background:var(--c)}
+iframe{flex:1;width:100%;border:0;background:var(--bg);min-height:0}
+</style></head><body>
+<header>
+ <div class="top">
+  <h1>📣 Central de Publicação</h1>
+  <a class="b" href="index.html">← Controle Geral</a>
+  <button class="b p" id="sy" type="button">🔄 Sincronizar com o site</button>
+ </div>
+ <div class="top" style="margin-top:8px">
+  <a class="b" id="lpa" href="https://fcostacorretor.com/painel_adm" target="_blank" rel="noopener">🏠 Painel ADM (cadastrar imóveis)</a>
+  <a class="b" id="lce" href="https://serfico21-arch.github.io/publicador_fcosta/" target="_blank" rel="noopener">📋 Central do Publicador</a>
+  <a class="b" id="lfs" href="https://serfico21-arch.github.io/publicador_fcosta/publicacao.html" target="_blank" rel="noopener">⛶ Tela cheia</a>
+ </div>
+ <div class="st" role="status" aria-live="polite">
+  <span>Painel ADM / Firebase: <b id="s1" class="am">verificando…</b></span>
+  <span>Publicação: <b id="s2" class="am">verificando…</b></span>
+  <span id="s3"></span>
+ </div>
+</header>
+<div id="aviso"></div>
+<iframe id="f" title="Painel de Publicação" allow="clipboard-write; clipboard-read" referrerpolicy="no-referrer-when-downgrade"></iframe>
+<script>
+(function(){'use strict';
+/* ── Os 3 repositórios ──────────────────────────────────────────────
+   Pessoal (este arquivo)  →  publicador_fcosta (publicacao.html)  →  Firebase do Painel ADM (fcostacorrigido) */
+var PUB='https://serfico21-arch.github.io/publicador_fcosta/publicacao.html',
+    DB='https://fcosta2026-847c3-default-rtdb.firebaseio.com',
+    $=function(i){return document.getElementById(i)};
+function set(id,t,c){var e=$(id);e.textContent=t;e.className=c||''}
+function aviso(h){var a=$('aviso');a.innerHTML=h;a.style.display='block'}
+
+/* 1) carrega o publicacao.html do repositório publicador dentro desta aba */
+var f=$('f');f.src=PUB;
+var perdeu=setTimeout(function(){if(!f.dataset.ok)set('s2','demorando para abrir','am')},8000);
+f.onload=function(){f.dataset.ok=1;clearTimeout(perdeu);set('s2','aberta','ok');leitura()};
+
+/* 2) confere se o arquivo existe no publicador (evita tela em branco) */
+fetch(PUB,{method:'HEAD',cache:'no-store'}).then(function(r){
+ if(!r.ok){set('s2','arquivo não encontrado','er');f.style.display='none';
+  aviso('<b>O arquivo publicacao.html não está no repositório publicador_fcosta.</b><br>Suba o <code>publicacao.html</code> na raiz de <b>publicador_fcosta</b> e recarregue esta página.')}
+},function(){/* sem rede: o iframe mostra o erro do navegador */});
+
+/* 3) confere a conexão com os imóveis cadastrados no Painel ADM do site */
+fetch(DB+'/fcosta_imoveis.json?shallow=true',{cache:'no-store'}).then(function(r){
+ if(r.status===401||r.status===403)throw 'perm';if(!r.ok)throw 0;return r.json()}).then(function(d){
+ var n=Object.keys(d||{}).length;set('s1',n+' imóvel(is) no cadastro do site','ok')
+},function(e){
+ set('s1',e==='perm'?'precisa entrar na Central (Acesso total)':'sem conexão agora',e==='perm'?'am':'er')});
+
+/* 4) lê de dentro da publicação quantos imóveis ela já trouxe (mesmo endereço github.io → leitura permitida) */
+function leitura(){try{var w=f.contentWindow,m=w.syncMsg;if(m)$('s3').textContent=m.replace(/^[^\wÀ-ú]+/,'')}catch(e){}}
+setInterval(leitura,4000);
+
+/* 5) botão sincronizar: manda a publicação buscar de novo no Painel ADM */
+$('sy').onclick=function(){
+ var b=this,o=b.textContent;b.disabled=true;b.textContent='Buscando…';
+ function fim(){b.disabled=false;b.textContent=o;leitura()}
+ try{f.contentWindow.sincronizar(true,function(ok,m){$('s3').textContent=m.replace(/^[^\wÀ-ú]+/,'');fim()});setTimeout(fim,12000)}
+ catch(e){f.src=PUB;setTimeout(fim,1500)}
+};
+})();
+</script></body></html>
