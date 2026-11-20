@@ -44,10 +44,36 @@ textarea.notes{width:100%;min-height:260px;margin:12px 0;border:1px solid var(--
 .cover{background:#fff;color:#222;border:2px solid var(--or);margin:0;page-break-after:always;padding:80px 20px}.cover .tag{margin:-80px -20px 50px}.cover em{color:var(--ord)}.cm{color:#555}
 .chapter{background:var(--sand);color:#222;border:1px solid var(--or);page-break-before:always;margin-top:0}.chapter .sub{color:#555}.tip.conceito{background:#eee;color:#222}.tip.conceito>b{color:var(--ord)}.back{background:#fff;color:#222;border:1px solid var(--or);page-break-before:always}.back small{color:#555}
 th{background:#f3d5c7;color:#222}.tip,.prompt,blockquote,.msg,.answer,tr{page-break-inside:avoid}h2,h3{page-break-after:avoid}textarea.notes{min-height:230px}.tw{overflow:visible}table{min-width:0}}
+
+/* ── LUPA / BUSCA NA APOSTILA ── */
+#lupa{position:fixed;right:16px;top:14px;z-index:9;width:42px;height:42px;border:0;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 10px #0003}
+#lupa:hover{background:var(--ord)}#lupa svg,#side .tools button svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+#side .tools button+button{margin-left:6px}#side .tools button svg{width:14px;height:14px;vertical-align:-2px;margin-right:4px}
+#sb{position:fixed;right:16px;top:64px;z-index:20;width:min(480px,calc(100vw - 24px));background:var(--bg);color:var(--fg);border:1px solid var(--or);border-radius:14px;box-shadow:0 10px 40px #0005;padding:10px;display:none}
+#sb.open{display:block}
+#sb .row{display:flex;gap:6px;align-items:center}
+#sb input{flex:1;min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:16px system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+#sb input:focus{outline:2px solid var(--or);border-color:var(--or)}
+#sb .cnt{font:600 12px ui-monospace,monospace;color:var(--mut);min-width:54px;text-align:center}
+#sb .bt{border:1px solid var(--line);background:var(--sand);color:var(--fg);border-radius:8px;width:34px;height:36px;font:700 15px sans-serif;cursor:pointer;flex:none}
+#sb .bt:hover{border-color:var(--or);color:var(--ord)}
+#sb ol{list-style:none;margin:8px 0 0;padding:0;max-height:min(46vh,340px);overflow:auto;display:none}
+#sb.lst ol{display:block}
+#sb li{margin:0;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:14px;line-height:1.4;border-bottom:1px solid var(--line)}
+#sb li:hover,#sb li.cur{background:var(--orl)}
+#sb li small{display:block;font:700 11px ui-monospace,monospace;color:var(--ord);letter-spacing:.03em;margin-bottom:1px}
+#sb li b{background:#ffe066;color:#222;border-radius:3px;padding:0 2px}
+#sb .vz{padding:10px 4px 2px;font-size:14px;color:var(--mut)}
+mark.hit{background:#ffe066;color:#222;border-radius:3px;padding:0 1px}
+mark.hit.cur{background:var(--or);color:#fff;box-shadow:0 0 0 3px #e8734a55}
+@media (max-width:900px){#lupa{right:98px;top:12px;width:38px;height:38px}#sb{right:12px;top:58px}}
+@media print{#lupa,#sb{display:none!important}mark.hit,mark.hit.cur{background:none!important;color:inherit!important;box-shadow:none!important}}
 </style></head><body>
+<button id="lupa" type="button" aria-label="Buscar na apostila" title="Buscar na apostila (atalho: /)"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg></button>
+<div id="sb" role="search" aria-label="Buscar na apostila"><div class="row"><input id="sbq" type="search" placeholder="Buscar assunto (ex.: token, skill, prompt…)" autocomplete="off" aria-label="Digite o assunto"><span class="cnt" id="sbc" aria-live="polite"></span><button class="bt" id="sbp" type="button" aria-label="Resultado anterior" title="Anterior (Shift+Enter)">&#8593;</button><button class="bt" id="sbn" type="button" aria-label="Próximo resultado" title="Próximo (Enter)">&#8595;</button><button class="bt" id="sbx" type="button" aria-label="Fechar busca" title="Fechar (Esc)">&#10005;</button></div><ol id="sbl"></ol></div>
 <button id="menuBtn" class="menu-btn" type="button" aria-label="Abrir sumário">Sumário</button>
 <nav id="side"><div class="brand"><span>&gt; IMERSÃO_</span><b>Claude na Prática</b></div>
-<div class="tools"><button type="button" onclick="window.print()">Imprimir</button></div><a class="n0" href="#c1">Como usar esta apostila</a><a class="n2" href="#s2">O mapa do curso</a><a class="n2" href="#s3">Os links das aulas gravadas</a><a class="n2" href="#s4">De onde vem o conteúdo (leia com atenção)</a><a class="n2" href="#s5">Como estudar com esta apostila</a><a class="n0" href="#c6">Fundamentos: IA do zero</a><a class="n2" href="#s7">1.1  O que é inteligência artificial</a><a class="n2" href="#s8">1.2  O que é o Claude</a><a class="n2" href="#s9">1.3  O que é um prompt</a><a class="n2" href="#s10">1.4  O que é token</a><a class="n2" href="#s11">1.5  Planos: grátis ou pago?</a><a class="n2" href="#s12">1.6  As três camadas do Claude</a><a class="n2" href="#s13">1.7  Instalar o Claude no computador</a><a class="n2" href="#s14">1.8  Cowork e Claude Code: qual a diferença?</a><a class="n2" href="#s15">1.9  Permissão: você está no controle</a><a class="n2" href="#s16">1.10  Arquivos .md, skills e CLAUDE.md</a><a class="n2" href="#s17">1.11  Boas práticas e cuidados</a><a class="n0" href="#c18">Os recursos do Claude no navegador</a><a class="n2" href="#s19">O que foi visto (revisão feita na Aula 2)</a><a class="n2" href="#s20">Os 4 projetos de renda extra (visão geral)</a><a class="n1" href="#c21">Anotações da Aula 1</a><a class="n0" href="#c22">Do Cowork ao Claude Code</a><a class="n2" href="#s23">Parte 1  ·  Claude Cowork</a><a class="n2" href="#s24">Exemplo 2: controle de custos de uma obra</a><a class="n2" href="#s25">Parte 2  ·  Claude Code</a><a class="n2" href="#s26">Parte 3  ·  O que mais é possível</a><a class="n2" href="#s27">Perguntas frequentes feitas ao vivo</a><a class="n1" href="#c28">Anotações da Aula 2</a><a class="n0" href="#c29">Do Excel ao sistema em 10 prompts</a><a class="n2" href="#s30">O método: 4 atos</a><a class="n2" href="#s31">Antes de começar</a><a class="n1" href="#c32">Entender</a><a class="n2" href="#s33">Passo 1  ·  Ler a base</a><a class="n1" href="#c34">Construir</a><a class="n2" href="#s35">Passo 2  ·  Visão inicial</a><a class="n2" href="#s36">Passo 3  ·  Navegação e detalhes</a><a class="n2" href="#s37">Passo 4  ·  Ação</a><a class="n1" href="#c38">Descobrir e decidir</a><a class="n2" href="#s39">Passo 5  ·  Investigar a causa</a><a class="n2" href="#s40">Passo 6  ·  Transformar em análise</a><a class="n2" href="#s41">Passo 7  ·  E se?</a><a class="n2" href="#s42">Passo 8  ·  Visão do gestor e regras</a><a class="n1" href="#c43">Profissionalizar</a><a class="n2" href="#s44">Passo 9  ·  Controle de acesso</a><a class="n2" href="#s45">Passo 10  ·  Identidade visual</a><a class="n2" href="#s46">Depois do passo 10: a versão completa</a><a class="n1" href="#c47">Anotações da Aula 3</a><a class="n0" href="#c48">3 passos para renda extra com IA</a><a class="n2" href="#s49">Toda área tem um problema que você resolve com o Claude</a><a class="n2" href="#s50">Passo 1  ·  O que vender?</a><a class="n2" href="#s51">Passo 2  ·  Para quem vender?</a><a class="n2" href="#s52">Passo 3  ·  Quanto cobrar?</a><a class="n2" href="#s53">3 formas de cobrar pelos seus projetos</a><a class="n2" href="#s54">Perguntas e respostas da Aula 4</a><a class="n1" href="#c55">Anotações da Aula 4</a><a class="n0" href="#c56">Materiais de apoio e referências</a><a class="n2" href="#s57">A.  Arquivos usados nas aulas</a><a class="n2" href="#s58">B.  Glossário</a><a class="n2" href="#s59">C.  Checklist de segurança</a><a class="n2" href="#s60">D.  Lista dos materiais de apoio</a></nav>
+<div class="tools"><button type="button" onclick="window.print()">Imprimir</button><button type="button" id="sideBusca"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg>Buscar</button></div><a class="n0" href="#c1">Como usar esta apostila</a><a class="n2" href="#s2">O mapa do curso</a><a class="n2" href="#s3">Os links das aulas gravadas</a><a class="n2" href="#s4">De onde vem o conteúdo (leia com atenção)</a><a class="n2" href="#s5">Como estudar com esta apostila</a><a class="n0" href="#c6">Fundamentos: IA do zero</a><a class="n2" href="#s7">1.1  O que é inteligência artificial</a><a class="n2" href="#s8">1.2  O que é o Claude</a><a class="n2" href="#s9">1.3  O que é um prompt</a><a class="n2" href="#s10">1.4  O que é token</a><a class="n2" href="#s11">1.5  Planos: grátis ou pago?</a><a class="n2" href="#s12">1.6  As três camadas do Claude</a><a class="n2" href="#s13">1.7  Instalar o Claude no computador</a><a class="n2" href="#s14">1.8  Cowork e Claude Code: qual a diferença?</a><a class="n2" href="#s15">1.9  Permissão: você está no controle</a><a class="n2" href="#s16">1.10  Arquivos .md, skills e CLAUDE.md</a><a class="n2" href="#s17">1.11  Boas práticas e cuidados</a><a class="n0" href="#c18">Os recursos do Claude no navegador</a><a class="n2" href="#s19">O que foi visto (revisão feita na Aula 2)</a><a class="n2" href="#s20">Os 4 projetos de renda extra (visão geral)</a><a class="n1" href="#c21">Anotações da Aula 1</a><a class="n0" href="#c22">Do Cowork ao Claude Code</a><a class="n2" href="#s23">Parte 1  ·  Claude Cowork</a><a class="n2" href="#s24">Exemplo 2: controle de custos de uma obra</a><a class="n2" href="#s25">Parte 2  ·  Claude Code</a><a class="n2" href="#s26">Parte 3  ·  O que mais é possível</a><a class="n2" href="#s27">Perguntas frequentes feitas ao vivo</a><a class="n1" href="#c28">Anotações da Aula 2</a><a class="n0" href="#c29">Do Excel ao sistema em 10 prompts</a><a class="n2" href="#s30">O método: 4 atos</a><a class="n2" href="#s31">Antes de começar</a><a class="n1" href="#c32">Entender</a><a class="n2" href="#s33">Passo 1  ·  Ler a base</a><a class="n1" href="#c34">Construir</a><a class="n2" href="#s35">Passo 2  ·  Visão inicial</a><a class="n2" href="#s36">Passo 3  ·  Navegação e detalhes</a><a class="n2" href="#s37">Passo 4  ·  Ação</a><a class="n1" href="#c38">Descobrir e decidir</a><a class="n2" href="#s39">Passo 5  ·  Investigar a causa</a><a class="n2" href="#s40">Passo 6  ·  Transformar em análise</a><a class="n2" href="#s41">Passo 7  ·  E se?</a><a class="n2" href="#s42">Passo 8  ·  Visão do gestor e regras</a><a class="n1" href="#c43">Profissionalizar</a><a class="n2" href="#s44">Passo 9  ·  Controle de acesso</a><a class="n2" href="#s45">Passo 10  ·  Identidade visual</a><a class="n2" href="#s46">Depois do passo 10: a versão completa</a><a class="n1" href="#c47">Anotações da Aula 3</a><a class="n0" href="#c48">3 passos para renda extra com IA</a><a class="n2" href="#s49">Toda área tem um problema que você resolve com o Claude</a><a class="n2" href="#s50">Passo 1  ·  O que vender?</a><a class="n2" href="#s51">Passo 2  ·  Para quem vender?</a><a class="n2" href="#s52">Passo 3  ·  Quanto cobrar?</a><a class="n2" href="#s53">3 formas de cobrar pelos seus projetos</a><a class="n2" href="#s54">Perguntas e respostas da Aula 4</a><a class="n1" href="#c55">Anotações da Aula 4</a><a class="n0" href="#c56">Materiais de apoio e referências</a><a class="n2" href="#s57">A.  Arquivos usados nas aulas</a><a class="n2" href="#s58">B.  Glossário</a><a class="n2" href="#s59">C.  Checklist de segurança</a><a class="n2" href="#s60">D.  Lista dos materiais de apoio</a></nav>
 <main>
 <header class="cover"><div class="tag">APOSTILA DE ESTUDO | IMERSÃO DE 4 AULAS</div><p class="im">&gt; I M E R S Ã O _</p>
 <h1>Claude<br><em>na Prática</em></h1><p class="cs">Guia completo para quem está começando do zero com Inteligência Artificial</p>
@@ -519,4 +545,96 @@ side.addEventListener('click',function(e){if(e.target.tagName==='A')side.classLi
 var links=[].slice.call(side.querySelectorAll('a'));var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a});
 if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(l){l.classList.remove('on')});var a=map[e.target.id];if(a){a.classList.add('on');a.scrollIntoView({block:'nearest'})}}})},{rootMargin:'0px 0px -75% 0px'});
 Object.keys(map).forEach(function(id){var el=document.getElementById(id);if(el)io.observe(el)})}
-</script></body></html>
+</script>
+<script>
+(function(){
+"use strict";
+var main=document.querySelector('main'),box=document.getElementById('sb'),inp=document.getElementById('sbq'),
+cnt=document.getElementById('sbc'),lst=document.getElementById('sbl'),
+btnL=document.getElementById('lupa'),btnS=document.getElementById('sideBusca');
+var hits=[],cur=-1,timer=null,MAX_LISTA=120;
+function esc(t){return String(t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+/* normaliza sem acento e sem diferenciar maiúsculas, mantendo o mesmo tamanho do texto */
+function nrm(t){var o='';for(var i=0;i<t.length;i++){var c=t.charAt(i),n=c.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();o+=n.length===1?n:c.toLowerCase()}return o}
+function limpar(){
+  [].forEach.call(main.querySelectorAll('mark.hit'),function(m){var p=m.parentNode;p.replaceChild(document.createTextNode(m.textContent),m);p.normalize()});
+  hits=[];cur=-1;
+}
+function titulos(){return [].slice.call(main.querySelectorAll('h1,h2,h3'))}
+function secaoDe(el,ts){
+  var r='';for(var i=0;i<ts.length;i++){
+    if(ts[i].compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING)r=ts[i].textContent;else break}
+  return r||'Início';
+}
+function buscar(q){
+  limpar();lst.innerHTML='';
+  var raw=q.trim(),nq=nrm(raw);
+  if(nq.length<2){cnt.textContent='';box.classList.remove('lst');if(raw.length)lst.innerHTML='';return}
+  var w=document.createTreeWalker(main,NodeFilter.SHOW_TEXT,{acceptNode:function(n){
+    var p=n.parentNode;if(!n.nodeValue.trim())return NodeFilter.FILTER_REJECT;
+    if(p.closest('script,style,textarea,button,mark'))return NodeFilter.FILTER_REJECT;
+    return NodeFilter.FILTER_ACCEPT}});
+  var nos=[],n;while(n=w.nextNode())nos.push(n);
+  nos.forEach(function(no){
+    var t=no.nodeValue,nt=nrm(t),pos=[],i=nt.indexOf(nq);
+    while(i>-1){pos.push(i);i=nt.indexOf(nq,i+nq.length)}
+    if(!pos.length)return;
+    var frag=document.createDocumentFragment(),ult=0;
+    pos.forEach(function(p){
+      if(p>ult)frag.appendChild(document.createTextNode(t.slice(ult,p)));
+      var m=document.createElement('mark');m.className='hit';m.textContent=t.slice(p,p+nq.length);
+      m._ctx=[t.slice(Math.max(0,p-45),p),t.slice(p,p+nq.length),t.slice(p+nq.length,p+nq.length+70),Math.max(0,p-45)>0,p+nq.length+70<t.length];
+      frag.appendChild(m);hits.push(m);ult=p+nq.length});
+    if(ult<t.length)frag.appendChild(document.createTextNode(t.slice(ult)));
+    no.parentNode.replaceChild(frag,no);
+  });
+  if(!hits.length){cnt.textContent='0';lst.innerHTML='<li class="vz" style="cursor:default">Nenhum resultado para “'+esc(raw)+'”. Tente outra palavra.</li>';box.classList.add('lst');return}
+  var ts=titulos(),html='';
+  hits.slice(0,MAX_LISTA).forEach(function(m,k){
+    var c=m._ctx;
+    html+='<li data-k="'+k+'"><small>'+esc(secaoDe(m,ts))+'</small>'+(c[3]?'…':'')+esc(c[0])+'<b>'+esc(c[1])+'</b>'+esc(c[2])+(c[4]?'…':'')+'</li>';
+  });
+  if(hits.length>MAX_LISTA)html+='<li class="vz" style="cursor:default">Mostrando os '+MAX_LISTA+' primeiros. Use as setas ↑ ↓ para ver todos.</li>';
+  lst.innerHTML=html;box.classList.add('lst');
+  ir(0,false);
+}
+function ir(k,rolar){
+  if(!hits.length)return;
+  if(cur>-1&&hits[cur])hits[cur].classList.remove('cur');
+  cur=(k+hits.length)%hits.length;
+  var m=hits[cur];m.classList.add('cur');
+  cnt.textContent=(cur+1)+' / '+hits.length;
+  [].forEach.call(lst.querySelectorAll('li.cur'),function(l){l.classList.remove('cur')});
+  var li=lst.querySelector('li[data-k="'+cur+'"]');if(li){li.classList.add('cur');li.scrollIntoView({block:'nearest'})}
+  if(rolar!==false)m.scrollIntoView({behavior:'smooth',block:'center',inline:'nearest'});
+}
+function abrir(){
+  box.classList.add('open');inp.focus();inp.select();
+  if(inp.value.trim().length>=2&&!hits.length)buscar(inp.value);
+  else if(hits.length)box.classList.add('lst');
+}
+function fechar(){box.classList.remove('open','lst');limpar();cnt.textContent='';lst.innerHTML=''}
+btnL.addEventListener('click',function(){box.classList.contains('open')?fechar():abrir()});
+btnS.addEventListener('click',function(){document.getElementById('side').classList.remove('open');abrir()});
+document.getElementById('sbx').addEventListener('click',fechar);
+document.getElementById('sbn').addEventListener('click',function(){ir(cur+1)});
+document.getElementById('sbp').addEventListener('click',function(){ir(cur-1)});
+inp.addEventListener('input',function(){clearTimeout(timer);timer=setTimeout(function(){buscar(inp.value)},160)});
+inp.addEventListener('focus',function(){if(hits.length)box.classList.add('lst')});
+inp.addEventListener('keydown',function(e){
+  if(e.key==='Enter'){e.preventDefault();if(!hits.length&&inp.value.trim().length>=2){clearTimeout(timer);buscar(inp.value)}else ir(e.shiftKey?cur-1:cur+1)}
+  else if(e.key==='Escape'){fechar();btnL.focus()}
+});
+lst.addEventListener('click',function(e){
+  var li=e.target.closest('li[data-k]');if(!li)return;
+  ir(parseInt(li.getAttribute('data-k'),10));
+  if(window.innerWidth<=900)box.classList.remove('lst');   /* no celular, libera a tela para ler o trecho */
+});
+document.addEventListener('keydown',function(e){
+  var tag=(e.target.tagName||'').toLowerCase(),digitando=tag==='input'||tag==='textarea'||e.target.isContentEditable;
+  if((e.key==='/'&&!digitando&&!e.ctrlKey&&!e.metaKey)||((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k')){e.preventDefault();abrir()}
+  else if(e.key==='Escape'&&box.classList.contains('open'))fechar();
+});
+})();
+</script>
+</body></html>
