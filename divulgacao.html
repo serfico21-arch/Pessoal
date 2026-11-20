@@ -43,8 +43,8 @@ iframe{flex:1;width:100%;border:0;background:var(--bg);min-height:0}
  </div>
  <div class="top" style="margin-top:8px">
   <a class="b" id="lpa" href="https://fcostacorretor.com/painel_adm" target="_blank" rel="noopener">🏠 Painel ADM (cadastrar imóveis)</a>
-  <a class="b" id="lce" href="https://serfico21-arch.github.io/publicador_fcosta/" target="_blank" rel="noopener">📋 Central do Publicador</a>
-  <a class="b" id="lfs" href="https://serfico21-arch.github.io/publicador_fcosta/publicacao.html" target="_blank" rel="noopener">⛶ Tela cheia</a>
+  <a class="b" id="lce" href="publicacao.html#ajuda" target="_blank" rel="noopener">❓ Ajuda do Publicador</a>
+  <a class="b" id="lfs" href="publicacao.html" target="_blank" rel="noopener">⛶ Tela cheia</a>
  </div>
  <div class="st" role="status" aria-live="polite">
   <span>Painel ADM / Firebase: <b id="s1" class="am">verificando…</b></span>
@@ -57,14 +57,14 @@ iframe{flex:1;width:100%;border:0;background:var(--bg);min-height:0}
 <script>
 (function(){'use strict';
 /* ── Os 3 repositórios ──────────────────────────────────────────────
-   Pessoal (este arquivo)  →  publicador_fcosta (publicacao.html)  →  Firebase do Painel ADM (fcostacorrigido) */
-var PUB='https://serfico21-arch.github.io/publicador_fcosta/publicacao.html',
+   Pessoal: divulgacao.html (este arquivo) → publicacao.html (o publicador, aqui mesmo no Pessoal) → Firebase do Painel ADM (fcostacorrigido) */
+var PUB='publicacao.html',
     DB='https://fcosta2026-847c3-default-rtdb.firebaseio.com',
     $=function(i){return document.getElementById(i)};
 function set(id,t,c){var e=$(id);e.textContent=t;e.className=c||''}
 function aviso(h){var a=$('aviso');a.innerHTML=h;a.style.display='block'}
 
-/* 1) carrega o publicacao.html do repositório publicador dentro desta aba */
+/* 1) carrega o publicador (publicacao.html, no próprio Pessoal) dentro desta aba */
 var f=$('f');f.src=PUB;
 var perdeu=setTimeout(function(){if(!f.dataset.ok)set('s2','demorando para abrir','am')},8000);
 f.onload=function(){f.dataset.ok=1;clearTimeout(perdeu);set('s2','aberta','ok');leitura()};
@@ -72,7 +72,7 @@ f.onload=function(){f.dataset.ok=1;clearTimeout(perdeu);set('s2','aberta','ok');
 /* 2) confere se o arquivo existe no publicador (evita tela em branco) */
 fetch(PUB,{method:'HEAD',cache:'no-store'}).then(function(r){
  if(!r.ok){set('s2','arquivo não encontrado','er');f.style.display='none';
-  aviso('<b>O arquivo publicacao.html não está no repositório publicador_fcosta.</b><br>Suba o <code>publicacao.html</code> na raiz de <b>publicador_fcosta</b> e recarregue esta página.')}
+  aviso('<b>O arquivo publicacao.html não está no repositório Pessoal.</b><br>Suba o <code>publicacao.html</code> na raiz do <b>Pessoal</b> e recarregue esta página.')}
 },function(){/* sem rede: o iframe mostra o erro do navegador */});
 
 /* 3) confere a conexão com os imóveis cadastrados no Painel ADM do site */
