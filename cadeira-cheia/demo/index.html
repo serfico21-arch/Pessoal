@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Demonstração · Espaço Barber Shop R-17</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Archivo:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Manrope:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
 /* Layout: abertura preta com amarelo da fachada e listra de barbeiro; seções em coluna larga; agenda em cartão; painel ADM só para quem administra */
 :root{
@@ -157,16 +157,102 @@ footer{background:var(--black);color:var(--on-dark);padding-block:22px;font-size
 }
 @media (prefers-reduced-motion:no-preference){.btn,.slot{transition:filter .15s,border-color .15s,background .15s}}
 </style>
+<style>
+/* Tema Cadeira Cheia aplicado à demonstração: couro escuro, latão e poste listrado */
+html:root:not(#cc){
+  --bg:#15100D; --surface:#1F1814; --ink:#F3EADC; --muted:#AB9C8B;
+  --black:#0F0B09; --black-2:#241C17; --yellow:#D9A84E; --yellow-ink:#E6BE6E; --accent-2:#E6BE6E;
+  --line:#3B2F27; --red:#D9625A; --ok:#5DBB85; --on-dark:#F3EADC; --on-accent:#1A1208;
+  --display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --oxblood:#9B2C2C; --pole-blue:#2E5C9E;
+  color-scheme:dark;
+}
+body{-webkit-font-smoothing:antialiased;font-size:16.5px;line-height:1.6}
+h1,h2,h3{font-weight:900;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+h2{font-size:clamp(2.4rem,7vw,3.6rem)}
+.eyebrow{font-family:var(--mono);font-weight:500;color:var(--yellow);letter-spacing:.16em}
+section{padding-block:clamp(56px,9vw,96px)}
+
+/* abertura */
+.hero{background:radial-gradient(120% 80% at 85% 110%,rgba(217,168,78,.22),transparent 60%),var(--black);position:relative;overflow:hidden}
+.nav{border-bottom:1px solid var(--line)}
+.brand{font-weight:800;font-size:1.35rem;text-transform:uppercase;letter-spacing:.03em}
+.herologo,.brand svg{box-shadow:0 0 0 2px var(--yellow),0 0 0 8px rgba(217,168,78,.12),0 30px 60px -20px #000}
+.herologo{width:180px;height:180px}
+.hero h1{font-size:clamp(3.2rem,11vw,6rem)}
+.hero h1 em{color:var(--yellow)}
+.hero-main>*{animation:cc-rise .8s cubic-bezier(.2,.8,.2,1) both}
+.hero-main>*:nth-child(2){animation-delay:.15s}
+@keyframes cc-rise{from{transform:translateY(28px);opacity:.15}to{transform:none;opacity:1}}
+.tag{font-family:var(--mono);font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow)}
+.hero p{color:var(--muted);opacity:1}
+.side{background:linear-gradient(160deg,#2A211B,#1A1411);border:1px solid var(--line);border-radius:22px;box-shadow:0 30px 60px -30px #000}
+.side h3{font-size:1.3rem;color:var(--yellow)}
+.side dd{font-family:var(--mono);font-size:.9rem}
+.barbers span{background:rgba(217,168,78,.12);color:var(--ink);border:1px solid rgba(217,168,78,.4)}
+.pole{height:12px;background:repeating-linear-gradient(-45deg,var(--oxblood) 0 14px,var(--ink) 14px 28px,var(--pole-blue) 28px 42px,var(--ink) 42px 56px);background-size:79.2px 79.2px;animation:cc-spin 2.4s linear infinite}
+@keyframes cc-spin{to{background-position:0 79.2px}}
+
+/* botões */
+.btn{border-radius:999px;font-weight:800;padding:14px 24px;transition:transform .2s,box-shadow .2s,filter .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn-y{background:linear-gradient(135deg,#F0CF86,#D9A84E 50%,#A87A2A);color:var(--on-accent);box-shadow:0 12px 30px -12px rgba(217,168,78,.7)}
+.btn-ghost{box-shadow:inset 0 0 0 1.5px var(--line);color:var(--ink)}
+.btn-ghost:hover{box-shadow:inset 0 0 0 1.5px var(--yellow)}
+.btn-line{box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn-line:hover{box-shadow:inset 0 0 0 1.5px var(--yellow)}
+.btn-red{background:var(--oxblood);color:#fff}
+
+/* tabela de preços */
+.cat{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px 22px}
+.cat h3{font-size:1.6rem;color:var(--yellow);margin-bottom:8px}
+.item{border-bottom-color:var(--line)}
+.item:last-child{border-bottom:0}
+.item .nm{font-weight:800}
+.item .dots{border-bottom-color:var(--line)}
+.item .pr{font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--yellow)}
+
+/* galeria */
+.gal figure{border-radius:18px;border:1px solid var(--line)}
+.gal img{transition:transform .5s}
+.gal figure:hover img{transform:scale(1.05)}
+
+/* agendamento */
+.book{background:linear-gradient(160deg,#2A211B,var(--surface));border-radius:28px;box-shadow:0 40px 80px -40px #000}
+input,select{border-radius:14px;background:var(--bg);border-color:var(--line)}
+input:focus,select:focus{border-color:var(--yellow)}
+.slot{font-family:var(--mono);border-radius:12px;background:var(--bg)}
+.slot[aria-pressed="true"]{background:var(--yellow);color:var(--on-accent);border-color:var(--yellow);box-shadow:0 8px 20px -8px rgba(217,168,78,.8)}
+.summary{background:var(--bg);border:1px dashed var(--line);border-radius:16px}
+.summary span:last-child{font-family:var(--mono);font-size:.9rem}
+.done{border-radius:18px}
+
+/* painel do barbeiro */
+.adm{border:2px solid var(--yellow);border-radius:28px;background:linear-gradient(180deg,rgba(217,168,78,.08),var(--surface) 30%);box-shadow:0 40px 80px -40px #000}
+.box{background:var(--bg);border-color:var(--line);border-radius:18px}
+.row{background:var(--bg);border-radius:16px}
+.row .h{font-family:var(--mono);font-weight:700;font-size:1rem;color:var(--yellow)}
+.contact img{border-radius:22px}
+.contact dt{color:var(--yellow);text-transform:uppercase;font-weight:800;font-size:1.2rem}
+footer{border-top:1px solid var(--line)}
+
+/* faixa da demonstração */
+.cc-demo{position:sticky;top:0;z-index:999;background:rgba(15,11,9,.92);backdrop-filter:blur(10px);color:var(--ink);font:600 14px/1.4 var(--body);padding:10px max(16px,env(safe-area-inset-left,0px));display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
+.cc-demo::after{content:"";position:absolute;left:0;right:0;bottom:-4px;height:3px;background:repeating-linear-gradient(-45deg,var(--oxblood) 0 8px,var(--ink) 8px 16px,var(--pole-blue) 16px 24px,var(--ink) 24px 32px)}
+.cc-demo .cc-t{display:flex;align-items:center;gap:10px}
+.cc-demo .cc-logo{font-family:var(--display);font-weight:900;text-transform:uppercase;font-size:1.15rem;color:var(--yellow);letter-spacing:.03em;white-space:nowrap}
+.cc-demo small{color:var(--muted);font-size:.82rem}
+.cc-demo .cc-b{display:flex;gap:8px;flex-wrap:wrap}
+.cc-demo button,.cc-demo a{font:800 13px var(--body);border-radius:999px;padding:9px 16px;border:0;background:linear-gradient(135deg,#F0CF86,#D9A84E 50%,#A87A2A);color:#1A1208;cursor:pointer;text-decoration:none}
+.cc-demo a{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+@media (max-width:560px){.cc-demo small{display:none}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
-<style>
-.cc-demo{position:sticky;top:0;z-index:999;background:#15100D;color:#F3EADC;font:600 14px/1.4 system-ui,sans-serif;padding:10px max(16px,env(safe-area-inset-left,0px));display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;border-bottom:3px solid #D9A84E}
-.cc-demo b{color:#D9A84E}
-.cc-demo .cc-b{display:flex;gap:8px;flex-wrap:wrap}
-.cc-demo button,.cc-demo a{font:700 13px system-ui,sans-serif;border-radius:999px;padding:8px 14px;border:1px solid #D9A84E;background:#D9A84E;color:#1a1208;cursor:pointer;text-decoration:none}
-.cc-demo a{background:transparent;color:#F3EADC}
-</style>
-<div class="cc-demo" role="note"><span><b>Demonstração Cadeira Cheia.</b> Teste à vontade: o que você mudar fica salvo só neste aparelho.</span><span class="cc-b"><button type="button" id="ccAdm">Abrir Área do barbeiro</button><a href="../">Voltar</a></span></div>
+<div class="cc-demo" role="note"><span class="cc-t"><span class="cc-logo">Cadeira Cheia</span><small>Demonstração. O que você mudar fica só neste aparelho.</small></span><span class="cc-b"><button type="button" id="ccAdm">Área do barbeiro</button><a href="../">Voltar</a></span></div>
 
 
 <header class="hero">
