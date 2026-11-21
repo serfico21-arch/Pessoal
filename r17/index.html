@@ -162,6 +162,19 @@ footer{background:var(--black);color:var(--on-dark);padding-block:22px;font-size
 .contact a{color:inherit;text-decoration-color:var(--yellow)}
 .contact img{max-width:380px;margin-inline:auto}
 @media (max-width:820px){.gal{grid-template-columns:repeat(2,1fr)}}
+
+/* barbeiros em destaque */
+.team{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.barber{position:relative;overflow:hidden;border-radius:22px;border:1px solid var(--line);background:linear-gradient(160deg,var(--black-2),var(--black));padding:28px;display:flex;gap:22px;align-items:center}
+.barber::before{content:"";position:absolute;inset:0 auto 0 0;width:8px;background:repeating-linear-gradient(-45deg,var(--oxblood) 0 8px,var(--ink) 8px 16px,var(--pole-blue) 16px 24px,var(--ink) 24px 32px)}
+.mono{flex:none;width:118px;height:118px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 30% 25%,#F0CF86,#D9A84E 45%,#8E6420);color:#1A1208;font:900 2.6rem/1 var(--display);box-shadow:0 0 0 4px var(--black),0 0 0 6px var(--yellow),0 20px 40px -18px #000;overflow:hidden}
+.mono img{width:100%;height:100%;object-fit:cover}
+.barber h3{font:900 clamp(1.8rem,4vw,2.4rem)/1 var(--display);text-transform:uppercase;color:var(--ink);margin:0 0 4px}
+.barber .apel{color:var(--yellow);font:700 .8rem var(--mono);letter-spacing:.14em;text-transform:uppercase}
+.barber p{color:var(--muted);margin:10px 0 16px;max-width:34ch}
+.barber .tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.barber .tags span{border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.8rem;color:var(--ink)}
+@media (max-width:820px){.team{grid-template-columns:1fr}.barber{flex-direction:column;align-items:flex-start;padding:24px 22px 24px 30px}}
 </style>
 <style>
 /* base */
@@ -305,6 +318,7 @@ footer{border-top:1px solid var(--line)}
         <span>Espaço Barber Shop <span style="color:var(--accent-2)">R-17</span></span>
       </a>
       <ul>
+        <li><a href="#barbeiros">Barbeiros</a></li>
         <li><a href="#servicos">Serviços</a></li>
         <li><a href="#galeria">Galeria</a></li>
         <li><a href="#agendar">Agendar</a></li>
@@ -366,6 +380,32 @@ footer{border-top:1px solid var(--line)}
 </header>
 
 <main>
+  <section id="barbeiros">
+    <div class="wrap">
+      <div class="head"><div><div class="eyebrow">Quem faz o seu corte</div><h2>Nossos barbeiros</h2></div><p>Escolha com quem quer cortar e reserve direto na agenda dele.</p></div>
+      <div class="team">
+        <article class="barber">
+          <div class="mono" aria-hidden="true">RÔ</div>
+          <div>
+            <span class="apel">Rodrigo</span>
+            <h3>Rô</h3>
+            <div class="tags"><span>Degradê</span><span>Desenho na navalha</span><span>Barba</span></div>
+            <button type="button" class="btn btn-y btn-sm" data-barb="ro">Agendar com o Rô</button>
+          </div>
+        </article>
+        <article class="barber">
+          <div class="mono" aria-hidden="true">J</div>
+          <div>
+            <span class="apel">Barbeiro</span>
+            <h3>João</h3>
+            <div class="tags"><span>Corte social</span><span>Topete</span><span>Pigmentação</span></div>
+            <button type="button" class="btn btn-y btn-sm" data-barb="joao">Agendar com o João</button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <section id="servicos">
     <div class="wrap">
       <div class="head">
@@ -1017,6 +1057,7 @@ renderSlots();
     if(temSenha && ssGet("r17adm")==="1"){ liberado=true; $("painel").hidden=false; entrarPainel(); }
   }
 })();
+document.querySelectorAll("[data-barb]").forEach(b=>b.addEventListener("click",()=>{const sel=document.getElementById("barbeiro"); sel.value=b.dataset.barb; sel.dispatchEvent(new Event("change")); document.getElementById("agendar").scrollIntoView({behavior:"smooth"});}));
 </script>
 </body>
 </html>
