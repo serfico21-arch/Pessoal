@@ -1882,7 +1882,7 @@ document.querySelectorAll("[data-barb]").forEach(b=>b.addEventListener("click",(
 const ehApp = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 if(ehApp){ const ab=$("abertura"); ab.querySelector(".ab-logo").innerHTML=document.querySelector(".herologo").outerHTML.replace('class="herologo"','');
   ab.classList.add("on"); setTimeout(()=>{ ab.classList.add("sai"); setTimeout(()=>ab.remove(),550); },1800); }
-if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).catch(()=>{}));
 let pedidoInstalar=null;
 const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
 const ehCelular = /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent) || ehIOS;
