@@ -3,127 +3,37 @@
 <style>body{font-family:system-ui,sans-serif;background:#15100D;color:#F3EADC;margin:0;padding:24px 16px}main{max-width:760px;margin:auto}
 h1{color:#E6BE6E;font-size:1.6rem}ol{font-size:1.15rem;line-height:1.7}button{font-size:1.3rem;font-weight:700;padding:16px 28px;border:0;border-radius:14px;background:#D9A84E;color:#1A1208;cursor:pointer}
 #ok{font-size:1.2rem;color:#5DBB85;font-weight:700;margin-left:12px}textarea{width:100%;height:160px;margin-top:20px;background:#1F1814;color:#AB9C8B;border:1px solid #3B2F27;border-radius:10px;font-size:.75rem}a{color:#E6BE6E}</style></head>
-<body><main><h1>Instalar o banco da agenda</h1>
+<body><main><h1>Atualizar o banco da agenda</h1>
 <ol><li>Toque no botão amarelo abaixo. Ele copia o comando.</li>
 <li>Abra o <a href="https://supabase.com/dashboard/project/avvhnajfczdedlydkcrb/sql/new" target="_blank" rel="noopener">SQL Editor do Supabase</a>.</li>
 <li>Clique na área branca e aperte <b>Ctrl + V</b> para colar.</li>
 <li>Clique no botão verde <b>Run</b>. Deve aparecer "Success".</li></ol>
 <p><button id="b">Copiar comando</button><span id="ok"></span></p>
-<textarea id="t" readonly>create extension if not exists pgcrypto with schema extensions;
+<textarea id="t" readonly>-- Atualização: dica do código, troca do código pelo painel e bloqueio mais forte
+alter table public.lojas_segredo add column if not exists dica text;
+alter table public.lojas_segredo add column if not exists bloqueios int not null default 0;
 
-create table if not exists public.lojas (
-  id text primary key,
-  nome text not null,
-  config jsonb not null default &#x27;{}&#x27;::jsonb,
-  criado timestamptz not null default now()
-);
-create table if not exists public.lojas_segredo (
-  loja_id text primary key references public.lojas(id) on delete cascade,
-  codigo_hash text not null,
-  senha_hash text,
-  erros int not null default 0,
-  bloqueado_ate timestamptz
-);
-create table if not exists public.sessoes (
-  token uuid primary key default gen_random_uuid(),
-  loja_id text not null references public.lojas(id) on delete cascade,
-  expira timestamptz not null default now() + interval &#x27;30 days&#x27;
-);
-create index if not exists sessoes_loja on public.sessoes(loja_id);
-create table if not exists public.dias (
-  loja_id text not null references public.lojas(id) on delete cascade,
-  data date not null,
-  abre text, fecha text, fechado boolean not null default false,
-  primary key (loja_id, data)
-);
-create table if not exists public.agenda (
-  id uuid primary key default gen_random_uuid(),
-  loja_id text not null references public.lojas(id) on delete cascade,
-  data date not null,
-  hora time not null,
-  min int not null check (min between 5 and 600),
-  servico text not null,
-  preco numeric not null default 0,
-  barbeiro text not null,
-  nome text not null,
-  fone text not null,
-  status text not null default &#x27;pendente&#x27; check (status in (&#x27;pendente&#x27;,&#x27;confirmado&#x27;)),
-  criado timestamptz not null default now()
-);
-create index if not exists agenda_loja_data on public.agenda(loja_id, data);
-create table if not exists public.fotos (
-  id uuid primary key default gen_random_uuid(),
-  loja_id text not null references public.lojas(id) on delete cascade,
-  ordem int not null default 0,
-  legenda text not null default &#x27;&#x27;,
-  img text not null,
-  criado timestamptz not null default now()
-);
-create index if not exists fotos_loja on public.fotos(loja_id, ordem);
-
-alter table public.lojas enable row level security;
-alter table public.lojas_segredo enable row level security;
-alter table public.sessoes enable row level security;
-alter table public.dias enable row level security;
-alter table public.agenda enable row level security;
-alter table public.fotos enable row level security;
-
-drop policy if exists &quot;publico le lojas&quot; on public.lojas;
-drop policy if exists &quot;publico le dias&quot; on public.dias;
-drop policy if exists &quot;publico le fotos&quot; on public.fotos;
-create policy &quot;publico le lojas&quot; on public.lojas for select to anon, authenticated using (true);
-create policy &quot;publico le dias&quot; on public.dias for select to anon, authenticated using (true);
-create policy &quot;publico le fotos&quot; on public.fotos for select to anon, authenticated using (true);
-
-revoke all on public.lojas_segredo, public.sessoes, public.agenda from anon, authenticated;
-revoke insert, update, delete, truncate on public.lojas, public.dias, public.fotos from anon, authenticated;
-
--- ===== funções públicas =====
-create or replace function public.ocupados(p_loja text, p_data date)
-returns table(barbeiro text, hora text, min int)
-language sql security definer set search_path = &#x27;&#x27; stable as $$
-  select a.barbeiro, to_char(a.hora,&#x27;HH24:MI&#x27;), a.min from public.agenda a
-  where a.loja_id = p_loja and a.data = p_data;
+create or replace function public._limpa_codigo(p text) returns text
+language sql immutable set search_path = &#x27;&#x27; as $$
+  select regexp_replace(upper(coalesce(p,&#x27;&#x27;)), &#x27;[^A-Z0-9]&#x27;, &#x27;&#x27;, &#x27;g&#x27;);
 $$;
 
-create or replace function public._livre(p_loja text, p_data date, p_ini time, p_min int, p_barb text, p_ignorar uuid)
-returns boolean language sql security definer set search_path = &#x27;&#x27; stable as $$
-  select not exists (select 1 from public.agenda a where a.loja_id = p_loja and a.data = p_data and a.barbeiro = p_barb
-    and (p_ignorar is null or a.id &lt;&gt; p_ignorar)
-    and a.hora &lt; p_ini + make_interval(mins =&gt; p_min) and a.hora + make_interval(mins =&gt; a.min) &gt; p_ini);
+-- errou: depois de 5 erros bloqueia 15 min, depois 1h, 4h, 24h...
+create or replace function public._errou(p_loja text) returns void
+language sql security definer set search_path = &#x27;&#x27; as $$
+  update public.lojas_segredo set
+    erros = case when erros + 1 &gt;= 5 then 0 else erros + 1 end,
+    bloqueios = case when erros + 1 &gt;= 5 then bloqueios + 1 else bloqueios end,
+    bloqueado_ate = case when erros + 1 &gt;= 5
+      then now() + (array[interval &#x27;15 minutes&#x27;, interval &#x27;1 hour&#x27;, interval &#x27;4 hours&#x27;])[least(bloqueios + 1, 3)]
+                 * case when bloqueios &gt;= 3 then 6 else 1 end
+      else bloqueado_ate end
+  where loja_id = p_loja;
 $$;
 
-create or replace function public.agendar(p_loja text, p_data date, p_hora text, p_min int,
-  p_servico text, p_preco numeric, p_barbeiro text, p_nome text, p_fone text)
-returns uuid language plpgsql security definer set search_path = &#x27;&#x27; as $$
-declare v_id uuid; v_fone text := regexp_replace(coalesce(p_fone,&#x27;&#x27;),&#x27;\D&#x27;,&#x27;&#x27;,&#x27;g&#x27;);
-begin
-  if not exists (select 1 from public.lojas where id = p_loja) then raise exception &#x27;loja&#x27;; end if;
-  if p_data &lt; (now() at time zone &#x27;America/Sao_Paulo&#x27;)::date or p_data &gt; (now() at time zone &#x27;America/Sao_Paulo&#x27;)::date + 120 then raise exception &#x27;data&#x27;; end if;
-  if length(coalesce(trim(p_nome),&#x27;&#x27;)) &lt; 2 or length(v_fone) &lt; 10 then raise exception &#x27;dados&#x27;; end if;
-  if (select count(*) from public.agenda where loja_id = p_loja and regexp_replace(fone,&#x27;\D&#x27;,&#x27;&#x27;,&#x27;g&#x27;) = v_fone
-      and status = &#x27;pendente&#x27; and data &gt;= (now() at time zone &#x27;America/Sao_Paulo&#x27;)::date) &gt;= 3 then raise exception &#x27;limite&#x27;; end if;
-  perform pg_advisory_xact_lock(hashtext(p_loja || p_data::text));
-  if not public._livre(p_loja, p_data, p_hora::time, p_min, p_barbeiro, null) then raise exception &#x27;ocupado&#x27;; end if;
-  insert into public.agenda(loja_id,data,hora,min,servico,preco,barbeiro,nome,fone)
-  values (p_loja,p_data,p_hora::time,p_min,left(p_servico,120),coalesce(p_preco,0),left(p_barbeiro,40),left(trim(p_nome),80),left(p_fone,20))
-  returning id into v_id;
-  return v_id;
-end $$;
-
--- ===== acesso do ADM =====
-create or replace function public._sessao(p_token uuid) returns text
-language plpgsql security definer set search_path = &#x27;&#x27; stable as $$
-declare v text;
-begin
-  select loja_id into v from public.sessoes where token = p_token and expira &gt; now();
-  if v is null then raise exception &#x27;sessao&#x27;; end if;
-  return v;
-end $$;
-
-create or replace function public.adm_estado(p_loja text) returns text
+create or replace function public.adm_dica(p_loja text) returns text
 language sql security definer set search_path = &#x27;&#x27; stable as $$
-  select case when senha_hash is null then &#x27;nova&#x27; else &#x27;login&#x27; end from public.lojas_segredo where loja_id = p_loja;
+  select dica from public.lojas_segredo where loja_id = p_loja;
 $$;
 
 create or replace function public.adm_entrar(p_loja text, p_senha text) returns uuid
@@ -134,165 +44,46 @@ begin
   if s is null or s.senha_hash is null then raise exception &#x27;sem_senha&#x27;; end if;
   if s.bloqueado_ate is not null and s.bloqueado_ate &gt; now() then raise exception &#x27;bloqueado&#x27;; end if;
   if extensions.crypt(p_senha, s.senha_hash) &lt;&gt; s.senha_hash then
-    update public.lojas_segredo set
-      erros = case when erros + 1 &gt;= 5 then 0 else erros + 1 end,
-      bloqueado_ate = case when erros + 1 &gt;= 5 then now() + interval &#x27;10 minutes&#x27; else bloqueado_ate end
-      where loja_id = p_loja;
+    perform public._errou(p_loja);
     return null;
   end if;
-  update public.lojas_segredo set erros = 0, bloqueado_ate = null where loja_id = p_loja;
+  update public.lojas_segredo set erros = 0, bloqueios = 0, bloqueado_ate = null where loja_id = p_loja;
   delete from public.sessoes where expira &lt; now();
   insert into public.sessoes(loja_id) values (p_loja) returning token into v;
   return v;
 end $$;
 
--- cria a primeira senha OU redefine com o código da barbearia
 create or replace function public.adm_nova_senha(p_loja text, p_codigo text, p_senha text) returns uuid
 language plpgsql security definer set search_path = &#x27;&#x27; as $$
-declare s public.lojas_segredo; v uuid;
+declare s public.lojas_segredo; v uuid; c text := public._limpa_codigo(p_codigo);
 begin
   select * into s from public.lojas_segredo where loja_id = p_loja for update;
   if s is null then raise exception &#x27;loja&#x27;; end if;
   if s.bloqueado_ate is not null and s.bloqueado_ate &gt; now() then raise exception &#x27;bloqueado&#x27;; end if;
   if length(coalesce(p_senha,&#x27;&#x27;)) &lt; 4 then raise exception &#x27;senha_curta&#x27;; end if;
-  if extensions.crypt(upper(trim(coalesce(p_codigo,&#x27;&#x27;))), s.codigo_hash) &lt;&gt; s.codigo_hash then
-    update public.lojas_segredo set
-      erros = case when erros + 1 &gt;= 5 then 0 else erros + 1 end,
-      bloqueado_ate = case when erros + 1 &gt;= 5 then now() + interval &#x27;10 minutes&#x27; else bloqueado_ate end
-      where loja_id = p_loja;
+  if extensions.crypt(c, s.codigo_hash) &lt;&gt; s.codigo_hash
+     and extensions.crypt(upper(trim(coalesce(p_codigo,&#x27;&#x27;))), s.codigo_hash) &lt;&gt; s.codigo_hash then
+    perform public._errou(p_loja);
     raise exception &#x27;codigo&#x27;;
   end if;
-  update public.lojas_segredo set senha_hash = extensions.crypt(p_senha, extensions.gen_salt(&#x27;bf&#x27;)), erros = 0, bloqueado_ate = null
-    where loja_id = p_loja;
+  update public.lojas_segredo set senha_hash = extensions.crypt(p_senha, extensions.gen_salt(&#x27;bf&#x27;)),
+    erros = 0, bloqueios = 0, bloqueado_ate = null where loja_id = p_loja;
   delete from public.sessoes where loja_id = p_loja;
   insert into public.sessoes(loja_id) values (p_loja) returning token into v;
   return v;
 end $$;
 
-create or replace function public.adm_trocar_senha(p_token uuid, p_senha text) returns void
+-- o ADM troca o código de recuperação e a dica pelo painel
+create or replace function public.adm_trocar_codigo(p_token uuid, p_codigo text, p_dica text) returns void
 language plpgsql security definer set search_path = &#x27;&#x27; as $$
-declare l text := public._sessao(p_token);
+declare l text := public._sessao(p_token); c text := public._limpa_codigo(p_codigo);
 begin
-  if length(coalesce(p_senha,&#x27;&#x27;)) &lt; 4 then raise exception &#x27;senha_curta&#x27;; end if;
-  update public.lojas_segredo set senha_hash = extensions.crypt(p_senha, extensions.gen_salt(&#x27;bf&#x27;)) where loja_id = l;
-  delete from public.sessoes where loja_id = l and token &lt;&gt; p_token;
+  if length(c) &lt; 4 then raise exception &#x27;codigo_curto&#x27;; end if;
+  update public.lojas_segredo set codigo_hash = extensions.crypt(c, extensions.gen_salt(&#x27;bf&#x27;)),
+    dica = nullif(left(trim(coalesce(p_dica,&#x27;&#x27;)),80),&#x27;&#x27;) where loja_id = l;
 end $$;
 
-create or replace function public.adm_sair(p_token uuid) returns void
-language sql security definer set search_path = &#x27;&#x27; as $$
-  delete from public.sessoes where token = p_token;
-$$;
-
-create or replace function public.adm_agenda(p_token uuid, p_data date)
-returns table(id uuid, data date, hora text, min int, servico text, preco numeric, barbeiro text, nome text, fone text, status text)
-language plpgsql security definer set search_path = &#x27;&#x27; stable as $$
-declare l text := public._sessao(p_token);
-begin
-  return query select a.id, a.data, to_char(a.hora,&#x27;HH24:MI&#x27;), a.min, a.servico, a.preco, a.barbeiro, a.nome, a.fone, a.status
-    from public.agenda a where a.loja_id = l and a.data = p_data order by a.hora;
-end $$;
-
-create or replace function public.adm_pendentes(p_token uuid)
-returns table(id uuid, data date, hora text, min int, servico text, preco numeric, barbeiro text, nome text, fone text, status text)
-language plpgsql security definer set search_path = &#x27;&#x27; stable as $$
-declare l text := public._sessao(p_token);
-begin
-  return query select a.id, a.data, to_char(a.hora,&#x27;HH24:MI&#x27;), a.min, a.servico, a.preco, a.barbeiro, a.nome, a.fone, a.status
-    from public.agenda a where a.loja_id = l and a.status = &#x27;pendente&#x27;
-      and a.data &gt;= (now() at time zone &#x27;America/Sao_Paulo&#x27;)::date order by a.data, a.hora limit 100;
-end $$;
-
-create or replace function public.adm_marcar(p_token uuid, p_data date, p_hora text, p_min int,
-  p_servico text, p_preco numeric, p_barbeiro text, p_nome text, p_fone text) returns uuid
-language plpgsql security definer set search_path = &#x27;&#x27; as $$
-declare l text := public._sessao(p_token); v uuid;
-begin
-  perform pg_advisory_xact_lock(hashtext(l || p_data::text));
-  if not public._livre(l, p_data, p_hora::time, p_min, p_barbeiro, null) then raise exception &#x27;ocupado&#x27;; end if;
-  insert into public.agenda(loja_id,data,hora,min,servico,preco,barbeiro,nome,fone,status)
-  values (l,p_data,p_hora::time,p_min,p_servico,coalesce(p_preco,0),p_barbeiro,p_nome,p_fone,&#x27;confirmado&#x27;) returning id into v;
-  return v;
-end $$;
-
-create or replace function public.adm_confirmar(p_token uuid, p_id uuid) returns void
-language plpgsql security definer set search_path = &#x27;&#x27; as $$
-declare l text := public._sessao(p_token);
-begin
-  update public.agenda set status = &#x27;confirmado&#x27; where id = p_id and loja_id = l;
-end $$;
-
-create or replace function public.adm_mover(p_token uuid, p_id uuid, p_data date, p_hora text, p_barbeiro text) returns void
-language plpgsql security definer set search_path = &#x27;&#x27; as $$
-declare l text := public._sessao(p_token); a public.agenda;
-begin
-  select * into a from public.agenda where id = p_id and loja_id = l;
-  if a is null then raise exception &#x27;nao_achei&#x27;; end if;
-  perform pg_advisory_xact_lock(hashtext(l || p_data::text));
-  if not public._livre(l, p_data, p_hora::time, a.min, p_barbeiro, p_id) then raise exception &#x27;ocupado&#x27;; end if;
-  update public.agenda set data = p_data, hora = p_hora::time, barbeiro = p_barbeiro where id = p_id;
-end $$;
-
-create or replace function public.adm_apagar(p_token uuid, p_id uuid) returns void
-language plpgsql security definer set search_path = &#x27;&#x27; as $$
-declare l text := public._sessao(p_token);
-begin
-  delete from public.agenda where id = p_id and loja_id = l;
-end $$;
-
-create or replace function public.adm_dia(p_token uuid, p_data date, p_abre text, p_fecha text, p_fechado boolean) returns void
-language plpgsql security definer set search_path = &#x27;&#x27; as $$
-declare l text := public._sessao(p_token);
-begin
-  if coalesce(p_abre,&#x27;&#x27;) = &#x27;&#x27; and coalesce(p_fecha,&#x27;&#x27;) = &#x27;&#x27; and not p_fechado then
-    delete from public.dias where loja_id = l and data = p_data;
-  else
-    insert into public.dias(loja_id,data,abre,fecha,fechado) values (l,p_data,nullif(p_abre,&#x27;&#x27;),nullif(p_fecha,&#x27;&#x27;),p_fechado)
-    on conflict (loja_id,data) do update set abre = excluded.abre, fecha = excluded.fecha, fechado = excluded.fechado;
-  end if;
-end $$;
-
--- chave: &#x27;horario&#x27; | &#x27;servicos&#x27; | &#x27;videos&#x27; | &#x27;barbeiros&#x27;
-create or replace function public.adm_config(p_token uuid, p_chave text, p_valor jsonb) returns void
-language plpgsql security definer set search_path = &#x27;&#x27; as $$
-declare l text := public._sessao(p_token);
-begin
-  if p_chave not in (&#x27;horario&#x27;,&#x27;servicos&#x27;,&#x27;videos&#x27;,&#x27;barbeiros&#x27;) then raise exception &#x27;chave&#x27;; end if;
-  update public.lojas set config = jsonb_set(config, array[p_chave], p_valor, true) where id = l;
-end $$;
-
-create or replace function public.adm_foto_add(p_token uuid, p_img text, p_legenda text) returns uuid
-language plpgsql security definer set search_path = &#x27;&#x27; as $$
-declare l text := public._sessao(p_token); v uuid;
-begin
-  if p_img not like &#x27;data:image/%&#x27; or length(p_img) &gt; 900000 then raise exception &#x27;imagem&#x27;; end if;
-  if (select count(*) from public.fotos where loja_id = l) &gt;= 40 then raise exception &#x27;muitas&#x27;; end if;
-  insert into public.fotos(loja_id, ordem, legenda, img)
-  values (l, coalesce((select min(ordem) from public.fotos where loja_id = l),0) - 1, left(coalesce(p_legenda,&#x27;&#x27;),80), p_img)
-  returning id into v;
-  return v;
-end $$;
-
-create or replace function public.adm_foto_legenda(p_token uuid, p_id uuid, p_legenda text) returns void
-language plpgsql security definer set search_path = &#x27;&#x27; as $$
-declare l text := public._sessao(p_token);
-begin
-  update public.fotos set legenda = left(coalesce(p_legenda,&#x27;&#x27;),80) where id = p_id and loja_id = l;
-end $$;
-
-create or replace function public.adm_foto_apagar(p_token uuid, p_id uuid) returns void
-language plpgsql security definer set search_path = &#x27;&#x27; as $$
-declare l text := public._sessao(p_token);
-begin
-  delete from public.fotos where id = p_id and loja_id = l;
-end $$;
-
--- funções internas não ficam expostas
-revoke execute on function public._sessao(uuid) from public, anon, authenticated;
-revoke execute on function public._livre(text, date, time, int, text, uuid) from public, anon, authenticated;
-
--- ===== barbearia R-17 =====
-insert into public.lojas(id, nome) values (&#x27;r17&#x27;,&#x27;Espaço Barber Shop R-17&#x27;) on conflict (id) do nothing;
-insert into public.lojas_segredo(loja_id, codigo_hash) values (&#x27;r17&#x27;, &#x27;$2a$10$wAGzIAHRIAY1encOdAGi0eUnPbDycA0PNzlYdBje11nLsvxFxhqwi&#x27;) on conflict (loja_id) do nothing;
+revoke execute on function public._errou(text) from public, anon, authenticated;
 </textarea>
 <script>document.getElementById("b").onclick=async()=>{const t=document.getElementById("t");try{await navigator.clipboard.writeText(t.value)}catch(e){t.select();document.execCommand("copy")}document.getElementById("ok").textContent="Copiado! Agora cole no Supabase."};</script>
 </main></body></html>

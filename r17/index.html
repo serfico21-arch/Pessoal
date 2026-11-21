@@ -302,6 +302,7 @@ footer{border-top:1px solid var(--line)}
 .vlink .play{width:48px;height:48px;border-radius:50%;background:var(--yellow);color:var(--on-accent);display:grid;place-items:center;font-size:1.1rem;margin-bottom:8px}
 .vlink span:last-child{color:var(--muted);font-size:.85rem}
 @media (max-width:820px){.vidform{grid-template-columns:1fr}}
+.dica{border:1px dashed var(--yellow);border-radius:12px;padding:10px 12px;margin:0 0 12px;font-weight:600}
 </style>
 </head>
 <body>
@@ -524,6 +525,7 @@ footer{border-top:1px solid var(--line)}
           </form>
           <form id="gateNova" class="gform" hidden novalidate>
             <p class="hint" id="novaTxt" style="margin:0 0 12px">Crie a senha que vai abrir o Painel ADM.</p>
+            <p class="dica" id="dicaTxt" hidden></p>
             <div class="field" id="campoCodigo"><label for="codigo">Código da barbearia</label><input id="codigo" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Ex.: R17-XXXX-XXXX"></div>
             <div class="field"><label for="nova1">Nova senha</label><input id="nova1" type="password" autocomplete="new-password"></div>
             <div class="field"><label for="nova2">Repita a nova senha</label><input id="nova2" type="password" autocomplete="new-password"></div>
@@ -582,6 +584,16 @@ footer{border-top:1px solid var(--line)}
               <button class="btn btn-sm btn-line" type="button" id="servDesfazer">Desfazer mudanças</button>
             </div>
             <p class="ok" id="servMsg" aria-live="polite"></p>
+          </div>
+          <div class="box" style="margin-top:24px">
+            <h3 class="bh">Código de recuperação</h3>
+            <p class="hint" style="margin:0 0 10px">É o código pedido quando alguém toca em "Esqueci a senha". A dica aparece nessa tela para ajudar a lembrar. Não coloque o código na dica.</p>
+            <div class="vidform">
+              <div class="field"><label for="codNovo">Novo código</label><input id="codNovo" autocomplete="off" inputmode="text" placeholder="Letras ou números"></div>
+              <div class="field"><label for="codDica">Dica (opcional)</label><input id="codDica" maxlength="80" placeholder="Algo que só você entende"></div>
+              <button class="btn btn-sm btn-y" type="button" id="codSalvar">Salvar código</button>
+            </div>
+            <p class="ok" id="codMsg" aria-live="polite"></p>
           </div>
           <div class="box" style="margin-top:24px">
             <h3 class="bh">Fotos da galeria</h3>
@@ -905,6 +917,8 @@ function mostrarGate(modo){ // "sem" | "login" | "nova" | "esqueci" | "trocar"
     : modo==="esqueci" ? "Sem problema. Digite o código da barbearia e crie uma senha nova."
     : "Digite a nova senha do Painel ADM.";
   $("gateNova").dataset.modo=modo; $("loginErr").textContent=""; $("novaErr").textContent="";
+  $("dicaTxt").hidden=true;
+  if(modo==="esqueci") api("adm_dica",{p_loja:CONFIG.loja}).then(d=>{ if(d && $("gateNova").dataset.modo==="esqueci"){ $("dicaTxt").textContent="Dica do código: "+d; $("dicaTxt").hidden=false; } }).catch(()=>{});
 }
 async function abrirPainel(){
   $("painel").hidden=false;
@@ -929,7 +943,7 @@ $("gateLogin").addEventListener("submit",async e=>{
     if(t){ $("senha").value=""; token=t; lsSet(TOK_KEY,t); liberado=true; entrarPainel(); }
     else $("loginErr").textContent="Senha errada. Tente de novo ou toque em \"Esqueci a senha\".";
   }catch(err){
-    $("loginErr").textContent = err.codigo==="bloqueado" ? "Muitas tentativas erradas. Espere 10 minutos e tente de novo."
+    $("loginErr").textContent = err.codigo==="bloqueado" ? "Muitas tentativas erradas. Por segurança, espere um pouco e tente de novo."
       : "Não foi possível conferir a senha agora. Confira a internet e tente de novo.";
   }
 });
@@ -946,7 +960,7 @@ $("gateNova").addEventListener("submit",async e=>{
     $("exMsg").textContent="Senha salva.";
   }catch(err){
     $("novaErr").textContent = err.codigo==="codigo" ? "Código da barbearia errado. Confira e tente de novo."
-      : err.codigo==="bloqueado" ? "Muitas tentativas erradas. Espere 10 minutos e tente de novo."
+      : err.codigo==="bloqueado" ? "Muitas tentativas erradas. Por segurança, espere um pouco e tente de novo."
       : "Não foi possível salvar a senha. Confira a internet e tente de novo.";
   }
 });
@@ -1192,6 +1206,15 @@ $("fotosAdm").addEventListener("change",async e=>{
     const f=fotos.find(x=>x.id===el.closest(".fa").dataset.id); if(f) f.legenda=el.value.trim();
     $("fotoMsg").textContent="Legenda salva."; }
   catch(err){ $("fotoMsg").textContent="Não foi possível salvar a legenda."; }
+});
+
+/* ---------- código de recuperação ---------- */
+$("codSalvar").addEventListener("click",async()=>{
+  const c=$("codNovo").value.trim(), d=$("codDica").value.trim();
+  if(c.replace(/[^0-9a-z]/gi,"").length<4){ $("codMsg").textContent="O código precisa ter pelo menos 4 letras ou números."; return; }
+  if(d && d.replace(/[^0-9a-z]/gi,"").toUpperCase().includes(c.replace(/[^0-9a-z]/gi,"").toUpperCase())){ $("codMsg").textContent="A dica não pode mostrar o código."; return; }
+  try{ await adm("adm_trocar_codigo",{p_codigo:c,p_dica:d}); $("codNovo").value=""; $("codMsg").textContent="Código salvo. Use ele se esquecer a senha."; }
+  catch(err){ $("codMsg").textContent = err.codigo==="sessao" ? "" : "Não foi possível salvar. Tente de novo."; }
 });
 
 /* ---------- vídeos no painel ---------- */
