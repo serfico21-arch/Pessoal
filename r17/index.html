@@ -7,7 +7,7 @@
 <meta name="description" content="Barbearia no Jardim Kemel, Itaim Paulista. Agende seu horário online.">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="manifest" id="mf" href="manifest.webmanifest">
-<script>/* painel do dono instala como app separado */ if(location.hash==="#adm"||/[?&]painel/.test(location.search)) { document.getElementById("mf").href="manifest-adm.webmanifest"; document.title="R-17 Painel"; }</script>
+<script>/* painel do dono instala como app separado */ if(location.hash==="#adm"||/[?&]painel/.test(location.search)) { document.getElementById("mf").href="manifest-adm.webmanifest"; document.title="R-17 Painel"; document.documentElement.classList.add("modo-painel"); }</script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Espaço Barber Shop R-17">
 <meta property="og:description" content="Instale nosso site no celular e agende seu horário em 1 minuto.">
@@ -466,6 +466,12 @@ footer{border-top:1px solid var(--line)}
 .saidaf .field{margin:0}
 @media (max-width:820px){.novo,.cxgrid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.saidaf{grid-template-columns:1fr 1fr}.duo{grid-template-columns:1fr}}
 @media print{body *{visibility:hidden}#painel .tab[data-painel="caixa"],#painel .tab[data-painel="caixa"] *{visibility:visible}#painel .tab[data-painel="caixa"]{position:absolute;left:0;top:0;width:100%;color:#000;background:#fff}.caixa-top .btns,#cxImprimir,.saidaf,.tb button{display:none!important}}
+/* link do dono: só o painel, sem a vitrine do site */
+.painel-bar{display:none}
+.modo-painel .hero,.modo-painel main>section:not(#painel),.modo-painel footer,.modo-painel #btnInstalar{display:none!important}
+.modo-painel #painel{padding-top:0!important;min-height:100vh}
+.modo-painel .painel-bar{display:flex;align-items:center;gap:10px;padding:14px 0 18px;font-family:var(--display,inherit);font-weight:800;font-size:1.1rem;letter-spacing:.04em}
+.modo-painel .painel-bar img{width:36px;height:36px;border-radius:10px}
 </style>
 </head>
 <body>
@@ -659,6 +665,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono</div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -1296,7 +1303,7 @@ async function abrirPainel(){
   catch(e){ mostrarGate("sem"); }
 }
 /* o painel só abre pelo link do administrador: .../r17/#adm */
-window.addEventListener("hashchange",()=>{ if(location.hash==="#adm"){ abrirPainel(); setTimeout(()=>$("painel").scrollIntoView({behavior:"smooth"}),200); } });
+window.addEventListener("hashchange",()=>{ document.documentElement.classList.toggle("modo-painel", location.hash==="#adm" || /[?&]painel/.test(location.search)); if(location.hash==="#adm"){ abrirPainel(); setTimeout(()=>$("painel").scrollIntoView({behavior:"smooth"}),200); } });
 $("esqueci").addEventListener("click",()=>mostrarGate("esqueci"));
 $("novaVoltar").addEventListener("click",()=> isAdmin() ? entrarPainel() : mostrarGate("login"));
 $("trocarSenha").addEventListener("click",()=>mostrarGate("trocar"));
