@@ -677,7 +677,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono</div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <small style="opacity:.5;font-weight:400;font-size:.75rem">v21.11-18h30</small></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -710,7 +710,7 @@ footer{border-top:1px solid var(--line)}
         <div id="admBody" hidden>
           <div class="adm-top">
             <div><div class="eyebrow">Somente administrador</div><h2>Agenda da barbearia</h2></div>
-            <div class="btns" style="margin:0"><button type="button" class="btn btn-sm btn-y" id="btnInstalarAdm" hidden>📲 Instalar painel no celular</button><a class="btn btn-sm btn-y" href="./" target="_blank" rel="noopener">Ver site do cliente</a><button class="btn btn-sm btn-line" type="button" id="trocarSenha">Trocar senha</button><button class="btn btn-sm btn-line" type="button" id="sair">Sair do painel</button></div>
+            <div class="btns" style="margin:0"><button type="button" class="btn btn-sm btn-y" id="btnSom">🔔 Ativar som dos pedidos</button><button type="button" class="btn btn-sm btn-y" id="btnInstalarAdm" hidden>📲 Instalar painel no celular</button><a class="btn btn-sm btn-y" href="./" target="_blank" rel="noopener">Ver site do cliente</a><button class="btn btn-sm btn-line" type="button" id="trocarSenha">Trocar senha</button><button class="btn btn-sm btn-line" type="button" id="sair">Sair do painel</button></div>
           </div>
 
           <nav class="tabs" id="tabs" role="tablist">
@@ -1294,9 +1294,10 @@ $("pForm").addEventListener("submit",e=>{
   const quando = (dia ? fmtData(dia) : "") + (per ? (dia?", ":"") + per.toLowerCase() : "");
   const texto=`Olá! Quero marcar um horário na R-17.\n\nNome: ${nome}`+(serv?`\nServiço: ${serv}`:"")+(b?`\nBarbeiro: ${nomeBarb(b)}`:"")+(quando?`\nQuando prefiro: ${quando}`:"")+`\nWhatsApp: ${$("pFone").value}`;
   const destino = (b && /^55\d{10,11}$/.test(ZAPS[b]||"")) ? ZAPS[b] : CONFIG.whatsapp;
+  /* o pedido fica guardado no painel do dono (keepalive: chega mesmo se o celular trocar para o WhatsApp) */
+  try{ fetch(CONFIG.api+"/rest/v1/rpc/pedir",{method:"POST",keepalive:true,headers:{apikey:CONFIG.chave,"Content-Type":"application/json"},
+    body:JSON.stringify({p_loja:CONFIG.loja,p_nome:nome,p_fone:$("pFone").value,p_servico:serv,p_barbeiro:b,p_dia:dia||null,p_periodo:per})}).catch(()=>{}); }catch(x){}
   window.open(`https://wa.me/${destino}?text=${encodeURIComponent(texto)}`,"_blank","noopener");
-  /* o pedido também fica guardado no painel do dono */
-  api("pedir",{p_loja:CONFIG.loja,p_nome:nome,p_fone:$("pFone").value,p_servico:serv,p_barbeiro:b,p_dia:dia||null,p_periodo:per}).catch(()=>{});
 });
 function renderPDia(){
   const antes=$("pDia").value, d=new Date(), op=[`<option value="">Tanto faz</option>`];
@@ -1521,6 +1522,8 @@ function bip(){
   }catch(e){}
   try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
 }
+let somOk=false;
+$("btnSom").addEventListener("click",()=>{ liberarSom(); somOk=true; bip(); $("btnSom").textContent="🔔 Som ligado (tocou um teste)"; $("btnSom").classList.remove("btn-y"); $("btnSom").classList.add("btn-line"); });
 const tituloOriginal=document.title;
 function avisarNovos(lista){
   const ids=new Set(lista.map(a=>a.id));
