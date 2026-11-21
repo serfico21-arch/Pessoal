@@ -452,6 +452,7 @@ footer{border-top:1px solid var(--line)}
 .receber{margin-top:8px;flex-wrap:wrap}
 .agcol .row .receber{grid-column:1/-1}
 .tb small{color:var(--muted)}
+.btn-zap{background:#25D366;color:#06301A;border:0;font-weight:800}
 .tbw{overflow-x:auto;max-width:100%}
 .vip{color:#1A1208!important;opacity:1!important}
 @media (max-width:820px){.saidaf{grid-template-columns:1fr 1fr}.saidaf .field:nth-child(2){grid-column:1/-1;order:-1}}
@@ -1245,7 +1246,7 @@ $("form").addEventListener("submit",async e=>{
   const v = valor===null ? Number(s.preco) : valor;
   $("doneBox").hidden=false;
   $("doneBox").innerHTML=`<div class="done"><h3>${agora?"Lançado no caixa":"Salvo na agenda"}</h3><p>${esc(nome)}: ${esc(s.nome)} com ${nomeBarb(barb)}, ${fmtData(iso)} às ${hora}. Valor: ${brl(v)}.</p>${
-    !agora && fone ? `<a class="btn btn-sm btn-line" target="_blank" rel="noopener" href="${esc(waCliente(fone,`Olá ${nome}! Seu horário na R-17 está marcado: ${s.nome} com ${nomeBarb(barb)}, ${fmtData(iso)} às ${hora}. Até lá!`))}">Avisar o cliente no WhatsApp</a>`:""}</div>`;
+    !agora && fone ? `<a class="btn btn-sm btn-zap" target="_blank" rel="noopener" href="${esc(waCliente(fone,msgConfirma(nome,s.nome,barb,iso,hora)))}">📲 Enviar confirmação no WhatsApp</a>`:""}</div>`;
   horaSel=null; $("nome").value=""; $("fone").value=""; $("cliente").value=""; $("vipNota").hidden=true;
   $("jaRecebido").checked=false; valorMexido=false; $("valor").value=Number(s.preco);
   clientesCache=null; renderSlots();
@@ -1419,10 +1420,13 @@ function opcoesHora(iso,dur,barb,atual,ignorar,occ){
 }
 function ocupAgenda(){ const occ={}; agendaDia.forEach(a=>{(occ[a.barbeiro]||(occ[a.barbeiro]=[])).push(...cobre(toMin(a.hora),a.min));}); return occ; }
 const corBarb = id => "b"+Math.max(0,BARBEIROS.findIndex(b=>b.id===id));
+const ENDERECO = "Rua Desembargador Flávio Torres, 230, Jardim Kemel, Itaim Paulista, SP";
+const msgConfirma = (nome,serv,barb,iso,hora) => `Olá ${nome}! ✂️ Seu horário na *Espaço Barber Shop R-17* está confirmado:\n\n📅 ${fmtData(iso)}\n🕒 ${hora}\n💈 ${serv} com ${nomeBarb(barb)}\n📍 ${ENDERECO}\n\nSe não puder vir, por favor avise por aqui. Até lá!`;
 const vlr = a => a.valor!==null && a.valor!==undefined ? Number(a.valor) : Number(a.preco||0);
 function linhaAgenda(a,comData,classe){
   const pend = a.status==="pendente";
-  const txt = `Olá ${a.nome}! Seu horário na R-17 está confirmado: ${a.servico} com ${nomeBarb(a.barbeiro)}, ${fmtData(a.data)} às ${a.hora}. Até lá!`;
+  const txt = msgConfirma(a.nome,a.servico,a.barbeiro,a.data,a.hora);
+  if(!String(a.fone||"").replace(/\D/g,"") && a.cliente_id){ const c=(clientesCache||[]).find(x=>x.id===a.cliente_id); if(c) a.fone=c.fone; }
   const temFone = String(a.fone||"").replace(/\D/g,"").length>=10;
   const receber = comData ? "" : a.recebido
     ? `<div class="receber pago"><span class="pago">Pago ${brl(vlr(a))}</span><button class="btn btn-sm btn-line" data-act="desfazer">Desfazer</button></div>`
@@ -1431,7 +1435,7 @@ function linhaAgenda(a,comData,classe){
     <div class="h">${comData?`<small>${fmtCurta(a.data)}</small>`:""}${esc(a.hora)}</div>
     <div class="who"><b>${esc(a.nome)}${a.vip?` <span class="vip">⭐ VIP</span>`:""}${pend?` <span class="badge b-pend">Aguardando confirmação</span>`:""}</b><span class="svc">${comData?`<span class="bchip ${corBarb(a.barbeiro)}">${esc(nomeBarb(a.barbeiro))}</span>`:""}${esc(a.servico)} · tabela ${brl(Number(a.preco||0))}</span>${temFone?`<span><a href="${waCliente(a.fone,"Olá "+a.nome+"!")}" target="_blank" rel="noopener">${esc(a.fone)}</a></span>`:""}</div>
     ${receber}
-    <div class="act">${pend?`<button class="btn btn-sm btn-y" data-act="confirmar">Confirmar</button>`:temFone?`<a class="btn btn-sm btn-line" href="${esc(waCliente(a.fone,txt))}" target="_blank" rel="noopener">Avisar cliente</a>`:""}${comData||a.recebido?"":`<button class="btn btn-sm btn-line" data-act="editar">Mudar dia/horário</button>`}<button class="btn btn-sm btn-line" data-act="cancelar">Apagar</button></div>
+    <div class="act">${pend?`<button class="btn btn-sm btn-y" data-act="confirmar">Confirmar</button>`:temFone?`<a class="btn btn-sm btn-zap" href="${esc(waCliente(a.fone,txt))}" target="_blank" rel="noopener">📲 Enviar confirmação no WhatsApp</a>`:""}${comData||a.recebido?"":`<button class="btn btn-sm btn-line" data-act="editar">Mudar dia/horário</button>`}<button class="btn btn-sm btn-line" data-act="cancelar">Apagar</button></div>
   </div>`;
 }
 let pendentes=[];
