@@ -84,6 +84,50 @@ begin
 end $$;
 
 revoke execute on function public._errou(text) from public, anon, authenticated;
+
+-- primeiro acesso: código de ativação (vem de quem vendeu o sistema) -&gt; dono cria seu código, dica e senha
+create or replace function public.adm_ativar(p_loja text, p_ativacao text, p_codigo text, p_dica text, p_senha text) returns uuid
+language plpgsql security definer set search_path = &#x27;&#x27; as $$
+declare s public.lojas_segredo; v uuid; c text := public._limpa_codigo(p_codigo);
+begin
+  select * into s from public.lojas_segredo where loja_id = p_loja for update;
+  if s is null then raise exception &#x27;loja&#x27;; end if;
+  if s.senha_hash is not null then raise exception &#x27;ja_ativado&#x27;; end if;
+  if s.bloqueado_ate is not null and s.bloqueado_ate &gt; now() then raise exception &#x27;bloqueado&#x27;; end if;
+  if extensions.crypt(upper(trim(coalesce(p_ativacao,&#x27;&#x27;))), s.codigo_hash) &lt;&gt; s.codigo_hash then
+    perform public._errou(p_loja);
+    raise exception &#x27;codigo&#x27;;
+  end if;
+  if length(c) &lt; 4 then raise exception &#x27;codigo_curto&#x27;; end if;
+  if length(coalesce(p_senha,&#x27;&#x27;)) &lt; 4 then raise exception &#x27;senha_curta&#x27;; end if;
+  update public.lojas_segredo set codigo_hash = extensions.crypt(c, extensions.gen_salt(&#x27;bf&#x27;)),
+    dica = nullif(left(trim(coalesce(p_dica,&#x27;&#x27;)),80),&#x27;&#x27;),
+    senha_hash = extensions.crypt(p_senha, extensions.gen_salt(&#x27;bf&#x27;)),
+    erros = 0, bloqueios = 0, bloqueado_ate = null where loja_id = p_loja;
+  delete from public.sessoes where loja_id = p_loja;
+  insert into public.sessoes(loja_id) values (p_loja) returning token into v;
+  return v;
+end $$;
+
+-- &quot;esqueci a senha&quot; só funciona depois que a barbearia já foi ativada
+create or replace function public.adm_nova_senha(p_loja text, p_codigo text, p_senha text) returns uuid
+language plpgsql security definer set search_path = &#x27;&#x27; as $$
+declare s public.lojas_segredo; v uuid; c text := public._limpa_codigo(p_codigo);
+begin
+  select * into s from public.lojas_segredo where loja_id = p_loja for update;
+  if s is null or s.senha_hash is null then raise exception &#x27;loja&#x27;; end if;
+  if s.bloqueado_ate is not null and s.bloqueado_ate &gt; now() then raise exception &#x27;bloqueado&#x27;; end if;
+  if length(coalesce(p_senha,&#x27;&#x27;)) &lt; 4 then raise exception &#x27;senha_curta&#x27;; end if;
+  if extensions.crypt(c, s.codigo_hash) &lt;&gt; s.codigo_hash then
+    perform public._errou(p_loja);
+    raise exception &#x27;codigo&#x27;;
+  end if;
+  update public.lojas_segredo set senha_hash = extensions.crypt(p_senha, extensions.gen_salt(&#x27;bf&#x27;)),
+    erros = 0, bloqueios = 0, bloqueado_ate = null where loja_id = p_loja;
+  delete from public.sessoes where loja_id = p_loja;
+  insert into public.sessoes(loja_id) values (p_loja) returning token into v;
+  return v;
+end $$;
 </textarea>
 <script>document.getElementById("b").onclick=async()=>{const t=document.getElementById("t");try{await navigator.clipboard.writeText(t.value)}catch(e){t.select();document.execCommand("copy")}document.getElementById("ok").textContent="Copiado! Agora cole no Supabase."};</script>
 </main></body></html>

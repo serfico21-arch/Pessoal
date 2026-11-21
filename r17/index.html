@@ -526,7 +526,13 @@ footer{border-top:1px solid var(--line)}
           <form id="gateNova" class="gform" hidden novalidate>
             <p class="hint" id="novaTxt" style="margin:0 0 12px">Crie a senha que vai abrir o Painel ADM.</p>
             <p class="dica" id="dicaTxt" hidden></p>
-            <div class="field" id="campoCodigo"><label for="codigo">Código da barbearia</label><input id="codigo" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Ex.: R17-XXXX-XXXX"></div>
+            <div class="field" id="campoCodigo"><label for="codigo" id="codigoLbl">Código de recuperação</label><input id="codigo" autocomplete="off" spellcheck="false"></div>
+            <div id="campoRec" hidden>
+              <p class="hint" style="margin:4px 0 10px"><b>Crie o seu código de recuperação.</b> Ele será pedido se você esquecer a senha. Anote num lugar seguro.</p>
+              <div class="field"><label for="recCod">Seu código de recuperação</label><input id="recCod" autocomplete="off" spellcheck="false"></div>
+              <div class="field"><label for="recDica">Dica para lembrar do código (opcional)</label><input id="recDica" maxlength="80" placeholder="Algo que só você entende"></div>
+              <p class="hint" style="margin:4px 0 10px"><b>Agora crie a senha</b> que vai abrir o painel.</p>
+            </div>
             <div class="field"><label for="nova1">Nova senha</label><input id="nova1" type="password" autocomplete="new-password"></div>
             <div class="field"><label for="nova2">Repita a nova senha</label><input id="nova2" type="password" autocomplete="new-password"></div>
             <p class="err" id="novaErr" role="alert"></p>
@@ -912,9 +918,11 @@ function mostrarGate(modo){ // "sem" | "login" | "nova" | "esqueci" | "trocar"
   $("gateLogin").hidden = modo!=="login";
   $("gateNova").hidden = !["nova","esqueci","trocar"].includes(modo);
   $("campoCodigo").hidden = modo==="trocar";
+  $("campoRec").hidden = modo!=="nova";
+  $("codigoLbl").textContent = modo==="nova" ? "Código de ativação" : "Código de recuperação";
   $("novaVoltar").hidden = modo==="nova";
-  $("novaTxt").textContent = modo==="nova" ? "Primeiro acesso: digite o código da barbearia e crie a senha que vai abrir o Painel ADM."
-    : modo==="esqueci" ? "Sem problema. Digite o código da barbearia e crie uma senha nova."
+  $("novaTxt").textContent = modo==="nova" ? "Primeiro acesso. Digite o código de ativação que veio com o sistema."
+    : modo==="esqueci" ? "Sem problema. Digite o seu código de recuperação e crie uma senha nova."
     : "Digite a nova senha do Painel ADM.";
   $("gateNova").dataset.modo=modo; $("loginErr").textContent=""; $("novaErr").textContent="";
   $("dicaTxt").hidden=true;
@@ -950,16 +958,22 @@ $("gateLogin").addEventListener("submit",async e=>{
 $("gateNova").addEventListener("submit",async e=>{
   e.preventDefault();
   const modo=$("gateNova").dataset.modo, a=$("nova1").value, b=$("nova2").value, cod=$("codigo").value.trim();
-  if(modo!=="trocar" && !cod){ $("novaErr").textContent="Digite o código da barbearia."; return; }
+  if(modo!=="trocar" && !cod){ $("novaErr").textContent = modo==="nova" ? "Digite o código de ativação." : "Digite o código de recuperação."; return; }
+  const rc=$("recCod").value.trim(), rd=$("recDica").value.trim(), limpa=x=>x.replace(/[^0-9a-z]/gi,"").toUpperCase();
+  if(modo==="nova"){
+    if(limpa(rc).length<4){ $("novaErr").textContent="Crie um código de recuperação com pelo menos 4 letras ou números."; return; }
+    if(rd && limpa(rd).includes(limpa(rc))){ $("novaErr").textContent="A dica não pode mostrar o código."; return; }
+  }
   if(a.length<4){ $("novaErr").textContent="A senha precisa ter pelo menos 4 caracteres."; return; }
   if(a!==b){ $("novaErr").textContent="As duas senhas estão diferentes."; return; }
   try{
     if(modo==="trocar") await adm("adm_trocar_senha",{p_senha:a});
+    else if(modo==="nova"){ token = await api("adm_ativar",{p_loja:CONFIG.loja,p_ativacao:cod,p_codigo:rc,p_dica:rd,p_senha:a}); lsSet(TOK_KEY,token); }
     else { token = await api("adm_nova_senha",{p_loja:CONFIG.loja,p_codigo:cod,p_senha:a}); lsSet(TOK_KEY,token); }
-    $("nova1").value=""; $("nova2").value=""; $("codigo").value=""; liberado=true; entrarPainel();
+    $("nova1").value=""; $("nova2").value=""; $("codigo").value=""; $("recCod").value=""; $("recDica").value=""; liberado=true; entrarPainel();
     $("exMsg").textContent="Senha salva.";
   }catch(err){
-    $("novaErr").textContent = err.codigo==="codigo" ? "Código da barbearia errado. Confira e tente de novo."
+    $("novaErr").textContent = err.codigo==="codigo" ? (modo==="nova" ? "Código de ativação errado." : "Código de recuperação errado.") + " Confira e tente de novo."
       : err.codigo==="bloqueado" ? "Muitas tentativas erradas. Por segurança, espere um pouco e tente de novo."
       : "Não foi possível salvar a senha. Confira a internet e tente de novo.";
   }
