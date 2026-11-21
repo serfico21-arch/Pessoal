@@ -593,6 +593,15 @@ footer{border-top:1px solid var(--line)}
             <p class="ok" id="servMsg" aria-live="polite"></p>
           </div>
           <div class="box" style="margin-top:24px">
+            <h3 class="bh">WhatsApp da barbearia</h3>
+            <p class="hint" style="margin:0 0 10px">É para esse número que os clientes mandam mensagem pelo site.</p>
+            <div class="vidform">
+              <div class="field"><label for="zapNovo">Número com DDD</label><input id="zapNovo" type="tel" inputmode="tel" placeholder="(11) 90000-0000"></div>
+              <button class="btn btn-sm btn-y" type="button" id="zapSalvar">Salvar WhatsApp</button>
+            </div>
+            <p class="ok" id="zapMsg" aria-live="polite"></p>
+          </div>
+          <div class="box" style="margin-top:24px">
             <h3 class="bh">Código de recuperação</h3>
             <p class="hint" style="margin:0 0 10px">É o código pedido quando alguém toca em "Esqueci a senha". A dica aparece nessa tela para ajudar a lembrar. Não coloque o código na dica.</p>
             <div class="vidform">
@@ -639,7 +648,7 @@ footer{border-top:1px solid var(--line)}
         <h2 style="margin-bottom:18px">Contato</h2>
         <dl>
           <div><dt>Endereço</dt><dd>Rua Desembargador Flávio Torres, 230<br>Jardim Kemel · Itaim Paulista · São Paulo/SP</dd></div>
-          <div><dt>WhatsApp</dt><dd><a href="https://wa.me/5511982544101" target="_blank" rel="noopener">(11) 98254-4101</a></dd></div>
+          <div><dt>WhatsApp</dt><dd><a id="zapLink" href="https://wa.me/5511982544101" target="_blank" rel="noopener">(11) 98254-4101</a></dd></div>
           
         </dl>
       </div>
@@ -838,8 +847,13 @@ async function carregarLoja(){
   if(c.horario && c.horario.dias) horario=c.horario;
   if(Array.isArray(c.servicos) && c.servicos.length) todosServ=c.servicos;
   videos = Array.isArray(c.videos) ? c.videos : [];
+  /* dados da barbearia ficam na chave "barbeiros" do banco (ex.: WhatsApp) */
+  if(c.barbeiros && /^55\d{10,11}$/.test(c.barbeiros.whatsapp||"")){ CONFIG.whatsapp=c.barbeiros.whatsapp; mostrarZap(); }
   renderHorasTopo(); renderServicos(); renderVideos();
 }
+
+const fmtZap = n => { const d=n.replace(/^55/,""); return `(${d.slice(0,2)}) ${d.slice(2,d.length-4)}-${d.slice(-4)}`; };
+function mostrarZap(){ const a=$("zapLink"); a.href="https://wa.me/"+CONFIG.whatsapp; a.textContent=fmtZap(CONFIG.whatsapp); }
 
 /* ---------- galeria e vídeos ---------- */
 let fotos = [];
@@ -1004,6 +1018,7 @@ function entrarPainel(){
   $("submitBtn").textContent="Salvar na agenda";
   if(!$("admData").value) $("admData").value=$("data").value || isoHoje;
   renderSemana(); renderServAdm(); renderFotosAdm(); renderVidAdm(); carregarEmailAdm(); ouvirAdm();
+  $("zapNovo").value=fmtZap(CONFIG.whatsapp);
 }
 function sairModoAdm(){
   $("lead").textContent="Escolha o horário e confirme. Seu horário fica guardado na agenda e você avisa a barbearia pelo WhatsApp.";
@@ -1238,6 +1253,19 @@ $("fotosAdm").addEventListener("change",async e=>{
     const f=fotos.find(x=>x.id===el.closest(".fa").dataset.id); if(f) f.legenda=el.value.trim();
     $("fotoMsg").textContent="Legenda salva."; }
   catch(err){ $("fotoMsg").textContent="Não foi possível salvar a legenda."; }
+});
+
+/* ---------- WhatsApp da barbearia ---------- */
+$("zapNovo").addEventListener("input",e=>{
+  let d=e.target.value.replace(/\D/g,"").slice(0,11);
+  e.target.value = d.length>6 ? `(${d.slice(0,2)}) ${d.slice(2,d.length-4)}-${d.slice(-4)}` : d.length>2 ? `(${d.slice(0,2)}) ${d.slice(2)}` : d;
+});
+$("zapSalvar").addEventListener("click",async()=>{
+  const d=$("zapNovo").value.replace(/\D/g,"").replace(/^55(?=\d{10,11}$)/,"");
+  if(d.length<10||d.length>11){ $("zapMsg").textContent="Digite o número com DDD. Ex.: (11) 98254-4101"; return; }
+  try{ await adm("adm_config",{p_chave:"barbeiros",p_valor:{whatsapp:"55"+d}}); CONFIG.whatsapp="55"+d; mostrarZap();
+    $("zapMsg").textContent="WhatsApp salvo: "+fmtZap(CONFIG.whatsapp)+". O site já usa o número novo."; }
+  catch(err){ $("zapMsg").textContent = err.codigo==="sessao" ? "" : "Não foi possível salvar. Tente de novo."; }
 });
 
 /* ---------- código de recuperação ---------- */
