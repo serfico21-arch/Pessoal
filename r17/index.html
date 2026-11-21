@@ -330,6 +330,51 @@ footer{border-top:1px solid var(--line)}
 .lbx{top:12px;right:12px;font-size:1.1rem}
 .lbn{top:50%;transform:translateY(-50%)}.lbp{left:12px}.lbq{right:12px}
 @media (max-width:600px){.lbn{top:auto;bottom:14px;transform:none}.lbp{left:calc(50% - 60px)}.lbq{right:calc(50% - 60px)}}
+
+/* ===== agenda organizada ===== */
+.daynav{display:flex;align-items:center;gap:8px;margin:0 0 14px;flex-wrap:wrap}
+.daynav .btn{min-width:48px;font-size:1.1rem}
+.dn-mid{flex:1;min-width:180px;position:relative;display:flex;flex-direction:column}
+.dn-mid input{font-weight:700}
+.dn-mid b{font-family:var(--display);font-size:1.5rem;text-transform:capitalize;margin-top:4px;line-height:1.1}
+.proximo{border:2px solid var(--yellow);border-radius:18px;padding:14px 18px;margin-bottom:14px;background:linear-gradient(90deg,rgba(217,168,78,.18),transparent);display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.proximo .ph{font-family:var(--mono);font-size:2.2rem;font-weight:700;color:var(--yellow);line-height:1}
+.proximo small{display:block;text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;color:var(--muted)}
+.proximo b{font-size:1.2rem}
+.agcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.agcol{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--bg)}
+.agcol h4{margin:0;padding:12px 16px;font-family:var(--display);font-size:1.35rem;letter-spacing:.02em;display:flex;justify-content:space-between;align-items:center;color:#1A1208}
+.agcol h4 span{font-family:var(--body);font-size:.85rem;font-weight:700;opacity:.8}
+.agcol.b0 h4{background:var(--yellow)}.agcol.b1 h4{background:#7FB3E8}.agcol.b2 h4{background:#E3897F}
+.agcol .rows{padding:10px}
+.agcol .empty{padding:14px 16px}
+.row.passou{opacity:.5}
+.row.agora{border:2px solid var(--yellow);box-shadow:0 0 0 4px rgba(217,168,78,.15)}
+.row .h{font-size:1.35rem!important}
+.row .who b{font-size:1.05rem}
+.row .svc{display:block;color:var(--ink);font-weight:600}
+.bchip{display:inline-block;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:99px;color:#1A1208;margin-right:6px;vertical-align:middle}
+.bchip.b0{background:var(--yellow)}.bchip.b1{background:#7FB3E8}.bchip.b2{background:#E3897F}
+@media (max-width:820px){.agcols{grid-template-columns:1fr}}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:120;background:var(--yellow);color:#1A1208;font-weight:800;padding:14px 22px;border-radius:16px;box-shadow:0 20px 50px -10px #000;max-width:calc(100% - 32px);text-align:center;cursor:pointer}
+.toast[hidden]{display:none}
+/* ===== agendamento simples ===== */
+.dias{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.dia{flex:0 0 auto;scroll-snap-align:start;min-width:74px;padding:10px 8px;border:1.5px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);cursor:pointer;text-align:center;font:inherit;line-height:1.15}
+.dia small{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.dia b{display:block;font-family:var(--display);font-size:1.5rem}
+.dia[aria-pressed="true"]{background:var(--yellow);border-color:var(--yellow);color:var(--on-accent)}
+.dia[aria-pressed="true"] small{color:var(--on-accent)}
+.dia:disabled{opacity:.35;cursor:not-allowed}
+.outrodia{font-size:.85rem;margin-top:4px;color:var(--muted)}
+.outrodia input{display:inline-block;width:auto;margin-left:6px;padding:6px 8px}
+.slots{grid-template-columns:repeat(auto-fill,minmax(84px,1fr))!important;gap:10px!important}
+.slot{padding:14px 0!important;font-size:1.05rem!important}
+.passo{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--yellow);color:var(--on-accent);font-size:.8rem;font-weight:800;margin-right:8px}
+.agcol .row{grid-template-columns:64px minmax(0,1fr)}
+.agcol .row .act{grid-column:1/-1;justify-content:flex-start}
+.agcol .row .who>span{display:block}
+.b-pend{color:#1A1208!important;font-weight:800}
 </style>
 </head>
 <body>
@@ -518,20 +563,21 @@ footer{border-top:1px solid var(--line)}
         </div>
 
         <form id="form" novalidate>
-          <div class="field"><label for="servico">Serviço</label><select id="servico"></select></div>
-          <div class="field"><label for="barbeiro">Barbeiro</label><select id="barbeiro"></select></div>
+          <div class="field"><label for="servico"><span class="passo">1</span>Serviço</label><select id="servico"></select></div>
+          <div class="field"><label for="barbeiro"><span class="passo">2</span>Barbeiro</label><select id="barbeiro"></select></div>
           <div class="field">
-            <label for="data">Data</label>
-            <input type="date" id="data">
+            <span class="lbl" id="diaLbl"><span class="passo">3</span>Dia</span>
+            <div class="dias" id="dias" role="group" aria-labelledby="diaLbl"></div>
+            <label class="outrodia" for="data">Outro dia: <input type="date" id="data"></label>
             <p class="hint" id="diaHint"></p>
           </div>
           <div class="field">
-            <span class="lbl" id="horaLbl">Horário</span>
+            <span class="lbl" id="horaLbl"><span class="passo">4</span>Horário</span>
             <div class="slots" id="slots" role="group" aria-labelledby="horaLbl"></div>
             <p class="hint" id="slotNote" hidden></p>
           </div>
-          <div class="field"><label for="nome">Nome do cliente</label><input id="nome" autocomplete="name" placeholder="Ex.: João da Silva"></div>
-          <div class="field"><label for="fone">WhatsApp</label><input id="fone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000"></div>
+          <div class="field"><label for="nome"><span class="passo">5</span>Seu nome</label><input id="nome" autocomplete="name" placeholder="Ex.: João da Silva"></div>
+          <div class="field"><label for="fone">Seu WhatsApp</label><input id="fone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000"></div>
           <p class="err" id="err" role="alert"></p>
           <button class="btn btn-y" id="submitBtn" type="submit" style="width:100%">Confirmar agendamento</button>
         </form>
@@ -581,8 +627,17 @@ footer{border-top:1px solid var(--line)}
             <p class="hint" style="margin:0 0 10px">Clientes que marcaram pelo site. Confirme ou apague. Só o ADM pode apagar um horário.</p>
             <div class="rows" id="pendRows"></div>
           </div>
-          <div class="box">
-            <div class="field" style="max-width:240px"><label for="admData">Dia</label><input type="date" id="admData"></div>
+          <div class="daynav">
+            <button type="button" class="btn btn-sm btn-line" id="diaAnt" aria-label="Dia anterior">‹</button>
+            <div class="dn-mid"><input type="date" id="admData" aria-label="Dia da agenda"><b id="admDiaTxt"></b></div>
+            <button type="button" class="btn btn-sm btn-line" id="diaProx" aria-label="Próximo dia">›</button>
+            <button type="button" class="btn btn-sm btn-y" id="diaHoje">Hoje</button>
+          </div>
+          <div class="proximo" id="proximo" hidden></div>
+          <p class="ok" id="agMsg" aria-live="polite"></p>
+          <div class="agcols" id="rows"><p class="empty">Carregando a agenda…</p></div>
+          <p class="hint" style="margin:10px 0 0">Para marcar um cliente que pediu pelo WhatsApp, use o formulário "Agende seu horário" mais acima.</p>
+          <div class="box" style="margin-top:24px">
             <h3 class="bh">Horário deste dia</h3>
             <p class="hint" id="diaInfo" style="margin:0 0 10px"></p>
             <div class="dayrow">
@@ -593,11 +648,6 @@ footer{border-top:1px solid var(--line)}
             <div class="btns" style="margin-top:4px"><button class="btn btn-sm btn-y" type="button" id="exSalvar">Salvar horário do dia</button><button class="btn btn-sm btn-line" type="button" id="exLimpar">Voltar ao horário padrão</button></div>
             <p class="ok" id="exMsg" aria-live="polite"></p>
           </div>
-
-          <h3 class="bh">Clientes marcados</h3>
-          <p class="hint" style="margin:0 0 12px">Para marcar um cliente que pediu pelo WhatsApp, use o formulário de agendamento acima.</p>
-          <p class="ok" id="agMsg" aria-live="polite"></p>
-          <div class="rows" id="rows"><p class="empty">Carregando a agenda…</p></div>
 
           <div class="box" style="margin-top:24px">
             <h3 class="bh">Horário padrão da semana</h3>
@@ -684,6 +734,7 @@ footer{border-top:1px solid var(--line)}
   </section>
 </main>
 
+<div class="toast" id="toast" role="status" hidden></div>
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Foto ampliada" hidden>
   <button type="button" class="lbx" id="lbFechar" aria-label="Fechar">✕</button>
   <button type="button" class="lbn lbp" id="lbAnt" aria-label="Foto anterior">‹</button>
@@ -848,7 +899,17 @@ function renderSlots(){
   $("s-serv").textContent=s.nome; $("s-valor").textContent=brl(Number(s.preco));
   $("s-barb").textContent=nomeBarb(b);
   $("s-data").textContent=iso?fmtData(iso):"—"; $("s-hora").textContent=horaSel||"—";
+  renderDias();
 }
+function renderDias(){
+  const sel=$("data").value, d=new Date(), html=[];
+  for(let i=0;i<10;i++){ const iso=isoOf(d), fechado=!grade(iso);
+    const top = i===0 ? "Hoje" : i===1 ? "Amanhã" : d.toLocaleDateString("pt-BR",{weekday:"short"}).replace(".","");
+    html.push(`<button type="button" class="dia" data-iso="${iso}" aria-pressed="${iso===sel}" ${fechado?"disabled":""} aria-label="${fmtData(iso)}${fechado?", fechado":""}"><small>${top}</small><b>${d.getDate()}</b><small>${fechado?"fechado":d.toLocaleDateString("pt-BR",{month:"short"}).replace(".","")}</small></button>`);
+    d.setDate(d.getDate()+1); }
+  $("dias").innerHTML=html.join("");
+}
+$("dias").addEventListener("click",e=>{ const b=e.target.closest(".dia"); if(!b||b.disabled) return; $("data").value=b.dataset.iso; $("data").dataset.mexeu="1"; horaSel=null; renderSlots(); ouvirDia(); });
 function proximoDia(){
   const d=new Date();
   for(let i=0;i<8;i++){ const iso=isoOf(d), g=grade(iso);
@@ -1097,7 +1158,7 @@ async function ouvirAdm(){
   try{
     const [lista, pend] = await Promise.all([adm("adm_agenda",{p_data:iso}), adm("adm_pendentes"), carregarDia(iso)]);
     if(iso!==$("admData").value) return;
-    agendaDia = lista||[]; renderAdm(); renderPend(pend||[]); renderDiaAdm();
+    agendaDia = lista||[]; renderAdm(); renderPend(pend||[]); avisarNovos(pend||[]); renderDiaAdm();
     if(iso===$("data").value) renderSlots();
   }catch(e){ if(e.codigo!=="sessao") $("rows").innerHTML=`<p class="empty">Não foi possível abrir a agenda agora. Confira a internet.</p>`; }
 }
@@ -1110,7 +1171,7 @@ function renderDiaAdm(){
   $("exFecha").value = ex.fecha || base.fecha || "18:00";
   $("exFechado").checked = !!ex.fechado || (!base.aberto && !ex.abre);
 }
-$("admData").addEventListener("change",()=>{ $("exMsg").textContent=""; agendaDia=[]; ouvirAdm(); });
+$("admData").addEventListener("change",()=>mudarDiaAdm($("admData").value));
 $("exSalvar").addEventListener("click",async()=>{
   const iso=$("admData").value, abre=$("exAbre").value, fecha=$("exFecha").value, fechado=$("exFechado").checked;
   if(!fechado && (!abre||!fecha||toMin(fecha)<=toMin(abre))){ $("exMsg").textContent="O horário de fechar precisa ser depois do de abrir."; return; }
@@ -1153,12 +1214,13 @@ function opcoesHora(iso,dur,barb,atual,ignorar,occ){
     return `<option value="${h}" ${h===atual?"selected":""} ${ok?"":"disabled"}>${h}${ok?"":" (ocupado)"}</option>`;}).join("");
 }
 function ocupAgenda(){ const occ={}; agendaDia.forEach(a=>{(occ[a.barbeiro]||(occ[a.barbeiro]=[])).push(...cobre(toMin(a.hora),a.min));}); return occ; }
-function linhaAgenda(a,comData){
+const corBarb = id => "b"+Math.max(0,BARBEIROS.findIndex(b=>b.id===id));
+function linhaAgenda(a,comData,classe){
   const pend = a.status==="pendente";
   const txt = `Olá ${a.nome}! Seu horário na R-17 está confirmado: ${a.servico} com ${nomeBarb(a.barbeiro)}, ${fmtData(a.data)} às ${a.hora}. Até lá!`;
-  return `<div class="row${pend?" pend":""}" data-id="${a.id}">
+  return `<div class="row${pend?" pend":""}${classe?" "+classe:""}" data-id="${a.id}">
     <div class="h">${comData?`<small>${fmtCurta(a.data)}</small>`:""}${esc(a.hora)}</div>
-    <div class="who"><b>${esc(a.nome)} <span class="badge ${pend?"b-pend":"b-ok"}">${pend?"Aguardando confirmação":"Confirmado"}</span></b><span>${esc(a.servico)} · ${nomeBarb(a.barbeiro)} · <a href="${waCliente(a.fone,"Olá "+a.nome+"!")}" target="_blank" rel="noopener">${esc(a.fone)}</a></span></div>
+    <div class="who"><b>${esc(a.nome)} <span class="badge ${pend?"b-pend":"b-ok"}">${pend?"Aguardando confirmação":"Confirmado"}</span></b><span class="svc">${comData?`<span class="bchip ${corBarb(a.barbeiro)}">${esc(nomeBarb(a.barbeiro))}</span>`:""}${esc(a.servico)} · ${a.min} min</span><span><a href="${waCliente(a.fone,"Olá "+a.nome+"!")}" target="_blank" rel="noopener">${esc(a.fone)}</a></span></div>
     <div class="act">${pend?`<button class="btn btn-sm btn-y" data-act="confirmar">Confirmar</button>`:`<a class="btn btn-sm btn-line" href="${esc(waCliente(a.fone,txt))}" target="_blank" rel="noopener">Avisar cliente</a>`}${comData?"":`<button class="btn btn-sm btn-line" data-act="editar">Mudar dia/horário</button>`}<button class="btn btn-sm btn-line" data-act="cancelar">Apagar</button></div>
   </div>`;
 }
@@ -1170,9 +1232,47 @@ function renderPend(lista){
   $("pendRows").innerHTML = lista.map(a=>linhaAgenda(a,true)).join("");
 }
 function renderAdm(){
-  if(!agendaDia.length){ $("rows").innerHTML=`<p class="empty">Nenhum cliente marcado neste dia.</p>`; return; }
-  $("rows").innerHTML = agendaDia.map(a=>linhaAgenda(a,false)).join("");
+  const iso=$("admData").value, ehHoje = iso===isoOf(new Date()), agora=new Date(), mAgora=agora.getHours()*60+agora.getMinutes();
+  $("admDiaTxt").textContent = (ehHoje ? "Hoje, " : "") + fmtData(iso);
+  const estado = a => { if(!ehHoje) return ""; const ini=toMin(a.hora), fim=ini+a.min; return fim<=mAgora ? "passou" : ini<=mAgora ? "agora" : ""; };
+  $("rows").innerHTML = BARBEIROS.map((b,i)=>{ const l=agendaDia.filter(a=>a.barbeiro===b.id);
+    return `<div class="agcol b${i}"><h4>${esc(b.nome)}<span>${l.length===1?"1 cliente":l.length+" clientes"}</span></h4>${
+      l.length ? `<div class="rows">${l.map(a=>linhaAgenda(a,false,estado(a))).join("")}</div>` : `<p class="empty">Ninguém marcado com ${esc(b.nome)} neste dia.</p>`}</div>`; }).join("");
+  // próximo cliente (só hoje)
+  const prox = ehHoje ? agendaDia.find(a=>toMin(a.hora)+a.min>mAgora) : null;
+  $("proximo").hidden = !prox;
+  if(prox){ const jaComecou = toMin(prox.hora)<=mAgora;
+    $("proximo").innerHTML = `<div class="ph">${esc(prox.hora)}</div><div><small>${jaComecou?"Atendendo agora":"Próximo cliente"}</small><b>${esc(prox.nome)}</b><div><span class="bchip ${corBarb(prox.barbeiro)}">${esc(nomeBarb(prox.barbeiro))}</span>${esc(prox.servico)}</div></div>`; }
 }
+function mudarDiaAdm(iso){ $("admData").value=iso; $("exMsg").textContent=""; agendaDia=[]; ouvirAdm(); }
+$("diaAnt").addEventListener("click",()=>{ const [y,m,d]=$("admData").value.split("-").map(Number); mudarDiaAdm(isoOf(new Date(y,m-1,d-1))); });
+$("diaProx").addEventListener("click",()=>{ const [y,m,d]=$("admData").value.split("-").map(Number); mudarDiaAdm(isoOf(new Date(y,m-1,d+1))); });
+$("diaHoje").addEventListener("click",()=>mudarDiaAdm(isoOf(new Date())));
+
+/* ---------- aviso sonoro de agendamento novo ---------- */
+let conhecidos=null, somCtx=null;
+function liberarSom(){ try{ somCtx = somCtx || new (window.AudioContext||window.webkitAudioContext)(); if(somCtx.state==="suspended") somCtx.resume(); }catch(e){} }
+document.addEventListener("pointerdown",liberarSom,{passive:true});
+function bip(){
+  try{ liberarSom(); if(!somCtx) return; const t=somCtx.currentTime;
+    [[880,0],[1175,.18],[1568,.36]].forEach(([f,d])=>{ const o=somCtx.createOscillator(), g=somCtx.createGain();
+      o.type="sine"; o.frequency.value=f; g.gain.setValueAtTime(0,t+d); g.gain.linearRampToValueAtTime(.35,t+d+.02); g.gain.exponentialRampToValueAtTime(.001,t+d+.3);
+      o.connect(g); g.connect(somCtx.destination); o.start(t+d); o.stop(t+d+.32); });
+  }catch(e){}
+  try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
+}
+const tituloOriginal=document.title;
+function avisarNovos(lista){
+  const ids=new Set(lista.map(a=>a.id));
+  if(conhecidos){ const novos=lista.filter(a=>!conhecidos.has(a.id));
+    if(novos.length){ bip(); const a=novos[0];
+      $("toast").textContent = novos.length===1 ? `Novo agendamento: ${a.nome}, ${fmtCurta(a.data)} às ${a.hora} com ${nomeBarb(a.barbeiro)}` : `${novos.length} agendamentos novos`;
+      $("toast").hidden=false; document.title=`(${novos.length}) Novo agendamento`;
+      clearTimeout(avisarNovos.t); avisarNovos.t=setTimeout(()=>{ $("toast").hidden=true; },12000); } }
+  conhecidos=ids;
+}
+$("toast").addEventListener("click",()=>{ $("toast").hidden=true; document.title=tituloOriginal; $("pendBox").scrollIntoView({behavior:"smooth",block:"center"}); });
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) setTimeout(()=>{ document.title=tituloOriginal; },4000); });
 async function acaoAgenda(e){
   const btn=e.target.closest("button"); if(!btn) return;
   const row=btn.closest(".row"), id=row.dataset.id;
@@ -1388,7 +1488,8 @@ renderSlots();
   await ouvirDia();
   if(online && !horaSel){ const p=proximoDia(); if(p!==$("data").value){ $("data").value=p; await ouvirDia(); } }
   if(location.hash==="#adm"){ abrirPainel(); setTimeout(()=>$("painel").scrollIntoView({behavior:"smooth"}),300); }
-  setInterval(()=>{ if(document.hidden) return; ouvirDia(); if(isAdmin() && !$("admBody").hidden && !document.querySelector(".row .edit")) ouvirAdm(); }, 30000);
+  setInterval(()=>{ if(!document.hidden) ouvirDia(); }, 30000);
+  setInterval(()=>{ if(isAdmin() && !$("admBody").hidden && !document.querySelector(".row .edit")) ouvirAdm(); }, 20000);
 })();
 $("data").addEventListener("change",()=>{ $("data").dataset.mexeu="1"; });
 document.querySelectorAll("[data-barb]").forEach(b=>b.addEventListener("click",()=>{const sel=document.getElementById("barbeiro"); sel.value=b.dataset.barb; sel.dispatchEvent(new Event("change")); document.getElementById("agendar").scrollIntoView({behavior:"smooth"});}));
