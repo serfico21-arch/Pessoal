@@ -657,7 +657,8 @@ footer{border-top:1px solid var(--line)}
           <div class="field"><label for="pNome">Seu nome</label><input id="pNome" autocomplete="name" placeholder="Ex.: João da Silva"></div>
           <div class="field"><label for="pServ">Serviço</label><select id="pServ"></select></div>
           <div class="field"><label for="pBarb">Barbeiro</label><select id="pBarb"></select></div>
-          <div class="field"><label for="pQuando">Quando prefere?</label><input id="pQuando" placeholder="Ex.: sábado de manhã"></div>
+          <div class="duo"><div class="field"><label for="pDia">Dia</label><select id="pDia"></select></div>
+           <div class="field"><label for="pPer">Período</label><select id="pPer"><option value="">Tanto faz</option><option>Manhã</option><option>Tarde</option><option>Noite</option></select></div></div>
           <p class="err" id="pErr" role="alert"></p>
           <button class="btn btn-y" type="submit" style="width:100%">Pedir horário pelo WhatsApp</button>
         </form>
@@ -1159,7 +1160,7 @@ async function carregarLoja(){
   /* dados da barbearia ficam na chave "barbeiros" do banco (ex.: WhatsApp) */
   if(c.barbeiros && /^55\d{10,11}$/.test(c.barbeiros.whatsapp||"")){ CONFIG.whatsapp=c.barbeiros.whatsapp; mostrarZap(); }
   if(c.barbeiros && c.barbeiros.zaps && typeof c.barbeiros.zaps==="object") ZAPS=c.barbeiros.zaps;
-  renderHorasTopo(); renderServicos(); renderVideos();
+  renderHorasTopo(); renderServicos(); renderVideos(); renderPDia();
 }
 
 const fmtZap = n => { const d=n.replace(/^55/,""); return `(${d.slice(0,2)}) ${d.slice(2,d.length-4)}-${d.slice(-4)}`; };
@@ -1272,11 +1273,20 @@ $("pForm").addEventListener("submit",e=>{
   const nome=$("pNome").value.trim();
   if(nome.length<2){ $("pErr").textContent="Digite seu nome."; return; }
   $("pErr").textContent="";
-  const serv=$("pServ").value, b=$("pBarb").value, quando=$("pQuando").value.trim();
+  const serv=$("pServ").value, b=$("pBarb").value, dia=$("pDia").value, per=$("pPer").value;
+  const quando = (dia ? fmtData(dia) : "") + (per ? (dia?", ":"") + per.toLowerCase() : "");
   const texto=`Olá! Quero marcar um horário na R-17.\n\nNome: ${nome}`+(serv?`\nServiço: ${serv}`:"")+(b?`\nBarbeiro: ${nomeBarb(b)}`:"")+(quando?`\nQuando prefiro: ${quando}`:"");
   const destino = (b && /^55\d{10,11}$/.test(ZAPS[b]||"")) ? ZAPS[b] : CONFIG.whatsapp;
   window.open(`https://wa.me/${destino}?text=${encodeURIComponent(texto)}`,"_blank","noopener");
 });
+function renderPDia(){
+  const antes=$("pDia").value, d=new Date(), op=[`<option value="">Tanto faz</option>`];
+  for(let i=0;i<14 && op.length<9;i++){ const iso=isoOf(d);
+    if(grade(iso)) op.push(`<option value="${iso}">${i===0?"Hoje, ":i===1?"Amanhã, ":""}${fmtData(iso)}</option>`);
+    d.setDate(d.getDate()+1); }
+  $("pDia").innerHTML=op.join(""); if([...$("pDia").options].some(o=>o.value===antes)) $("pDia").value=antes;
+}
+renderPDia();
 function linkZapDireto(){ $("zapDireto").href=`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent("Olá! Quero marcar um horário na R-17.")}`; }
 linkZapDireto();
 
