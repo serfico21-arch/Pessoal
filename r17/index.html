@@ -454,7 +454,14 @@ footer{border-top:1px solid var(--line)}
 .kpi span{display:block;color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}
 .kpi b{font-family:var(--mono);font-size:1.5rem}
 .kpi.ent b{color:var(--ok)}.kpi.sai b{color:var(--red)}.kpi.sal b{color:var(--yellow)}
-.cxgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cxgrid{display:grid;grid-template-columns:1fr;gap:16px}
+.cxtop{border:2px solid var(--yellow)}
+.bcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.bcard{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--bg)}
+.bcard h4{margin:0;font-size:1.2rem}.bcard>small{color:var(--muted)}
+.bcard dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:10px 0 0}
+.bcard dt{color:var(--muted)}.bcard dd{margin:0;text-align:right;font-family:var(--mono);font-weight:700}
+.bcard dd.e{color:var(--ok)}.bcard dd.s{color:var(--red)}.bcard dd.g{color:var(--yellow);font-size:1.3rem}
 .kpi small{display:block;color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
 .kpi span{text-transform:none!important;letter-spacing:0!important;font-size:.82rem!important}
 .cli>div:first-child>span,.cli>div:first-child>small{display:block;margin-top:4px;color:var(--muted);font-size:.88rem}
@@ -472,7 +479,8 @@ footer{border-top:1px solid var(--line)}
 .tb th,.tb td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
 .tb td.n,.tb th.n{text-align:right;font-family:var(--mono);white-space:nowrap}
 .tb tfoot td{font-weight:800;border-bottom:0}
-.saidaf{display:grid;grid-template-columns:160px 1fr 150px auto;gap:10px;align-items:end}
+.cxfiltro{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 14px;font-weight:700}
+.saidaf{display:grid;grid-template-columns:150px 170px 1fr 140px auto;gap:10px;align-items:end}
 .saidaf .field{margin:0}
 @media (max-width:820px){.novo,.cxgrid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.saidaf{grid-template-columns:1fr 1fr}.duo{grid-template-columns:1fr}}
 @media print{body *{visibility:hidden}#painel .tab[data-painel="caixa"],#painel .tab[data-painel="caixa"] *{visibility:visible}#painel .tab[data-painel="caixa"]{position:absolute;left:0;top:0;width:100%;color:#000;background:#fff}.caixa-top .btns,#cxImprimir,.saidaf,.tb button{display:none!important}}
@@ -678,7 +686,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <small style="opacity:.5;font-weight:400;font-size:.75rem">v21.11-18h40</small></div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <small style="opacity:.5;font-weight:400;font-size:.75rem">v21.11-19h</small></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -711,7 +719,7 @@ footer{border-top:1px solid var(--line)}
         <div id="admBody" hidden>
           <div class="adm-top">
             <div><div class="eyebrow">Somente administrador</div><h2>Agenda da barbearia</h2></div>
-            <div class="btns" style="margin:0"><button type="button" class="btn btn-sm btn-y" id="btnSom">🔔 Ativar som dos pedidos</button><button type="button" class="btn btn-sm btn-y" id="btnInstalarAdm" hidden>📲 Instalar painel no celular</button><a class="btn btn-sm btn-y" href="./" target="_blank" rel="noopener">Ver site do cliente</a><button class="btn btn-sm btn-line" type="button" id="trocarSenha">Trocar senha</button><button class="btn btn-sm btn-line" type="button" id="sair">Sair do painel</button></div>
+            <div class="btns" style="margin:0"><button type="button" class="btn btn-sm btn-y" id="btnConvite">📤 Convidar clientes para instalar o app</button><button type="button" class="btn btn-sm btn-y" id="btnSom">🔔 Ativar som dos pedidos</button><button type="button" class="btn btn-sm btn-y" id="btnInstalarAdm" hidden>📲 Instalar painel no celular</button><a class="btn btn-sm btn-y" href="./" target="_blank" rel="noopener">Ver site do cliente</a><button class="btn btn-sm btn-line" type="button" id="trocarSenha">Trocar senha</button><button class="btn btn-sm btn-line" type="button" id="sair">Sair do painel</button></div>
           </div>
 
           <nav class="tabs" id="tabs" role="tablist">
@@ -824,15 +832,17 @@ footer{border-top:1px solid var(--line)}
               <div class="field"><label for="cxAte">Até</label><input type="date" id="cxAte"></div>
               <div class="btns" style="margin:0"><button type="button" class="btn btn-sm btn-line" data-per="hoje">Hoje</button><button type="button" class="btn btn-sm btn-line" data-per="semana">7 dias</button><button type="button" class="btn btn-sm btn-line" data-per="mes">Este mês</button><button type="button" class="btn btn-sm btn-line" data-per="mesant">Mês passado</button></div>
             </div>
+            <div class="box cxtop"><h3 class="bh">💈 Total por barbeiro</h3><div id="cxBarb"></div></div>
+            <div class="cxfiltro" role="group" aria-label="Ver caixa de"><span>Ver caixa de:</span><div class="btns" id="cxBarbF" style="margin:0"></div></div>
             <div class="kpis" id="cxKpis"></div>
             <div class="cxgrid">
               <div class="box"><h3 class="bh">Por serviço</h3><div id="cxServ"></div></div>
-              <div class="box"><h3 class="bh">Por barbeiro</h3><div id="cxBarb"></div></div>
             </div>
             <div class="box">
               <h3 class="bh">Saídas (despesas)</h3>
               <div class="saidaf">
                 <div class="field"><label for="sData">Dia</label><input type="date" id="sData"></div>
+                <div class="field"><label for="sBarb">De quem</label><select id="sBarb"></select></div>
                 <div class="field"><label for="sDesc">O que foi</label><input id="sDesc" placeholder="Ex.: lâminas, luz, aluguel"></div>
                 <div class="field"><label for="sValor">Valor</label><div class="money"><span>R$</span><input id="sValor" type="number" min="0" step="0.01" inputmode="decimal"></div></div>
                 <button type="button" class="btn btn-sm btn-y" id="sAdd">Lançar saída</button>
@@ -1485,8 +1495,8 @@ function linhaAgenda(a,comData,classe){
   const temFone = String(a.fone||"").replace(/\D/g,"").length>=10;
   const cli = clienteDe(a);
   const receber = comData ? "" : a.recebido
-    ? `<div class="receber pago"><span class="pago">Pago ${brl(vlr(a))}</span><button class="btn btn-sm btn-line" data-act="desfazer">Desfazer</button></div>`
-    : `<div class="receber"><div class="money"><span>R$</span><input type="number" min="0" step="1" inputmode="decimal" value="${vlr(a)}" aria-label="Valor cobrado de ${esc(a.nome)}" data-valor></div><button class="btn btn-sm btn-y" data-act="receber">Recebido</button></div>`;
+    ? `<div class="receber pago"><span class="pago">✅ Pago ${brl(vlr(a))} · no caixa</span><button class="btn btn-sm btn-line" data-act="desfazer">Desfazer</button></div>`
+    : `<div class="receber"><div class="money"><span>R$</span><input type="number" min="0" step="1" inputmode="decimal" value="${vlr(a)}" aria-label="Valor cobrado de ${esc(a.nome)}" data-valor></div><button class="btn btn-sm btn-y" data-act="receber">✅ Feito, receber</button></div>`;
   return `<div class="row${pend?" pend":""}${classe?" "+classe:""}" data-id="${a.id}">
     <div class="h">${comData?`<small>${fmtCurta(a.data)}</small>`:""}${esc(a.hora)}</div>
     <div class="who"><b>${esc(a.nome)}${a.vip?` <span class="vip">⭐ VIP</span>`:""}${pend?` <span class="badge b-pend">Aguardando confirmação</span>`:""}</b><span class="svc">${comData?`<span class="bchip ${corBarb(a.barbeiro)}">${esc(nomeBarb(a.barbeiro))}</span>`:""}${esc(a.servico)} · tabela ${brl(Number(a.preco||0))}</span>${temFone?`<span><a href="${waCliente(a.fone,"Olá "+a.nome+"!")}" target="_blank" rel="noopener">${esc(a.fone)}</a></span>`:""}${cli&&cli.obs?`<span class="notacli">📝 ${esc(cli.obs)}</span>`:""}</div>
@@ -1742,34 +1752,53 @@ document.querySelectorAll("[data-per]").forEach(b=>b.addEventListener("click",()
 function tabela(cab,linhas,rodape){
   return `<div class="tbw"><table class="tb"><thead><tr>${cab.map((c,i)=>`<th${i===cab.length-1?' class="n"':""}>${c}</th>`).join("")}</tr></thead><tbody>${linhas.join("")}</tbody>${rodape?`<tfoot>${rodape}</tfoot>`:""}</table></div>`;
 }
+let cxDados=null, cxBarb="";
+function renderCxFiltro(){
+  $("cxBarbF").innerHTML = [{id:"",nome:"Todos (geral)"},...BARBEIROS].map(b=>`<button type="button" class="btn btn-sm ${cxBarb===b.id?"btn-y":"btn-line"}" data-cb="${b.id}">${esc(b.nome)}</button>`).join("");
+  $("sBarb").innerHTML = `<option value="">Barbearia (geral)</option>` + BARBEIROS.map(b=>`<option value="${b.id}">${esc(b.nome)}</option>`).join("");
+  $("sBarb").value = cxBarb;
+}
+$("cxBarbF").addEventListener("click",e=>{ const b=e.target.closest("[data-cb]"); if(!b) return; cxBarb=b.dataset.cb; renderCxFiltro(); renderCaixa(); });
 async function carregarCaixa(){
   if(!isAdmin()) return;
+  if(!$("cxBarbF").children.length) renderCxFiltro();
   let de=$("cxDe").value, ate=$("cxAte").value;
   if(!de||!ate){ periodo("mes"); de=$("cxDe").value; ate=$("cxAte").value; }
   if(de>ate){ [de,ate]=[ate,de]; $("cxDe").value=de; $("cxAte").value=ate; }
   if(!$("sData").value) $("sData").value=isoOf(new Date());
   $("cxKpis").innerHTML=`<p class="empty">Somando…</p>`;
-  let r;
-  try{ r = await adm("adm_caixa",{p_de:de,p_ate:ate}); }
+  try{ cxDados = await adm("adm_caixa",{p_de:de,p_ate:ate}); cxDados.de=de; cxDados.ate=ate; }
   catch(e){ if(e.codigo!=="sessao") $("cxKpis").innerHTML=`<p class="empty">Não foi possível abrir o caixa agora. Confira a internet.</p>`; return; }
-  const ent=r.entradas||[], sai=r.saidas||[];
-  const tEnt=ent.reduce((t,a)=>t+Number(a.valor),0), tSai=sai.reduce((t,s)=>t+Number(s.valor),0);
+  renderCaixa();
+}
+function renderCaixa(){
+  if(!cxDados) return;
+  const {de,ate}=cxDados, todasE=cxDados.entradas||[], todasS=cxDados.saidas||[];
+  const ent = cxBarb ? todasE.filter(a=>a.barbeiro===cxBarb) : todasE;
+  const sai = cxBarb ? todasS.filter(s=>(s.barbeiro||"")===cxBarb) : todasS;
+  const soma = (l)=>l.reduce((t,x)=>t+Number(x.valor),0);
+  const tEnt=soma(ent), tSai=soma(sai);
   const desc=ent.reduce((t,a)=>t+Math.max(0,Number(a.preco)-Number(a.valor)),0);
   const per = de===ate ? fmtData(de) : `${fmtCurta(de)} até ${fmtCurta(ate)}`;
-  $("cxKpis").innerHTML = `<p class="hint" style="grid-column:1/-1;margin:0">Período: ${per}</p>
+  const quem = cxBarb ? nomeBarb(cxBarb) : "toda a barbearia";
+  $("cxKpis").innerHTML = `<p class="hint" style="grid-column:1/-1;margin:0">Caixa de <b>${esc(quem)}</b> · ${per}</p>
     <div class="kpi ent"><small>Entradas</small><b>${brl(tEnt)}</b><span>${ent.length===1?"1 atendimento":ent.length+" atendimentos"}</span></div>
     <div class="kpi sai"><small>Saídas</small><b>${brl(tSai)}</b><span>${sai.length===1?"1 despesa":sai.length+" despesas"}</span></div>
-    <div class="kpi sal"><small>Saldo (ganho)</small><b>${brl(tEnt-tSai)}</b><span>entradas menos saídas</span></div>
+    <div class="kpi sal"><small>Ganho (saldo)</small><b>${brl(tEnt-tSai)}</b><span>entradas menos saídas</span></div>
     <div class="kpi"><small>Desconto VIP / combinado</small><b>${brl(desc)}</b><span>abaixo da tabela</span></div>`;
   const agrupa = campo => { const g={}; ent.forEach(a=>{ const k=a[campo]||"—"; (g[k]||(g[k]={q:0,v:0})); g[k].q++; g[k].v+=Number(a.valor); }); return Object.entries(g).sort((x,y)=>y[1].v-x[1].v); };
-  const linhasG = (lista,nomeF) => lista.map(([k,x])=>`<tr><td>${esc(nomeF(k))}</td><td>${x.q}</td><td class="n">${brl(x.v)}</td></tr>`);
   const rod = `<tr><td>Total</td><td>${ent.length}</td><td class="n">${brl(tEnt)}</td></tr>`;
-  $("cxServ").innerHTML = ent.length ? tabela(["Serviço","Qtd.","Total"],linhasG(agrupa("servico"),k=>k),rod) : `<p class="empty">Nada recebido neste período.</p>`;
-  $("cxBarb").innerHTML = ent.length ? tabela(["Barbeiro","Qtd.","Total"],linhasG(agrupa("barbeiro"),nomeBarb),rod) : `<p class="empty">Nada recebido neste período.</p>`;
-  $("cxSaidas").innerHTML = sai.length ? tabela(["Dia","O que foi","Valor"],sai.map(s=>`<tr data-id="${s.id}"><td>${fmtCurta(s.data)}</td><td>${esc(s.descricao)}</td><td class="n">${brl(Number(s.valor))} <button type="button" class="btn btn-sm btn-line" data-s="apagar" aria-label="Apagar saída">✕</button></td></tr>`),
+  $("cxServ").innerHTML = ent.length ? tabela(["Serviço","Qtd.","Total"],agrupa("servico").map(([k,x])=>`<tr><td>${esc(k)}</td><td>${x.q}</td><td class="n">${brl(x.v)}</td></tr>`),rod) : `<p class="empty">Nada recebido neste período.</p>`;
+  // ganhos separados de cada barbeiro (sempre mostra todos)
+  const lin = BARBEIROS.map(b=>{ const e=soma(todasE.filter(a=>a.barbeiro===b.id)), x=soma(todasS.filter(s=>s.barbeiro===b.id)), q=todasE.filter(a=>a.barbeiro===b.id).length;
+    return `<div class="bcard ${corBarb(b.id)}"><h4>${esc(b.nome)}</h4><small>${q===1?"1 atendimento":q+" atendimentos"}</small><dl><dt>Entradas</dt><dd class="e">${brl(e)}</dd><dt>Saídas</dt><dd class="s">${brl(x)}</dd><dt>Ganho</dt><dd class="g">${brl(e-x)}</dd></dl></div>`; });
+  const geralS=soma(todasS.filter(s=>!s.barbeiro || !BARBEIROS.some(b=>b.id===s.barbeiro)));
+  const tE=soma(todasE), tS=soma(todasS);
+  $("cxBarb").innerHTML = `<div class="bcards">${lin.join("")}</div><p class="hint" style="margin:10px 0 0">Total da barbearia: entradas <b>${brl(tE)}</b> · saídas <b>${brl(tS)}</b>${geralS?` (das quais ${brl(geralS)} são da barbearia)`:""} · ganho <b>${brl(tE-tS)}</b></p>`;
+  $("cxSaidas").innerHTML = sai.length ? tabela(["Dia","O que foi","Valor"],sai.map(s=>`<tr data-id="${s.id}"><td>${fmtCurta(s.data)}</td><td>${esc(s.descricao)}<br><small>${s.barbeiro?esc(nomeBarb(s.barbeiro)):"Barbearia (geral)"}</small></td><td class="n">${brl(Number(s.valor))} <button type="button" class="btn btn-sm btn-line" data-s="apagar" aria-label="Apagar saída">✕</button></td></tr>`),
       `<tr><td colspan="2">Total de saídas</td><td class="n">${brl(tSai)}</td></tr>`) : `<p class="empty">Nenhuma saída lançada neste período.</p>`;
   $("cxEntradas").innerHTML = ent.length ? tabela(["Cliente","Serviço","Valor"],ent.map(a=>`<tr><td>${esc(a.nome)}${a.vip?" ⭐":""}<br><small>${fmtCurta(a.data)} ${esc(a.hora)}</small></td><td>${esc(a.servico)}<br><small>${esc(nomeBarb(a.barbeiro))}</small></td><td class="n">${brl(Number(a.valor))}${Number(a.valor)!==Number(a.preco)?`<br><small>tabela ${brl(Number(a.preco))}</small>`:""}</td></tr>`))
-    : `<p class="empty">Nenhum atendimento recebido neste período. Na agenda, toque em "Recebido" depois de cada atendimento.</p>`;
+    : `<p class="empty">Nenhum atendimento recebido neste período. Na Agenda, depois de cada serviço, toque em "✅ Feito, receber".</p>`;
 }
 $("sAdd").addEventListener("click",async()=>{
   const d=$("sData").value, desc=$("sDesc").value.trim(), v=Number(String($("sValor").value).replace(",","."));
@@ -1777,7 +1806,9 @@ $("sAdd").addEventListener("click",async()=>{
   if(desc.length<2){ $("sMsg").textContent="Escreva o que foi (ex.: lâminas)."; return; }
   if(!$("sValor").value || isNaN(v) || v<=0){ $("sMsg").textContent="Digite o valor da saída."; return; }
   $("sAdd").disabled=true;
-  try{ await adm("adm_saida_add",{p_data:d,p_descricao:desc,p_valor:v}); $("sMsg").textContent=`Saída lançada: ${desc}, ${brl(v)}.`; $("sDesc").value=""; $("sValor").value=""; carregarCaixa(); }
+  try{ const sb=$("sBarb").value;
+    try{ await adm("adm_saida_add2",{p_data:d,p_descricao:desc,p_valor:v,p_barbeiro:sb}); }
+    catch(e1){ if(e1.codigo==="sessao" || sb) throw e1; await adm("adm_saida_add",{p_data:d,p_descricao:desc,p_valor:v}); } $("sMsg").textContent=`Saída lançada: ${desc}, ${brl(v)}.`; $("sDesc").value=""; $("sValor").value=""; carregarCaixa(); }
   catch(e){ if(e.codigo!=="sessao") $("sMsg").textContent="Não foi possível lançar. Tente de novo."; }
   $("sAdd").disabled=false;
 });
@@ -2035,6 +2066,7 @@ $("compartilhar").addEventListener("click",async()=>{
     window.open($("compZap").href,"_blank","noopener");
   }catch(e){ if(e && e.name!=="AbortError") $("compMsg").textContent="Não deu para abrir o compartilhamento. Use o botão Mandar no WhatsApp."; }
 });
+$("btnConvite").addEventListener("click",()=>$("compartilhar").click());
 $("compCopiar").addEventListener("click",async()=>{
   try{ await navigator.clipboard.writeText(MSG_APP); }catch(e){ const t=document.createElement("textarea"); t.value=MSG_APP; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
   $("compMsg").textContent="Mensagem copiada. É só colar onde quiser.";
