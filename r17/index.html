@@ -690,7 +690,7 @@ footer{border-top:1px solid var(--line)}
   <figure><img id="lbImg" alt=""><figcaption><b id="lbCap"></b><span id="lbNum"></span></figcaption></figure>
   <button type="button" class="lbn lbq" id="lbProx" aria-label="Próxima foto">›</button>
 </div>
-<footer><div class="wrap foot">Espaço Barber Shop R-17 · #Mandando aquele corte<button type="button" class="admlink" id="admLink">Área do barbeiro</button></div></footer>
+<footer><div class="wrap foot">Espaço Barber Shop R-17 · #Mandando aquele corte</div></footer>
 
 <script>
 /* ====== PERSONALIZE AQUI ====== */
@@ -1023,7 +1023,8 @@ async function abrirPainel(){
   try{ const st = await api("adm_estado",{p_loja:CONFIG.loja}); mostrarGate(st==="nova" ? "nova" : "login"); }
   catch(e){ mostrarGate("sem"); }
 }
-$("admLink").addEventListener("click",()=>{ abrirPainel(); $("painel").scrollIntoView({behavior:"smooth"}); });
+/* o painel só abre pelo link do administrador: .../r17/#adm */
+window.addEventListener("hashchange",()=>{ if(location.hash==="#adm"){ abrirPainel(); setTimeout(()=>$("painel").scrollIntoView({behavior:"smooth"}),200); } });
 $("esqueci").addEventListener("click",()=>mostrarGate("esqueci"));
 $("novaVoltar").addEventListener("click",()=> isAdmin() ? entrarPainel() : mostrarGate("login"));
 $("trocarSenha").addEventListener("click",()=>mostrarGate("trocar"));
