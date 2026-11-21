@@ -669,6 +669,7 @@ footer{border-top:1px solid var(--line)}
           <div class="duo"><div class="field"><label for="pDia">Dia</label><select id="pDia"></select></div>
            <div class="field"><label for="pPer">Período</label><select id="pPer"><option value="">Tanto faz</option><option>Manhã</option><option>Tarde</option><option>Noite</option></select></div></div>
           <p class="err" id="pErr" role="alert"></p>
+           <p class="ok" id="pOk" hidden></p>
           <button class="btn btn-y" type="submit" style="width:100%">Pedir horário pelo WhatsApp</button>
         </form>
       </div>
@@ -677,7 +678,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <small style="opacity:.5;font-weight:400;font-size:.75rem">v21.11-18h30</small></div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <small style="opacity:.5;font-weight:400;font-size:.75rem">v21.11-18h40</small></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -1294,10 +1295,19 @@ $("pForm").addEventListener("submit",e=>{
   const quando = (dia ? fmtData(dia) : "") + (per ? (dia?", ":"") + per.toLowerCase() : "");
   const texto=`Olá! Quero marcar um horário na R-17.\n\nNome: ${nome}`+(serv?`\nServiço: ${serv}`:"")+(b?`\nBarbeiro: ${nomeBarb(b)}`:"")+(quando?`\nQuando prefiro: ${quando}`:"")+`\nWhatsApp: ${$("pFone").value}`;
   const destino = (b && /^55\d{10,11}$/.test(ZAPS[b]||"")) ? ZAPS[b] : CONFIG.whatsapp;
-  /* o pedido fica guardado no painel do dono (keepalive: chega mesmo se o celular trocar para o WhatsApp) */
-  try{ fetch(CONFIG.api+"/rest/v1/rpc/pedir",{method:"POST",keepalive:true,headers:{apikey:CONFIG.chave,"Content-Type":"application/json"},
-    body:JSON.stringify({p_loja:CONFIG.loja,p_nome:nome,p_fone:$("pFone").value,p_servico:serv,p_barbeiro:b,p_dia:dia||null,p_periodo:per})}).catch(()=>{}); }catch(x){}
-  window.open(`https://wa.me/${destino}?text=${encodeURIComponent(texto)}`,"_blank","noopener");
+  /* 1º guarda o pedido no painel do dono, depois abre o WhatsApp */
+  const btn=$("pForm").querySelector("button[type=submit]"); btn.disabled=true; btn.textContent="Enviando pedido…";
+  const link=`https://wa.me/${destino}?text=${encodeURIComponent(texto)}`;
+  const tempo=new Promise(r=>setTimeout(()=>r("tempo"),4000));
+  Promise.race([api("pedir",{p_loja:CONFIG.loja,p_nome:nome,p_fone:$("pFone").value,p_servico:serv,p_barbeiro:b,p_dia:dia||null,p_periodo:per}).then(()=>"ok"),tempo])
+    .catch(err=>err.codigo||"erro")
+    .then(res=>{
+      btn.disabled=false; btn.textContent="Pedir horário pelo WhatsApp";
+      if(res==="limite"){ $("pErr").textContent="Você já mandou pedidos. Aguarde a barbearia responder pelo WhatsApp."; return; }
+      $("pErr").textContent = res==="ok" ? "" : "";
+      $("pOk").hidden=false; $("pOk").textContent = res==="ok" ? "✓ Pedido enviado para a barbearia. Abrindo o WhatsApp…" : "Abrindo o WhatsApp…";
+      location.href=link;
+    });
 });
 function renderPDia(){
   const antes=$("pDia").value, d=new Date(), op=[`<option value="">Tanto faz</option>`];
