@@ -690,7 +690,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <small style="opacity:.5;font-weight:400;font-size:.75rem">v21.11-19h40</small></div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <small style="opacity:.5;font-weight:400;font-size:.75rem">v21.11-21h</small></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -741,7 +741,7 @@ footer{border-top:1px solid var(--line)}
             <div class="rows" id="pedRows"></div>
           </div>
           <div class="box pendbox" id="pendBox" hidden>
-            <h3 class="bh" id="pendTit">Pedidos esperando confirmação</h3>
+            <h3 class="bh" id="pendTit">Horários marcados pelo site (versão antiga)</h3>
             <p class="hint" style="margin:0 0 10px">Clientes que marcaram pelo site. Confirme ou apague. Só o ADM pode apagar um horário.</p>
             <div class="rows" id="pendRows"></div>
           </div>
@@ -1088,8 +1088,10 @@ renderServicos();
 $("barbeiro").innerHTML = `<option value="">Quem estiver livre</option>` + BARBEIROS.map(b=>`<option value="${b.id}">${b.nome}</option>`).join("");
 $("pBarb").innerHTML = `<option value="">Tanto faz</option>` + BARBEIROS.map(b=>`<option value="${b.id}">${b.nome}</option>`).join("");
 
-const hoje = new Date(), isoHoje = isoOf(hoje);
+let isoHoje = isoOf(new Date());
 $("data").min = isoHoje;
+/* painel aberto de um dia para o outro: atualiza o "hoje" */
+setInterval(()=>{ const h=isoOf(new Date()); if(h===isoHoje) return; isoHoje=h; $("data").min=h; renderPDia(); if($("data").value && $("data").value<h){ $("data").value=proximoDia(); horaSel=null; } renderSlots(); },60000);
 let horario = PADRAO;          // horário padrão (vem do banco)
 const diasCache = {};          // data -> {abre, fecha, fechado, ocupado:{barbeiro:[horas]}}
 let horaSel=null, online=false, liberado=false, agendaDia=[];
@@ -1114,7 +1116,7 @@ function barbLivre(b,iso,t,dur,occ,ignorar){
 }
 const ocupadoDe = iso => (diasCache[iso]&&diasCache[iso].ocupado) || {};
 function livre(iso,t,dur,barb){
-  if(iso===isoHoje && t <= hoje.getHours()*60+hoje.getMinutes()) return false;
+  const ag=new Date(); if(iso===isoOf(ag) && t <= ag.getHours()*60+ag.getMinutes()) return false;
   return (barb?[barb]:BARBEIROS.map(b=>b.id)).some(b=>barbLivre(b,iso,t,dur,ocupadoDe(iso)));
 }
 function renderHorasTopo(){
@@ -1366,7 +1368,7 @@ window.addEventListener("hashchange",()=>{ document.documentElement.classList.to
 $("esqueci").addEventListener("click",()=>mostrarGate("esqueci"));
 $("novaVoltar").addEventListener("click",()=> isAdmin() ? entrarPainel() : mostrarGate("login"));
 $("trocarSenha").addEventListener("click",()=>mostrarGate("trocar"));
-$("sair").addEventListener("click",()=>{ const t=token; token=null; lsSet(TOK_KEY,null); liberado=false; api("adm_sair",{p_token:t}).catch(()=>{}); sairModoAdm(); mostrarGate("login"); });
+$("sair").addEventListener("click",()=>{ pararAlarme(); pedidos=[]; $("pedBox").hidden=true; const t=token; token=null; lsSet(TOK_KEY,null); liberado=false; api("adm_sair",{p_token:t}).catch(()=>{}); sairModoAdm(); mostrarGate("login"); });
 $("tentarDeNovo").addEventListener("click",abrirPainel);
 $("pedirEmail").addEventListener("click",async()=>{
   const b=$("pedirEmail"); b.disabled=true; $("emailMsg").textContent="Enviando…";
@@ -1422,6 +1424,7 @@ function entrarPainel(){
   if(!$("cxDe").value) periodo("mes");
   renderSemana(); renderServAdm(); renderFotosAdm(); renderVidAdm(); carregarEmailAdm(); ouvirAdm(); ouvirDia(); carregarClientes();
   $("zapNovo").value=fmtZap(CONFIG.whatsapp); renderZapBarbs(); avisosEstado(true);
+  if(/[?&]parar=1/.test(location.search)){ pararAoCarregar=true; pararAlarme(); history.replaceState(null,"",location.pathname+"?painel=1#adm"); }
 }
 function sairModoAdm(){ agendaDia=[]; clientesCache=null; }
 async function ouvirAdm(){
@@ -1513,7 +1516,7 @@ let pendentes=[];
 function renderPend(lista){
   pendentes=lista;
   $("pendBox").hidden=!lista.length;
-  $("pendTit").textContent = lista.length===1 ? "1 pedido esperando confirmação" : `${lista.length} pedidos esperando confirmação`;
+  $("pendTit").textContent = lista.length===1 ? "1 horário para confirmar" : `${lista.length} horários para confirmar`;
   $("pendRows").innerHTML = lista.map(a=>linhaAgenda(a,true)).join("");
 }
 function renderAdm(){
@@ -1542,11 +1545,13 @@ document.addEventListener("pointerdown",liberarSom,{passive:true});
 function bip(){
   if(typeof somLigado!=="undefined" && !somLigado) return;
   try{ liberarSom(); if(!somCtx) return; const t=somCtx.currentTime;
-    [[880,0],[1175,.18],[1568,.36]].forEach(([f,d])=>{ const o=somCtx.createOscillator(), g=somCtx.createGain();
-      o.type="sine"; o.frequency.value=f; g.gain.setValueAtTime(0,t+d); g.gain.linearRampToValueAtTime(.35,t+d+.02); g.gain.exponentialRampToValueAtTime(.001,t+d+.3);
-      o.connect(g); g.connect(somCtx.destination); o.start(t+d); o.stop(t+d+.32); });
+    /* sirene da R-17: alterna grave/agudo 6 vezes (bem diferente do som do WhatsApp) */
+    for(let i=0;i<6;i++){ const d=i*.28, f=i%2?1320:760, o=somCtx.createOscillator(), g=somCtx.createGain();
+      o.type="square"; o.frequency.setValueAtTime(f,t+d); o.frequency.linearRampToValueAtTime(f*1.08,t+d+.24);
+      g.gain.setValueAtTime(0,t+d); g.gain.linearRampToValueAtTime(.22,t+d+.02); g.gain.setValueAtTime(.22,t+d+.22); g.gain.linearRampToValueAtTime(0,t+d+.26);
+      o.connect(g); g.connect(somCtx.destination); o.start(t+d); o.stop(t+d+.27); }
   }catch(e){}
-  try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
+  try{ if(navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) navigator.vibrate([600,150,600,150,600]); }catch(e){}
 }
 /* notificação no celular (chega com a tela desligada) */
 const b64u = t => { const p="=".repeat((4-t.length%4)%4), b=atob((t+p).replace(/-/g,"+").replace(/_/g,"/")); return Uint8Array.from(b,c=>c.charCodeAt(0)); };
@@ -1586,24 +1591,32 @@ document.addEventListener("touchstart",liberarSom,{passive:true});
 let alarmeTimer=null;
 function ligarAlarme(txt){
   $("alarmeTxt").textContent=txt; $("alarme").hidden=false; $("toast").hidden=true;
-  clearInterval(alarmeTimer); alarmeTimer=setInterval(()=>{ bip(); },2500);
+  clearInterval(alarmeTimer); bip(); alarmeTimer=setInterval(()=>{ bip(); },2500);
 }
-function pararAlarme(){ clearInterval(alarmeTimer); alarmeTimer=null; $("alarme").hidden=true; $("toast").hidden=true; document.title=tituloOriginal; }
+function pararAlarme(){ clearInterval(alarmeTimer); alarmeTimer=null; pedidos.forEach(p=>vistos.add(p.id)); tocando.clear(); guardarVistos(); $("alarme").hidden=true; $("toast").hidden=true; document.title=tituloOriginal;
+  if(isAdmin()) adm("adm_silenciar").catch(()=>{});   /* para também o alarme que repete no celular */ }
+if("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message",e=>{ if(e.data && e.data.parar) pararAlarme(); });
 $("alarmePar").addEventListener("click",pararAlarme);
 $("alarmeVer").addEventListener("click",()=>{ pararAlarme(); abrirAba("agenda"); setTimeout(()=>$("pedBox").scrollIntoView({behavior:"smooth",block:"center"}),300); });
 const tituloOriginal=document.title;
+/* pedidos que o barbeiro já viu (parou o alarme). Fica guardado no aparelho:
+   se fechar e abrir o painel, o alarme volta a tocar para pedido ainda não visto. */
+const VISTOS_KEY="ped-vistos-"+CONFIG.loja;
+let vistos=new Set((lsGet(VISTOS_KEY)||"").split(",").filter(Boolean)), tocando=new Set(), pararAoCarregar=false;
+function guardarVistos(){ lsSet(VISTOS_KEY,[...vistos].join(",")||null); }
 function avisarNovos(lista){
   const ids=new Set(lista.map(a=>a.id));
-  if(conhecidos){ const novos=lista.filter(a=>!conhecidos.has(a.id));
-    if(novos.length){ bip(); const a=novos[0];
-      $("toast").textContent = novos.length===1 ? `🔔 Novo pedido: ${a.nome}${a.dia?", "+fmtCurta(a.dia):""}${a.periodo?", "+a.periodo.toLowerCase():""}` : `🔔 ${novos.length} pedidos novos`;
-      $("toast").hidden=false; document.title=`(${novos.length}) Novo pedido`;
-      ligarAlarme(novos.length===1 ? `🔔 NOVO PEDIDO: ${a.nome}` : `🔔 ${novos.length} PEDIDOS NOVOS`);
-      clearTimeout(avisarNovos.t); avisarNovos.t=setTimeout(()=>{ $("toast").hidden=true; },12000); } }
-  conhecidos=ids;
+  vistos=new Set([...vistos].filter(id=>ids.has(id)));
+  if(pararAoCarregar){ pararAoCarregar=false; lista.forEach(a=>vistos.add(a.id)); guardarVistos(); return; }
+  guardarVistos();
+  const naoVistos=lista.filter(a=>!vistos.has(a.id));
+  if(naoVistos.some(a=>!tocando.has(a.id))){ const a=naoVistos[naoVistos.length-1];
+    naoVistos.forEach(x=>tocando.add(x.id));
+    document.title=`(${naoVistos.length}) Novo pedido`;
+    ligarAlarme(naoVistos.length===1 ? `🔔 NOVO PEDIDO: ${a.nome}` : `🔔 ${naoVistos.length} PEDIDOS NOVOS`); }
 }
-$("toast").addEventListener("click",()=>{ pararAlarme(); abrirAba("agenda"); setTimeout(()=>$("pedBox").scrollIntoView({behavior:"smooth",block:"center"}),300); });
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden) setTimeout(()=>{ document.title=tituloOriginal; },4000); });
+$("toast").addEventListener("click",()=>{ $("toast").hidden=true; if(!pedidos.length || !isAdmin()) return; pararAlarme(); abrirAba("agenda"); setTimeout(()=>$("pedBox").scrollIntoView({behavior:"smooth",block:"center"}),300); });
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) setTimeout(()=>{ if(!alarmeTimer) document.title=tituloOriginal; },4000); });
 async function acaoAgenda(e){
   const btn=e.target.closest("button"); if(!btn) return;
   const row=btn.closest(".row"), id=row.dataset.id;
@@ -1612,7 +1625,7 @@ async function acaoAgenda(e){
   try{
     if(act==="confirmar"){
       btn.disabled=true; await adm("adm_confirmar",{p_id:a.id});
-      await ouvirAdm(); alertaAdm("Confirmado. Toque em \"Avisar cliente\" para mandar a confirmação pelo WhatsApp."); return;
+      await ouvirAdm(); alertaAdm("Confirmado. Toque em \"Enviar confirmação no WhatsApp\" para avisar o cliente."); return;
     }
     if(act==="nota"){
       if(row.querySelector(".notaed")) return;
@@ -1665,7 +1678,9 @@ async function acaoAgenda(e){
     if(err.codigo!=="sessao") alertaAdm(err.codigo==="ocupado" ? "Esse horário já está ocupado. Escolha outro." : "Não foi possível salvar. Confira a internet e tente de novo.");
   }
 }
-function alertaAdm(t){ $("agMsg").textContent=t; setTimeout(()=>{ if($("agMsg").textContent===t) $("agMsg").textContent=""; },6000); }
+function alertaAdm(t){ $("agMsg").textContent=t;
+  if(!$("agMsg").offsetParent && !alarmeTimer){ $("toast").textContent=t; $("toast").hidden=false; clearTimeout(alertaAdm.t); alertaAdm.t=setTimeout(()=>{ $("toast").hidden=true; },5000); }
+  setTimeout(()=>{ if($("agMsg").textContent===t) $("agMsg").textContent=""; },6000); }
 $("rows").addEventListener("click",acaoAgenda);
 $("pendRows").addEventListener("click",acaoAgenda);
 
@@ -1696,7 +1711,7 @@ $("pedRows").addEventListener("click",async e=>{
   pararAlarme();
   const p=pedidos.find(x=>x.id===b.closest(".ped").dataset.id); if(!p) return;
   if(b.dataset.p==="marcar"){
-    pedidoAtual=p.id; abrirAba("novo");
+    abrirAba("novo"); pedidoAtual=p.id;
     const c=clienteDe(p); encherSelectCliente(); $("cliente").value=c?c.id:""; if(c) escolherCliente();
     $("nome").value=p.nome; $("fone").value=p.fone;
     const si=SERVICOS.findIndex(s=>s.nome===p.servico); if(si>=0){ $("servico").value=String(si); $("servico").dispatchEvent(new Event("change")); }
@@ -1716,6 +1731,7 @@ $("pedRows").addEventListener("click",async e=>{
 
 /* ---------- abas do painel ---------- */
 function abrirAba(t){
+  pedidoAtual=null;
   document.querySelectorAll("#tabs [data-tab]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===t)));
   document.querySelectorAll("#admBody .tab").forEach(d=>d.hidden = d.dataset.painel!==t);
   if(t==="agenda") ouvirAdm();
@@ -1724,7 +1740,7 @@ function abrirAba(t){
   if(t==="caixa") carregarCaixa();
   $("tabs").scrollIntoView({behavior:"smooth",block:"start"});
 }
-$("tabs").addEventListener("click",e=>{ const b=e.target.closest("[data-tab]"); if(b){ pedidoAtual=null; abrirAba(b.dataset.tab); } });
+$("tabs").addEventListener("click",e=>{ const b=e.target.closest("[data-tab]"); if(b) abrirAba(b.dataset.tab); });
 
 /* ---------- clientes (VIP) ---------- */
 let clientesCache=null, cliEdit=null;
@@ -1892,6 +1908,7 @@ let servTimer=null;
 function agendarSalvarServ(ms){ clearTimeout(servTimer); $("servMsg").textContent="Salvando…"; $("servMsg").className="servst"; servTimer=setTimeout(salvarServ, ms??1000); }
 async function salvarServ(){
   clearTimeout(servTimer);
+  if(!online){ $("servMsg").textContent="O painel abriu sem internet. Feche e abra de novo antes de mudar os preços."; $("servMsg").className="servst err"; return; }
   const lista=rascunho.filter(x=>x.nome.trim()).map(x=>({...x,nome:x.nome.trim(),desc:(x.desc||"").trim(),preco:Math.max(0,Number(x.preco)||0),min:Math.max(5,Number(x.min)||30)}));
   if(!lista.some(x=>x.ativo)){ $("servMsg").textContent="Deixe pelo menos um serviço ativo."; $("servMsg").className="servst err"; return; }
   try{
@@ -2054,7 +2071,10 @@ renderSlots();
   if(location.hash!=="#adm" && /[?&]painel/.test(location.search)) history.replaceState(null,"",location.pathname+location.search+"#adm");
   if(location.hash==="#adm"){ abrirPainel(); setTimeout(()=>$("painel").scrollIntoView({behavior:"smooth"}),300); }
   setInterval(()=>{ if(!document.hidden && isAdmin() && !$("admBody").hidden) ouvirDia(); }, 30000);
-  setInterval(()=>{ if(isAdmin() && !$("admBody").hidden && !document.querySelector(".row .edit")) ouvirAdm(); }, 20000);
+  setInterval(()=>{ if(!isAdmin() || $("admBody").hidden) return;
+    const f=document.activeElement, digitando = f && f.closest && f.closest("#rows,#pedRows,#pendRows") && /INPUT|TEXTAREA|SELECT/.test(f.tagName);
+    if(digitando || document.querySelector(".row .edit, .notaed")){ adm("adm_pedidos").then(p=>{ if(p){ renderPedidos(p); avisarNovos(p); } }).catch(()=>{}); return; }
+    ouvirAdm(); }, 20000);
 })();
 $("data").addEventListener("change",()=>{ $("data").dataset.mexeu="1"; });
 document.querySelectorAll("[data-barb]").forEach(b=>b.addEventListener("click",()=>{ $("pBarb").value=b.dataset.barb; $("pedir").scrollIntoView({behavior:"smooth"}); setTimeout(()=>$("pNome").focus({preventScroll:true}),500); }));
