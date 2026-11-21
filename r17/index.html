@@ -6,7 +6,8 @@
 <title>Espaço Barber Shop R-17</title>
 <meta name="description" content="Barbearia no Jardim Kemel, Itaim Paulista. Agende seu horário online.">
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" id="mf" href="manifest.webmanifest">
+<script>/* painel do dono instala como app separado */ if(location.hash==="#adm"||/[?&]painel/.test(location.search)) { document.getElementById("mf").href="manifest-adm.webmanifest"; document.title="R-17 Painel"; }</script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Espaço Barber Shop R-17">
 <meta property="og:description" content="Instale nosso site no celular e agende seu horário em 1 minuto.">
@@ -690,7 +691,7 @@ footer{border-top:1px solid var(--line)}
         <div id="admBody" hidden>
           <div class="adm-top">
             <div><div class="eyebrow">Somente administrador</div><h2>Agenda da barbearia</h2></div>
-            <div class="btns" style="margin:0"><a class="btn btn-sm btn-y" href="./" target="_blank" rel="noopener">Ver site do cliente</a><button class="btn btn-sm btn-line" type="button" id="trocarSenha">Trocar senha</button><button class="btn btn-sm btn-line" type="button" id="sair">Sair do painel</button></div>
+            <div class="btns" style="margin:0"><button type="button" class="btn btn-sm btn-y" id="btnInstalarAdm" hidden>📲 Instalar painel no celular</button><a class="btn btn-sm btn-y" href="./" target="_blank" rel="noopener">Ver site do cliente</a><button class="btn btn-sm btn-line" type="button" id="trocarSenha">Trocar senha</button><button class="btn btn-sm btn-line" type="button" id="sair">Sair do painel</button></div>
           </div>
 
           <nav class="tabs" id="tabs" role="tablist">
@@ -1853,6 +1854,7 @@ renderSlots();
   carregarFotos();
   try{ await carregarLoja(); online=true; }catch(e){}
   if(!$("data").dataset.mexeu){ $("data").value=proximoDia(); }
+  if(location.hash!=="#adm" && /[?&]painel/.test(location.search)) history.replaceState(null,"",location.pathname+location.search+"#adm");
   if(location.hash==="#adm"){ abrirPainel(); setTimeout(()=>$("painel").scrollIntoView({behavior:"smooth"}),300); }
   setInterval(()=>{ if(!document.hidden && isAdmin() && !$("admBody").hidden) ouvirDia(); }, 30000);
   setInterval(()=>{ if(isAdmin() && !$("admBody").hidden && !document.querySelector(".row .edit")) ouvirAdm(); }, 20000);
@@ -1869,24 +1871,35 @@ let pedidoInstalar=null;
 const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
 const ehCelular = /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent) || ehIOS;
 let fechouInstalar=false; try{ fechouInstalar = sessionStorage.getItem("r17-inst")==="0"; }catch(e){}
-function mostrarBtnInstalar(){ if(!ehApp && !fechouInstalar && location.hash!=="#adm" && (pedidoInstalar || ehCelular)) $("btnInstalar").hidden=false; }
+const ehPainel = () => location.hash==="#adm" || /[?&]painel/.test(location.search);
+function mostrarBtnInstalar(){
+  if(ehApp) return;
+  if(!ehPainel() && !fechouInstalar && (pedidoInstalar || ehCelular)) $("btnInstalar").hidden=false;
+  if(ehPainel()) $("btnInstalarAdm").hidden=false;
+}
 window.addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); pedidoInstalar=e; mostrarBtnInstalar(); });
-window.addEventListener("appinstalled",()=>{ $("btnInstalar").hidden=true; });
+window.addEventListener("appinstalled",()=>{ $("btnInstalar").hidden=true; $("btnInstalarAdm").hidden=true; });
+window.addEventListener("hashchange",mostrarBtnInstalar);
 setTimeout(mostrarBtnInstalar,2500);
-$("btnInstalar").addEventListener("click",async()=>{
-  if(pedidoInstalar){ pedidoInstalar.prompt(); const r=await pedidoInstalar.userChoice.catch(()=>null); pedidoInstalar=null; if(r && r.outcome==="accepted") $("btnInstalar").hidden=true; return; }
-  $("instPassos").innerHTML = ehIOS
-    ? `<li>Abra este site no <b>Safari</b>.</li><li>Toque no botão <b>Compartilhar</b> (o quadrado com a setinha para cima ⬆).</li><li>Role e toque em <b>Adicionar à Tela de Início</b>.</li><li>Toque em <b>Adicionar</b>. Pronto, o ícone da R-17 aparece no celular.</li>`
-    : `<li>Toque nos <b>3 pontinhos ⋮</b> no canto de cima do navegador.</li><li>Toque em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.</li><li>Confirme. Pronto, o ícone da R-17 aparece no celular.</li>`;
+async function instalarApp(){
+  const painel=ehPainel();
+  if(pedidoInstalar){ pedidoInstalar.prompt(); const r=await pedidoInstalar.userChoice.catch(()=>null); pedidoInstalar=null; if(r && r.outcome==="accepted"){ $("btnInstalar").hidden=true; $("btnInstalarAdm").hidden=true; } return; }
+  const nome = painel ? "R-17 Painel" : "R-17";
+  $("instPassos").innerHTML = (ehIOS
+    ? `<li>Abra este site no <b>Safari</b>.</li><li>Toque no botão <b>Compartilhar</b> (o quadrado com a setinha para cima ⬆).</li><li>Role e toque em <b>Adicionar à Tela de Início</b>.</li><li>Toque em <b>Adicionar</b>. Pronto, o ícone <b>${nome}</b> aparece no celular.</li>`
+    : `<li>Toque nos <b>3 pontinhos ⋮</b> no canto de cima do navegador.</li><li>Toque em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.</li><li>Confirme. Pronto, o ícone <b>${nome}</b> aparece no celular.</li>`)
+    + (painel ? `<li>Faça isso no celular do dono. O app do painel é separado do app dos clientes.</li>` : "");
   $("instAjuda").hidden=false;
-});
+}
+$("btnInstalar").addEventListener("click",instalarApp);
+$("btnInstalarAdm").addEventListener("click",instalarApp);
 $("instFechar").addEventListener("click",()=>{ $("instAjuda").hidden=true; });
 $("instAjuda").addEventListener("click",e=>{ if(e.target===$("instAjuda")) $("instAjuda").hidden=true; });
 
 /* ---------- divulgar o app ---------- */
 const LINK_CLIENTE = new URL("./", location.href.split("#")[0]).href.replace(/index\.html$/,"");
 const MSG_APP = `💈 *Espaço Barber Shop R-17*
-Instale nosso site no seu celular e peça seu horário pelo WhatsApp!
+Instale nosso app no seu celular e peça seu horário pelo WhatsApp!
 
 👉 ${LINK_CLIENTE}
 
