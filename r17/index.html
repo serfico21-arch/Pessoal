@@ -7,6 +7,14 @@
 <meta name="description" content="Barbearia no Jardim Kemel, Itaim Paulista. Agende seu horário online.">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="manifest" href="manifest.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Espaço Barber Shop R-17">
+<meta property="og:description" content="Instale nosso site no celular e agende seu horário em 1 minuto.">
+<meta property="og:url" content="https://serfico21-arch.github.io/Pessoal/r17/">
+<meta property="og:image" content="https://serfico21-arch.github.io/Pessoal/r17/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0F0B09">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -701,6 +709,16 @@ footer{border-top:1px solid var(--line)}
               <button class="btn btn-sm btn-line" type="button" id="servDesfazer">Desfazer mudanças</button>
             </div>
             <p class="ok" id="servMsg" aria-live="polite"></p>
+          </div>
+          <div class="box divulgar" style="margin-top:24px">
+            <h3 class="bh">Divulgar o app para os clientes</h3>
+            <p class="hint" style="margin:0 0 10px">Manda a logo da R-17 com a frase "Instale nosso site", o link e como instalar. Funciona com WhatsApp, Instagram, Facebook ou qualquer aplicativo.</p>
+            <div class="btns" style="margin-top:0">
+              <button class="btn btn-y" type="button" id="compartilhar">Compartilhar o app</button>
+              <a class="btn btn-line" id="compZap" target="_blank" rel="noopener">Mandar no WhatsApp</a>
+              <button class="btn btn-line" type="button" id="compCopiar">Copiar mensagem</button>
+            </div>
+            <p class="ok" id="compMsg" aria-live="polite"></p>
           </div>
           <div class="box" style="margin-top:24px">
             <h3 class="bh">WhatsApp da barbearia</h3>
@@ -1561,6 +1579,34 @@ $("btnInstalar").addEventListener("click",async()=>{
 });
 $("instFechar").addEventListener("click",()=>{ $("instAjuda").hidden=true; });
 $("instAjuda").addEventListener("click",e=>{ if(e.target===$("instAjuda")) $("instAjuda").hidden=true; });
+
+/* ---------- divulgar o app ---------- */
+const LINK_CLIENTE = new URL("./", location.href.split("#")[0]).href.replace(/index\.html$/,"");
+const MSG_APP = `💈 *Espaço Barber Shop R-17*
+Instale nosso site no seu celular e agende seu horário em 1 minuto!
+
+👉 ${LINK_CLIENTE}
+
+*Como instalar:*
+📱 Android: abra o link e toque em "Instalar app".
+🍎 iPhone: abra no Safari, toque em Compartilhar ⬆ e depois em "Adicionar à Tela de Início".`;
+$("compZap").href = "https://wa.me/?text=" + encodeURIComponent(MSG_APP);
+$("compartilhar").addEventListener("click",async()=>{
+  try{
+    let files=[];
+    try{ const r=await fetch("og.jpg"); const bl=await r.blob(); files=[new File([bl],"R-17-barbearia.jpg",{type:"image/jpeg"})]; }catch(e){}
+    if(navigator.share){
+      if(files.length && navigator.canShare && navigator.canShare({files})) await navigator.share({files,text:MSG_APP,title:"Espaço Barber Shop R-17"});
+      else await navigator.share({text:MSG_APP,title:"Espaço Barber Shop R-17",url:LINK_CLIENTE});
+      $("compMsg").textContent="Pronto!"; return;
+    }
+    window.open($("compZap").href,"_blank","noopener");
+  }catch(e){ if(e && e.name!=="AbortError") $("compMsg").textContent="Não deu para abrir o compartilhamento. Use o botão Mandar no WhatsApp."; }
+});
+$("compCopiar").addEventListener("click",async()=>{
+  try{ await navigator.clipboard.writeText(MSG_APP); }catch(e){ const t=document.createElement("textarea"); t.value=MSG_APP; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
+  $("compMsg").textContent="Mensagem copiada. É só colar onde quiser.";
+});
 </script>
 
 </body>
