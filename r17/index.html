@@ -690,7 +690,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <small style="opacity:.5;font-weight:400;font-size:.75rem">v21.11-19h10</small></div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <small style="opacity:.5;font-weight:400;font-size:.75rem">v21.11-19h20</small></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -723,7 +723,7 @@ footer{border-top:1px solid var(--line)}
         <div id="admBody" hidden>
           <div class="adm-top">
             <div><div class="eyebrow">Somente administrador</div><h2>Agenda da barbearia</h2></div>
-            <div class="btns" style="margin:0"><button type="button" class="btn btn-sm btn-y" id="btnConvite">📤 Convidar clientes para instalar o app</button><button type="button" class="btn btn-sm btn-y" id="btnSom">🔔 Ativar som dos pedidos</button><button type="button" class="btn btn-sm btn-y" id="btnInstalarAdm" hidden>📲 Instalar painel no celular</button><a class="btn btn-sm btn-y" href="./" target="_blank" rel="noopener">Ver site do cliente</a><button class="btn btn-sm btn-line" type="button" id="trocarSenha">Trocar senha</button><button class="btn btn-sm btn-line" type="button" id="sair">Sair do painel</button></div>
+            <div class="btns" style="margin:0"><button type="button" class="btn btn-sm btn-y" id="btnConvite">📤 Convidar clientes para instalar o app</button><button type="button" class="btn btn-sm btn-line" id="btnSom">🔊 Som ligado · desligar</button><button type="button" class="btn btn-sm btn-y" id="btnInstalarAdm" hidden>📲 Instalar painel no celular</button><a class="btn btn-sm btn-y" href="./" target="_blank" rel="noopener">Ver site do cliente</a><button class="btn btn-sm btn-line" type="button" id="trocarSenha">Trocar senha</button><button class="btn btn-sm btn-line" type="button" id="sair">Sair do painel</button></div>
           </div>
 
           <nav class="tabs" id="tabs" role="tablist">
@@ -1540,6 +1540,7 @@ let conhecidos=null, somCtx=null;
 function liberarSom(){ try{ somCtx = somCtx || new (window.AudioContext||window.webkitAudioContext)(); if(somCtx.state==="suspended") somCtx.resume(); }catch(e){} }
 document.addEventListener("pointerdown",liberarSom,{passive:true});
 function bip(){
+  if(typeof somLigado!=="undefined" && !somLigado) return;
   try{ liberarSom(); if(!somCtx) return; const t=somCtx.currentTime;
     [[880,0],[1175,.18],[1568,.36]].forEach(([f,d])=>{ const o=somCtx.createOscillator(), g=somCtx.createGain();
       o.type="sine"; o.frequency.value=f; g.gain.setValueAtTime(0,t+d); g.gain.linearRampToValueAtTime(.35,t+d+.02); g.gain.exponentialRampToValueAtTime(.001,t+d+.3);
@@ -1547,8 +1548,13 @@ function bip(){
   }catch(e){}
   try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
 }
-let somOk=false;
-$("btnSom").addEventListener("click",()=>{ liberarSom(); somOk=true; bip(); $("btnSom").textContent="🔔 Som ligado (tocou um teste)"; $("btnSom").classList.remove("btn-y"); $("btnSom").classList.add("btn-line"); });
+/* som ligado sempre; o dono só desliga se quiser (fica lembrado) */
+let somLigado = lsGet("som-"+CONFIG.loja)!=="0";
+function mostrarSom(){ $("btnSom").textContent = somLigado ? "🔊 Som ligado · desligar" : "🔇 Som desligado · ligar"; $("btnSom").classList.toggle("btn-red",!somLigado); }
+mostrarSom();
+$("btnSom").addEventListener("click",()=>{ somLigado=!somLigado; lsSet("som-"+CONFIG.loja, somLigado?null:"0"); mostrarSom(); if(somLigado){ liberarSom(); bip(); } });
+document.addEventListener("keydown",liberarSom);
+document.addEventListener("touchstart",liberarSom,{passive:true});
 let alarmeTimer=null;
 function ligarAlarme(txt){
   $("alarmeTxt").textContent=txt; $("alarme").hidden=false; $("toast").hidden=true;
