@@ -526,6 +526,7 @@ footer{border-top:1px solid var(--line)}
           <form id="gateNova" class="gform" hidden novalidate>
             <p class="hint" id="novaTxt" style="margin:0 0 12px">Crie a senha que vai abrir o Painel ADM.</p>
             <p class="dica" id="dicaTxt" hidden></p>
+            <div id="porEmail" hidden style="margin:0 0 12px"><button class="btn btn-sm btn-line" type="button" id="pedirEmail">Mandar código para meu e-mail</button><p class="ok" id="emailMsg" aria-live="polite"></p></div>
             <div class="field" id="campoCodigo"><label for="codigo" id="codigoLbl">Código de recuperação</label><input id="codigo" autocomplete="off" spellcheck="false"></div>
             <div id="campoRec" hidden>
               <p class="hint" style="margin:4px 0 10px"><b>Crie o seu código de recuperação.</b> Ele será pedido se você esquecer a senha. Anote num lugar seguro.</p>
@@ -600,6 +601,12 @@ footer{border-top:1px solid var(--line)}
               <button class="btn btn-sm btn-y" type="button" id="codSalvar">Salvar código</button>
             </div>
             <p class="ok" id="codMsg" aria-live="polite"></p>
+            <div class="vidform" style="margin-top:14px">
+              <div class="field"><label for="emailDono">E-mail para receber o código se esquecer a senha</label><input id="emailDono" type="email" inputmode="email" autocomplete="email"></div>
+              <button class="btn btn-sm btn-y" type="button" id="emailSalvar">Salvar e-mail</button>
+              <button class="btn btn-sm btn-line" type="button" id="emailTeste">Mandar e-mail de teste</button>
+            </div>
+            <p class="ok" id="emailAdmMsg" aria-live="polite"></p>
           </div>
           <div class="box" style="margin-top:24px">
             <h3 class="bh">Fotos da galeria</h3>
@@ -922,10 +929,11 @@ function mostrarGate(modo){ // "sem" | "login" | "nova" | "esqueci" | "trocar"
   $("codigoLbl").textContent = modo==="nova" ? "Código de ativação" : "Código de recuperação";
   $("novaVoltar").hidden = modo==="nova";
   $("novaTxt").textContent = modo==="nova" ? "Primeiro acesso. Digite o código de ativação que veio com o sistema."
-    : modo==="esqueci" ? "Sem problema. Digite o seu código de recuperação e crie uma senha nova."
+    : modo==="esqueci" ? "Sem problema. Digite o seu código de recuperação (ou o código que chegou no e-mail) e crie uma senha nova."
     : "Digite a nova senha do Painel ADM.";
   $("gateNova").dataset.modo=modo; $("loginErr").textContent=""; $("novaErr").textContent="";
-  $("dicaTxt").hidden=true;
+  $("dicaTxt").hidden=true; $("porEmail").hidden=true; $("emailMsg").textContent="";
+  if(modo==="esqueci") api("adm_tem_email",{p_loja:CONFIG.loja}).then(t=>{ if(t && $("gateNova").dataset.modo==="esqueci") $("porEmail").hidden=false; }).catch(()=>{});
   if(modo==="esqueci") api("adm_dica",{p_loja:CONFIG.loja}).then(d=>{ if(d && $("gateNova").dataset.modo==="esqueci"){ $("dicaTxt").textContent="Dica do código: "+d; $("dicaTxt").hidden=false; } }).catch(()=>{});
 }
 async function abrirPainel(){
@@ -942,6 +950,16 @@ $("novaVoltar").addEventListener("click",()=> isAdmin() ? entrarPainel() : mostr
 $("trocarSenha").addEventListener("click",()=>mostrarGate("trocar"));
 $("sair").addEventListener("click",()=>{ const t=token; token=null; lsSet(TOK_KEY,null); liberado=false; api("adm_sair",{p_token:t}).catch(()=>{}); sairModoAdm(); mostrarGate("login"); });
 $("tentarDeNovo").addEventListener("click",abrirPainel);
+$("pedirEmail").addEventListener("click",async()=>{
+  const b=$("pedirEmail"); b.disabled=true; $("emailMsg").textContent="Enviando…";
+  try{ const m=await api("adm_pedir_codigo",{p_loja:CONFIG.loja});
+    $("emailMsg").textContent=`Mandamos um código de 6 números para ${m}. Olhe também a caixa de spam. Digite o código no campo abaixo.`;
+    $("codigo").focus(); }
+  catch(err){ $("emailMsg").textContent = err.codigo==="espere" ? "Espere 1 minuto para pedir outro código."
+      : err.codigo==="limite" ? "Já mandamos muitos códigos hoje. Use o código de recuperação ou tente amanhã."
+      : "Não foi possível mandar o e-mail agora. Tente de novo."; }
+  setTimeout(()=>{ b.disabled=false; },60000);
+});
 
 $("gateLogin").addEventListener("submit",async e=>{
   e.preventDefault();
@@ -985,7 +1003,7 @@ function entrarPainel(){
   $("lead").textContent="Você está no modo administrador: ao confirmar, o cliente entra direto na agenda já confirmado.";
   $("submitBtn").textContent="Salvar na agenda";
   if(!$("admData").value) $("admData").value=$("data").value || isoHoje;
-  renderSemana(); renderServAdm(); renderFotosAdm(); renderVidAdm(); ouvirAdm();
+  renderSemana(); renderServAdm(); renderFotosAdm(); renderVidAdm(); carregarEmailAdm(); ouvirAdm();
 }
 function sairModoAdm(){
   $("lead").textContent="Escolha o horário e confirme. Seu horário fica guardado na agenda e você avisa a barbearia pelo WhatsApp.";
@@ -1229,6 +1247,16 @@ $("codSalvar").addEventListener("click",async()=>{
   if(d && d.replace(/[^0-9a-z]/gi,"").toUpperCase().includes(c.replace(/[^0-9a-z]/gi,"").toUpperCase())){ $("codMsg").textContent="A dica não pode mostrar o código."; return; }
   try{ await adm("adm_trocar_codigo",{p_codigo:c,p_dica:d}); $("codNovo").value=""; $("codMsg").textContent="Código salvo. Use ele se esquecer a senha."; }
   catch(err){ $("codMsg").textContent = err.codigo==="sessao" ? "" : "Não foi possível salvar. Tente de novo."; }
+});
+
+function carregarEmailAdm(){ adm("adm_email_ver").then(e=>{ $("emailDono").value=e||""; }).catch(()=>{}); }
+$("emailSalvar").addEventListener("click",async()=>{
+  try{ await adm("adm_email_salvar",{p_email:$("emailDono").value}); $("emailAdmMsg").textContent="E-mail salvo."; }
+  catch(err){ $("emailAdmMsg").textContent = err.codigo==="email" ? "Confira o e-mail digitado." : "Não foi possível salvar. Tente de novo."; }
+});
+$("emailTeste").addEventListener("click",async()=>{
+  try{ await adm("adm_email_teste"); $("emailAdmMsg").textContent="Teste enviado. Olhe a caixa de entrada e o spam em 1 ou 2 minutos."; }
+  catch(err){ $("emailAdmMsg").textContent="Não foi possível mandar. Salve o e-mail primeiro."; }
 });
 
 /* ---------- vídeos no painel ---------- */

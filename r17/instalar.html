@@ -1,13 +1,17 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Instalar banco R-17</title><meta name="robots" content="noindex">
+<title>Atualizar banco R-17</title><meta name="robots" content="noindex">
 <style>body{font-family:system-ui,sans-serif;background:#15100D;color:#F3EADC;margin:0;padding:24px 16px}main{max-width:760px;margin:auto}
-h1{color:#E6BE6E;font-size:1.6rem}ol{font-size:1.15rem;line-height:1.7}button{font-size:1.3rem;font-weight:700;padding:16px 28px;border:0;border-radius:14px;background:#D9A84E;color:#1A1208;cursor:pointer}
-#ok{font-size:1.2rem;color:#5DBB85;font-weight:700;margin-left:12px}textarea{width:100%;height:160px;margin-top:20px;background:#1F1814;color:#AB9C8B;border:1px solid #3B2F27;border-radius:10px;font-size:.75rem}a{color:#E6BE6E}</style></head>
-<body><main><h1>Atualizar o banco da agenda</h1>
-<ol><li>Toque no botão amarelo abaixo. Ele copia o comando.</li>
-<li>Abra o <a href="https://supabase.com/dashboard/project/avvhnajfczdedlydkcrb/sql/new" target="_blank" rel="noopener">SQL Editor do Supabase</a>.</li>
-<li>Clique na área branca e aperte <b>Ctrl + V</b> para colar.</li>
-<li>Clique no botão verde <b>Run</b>. Deve aparecer "Success".</li></ol>
+h1{color:#E6BE6E;font-size:1.6rem}ol{font-size:1.15rem;line-height:1.7;padding-left:22px}button{font-size:1.3rem;font-weight:700;padding:16px 28px;border:0;border-radius:14px;background:#D9A84E;color:#1A1208;cursor:pointer}
+button:disabled{opacity:.4;cursor:default}label{display:block;font-weight:700;margin:14px 0 6px}input{width:100%;box-sizing:border-box;font-size:1.1rem;padding:12px;border-radius:10px;border:1px solid #3B2F27;background:#1F1814;color:#F3EADC}
+#ok{display:block;font-size:1.2rem;color:#5DBB85;font-weight:700;margin-top:12px}#err{color:#D9625A;font-weight:700}textarea{width:100%;height:120px;margin-top:20px;background:#1F1814;color:#AB9C8B;border:1px solid #3B2F27;border-radius:10px;font-size:.7rem}a{color:#E6BE6E}</style></head>
+<body><main><h1>Atualizar o banco (e-mail de recuperação)</h1>
+<ol><li>Cole a chave do Resend (começa com <b>re_</b>) e digite o seu e-mail. Elas ficam só neste aparelho e vão direto para o seu Supabase.</li>
+<li>Clique em <b>Copiar comando</b>.</li>
+<li>Abra o <a href="https://supabase.com/dashboard/project/avvhnajfczdedlydkcrb/sql/new" target="_blank" rel="noopener">SQL Editor do Supabase</a>, clique na área branca e aperte <b>Ctrl + V</b>.</li>
+<li>Clique em <b>Run</b>. Em 1 ou 2 minutos chega um e-mail de teste.</li></ol>
+<label for="k">Chave do Resend</label><input id="k" autocomplete="off" spellcheck="false" placeholder="re_...">
+<label for="e">E-mail do dono (o mesmo da conta do Resend)</label><input id="e" type="email" autocomplete="off">
+<p id="err"></p>
 <p><button id="b">Copiar comando</button><span id="ok"></span></p>
 <textarea id="t" readonly>-- Atualização: dica do código, troca do código pelo painel e bloqueio mais forte
 alter table public.lojas_segredo add column if not exists dica text;
@@ -128,6 +132,113 @@ begin
   insert into public.sessoes(loja_id) values (p_loja) returning token into v;
   return v;
 end $$;
+
+-- ===== código por e-mail (Resend) =====
+create extension if not exists pg_net;
+create table if not exists public.sistema (chave text primary key, valor text not null);
+alter table public.sistema enable row level security;
+revoke all on public.sistema from anon, authenticated;
+alter table public.lojas_segredo add column if not exists email text;
+alter table public.lojas_segredo add column if not exists temp_hash text;
+alter table public.lojas_segredo add column if not exists temp_expira timestamptz;
+alter table public.lojas_segredo add column if not exists envios_dia date;
+alter table public.lojas_segredo add column if not exists envios int not null default 0;
+alter table public.lojas_segredo add column if not exists ultimo_envio timestamptz;
+
+create or replace function public._mandar_email(p_para text, p_assunto text, p_html text) returns void
+language plpgsql security definer set search_path = &#x27;&#x27; as $$
+declare k text; de text;
+begin
+  select valor into k from public.sistema where chave = &#x27;resend_key&#x27;;
+  select valor into de from public.sistema where chave = &#x27;remetente&#x27;;
+  if k is null or p_para is null then raise exception &#x27;sem_email&#x27;; end if;
+  perform net.http_post(
+    url := &#x27;https://api.resend.com/emails&#x27;,
+    body := jsonb_build_object(&#x27;from&#x27;, coalesce(de,&#x27;Painel R-17 &lt;onboarding@resend.dev&gt;&#x27;), &#x27;to&#x27;, jsonb_build_array(p_para), &#x27;subject&#x27;, p_assunto, &#x27;html&#x27;, p_html),
+    headers := jsonb_build_object(&#x27;Authorization&#x27;, &#x27;Bearer &#x27; || k, &#x27;Content-Type&#x27;, &#x27;application/json&#x27;));
+end $$;
+
+create or replace function public.adm_pedir_codigo(p_loja text) returns text
+language plpgsql security definer set search_path = &#x27;&#x27; as $$
+declare s public.lojas_segredo; c text; hoje date := (now() at time zone &#x27;America/Sao_Paulo&#x27;)::date; n text;
+begin
+  select * into s from public.lojas_segredo where loja_id = p_loja for update;
+  if s is null or s.senha_hash is null or s.email is null then raise exception &#x27;sem_email&#x27;; end if;
+  if s.ultimo_envio is not null and s.ultimo_envio &gt; now() - interval &#x27;1 minute&#x27; then raise exception &#x27;espere&#x27;; end if;
+  if s.envios_dia = hoje and s.envios &gt;= 6 then raise exception &#x27;limite&#x27;; end if;
+  c := lpad(((((&#x27;x&#x27; || encode(extensions.gen_random_bytes(4),&#x27;hex&#x27;))::bit(32)::bigint) % 1000000))::text, 6, &#x27;0&#x27;);
+  update public.lojas_segredo set temp_hash = extensions.crypt(c, extensions.gen_salt(&#x27;bf&#x27;)), temp_expira = now() + interval &#x27;15 minutes&#x27;,
+    ultimo_envio = now(), envios = case when envios_dia = hoje then envios + 1 else 1 end, envios_dia = hoje
+    where loja_id = p_loja;
+  select nome into n from public.lojas where id = p_loja;
+  perform public._mandar_email(s.email, &#x27;Seu código para entrar no painel: &#x27; || c,
+    &#x27;&lt;div style=&quot;font-family:Arial,sans-serif;font-size:16px&quot;&gt;&lt;p&gt;Olá! Alguém pediu para criar uma senha nova no Painel ADM da &lt;b&gt;&#x27; || coalesce(n,&#x27;barbearia&#x27;) || &#x27;&lt;/b&gt;.&lt;/p&gt;&#x27;
+    || &#x27;&lt;p style=&quot;font-size:32px;font-weight:bold;letter-spacing:6px&quot;&gt;&#x27; || c || &#x27;&lt;/p&gt;&#x27;
+    || &#x27;&lt;p&gt;Digite esse código no site. Ele vale por 15 minutos.&lt;/p&gt;&lt;p&gt;Se não foi você, pode ignorar este e-mail.&lt;/p&gt;&lt;/div&gt;&#x27;);
+  return regexp_replace(s.email, &#x27;^(.)[^@]*(.@)&#x27;, &#x27;\1***\2&#x27;);
+end $$;
+
+create or replace function public.adm_nova_senha(p_loja text, p_codigo text, p_senha text) returns uuid
+language plpgsql security definer set search_path = &#x27;&#x27; as $$
+declare s public.lojas_segredo; v uuid; c text := public._limpa_codigo(p_codigo); ok boolean;
+begin
+  select * into s from public.lojas_segredo where loja_id = p_loja for update;
+  if s is null or s.senha_hash is null then raise exception &#x27;loja&#x27;; end if;
+  if s.bloqueado_ate is not null and s.bloqueado_ate &gt; now() then raise exception &#x27;bloqueado&#x27;; end if;
+  if length(coalesce(p_senha,&#x27;&#x27;)) &lt; 4 then raise exception &#x27;senha_curta&#x27;; end if;
+  ok := extensions.crypt(c, s.codigo_hash) = s.codigo_hash
+     or (s.temp_hash is not null and s.temp_expira &gt; now() and extensions.crypt(c, s.temp_hash) = s.temp_hash);
+  if not ok then
+    perform public._errou(p_loja);
+    raise exception &#x27;codigo&#x27;;
+  end if;
+  update public.lojas_segredo set senha_hash = extensions.crypt(p_senha, extensions.gen_salt(&#x27;bf&#x27;)),
+    erros = 0, bloqueios = 0, bloqueado_ate = null, temp_hash = null, temp_expira = null where loja_id = p_loja;
+  delete from public.sessoes where loja_id = p_loja;
+  insert into public.sessoes(loja_id) values (p_loja) returning token into v;
+  return v;
+end $$;
+
+create or replace function public.adm_tem_email(p_loja text) returns boolean
+language sql security definer set search_path = &#x27;&#x27; stable as $$
+  select email is not null and exists(select 1 from public.sistema where chave = &#x27;resend_key&#x27;) from public.lojas_segredo where loja_id = p_loja;
+$$;
+
+create or replace function public.adm_email_ver(p_token uuid) returns text
+language sql security definer set search_path = &#x27;&#x27; stable as $$
+  select email from public.lojas_segredo where loja_id = public._sessao(p_token);
+$$;
+
+create or replace function public.adm_email_salvar(p_token uuid, p_email text) returns void
+language plpgsql security definer set search_path = &#x27;&#x27; as $$
+declare l text := public._sessao(p_token); e text := lower(trim(coalesce(p_email,&#x27;&#x27;)));
+begin
+  if e &lt;&gt; &#x27;&#x27; and e !~ &#x27;^[^@\s]+@[^@\s]+\.[^@\s]+$&#x27; then raise exception &#x27;email&#x27;; end if;
+  update public.lojas_segredo set email = nullif(e,&#x27;&#x27;) where loja_id = l;
+end $$;
+
+create or replace function public.adm_email_teste(p_token uuid) returns void
+language plpgsql security definer set search_path = &#x27;&#x27; as $$
+declare l text := public._sessao(p_token); e text;
+begin
+  select email into e from public.lojas_segredo where loja_id = l;
+  perform public._mandar_email(e, &#x27;Teste do Painel ADM&#x27;, &#x27;&lt;p style=&quot;font-family:Arial,sans-serif;font-size:16px&quot;&gt;Deu certo! Este e-mail vai receber o código quando você esquecer a senha do painel.&lt;/p&gt;&#x27;);
+end $$;
+
+revoke execute on function public._mandar_email(text, text, text) from public, anon, authenticated;
 </textarea>
-<script>document.getElementById("b").onclick=async()=>{const t=document.getElementById("t");try{await navigator.clipboard.writeText(t.value)}catch(e){t.select();document.execCommand("copy")}document.getElementById("ok").textContent="Copiado! Agora cole no Supabase."};</script>
-</main></body></html>
+<script>
+const q=s=>"'"+s.replace(/'/g,"''")+"'";
+document.getElementById("b").onclick=async()=>{
+  const k=document.getElementById("k").value.trim(), e=document.getElementById("e").value.trim().toLowerCase(), err=document.getElementById("err");
+  err.textContent=""; document.getElementById("ok").textContent="";
+  if(!/^re_[A-Za-z0-9_]+$/.test(k)){ err.textContent="Cole a chave do Resend. Ela começa com re_"; return; }
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){ err.textContent="Confira o e-mail."; return; }
+  const extra="\n-- ===== dados da R-17 =====\ninsert into public.sistema(chave,valor) values ('resend_key',"+q(k)+") on conflict (chave) do update set valor=excluded.valor;\n"
+   +"update public.lojas_segredo set email="+q(e)+" where loja_id='r17';\n"
+   +"select public._mandar_email("+q(e)+",'Teste do Painel R-17','<p style=\"font-family:Arial,sans-serif;font-size:16px\">Deu certo! Este e-mail vai receber o código quando você esquecer a senha do painel.</p>');\n";
+  const txt=document.getElementById("t").value+extra;
+  try{ await navigator.clipboard.writeText(txt); }catch(x){ const t=document.createElement("textarea"); t.value=txt; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
+  document.getElementById("ok").textContent="Copiado! Agora cole no Supabase e clique em Run.";
+};
+</script></main></body></html>
