@@ -690,7 +690,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <small style="opacity:.5;font-weight:400;font-size:.75rem">v21.11-19h20</small></div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <small style="opacity:.5;font-weight:400;font-size:.75rem">v21.11-19h40</small></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -723,7 +723,7 @@ footer{border-top:1px solid var(--line)}
         <div id="admBody" hidden>
           <div class="adm-top">
             <div><div class="eyebrow">Somente administrador</div><h2>Agenda da barbearia</h2></div>
-            <div class="btns" style="margin:0"><button type="button" class="btn btn-sm btn-y" id="btnConvite">📤 Convidar clientes para instalar o app</button><button type="button" class="btn btn-sm btn-line" id="btnSom">🔊 Som ligado · desligar</button><button type="button" class="btn btn-sm btn-y" id="btnInstalarAdm" hidden>📲 Instalar painel no celular</button><a class="btn btn-sm btn-y" href="./" target="_blank" rel="noopener">Ver site do cliente</a><button class="btn btn-sm btn-line" type="button" id="trocarSenha">Trocar senha</button><button class="btn btn-sm btn-line" type="button" id="sair">Sair do painel</button></div>
+            <div class="btns" style="margin:0"><button type="button" class="btn btn-sm btn-y" id="btnConvite">📤 Convidar clientes para instalar o app</button><button type="button" class="btn btn-sm btn-y" id="btnAvisos" hidden>📲 Receber avisos no celular</button><button type="button" class="btn btn-sm btn-line" id="btnSom">🔊 Som ligado · desligar</button><button type="button" class="btn btn-sm btn-y" id="btnInstalarAdm" hidden>📲 Instalar painel no celular</button><a class="btn btn-sm btn-y" href="./" target="_blank" rel="noopener">Ver site do cliente</a><button class="btn btn-sm btn-line" type="button" id="trocarSenha">Trocar senha</button><button class="btn btn-sm btn-line" type="button" id="sair">Sair do painel</button></div>
           </div>
 
           <nav class="tabs" id="tabs" role="tablist">
@@ -1421,7 +1421,7 @@ function entrarPainel(){
   if(!$("admData").value) $("admData").value=isoHoje;
   if(!$("cxDe").value) periodo("mes");
   renderSemana(); renderServAdm(); renderFotosAdm(); renderVidAdm(); carregarEmailAdm(); ouvirAdm(); ouvirDia(); carregarClientes();
-  $("zapNovo").value=fmtZap(CONFIG.whatsapp); renderZapBarbs();
+  $("zapNovo").value=fmtZap(CONFIG.whatsapp); renderZapBarbs(); avisosEstado(true);
 }
 function sairModoAdm(){ agendaDia=[]; clientesCache=null; }
 async function ouvirAdm(){
@@ -1548,6 +1548,34 @@ function bip(){
   }catch(e){}
   try{ navigator.vibrate && navigator.vibrate([200,100,200]); }catch(e){}
 }
+/* notificação no celular (chega com a tela desligada) */
+const b64u = t => { const p="=".repeat((4-t.length%4)%4), b=atob((t+p).replace(/-/g,"+").replace(/_/g,"/")); return Uint8Array.from(b,c=>c.charCodeAt(0)); };
+const pushOk = () => "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+async function avisosEstado(salvar){
+  const bt=$("btnAvisos");
+  if(!pushOk()){ bt.hidden=!ehIOS; if(ehIOS){ bt.textContent="📲 Avisos no iPhone: instale o app primeiro"; } return; }
+  bt.hidden=false;
+  try{
+    const reg=await navigator.serviceWorker.ready, sub=await reg.pushManager.getSubscription();
+    if(sub && Notification.permission==="granted"){ bt.textContent="📲 Avisos no celular ligados"; bt.classList.remove("btn-y"); bt.classList.add("btn-line");
+      if(salvar) adm("adm_push_salvar",{p_sub:sub.toJSON()}).catch(()=>{}); }
+  }catch(e){}
+}
+$("btnAvisos").addEventListener("click",async()=>{
+  const bt=$("btnAvisos");
+  if(!pushOk()){ $("instPassos").innerHTML=`<li>No iPhone os avisos só funcionam com o app instalado.</li><li>Toque em <b>📲 Instalar painel no celular</b> e siga os passos.</li><li>Abra o app <b>R-17 Painel</b> pela tela inicial e toque em <b>Receber avisos no celular</b>.</li>`; $("instAjuda").hidden=false; return; }
+  try{
+    const perm = await Notification.requestPermission();
+    if(perm!=="granted"){ alertaAdm("O celular bloqueou os avisos. Libere as notificações deste site nas configurações do navegador."); return; }
+    const pub = await adm("adm_push_chave");
+    if(!pub){ alertaAdm("Falta rodar o comando de avisos no Supabase (página instalar)."); return; }
+    const reg = await navigator.serviceWorker.ready;
+    const sub = (await reg.pushManager.getSubscription()) || await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(pub)});
+    await adm("adm_push_salvar",{p_sub:sub.toJSON()});
+    reg.showNotification("✅ Avisos ligados",{body:"Quando chegar um pedido, este celular vai tocar e vibrar.",icon:"icon-192.png",vibrate:[300,100,300]});
+    avisosEstado(false);
+  }catch(e){ if(e.codigo!=="sessao") alertaAdm("Não foi possível ligar os avisos neste celular. Tente pelo Chrome."); }
+});
 /* som ligado sempre; o dono só desliga se quiser (fica lembrado) */
 let somLigado = lsGet("som-"+CONFIG.loja)!=="0";
 function mostrarSom(){ $("btnSom").textContent = somLigado ? "🔊 Som ligado · desligar" : "🔇 Som desligado · ligar"; $("btnSom").classList.toggle("btn-red",!somLigado); }

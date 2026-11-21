@@ -4,41 +4,88 @@
 h1{color:#E6BE6E;font-size:1.6rem}ol{font-size:1.15rem;line-height:1.7;padding-left:22px}button{font-size:1.3rem;font-weight:700;padding:16px 28px;border:0;border-radius:14px;background:#D9A84E;color:#1A1208;cursor:pointer}
 button:disabled{opacity:.4;cursor:default}label{display:block;font-weight:700;margin:14px 0 6px}input{width:100%;box-sizing:border-box;font-size:1.1rem;padding:12px;border-radius:10px;border:1px solid #3B2F27;background:#1F1814;color:#F3EADC}
 #ok{display:block;font-size:1.2rem;color:#5DBB85;font-weight:700;margin-top:12px}#err{color:#D9625A;font-weight:700}textarea{width:100%;height:120px;margin-top:20px;background:#1F1814;color:#AB9C8B;border:1px solid #3B2F27;border-radius:10px;font-size:.7rem}a{color:#E6BE6E}</style></head>
-<body><main><h1>Atualizar o banco: caixa separado por barbeiro</h1>
+<body><main><h1>Ligar os avisos de pedido no celular</h1>
 <ol><li>Clique em <b>Copiar comando</b>. Tem que aparecer "Copiado!" em verde.</li>
 <li>Abra o <a href="https://supabase.com/dashboard/project/avvhnajfczdedlydkcrb/sql/new" target="_blank" rel="noopener">SQL Editor do Supabase</a>, clique na área branca, apague o que estiver lá (Ctrl + A e Delete) e aperte <b>Ctrl + V</b>.</li>
 <li>Clique em <b>Run</b>. Tem que aparecer <b>Success</b>. Se aparecer um aviso amarelo, clique em <b>Run this query</b>.</li>
 <li>Pronto. Abra o painel e veja as abas novas.</li></ol>
 <p><button id="b">Copiar comando</button><span id="ok"></span></p>
 <p style="color:#AB9C8B;margin-top:30px">Para ligar o e-mail de recuperação, use a <a href="email.html">página do e-mail</a>.</p>
-<script type="text/plain" id="sql">-- R-17: saídas separadas por barbeiro (ou da barbearia)
-alter table public.saidas add column if not exists barbeiro text not null default '';
+<script type="text/plain" id="sql">-- R-17: aviso no celular (notificação) quando chega pedido, mesmo com o celular no bolso
+alter table public.pedidos add column if not exists avisado boolean not null default false;
+create table if not exists public.push_subs (
+  endpoint text primary key,
+  loja_id text not null references public.lojas(id) on delete cascade,
+  sub jsonb not null,
+  criado timestamptz not null default now()
+);
+alter table public.push_subs enable row level security;
+revoke all on public.push_subs from anon, authenticated;
 
-create or replace function public.adm_saida_add2(p_token uuid, p_data date, p_descricao text, p_valor numeric, p_barbeiro text) returns uuid
-language plpgsql security definer set search_path = '' as $$
-declare l text := public._sessao(p_token); v uuid;
-begin
-  if length(coalesce(trim(p_descricao),'')) < 1 or coalesce(p_valor,-1) < 0 then raise exception 'dados'; end if;
-  insert into public.saidas(loja_id,data,descricao,valor,barbeiro) values (l,p_data,left(trim(p_descricao),120),p_valor,left(coalesce(p_barbeiro,''),40)) returning id into v;
-  return v;
-end $$;
-
-create or replace function public.adm_caixa(p_token uuid, p_de date, p_ate date) returns jsonb
+create or replace function public.adm_push_chave(p_token uuid) returns text
 language plpgsql security definer set search_path = '' stable as $$
 declare l text := public._sessao(p_token);
 begin
-  return jsonb_build_object(
-    'entradas', coalesce((select jsonb_agg(jsonb_build_object('data',a.data,'hora',to_char(a.hora,'HH24:MI'),'servico',a.servico,'barbeiro',a.barbeiro,
-        'nome',a.nome,'valor',coalesce(a.valor,a.preco),'preco',a.preco,'vip',coalesce(c.vip,false)) order by a.data, a.hora)
-      from public.agenda a left join public.clientes c on c.id = a.cliente_id
-      where a.loja_id = l and a.recebido and a.data between p_de and p_ate), '[]'::jsonb),
-    'saidas', coalesce((select jsonb_agg(jsonb_build_object('id',s.id,'data',s.data,'descricao',s.descricao,'valor',s.valor,'barbeiro',s.barbeiro) order by s.data, s.criado)
-      from public.saidas s where s.loja_id = l and s.data between p_de and p_ate), '[]'::jsonb));
+  return (select valor from public.sistema where chave = 'vapid_public');
 end $$;
+
+create or replace function public.adm_push_salvar(p_token uuid, p_sub jsonb) returns void
+language plpgsql security definer set search_path = '' as $$
+declare l text := public._sessao(p_token); e text := p_sub->>'endpoint';
+begin
+  if e is null or e !~ '^https://' or length(e) > 1000 then raise exception 'dados'; end if;
+  insert into public.push_subs(endpoint, loja_id, sub) values (e, l, p_sub)
+    on conflict (endpoint) do update set loja_id = excluded.loja_id, sub = excluded.sub, criado = now();
+end $$;
+
+-- usado só pela função de envio (service_role)
+create or replace function public.push_dados() returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare r jsonb;
+begin
+  with p as (
+    update public.pedidos set avisado = true
+    where not avisado and status = 'novo' and criado > now() - interval '15 minutes'
+    returning loja_id, nome, dia, periodo, barbeiro)
+  select jsonb_build_object(
+    'pub', (select valor from public.sistema where chave = 'vapid_public'),
+    'priv', (select valor from public.sistema where chave = 'vapid_private'),
+    'itens', coalesce((select jsonb_agg(jsonb_build_object('sub', s.sub, 'nome', p.nome, 'dia', p.dia, 'periodo', p.periodo, 'barbeiro', p.barbeiro))
+      from p join public.push_subs s on s.loja_id = p.loja_id), '[]'::jsonb))
+  into r;
+  return r;
+end $$;
+create or replace function public.push_remover(p_endpoint text) returns void
+language sql security definer set search_path = '' as $$ delete from public.push_subs where endpoint = p_endpoint; $$;
+revoke execute on function public.push_dados() from public, anon, authenticated;
+revoke execute on function public.push_remover(text) from public, anon, authenticated;
+grant execute on function public.push_dados() to service_role;
+grant execute on function public.push_remover(text) to service_role;
+
+-- quando entra um pedido, chama a função que manda a notificação
+create or replace function public._pedido_push() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  perform net.http_post(
+    url := 'https://avvhnajfczdedlydkcrb.supabase.co/functions/v1/push-pedido',
+    body := '{}'::jsonb,
+    headers := jsonb_build_object('Content-Type', 'application/json'));
+  return new;
+exception when others then return new;
+end $$;
+drop trigger if exists pedido_push on public.pedidos;
+create trigger pedido_push after insert on public.pedidos for each row execute function public._pedido_push();
 </script>
 <script>
 document.getElementById("b").onclick=async()=>{
-  const txt=document.getElementById("sql").textContent;
+  /* cria as chaves dos avisos aqui no seu computador; elas vão direto para o seu Supabase */
+  const k=await crypto.subtle.generateKey({name:"ECDSA",namedCurve:"P-256"},true,["sign"]);
+  const j=await crypto.subtle.exportKey("jwk",k.privateKey);
+  const de=s=>Uint8Array.from(atob(s.replace(/-/g,"+").replace(/_/g,"/")+"=".repeat((4-s.length%4)%4)),c=>c.charCodeAt(0));
+  const en=u=>btoa(String.fromCharCode(...u)).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+  const pub=en(Uint8Array.from([4,...de(j.x),...de(j.y)]));
+  const txt=document.getElementById("sql").textContent
+    +"\ninsert into public.sistema(chave,valor) values ('vapid_public','"+pub+"'),('vapid_private','"+j.d+"') on conflict (chave) do nothing;\n";
   try{ await navigator.clipboard.writeText(txt); }catch(x){ const t=document.createElement("textarea"); t.value=txt; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
   document.getElementById("ok").textContent="Copiado! Agora cole no Supabase e clique em Run.";
 };
