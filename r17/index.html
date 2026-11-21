@@ -690,7 +690,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <small style="opacity:.5;font-weight:400;font-size:.75rem">v21.11-21h</small></div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 22</span></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -957,6 +957,7 @@ footer{border-top:1px solid var(--line)}
 </main>
 
 <div class="toast" id="toast" role="status" hidden></div>
+<button type="button" id="novaVersao" hidden style="position:fixed;left:12px;right:12px;top:12px;z-index:200;background:#D9A84E;color:#1A1208;font-weight:900;font-size:1.25rem;padding:18px;border:0;border-radius:16px;box-shadow:0 10px 30px #000">🔄 Versão nova pronta. Toque aqui para atualizar</button>
 <div class="alarme" id="alarme" role="alert" hidden><span id="alarmeTxt">🔔 NOVO PEDIDO</span><button type="button" class="ver" id="alarmeVer">Ver pedido</button><button type="button" class="parar" id="alarmePar">🔕 Parar alarme</button></div>
 <div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Foto ampliada" hidden>
   <button type="button" class="lbx" id="lbFechar" aria-label="Fechar">✕</button>
@@ -2083,7 +2084,22 @@ document.querySelectorAll("[data-barb]").forEach(b=>b.addEventListener("click",(
 const ehApp = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
 if(ehApp){ const ab=$("abertura"); ab.querySelector(".ab-logo").innerHTML=document.querySelector(".herologo").outerHTML.replace('class="herologo"','');
   ab.classList.add("on"); setTimeout(()=>{ ab.classList.add("sai"); setTimeout(()=>ab.remove(),550); },1800); }
-if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).catch(()=>{}));
+/* versão do site: muda a cada atualização. O app confere sozinho e atualiza. */
+const VERSAO="22";
+function atualizarAgora(){ const u=new URL(location.href); u.searchParams.set("v",Date.now()); u.searchParams.delete("parar"); location.replace(u.href); }
+$("novaVersao").addEventListener("click",atualizarAgora);
+async function conferirVersao(){
+  try{ const t=await (await fetch("index.html?nv="+Date.now(),{cache:"no-store"})).text();
+    const m=t.match(/const VERSAO="(\d+)"/); if(!m || m[1]===VERSAO) return;
+    try{ const reg=await navigator.serviceWorker.getRegistration(); if(reg) await reg.update(); }catch(e){}
+    const f=document.activeElement, ocupado = alarmeTimer || (f && /INPUT|TEXTAREA|SELECT/.test(f.tagName));
+    let tentou=null; try{ tentou=sessionStorage.getItem("r17-tentou"); sessionStorage.setItem("r17-tentou",m[1]); }catch(e){}
+    if(ocupado || tentou===m[1]) $("novaVersao").hidden=false; else atualizarAgora();
+  }catch(e){}
+}
+setTimeout(conferirVersao,3000); setInterval(conferirVersao,5*60000);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) conferirVersao(); });
+if("serviceWorker" in navigator) window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{}));
 let pedidoInstalar=null;
 const ehIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==="MacIntel" && navigator.maxTouchPoints>1);
 const ehCelular = /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent) || ehIOS;
