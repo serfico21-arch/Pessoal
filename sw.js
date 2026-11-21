@@ -1,7 +1,7 @@
 /* Service worker do Painel FCosta.
    Estratégia: rede primeiro (você sempre vê a versão mais nova do GitHub);
    se estiver sem internet, usa a cópia guardada. Só mexe em arquivos do próprio site. */
-const CACHE = 'painel-fcosta-v1';
+const CACHE = 'painel-fcosta-v2';
 const BASICO = ['./', './index.html', './manifest.json', './icone-tela-inicial-192.png', './icone-tela-inicial-512.png'];
 
 self.addEventListener('install', (e) => {
