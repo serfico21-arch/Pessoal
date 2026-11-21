@@ -414,6 +414,56 @@ footer{border-top:1px solid var(--line)}
 .inst-box .lbx{top:10px;right:10px}
 .book>*,#form,#form .field{min-width:0}
 .dias{max-width:100%}
+
+/* ===== painel em abas ===== */
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:0 0 18px;padding-bottom:4px;position:sticky;top:0;z-index:5;background:var(--surface)}
+.tabs button{flex:0 0 auto;font:700 .98rem var(--body);padding:12px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--yellow);border-color:var(--yellow);color:#1A1208}
+.novo{display:grid;grid-template-columns:1.4fr 1fr;gap:24px;align-items:start}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vipnota{color:var(--yellow)!important;font-weight:700}
+.chk.agora{border:1px dashed var(--line);border-radius:12px;padding:10px 12px;margin:4px 0 14px}
+.valorf .money{max-width:220px}
+.valorf input{font-size:1.3rem;font-weight:800}
+.vip{display:inline-block;background:var(--yellow);color:#1A1208;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:99px;margin-left:6px;vertical-align:middle}
+.pago{display:inline-block;background:var(--ok);color:#fff;font-size:.78rem;font-weight:800;padding:3px 10px;border-radius:99px}
+.receber{display:flex;gap:6px;align-items:center}
+.receber .money{width:120px}
+.receber input{padding:8px;font-weight:700}
+.clis{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.cli{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--bg)}
+.cli.ehvip{border-color:var(--yellow)}
+.cli b{font-size:1.05rem}
+.cli p{margin:4px 0;color:var(--muted);font-size:.88rem}
+.cli .btns{margin:8px 0 0}
+.caixa-top{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin-bottom:14px}
+.caixa-top .field{margin:0}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--bg)}
+.kpi span{display:block;color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}
+.kpi b{font-family:var(--mono);font-size:1.5rem}
+.kpi.ent b{color:var(--ok)}.kpi.sai b{color:var(--red)}.kpi.sal b{color:var(--yellow)}
+.cxgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.kpi small{display:block;color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.kpi span{text-transform:none!important;letter-spacing:0!important;font-size:.82rem!important}
+.cli>div:first-child>span,.cli>div:first-child>small{display:block;margin-top:4px;color:var(--muted);font-size:.88rem}
+.cli .obs{color:var(--ink)!important;font-style:italic}
+.cli .act{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.receber{margin-top:8px;flex-wrap:wrap}
+.agcol .row .receber{grid-column:1/-1}
+.tb small{color:var(--muted)}
+.tbw{overflow-x:auto;max-width:100%}
+.vip{color:#1A1208!important;opacity:1!important}
+@media (max-width:820px){.saidaf{grid-template-columns:1fr 1fr}.saidaf .field:nth-child(2){grid-column:1/-1;order:-1}}
+@media (max-width:520px){.tb{font-size:.84rem}.tb th,.tb td{padding:7px 4px}}
+.tb{width:100%;border-collapse:collapse;font-size:.92rem}
+.tb th,.tb td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+.tb td.n,.tb th.n{text-align:right;font-family:var(--mono);white-space:nowrap}
+.tb tfoot td{font-weight:800;border-bottom:0}
+.saidaf{display:grid;grid-template-columns:160px 1fr 150px auto;gap:10px;align-items:end}
+.saidaf .field{margin:0}
+@media (max-width:820px){.novo,.cxgrid{grid-template-columns:1fr}.kpis{grid-template-columns:1fr 1fr}.saidaf{grid-template-columns:1fr 1fr}.duo{grid-template-columns:1fr}}
+@media print{body *{visibility:hidden}#painel .tab[data-painel="caixa"],#painel .tab[data-painel="caixa"] *{visibility:visible}#painel .tab[data-painel="caixa"]{position:absolute;left:0;top:0;width:100%;color:#000;background:#fff}.caixa-top .btns,#cxImprimir,.saidaf,.tb button{display:none!important}}
 </style>
 </head>
 <body>
@@ -462,7 +512,7 @@ footer{border-top:1px solid var(--line)}
         <li><a href="#barbeiros">Barbeiros</a></li>
         <li><a href="#servicos">Serviços</a></li>
         <li><a href="#galeria">Galeria</a></li>
-        <li><a href="#agendar">Agendar</a></li>
+        <li><a href="#pedir">Agendar</a></li>
         <li><a href="#contato">Contato</a></li>
         
       </ul>
@@ -505,7 +555,7 @@ footer{border-top:1px solid var(--line)}
         <h1>Corte simples ou moderno,<br><em>do seu jeito.</em></h1>
         <p>Degradê, desenho, luzes, pigmentação, progressiva e barba. Escolha o serviço, o barbeiro e reserve seu horário em menos de um minuto.</p>
         <div class="btns">
-          <a class="btn btn-y" href="#agendar">Agendar horário</a>
+          <a class="btn btn-y" href="#pedir">Pedir horário</a>
           <a class="btn btn-ghost" href="#servicos">Ver preços</a>
           <button type="button" class="btn btn-ghost instalar" id="btnInstalar" hidden><img src="icon-192.png" alt="" width="26" height="26">Instalar app</button>
         </div>
@@ -532,7 +582,7 @@ footer{border-top:1px solid var(--line)}
             <span class="apel">Rodrigo</span>
             <h3>Rô</h3>
             <div class="tags"><span>Degradê</span><span>Desenho na navalha</span><span>Barba</span></div>
-            <button type="button" class="btn btn-y btn-sm" data-barb="ro">Agendar com o Rô</button>
+            <button type="button" class="btn btn-y btn-sm" data-barb="ro">Pedir horário com o Rô</button>
           </div>
         </article>
         <article class="barber">
@@ -541,7 +591,7 @@ footer{border-top:1px solid var(--line)}
             <span class="apel">Barbeiro</span>
             <h3>João</h3>
             <div class="tags"><span>Corte social</span><span>Topete</span><span>Pigmentação</span></div>
-            <button type="button" class="btn btn-y btn-sm" data-barb="joao">Agendar com o João</button>
+            <button type="button" class="btn btn-y btn-sm" data-barb="joao">Pedir horário com o João</button>
           </div>
         </article>
       </div>
@@ -584,42 +634,22 @@ footer{border-top:1px solid var(--line)}
     </div>
   </section>
 
-  <section id="agendar" style="padding-top:0">
+  <section id="pedir" style="padding-top:0">
     <div class="wrap">
-      <div class="book">
+      <div class="book pedir">
         <div>
           <div class="eyebrow">Hora marcada</div>
-          <h2>Agende seu horário</h2>
-          <p class="lead" id="lead">Escolha o horário e confirme. Seu horário fica guardado na agenda e você avisa a barbearia pelo WhatsApp.</p>
-          <div class="summary" aria-live="polite">
-            <div><span>Serviço</span><strong id="s-serv">—</strong></div>
-            <div><span>Barbeiro</span><strong id="s-barb">—</strong></div>
-            <div><span>Data</span><strong id="s-data">—</strong></div>
-            <div><span>Horário</span><strong id="s-hora">—</strong></div>
-            <div><span>Valor</span><strong id="s-valor">—</strong></div>
-          </div>
-          <div id="doneBox" hidden></div>
-          <p class="lock">Horários riscados já estão ocupados. Depois de marcado, só a barbearia pode mudar o dia ou o horário.</p>
+          <h2>Peça seu horário</h2>
+          <p class="lead">Mande seu pedido pelo WhatsApp e a barbearia responde com o horário confirmado. É rapidinho.</p>
+          <a class="btn btn-line" id="zapDireto" target="_blank" rel="noopener">Só abrir o WhatsApp</a>
         </div>
-
-        <form id="form" novalidate>
-          <div class="field"><label for="servico"><span class="passo">1</span>Serviço</label><select id="servico"></select></div>
-          <div class="field"><label for="barbeiro"><span class="passo">2</span>Barbeiro</label><select id="barbeiro"></select></div>
-          <div class="field">
-            <span class="lbl" id="diaLbl"><span class="passo">3</span>Dia</span>
-            <div class="dias" id="dias" role="group" aria-labelledby="diaLbl"></div>
-            <label class="outrodia" for="data">Outro dia: <input type="date" id="data"></label>
-            <p class="hint" id="diaHint"></p>
-          </div>
-          <div class="field">
-            <span class="lbl" id="horaLbl"><span class="passo">4</span>Horário</span>
-            <div class="slots" id="slots" role="group" aria-labelledby="horaLbl"></div>
-            <p class="hint" id="slotNote" hidden></p>
-          </div>
-          <div class="field"><label for="nome"><span class="passo">5</span>Seu nome</label><input id="nome" autocomplete="name" placeholder="Ex.: João da Silva"></div>
-          <div class="field"><label for="fone">Seu WhatsApp</label><input id="fone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000"></div>
-          <p class="err" id="err" role="alert"></p>
-          <button class="btn btn-y" id="submitBtn" type="submit" style="width:100%">Confirmar agendamento</button>
+        <form id="pForm" novalidate>
+          <div class="field"><label for="pNome">Seu nome</label><input id="pNome" autocomplete="name" placeholder="Ex.: João da Silva"></div>
+          <div class="field"><label for="pServ">Serviço</label><select id="pServ"></select></div>
+          <div class="field"><label for="pBarb">Barbeiro</label><select id="pBarb"></select></div>
+          <div class="field"><label for="pQuando">Quando prefere?</label><input id="pQuando" placeholder="Ex.: sábado de manhã"></div>
+          <p class="err" id="pErr" role="alert"></p>
+          <button class="btn btn-y" type="submit" style="width:100%">Pedir horário pelo WhatsApp</button>
         </form>
       </div>
     </div>
@@ -662,6 +692,14 @@ footer{border-top:1px solid var(--line)}
             <div class="btns" style="margin:0"><a class="btn btn-sm btn-y" href="./" target="_blank" rel="noopener">Ver site do cliente</a><button class="btn btn-sm btn-line" type="button" id="trocarSenha">Trocar senha</button><button class="btn btn-sm btn-line" type="button" id="sair">Sair do painel</button></div>
           </div>
 
+          <nav class="tabs" id="tabs" role="tablist">
+            <button type="button" role="tab" data-tab="agenda" aria-selected="true">📅 Agenda</button>
+            <button type="button" role="tab" data-tab="novo">＋ Novo horário</button>
+            <button type="button" role="tab" data-tab="clientes">👤 Clientes</button>
+            <button type="button" role="tab" data-tab="caixa">💰 Caixa</button>
+            <button type="button" role="tab" data-tab="ajustes">⚙️ Ajustes</button>
+          </nav>
+          <div class="tab" data-painel="agenda">
           <div class="box pendbox" id="pendBox" hidden>
             <h3 class="bh" id="pendTit">Pedidos esperando confirmação</h3>
             <p class="hint" style="margin:0 0 10px">Clientes que marcaram pelo site. Confirme ou apague. Só o ADM pode apagar um horário.</p>
@@ -676,7 +714,7 @@ footer{border-top:1px solid var(--line)}
           <div class="proximo" id="proximo" hidden></div>
           <p class="ok" id="agMsg" aria-live="polite"></p>
           <div class="agcols" id="rows"><p class="empty">Carregando a agenda…</p></div>
-          <p class="hint" style="margin:10px 0 0">Para marcar um cliente que pediu pelo WhatsApp, use o formulário "Agende seu horário" mais acima.</p>
+          <p class="hint" style="margin:10px 0 0">Para marcar um cliente, toque na aba <b>＋ Novo horário</b>.</p>
           <div class="box" style="margin-top:24px">
             <h3 class="bh">Horário deste dia</h3>
             <p class="hint" id="diaInfo" style="margin:0 0 10px"></p>
@@ -688,6 +726,97 @@ footer{border-top:1px solid var(--line)}
             <div class="btns" style="margin-top:4px"><button class="btn btn-sm btn-y" type="button" id="exSalvar">Salvar horário do dia</button><button class="btn btn-sm btn-line" type="button" id="exLimpar">Voltar ao horário padrão</button></div>
             <p class="ok" id="exMsg" aria-live="polite"></p>
           </div>
+          </div>
+
+          <div class="tab" data-painel="novo" hidden>
+            <div class="novo">
+              <form id="form" novalidate>
+                <h3 class="bh">Marcar um horário</h3>
+                <div class="field"><label for="cliente">Cliente</label>
+                  <select id="cliente"><option value="">— Cliente novo ou avulso —</option></select>
+                  <p class="hint vipnota" id="vipNota" hidden></p></div>
+                <div class="duo">
+                  <div class="field"><label for="nome">Nome</label><input id="nome" autocomplete="off" placeholder="Nome do cliente"></div>
+                  <div class="field"><label for="fone">WhatsApp (opcional)</label><input id="fone" type="tel" inputmode="tel" autocomplete="off" placeholder="(11) 90000-0000"></div>
+                </div>
+                <div class="duo">
+                  <div class="field"><label for="servico">Serviço</label><select id="servico"></select></div>
+                  <div class="field"><label for="barbeiro">Barbeiro</label><select id="barbeiro"></select></div>
+                </div>
+                <div class="field">
+                  <span class="lbl" id="diaLbl">Dia</span>
+                  <div class="dias" id="dias" role="group" aria-labelledby="diaLbl"></div>
+                  <label class="outrodia" for="data">Outro dia: <input type="date" id="data"></label>
+                  <p class="hint" id="diaHint"></p>
+                </div>
+                <label class="chk agora"><input type="checkbox" id="jaRecebido"> Atendimento agora, sem hora marcada (já entra no caixa)</label>
+                <div class="field" id="campoHora">
+                  <span class="lbl" id="horaLbl">Horário</span>
+                  <div class="slots" id="slots" role="group" aria-labelledby="horaLbl"></div>
+                  <p class="hint" id="slotNote" hidden></p>
+                </div>
+                <div class="field valorf"><label for="valor">Valor cobrado</label><div class="money"><span>R$</span><input id="valor" type="number" min="0" step="1" inputmode="decimal"></div>
+                  <p class="hint" id="valorNota">Preço da tabela. Mude se for um valor diferente.</p></div>
+                <p class="err" id="err" role="alert"></p>
+                <button class="btn btn-y" id="submitBtn" type="submit" style="width:100%">Salvar na agenda</button>
+              </form>
+              <div>
+                <div class="summary" aria-live="polite">
+                  <div><span>Serviço</span><strong id="s-serv">—</strong></div>
+                  <div><span>Barbeiro</span><strong id="s-barb">—</strong></div>
+                  <div><span>Data</span><strong id="s-data">—</strong></div>
+                  <div><span>Horário</span><strong id="s-hora">—</strong></div>
+                  <div><span>Preço da tabela</span><strong id="s-valor">—</strong></div>
+                </div>
+                <div id="doneBox" hidden></div>
+                <p id="lead" hidden></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab" data-painel="clientes" hidden>
+            <div class="box">
+              <h3 class="bh" id="cliTit">Cadastrar cliente</h3>
+              <div class="duo">
+                <div class="field"><label for="cNome">Nome</label><input id="cNome" autocomplete="off"></div>
+                <div class="field"><label for="cFone">WhatsApp</label><input id="cFone" type="tel" inputmode="tel" autocomplete="off" placeholder="(11) 90000-0000"></div>
+              </div>
+              <label class="chk"><input type="checkbox" id="cVip"> ⭐ Cliente VIP (preço especial)</label>
+              <div class="field"><label for="cObs">Anotação (ex.: preço combinado, preferências)</label><input id="cObs" maxlength="300" placeholder="Ex.: corte por R$ 25"></div>
+              <div class="btns" style="margin-top:0"><button type="button" class="btn btn-sm btn-y" id="cSalvar">Salvar cliente</button><button type="button" class="btn btn-sm btn-line" id="cCancelar" hidden>Cancelar</button></div>
+              <p class="ok" id="cMsg" aria-live="polite"></p>
+            </div>
+            <div class="field" style="max-width:360px"><label for="cBusca">Procurar cliente</label><input id="cBusca" type="search" placeholder="Digite o nome"></div>
+            <div class="clis" id="cLista"><p class="empty">Carregando…</p></div>
+          </div>
+
+          <div class="tab" data-painel="caixa" hidden>
+            <div class="caixa-top">
+              <div class="field"><label for="cxDe">De</label><input type="date" id="cxDe"></div>
+              <div class="field"><label for="cxAte">Até</label><input type="date" id="cxAte"></div>
+              <div class="btns" style="margin:0"><button type="button" class="btn btn-sm btn-line" data-per="hoje">Hoje</button><button type="button" class="btn btn-sm btn-line" data-per="semana">7 dias</button><button type="button" class="btn btn-sm btn-line" data-per="mes">Este mês</button><button type="button" class="btn btn-sm btn-line" data-per="mesant">Mês passado</button></div>
+            </div>
+            <div class="kpis" id="cxKpis"></div>
+            <div class="cxgrid">
+              <div class="box"><h3 class="bh">Por serviço</h3><div id="cxServ"></div></div>
+              <div class="box"><h3 class="bh">Por barbeiro</h3><div id="cxBarb"></div></div>
+            </div>
+            <div class="box">
+              <h3 class="bh">Saídas (despesas)</h3>
+              <div class="saidaf">
+                <div class="field"><label for="sData">Dia</label><input type="date" id="sData"></div>
+                <div class="field"><label for="sDesc">O que foi</label><input id="sDesc" placeholder="Ex.: lâminas, luz, aluguel"></div>
+                <div class="field"><label for="sValor">Valor</label><div class="money"><span>R$</span><input id="sValor" type="number" min="0" step="0.01" inputmode="decimal"></div></div>
+                <button type="button" class="btn btn-sm btn-y" id="sAdd">Lançar saída</button>
+              </div>
+              <p class="ok" id="sMsg" aria-live="polite"></p>
+              <div id="cxSaidas"></div>
+            </div>
+            <div class="box"><h3 class="bh">Atendimentos recebidos</h3><div id="cxEntradas"></div></div>
+            <button type="button" class="btn btn-sm btn-line" id="cxImprimir">Imprimir relatório</button>
+          </div>
+
+          <div class="tab" data-painel="ajustes" hidden>
 
           <div class="box" style="margin-top:24px">
             <h3 class="bh">Horário padrão da semana</h3>
@@ -762,6 +891,7 @@ footer{border-top:1px solid var(--line)}
             </div>
             <p class="ok" id="vidMsg" aria-live="polite"></p>
             <div class="vidadm" id="vidAdm"></div>
+          </div>
           </div>
         </div>
       </div>
@@ -857,7 +987,7 @@ const PADRAO_SERV = [
   ["Outros","Depilação de nariz e orelha","Com cera",15,15],
   ["Outros","Lavagem","Lavagem e finalização",15,15]
 ].map(([cat,nome,desc,preco,min],i)=>({id:"s"+i,cat,nome,desc,preco,min,ativo:true}));
-let todosServ = PADRAO_SERV, SERVICOS = PADRAO_SERV, videos = [];
+let todosServ = PADRAO_SERV, SERVICOS = PADRAO_SERV, videos = [], valorMexido = false;
 /* ============================== */
 
 /* ---------- conexão com o banco online ---------- */
@@ -905,9 +1035,14 @@ function renderServicos(){
   $("servico").innerHTML = SERVICOS.map((s,i)=>`<option value="${i}">${esc(s.nome)} · ${brl(Number(s.preco))}</option>`).join("");
   const idx = SERVICOS.findIndex(s=>s.id===antes); $("servico").value = String(idx>=0?idx:0);
   $("servico").dataset.id = SERVICOS[$("servico").value]?.id || "";
+  const pAntes=$("pServ").value;
+  $("pServ").innerHTML = `<option value="">Ainda não sei</option>` + SERVICOS.map(s=>`<option>${esc(s.nome)}</option>`).join("");
+  if([...$("pServ").options].some(o=>o.value===pAntes)) $("pServ").value=pAntes;
+  if(!valorMexido) $("valor").value = Number((SERVICOS[$("servico").value]||{}).preco||0);
 }
 renderServicos();
-$("barbeiro").innerHTML = `<option value="">Sem preferência</option>` + BARBEIROS.map(b=>`<option value="${b.id}">${b.nome}</option>`).join("");
+$("barbeiro").innerHTML = `<option value="">Quem estiver livre</option>` + BARBEIROS.map(b=>`<option value="${b.id}">${b.nome}</option>`).join("");
+$("pBarb").innerHTML = `<option value="">Tanto faz</option>` + BARBEIROS.map(b=>`<option value="${b.id}">${b.nome}</option>`).join("");
 
 const hoje = new Date(), isoHoje = isoOf(hoje);
 $("data").min = isoHoje;
@@ -950,6 +1085,7 @@ function renderHorasTopo(){
 function renderSlots(){
   const iso=$("data").value, s=SERVICOS[$("servico").value]||{nome:"—",preco:0,min:30}, b=$("barbeiro").value;
   const g = iso && grade(iso);
+  $("campoHora").hidden = $("jaRecebido").checked;
   if(!iso){ $("slots").innerHTML=`<p class="hint">Escolha uma data.</p>`; horaSel=null; }
   else if(!g){ $("slots").innerHTML=`<p class="hint">Fechado neste dia. Escolha outra data.</p>`; horaSel=null; }
   else{
@@ -961,7 +1097,8 @@ function renderSlots(){
   }
   $("s-serv").textContent=s.nome; $("s-valor").textContent=brl(Number(s.preco));
   $("s-barb").textContent=nomeBarb(b);
-  $("s-data").textContent=iso?fmtData(iso):"—"; $("s-hora").textContent=horaSel||"—";
+  const agora=$("jaRecebido").checked;
+  $("s-data").textContent=agora?fmtData(isoHoje):iso?fmtData(iso):"—"; $("s-hora").textContent=agora?"Agora":horaSel||"—";
   renderDias();
 }
 function renderDias(){
@@ -981,22 +1118,23 @@ function proximoDia(){
 }
 
 /* ---------- dados ao vivo ---------- */
-async function carregarDia(iso){
-  const [dia, occ] = await Promise.all([
-    api(`dias?loja_id=eq.${CONFIG.loja}&data=eq.${iso}&select=abre,fecha,fechado`),
-    api("ocupados",{p_loja:CONFIG.loja,p_data:iso})
-  ]);
+function guardarDia(iso,dia,lista){
   const ocupado={}; BARBEIROS.forEach(b=>ocupado[b.id]=[]);
-  (occ||[]).forEach(a=>(ocupado[a.barbeiro]||(ocupado[a.barbeiro]=[])).push(...cobre(toMin(a.hora),a.min)));
-  diasCache[iso] = Object.assign({}, (dia&&dia[0])||{}, {ocupado});
+  (lista||[]).forEach(a=>(ocupado[a.barbeiro]||(ocupado[a.barbeiro]=[])).push(...cobre(toMin(a.hora),a.min)));
+  diasCache[iso] = Object.assign({}, (dia&&dia[0])||{}, {ocupado, lista:lista||[]});
   return diasCache[iso];
 }
+const buscarDia = iso => api(`dias?loja_id=eq.${CONFIG.loja}&data=eq.${iso}&select=abre,fecha,fechado`);
+async function carregarDia(iso){
+  const [dia, lista] = await Promise.all([buscarDia(iso), isAdmin() ? adm("adm_agenda2",{p_data:iso}) : []]);
+  return guardarDia(iso,dia,lista);
+}
 async function ouvirDia(){
-  const iso=$("data").value; if(!iso) return;
+  const iso=$("data").value; if(!iso || !isAdmin()) return;
   const note=$("slotNote");
   if(!diasCache[iso]){ note.hidden=false; note.textContent="Conferindo horários ocupados…"; }
   try{ await carregarDia(iso); note.hidden=true; }
-  catch(e){ note.hidden=false; note.textContent="Não deu para conferir os horários ocupados agora. A barbearia confirma pelo WhatsApp."; }
+  catch(e){ note.hidden=false; note.textContent="Não deu para conferir os horários ocupados agora. Confira a internet."; }
   if(iso===$("data").value) renderSlots();
 }
 async function carregarLoja(){
@@ -1011,7 +1149,7 @@ async function carregarLoja(){
 }
 
 const fmtZap = n => { const d=n.replace(/^55/,""); return `(${d.slice(0,2)}) ${d.slice(2,d.length-4)}-${d.slice(-4)}`; };
-function mostrarZap(){ const a=$("zapLink"); a.href="https://wa.me/"+CONFIG.whatsapp; a.textContent=fmtZap(CONFIG.whatsapp); }
+function mostrarZap(){ const a=$("zapLink"); a.href="https://wa.me/"+CONFIG.whatsapp; a.textContent=fmtZap(CONFIG.whatsapp); if(typeof linkZapDireto==="function") linkZapDireto(); }
 
 /* ---------- galeria e vídeos ---------- */
 let fotos = [];
@@ -1071,55 +1209,61 @@ function renderVideos(){
 
 /* ---------- formulário do cliente ---------- */
 $("slots").addEventListener("click",e=>{const b=e.target.closest(".slot"); if(!b||b.disabled) return; horaSel=b.dataset.h; renderSlots();});
-$("servico").addEventListener("change",()=>{ $("servico").dataset.id=SERVICOS[$("servico").value]?.id||""; renderSlots(); });
+$("servico").addEventListener("change",()=>{ $("servico").dataset.id=SERVICOS[$("servico").value]?.id||""; if(!valorMexido) $("valor").value=Number((SERVICOS[$("servico").value]||{}).preco||0); renderSlots(); });
 $("barbeiro").addEventListener("change",renderSlots);
 $("data").addEventListener("change",()=>{renderSlots(); ouvirDia();});
 $("fone").addEventListener("input",e=>{
   let d=e.target.value.replace(/\D/g,"").slice(0,11);
   e.target.value = d.length>6 ? `(${d.slice(0,2)}) ${d.slice(2,d.length-4)}-${d.slice(-4)}` : d.length>2 ? `(${d.slice(0,2)}) ${d.slice(2)}` : d;
 });
+$("valor").addEventListener("input",()=>{ valorMexido=true; });
+$("jaRecebido").addEventListener("change",renderSlots);
 $("form").addEventListener("submit",async e=>{
   e.preventDefault();
-  const nome=$("nome").value.trim(), fone=$("fone").value.replace(/\D/g,"");
+  const nome=$("nome").value.trim(), fone=$("fone").value.replace(/\D/g,""), agora=$("jaRecebido").checked;
+  const vtxt=String($("valor").value).replace(",","."), valor = vtxt==="" ? null : Number(vtxt);
   let msg="";
-  if(!$("data").value) msg="Escolha a data do atendimento.";
-  else if(!horaSel) msg="Escolha um horário.";
-  else if(nome.length<2) msg="Digite o nome.";
-  else if(fone.length<10) msg="Digite o WhatsApp com DDD.";
-  if(!msg && !SERVICOS[$("servico").value]) msg="Escolha um serviço.";
+  if(nome.length<2) msg="Digite o nome do cliente.";
+  else if(!SERVICOS[$("servico").value]) msg="Escolha um serviço.";
+  else if(!agora && !$("data").value) msg="Escolha o dia.";
+  else if(!agora && !horaSel) msg="Escolha um horário.";
+  else if(fone && fone.length<10) msg="O WhatsApp precisa ter DDD. Ou deixe em branco.";
+  else if(valor!==null && (isNaN(valor)||valor<0)) msg="Confira o valor cobrado.";
   $("err").textContent=msg; if(msg) return;
-  const s=SERVICOS[$("servico").value], iso=$("data").value, t=toMin(horaSel), hora=horaSel;
-  const barb=$("barbeiro").value || BARBEIROS.find(b=>barbLivre(b.id,iso,t,s.min,ocupadoDe(iso)))?.id || BARBEIROS[0].id;
-  const dados={p_data:iso,p_hora:hora,p_min:Number(s.min),p_servico:s.nome,p_preco:Number(s.preco),p_barbeiro:barb,p_nome:nome,p_fone:$("fone").value};
+  const s=SERVICOS[$("servico").value], n=new Date();
+  const iso = agora ? isoOf(n) : $("data").value, hora = agora ? toHora(n.getHours()*60+n.getMinutes()) : horaSel;
+  const t=toMin(hora);
+  const barb=$("barbeiro").value || (agora ? BARBEIROS[0].id : (BARBEIROS.find(b=>barbLivre(b.id,iso,t,s.min,ocupadoDe(iso)))||BARBEIROS[0]).id);
+  const dados={p_data:iso,p_hora:hora,p_min:Number(s.min),p_servico:s.nome,p_preco:Number(s.preco),p_barbeiro:barb,p_nome:nome,p_fone:$("fone").value,
+    p_cliente:$("cliente").value||null,p_valor:valor,p_recebido:agora};
   $("submitBtn").disabled=true; $("submitBtn").textContent="Salvando…";
-  let salvo=false, erro="";
-  try{
-    if(isAdmin()) await adm("adm_marcar",dados);
-    else await api("agendar",Object.assign({p_loja:CONFIG.loja},dados));
-    salvo=true;
-  }catch(err){
-    erro = err.codigo==="ocupado" ? "Esse horário acabou de ser ocupado. Escolha outro."
-         : err.codigo==="limite" ? "Este WhatsApp já tem 3 pedidos esperando confirmação. Fale com a barbearia."
-         : "";
-  }
-  $("submitBtn").disabled=false; $("submitBtn").textContent=isAdmin()?"Salvar na agenda":"Confirmar agendamento";
-  if(erro){ $("err").textContent=erro; horaSel=null; await ouvirDia(); return; }
-  if(isAdmin()){
-    if(!salvo){ $("err").textContent="Não foi possível salvar. Confira a internet e tente de novo."; return; }
-    $("doneBox").hidden=false;
-    $("doneBox").innerHTML=`<div class="done"><h3>Salvo na agenda</h3><p>${esc(nome)}: ${esc(s.nome)} com ${nomeBarb(barb)}, ${fmtData(iso)} às ${hora}. O horário agora aparece ocupado.</p></div>`;
-    horaSel=null; $("nome").value=""; $("fone").value="";
-    $("admData").value=iso; ouvirDia(); ouvirAdm(); return;
-  }
-  const texto=`Olá! ${salvo?"Fiz um agendamento":"Quero agendar um horário"} na R-17:\n\nServiço: ${s.nome} (${brl(Number(s.preco))})\nBarbeiro: ${nomeBarb(barb)}\nData: ${fmtData(iso)}\nHorário: ${hora}\nNome: ${nome}\nWhatsApp: ${$("fone").value}`;
-  const link=`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(texto)}`;
+  let erro="";
+  try{ await adm("adm_marcar2",dados); }
+  catch(err){ erro = err.codigo==="ocupado" ? "Esse horário já está ocupado. Escolha outro." : err.codigo==="sessao" ? "" : "Não foi possível salvar. Confira a internet e tente de novo."; if(err.codigo==="sessao") erro=" "; }
+  $("submitBtn").disabled=false; $("submitBtn").textContent="Salvar na agenda";
+  if(erro){ $("err").textContent=erro.trim(); if(!agora){ horaSel=null; await ouvirDia(); } return; }
+  const v = valor===null ? Number(s.preco) : valor;
   $("doneBox").hidden=false;
-  $("doneBox").innerHTML = salvo
-    ? `<div class="done"><h3>Horário reservado!</h3><p>${esc(s.nome)} com ${nomeBarb(barb)}, ${fmtData(iso)} às ${hora}. Seu horário já está guardado na agenda. Toque no botão para avisar a barbearia pelo WhatsApp.</p><a class="btn btn-y" href="${link}" target="_blank" rel="noopener">Avisar pelo WhatsApp</a></div>`
-    : `<div class="done"><h3>Quase lá!</h3><p>${esc(s.nome)}, ${fmtData(iso)} às ${hora}. Toque no botão para mandar o pedido à barbearia pelo WhatsApp. A barbearia confirma por lá.</p><a class="btn btn-y" href="${link}" target="_blank" rel="noopener">Enviar pelo WhatsApp</a></div>`;
-  if(salvo){ horaSel=null; ouvirDia(); }
-  $("doneBox").scrollIntoView({behavior:"smooth",block:"center"});
+  $("doneBox").innerHTML=`<div class="done"><h3>${agora?"Lançado no caixa":"Salvo na agenda"}</h3><p>${esc(nome)}: ${esc(s.nome)} com ${nomeBarb(barb)}, ${fmtData(iso)} às ${hora}. Valor: ${brl(v)}.</p>${
+    !agora && fone ? `<a class="btn btn-sm btn-line" target="_blank" rel="noopener" href="${esc(waCliente(fone,`Olá ${nome}! Seu horário na R-17 está marcado: ${s.nome} com ${nomeBarb(barb)}, ${fmtData(iso)} às ${hora}. Até lá!`))}">Avisar o cliente no WhatsApp</a>`:""}</div>`;
+  horaSel=null; $("nome").value=""; $("fone").value=""; $("cliente").value=""; $("vipNota").hidden=true;
+  $("jaRecebido").checked=false; valorMexido=false; $("valor").value=Number(s.preco);
+  clientesCache=null; renderSlots();
+  $("admData").value=iso; ouvirDia(); ouvirAdm();
 });
+
+/* ---------- pedido do cliente pelo WhatsApp (o cliente não vê a agenda) ---------- */
+$("pForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const nome=$("pNome").value.trim();
+  if(nome.length<2){ $("pErr").textContent="Digite seu nome."; return; }
+  $("pErr").textContent="";
+  const serv=$("pServ").value, b=$("pBarb").value, quando=$("pQuando").value.trim();
+  const texto=`Olá! Quero marcar um horário na R-17.\n\nNome: ${nome}`+(serv?`\nServiço: ${serv}`:"")+(b?`\nBarbeiro: ${nomeBarb(b)}`:"")+(quando?`\nQuando prefiro: ${quando}`:"");
+  window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(texto)}`,"_blank","noopener");
+});
+function linkZapDireto(){ $("zapDireto").href=`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent("Olá! Quero marcar um horário na R-17.")}`; }
+linkZapDireto();
 
 /* ---------- senha do painel ---------- */
 function mostrarGate(modo){ // "sem" | "login" | "nova" | "esqueci" | "trocar"
@@ -1204,24 +1348,21 @@ $("gateNova").addEventListener("submit",async e=>{
 /* ---------- painel ---------- */
 function entrarPainel(){
   $("gate").hidden=true; $("admBody").hidden=false;
-  $("lead").textContent="Você está no modo administrador: ao confirmar, o cliente entra direto na agenda já confirmado.";
-  $("submitBtn").textContent="Salvar na agenda";
-  if(!$("admData").value) $("admData").value=$("data").value || isoHoje;
-  renderSemana(); renderServAdm(); renderFotosAdm(); renderVidAdm(); carregarEmailAdm(); ouvirAdm();
+  if(!$("admData").value) $("admData").value=isoHoje;
+  if(!$("cxDe").value) periodo("mes");
+  renderSemana(); renderServAdm(); renderFotosAdm(); renderVidAdm(); carregarEmailAdm(); ouvirAdm(); ouvirDia(); carregarClientes();
   $("zapNovo").value=fmtZap(CONFIG.whatsapp);
 }
-function sairModoAdm(){
-  $("lead").textContent="Escolha o horário e confirme. Seu horário fica guardado na agenda e você avisa a barbearia pelo WhatsApp.";
-  $("submitBtn").textContent="Confirmar agendamento";
-}
+function sairModoAdm(){ agendaDia=[]; clientesCache=null; }
 async function ouvirAdm(){
   if(!isAdmin()) return;
   const iso=$("admData").value;
   if(!agendaDia.length) $("rows").innerHTML=`<p class="empty">Carregando a agenda…</p>`;
   try{
-    const [lista, pend] = await Promise.all([adm("adm_agenda",{p_data:iso}), adm("adm_pendentes"), carregarDia(iso)]);
+    const [lista, pend, dia] = await Promise.all([adm("adm_agenda2",{p_data:iso}), adm("adm_pendentes").catch(()=>[]), buscarDia(iso)]);
     if(iso!==$("admData").value) return;
-    agendaDia = lista||[]; renderAdm(); renderPend(pend||[]); avisarNovos(pend||[]); renderDiaAdm();
+    guardarDia(iso,dia,lista);
+    agendaDia = lista||[]; renderAdm(); renderPend(pend||[]); renderDiaAdm();
     if(iso===$("data").value) renderSlots();
   }catch(e){ if(e.codigo!=="sessao") $("rows").innerHTML=`<p class="empty">Não foi possível abrir a agenda agora. Confira a internet.</p>`; }
 }
@@ -1278,13 +1419,19 @@ function opcoesHora(iso,dur,barb,atual,ignorar,occ){
 }
 function ocupAgenda(){ const occ={}; agendaDia.forEach(a=>{(occ[a.barbeiro]||(occ[a.barbeiro]=[])).push(...cobre(toMin(a.hora),a.min));}); return occ; }
 const corBarb = id => "b"+Math.max(0,BARBEIROS.findIndex(b=>b.id===id));
+const vlr = a => a.valor!==null && a.valor!==undefined ? Number(a.valor) : Number(a.preco||0);
 function linhaAgenda(a,comData,classe){
   const pend = a.status==="pendente";
   const txt = `Olá ${a.nome}! Seu horário na R-17 está confirmado: ${a.servico} com ${nomeBarb(a.barbeiro)}, ${fmtData(a.data)} às ${a.hora}. Até lá!`;
+  const temFone = String(a.fone||"").replace(/\D/g,"").length>=10;
+  const receber = comData ? "" : a.recebido
+    ? `<div class="receber pago"><span class="pago">Pago ${brl(vlr(a))}</span><button class="btn btn-sm btn-line" data-act="desfazer">Desfazer</button></div>`
+    : `<div class="receber"><div class="money"><span>R$</span><input type="number" min="0" step="1" inputmode="decimal" value="${vlr(a)}" aria-label="Valor cobrado de ${esc(a.nome)}" data-valor></div><button class="btn btn-sm btn-y" data-act="receber">Recebido</button></div>`;
   return `<div class="row${pend?" pend":""}${classe?" "+classe:""}" data-id="${a.id}">
     <div class="h">${comData?`<small>${fmtCurta(a.data)}</small>`:""}${esc(a.hora)}</div>
-    <div class="who"><b>${esc(a.nome)} <span class="badge ${pend?"b-pend":"b-ok"}">${pend?"Aguardando confirmação":"Confirmado"}</span></b><span class="svc">${comData?`<span class="bchip ${corBarb(a.barbeiro)}">${esc(nomeBarb(a.barbeiro))}</span>`:""}${esc(a.servico)} · ${a.min} min</span><span><a href="${waCliente(a.fone,"Olá "+a.nome+"!")}" target="_blank" rel="noopener">${esc(a.fone)}</a></span></div>
-    <div class="act">${pend?`<button class="btn btn-sm btn-y" data-act="confirmar">Confirmar</button>`:`<a class="btn btn-sm btn-line" href="${esc(waCliente(a.fone,txt))}" target="_blank" rel="noopener">Avisar cliente</a>`}${comData?"":`<button class="btn btn-sm btn-line" data-act="editar">Mudar dia/horário</button>`}<button class="btn btn-sm btn-line" data-act="cancelar">Apagar</button></div>
+    <div class="who"><b>${esc(a.nome)}${a.vip?` <span class="vip">⭐ VIP</span>`:""}${pend?` <span class="badge b-pend">Aguardando confirmação</span>`:""}</b><span class="svc">${comData?`<span class="bchip ${corBarb(a.barbeiro)}">${esc(nomeBarb(a.barbeiro))}</span>`:""}${esc(a.servico)} · tabela ${brl(Number(a.preco||0))}</span>${temFone?`<span><a href="${waCliente(a.fone,"Olá "+a.nome+"!")}" target="_blank" rel="noopener">${esc(a.fone)}</a></span>`:""}</div>
+    ${receber}
+    <div class="act">${pend?`<button class="btn btn-sm btn-y" data-act="confirmar">Confirmar</button>`:temFone?`<a class="btn btn-sm btn-line" href="${esc(waCliente(a.fone,txt))}" target="_blank" rel="noopener">Avisar cliente</a>`:""}${comData||a.recebido?"":`<button class="btn btn-sm btn-line" data-act="editar">Mudar dia/horário</button>`}<button class="btn btn-sm btn-line" data-act="cancelar">Apagar</button></div>
   </div>`;
 }
 let pendentes=[];
@@ -1299,7 +1446,8 @@ function renderAdm(){
   $("admDiaTxt").textContent = (ehHoje ? "Hoje, " : "") + fmtData(iso);
   const estado = a => { if(!ehHoje) return ""; const ini=toMin(a.hora), fim=ini+a.min; return fim<=mAgora ? "passou" : ini<=mAgora ? "agora" : ""; };
   $("rows").innerHTML = BARBEIROS.map((b,i)=>{ const l=agendaDia.filter(a=>a.barbeiro===b.id);
-    return `<div class="agcol b${i}"><h4>${esc(b.nome)}<span>${l.length===1?"1 cliente":l.length+" clientes"}</span></h4>${
+    const pago=l.filter(a=>a.recebido).reduce((t,a)=>t+vlr(a),0);
+    return `<div class="agcol b${i}"><h4>${esc(b.nome)}<span>${l.length===1?"1 cliente":l.length+" clientes"}${pago?" · recebido "+brl(pago):""}</span></h4>${
       l.length ? `<div class="rows">${l.map(a=>linhaAgenda(a,false,estado(a))).join("")}</div>` : `<p class="empty">Ninguém marcado com ${esc(b.nome)} neste dia.</p>`}</div>`; }).join("");
   // próximo cliente (só hoje)
   const prox = ehHoje ? agendaDia.find(a=>toMin(a.hora)+a.min>mAgora) : null;
@@ -1346,6 +1494,12 @@ async function acaoAgenda(e){
       btn.disabled=true; await adm("adm_confirmar",{p_id:a.id});
       await ouvirAdm(); alertaAdm("Confirmado. Toque em \"Avisar cliente\" para mandar a confirmação pelo WhatsApp."); return;
     }
+    if(act==="receber"||act==="desfazer"){
+      const inp=row.querySelector("[data-valor]"), v = inp ? Number(String(inp.value).replace(",",".")) : vlr(a);
+      if(act==="receber" && (inp.value==="" || isNaN(v) || v<0)){ alertaAdm("Digite o valor cobrado."); return; }
+      btn.disabled=true; await adm("adm_receber",{p_id:a.id,p_valor:v,p_recebido:act==="receber"});
+      await ouvirAdm(); alertaAdm(act==="receber" ? `Recebido ${brl(v)} de ${a.nome}. Já está no caixa.` : "Recebimento desfeito."); return;
+    }
     if(act==="cancelar"){ btn.textContent="Toque de novo para apagar"; btn.dataset.act="cancelar2"; btn.classList.add("btn-red"); return; }
     if(act==="cancelar2"){ btn.disabled=true; await adm("adm_apagar",{p_id:a.id}); await ouvirAdm(); if(a.data===$("data").value) ouvirDia(); return; }
     if(act==="editar"){
@@ -1381,6 +1535,142 @@ async function acaoAgenda(e){
 function alertaAdm(t){ $("agMsg").textContent=t; setTimeout(()=>{ if($("agMsg").textContent===t) $("agMsg").textContent=""; },6000); }
 $("rows").addEventListener("click",acaoAgenda);
 $("pendRows").addEventListener("click",acaoAgenda);
+
+/* ---------- abas do painel ---------- */
+function abrirAba(t){
+  document.querySelectorAll("#tabs [data-tab]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===t)));
+  document.querySelectorAll("#admBody .tab").forEach(d=>d.hidden = d.dataset.painel!==t);
+  if(t==="agenda") ouvirAdm();
+  if(t==="novo"){ $("doneBox").hidden=true; carregarClientes(); ouvirDia(); }
+  if(t==="clientes") carregarClientes();
+  if(t==="caixa") carregarCaixa();
+  $("tabs").scrollIntoView({behavior:"smooth",block:"start"});
+}
+$("tabs").addEventListener("click",e=>{ const b=e.target.closest("[data-tab]"); if(b) abrirAba(b.dataset.tab); });
+
+/* ---------- clientes (VIP) ---------- */
+let clientesCache=null, cliEdit=null;
+async function carregarClientes(){
+  if(!isAdmin()) return;
+  try{ clientesCache = (await adm("adm_clientes")) || []; }
+  catch(e){ if(e.codigo!=="sessao") $("cLista").innerHTML=`<p class="empty">Não foi possível abrir os clientes agora. Confira a internet.</p>`; return; }
+  renderClientes(); encherSelectCliente();
+}
+function encherSelectCliente(){
+  const sel=$("cliente"), antes=sel.value;
+  sel.innerHTML = `<option value="">— Cliente novo ou avulso —</option>` + (clientesCache||[]).map(c=>`<option value="${c.id}">${c.vip?"⭐ ":""}${esc(c.nome)}</option>`).join("");
+  if((clientesCache||[]).some(c=>c.id===antes)) sel.value=antes;
+}
+function renderClientes(){
+  const q=$("cBusca").value.trim().toLowerCase(), l=(clientesCache||[]).filter(c=>!q || c.nome.toLowerCase().includes(q) || String(c.fone).includes(q));
+  $("cLista").innerHTML = l.length ? l.map(c=>`<div class="cli${c.vip?" ehvip":""}" data-id="${c.id}">
+      <div><b>${esc(c.nome)}${c.vip?` <span class="vip">⭐ VIP</span>`:""}</b>
+      ${c.fone?`<span><a href="${esc(waCliente(c.fone,"Olá "+c.nome+"!"))}" target="_blank" rel="noopener">${esc(c.fone)}</a></span>`:""}
+      ${c.obs?`<span class="obs">${esc(c.obs)}</span>`:""}
+      <small>${Number(c.visitas)===1?"1 atendimento":Number(c.visitas||0)+" atendimentos"}${c.ultima?" · último em "+fmtCurta(c.ultima):""}</small></div>
+      <div class="act"><button class="btn btn-sm btn-y" data-c="agendar">Marcar horário</button><button class="btn btn-sm btn-line" data-c="editar">Editar</button><button class="btn btn-sm btn-line" data-c="apagar">Apagar</button></div>
+    </div>`).join("")
+    : `<p class="empty">${clientesCache&&clientesCache.length?"Nenhum cliente com esse nome.":"Nenhum cliente cadastrado ainda. Cadastre acima."}</p>`;
+}
+$("cBusca").addEventListener("input",renderClientes);
+$("cFone").addEventListener("input",e=>{ let d=e.target.value.replace(/\D/g,"").slice(0,11);
+  e.target.value = d.length>6 ? `(${d.slice(0,2)}) ${d.slice(2,d.length-4)}-${d.slice(-4)}` : d.length>2 ? `(${d.slice(0,2)}) ${d.slice(2)}` : d; });
+function limparCliForm(){ cliEdit=null; $("cNome").value=""; $("cFone").value=""; $("cVip").checked=false; $("cObs").value=""; $("cliTit").textContent="Cadastrar cliente"; $("cCancelar").hidden=true; }
+$("cCancelar").addEventListener("click",()=>{ limparCliForm(); $("cMsg").textContent=""; });
+$("cSalvar").addEventListener("click",async()=>{
+  const nome=$("cNome").value.trim(), fone=$("cFone").value.replace(/\D/g,"");
+  if(nome.length<2){ $("cMsg").textContent="Digite o nome do cliente."; return; }
+  if(fone && fone.length<10){ $("cMsg").textContent="O WhatsApp precisa ter DDD. Ou deixe em branco."; return; }
+  try{
+    await adm("adm_cliente_salvar",{p_id:cliEdit,p_nome:nome,p_fone:$("cFone").value,p_vip:$("cVip").checked,p_obs:$("cObs").value.trim()});
+    $("cMsg").textContent = (cliEdit?"Cliente atualizado: ":"Cliente cadastrado: ") + nome + ($("cVip").checked?" (VIP)":"") + ".";
+    limparCliForm(); carregarClientes();
+  }catch(e){ if(e.codigo!=="sessao") $("cMsg").textContent="Não foi possível salvar. Tente de novo."; }
+});
+$("cLista").addEventListener("click",async e=>{
+  const b=e.target.closest("button[data-c]"); if(!b) return;
+  const c=(clientesCache||[]).find(x=>x.id===b.closest(".cli").dataset.id); if(!c) return;
+  if(b.dataset.c==="editar"){ cliEdit=c.id; $("cNome").value=c.nome; $("cFone").value=c.fone; $("cVip").checked=c.vip; $("cObs").value=c.obs;
+    $("cliTit").textContent="Editar cliente"; $("cCancelar").hidden=false; $("cMsg").textContent=""; $("cliTit").scrollIntoView({behavior:"smooth",block:"center"}); $("cNome").focus({preventScroll:true}); return; }
+  if(b.dataset.c==="agendar"){ abrirAba("novo"); encherSelectCliente(); $("cliente").value=c.id; escolherCliente(); return; }
+  if(b.dataset.c==="apagar"){ b.textContent="Toque de novo para apagar"; b.dataset.c="apagar2"; b.classList.add("btn-red"); return; }
+  if(b.dataset.c==="apagar2"){ b.disabled=true;
+    try{ await adm("adm_cliente_apagar",{p_id:c.id}); $("cMsg").textContent=`${c.nome} foi apagado da lista. Os atendimentos dele continuam no caixa.`; carregarClientes(); }
+    catch(err){ b.disabled=false; if(err.codigo!=="sessao") $("cMsg").textContent="Não foi possível apagar. Tente de novo."; } }
+});
+function escolherCliente(){
+  const c=(clientesCache||[]).find(x=>x.id===$("cliente").value);
+  if(!c){ $("vipNota").hidden=true; return; }
+  $("nome").value=c.nome; $("fone").value=c.fone||"";
+  const partes=[]; if(c.vip) partes.push("⭐ Cliente VIP: digite o valor combinado em \"Valor cobrado\".");
+  if(c.obs) partes.push("Anotação: "+c.obs);
+  $("vipNota").textContent=partes.join(" "); $("vipNota").hidden=!partes.length;
+  if(c.vip){ $("valor").focus({preventScroll:true}); }
+}
+$("cliente").addEventListener("change",escolherCliente);
+
+/* ---------- caixa e relatório ---------- */
+function periodo(p){
+  const d=new Date(), y=d.getFullYear(), m=d.getMonth();
+  let de=d, ate=d;
+  if(p==="semana") de=new Date(y,m,d.getDate()-6);
+  if(p==="mes") de=new Date(y,m,1);
+  if(p==="mesant"){ de=new Date(y,m-1,1); ate=new Date(y,m,0); }
+  $("cxDe").value=isoOf(de); $("cxAte").value=isoOf(ate);
+  document.querySelectorAll("[data-per]").forEach(b=>b.classList.toggle("btn-y",b.dataset.per===p));
+}
+document.querySelectorAll("[data-per]").forEach(b=>b.addEventListener("click",()=>{ periodo(b.dataset.per); carregarCaixa(); }));
+["cxDe","cxAte"].forEach(id=>$(id).addEventListener("change",()=>{ document.querySelectorAll("[data-per]").forEach(b=>b.classList.remove("btn-y")); carregarCaixa(); }));
+function tabela(cab,linhas,rodape){
+  return `<div class="tbw"><table class="tb"><thead><tr>${cab.map((c,i)=>`<th${i===cab.length-1?' class="n"':""}>${c}</th>`).join("")}</tr></thead><tbody>${linhas.join("")}</tbody>${rodape?`<tfoot>${rodape}</tfoot>`:""}</table></div>`;
+}
+async function carregarCaixa(){
+  if(!isAdmin()) return;
+  let de=$("cxDe").value, ate=$("cxAte").value;
+  if(!de||!ate){ periodo("mes"); de=$("cxDe").value; ate=$("cxAte").value; }
+  if(de>ate){ [de,ate]=[ate,de]; $("cxDe").value=de; $("cxAte").value=ate; }
+  if(!$("sData").value) $("sData").value=isoOf(new Date());
+  $("cxKpis").innerHTML=`<p class="empty">Somando…</p>`;
+  let r;
+  try{ r = await adm("adm_caixa",{p_de:de,p_ate:ate}); }
+  catch(e){ if(e.codigo!=="sessao") $("cxKpis").innerHTML=`<p class="empty">Não foi possível abrir o caixa agora. Confira a internet.</p>`; return; }
+  const ent=r.entradas||[], sai=r.saidas||[];
+  const tEnt=ent.reduce((t,a)=>t+Number(a.valor),0), tSai=sai.reduce((t,s)=>t+Number(s.valor),0);
+  const desc=ent.reduce((t,a)=>t+Math.max(0,Number(a.preco)-Number(a.valor)),0);
+  const per = de===ate ? fmtData(de) : `${fmtCurta(de)} até ${fmtCurta(ate)}`;
+  $("cxKpis").innerHTML = `<p class="hint" style="grid-column:1/-1;margin:0">Período: ${per}</p>
+    <div class="kpi ent"><small>Entradas</small><b>${brl(tEnt)}</b><span>${ent.length===1?"1 atendimento":ent.length+" atendimentos"}</span></div>
+    <div class="kpi sai"><small>Saídas</small><b>${brl(tSai)}</b><span>${sai.length===1?"1 despesa":sai.length+" despesas"}</span></div>
+    <div class="kpi sal"><small>Saldo (ganho)</small><b>${brl(tEnt-tSai)}</b><span>entradas menos saídas</span></div>
+    <div class="kpi"><small>Desconto VIP / combinado</small><b>${brl(desc)}</b><span>abaixo da tabela</span></div>`;
+  const agrupa = campo => { const g={}; ent.forEach(a=>{ const k=a[campo]||"—"; (g[k]||(g[k]={q:0,v:0})); g[k].q++; g[k].v+=Number(a.valor); }); return Object.entries(g).sort((x,y)=>y[1].v-x[1].v); };
+  const linhasG = (lista,nomeF) => lista.map(([k,x])=>`<tr><td>${esc(nomeF(k))}</td><td>${x.q}</td><td class="n">${brl(x.v)}</td></tr>`);
+  const rod = `<tr><td>Total</td><td>${ent.length}</td><td class="n">${brl(tEnt)}</td></tr>`;
+  $("cxServ").innerHTML = ent.length ? tabela(["Serviço","Qtd.","Total"],linhasG(agrupa("servico"),k=>k),rod) : `<p class="empty">Nada recebido neste período.</p>`;
+  $("cxBarb").innerHTML = ent.length ? tabela(["Barbeiro","Qtd.","Total"],linhasG(agrupa("barbeiro"),nomeBarb),rod) : `<p class="empty">Nada recebido neste período.</p>`;
+  $("cxSaidas").innerHTML = sai.length ? tabela(["Dia","O que foi","Valor"],sai.map(s=>`<tr data-id="${s.id}"><td>${fmtCurta(s.data)}</td><td>${esc(s.descricao)}</td><td class="n">${brl(Number(s.valor))} <button type="button" class="btn btn-sm btn-line" data-s="apagar" aria-label="Apagar saída">✕</button></td></tr>`),
+      `<tr><td colspan="2">Total de saídas</td><td class="n">${brl(tSai)}</td></tr>`) : `<p class="empty">Nenhuma saída lançada neste período.</p>`;
+  $("cxEntradas").innerHTML = ent.length ? tabela(["Cliente","Serviço","Valor"],ent.map(a=>`<tr><td>${esc(a.nome)}${a.vip?" ⭐":""}<br><small>${fmtCurta(a.data)} ${esc(a.hora)}</small></td><td>${esc(a.servico)}<br><small>${esc(nomeBarb(a.barbeiro))}</small></td><td class="n">${brl(Number(a.valor))}${Number(a.valor)!==Number(a.preco)?`<br><small>tabela ${brl(Number(a.preco))}</small>`:""}</td></tr>`))
+    : `<p class="empty">Nenhum atendimento recebido neste período. Na agenda, toque em "Recebido" depois de cada atendimento.</p>`;
+}
+$("sAdd").addEventListener("click",async()=>{
+  const d=$("sData").value, desc=$("sDesc").value.trim(), v=Number(String($("sValor").value).replace(",","."));
+  if(!d){ $("sMsg").textContent="Escolha o dia."; return; }
+  if(desc.length<2){ $("sMsg").textContent="Escreva o que foi (ex.: lâminas)."; return; }
+  if(!$("sValor").value || isNaN(v) || v<=0){ $("sMsg").textContent="Digite o valor da saída."; return; }
+  $("sAdd").disabled=true;
+  try{ await adm("adm_saida_add",{p_data:d,p_descricao:desc,p_valor:v}); $("sMsg").textContent=`Saída lançada: ${desc}, ${brl(v)}.`; $("sDesc").value=""; $("sValor").value=""; carregarCaixa(); }
+  catch(e){ if(e.codigo!=="sessao") $("sMsg").textContent="Não foi possível lançar. Tente de novo."; }
+  $("sAdd").disabled=false;
+});
+$("cxSaidas").addEventListener("click",async e=>{
+  const b=e.target.closest('button[data-s]'); if(!b) return;
+  if(b.dataset.s==="apagar"){ b.textContent="Apagar?"; b.dataset.s="apagar2"; b.classList.add("btn-red"); return; }
+  b.disabled=true;
+  try{ await adm("adm_saida_apagar",{p_id:b.closest("tr").dataset.id}); $("sMsg").textContent="Saída apagada."; carregarCaixa(); }
+  catch(err){ b.disabled=false; }
+});
+$("cxImprimir").addEventListener("click",()=>window.print());
 
 /* ---------- serviços no painel ---------- */
 let rascunho=[], servSujo=false;
@@ -1548,14 +1838,12 @@ renderSlots();
   carregarFotos();
   try{ await carregarLoja(); online=true; }catch(e){}
   if(!$("data").dataset.mexeu){ $("data").value=proximoDia(); }
-  await ouvirDia();
-  if(online && !horaSel){ const p=proximoDia(); if(p!==$("data").value){ $("data").value=p; await ouvirDia(); } }
   if(location.hash==="#adm"){ abrirPainel(); setTimeout(()=>$("painel").scrollIntoView({behavior:"smooth"}),300); }
-  setInterval(()=>{ if(!document.hidden) ouvirDia(); }, 30000);
+  setInterval(()=>{ if(!document.hidden && isAdmin() && !$("admBody").hidden) ouvirDia(); }, 30000);
   setInterval(()=>{ if(isAdmin() && !$("admBody").hidden && !document.querySelector(".row .edit")) ouvirAdm(); }, 20000);
 })();
 $("data").addEventListener("change",()=>{ $("data").dataset.mexeu="1"; });
-document.querySelectorAll("[data-barb]").forEach(b=>b.addEventListener("click",()=>{const sel=document.getElementById("barbeiro"); sel.value=b.dataset.barb; sel.dispatchEvent(new Event("change")); document.getElementById("agendar").scrollIntoView({behavior:"smooth"});}));
+document.querySelectorAll("[data-barb]").forEach(b=>b.addEventListener("click",()=>{ $("pBarb").value=b.dataset.barb; $("pedir").scrollIntoView({behavior:"smooth"}); setTimeout(()=>$("pNome").focus({preventScroll:true}),500); }));
 
 /* ---------- app instalável ---------- */
 const ehApp = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
@@ -1583,7 +1871,7 @@ $("instAjuda").addEventListener("click",e=>{ if(e.target===$("instAjuda")) $("in
 /* ---------- divulgar o app ---------- */
 const LINK_CLIENTE = new URL("./", location.href.split("#")[0]).href.replace(/index\.html$/,"");
 const MSG_APP = `💈 *Espaço Barber Shop R-17*
-Instale nosso site no seu celular e agende seu horário em 1 minuto!
+Instale nosso site no seu celular e peça seu horário pelo WhatsApp!
 
 👉 ${LINK_CLIENTE}
 

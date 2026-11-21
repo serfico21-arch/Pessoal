@@ -4,27 +4,143 @@
 h1{color:#E6BE6E;font-size:1.6rem}ol{font-size:1.15rem;line-height:1.7;padding-left:22px}button{font-size:1.3rem;font-weight:700;padding:16px 28px;border:0;border-radius:14px;background:#D9A84E;color:#1A1208;cursor:pointer}
 button:disabled{opacity:.4;cursor:default}label{display:block;font-weight:700;margin:14px 0 6px}input{width:100%;box-sizing:border-box;font-size:1.1rem;padding:12px;border-radius:10px;border:1px solid #3B2F27;background:#1F1814;color:#F3EADC}
 #ok{display:block;font-size:1.2rem;color:#5DBB85;font-weight:700;margin-top:12px}#err{color:#D9625A;font-weight:700}textarea{width:100%;height:120px;margin-top:20px;background:#1F1814;color:#AB9C8B;border:1px solid #3B2F27;border-radius:10px;font-size:.7rem}a{color:#E6BE6E}</style></head>
-<body><main><h1>Ligar o e-mail de recuperação</h1>
-<ol><li>Cole a chave do Resend (começa com <b>re_</b>) e digite o seu e-mail. Elas ficam só neste aparelho e vão direto para o seu Supabase.</li>
-<li>Clique em <b>Copiar comando</b>. Tem que aparecer "Copiado!" em verde.</li>
+<body><main><h1>Atualizar o banco: agenda do dono, clientes VIP e caixa</h1>
+<ol><li>Clique em <b>Copiar comando</b>. Tem que aparecer "Copiado!" em verde.</li>
 <li>Abra o <a href="https://supabase.com/dashboard/project/avvhnajfczdedlydkcrb/sql/new" target="_blank" rel="noopener">SQL Editor do Supabase</a>, clique na área branca, apague o que estiver lá (Ctrl + A e Delete) e aperte <b>Ctrl + V</b>.</li>
-<li>Clique em <b>Run</b>. Em 1 ou 2 minutos chega um e-mail de teste.</li></ol>
-<label for="k">Chave do Resend</label><input id="k" autocomplete="off" spellcheck="false" placeholder="re_...">
-<label for="e">E-mail do dono (o mesmo da conta do Resend)</label><input id="e" type="email" autocomplete="off">
-<p id="err"></p>
+<li>Clique em <b>Run</b>. Tem que aparecer <b>Success</b>. Se aparecer um aviso amarelo, clique em <b>Run this query</b>.</li>
+<li>Pronto. Abra o painel e veja as abas novas.</li></ol>
 <p><button id="b">Copiar comando</button><span id="ok"></span></p>
+<p style="color:#AB9C8B;margin-top:30px">Para ligar o e-mail de recuperação, use a <a href="email.html">página do e-mail</a>.</p>
+<script type="text/plain" id="sql">-- R-17: só o dono agenda, cadastro de clientes (VIP), valor cobrado, saídas e relatório
+create table if not exists public.clientes (
+  id uuid primary key default gen_random_uuid(),
+  loja_id text not null references public.lojas(id) on delete cascade,
+  nome text not null,
+  fone text not null default '',
+  vip boolean not null default false,
+  obs text not null default '',
+  criado timestamptz not null default now()
+);
+create index if not exists clientes_loja on public.clientes(loja_id, nome);
+create table if not exists public.saidas (
+  id uuid primary key default gen_random_uuid(),
+  loja_id text not null references public.lojas(id) on delete cascade,
+  data date not null,
+  descricao text not null,
+  valor numeric not null check (valor >= 0),
+  criado timestamptz not null default now()
+);
+create index if not exists saidas_loja_data on public.saidas(loja_id, data);
+alter table public.clientes enable row level security;
+alter table public.saidas enable row level security;
+revoke all on public.clientes, public.saidas from anon, authenticated;
 
+alter table public.agenda add column if not exists cliente_id uuid references public.clientes(id) on delete set null;
+alter table public.agenda add column if not exists valor numeric;
+alter table public.agenda add column if not exists recebido boolean not null default false;
+alter table public.agenda alter column fone set default '';
+
+-- o cliente não agenda mais sozinho pelo site
+revoke execute on function public.agendar(text, date, text, int, text, numeric, text, text, text) from public, anon, authenticated;
+revoke execute on function public.ocupados(text, date) from public, anon, authenticated;
+
+create or replace function public.adm_agenda2(p_token uuid, p_data date)
+returns table(id uuid, data date, hora text, min int, servico text, preco numeric, barbeiro text, nome text, fone text, status text, cliente_id uuid, valor numeric, recebido boolean, vip boolean)
+language plpgsql security definer set search_path = '' stable as $$
+declare l text := public._sessao(p_token);
+begin
+  return query select a.id, a.data, to_char(a.hora,'HH24:MI'), a.min, a.servico, a.preco, a.barbeiro, a.nome, a.fone, a.status,
+    a.cliente_id, a.valor, a.recebido, coalesce(c.vip,false)
+    from public.agenda a left join public.clientes c on c.id = a.cliente_id
+    where a.loja_id = l and a.data = p_data order by a.hora;
+end $$;
+
+create or replace function public.adm_marcar2(p_token uuid, p_data date, p_hora text, p_min int, p_servico text, p_preco numeric,
+  p_barbeiro text, p_nome text, p_fone text, p_cliente uuid, p_valor numeric, p_recebido boolean) returns uuid
+language plpgsql security definer set search_path = '' as $$
+declare l text := public._sessao(p_token); v uuid;
+begin
+  if length(coalesce(trim(p_nome),'')) < 1 then raise exception 'dados'; end if;
+  perform pg_advisory_xact_lock(hashtext(l || p_data::text));
+  if not coalesce(p_recebido,false) and not public._livre(l, p_data, p_hora::time, p_min, p_barbeiro, null) then raise exception 'ocupado'; end if;
+  insert into public.agenda(loja_id,data,hora,min,servico,preco,barbeiro,nome,fone,status,cliente_id,valor,recebido)
+  values (l,p_data,p_hora::time,p_min,left(p_servico,120),coalesce(p_preco,0),left(p_barbeiro,40),left(trim(p_nome),80),left(coalesce(p_fone,''),20),'confirmado',
+    (select c.id from public.clientes c where c.id = p_cliente and c.loja_id = l), p_valor, coalesce(p_recebido,false))
+  returning id into v;
+  return v;
+end $$;
+
+create or replace function public.adm_receber(p_token uuid, p_id uuid, p_valor numeric, p_recebido boolean) returns void
+language plpgsql security definer set search_path = '' as $$
+declare l text := public._sessao(p_token);
+begin
+  update public.agenda set valor = p_valor, recebido = coalesce(p_recebido,false), status = 'confirmado' where id = p_id and loja_id = l;
+end $$;
+
+create or replace function public.adm_clientes(p_token uuid)
+returns table(id uuid, nome text, fone text, vip boolean, obs text, visitas bigint, ultima date)
+language plpgsql security definer set search_path = '' stable as $$
+declare l text := public._sessao(p_token);
+begin
+  return query select c.id, c.nome, c.fone, c.vip, c.obs,
+    (select count(*) from public.agenda a where a.cliente_id = c.id),
+    (select max(a.data) from public.agenda a where a.cliente_id = c.id)
+    from public.clientes c where c.loja_id = l order by c.vip desc, lower(c.nome);
+end $$;
+
+create or replace function public.adm_cliente_salvar(p_token uuid, p_id uuid, p_nome text, p_fone text, p_vip boolean, p_obs text) returns uuid
+language plpgsql security definer set search_path = '' as $$
+declare l text := public._sessao(p_token); v uuid;
+begin
+  if length(coalesce(trim(p_nome),'')) < 1 then raise exception 'dados'; end if;
+  if p_id is null then
+    insert into public.clientes(loja_id,nome,fone,vip,obs) values (l,left(trim(p_nome),80),left(coalesce(p_fone,''),20),coalesce(p_vip,false),left(coalesce(p_obs,''),300)) returning id into v;
+  else
+    update public.clientes set nome = left(trim(p_nome),80), fone = left(coalesce(p_fone,''),20), vip = coalesce(p_vip,false), obs = left(coalesce(p_obs,''),300)
+      where id = p_id and loja_id = l returning id into v;
+  end if;
+  return v;
+end $$;
+
+create or replace function public.adm_cliente_apagar(p_token uuid, p_id uuid) returns void
+language plpgsql security definer set search_path = '' as $$
+declare l text := public._sessao(p_token);
+begin
+  delete from public.clientes where id = p_id and loja_id = l;
+end $$;
+
+create or replace function public.adm_saida_add(p_token uuid, p_data date, p_descricao text, p_valor numeric) returns uuid
+language plpgsql security definer set search_path = '' as $$
+declare l text := public._sessao(p_token); v uuid;
+begin
+  if length(coalesce(trim(p_descricao),'')) < 1 or coalesce(p_valor,-1) < 0 then raise exception 'dados'; end if;
+  insert into public.saidas(loja_id,data,descricao,valor) values (l,p_data,left(trim(p_descricao),120),p_valor) returning id into v;
+  return v;
+end $$;
+
+create or replace function public.adm_saida_apagar(p_token uuid, p_id uuid) returns void
+language plpgsql security definer set search_path = '' as $$
+declare l text := public._sessao(p_token);
+begin
+  delete from public.saidas where id = p_id and loja_id = l;
+end $$;
+
+create or replace function public.adm_caixa(p_token uuid, p_de date, p_ate date) returns jsonb
+language plpgsql security definer set search_path = '' stable as $$
+declare l text := public._sessao(p_token);
+begin
+  return jsonb_build_object(
+    'entradas', coalesce((select jsonb_agg(jsonb_build_object('data',a.data,'hora',to_char(a.hora,'HH24:MI'),'servico',a.servico,'barbeiro',a.barbeiro,
+        'nome',a.nome,'valor',coalesce(a.valor,a.preco),'preco',a.preco,'vip',coalesce(c.vip,false)) order by a.data, a.hora)
+      from public.agenda a left join public.clientes c on c.id = a.cliente_id
+      where a.loja_id = l and a.recebido and a.data between p_de and p_ate), '[]'::jsonb),
+    'saidas', coalesce((select jsonb_agg(jsonb_build_object('id',s.id,'data',s.data,'descricao',s.descricao,'valor',s.valor) order by s.data, s.criado)
+      from public.saidas s where s.loja_id = l and s.data between p_de and p_ate), '[]'::jsonb));
+end $$;
+</script>
 <script>
-const q=s=>"'"+s.replace(/'/g,"''")+"'";
 document.getElementById("b").onclick=async()=>{
-  const k=document.getElementById("k").value.trim(), e=document.getElementById("e").value.trim().toLowerCase(), err=document.getElementById("err");
-  err.textContent=""; document.getElementById("ok").textContent="";
-  if(!/^re_[^\s'"]+$/.test(k)){ err.textContent="Cole a chave do Resend. Ela começa com re_"; return; }
-  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){ err.textContent="Confira o e-mail."; return; }
-  const extra="\n-- ===== dados da R-17 =====\ninsert into public.sistema(chave,valor) values ('resend_key',"+q(k)+") on conflict (chave) do update set valor=excluded.valor;\n"
-   +"update public.lojas_segredo set email="+q(e)+" where loja_id='r17';\n"
-   +"select public._mandar_email("+q(e)+",'Teste do Painel R-17','<p style=\"font-family:Arial,sans-serif;font-size:16px\">Deu certo! Este e-mail vai receber o código quando você esquecer a senha do painel.</p>');\n";
-  const txt=extra;
+  const txt=document.getElementById("sql").textContent;
   try{ await navigator.clipboard.writeText(txt); }catch(x){ const t=document.createElement("textarea"); t.value=txt; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
   document.getElementById("ok").textContent="Copiado! Agora cole no Supabase e clique em Run.";
 };

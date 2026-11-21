@@ -1,0 +1,31 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Atualizar banco R-17</title><meta name="robots" content="noindex">
+<style>body{font-family:system-ui,sans-serif;background:#15100D;color:#F3EADC;margin:0;padding:24px 16px}main{max-width:760px;margin:auto}
+h1{color:#E6BE6E;font-size:1.6rem}ol{font-size:1.15rem;line-height:1.7;padding-left:22px}button{font-size:1.3rem;font-weight:700;padding:16px 28px;border:0;border-radius:14px;background:#D9A84E;color:#1A1208;cursor:pointer}
+button:disabled{opacity:.4;cursor:default}label{display:block;font-weight:700;margin:14px 0 6px}input{width:100%;box-sizing:border-box;font-size:1.1rem;padding:12px;border-radius:10px;border:1px solid #3B2F27;background:#1F1814;color:#F3EADC}
+#ok{display:block;font-size:1.2rem;color:#5DBB85;font-weight:700;margin-top:12px}#err{color:#D9625A;font-weight:700}textarea{width:100%;height:120px;margin-top:20px;background:#1F1814;color:#AB9C8B;border:1px solid #3B2F27;border-radius:10px;font-size:.7rem}a{color:#E6BE6E}</style></head>
+<body><main><h1>Ligar o e-mail de recuperação</h1>
+<ol><li>Cole a chave do Resend (começa com <b>re_</b>) e digite o seu e-mail. Elas ficam só neste aparelho e vão direto para o seu Supabase.</li>
+<li>Clique em <b>Copiar comando</b>. Tem que aparecer "Copiado!" em verde.</li>
+<li>Abra o <a href="https://supabase.com/dashboard/project/avvhnajfczdedlydkcrb/sql/new" target="_blank" rel="noopener">SQL Editor do Supabase</a>, clique na área branca, apague o que estiver lá (Ctrl + A e Delete) e aperte <b>Ctrl + V</b>.</li>
+<li>Clique em <b>Run</b>. Em 1 ou 2 minutos chega um e-mail de teste.</li></ol>
+<label for="k">Chave do Resend</label><input id="k" autocomplete="off" spellcheck="false" placeholder="re_...">
+<label for="e">E-mail do dono (o mesmo da conta do Resend)</label><input id="e" type="email" autocomplete="off">
+<p id="err"></p>
+<p><button id="b">Copiar comando</button><span id="ok"></span></p>
+
+<script>
+const q=s=>"'"+s.replace(/'/g,"''")+"'";
+document.getElementById("b").onclick=async()=>{
+  const k=document.getElementById("k").value.trim(), e=document.getElementById("e").value.trim().toLowerCase(), err=document.getElementById("err");
+  err.textContent=""; document.getElementById("ok").textContent="";
+  if(!/^re_[^\s'"]+$/.test(k)){ err.textContent="Cole a chave do Resend. Ela começa com re_"; return; }
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){ err.textContent="Confira o e-mail."; return; }
+  const extra="\n-- ===== dados da R-17 =====\ninsert into public.sistema(chave,valor) values ('resend_key',"+q(k)+") on conflict (chave) do update set valor=excluded.valor;\n"
+   +"update public.lojas_segredo set email="+q(e)+" where loja_id='r17';\n"
+   +"select public._mandar_email("+q(e)+",'Teste do Painel R-17','<p style=\"font-family:Arial,sans-serif;font-size:16px\">Deu certo! Este e-mail vai receber o código quando você esquecer a senha do painel.</p>');\n";
+  const txt=extra;
+  try{ await navigator.clipboard.writeText(txt); }catch(x){ const t=document.createElement("textarea"); t.value=txt; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
+  document.getElementById("ok").textContent="Copiado! Agora cole no Supabase e clique em Run.";
+};
+</script></main></body></html>
