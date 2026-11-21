@@ -86,6 +86,8 @@ section{padding-block:56px}
 .menu{display:grid;grid-template-columns:repeat(2,1fr);gap:28px 48px;align-items:start}
 .cat h3{font-size:1.25rem;margin:0 0 4px;color:var(--yellow-ink)}
 .svhead,.sv{display:grid;grid-template-columns:56px minmax(0,1.6fr) minmax(0,1fr) 110px 100px auto;gap:8px;align-items:center}
+.servst{min-height:1.4em;margin:0 0 10px;font-weight:700;color:var(--muted)}.servst.ok{color:var(--ok)}.servst.err{color:var(--red)}
+.sv input[data-f=preco]{font-weight:800;font-size:1.05rem}
 .svhead{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;padding-bottom:6px}
 .sv{padding-block:10px;border-top:1px solid var(--line)}
 .sv input,.sv select{padding:8px 10px}
@@ -706,6 +708,7 @@ footer{border-top:1px solid var(--line)}
             <button type="button" role="tab" data-tab="novo">＋ Novo horário</button>
             <button type="button" role="tab" data-tab="clientes">👤 Clientes</button>
             <button type="button" role="tab" data-tab="caixa">💰 Caixa</button>
+            <button type="button" role="tab" data-tab="precos">✂️ Preços</button>
             <button type="button" role="tab" data-tab="ajustes">⚙️ Ajustes</button>
           </nav>
           <div class="tab" data-painel="agenda">
@@ -825,6 +828,19 @@ footer{border-top:1px solid var(--line)}
             <button type="button" class="btn btn-sm btn-line" id="cxImprimir">Imprimir relatório</button>
           </div>
 
+          <div class="tab" data-painel="precos" hidden>
+          <div class="box">
+            <h3 class="bh">Serviços e preços</h3>
+            <p class="hint" style="margin:0 0 10px">Toque no preço ou no nome e mude. <b>Salva sozinho</b> e o site do cliente já mostra o valor novo. Desmarque a caixinha para esconder um serviço do site sem apagar.</p>
+            <p class="servst" id="servMsg" aria-live="polite"></p>
+            <div class="svhead" aria-hidden="true"><span>Ativo</span><span>Serviço</span><span>Categoria</span><span>Preço</span><span>Tempo</span><span></span></div>
+            <div id="servLista"></div>
+            <div class="btns" style="margin-top:12px">
+              <button class="btn btn-sm btn-y" type="button" id="servNovo">+ Adicionar serviço</button>
+            </div>
+          </div>
+          </div>
+
           <div class="tab" data-painel="ajustes" hidden>
 
           <div class="box" style="margin-top:24px">
@@ -835,18 +851,6 @@ footer{border-top:1px solid var(--line)}
               <select id="intervalo"><option value="15">15 minutos</option><option value="30">30 minutos</option><option value="60">1 hora</option></select></div>
             <button class="btn btn-sm btn-y" type="button" id="semSalvar">Salvar horário padrão</button>
             <p class="ok" id="semMsg" aria-live="polite"></p>
-          </div>
-          <div class="box" style="margin-top:24px">
-            <h3 class="bh">Serviços e preços</h3>
-            <p class="hint" style="margin:0 0 10px">Mude o nome, o preço e o tempo de cada serviço. Desmarque a caixinha para esconder um serviço do site sem apagar.</p>
-            <div class="svhead" aria-hidden="true"><span>Ativo</span><span>Serviço</span><span>Categoria</span><span>Preço</span><span>Tempo</span><span></span></div>
-            <div id="servLista"></div>
-            <div class="btns" style="margin-top:12px">
-              <button class="btn btn-sm btn-line" type="button" id="servNovo">+ Adicionar serviço</button>
-              <button class="btn btn-sm btn-y" type="button" id="servSalvar">Salvar serviços e preços</button>
-              <button class="btn btn-sm btn-line" type="button" id="servDesfazer">Desfazer mudanças</button>
-            </div>
-            <p class="ok" id="servMsg" aria-live="polite"></p>
           </div>
           <div class="box divulgar" style="margin-top:24px">
             <h3 class="bh">Divulgar o app para os clientes</h3>
@@ -1703,33 +1707,38 @@ function desenharServ(){
     <input data-f="desc" class="desc" value="${esc(x.desc)}" aria-label="Descrição" placeholder="Descrição (opcional)">
   </div>`).join("");
 }
+let servTimer=null;
+function agendarSalvarServ(ms){ clearTimeout(servTimer); $("servMsg").textContent="Salvando…"; $("servMsg").className="servst"; servTimer=setTimeout(salvarServ, ms??1000); }
+async function salvarServ(){
+  clearTimeout(servTimer);
+  const lista=rascunho.filter(x=>x.nome.trim()).map(x=>({...x,nome:x.nome.trim(),desc:(x.desc||"").trim(),preco:Math.max(0,Number(x.preco)||0),min:Math.max(5,Number(x.min)||30)}));
+  if(!lista.some(x=>x.ativo)){ $("servMsg").textContent="Deixe pelo menos um serviço ativo."; $("servMsg").className="servst err"; return; }
+  try{
+    await adm("adm_config",{p_chave:"servicos",p_valor:lista});
+    servSujo=false; todosServ=lista; renderServicos(); renderSlots();
+    $("servMsg").textContent="✓ Salvo. O site do cliente já mostra os valores novos."; $("servMsg").className="servst ok";
+  }catch(err){ if(err.codigo!=="sessao"){ $("servMsg").textContent="Não foi possível salvar. Confira a internet."; $("servMsg").className="servst err"; } }
+}
 $("servLista").addEventListener("input",e=>{
   const el=e.target, row=el.closest(".sv"); if(!row||!el.dataset.f) return;
   const x=rascunho[row.dataset.i], f=el.dataset.f;
-  x[f] = f==="ativo" ? el.checked : (f==="preco"||f==="min") ? Number(el.value) : el.value;
+  x[f] = f==="ativo" ? el.checked : (f==="preco"||f==="min") ? Number(String(el.value).replace(",",".")) : el.value;
   if(f==="ativo") row.classList.toggle("off",!el.checked);
-  servSujo=true; $("servMsg").textContent="";
+  servSujo=true; agendarSalvarServ(f==="ativo"||el.tagName==="SELECT" ? 200 : 1000);
 });
+$("servLista").addEventListener("focusout",e=>{ if(servSujo && e.target.dataset && e.target.dataset.f) agendarSalvarServ(100); });
+$("servLista").addEventListener("focusin",e=>{ if(e.target.dataset && e.target.dataset.f==="preco") setTimeout(()=>{ try{ e.target.select(); }catch(x){} },0); });
 $("servLista").addEventListener("click",e=>{
   const b=e.target.closest('button[data-f="del"]'); if(!b) return;
   const i=+b.closest(".sv").dataset.i;
   if(b.dataset.ok!=="1"){ b.dataset.ok="1"; b.textContent="Confirmar"; b.classList.add("btn-red"); return; }
-  rascunho.splice(i,1); servSujo=true; desenharServ(); $("servMsg").textContent="Removido. Toque em Salvar para confirmar.";
+  rascunho.splice(i,1); servSujo=true; desenharServ(); agendarSalvarServ(100);
 });
 $("servNovo").addEventListener("click",()=>{
   rascunho.push({id:"n"+Date.now().toString(36),cat:"Outros",nome:"",desc:"",preco:0,min:30,ativo:true});
-  servSujo=true; desenharServ();
+  desenharServ();
   const ins=$("servLista").querySelectorAll('input[data-f="nome"]'); ins[ins.length-1].focus();
-});
-$("servDesfazer").addEventListener("click",()=>{ renderServAdm(); $("servMsg").textContent="Mudanças desfeitas."; });
-$("servSalvar").addEventListener("click",async()=>{
-  const lista=rascunho.filter(x=>x.nome.trim()).map(x=>({...x,nome:x.nome.trim(),desc:(x.desc||"").trim(),preco:Math.max(0,Number(x.preco)||0),min:Math.max(5,Number(x.min)||30)}));
-  if(!lista.some(x=>x.ativo)){ $("servMsg").textContent="Deixe pelo menos um serviço ativo."; return; }
-  try{
-    await adm("adm_config",{p_chave:"servicos",p_valor:lista});
-    servSujo=false; todosServ=lista; renderServAdm(); renderServicos(); renderSlots();
-    $("servMsg").textContent="Serviços e preços salvos. O site já mostra os novos valores.";
-  }catch(err){ $("servMsg").textContent="Não foi possível salvar. Tente de novo."; }
+  $("servMsg").textContent="Digite o nome e o preço do serviço novo. Salva sozinho."; $("servMsg").className="servst";
 });
 
 /* ---------- fotos no painel ---------- */
