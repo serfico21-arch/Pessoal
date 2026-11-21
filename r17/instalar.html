@@ -232,7 +232,7 @@ const q=s=>"'"+s.replace(/'/g,"''")+"'";
 document.getElementById("b").onclick=async()=>{
   const k=document.getElementById("k").value.trim(), e=document.getElementById("e").value.trim().toLowerCase(), err=document.getElementById("err");
   err.textContent=""; document.getElementById("ok").textContent="";
-  if(!/^re_[A-Za-z0-9_]+$/.test(k)){ err.textContent="Cole a chave do Resend. Ela começa com re_"; return; }
+  if(!/^re_[^\s'"]+$/.test(k)){ err.textContent="Cole a chave do Resend. Ela começa com re_"; return; }
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){ err.textContent="Confira o e-mail."; return; }
   const extra="\n-- ===== dados da R-17 =====\ninsert into public.sistema(chave,valor) values ('resend_key',"+q(k)+") on conflict (chave) do update set valor=excluded.valor;\n"
    +"update public.lojas_segredo set email="+q(e)+" where loja_id='r17';\n"
