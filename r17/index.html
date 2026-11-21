@@ -113,7 +113,7 @@ section{padding-block:56px}
 .lead{color:var(--muted);margin:8px 0 18px}
 .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
 label,.lbl{font-weight:700;font-size:.92rem}
-input,select{font:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%}
+input,select,textarea{font:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%;box-sizing:border-box}
 input:focus,select:focus{border-color:var(--yellow);outline:none}
 .slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px}
 .slot{font:500 .95rem var(--body);padding:10px 0;border:1.5px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);cursor:pointer;font-variant-numeric:tabular-nums}
@@ -265,7 +265,7 @@ section{padding-block:clamp(56px,9vw,96px)}
 
 /* agendamento */
 .book{background:linear-gradient(160deg,#2A211B,var(--surface));border-radius:28px;box-shadow:0 40px 80px -40px #000}
-input,select{border-radius:14px;background:var(--bg);border-color:var(--line)}
+input,select,textarea{border-radius:14px;background:var(--bg);border-color:var(--line)}
 input:focus,select:focus{border-color:var(--yellow)}
 .slot{font-family:var(--mono);border-radius:12px;background:var(--bg)}
 .slot[aria-pressed="true"]{background:var(--yellow);color:var(--on-accent);border-color:var(--yellow);box-shadow:0 8px 20px -8px rgba(217,168,78,.8)}
@@ -301,6 +301,14 @@ footer{border-top:1px solid var(--line)}
 .row .h small{display:block;font-size:.72rem;color:var(--muted);font-weight:500;text-transform:capitalize}
 .row .who a{color:inherit}
 .pendbox{border-color:var(--yellow)}
+.pedbox{border:2px solid var(--yellow);animation:pisca 1.1s ease-in-out infinite}
+@keyframes pisca{0%,100%{box-shadow:0 0 0 0 rgba(217,168,78,.0);background:var(--surface)}50%{box-shadow:0 0 0 6px rgba(217,168,78,.45);background:rgba(217,168,78,.14)}}
+#tabs button.temped{animation:pisca 1.1s ease-in-out infinite}
+.ped{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--bg);display:grid;gap:6px}
+.ped .act{display:flex;flex-wrap:wrap;gap:6px}
+.notacli{display:block;margin-top:4px;color:var(--ink);font-style:italic;white-space:pre-wrap}
+.notaed textarea{width:100%;min-height:80px;margin:6px 0}
+@media (prefers-reduced-motion:reduce){.pedbox,#tabs button.temped{animation:none}}
 .upl{position:relative;overflow:hidden;cursor:pointer}
 .upl input{position:absolute;inset:0;opacity:0;cursor:pointer}
 .fotosadm{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:10px}
@@ -655,6 +663,7 @@ footer{border-top:1px solid var(--line)}
         </div>
         <form id="pForm" novalidate>
           <div class="field"><label for="pNome">Seu nome</label><input id="pNome" autocomplete="name" placeholder="Ex.: João da Silva"></div>
+           <div class="field"><label for="pFone">Seu WhatsApp</label><input id="pFone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000" class="zapin"></div>
           <div class="field"><label for="pServ">Serviço</label><select id="pServ"></select></div>
           <div class="field"><label for="pBarb">Barbeiro</label><select id="pBarb"></select></div>
           <div class="duo"><div class="field"><label for="pDia">Dia</label><select id="pDia"></select></div>
@@ -713,6 +722,11 @@ footer{border-top:1px solid var(--line)}
             <button type="button" role="tab" data-tab="ajustes">⚙️ Ajustes</button>
           </nav>
           <div class="tab" data-painel="agenda">
+          <div class="box pedbox" id="pedBox" hidden>
+            <h3 class="bh" id="pedTit">Pedidos novos</h3>
+            <p class="hint" style="margin:0 0 10px">Clientes que pediram horário pelo site. Toque em <b>Marcar horário</b> para escolher a hora e colocar na agenda.</p>
+            <div class="rows" id="pedRows"></div>
+          </div>
           <div class="box pendbox" id="pendBox" hidden>
             <h3 class="bh" id="pendTit">Pedidos esperando confirmação</h3>
             <p class="hint" style="margin:0 0 10px">Clientes que marcaram pelo site. Confirme ou apague. Só o ADM pode apagar um horário.</p>
@@ -795,7 +809,7 @@ footer{border-top:1px solid var(--line)}
                 <div class="field"><label for="cFone">WhatsApp</label><input id="cFone" type="tel" inputmode="tel" autocomplete="off" placeholder="(11) 90000-0000"></div>
               </div>
               <label class="chk"><input type="checkbox" id="cVip"> ⭐ Cliente VIP (preço especial)</label>
-              <div class="field"><label for="cObs">Anotação (ex.: preço combinado, preferências)</label><input id="cObs" maxlength="300" placeholder="Ex.: corte por R$ 25"></div>
+              <div class="field"><label for="cObs">Anotação (ex.: preço combinado, preferências)</label><textarea id="cObs" maxlength="1000" rows="3" placeholder="Ex.: corte por R$ 25, gosta do degradê baixo, alérgico a…"></textarea></div>
               <div class="btns" style="margin-top:0"><button type="button" class="btn btn-sm btn-y" id="cSalvar">Salvar cliente</button><button type="button" class="btn btn-sm btn-line" id="cCancelar" hidden>Cancelar</button></div>
               <p class="ok" id="cMsg" aria-live="polite"></p>
             </div>
@@ -1257,13 +1271,14 @@ $("form").addEventListener("submit",async e=>{
   catch(err){ erro = err.codigo==="ocupado" ? "Esse horário já está ocupado. Escolha outro." : err.codigo==="sessao" ? "" : "Não foi possível salvar. Confira a internet e tente de novo."; if(err.codigo==="sessao") erro=" "; }
   $("submitBtn").disabled=false; $("submitBtn").textContent="Salvar na agenda";
   if(erro){ $("err").textContent=erro.trim(); if(!agora){ horaSel=null; await ouvirDia(); } return; }
+  if(pedidoAtual){ adm("adm_pedido_fim",{p_id:pedidoAtual,p_status:"confirmado"}).catch(()=>{}); pedidoAtual=null; }
   const v = valor===null ? Number(s.preco) : valor;
   $("doneBox").hidden=false;
   $("doneBox").innerHTML=`<div class="done"><h3>${agora?"Lançado no caixa":"Salvo na agenda"}</h3><p>${esc(nome)}: ${esc(s.nome)} com ${nomeBarb(barb)}, ${fmtData(iso)} às ${hora}. Valor: ${brl(v)}.</p>${
     !agora && fone ? `<a class="btn btn-sm btn-zap" target="_blank" rel="noopener" href="${esc(waCliente(fone,msgConfirma(nome,s.nome,barb,iso,hora)))}">📲 Enviar confirmação no WhatsApp</a>`:""}</div>`;
   horaSel=null; $("nome").value=""; $("fone").value=""; $("cliente").value=""; $("vipNota").hidden=true;
   $("jaRecebido").checked=false; valorMexido=false; $("valor").value=Number(s.preco);
-  clientesCache=null; renderSlots();
+  carregarClientes(); renderSlots();
   $("admData").value=iso; ouvirDia(); ouvirAdm();
 });
 
@@ -1271,13 +1286,17 @@ $("form").addEventListener("submit",async e=>{
 $("pForm").addEventListener("submit",e=>{
   e.preventDefault();
   const nome=$("pNome").value.trim();
+  const pf=$("pFone").value.replace(/\D/g,"");
   if(nome.length<2){ $("pErr").textContent="Digite seu nome."; return; }
+  if(pf.length<10){ $("pErr").textContent="Digite seu WhatsApp com DDD."; return; }
   $("pErr").textContent="";
   const serv=$("pServ").value, b=$("pBarb").value, dia=$("pDia").value, per=$("pPer").value;
   const quando = (dia ? fmtData(dia) : "") + (per ? (dia?", ":"") + per.toLowerCase() : "");
-  const texto=`Olá! Quero marcar um horário na R-17.\n\nNome: ${nome}`+(serv?`\nServiço: ${serv}`:"")+(b?`\nBarbeiro: ${nomeBarb(b)}`:"")+(quando?`\nQuando prefiro: ${quando}`:"");
+  const texto=`Olá! Quero marcar um horário na R-17.\n\nNome: ${nome}`+(serv?`\nServiço: ${serv}`:"")+(b?`\nBarbeiro: ${nomeBarb(b)}`:"")+(quando?`\nQuando prefiro: ${quando}`:"")+`\nWhatsApp: ${$("pFone").value}`;
   const destino = (b && /^55\d{10,11}$/.test(ZAPS[b]||"")) ? ZAPS[b] : CONFIG.whatsapp;
   window.open(`https://wa.me/${destino}?text=${encodeURIComponent(texto)}`,"_blank","noopener");
+  /* o pedido também fica guardado no painel do dono */
+  api("pedir",{p_loja:CONFIG.loja,p_nome:nome,p_fone:$("pFone").value,p_servico:serv,p_barbeiro:b,p_dia:dia||null,p_periodo:per}).catch(()=>{});
 });
 function renderPDia(){
   const antes=$("pDia").value, d=new Date(), op=[`<option value="">Tanto faz</option>`];
@@ -1384,7 +1403,8 @@ async function ouvirAdm(){
   const iso=$("admData").value;
   if(!agendaDia.length) $("rows").innerHTML=`<p class="empty">Carregando a agenda…</p>`;
   try{
-    const [lista, pend, dia] = await Promise.all([adm("adm_agenda2",{p_data:iso}), adm("adm_pendentes").catch(()=>[]), buscarDia(iso)]);
+    const [lista, pend, dia, peds] = await Promise.all([adm("adm_agenda2",{p_data:iso}), adm("adm_pendentes").catch(()=>[]), buscarDia(iso), adm("adm_pedidos").catch(()=>null)]);
+    if(peds){ renderPedidos(peds); avisarNovos(peds); }
     if(iso!==$("admData").value) return;
     guardarDia(iso,dia,lista);
     agendaDia = lista||[]; renderAdm(); renderPend(pend||[]); renderDiaAdm();
@@ -1452,14 +1472,15 @@ function linhaAgenda(a,comData,classe){
   const txt = msgConfirma(a.nome,a.servico,a.barbeiro,a.data,a.hora);
   if(!String(a.fone||"").replace(/\D/g,"") && a.cliente_id){ const c=(clientesCache||[]).find(x=>x.id===a.cliente_id); if(c) a.fone=c.fone; }
   const temFone = String(a.fone||"").replace(/\D/g,"").length>=10;
+  const cli = clienteDe(a);
   const receber = comData ? "" : a.recebido
     ? `<div class="receber pago"><span class="pago">Pago ${brl(vlr(a))}</span><button class="btn btn-sm btn-line" data-act="desfazer">Desfazer</button></div>`
     : `<div class="receber"><div class="money"><span>R$</span><input type="number" min="0" step="1" inputmode="decimal" value="${vlr(a)}" aria-label="Valor cobrado de ${esc(a.nome)}" data-valor></div><button class="btn btn-sm btn-y" data-act="receber">Recebido</button></div>`;
   return `<div class="row${pend?" pend":""}${classe?" "+classe:""}" data-id="${a.id}">
     <div class="h">${comData?`<small>${fmtCurta(a.data)}</small>`:""}${esc(a.hora)}</div>
-    <div class="who"><b>${esc(a.nome)}${a.vip?` <span class="vip">⭐ VIP</span>`:""}${pend?` <span class="badge b-pend">Aguardando confirmação</span>`:""}</b><span class="svc">${comData?`<span class="bchip ${corBarb(a.barbeiro)}">${esc(nomeBarb(a.barbeiro))}</span>`:""}${esc(a.servico)} · tabela ${brl(Number(a.preco||0))}</span>${temFone?`<span><a href="${waCliente(a.fone,"Olá "+a.nome+"!")}" target="_blank" rel="noopener">${esc(a.fone)}</a></span>`:""}</div>
+    <div class="who"><b>${esc(a.nome)}${a.vip?` <span class="vip">⭐ VIP</span>`:""}${pend?` <span class="badge b-pend">Aguardando confirmação</span>`:""}</b><span class="svc">${comData?`<span class="bchip ${corBarb(a.barbeiro)}">${esc(nomeBarb(a.barbeiro))}</span>`:""}${esc(a.servico)} · tabela ${brl(Number(a.preco||0))}</span>${temFone?`<span><a href="${waCliente(a.fone,"Olá "+a.nome+"!")}" target="_blank" rel="noopener">${esc(a.fone)}</a></span>`:""}${cli&&cli.obs?`<span class="notacli">📝 ${esc(cli.obs)}</span>`:""}</div>
     ${receber}
-    <div class="act">${pend?`<button class="btn btn-sm btn-y" data-act="confirmar">Confirmar</button>`:temFone?`<a class="btn btn-sm btn-zap" href="${esc(waCliente(a.fone,txt))}" target="_blank" rel="noopener">📲 Enviar confirmação no WhatsApp</a>`:""}${comData||a.recebido?"":`<button class="btn btn-sm btn-line" data-act="editar">Mudar dia/horário</button>`}<button class="btn btn-sm btn-line" data-act="cancelar">Apagar</button></div>
+    <div class="act">${pend?`<button class="btn btn-sm btn-y" data-act="confirmar">Confirmar</button>`:temFone?`<a class="btn btn-sm btn-zap" href="${esc(waCliente(a.fone,txt))}" target="_blank" rel="noopener">📲 Enviar confirmação no WhatsApp</a>`:""}${comData||a.recebido?"":`<button class="btn btn-sm btn-line" data-act="editar">Mudar dia/horário</button>`}${comData?"":`<button class="btn btn-sm btn-line" data-act="nota">📝 Anotação</button>`}<button class="btn btn-sm btn-line" data-act="cancelar">Apagar</button></div>
   </div>`;
 }
 let pendentes=[];
@@ -1505,12 +1526,12 @@ function avisarNovos(lista){
   const ids=new Set(lista.map(a=>a.id));
   if(conhecidos){ const novos=lista.filter(a=>!conhecidos.has(a.id));
     if(novos.length){ bip(); const a=novos[0];
-      $("toast").textContent = novos.length===1 ? `Novo agendamento: ${a.nome}, ${fmtCurta(a.data)} às ${a.hora} com ${nomeBarb(a.barbeiro)}` : `${novos.length} agendamentos novos`;
-      $("toast").hidden=false; document.title=`(${novos.length}) Novo agendamento`;
+      $("toast").textContent = novos.length===1 ? `🔔 Novo pedido: ${a.nome}${a.dia?", "+fmtCurta(a.dia):""}${a.periodo?", "+a.periodo.toLowerCase():""}` : `🔔 ${novos.length} pedidos novos`;
+      $("toast").hidden=false; document.title=`(${novos.length}) Novo pedido`;
       clearTimeout(avisarNovos.t); avisarNovos.t=setTimeout(()=>{ $("toast").hidden=true; },12000); } }
   conhecidos=ids;
 }
-$("toast").addEventListener("click",()=>{ $("toast").hidden=true; document.title=tituloOriginal; $("pendBox").scrollIntoView({behavior:"smooth",block:"center"}); });
+$("toast").addEventListener("click",()=>{ $("toast").hidden=true; document.title=tituloOriginal; abrirAba("agenda"); setTimeout(()=>$("pedBox").scrollIntoView({behavior:"smooth",block:"center"}),300); });
 document.addEventListener("visibilitychange",()=>{ if(!document.hidden) setTimeout(()=>{ document.title=tituloOriginal; },4000); });
 async function acaoAgenda(e){
   const btn=e.target.closest("button"); if(!btn) return;
@@ -1521,6 +1542,19 @@ async function acaoAgenda(e){
     if(act==="confirmar"){
       btn.disabled=true; await adm("adm_confirmar",{p_id:a.id});
       await ouvirAdm(); alertaAdm("Confirmado. Toque em \"Avisar cliente\" para mandar a confirmação pelo WhatsApp."); return;
+    }
+    if(act==="nota"){
+      if(row.querySelector(".notaed")) return;
+      if(!clientesCache) await carregarClientes();
+      const c=clienteDe(a), ed=document.createElement("div"); ed.className="notaed";
+      ed.innerHTML=`<label for="nt-${a.id}"><b>Anotação sobre ${esc(a.nome)}</b> (fica no cadastro do cliente)</label><textarea id="nt-${a.id}" maxlength="1000">${esc(c?c.obs:"")}</textarea><button class="btn btn-sm btn-y" data-act="notasalvar">Salvar anotação</button>`;
+      row.appendChild(ed); $("nt-"+a.id).focus(); return;
+    }
+    if(act==="notasalvar"){
+      if(!clientesCache) await carregarClientes();
+      const c=clienteDe(a), obs=$("nt-"+a.id).value.trim(); btn.disabled=true;
+      await adm("adm_cliente_salvar",{p_id:c?c.id:null,p_nome:c?c.nome:a.nome,p_fone:c?c.fone:(a.fone||""),p_vip:c?c.vip:false,p_obs:obs});
+      await carregarClientes(); renderAdm(); alertaAdm(`Anotação de ${a.nome} salva.`); return;
     }
     if(act==="receber"||act==="desfazer"){
       const inp=row.querySelector("[data-valor]"), v = inp ? Number(String(inp.value).replace(",",".")) : vlr(a);
@@ -1564,6 +1598,49 @@ function alertaAdm(t){ $("agMsg").textContent=t; setTimeout(()=>{ if($("agMsg").
 $("rows").addEventListener("click",acaoAgenda);
 $("pendRows").addEventListener("click",acaoAgenda);
 
+/* ---------- cliente de um atendimento (pelo cadastro ou pelo WhatsApp) ---------- */
+function clienteDe(a){
+  const l=clientesCache||[]; if(a.cliente_id){ const c=l.find(x=>x.id===a.cliente_id); if(c) return c; }
+  const f=String(a.fone||"").replace(/\D/g,"").slice(-11); if(f.length<10) return null;
+  return l.find(x=>String(x.fone||"").replace(/\D/g,"").slice(-11)===f) || null;
+}
+
+/* ---------- pedidos que os clientes mandaram pelo site ---------- */
+let pedidos=[], pedidoAtual=null;
+function renderPedidos(lista){
+  pedidos=lista;
+  $("pedBox").hidden=!lista.length;
+  $("pedTit").textContent = lista.length===1 ? "🔔 1 pedido novo" : `🔔 ${lista.length} pedidos novos`;
+  const tab=document.querySelector('#tabs [data-tab="agenda"]');
+  tab.textContent = lista.length ? `📅 Agenda (${lista.length})` : "📅 Agenda"; tab.classList.toggle("temped",!!lista.length);
+  $("pedRows").innerHTML = lista.map(p=>{ const c=clienteDe(p);
+    return `<div class="ped" data-id="${p.id}"><b>${esc(p.nome)}${c&&c.vip?` <span class="vip">⭐ VIP</span>`:""}</b>
+    <span>${p.dia?esc(fmtData(p.dia)):"Qualquer dia"} · ${p.periodo?esc(p.periodo):"qualquer horário"} · ${p.barbeiro?esc(nomeBarb(p.barbeiro)):"qualquer barbeiro"}${p.servico?" · "+esc(p.servico):""}</span>
+    <span><a href="${esc(waCliente(p.fone,"Olá "+p.nome+"!"))}" target="_blank" rel="noopener">${esc(p.fone)}</a></span>${c&&c.obs?`<span class="notacli">📝 ${esc(c.obs)}</span>`:""}
+    <div class="act"><button class="btn btn-sm btn-y" data-p="marcar">Marcar horário</button><button class="btn btn-sm btn-line" data-p="recusar">Recusar</button></div></div>`; }).join("");
+}
+$("pedRows").addEventListener("click",async e=>{
+  const b=e.target.closest("button[data-p]"); if(!b) return;
+  const p=pedidos.find(x=>x.id===b.closest(".ped").dataset.id); if(!p) return;
+  if(b.dataset.p==="marcar"){
+    pedidoAtual=p.id; abrirAba("novo");
+    const c=clienteDe(p); encherSelectCliente(); $("cliente").value=c?c.id:""; if(c) escolherCliente();
+    $("nome").value=p.nome; $("fone").value=p.fone;
+    const si=SERVICOS.findIndex(s=>s.nome===p.servico); if(si>=0){ $("servico").value=String(si); $("servico").dispatchEvent(new Event("change")); }
+    $("barbeiro").value=p.barbeiro||""; $("jaRecebido").checked=false;
+    if(p.dia && p.dia>=isoHoje){ $("data").value=p.dia; }
+    horaSel=null; renderSlots(); ouvirDia();
+    $("err").textContent=""; $("doneBox").hidden=false;
+    $("doneBox").innerHTML=`<div class="done"><h3>Pedido de ${esc(p.nome)}</h3><p>Pediu: ${p.dia?esc(fmtData(p.dia)):"qualquer dia"}, ${p.periodo?esc(p.periodo.toLowerCase()):"qualquer horário"}. Escolha o horário e toque em <b>Salvar na agenda</b>.</p></div>`;
+    return;
+  }
+  if(b.dataset.p==="recusar"){ b.textContent="Toque de novo para recusar"; b.dataset.p="recusar2"; b.classList.add("btn-red"); return; }
+  if(b.dataset.p==="recusar2"){ b.disabled=true;
+    try{ await adm("adm_pedido_fim",{p_id:p.id,p_status:"recusado"}); await ouvirAdm();
+      alertaAdm(`Pedido de ${p.nome} recusado.`); }
+    catch(err){ b.disabled=false; } }
+});
+
 /* ---------- abas do painel ---------- */
 function abrirAba(t){
   document.querySelectorAll("#tabs [data-tab]").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab===t)));
@@ -1574,7 +1651,7 @@ function abrirAba(t){
   if(t==="caixa") carregarCaixa();
   $("tabs").scrollIntoView({behavior:"smooth",block:"start"});
 }
-$("tabs").addEventListener("click",e=>{ const b=e.target.closest("[data-tab]"); if(b) abrirAba(b.dataset.tab); });
+$("tabs").addEventListener("click",e=>{ const b=e.target.closest("[data-tab]"); if(b){ pedidoAtual=null; abrirAba(b.dataset.tab); } });
 
 /* ---------- clientes (VIP) ---------- */
 let clientesCache=null, cliEdit=null;
