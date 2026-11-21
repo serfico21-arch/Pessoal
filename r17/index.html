@@ -851,12 +851,11 @@ footer{border-top:1px solid var(--line)}
             <p class="ok" id="compMsg" aria-live="polite"></p>
           </div>
           <div class="box" style="margin-top:24px">
-            <h3 class="bh">WhatsApp da barbearia</h3>
-            <p class="hint" style="margin:0 0 10px">É para esse número que os clientes mandam mensagem pelo site.</p>
-            <div class="vidform">
-              <div class="field"><label for="zapNovo">Número com DDD</label><input id="zapNovo" type="tel" inputmode="tel" placeholder="(11) 90000-0000"></div>
-              <button class="btn btn-sm btn-y" type="button" id="zapSalvar">Salvar WhatsApp</button>
-            </div>
+            <h3 class="bh">WhatsApp da barbearia e dos barbeiros</h3>
+            <p class="hint" style="margin:0 0 10px">Quando o cliente pede horário com um barbeiro, a mensagem vai para o WhatsApp dele. Se o barbeiro ficar sem número, vai para o da barbearia.</p>
+            <div class="field" style="max-width:360px"><label for="zapNovo">WhatsApp da barbearia</label><input id="zapNovo" class="zapin" type="tel" inputmode="tel" placeholder="(11) 90000-0000"></div>
+            <div id="zapBarbs"></div>
+            <button class="btn btn-sm btn-y" type="button" id="zapSalvar">Salvar WhatsApp</button>
             <p class="ok" id="zapMsg" aria-live="polite"></p>
           </div>
           <div class="box" style="margin-top:24px">
@@ -988,6 +987,7 @@ const PADRAO_SERV = [
   ["Outros","Depilação de nariz e orelha","Com cera",15,15],
   ["Outros","Lavagem","Lavagem e finalização",15,15]
 ].map(([cat,nome,desc,preco,min],i)=>({id:"s"+i,cat,nome,desc,preco,min,ativo:true}));
+let ZAPS = {};   /* WhatsApp de cada barbeiro: {ro:"5511...", joao:"5511..."} */
 let todosServ = PADRAO_SERV, SERVICOS = PADRAO_SERV, videos = [], valorMexido = false;
 /* ============================== */
 
@@ -1146,6 +1146,7 @@ async function carregarLoja(){
   videos = Array.isArray(c.videos) ? c.videos : [];
   /* dados da barbearia ficam na chave "barbeiros" do banco (ex.: WhatsApp) */
   if(c.barbeiros && /^55\d{10,11}$/.test(c.barbeiros.whatsapp||"")){ CONFIG.whatsapp=c.barbeiros.whatsapp; mostrarZap(); }
+  if(c.barbeiros && c.barbeiros.zaps && typeof c.barbeiros.zaps==="object") ZAPS=c.barbeiros.zaps;
   renderHorasTopo(); renderServicos(); renderVideos();
 }
 
@@ -1261,7 +1262,8 @@ $("pForm").addEventListener("submit",e=>{
   $("pErr").textContent="";
   const serv=$("pServ").value, b=$("pBarb").value, quando=$("pQuando").value.trim();
   const texto=`Olá! Quero marcar um horário na R-17.\n\nNome: ${nome}`+(serv?`\nServiço: ${serv}`:"")+(b?`\nBarbeiro: ${nomeBarb(b)}`:"")+(quando?`\nQuando prefiro: ${quando}`:"");
-  window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(texto)}`,"_blank","noopener");
+  const destino = (b && /^55\d{10,11}$/.test(ZAPS[b]||"")) ? ZAPS[b] : CONFIG.whatsapp;
+  window.open(`https://wa.me/${destino}?text=${encodeURIComponent(texto)}`,"_blank","noopener");
 });
 function linkZapDireto(){ $("zapDireto").href=`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent("Olá! Quero marcar um horário na R-17.")}`; }
 linkZapDireto();
@@ -1352,7 +1354,7 @@ function entrarPainel(){
   if(!$("admData").value) $("admData").value=isoHoje;
   if(!$("cxDe").value) periodo("mes");
   renderSemana(); renderServAdm(); renderFotosAdm(); renderVidAdm(); carregarEmailAdm(); ouvirAdm(); ouvirDia(); carregarClientes();
-  $("zapNovo").value=fmtZap(CONFIG.whatsapp);
+  $("zapNovo").value=fmtZap(CONFIG.whatsapp); renderZapBarbs();
 }
 function sairModoAdm(){ agendaDia=[]; clientesCache=null; }
 async function ouvirAdm(){
@@ -1782,15 +1784,24 @@ $("fotosAdm").addEventListener("change",async e=>{
 });
 
 /* ---------- WhatsApp da barbearia ---------- */
-$("zapNovo").addEventListener("input",e=>{
+function renderZapBarbs(){
+  $("zapBarbs").innerHTML = BARBEIROS.map(b=>`<div class="field" style="max-width:360px"><label for="zapB-${b.id}">WhatsApp do ${esc(b.nome)}</label><input id="zapB-${b.id}" class="zapin" type="tel" inputmode="tel" placeholder="Deixe vazio para usar o da barbearia" value="${ZAPS[b.id]?fmtZap(ZAPS[b.id]):""}"></div>`).join("");
+}
+document.addEventListener("input",e=>{ if(!e.target.classList || !e.target.classList.contains("zapin")) return;
   let d=e.target.value.replace(/\D/g,"").slice(0,11);
   e.target.value = d.length>6 ? `(${d.slice(0,2)}) ${d.slice(2,d.length-4)}-${d.slice(-4)}` : d.length>2 ? `(${d.slice(0,2)}) ${d.slice(2)}` : d;
 });
 $("zapSalvar").addEventListener("click",async()=>{
-  const d=$("zapNovo").value.replace(/\D/g,"").replace(/^55(?=\d{10,11}$)/,"");
-  if(d.length<10||d.length>11){ $("zapMsg").textContent="Digite o número com DDD. Ex.: (11) 98254-4101"; return; }
-  try{ await adm("adm_config",{p_chave:"barbeiros",p_valor:{whatsapp:"55"+d}}); CONFIG.whatsapp="55"+d; mostrarZap();
-    $("zapMsg").textContent="WhatsApp salvo: "+fmtZap(CONFIG.whatsapp)+". O site já usa o número novo."; }
+  const limpa = v => v.replace(/\D/g,"").replace(/^55(?=\d{10,11}$)/,"");
+  const d=limpa($("zapNovo").value);
+  if(d.length<10||d.length>11){ $("zapMsg").textContent="Digite o WhatsApp da barbearia com DDD. Ex.: (11) 98254-4101"; return; }
+  const zaps={};
+  for(const b of BARBEIROS){ const x=limpa($("zapB-"+b.id).value);
+    if(!x) continue;
+    if(x.length<10||x.length>11){ $("zapMsg").textContent=`Confira o WhatsApp do ${b.nome}. Precisa ter DDD.`; return; }
+    zaps[b.id]="55"+x; }
+  try{ await adm("adm_config",{p_chave:"barbeiros",p_valor:{whatsapp:"55"+d,zaps}}); CONFIG.whatsapp="55"+d; ZAPS=zaps; mostrarZap(); renderZapBarbs();
+    $("zapMsg").textContent="WhatsApp salvo. O site já usa os números novos."; }
   catch(err){ $("zapMsg").textContent = err.codigo==="sessao" ? "" : "Não foi possível salvar. Tente de novo."; }
 });
 
