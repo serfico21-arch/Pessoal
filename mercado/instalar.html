@@ -1,0 +1,119 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Instalar loja Pinheiro &amp; Costa</title><meta name="robots" content="noindex">
+<style>body{font-family:system-ui,sans-serif;background:#0d3b2e;color:#f3f5f2;margin:0;padding:24px 16px}main{max-width:760px;margin:auto}
+h1{color:#f5c400;font-size:1.6rem}ol{font-size:1.15rem;line-height:1.7;padding-left:22px}button{font-size:1.3rem;font-weight:800;padding:16px 28px;border:0;border-radius:14px;background:#f5c400;color:#1d1600;cursor:pointer}
+#ok{display:block;font-size:1.2rem;color:#7fe0a8;font-weight:700;margin-top:12px}a{color:#ffd935}</style></head>
+<body><main><h1>Criar o banco da loja online</h1>
+<ol><li>Clique em <b>Copiar comando</b>. Tem que aparecer "Copiado!" em verde.</li>
+<li>Abra o <a href="https://supabase.com/dashboard/project/avvhnajfczdedlydkcrb/sql/new" target="_blank" rel="noopener">SQL Editor do Supabase</a>, clique na área branca, apague o que estiver lá (Ctrl + A e Delete) e aperte <b>Ctrl + V</b>.</li>
+<li>Clique em <b>Run</b>. Tem que aparecer <b>Success</b>. Se aparecer um aviso amarelo, clique em <b>Run this query</b>.</li>
+<li>Pronto. Volte e me avise.</li></ol>
+<p><button id="b">Copiar comando</button><span id="ok"></span></p>
+<script type="text/plain" id="sql">-- Loja online Pinheiro & Costa (lê os produtos que o gestor publica)
+create extension if not exists pgcrypto with schema extensions;
+
+create table if not exists public.mercado_lojas (
+  slug text primary key,
+  nome text not null default 'Mercado',
+  config jsonb not null default '{}'::jsonb,
+  atualizado_em timestamptz not null default now()
+);
+create table if not exists public.mercado_segredo (
+  slug text primary key references public.mercado_lojas(slug) on delete cascade,
+  codigo_hash text not null
+);
+create table if not exists public.mercado_produtos (
+  slug text not null references public.mercado_lojas(slug) on delete cascade,
+  id text not null,
+  nome text not null,
+  marca text,
+  categoria text,
+  preco numeric(12,2) not null default 0,
+  tipo_venda text default 'unidade',
+  estoque numeric(12,3) default 0,
+  foto text,
+  atualizado_em timestamptz not null default now(),
+  primary key (slug, id)
+);
+alter table public.mercado_lojas enable row level security;
+alter table public.mercado_segredo enable row level security;
+alter table public.mercado_produtos enable row level security;
+
+drop policy if exists mercado_lojas_ler on public.mercado_lojas;
+create policy mercado_lojas_ler on public.mercado_lojas for select to anon, authenticated using (true);
+drop policy if exists mercado_produtos_ler on public.mercado_produtos;
+create policy mercado_produtos_ler on public.mercado_produtos for select to anon, authenticated using (true);
+revoke all on public.mercado_segredo from anon, authenticated;
+grant select on public.mercado_lojas, public.mercado_produtos to anon, authenticated;
+
+create or replace function public.mercado_codigo_ok(p_slug text, p_codigo text)
+returns boolean language plpgsql security definer set search_path = public, extensions as $$
+declare h text;
+begin
+  select codigo_hash into h from public.mercado_segredo where slug = p_slug;
+  if h is null or extensions.crypt(upper(trim(coalesce(p_codigo,''))), h) <> h then
+    perform pg_sleep(1);
+    return false;
+  end if;
+  return true;
+end $$;
+revoke all on function public.mercado_codigo_ok(text,text) from public, anon, authenticated;
+
+-- 1) Salva a configuração da loja e apaga da loja os produtos que não existem mais no gestor
+create or replace function public.mercado_publicar_config(p_slug text, p_codigo text, p_config jsonb, p_ids jsonb)
+returns jsonb language plpgsql security definer set search_path = public, extensions as $$
+begin
+  if not public.mercado_codigo_ok(p_slug, p_codigo) then
+    return jsonb_build_object('ok', false, 'erro', 'codigo');
+  end if;
+  update public.mercado_lojas
+     set config = coalesce(p_config, config),
+         nome = coalesce(nullif(p_config->>'nome',''), nome),
+         atualizado_em = now()
+   where slug = p_slug;
+  delete from public.mercado_produtos
+   where slug = p_slug
+     and id not in (select jsonb_array_elements_text(coalesce(p_ids,'[]'::jsonb)));
+  return jsonb_build_object('ok', true);
+end $$;
+
+-- 2) Envia um lote de produtos (o gestor manda em partes). foto = '__MANTER__' mantém a foto já enviada
+create or replace function public.mercado_publicar_produtos(p_slug text, p_codigo text, p_produtos jsonb)
+returns jsonb language plpgsql security definer set search_path = public, extensions as $$
+declare n int;
+begin
+  if not public.mercado_codigo_ok(p_slug, p_codigo) then
+    return jsonb_build_object('ok', false, 'erro', 'codigo');
+  end if;
+  insert into public.mercado_produtos (slug, id, nome, marca, categoria, preco, tipo_venda, estoque, foto, atualizado_em)
+  select p_slug, x->>'id', left(x->>'nome',200), left(x->>'marca',100), left(x->>'categoria',100),
+         coalesce((x->>'preco')::numeric,0), coalesce(x->>'tipo_venda','unidade'),
+         coalesce((x->>'estoque')::numeric,0),
+         case when x ? 'foto' then x->>'foto' else null end, now()
+    from jsonb_array_elements(coalesce(p_produtos,'[]'::jsonb)) x
+   where coalesce(x->>'id','') <> '' and coalesce(x->>'nome','') <> ''
+  on conflict (slug, id) do update set
+    nome = excluded.nome, marca = excluded.marca, categoria = excluded.categoria,
+    preco = excluded.preco, tipo_venda = excluded.tipo_venda, estoque = excluded.estoque,
+    foto = case when excluded.foto = '__MANTER__' then public.mercado_produtos.foto else excluded.foto end,
+    atualizado_em = now();
+  get diagnostics n = row_count;
+  return jsonb_build_object('ok', true, 'produtos', n);
+end $$;
+
+revoke all on function public.mercado_publicar_config(text,text,jsonb,jsonb) from public;
+revoke all on function public.mercado_publicar_produtos(text,text,jsonb) from public;
+grant execute on function public.mercado_publicar_config(text,text,jsonb,jsonb) to anon, authenticated;
+grant execute on function public.mercado_publicar_produtos(text,text,jsonb) to anon, authenticated;
+
+insert into public.mercado_lojas (slug, nome) values ('pinheiro-costa', 'Pinheiro & Costa') on conflict do nothing;
+-- o código de ativação é gravado à parte (não fica neste arquivo)
+insert into public.mercado_segredo (slug, codigo_hash) values ('pinheiro-costa', '$2a$10$/JDe7edpu4L6uxWfUrHO9eYN7aUKEY8CMPd0mp9aoQEw84HA.4oD.') on conflict (slug) do update set codigo_hash = excluded.codigo_hash;
+</script>
+<script>
+document.getElementById("b").onclick=async()=>{
+  const txt=document.getElementById("sql").textContent;
+  try{ await navigator.clipboard.writeText(txt); }catch(x){ const t=document.createElement("textarea"); t.value=txt; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
+  document.getElementById("ok").textContent="Copiado! Agora cole no Supabase e clique em Run.";
+};
+</script></main></body></html>
