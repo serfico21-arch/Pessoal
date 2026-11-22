@@ -701,7 +701,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do Rodrigo <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 28</span></div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do Rodrigo <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 29</span></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -756,6 +756,7 @@ footer{border-top:1px solid var(--line)}
               <button type="button" class="btn btn-line" data-ir="caixa">💰 Caixa</button>
               <button type="button" class="btn btn-line" data-ir="config">⚙️ Ajustes</button>
               <button type="button" class="btn btn-line" data-ir="site" style="grid-column:1/-1">📣 Postar no site (avisos, fotos, vídeos)</button>
+              <button type="button" class="btn btn-y" id="homeConvite" style="grid-column:1/-1">📤 Mandar o site para o cliente</button>
             </div>
           </div>
 
@@ -2191,7 +2192,7 @@ const ehApp = matchMedia("(display-mode: standalone)").matches || navigator.stan
 if(ehApp){ const ab=$("abertura"); ab.querySelector(".ab-logo").innerHTML=document.querySelector(".herologo").outerHTML.replace('class="herologo"','');
   ab.classList.add("on"); setTimeout(()=>{ ab.classList.add("sai"); setTimeout(()=>ab.remove(),550); },1800); }
 /* versão do site: muda a cada atualização. O app confere sozinho e atualiza. */
-const VERSAO="28";
+const VERSAO="29";
 function atualizarAgora(){ const u=new URL(location.href); u.searchParams.set("v",Date.now()); u.searchParams.delete("parar"); location.replace(u.href); }
 $("novaVersao").addEventListener("click",atualizarAgora);
 async function conferirVersao(){
@@ -2238,7 +2239,7 @@ $("instAjuda").addEventListener("click",e=>{ if(e.target===$("instAjuda")) $("in
 /* ---------- divulgar o app ---------- */
 const LINK_CLIENTE = new URL("./", document.baseURI.split("#")[0]).href.replace(/index\.html$/,"");
 const MSG_APP = `💈 *Espaço Barber Shop R-17*
-Instale nosso app no seu celular e peça seu horário pelo WhatsApp!
+Veja nossos preços, fotos e novidades, e agende seu horário pelo WhatsApp em 1 toque. Instale o app no seu celular!
 
 👉 ${LINK_CLIENTE}
 
@@ -2259,6 +2260,7 @@ $("compartilhar").addEventListener("click",async()=>{
   }catch(e){ if(e && e.name!=="AbortError") $("compMsg").textContent="Não deu para abrir o compartilhamento. Use o botão Mandar no WhatsApp."; }
 });
 $("btnConvite").addEventListener("click",()=>$("compartilhar").click());
+$("homeConvite").addEventListener("click",()=>$("compartilhar").click());
 $("compCopiar").addEventListener("click",async()=>{
   try{ await navigator.clipboard.writeText(MSG_APP); }catch(e){ const t=document.createElement("textarea"); t.value=MSG_APP; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
   $("compMsg").textContent="Mensagem copiada. É só colar onde quiser.";

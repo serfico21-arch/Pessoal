@@ -169,6 +169,12 @@ footer{border-top:1px solid var(--line);padding:40px 0 calc(110px + env(safe-are
 footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center}
 footer a{color:var(--muted)}
 
+/* instalar o app */
+.inst{display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#221d14,#141312);border:1px solid #3a3226;border-radius:20px;padding:26px}
+.inst h3{font-size:2.2rem}.inst p{margin:6px 0 0;color:var(--muted)}
+.inst button{background:var(--gold);color:#16110A;border:0;border-radius:999px;padding:16px 26px;font:800 1rem var(--body);cursor:pointer}
+.inst ol{flex-basis:100%;margin:6px 0 0;padding-left:22px;color:#ddd6c9}
+.inst ol[hidden]{display:none}
 /* botão fixo */
 .fixo{transition:opacity .3s,translate .3s}.fixo.off{opacity:0;translate:0 30px;pointer-events:none}
 .fixo{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(92vw,420px)}
@@ -295,6 +301,14 @@ footer a{color:var(--muted)}
     </div>
   </section>
 
+  <section id="app" style="padding-bottom:0">
+    <div class="wrap"><div class="inst">
+      <div><h3>Tenha a R-17 no celular</h3><p>Instale grátis e chame a gente no WhatsApp com 1 toque.</p></div>
+      <button type="button" id="btnInst">📲 Instalar o app</button>
+      <ol id="instPassos" hidden></ol>
+    </div></div>
+  </section>
+
   <section id="local">
     <div class="wrap info">
       <div>
@@ -411,8 +425,21 @@ linksZap(); renderAvisos([]); renderServicos(null); renderGaleria(null); renderH
   try{ const f=await api(`fotos?loja_id=eq.${CONFIG.loja}&select=legenda,img&order=ordem.asc,criado.asc`); if(f&&f.length) renderGaleria(f); }catch(e){}
 })();
 
+/* instalar o app (Android: janela do Chrome; iPhone: passos) */
+let pedidoInst=null;
+const ehIOS=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+if(matchMedia("(display-mode: standalone)").matches||navigator.standalone===true) $("app").hidden=true;
+addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); pedidoInst=e; });
+$("btnInst").addEventListener("click",async()=>{
+  if(pedidoInst){ pedidoInst.prompt(); await pedidoInst.userChoice.catch(()=>null); pedidoInst=null; return; }
+  $("instPassos").innerHTML = ehIOS
+    ? "<li>Abra este site no <b>Safari</b>.</li><li>Toque em <b>Compartilhar</b> (quadrado com a setinha ⬆).</li><li>Toque em <b>Adicionar à Tela de Início</b> e depois em <b>Adicionar</b>.</li>"
+    : "<li>Toque nos <b>3 pontinhos ⋮</b> no canto de cima do navegador.</li><li>Toque em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.</li>";
+  $("instPassos").hidden=false;
+});
+
 /* versão do site: muda a cada atualização. O app confere sozinho e atualiza. */
-const VERSAO="27";
+const VERSAO="29";
 async function conferirVersao(){
   try{ const t=await (await fetch("index.html?nv="+Date.now(),{cache:"no-store"})).text();
     const m=t.match(/const VERSAO="(\d+)"/); if(!m || m[1]===VERSAO) return;
