@@ -1,0 +1,80 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pedidos da loja Pinheiro &amp; Costa</title><meta name="robots" content="noindex">
+<style>body{font-family:system-ui,sans-serif;background:#0d3b2e;color:#f3f5f2;margin:0;padding:24px 16px}main{max-width:760px;margin:auto}
+h1{color:#f5c400;font-size:1.6rem}ol{font-size:1.15rem;line-height:1.7;padding-left:22px}button{font-size:1.3rem;font-weight:800;padding:16px 28px;border:0;border-radius:14px;background:#f5c400;color:#1d1600;cursor:pointer}
+#ok{display:block;font-size:1.2rem;color:#7fe0a8;font-weight:700;margin-top:12px}a{color:#ffd935}</style></head>
+<body><main><h1>Ligar os pedidos do site no painel</h1>
+<ol><li>Clique em <b>Copiar comando</b>. Tem que aparecer "Copiado!" em verde.</li>
+<li>Abra o <a href="https://supabase.com/dashboard/project/avvhnajfczdedlydkcrb/sql/new" target="_blank" rel="noopener">SQL Editor do Supabase</a>, clique na área branca, apague o que estiver lá (Ctrl + A e Delete) e aperte <b>Ctrl + V</b>.</li>
+<li>Clique em <b>Run</b>. Tem que aparecer <b>Success</b>. Se aparecer um aviso amarelo, clique em <b>Run this query</b>.</li>
+<li>Pronto. Volte e me avise.</li></ol>
+<p><button id="b">Copiar comando</button><span id="ok"></span></p>
+<script type="text/plain" id="sql">-- ===== Pedidos feitos pelo site (aparecem no Painel ADM e no gestor) =====
+create table if not exists public.mercado_pedidos (
+  id bigserial primary key,
+  slug text not null references public.mercado_lojas(slug) on delete cascade,
+  criado_em timestamptz not null default now(),
+  status text not null default 'novo',
+  cliente jsonb not null default '{}'::jsonb,
+  itens jsonb not null default '[]'::jsonb,
+  subtotal numeric(12,2) default 0,
+  taxa numeric(12,2) default 0,
+  total numeric(12,2) default 0
+);
+create index if not exists mercado_pedidos_slug_idx on public.mercado_pedidos(slug, criado_em desc);
+alter table public.mercado_pedidos enable row level security;
+revoke all on public.mercado_pedidos from anon, authenticated;
+
+create or replace function public.mercado_fazer_pedido(p_slug text, p_pedido jsonb)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare n bigint; recentes int;
+begin
+  if not exists (select 1 from public.mercado_lojas where slug = p_slug) then
+    return jsonb_build_object('ok', false);
+  end if;
+  if jsonb_typeof(p_pedido->'itens') <> 'array' or jsonb_array_length(p_pedido->'itens') = 0
+     or jsonb_array_length(p_pedido->'itens') > 200 or length(p_pedido::text) > 60000 then
+    return jsonb_build_object('ok', false);
+  end if;
+  select count(*) into recentes from public.mercado_pedidos where slug = p_slug and criado_em > now() - interval '1 minute';
+  if recentes > 20 then return jsonb_build_object('ok', false); end if;
+  insert into public.mercado_pedidos (slug, cliente, itens, subtotal, taxa, total)
+  values (p_slug, coalesce(p_pedido->'cliente','{}'::jsonb), p_pedido->'itens',
+          coalesce((p_pedido->>'subtotal')::numeric,0), coalesce((p_pedido->>'taxa')::numeric,0), coalesce((p_pedido->>'total')::numeric,0))
+  returning id into n;
+  return jsonb_build_object('ok', true, 'numero', n);
+end $$;
+
+create or replace function public.mercado_listar_pedidos(p_slug text, p_codigo text, p_dias int default 30)
+returns jsonb language plpgsql security definer set search_path = public, extensions as $$
+begin
+  if not public.mercado_codigo_ok(p_slug, p_codigo) then return null; end if;
+  return coalesce((select jsonb_agg(to_jsonb(x) order by x.criado_em desc) from (
+    select id, criado_em, status, cliente, itens, subtotal, taxa, total from public.mercado_pedidos
+     where slug = p_slug and criado_em > now() - make_interval(days => least(greatest(p_dias,1),365))
+     order by criado_em desc limit 300) x), '[]'::jsonb);
+end $$;
+
+create or replace function public.mercado_status_pedido(p_slug text, p_codigo text, p_id bigint, p_status text)
+returns boolean language plpgsql security definer set search_path = public, extensions as $$
+begin
+  if not public.mercado_codigo_ok(p_slug, p_codigo) then return false; end if;
+  if p_status not in ('novo','confirmado','saiu','entregue','cancelado') then return false; end if;
+  update public.mercado_pedidos set status = p_status where slug = p_slug and id = p_id;
+  return found;
+end $$;
+
+revoke all on function public.mercado_fazer_pedido(text,jsonb) from public;
+revoke all on function public.mercado_listar_pedidos(text,text,int) from public;
+revoke all on function public.mercado_status_pedido(text,text,bigint,text) from public;
+grant execute on function public.mercado_fazer_pedido(text,jsonb) to anon, authenticated;
+grant execute on function public.mercado_listar_pedidos(text,text,int) to anon, authenticated;
+grant execute on function public.mercado_status_pedido(text,text,bigint,text) to anon, authenticated;
+</script>
+<script>
+document.getElementById("b").onclick=async()=>{
+  const txt=document.getElementById("sql").textContent;
+  try{ await navigator.clipboard.writeText(txt); }catch(x){ const t=document.createElement("textarea"); t.value=txt; document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); }
+  document.getElementById("ok").textContent="Copiado! Agora cole no Supabase e clique em Run.";
+};
+</script></main></body></html>

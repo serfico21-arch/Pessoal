@@ -68,6 +68,22 @@ h2{font-family:'Manrope',sans-serif;font-size:21px;font-weight:800;margin-bottom
 .barra{height:12px;background:#e6ece8;border-radius:99px;overflow:hidden;margin-top:12px;display:none}
 .barra i{display:block;height:100%;width:0;background:var(--verde3);transition:width .3s}
 .oculto{display:none!important}
+.ped{border:1px solid var(--linha);border-radius:16px;padding:14px;margin-top:10px}
+.ped.novo{border:2px solid var(--amarelo);background:#fffbe8}
+.ped-top{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.ped-top b{font-size:18px}
+.ped-top span{color:var(--suave);font-size:13.5px;white-space:nowrap}
+.ped .cli{margin-top:6px;font-size:15px;line-height:1.5}
+.ped ul{margin:8px 0 0 18px;font-size:14.5px;line-height:1.5}
+.ped .tot{font-weight:900;font-size:18px;color:var(--verde);margin-top:6px}
+.st{display:inline-block;border-radius:99px;padding:4px 10px;font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.st.novo{background:var(--amarelo);color:#1d1600}.st.confirmado{background:#dbeafe;color:#1e3a8a}.st.saiu{background:#ede9fe;color:#4c1d95}.st.entregue{background:#dcfce7;color:#14532d}.st.cancelado{background:#fee2e2;color:#7f1d1d}
+.bts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.bts button,.bts a{flex:1;min-width:30%;border:0;border-radius:12px;padding:12px 6px;font-weight:800;font-size:14px;cursor:pointer;text-align:center;text-decoration:none;background:#eef2ef;color:var(--verde)}
+.bts .zap{background:#25d366;color:#fff}
+.filtro{display:flex;gap:6px;margin-top:6px}
+.filtro button{flex:1;border:2px solid var(--linha);background:#fff;border-radius:12px;padding:10px 4px;font-weight:800;font-size:14px;cursor:pointer}
+.filtro button.on{border-color:var(--verde3);background:#e9f6ee;color:var(--verde)}
 </style>
 </head>
 <body>
@@ -85,6 +101,12 @@ h2{font-family:'Manrope',sans-serif;font-size:21px;font-weight:800;margin-bottom
 
 <!-- PAINEL -->
 <section id="telaPainel" class="oculto">
+  <div class="card">
+    <h1>🧾 Pedidos do site</h1>
+    <div class="desc">Os pedidos que os clientes fazem pelo site aparecem aqui. A lista atualiza sozinha.</div>
+    <div class="filtro"><button class="on" data-f="abertos" onclick="filtroPed(this)">Em aberto</button><button data-f="todos" onclick="filtroPed(this)">Todos</button></div>
+    <div id="pedidos"><div class="desc" style="margin-top:12px">Carregando...</div></div>
+  </div>
   <div class="card">
     <h1>Atualizar produtos do site</h1>
     <div class="desc">Os produtos do site vêm do arquivo do <b>FCosta Gestor</b>.</div>
@@ -183,6 +205,8 @@ async function entrar(auto){
     codigo = c; try{ localStorage.setItem('pc_adm_codigo', c); }catch(e){}
     $('telaEntrar').classList.add('oculto'); $('telaPainel').classList.remove('oculto'); $('btnSair').classList.remove('oculto');
     await carregarLoja();
+    carregarPedidos(); clearInterval(timerPed); timerPed = setInterval(carregarPedidos, 30000);
+    document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ document.title='Painel ADM · Pinheiro & Costa'; carregarPedidos(); } });
   }catch(e){
     console.error(e);
     msg('msgEntrar','er', String(e.message).includes('404') ? 'O banco da loja ainda não foi criado. Abra a página <a href="../instalar.html">instalar</a> primeiro.' : 'Sem conexão agora. Tente de novo.');
@@ -229,6 +253,47 @@ async function salvarCondicoes(){
     CFG = c; msg('msgCond','ok','✅ Condições salvas. Já aparecem no site.');
   }catch(e){ console.error(e); msg('msgCond','er','Não consegui salvar agora. Tente de novo.'); }
   finally{ $('btnCond').disabled = false; }
+}
+
+
+/* ---------- Pedidos do site ---------- */
+let PEDIDOS = [], filtroP = 'abertos', ultimoMaior = null, timerPed = null;
+const ST = {novo:'Novo',confirmado:'Confirmado',saiu:'Saiu p/ entrega',entregue:'Entregue',cancelado:'Cancelado'};
+function filtroPed(b){ filtroP=b.dataset.f; document.querySelectorAll('.filtro button').forEach(x=>x.classList.toggle('on',x===b)); desenharPedidos(); }
+function bip(){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); [0,0.25].forEach(t=>{ const o=c.createOscillator(),g=c.createGain(); o.frequency.value=880; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(.25,c.currentTime+t); o.start(c.currentTime+t); o.stop(c.currentTime+t+0.18); }); }catch(e){} }
+async function carregarPedidos(){
+  try{
+    const r = await rpc('mercado_listar_pedidos',{p_slug:LOJA,p_codigo:codigo,p_dias:30});
+    if(!Array.isArray(r)) return;
+    PEDIDOS = r;
+    const maior = r.reduce((m,x)=>Math.max(m,x.id),0);
+    if(ultimoMaior!==null && maior>ultimoMaior){ bip(); document.title='🔔 Novo pedido · Painel'; }
+    ultimoMaior = maior;
+    desenharPedidos();
+  }catch(e){
+    console.warn(e);
+    if(String(e.message).includes('404')) $('pedidos').innerHTML = '<div class="msg in" style="display:block">Para os pedidos aparecerem aqui, abra uma vez a página <a href="../instalar-pedidos.html" target="_blank">ligar pedidos</a>, copie o comando e rode no Supabase.</div>';
+  }
+}
+function desenharPedidos(){
+  const lista = PEDIDOS.filter(p=> filtroP==='todos' || ['novo','confirmado','saiu'].includes(p.status));
+  if(!lista.length){ $('pedidos').innerHTML = '<div class="desc" style="margin-top:12px">'+(filtroP==='todos'?'Nenhum pedido nos últimos 30 dias.':'Nenhum pedido em aberto agora.')+'</div>'; return; }
+  $('pedidos').innerHTML = lista.map(p=>{
+    const c = p.cliente||{};
+    const fone = String(c.fone||'').replace(/\D/g,''); const zap = 'https://wa.me/'+(fone.length<=11?'55'+fone:fone);
+    const itens = (p.itens||[]).map(i=>'<li>'+esc((i.tipo==='peso'?(i.qtd<1?Math.round(i.qtd*1000)+' g':i.qtd+' kg'):i.qtd+' un')+' — '+i.nome+(i.marca?' ('+i.marca+')':''))+' · '+brl(i.total)+'</li>').join('');
+    const bt = (st,t)=> p.status===st ? '' : '<button onclick="mudarStatus('+p.id+',\''+st+'\')">'+t+'</button>';
+    return '<div class="ped '+(p.status==='novo'?'novo':'')+'"><div class="ped-top"><b>Pedido Nº '+p.id+'</b><span>'+new Date(p.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</span></div>'+
+      '<div style="margin-top:6px"><span class="st '+esc(p.status)+'">'+esc(ST[p.status]||p.status)+'</span></div>'+
+      '<div class="cli"><b>'+esc(c.nome||'')+'</b> · '+esc(c.fone||'')+'<br>'+(c.modo==='entrega'?'🛵 Entrega: '+esc(c.endereco||''):'🏪 Retira na loja')+'<br>💳 '+esc(c.pagamento||'')+(c.troco?' (troco para '+esc(c.troco)+')':'')+(c.obs?'<br>📝 '+esc(c.obs):'')+'</div>'+
+      '<ul>'+itens+'</ul><div class="tot">Total '+brl(p.total)+(Number(p.taxa)>0?' <span style="font-size:13px;color:var(--suave);font-weight:600">(entrega '+brl(p.taxa)+')</span>':'')+'</div>'+
+      '<div class="bts"><a class="zap" href="'+zap+'" target="_blank" rel="noopener">WhatsApp</a>'+bt('confirmado','Confirmar')+(c.modo==='entrega'?bt('saiu','Saiu'):'')+bt('entregue','Entregue')+bt('cancelado','Cancelar')+'</div></div>';
+  }).join('');
+}
+async function mudarStatus(id, st){
+  if(st==='cancelado' && !confirm('Cancelar o pedido Nº '+id+'?')) return;
+  try{ const ok = await rpc('mercado_status_pedido',{p_slug:LOJA,p_codigo:codigo,p_id:id,p_status:st}); if(ok){ const p=PEDIDOS.find(x=>x.id===id); if(p) p.status=st; desenharPedidos(); } }
+  catch(e){ alert('Não consegui mudar agora. Tente de novo.'); }
 }
 
 /* ---------- Arquivo JSON do gestor ---------- */

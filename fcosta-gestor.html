@@ -3593,6 +3593,12 @@ function renderLojaOnlineCad(){
     <label style="display:flex; gap:8px; align-items:center; margin-top:10px;"><input type="checkbox" id="loAuto" ${c.automatico?'checked':''}> Atualizar sozinho quando eu mudar produtos, preços ou estoque</label>
   </div>
   <div class="card">
+    <h2>🧾 Pedidos do site</h2>
+    <div class="desc">Pedidos que os clientes fizeram pela loja online (últimos 7 dias, em aberto).</div>
+    <button class="btn btn-primary" onclick="carregarPedidosLoja()">🔄 Ver pedidos</button>
+    <div id="loPedidos" style="margin-top:10px;"></div>
+  </div>
+  <div class="card">
     <h2>Condições da loja e Painel ADM</h2>
     <div class="desc">WhatsApp dos pedidos, taxa de entrega, horário e formas de pagamento ficam no Painel ADM da loja. Lá também dá para enviar o arquivo JSON do backup.</div>
     <a class="btn btn-ghost" href="${LOJA_SITE}painel/" target="_blank" rel="noopener">Abrir o Painel ADM</a>
@@ -3606,6 +3612,23 @@ async function salvarLojaOnline(publicar){
   c.automatico = !!(document.getElementById('loAuto')||{}).checked;
   await saveKey(KEYS.settings, DB.settings);
   if(publicar) publicarLojaOnline(false);
+}
+async function carregarPedidosLoja(){
+  const c = lojaCfg(), el = document.getElementById('loPedidos');
+  if(!c.codigo){ showToast('Digite e salve o código da loja primeiro.'); return; }
+  el.innerHTML = '<div class="small-note">Carregando...</div>';
+  try{
+    const r = await lojaRPC('mercado_listar_pedidos', { p_slug:LOJA_SLUG, p_codigo:c.codigo, p_dias:7 });
+    const lista = (Array.isArray(r)?r:[]).filter(p=>['novo','confirmado','saiu'].includes(p.status));
+    if(!lista.length){ el.innerHTML = '<div class="small-note">Nenhum pedido em aberto.</div>'; return; }
+    el.innerHTML = lista.map(p=>{
+      const cl = p.cliente||{};
+      return '<div style="border:1px solid #ddd; border-radius:10px; padding:10px; margin-bottom:8px;">'+
+        '<b>Pedido Nº '+p.id+'</b> · '+escapeHtml(cl.nome||'')+' · '+escapeHtml(cl.fone||'')+' · <b>'+brl(p.total)+'</b><br>'+
+        '<span class="small-note">'+(cl.modo==='entrega'?'Entrega: '+escapeHtml(cl.endereco||''):'Retira na loja')+' · '+escapeHtml(cl.pagamento||'')+' · '+escapeHtml(p.status)+'</span>'+
+        '<div style="font-size:13px; margin-top:4px;">'+(p.itens||[]).map(i=>escapeHtml(i.qtd+(i.tipo==='peso'?' kg ':' un ')+i.nome)).join(' · ')+'</div></div>';
+    }).join('') + '<a class="btn btn-ghost" href="'+LOJA_SITE+'painel/" target="_blank" rel="noopener">Confirmar e acompanhar no Painel ADM</a>';
+  }catch(e){ el.innerHTML = '<div class="small-note">Não consegui buscar os pedidos agora.</div>'; }
 }
 function agendarPublicacaoLoja(){
   const c = DB.settings && DB.settings.lojaOnline;
