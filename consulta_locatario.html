@@ -233,7 +233,7 @@ function maskMoney(el){const v=el.value.replace(/\D/g,"");el.value=v?brl(parseIn
 function money(s){const v=s.replace(/\D/g,"");return v?parseInt(v,10)/100:0}
 function maskCPF(v){v=v.replace(/\D/g,"").slice(0,11);return v.replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d)/,"$1.$2").replace(/(\d{3})(\d{1,2})$/,"$1-$2")}
 function validCPF(c){c=c.replace(/\D/g,"");if(c.length!==11||/^(\d)\1+$/.test(c))return false;for(let t=9;t<11;t++){let s=0;for(let i=0;i<t;i++)s+=c[i]*(t+1-i);if((s*10%11)%10!=c[t])return false}return true}
-function age(s){if(!s)return null;const b=new Date(s),n=new Date();let a=n.getFullYear()-b.getFullYear();const m=n.getMonth()-b.getMonth();if(m<0||(m===0&&n.getDate()<b.getDate()))a--;return a}
+function age(s){if(!s)return null;const b=/^\d{4}-\d{2}-\d{2}$/.test(s)?new Date(s+"T00:00:00"):new Date(s),n=new Date();let a=n.getFullYear()-b.getFullYear();const m=n.getMonth()-b.getMonth();if(m<0||(m===0&&n.getDate()<b.getDate()))a--;return a}
 
 function calc(){
  const r=money($("renda").value),a=money($("aluguel").value);
