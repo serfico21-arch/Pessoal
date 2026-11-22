@@ -189,6 +189,13 @@ section{padding:110px 0}
 .galeria img{width:100%;height:100%;object-fit:cover;transition:transform .8s}
 .galeria div:hover img{transform:scale(1.04)}
 
+/* vídeos */
+.videos{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.videos figure{margin:0}
+.vframe{position:relative;padding-bottom:56.25%;height:0;background:var(--preto)}
+.vframe iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.videos figcaption{font-family:'Cormorant Garamond',serif;font-size:22px;color:var(--preto);margin-top:10px}
+
 /* depoimentos */
 #depo{background:#fff}
 .depo{display:grid;grid-template-columns:repeat(3,1fr);gap:50px}
@@ -261,7 +268,7 @@ footer{background:#2a1f20;color:#857b71;text-align:center;padding:28px 22px 110p
 
 <header class="top">
   <div class="wrap">
-    <a class="marca" href="#"><span data-nome>Leh</span><small>Micropigmentação · Sobrancelhas</small></a>
+    <a class="marca" href="#" style="-webkit-tap-highlight-color:transparent;user-select:none"><span data-nome>Leh</span><small>Micropigmentação · Sobrancelhas</small></a>
     <nav class="menu"><a href="#sobre">O estúdio</a><a href="#servicos">Serviços</a><a href="#galeria">Resultados</a><a href="#contato">Contato</a></nav>
     <a class="btn btn-1" href="#agendar">Agendar</a>
   </div>
@@ -365,6 +372,16 @@ footer{background:#2a1f20;color:#857b71;text-align:center;padding:28px 22px 110p
   </div>
 </section>
 
+<section id="videos" hidden style="padding-top:0">
+  <div class="wrap">
+    <div class="titulo centro">
+      <span class="rotulo">Vídeos</span>
+      <h2>Veja o trabalho</h2>
+    </div>
+    <div class="videos" id="listaVideos"></div>
+  </div>
+</section>
+
 <section id="depo">
   <div class="wrap">
     <div class="titulo centro">
@@ -407,7 +424,7 @@ footer{background:#2a1f20;color:#857b71;text-align:center;padding:28px 22px 110p
     </div>
     <dl>
       <div><dt>Endereço</dt><dd id="endTxt"></dd><dd><a id="mapa" target="_blank" rel="noopener" style="font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(#e3a9b1);border-bottom:1px solid #e3a9b1">Ver no mapa</a></dd></div>
-      <div><dt>Horário</dt><dd>Terça a sexta, das 9h às 19h<br>Sábado, das 9h às 15h</dd></div>
+      <div><dt>Horário</dt><dd id="horarioTxt">Terça a sexta, das 9h às 19h<br>Sábado, das 9h às 15h</dd></div>
       <div><dt>WhatsApp</dt><dd id="zapTxt"></dd></div>
     </dl>
   </div>
@@ -433,7 +450,7 @@ const CONFIG = {
   horario: {0:null, 1:null, 2:["09:00","19:00"], 3:["09:00","19:00"], 4:["09:00","19:00"], 5:["09:00","19:00"], 6:["09:00","15:00"]},
   almoco: ["12:00","13:00"]           // horário sem atendimento (ou null)
 };
-const SERVICOS = [
+let SERVICOS = [
   {id:"micro",    nome:"Micropigmentação fio a fio", desc:"Fios desenhados um a um, imitando os pelos naturais. Preenche falhas e dura de 1 a 2 anos.", preco:450, min:120},
   {id:"shadow",   nome:"Micropigmentação shadow", desc:"Efeito esfumado, como uma sombra suave. Ideal para quem gosta de sobrancelha marcada.", preco:480, min:120},
   {id:"retoque",  nome:"Retoque de micropigmentação", desc:"Feito de 30 a 40 dias depois, para fixar a cor e deixar tudo perfeito.", preco:150, min:60},
@@ -463,12 +480,16 @@ $("#zapContato").href = $("#zapFlutua").href = linkZap("Olá! Vim pelo site e go
 $("#mapa").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(CONFIG.endereco);
 
 // Lista de serviços
-$("#listaServicos").innerHTML = SERVICOS.map(s => `
+const esc = t => String(t==null?"":t).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function desenharListaServicos(){
+  $("#listaServicos").innerHTML = SERVICOS.map(s => `
   <div class="serv">
-    <h3>${s.nome}</h3><span class="preco">${real(s.preco)}</span>
-    <p>${s.desc}</p>
-    <div class="rod"><span class="tempo">${s.min} minutos</span><button data-agendar="${s.id}">Agendar</button></div>
+    <h3>${esc(s.nome)}</h3><span class="preco">${real(s.preco)}</span>
+    <p>${esc(s.desc)}</p>
+    <div class="rod"><span class="tempo">${esc(s.min)} minutos</span><button data-agendar="${esc(s.id)}">Agendar</button></div>
   </div>`).join("");
+}
+desenharListaServicos();
 
 // Galeria (fotos de banco gratuito Unsplash; trocar pelas fotos reais da profissional)
 const FOTOS = [
@@ -479,8 +500,11 @@ const FOTOS = [
   ["photo-1519415387722-a1c3bbef716c","Resultado natural"],
   ["photo-1516220362602-dba5272034e7","Detalhe dos fios"]
 ];
-$("#galeriaFotos").innerHTML = FOTOS.map(([id,alt]) =>
-  `<div><img src="https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=75" alt="${alt}" loading="lazy" onerror="this.parentNode.style.display='none'"></div>`).join("");
+function desenharGaleria(lista){
+  $("#galeriaFotos").innerHTML = lista.map(([src,alt]) =>
+    `<div><img src="${esc(src)}" alt="${esc(alt)}" loading="lazy" onerror="this.parentNode.style.display='none'"></div>`).join("");
+}
+desenharGaleria(FOTOS.map(([id,alt]) => ["https://images.unsplash.com/" + id + "?auto=format&fit=crop&w=900&q=75", alt]));
 
 /* ====== AGENDAMENTO (tela única) ====== */
 const estado = { serv: null, dia: null, hora: null };
@@ -529,7 +553,7 @@ function proximosDias(){
 
 function desenharServicos(){
   $("#escolhaServ").innerHTML = SERVICOS.map(s =>
-    `<button class="${estado.serv===s.id?"sel":""}" data-s="${s.id}"><b>${s.nome}</b><small>${real(s.preco)}<br>${s.min} minutos</small></button>`).join("");
+    `<button class="${estado.serv===s.id?"sel":""}" data-s="${s.id}"><b>${esc(s.nome)}</b><small>${real(s.preco)}<br>${esc(s.min)} minutos</small></button>`).join("");
 }
 function desenharDias(){
   $("#dias").innerHTML = proximosDias().map(d => {
@@ -594,6 +618,45 @@ $("#novo").onclick = () => {
 };
 
 tudo();
+
+/* ====== DADOS DO PAINEL DA DONA (banco online) ====== */
+const BANCO = { loja:"leh", api:"https://avvhnajfczdedlydkcrb.supabase.co", chave:"sb_publishable_y3y3sLLFrm5HrXDa2ttGTA_dl8vouP7" };
+const lerBanco = c => fetch(BANCO.api + "/rest/v1/" + c, {headers:{apikey:BANCO.chave}}).then(r => r.ok ? r.json() : null);
+const ytId = u => { const m = String(u).match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/); return m ? m[1] : null; };
+lerBanco(`lojas?id=eq.${BANCO.loja}&select=config`).then(r => {
+  const c = r && r[0] && r[0].config; if (!c) return;
+  if (Array.isArray(c.servicos) && c.servicos.length){
+    SERVICOS = c.servicos.map(s => ({id:String(s.id), nome:String(s.nome||""), desc:String(s.desc||""), preco:+s.preco||0, min:Math.max(10, +s.min||30)}));
+    if (estado.serv && !servico()) estado.serv = null;
+    desenharListaServicos(); tudo();
+  }
+  if (c.horario && c.horario.dias){
+    CONFIG.horario = c.horario.dias; CONFIG.almoco = c.horario.almoco || null;
+    const NOMES_C = ["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+    const abertos = [1,2,3,4,5,6,0].filter(d => CONFIG.horario[d]).map(d => `${NOMES_C[d]} ${CONFIG.horario[d][0]} às ${CONFIG.horario[d][1]}`);
+    if ($("#horarioTxt")) $("#horarioTxt").innerHTML = abertos.map(esc).join("<br>") || "Com hora marcada";
+    tudo();
+  }
+  const vids = (Array.isArray(c.videos) ? c.videos : []).filter(v => ytId(v.url));
+  if (vids.length){
+    $("#listaVideos").innerHTML = vids.map(v => `<figure><div class="vframe"><iframe src="https://www.youtube-nocookie.com/embed/${ytId(v.url)}" title="${esc(v.titulo||"Vídeo")}" loading="lazy" allowfullscreen allow="encrypted-media; picture-in-picture"></iframe></div>${v.titulo?`<figcaption>${esc(v.titulo)}</figcaption>`:""}</figure>`).join("");
+    $("#videos").hidden = false;
+  }
+}).catch(() => {});
+lerBanco(`fotos?loja_id=eq.${BANCO.loja}&select=img,legenda&order=ordem.asc,criado.asc`).then(f => {
+  if (Array.isArray(f) && f.length) desenharGaleria(f.map(x => [x.img, x.legenda || "Trabalho da Leh"]));
+}).catch(() => {});
+
+/* entrada escondida do painel: 5 toques seguidos no nome "Leh" do topo */
+(function(){
+  let n = 0, t = null;
+  $(".marca").addEventListener("click", e => {
+    e.preventDefault();
+    n++; clearTimeout(t);
+    if (n >= 5){ n = 0; location.href = "painel.html"; return; }
+    t = setTimeout(() => { n = 0; }, 2000);
+  });
+})();
 if ('IntersectionObserver' in window){ new IntersectionObserver(es => es.forEach(e => $('.fixo').classList.toggle('some', e.isIntersecting)), {threshold:0.05}).observe($('#agendar')); }
 </script>
 </body>

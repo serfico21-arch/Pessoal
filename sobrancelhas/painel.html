@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Painel · Leh</title>
+<meta name="theme-color" content="#1b1917">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--fundo:#f7f3ee;--bege:#f1e2df;--preto:#1b1917;--texto:#2b2724;--suave:#5f5650;--linha:#ddd2c6;--rosa:#9b4f5c;--verde:#2f7d4f;--erro:#b3261e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Jost',system-ui,sans-serif;background:var(--fundo);color:var(--texto);font-size:17px;line-height:1.5;overflow-x:hidden}
+h1,h2,h3{font-family:'Cormorant Garamond',serif;font-weight:700;color:var(--preto);line-height:1.15}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+header{background:var(--preto);color:#f7f3ee}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+header b{font-family:'Cormorant Garamond',serif;font-size:28px;letter-spacing:.12em}
+header small{display:block;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:#e3a9b1}
+header a,header button{color:#f7f3ee;font:500 14px 'Jost',sans-serif;background:none;border:1px solid #6b625a;padding:8px 12px;cursor:pointer;text-decoration:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;border:1.5px solid var(--preto);padding:14px 20px;font:600 15px 'Jost',sans-serif;cursor:pointer;background:var(--preto);color:#fff;text-decoration:none}
+.btn.linha{background:#fff;color:var(--preto)}
+.btn.rosa{background:var(--rosa);border-color:var(--rosa)}
+.btn.perigo{background:#fff;color:var(--erro);border-color:#e4b4b0}
+.btn.peq{padding:9px 14px;font-size:14px}
+.btn.cheio{width:100%}
+.btn[disabled]{opacity:.5}
+.cartao{background:#fff;border:1px solid var(--linha);padding:22px 18px;margin:18px 0}
+label{display:block;font-size:14px;font-weight:500;color:var(--suave);margin:14px 0 5px}
+input,textarea,select{width:100%;border:1.5px solid var(--linha);padding:12px 13px;font:400 17px 'Jost',sans-serif;color:var(--preto);background:#fff;border-radius:0}
+input:focus,textarea:focus{outline:none;border-color:var(--preto)}
+.msg{min-height:22px;margin-top:10px;font-weight:500}
+.msg.ok{color:var(--verde)}
+.msg.erro{color:var(--erro)}
+.ajuda{font-size:15px;color:var(--suave);margin-top:6px}
+.abas{display:flex;gap:6px;overflow-x:auto;padding:14px 0 0;position:sticky;top:0;background:var(--fundo);z-index:5}
+.abas button{flex:1 0 auto;padding:13px 14px;border:1.5px solid var(--linha);background:#fff;font:600 15px 'Jost',sans-serif;cursor:pointer;color:var(--preto)}
+.abas button.on{background:var(--preto);color:#fff;border-color:var(--preto)}
+.aba{display:none}.aba.on{display:block}
+.serv{border:1px solid var(--linha);padding:14px;margin-bottom:12px;background:#fff}
+.serv .lin{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.serv label{margin-top:10px}
+.serv .rod{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px}
+.fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.fotos div{position:relative;aspect-ratio:1;background:var(--bege);overflow:hidden}
+.fotos img{width:100%;height:100%;object-fit:cover}
+.fotos button{position:absolute;right:6px;top:6px;background:rgba(255,255,255,.95);border:0;padding:6px 10px;font:600 13px 'Jost',sans-serif;color:var(--erro);cursor:pointer}
+.vid{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--linha);background:#fff;padding:12px;margin-top:10px}
+.vid span{font-size:14px;color:var(--suave);word-break:break-all;display:block}
+.dia{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid #eee6dd}
+.dia>label{grid-column:1/-1}
+.dia input[type=time]{min-width:0}
+.dia .fech{grid-column:1/-1;color:var(--suave);font-size:15px}
+.dia label{margin:0;display:flex;gap:8px;align-items:center;color:var(--texto);font-size:16px}
+.dia input[type=checkbox]{width:22px;height:22px}
+.oculto{display:none!important}
+.carregando{text-align:center;color:var(--suave);padding:50px 0}
+@media (max-width:420px){.fotos{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div><b>LEH</b><small>Painel da dona</small></div><div><a href="./">Ver site</a> <button id="sair" class="oculto">Sair</button></div></div></header>
+
+<main class="wrap">
+  <p class="carregando" id="carregando">Carregando...</p>
+
+  <!-- PRIMEIRO ACESSO -->
+  <div class="cartao oculto" id="telaNova">
+    <h2>Primeiro acesso</h2>
+    <p class="ajuda">Digite o código de ativação que você recebeu e crie a sua senha.</p>
+    <label>Código de ativação</label><input id="atCod" autocapitalize="characters" placeholder="Ex.: LEH-XXXX-XXXX">
+    <label>Crie uma senha</label><input id="atSenha" type="password" autocomplete="new-password">
+    <label>Repita a senha</label><input id="atSenha2" type="password" autocomplete="new-password">
+    <label>Crie um código de recuperação (para quando esquecer a senha)</label><input id="atRec" placeholder="Pelo menos 4 letras ou números">
+    <label>Dica para lembrar desse código (opcional)</label><input id="atDica" placeholder="Ex.: data especial">
+    <p class="msg erro" id="atMsg"></p>
+    <button class="btn cheio" id="atBtn">Ativar o painel</button>
+  </div>
+
+  <!-- ENTRAR -->
+  <div class="cartao oculto" id="telaLogin">
+    <h2>Entrar no painel</h2>
+    <label>Senha</label><input id="lgSenha" type="password" autocomplete="current-password">
+    <p class="msg erro" id="lgMsg"></p>
+    <button class="btn cheio" id="lgBtn">Entrar</button>
+    <p style="margin-top:16px;text-align:center"><button class="btn linha peq" id="esqueci">Esqueci a senha</button></p>
+  </div>
+
+  <!-- ESQUECI -->
+  <div class="cartao oculto" id="telaEsqueci">
+    <h2>Criar senha nova</h2>
+    <p class="ajuda" id="dicaTxt"></p>
+    <label>Código de recuperação</label><input id="esCod">
+    <label>Senha nova</label><input id="esSenha" type="password" autocomplete="new-password">
+    <label>Repita a senha nova</label><input id="esSenha2" type="password" autocomplete="new-password">
+    <p class="msg erro" id="esMsg"></p>
+    <button class="btn cheio" id="esBtn">Salvar senha nova</button>
+    <p style="margin-top:16px;text-align:center"><button class="btn linha peq" id="voltarLogin">Voltar</button></p>
+  </div>
+
+  <!-- PAINEL -->
+  <div class="oculto" id="telaPainel">
+    <div class="abas" id="abas">
+      <button data-a="serv" class="on">Serviços e preços</button>
+      <button data-a="fotos">Fotos</button>
+      <button data-a="videos">Vídeos</button>
+      <button data-a="horario">Horário</button>
+    </div>
+
+    <section class="aba on" id="aba-serv">
+      <div class="cartao">
+        <h2>Serviços e preços</h2>
+        <p class="ajuda">Mude o que quiser e toque em <b>Salvar</b>. O site atualiza na hora.</p>
+        <div id="listaServ" style="margin-top:16px"></div>
+        <button class="btn linha cheio" id="servAdd">+ Novo serviço</button>
+        <p class="msg" id="servMsg"></p>
+        <button class="btn rosa cheio" id="servSalvar">Salvar serviços</button>
+      </div>
+    </section>
+
+    <section class="aba" id="aba-fotos">
+      <div class="cartao">
+        <h2>Fotos do site</h2>
+        <p class="ajuda">Escolha fotos do celular. Elas aparecem na galeria do site. Para tirar, toque em “Tirar”.</p>
+        <input type="file" id="fotoArq" accept="image/*" multiple class="oculto">
+        <button class="btn rosa cheio" id="fotoBtn" style="margin-top:14px">+ Colocar fotos</button>
+        <p class="msg" id="fotoMsg"></p>
+        <div class="fotos" id="listaFotos"></div>
+      </div>
+    </section>
+
+    <section class="aba" id="aba-videos">
+      <div class="cartao">
+        <h2>Vídeos do site</h2>
+        <p class="ajuda">Cole o link de um vídeo do YouTube (pode ser um “Shorts”). Ele aparece no site.</p>
+        <label>Link do vídeo</label><input id="vidUrl" inputmode="url" placeholder="https://youtube.com/...">
+        <label>Título (opcional)</label><input id="vidTit" placeholder="Ex.: Micropigmentação fio a fio">
+        <p class="msg" id="vidMsg"></p>
+        <button class="btn rosa cheio" id="vidAdd">Colocar vídeo no site</button>
+        <div id="listaVid" style="margin-top:12px"></div>
+      </div>
+    </section>
+
+    <section class="aba" id="aba-horario">
+      <div class="cartao">
+        <h2>Horário de atendimento</h2>
+        <p class="ajuda">Marque os dias que você atende e o horário de começo e fim.</p>
+        <div id="listaDias" style="margin-top:12px"></div>
+        <label>Intervalo de almoço (opcional)</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input id="almIni" type="time" style="min-width:0"><input id="almFim" type="time" style="min-width:0"></div>
+        <p class="msg" id="horMsg"></p>
+        <button class="btn rosa cheio" id="horSalvar">Salvar horário</button>
+      </div>
+    </section>
+    <p style="text-align:center;color:var(--suave);font-size:13px;margin:20px 0 40px">Painel feito por FCOSTA Sistemas &amp; Apps</p>
+  </div>
+</main>
+
+<script>
+const CONFIG = { loja:"leh", api:"https://avvhnajfczdedlydkcrb.supabase.co", chave:"sb_publishable_y3y3sLLFrm5HrXDa2ttGTA_dl8vouP7" };
+const SERV_PADRAO = [
+  {id:"micro",   nome:"Micropigmentação fio a fio", desc:"Fios desenhados um a um, imitando os pelos naturais. Preenche falhas e dura de 1 a 2 anos.", preco:450, min:120},
+  {id:"shadow",  nome:"Micropigmentação shadow", desc:"Efeito esfumado, como uma sombra suave. Ideal para quem gosta de sobrancelha marcada.", preco:480, min:120},
+  {id:"retoque", nome:"Retoque de micropigmentação", desc:"Feito de 30 a 40 dias depois, para fixar a cor e deixar tudo perfeito.", preco:150, min:60},
+  {id:"design",  nome:"Design de sobrancelhas", desc:"Mapeamento do rosto e modelagem com pinça, no formato ideal para você.", preco:35, min:30},
+  {id:"henna",   nome:"Design com henna", desc:"Design completo e henna para preencher falhas e dar cor por até 15 dias.", preco:50, min:45},
+  {id:"lamin",   nome:"Brow lamination", desc:"Fios alinhados, volumosos e penteados por até 6 semanas.", preco:120, min:60}
+];
+const HOR_PADRAO = {dias:{0:null,1:null,2:["09:00","19:00"],3:["09:00","19:00"],4:["09:00","19:00"],5:["09:00","19:00"],6:["09:00","15:00"]}, almoco:["12:00","13:00"]};
+const NOMES = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+
+const $ = s => document.querySelector(s);
+const esc = t => String(t==null?"":t).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const limpa = x => String(x||"").replace(/[^0-9a-z]/gi,"").toUpperCase();
+const ls = { get:k=>{try{return localStorage.getItem(k)}catch(e){return null}}, set:(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}} };
+const TOK = "adm-" + CONFIG.loja;
+let token = ls.get(TOK), config = {}, servicos = [], videos = [], horario = HOR_PADRAO;
+
+async function api(caminho, corpo){
+  const r = await fetch(CONFIG.api + (corpo===undefined ? "/rest/v1/" + caminho : "/rest/v1/rpc/" + caminho), {
+    method: corpo===undefined ? "GET" : "POST",
+    headers: {apikey:CONFIG.chave, "Content-Type":"application/json"},
+    body: corpo===undefined ? undefined : JSON.stringify(corpo)
+  });
+  const txt = await r.text(); let d=null; try{ d = txt ? JSON.parse(txt) : null; }catch(e){}
+  if(!r.ok){ const e = new Error((d && d.message) || ("http " + r.status)); e.codigo = d && d.message; throw e; }
+  return d;
+}
+async function adm(fn, args){
+  try{ return await api(fn, Object.assign({p_token:token}, args||{})); }
+  catch(e){ if(e.codigo==="sessao"){ token=null; ls.set(TOK,null); mostrar("telaLogin"); $("#lgMsg").textContent="Sua sessão terminou. Entre de novo."; } throw e; }
+}
+function traduz(e){
+  const c = e && e.codigo;
+  return ({codigo:"Código errado.", bloqueado:"Muitas tentativas erradas. Espere alguns minutos e tente de novo.", senha_curta:"A senha precisa ter pelo menos 4 caracteres.", codigo_curto:"O código de recuperação precisa ter pelo menos 4 letras ou números.", ja_ativado:"O painel já foi ativado. Entre com a senha.", imagem:"Essa foto não deu certo. Tente outra.", muitas:"Chegou no limite de 40 fotos. Tire alguma antes.", sem_senha:"O painel ainda não foi ativado."})[c] || "Não deu certo. Confira a internet e tente de novo.";
+}
+function mostrar(id){
+  ["carregando","telaNova","telaLogin","telaEsqueci","telaPainel"].forEach(t => $("#"+t).classList.toggle("oculto", t!==id));
+  $("#sair").classList.toggle("oculto", id!=="telaPainel");
+}
+function msg(el, txt, tipo){ el.textContent = txt; el.className = "msg " + (tipo||""); }
+
+/* ---------- entrada ---------- */
+async function iniciar(){
+  if(token){ try{ await carregar(); mostrar("telaPainel"); return; }catch(e){ if(e.codigo!=="sessao"){ mostrar("telaLogin"); msg($("#lgMsg"), "Sem internet? Tente de novo.", "erro"); return; } } }
+  try{
+    const est = await api("adm_estado",{p_loja:CONFIG.loja});
+    mostrar(est==="nova" ? "telaNova" : "telaLogin");
+  }catch(e){ mostrar("telaLogin"); msg($("#lgMsg"), "Sem internet? Tente de novo.", "erro"); }
+}
+$("#atBtn").onclick = async () => {
+  const m = $("#atMsg"), cod = limpa($("#atCod").value), s = $("#atSenha").value, rc = $("#atRec").value.trim(), dica = $("#atDica").value.trim();
+  if(!cod) return msg(m,"Digite o código de ativação.","erro");
+  if(s.length < 4) return msg(m,"A senha precisa ter pelo menos 4 caracteres.","erro");
+  if(s !== $("#atSenha2").value) return msg(m,"As duas senhas estão diferentes.","erro");
+  if(limpa(rc).length < 4) return msg(m,"Crie um código de recuperação com pelo menos 4 letras ou números.","erro");
+  if(dica && limpa(dica).includes(limpa(rc))) return msg(m,"A dica não pode mostrar o código.","erro");
+  try{ token = await api("adm_ativar",{p_loja:CONFIG.loja,p_ativacao:cod,p_codigo:rc,p_dica:dica,p_senha:s}); ls.set(TOK,token); await carregar(); mostrar("telaPainel"); }
+  catch(e){ msg(m, traduz(e), "erro"); }
+};
+async function entrar(){
+  const m = $("#lgMsg"), s = $("#lgSenha").value;
+  if(!s) return msg(m,"Digite a senha.","erro");
+  try{
+    const t = await api("adm_entrar",{p_loja:CONFIG.loja,p_senha:s});
+    if(!t) return msg(m,"Senha errada.","erro");
+    token = t; ls.set(TOK,token); $("#lgSenha").value=""; await carregar(); mostrar("telaPainel");
+  }catch(e){ msg(m, traduz(e), "erro"); }
+}
+$("#lgBtn").onclick = entrar;
+$("#lgSenha").onkeydown = e => { if(e.key==="Enter") entrar(); };
+$("#esqueci").onclick = async () => {
+  mostrar("telaEsqueci");
+  try{ const d = await api("adm_dica",{p_loja:CONFIG.loja}); $("#dicaTxt").textContent = d ? "Dica: " + d : "Digite o código de recuperação que você criou no primeiro acesso."; }catch(e){}
+};
+$("#voltarLogin").onclick = () => mostrar("telaLogin");
+$("#esBtn").onclick = async () => {
+  const m = $("#esMsg"), s = $("#esSenha").value;
+  if(s.length < 4) return msg(m,"A senha precisa ter pelo menos 4 caracteres.","erro");
+  if(s !== $("#esSenha2").value) return msg(m,"As duas senhas estão diferentes.","erro");
+  try{ token = await api("adm_nova_senha",{p_loja:CONFIG.loja,p_codigo:$("#esCod").value,p_senha:s}); ls.set(TOK,token); await carregar(); mostrar("telaPainel"); }
+  catch(e){ msg(m, traduz(e), "erro"); }
+};
+$("#sair").onclick = async () => { try{ await api("adm_sair",{p_token:token}); }catch(e){} token=null; ls.set(TOK,null); mostrar("telaLogin"); };
+
+/* ---------- dados ---------- */
+async function carregar(){
+  await adm("adm_email_ver");   // só confere se a sessão ainda vale
+  const r = await api(`lojas?id=eq.${CONFIG.loja}&select=config`);
+  config = (r && r[0] && r[0].config) || {};
+  servicos = Array.isArray(config.servicos) && config.servicos.length ? config.servicos : SERV_PADRAO.map(s=>({...s}));
+  videos = Array.isArray(config.videos) ? config.videos : [];
+  horario = config.horario && config.horario.dias ? config.horario : JSON.parse(JSON.stringify(HOR_PADRAO));
+  desenharServ(); desenharVid(); desenharHor(); carregarFotos();
+}
+
+/* abas */
+$("#abas").onclick = e => {
+  const b = e.target.closest("[data-a]"); if(!b) return;
+  document.querySelectorAll("#abas button").forEach(x => x.classList.toggle("on", x===b));
+  document.querySelectorAll(".aba").forEach(x => x.classList.toggle("on", x.id==="aba-"+b.dataset.a));
+};
+
+/* ---------- serviços ---------- */
+function desenharServ(){
+  $("#listaServ").innerHTML = servicos.map((s,i) => `
+    <div class="serv" data-i="${i}">
+      <label>Nome do serviço</label><input data-c="nome" value="${esc(s.nome)}">
+      <label>Explicação curta</label><textarea data-c="desc" rows="2">${esc(s.desc)}</textarea>
+      <div class="lin">
+        <div><label>Preço (R$)</label><input data-c="preco" inputmode="decimal" value="${esc(String(s.preco).replace(".",","))}"></div>
+        <div><label>Duração (minutos)</label><input data-c="min" inputmode="numeric" value="${esc(s.min)}"></div>
+      </div>
+      <div class="rod"><span class="ajuda">Preço 0 aparece como “Grátis”.</span><button class="btn perigo peq" data-tirar="${i}">Tirar</button></div>
+    </div>`).join("");
+}
+function lerServ(){
+  return [...document.querySelectorAll("#listaServ .serv")].map((el,i) => {
+    const v = c => el.querySelector(`[data-c="${c}"]`).value.trim();
+    return { id: servicos[i].id || ("s"+Date.now()+i), nome: v("nome").slice(0,60), desc: v("desc").slice(0,200),
+             preco: Math.max(0, parseFloat(v("preco").replace(/\./g,"").replace(",", ".")) || 0),
+             min: Math.min(480, Math.max(10, parseInt(v("min")) || 30)) };
+  });
+}
+$("#listaServ").onclick = e => {
+  const b = e.target.closest("[data-tirar]"); if(!b) return;
+  servicos = lerServ(); servicos.splice(+b.dataset.tirar, 1); desenharServ();
+  msg($("#servMsg"), "Serviço tirado. Toque em Salvar para valer no site.", "");
+};
+$("#servAdd").onclick = () => {
+  servicos = lerServ(); servicos.push({id:"s"+Date.now(), nome:"", desc:"", preco:0, min:30}); desenharServ();
+  const ult = document.querySelector("#listaServ .serv:last-child input"); ult.focus(); ult.scrollIntoView({block:"center"});
+};
+$("#servSalvar").onclick = async () => {
+  const lista = lerServ().filter(s => s.nome);
+  if(!lista.length) return msg($("#servMsg"), "Deixe pelo menos um serviço.", "erro");
+  try{ await adm("adm_config",{p_chave:"servicos",p_valor:lista}); servicos = lista; desenharServ(); msg($("#servMsg"), "Salvo! Já está no site.", "ok"); }
+  catch(e){ msg($("#servMsg"), traduz(e), "erro"); }
+};
+
+/* ---------- fotos ---------- */
+async function carregarFotos(){
+  try{
+    const f = await api(`fotos?loja_id=eq.${CONFIG.loja}&select=id,img&order=ordem.asc,criado.asc`) || [];
+    $("#listaFotos").innerHTML = f.length ? f.map(x => `<div><img src="${esc(x.img)}" alt=""><button data-apagar="${x.id}">Tirar</button></div>`).join("")
+      : `<p class="ajuda" style="grid-column:1/-1">Ainda não tem fotos. Enquanto isso, o site mostra fotos de exemplo.</p>`;
+  }catch(e){ msg($("#fotoMsg"), "Não consegui mostrar as fotos.", "erro"); }
+}
+function reduzir(arq){
+  return new Promise((ok, falha) => {
+    const img = new Image(), url = URL.createObjectURL(arq);
+    img.onload = () => {
+      const max = 1400, k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas"); c.width = Math.round(img.width*k); c.height = Math.round(img.height*k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      let q = .82, d = c.toDataURL("image/jpeg", q); while(d.length > 600000 && q > .4){ q -= .12; d = c.toDataURL("image/jpeg", q); }
+      ok(d);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); falha(new Error("imagem")); };
+    img.src = url;
+  });
+}
+$("#fotoBtn").onclick = () => $("#fotoArq").click();
+$("#fotoArq").onchange = async e => {
+  const arqs = [...e.target.files]; e.target.value = ""; if(!arqs.length) return;
+  let feitas = 0, erro = "";
+  for(const a of arqs){
+    msg($("#fotoMsg"), `Enviando foto ${feitas+1} de ${arqs.length}...`, "");
+    try{ await adm("adm_foto_add",{p_img: await reduzir(a), p_legenda:""}); feitas++; }
+    catch(x){ erro = traduz(x); if(x.codigo==="muitas" || x.codigo==="sessao") break; }
+  }
+  msg($("#fotoMsg"), erro ? `${feitas} foto(s) colocada(s). ${erro}` : `${feitas} foto(s) colocada(s) no site.`, erro ? "erro" : "ok");
+  carregarFotos();
+};
+$("#listaFotos").onclick = async e => {
+  const b = e.target.closest("[data-apagar]"); if(!b) return;
+  if(b.dataset.certeza !== "1"){ b.dataset.certeza = "1"; b.textContent = "Tirar mesmo?"; setTimeout(() => { b.dataset.certeza=""; b.textContent="Tirar"; }, 4000); return; }
+  try{ await adm("adm_foto_apagar",{p_id:b.dataset.apagar}); msg($("#fotoMsg"), "Foto tirada do site.", "ok"); carregarFotos(); }
+  catch(x){ msg($("#fotoMsg"), traduz(x), "erro"); }
+};
+
+/* ---------- vídeos ---------- */
+const ytId = u => { const m = String(u).match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([\w-]{11})/); return m ? m[1] : null; };
+function desenharVid(){
+  $("#listaVid").innerHTML = videos.map((v,i) => `<div class="vid"><div><b>${esc(v.titulo||"Vídeo")}</b><span>${esc(v.url)}</span></div><button class="btn perigo peq" data-i="${i}">Tirar</button></div>`).join("");
+}
+async function salvarVid(lista, texto){
+  try{ await adm("adm_config",{p_chave:"videos",p_valor:lista}); videos = lista; desenharVid(); msg($("#vidMsg"), texto, "ok"); return true; }
+  catch(e){ msg($("#vidMsg"), traduz(e), "erro"); return false; }
+}
+$("#vidAdd").onclick = async () => {
+  const url = $("#vidUrl").value.trim(), titulo = $("#vidTit").value.trim().slice(0,80);
+  if(!ytId(url)) return msg($("#vidMsg"), "Esse link não é de um vídeo do YouTube. Copie o link no botão Compartilhar do YouTube.", "erro");
+  if(videos.length >= 12) return msg($("#vidMsg"), "Chegou no limite de 12 vídeos. Tire algum antes.", "erro");
+  if(await salvarVid([...videos, {url, titulo}], "Vídeo colocado no site.")){ $("#vidUrl").value=""; $("#vidTit").value=""; }
+};
+$("#listaVid").onclick = e => { const b = e.target.closest("[data-i]"); if(b) salvarVid(videos.filter((_,j) => j !== +b.dataset.i), "Vídeo tirado do site."); };
+
+/* ---------- horário ---------- */
+function desenharHor(){
+  $("#listaDias").innerHTML = [2,3,4,5,6,0,1].map(d => {
+    const h = horario.dias[d];
+    return `<div class="dia" data-d="${d}"><label><input type="checkbox" ${h?"checked":""}> ${NOMES[d]}</label>
+      ${h ? `<input type="time" value="${h[0]}" aria-label="Abre"><input type="time" value="${h[1]}" aria-label="Fecha">` : `<span class="fech">Fechado</span>`}</div>`;
+  }).join("");
+  const a = horario.almoco || ["",""]; $("#almIni").value = a[0]||""; $("#almFim").value = a[1]||"";
+}
+function lerHor(){
+  const dias = {};
+  document.querySelectorAll("#listaDias .dia").forEach(el => {
+    const t = el.querySelectorAll("input[type=time]");
+    dias[el.dataset.d] = el.querySelector("input[type=checkbox]").checked ? (t.length ? [t[0].value||"09:00", t[1].value||"18:00"] : ["09:00","18:00"]) : null;
+  });
+  const ai = $("#almIni").value, af = $("#almFim").value;
+  return {dias, almoco: ai && af && ai < af ? [ai, af] : null};
+}
+$("#listaDias").onchange = e => { if(e.target.type==="checkbox"){ horario = lerHor(); desenharHor(); } };
+$("#horSalvar").onclick = async () => {
+  const h = lerHor();
+  for(const d in h.dias){ const x = h.dias[d]; if(x && x[0] >= x[1]) return msg($("#horMsg"), `${NOMES[d]}: a hora de fechar precisa ser depois da hora de abrir.`, "erro"); }
+  try{ await adm("adm_config",{p_chave:"horario",p_valor:h}); horario = h; msg($("#horMsg"), "Horário salvo! Já vale para os agendamentos.", "ok"); }
+  catch(e){ msg($("#horMsg"), traduz(e), "erro"); }
+};
+
+iniciar();
+</script>
+</body>
+</html>
