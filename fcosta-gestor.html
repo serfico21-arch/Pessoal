@@ -438,6 +438,7 @@ async function saveKey(key, value, tentativa){
     await idbSet(key, JSON.stringify(value));
     try{ localStorage.setItem(key, JSON.stringify(value)); }catch(e){ /* apenas reserva extra, ignora erro de espaço */ }
     limparAvisoSalvamento();
+    if(key===KEYS.products && typeof agendarPublicacaoLoja==='function') agendarPublicacaoLoja();
   }catch(e){
     console.error('Falha ao salvar', key, e, '— tentativa', tentativa);
     if(tentativa < 3){
@@ -2824,6 +2825,7 @@ function renderCadastros(){
         <button class="${cadSubTab==='funcionarios'?'active':''}" onclick="cadSubTab='funcionarios';renderContent()">Funcionários</button>
         <button class="${cadSubTab==='operadores'?'active':''}" onclick="cadSubTab='operadores';renderContent()">Operadores</button>
         <button class="${cadSubTab==='usuarios'?'active':''}" onclick="cadSubTab='usuarios';renderContent()">🔐 Usuários</button>
+        <button class="${cadSubTab==='lojaonline'?'active':''}" onclick="cadSubTab='lojaonline';renderContent()">🛒 Loja online</button>
         <button class="${cadSubTab==='config'?'active':''}" onclick="cadSubTab='config';renderContent()">Impressora &amp; Backup</button>
       </div>
       <button class="btn btn-ghost btn-sm" onclick="lockCadastros()">🔒 Bloquear</button>
@@ -2836,6 +2838,7 @@ function renderCadastros(){
     ${cadSubTab==='operadores'?renderOperadoresCad():''}
     ${cadSubTab==='usuarios'?renderUsuariosCad():''}
     ${cadSubTab==='config'?renderConfigCad():''}
+    ${cadSubTab==='lojaonline'?renderLojaOnlineCad():''}
   `;
 }
 function renderProdutosCad(){
@@ -3549,6 +3552,170 @@ async function salvarDadosLoja(){
   updateBrandMark();
   showToast('Dados da loja salvos com sucesso.');
 }
+/* ---------------- Loja online (site para o cliente comprar de casa) ----------------
+   Manda os produtos (nome, marca, categoria, preço, estoque e foto) para o site
+   https://serfico21-arch.github.io/Pessoal/mercado/
+   O preço de custo, fornecedor e código de barras NÃO são enviados.
+   Precisa do código da loja (digitado uma vez nesta tela). */
+const LOJA_SB_URL = 'https://avvhnajfczdedlydkcrb.supabase.co';
+const LOJA_SB_KEY = 'sb_publishable_y3y3sLLFrm5HrXDa2ttGTA_dl8vouP7';
+const LOJA_SLUG = 'pinheiro-costa';
+const LOJA_SITE = 'https://serfico21-arch.github.io/Pessoal/mercado/';
+const LOJA_FOTOS_KEY = 'pc_loja_fotos_enviadas';
+let lojaPublicando = false, lojaTimer = null, lojaStatus = '';
+
+function lojaCfg(){
+  const s = DB.settings;
+  if(!s.lojaOnline) s.lojaOnline = {};
+  const c = s.lojaOnline;
+  const pad = { whatsapp:'', horario:'Segunda a sábado, 8h às 20h · Domingo, 8h às 13h', area_entrega:'Bairros próximos ao mercado',
+    taxa_entrega:5, pedido_minimo:30, frete_gratis_acima:150, entrega:true, retirada:true,
+    pagamentos:['Pix','Dinheiro','Cartão na entrega'], aviso:'', codigo:'', automatico:true, ultima:null };
+  for(const k in pad){ if(c[k]===undefined) c[k]=pad[k]; }
+  return c;
+}
+function renderLojaOnlineCad(){
+  const c = lojaCfg();
+  const pg = ['Pix','Dinheiro','Cartão na entrega'];
+  return `
+  <div class="card">
+    <h2>🛒 Loja online</h2>
+    <div class="desc">O cliente escolhe os produtos de casa e manda o pedido pelo WhatsApp. Os produtos são os mesmos cadastrados aqui. O preço de custo nunca aparece no site.</div>
+    <div class="field"><label>Endereço do site (mande para os clientes)</label>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <input readonly value="${LOJA_SITE}" style="flex:1; min-width:200px;">
+        <button class="btn btn-ghost" onclick="navigator.clipboard&&navigator.clipboard.writeText('${LOJA_SITE}').then(()=>showToast('Endereço copiado!'))">Copiar</button>
+        <a class="btn btn-ghost" href="${LOJA_SITE}" target="_blank" rel="noopener">Abrir</a>
+      </div></div>
+    <div class="field"><label>Código da loja (só precisa digitar uma vez)</label><input id="loCodigo" value="${escapeHtml(c.codigo||'')}" placeholder="PC-XXXX-XXXX" style="text-transform:uppercase;"></div>
+    <button class="btn btn-primary btn-block" style="font-size:17px; padding:14px;" onclick="salvarLojaOnline(true)" ${lojaPublicando?'disabled':''}>${lojaPublicando?'⏳ Atualizando...':'🔄 Salvar e atualizar loja online agora'}</button>
+    <div class="small-note" id="loStatus">${escapeHtml(lojaStatus || (c.ultima?'Última atualização: '+new Date(c.ultima).toLocaleString('pt-BR'):'Ainda não foi atualizada.'))}</div>
+    <label style="display:flex; gap:8px; align-items:center; margin-top:10px;"><input type="checkbox" id="loAuto" ${c.automatico?'checked':''}> Atualizar sozinho quando eu mudar produtos, preços ou estoque</label>
+  </div>
+  <div class="card">
+    <h2>Condições da loja</h2>
+    <div class="desc">Isso aparece no site. Pode mudar quando quiser e depois tocar em "Salvar e atualizar".</div>
+    <div class="field"><label>WhatsApp que recebe os pedidos (com DDD)</label><input id="loZap" inputmode="tel" value="${escapeHtml(c.whatsapp||'')}" placeholder="(11) 90000-0000"></div>
+    <div class="field"><label>Horário de funcionamento</label><input id="loHorario" value="${escapeHtml(c.horario||'')}"></div>
+    <div style="display:flex; gap:16px; flex-wrap:wrap; margin:6px 0 10px;">
+      <label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" id="loEntrega" ${c.entrega?'checked':''}> Faz entrega</label>
+      <label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" id="loRetirada" ${c.retirada?'checked':''}> Cliente pode retirar na loja</label>
+    </div>
+    <div class="field"><label>Onde entrega</label><input id="loArea" value="${escapeHtml(c.area_entrega||'')}" placeholder="Ex: Jardim São Fernando e bairros vizinhos"></div>
+    <div class="grid2" style="gap:12px;">
+      <div class="field"><label>Taxa de entrega (R$)</label><input id="loTaxa" type="number" step="0.01" min="0" value="${Number(c.taxa_entrega)||0}"></div>
+      <div class="field"><label>Pedido mínimo (R$)</label><input id="loMin" type="number" step="0.01" min="0" value="${Number(c.pedido_minimo)||0}"></div>
+    </div>
+    <div class="field"><label>Entrega grátis acima de (R$) — 0 para não usar</label><input id="loGratis" type="number" step="0.01" min="0" value="${Number(c.frete_gratis_acima)||0}"></div>
+    <div class="field"><label>Formas de pagamento</label>
+      <div style="display:flex; gap:16px; flex-wrap:wrap;">${pg.map((p,i)=>`<label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" id="loPag${i}" ${(c.pagamentos||[]).includes(p)?'checked':''}> ${p}</label>`).join('')}</div></div>
+    <div class="field"><label>Aviso no topo do site (opcional)</label><input id="loAviso" value="${escapeHtml(c.aviso||'')}" placeholder="Ex: Promoção de carnes neste sábado!"></div>
+    <div class="small-note">O nome, o endereço e o logo do site vêm de "Dados da Loja".</div>
+  </div>`;
+}
+async function salvarLojaOnline(publicar){
+  const c = lojaCfg();
+  const v = id => (document.getElementById(id)||{}).value;
+  const ck = id => !!(document.getElementById(id)||{}).checked;
+  const novoCodigo = String(v('loCodigo')||'').trim().toUpperCase();
+  if(novoCodigo !== (c.codigo||'')){ try{ localStorage.removeItem(LOJA_FOTOS_KEY); }catch(e){} }
+  c.codigo = novoCodigo;
+  c.whatsapp = String(v('loZap')||'').trim();
+  c.horario = String(v('loHorario')||'').trim();
+  c.area_entrega = String(v('loArea')||'').trim();
+  c.taxa_entrega = parseFloat(v('loTaxa'))||0;
+  c.pedido_minimo = parseFloat(v('loMin'))||0;
+  c.frete_gratis_acima = parseFloat(v('loGratis'))||0;
+  c.entrega = ck('loEntrega'); c.retirada = ck('loRetirada');
+  if(!c.entrega && !c.retirada){ showToast('Marque pelo menos "Faz entrega" ou "Retirar na loja".'); return; }
+  c.pagamentos = ['Pix','Dinheiro','Cartão na entrega'].filter((p,i)=>ck('loPag'+i));
+  if(!c.pagamentos.length) c.pagamentos = ['Pix'];
+  c.aviso = String(v('loAviso')||'').trim();
+  c.automatico = ck('loAuto');
+  await saveKey(KEYS.settings, DB.settings);
+  if(publicar) publicarLojaOnline(false);
+}
+function agendarPublicacaoLoja(){
+  const c = DB.settings && DB.settings.lojaOnline;
+  if(!c || !c.codigo || !c.automatico) return;
+  clearTimeout(lojaTimer);
+  lojaTimer = setTimeout(()=>publicarLojaOnline(true), 15000);
+}
+function lojaFotoPequena(src){
+  return new Promise(resolve=>{
+    if(!src || !String(src).startsWith('data:image')) return resolve(null);
+    const img = new Image();
+    img.onload = ()=>{
+      const max = 360, r = Math.min(1, max/Math.max(img.width, img.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width*r); cv.height = Math.round(img.height*r);
+      const cx = cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height);
+      cx.drawImage(img,0,0,cv.width,cv.height);
+      resolve(cv.toDataURL('image/jpeg', 0.72));
+    };
+    img.onerror = ()=>resolve(null);
+    img.src = src;
+  });
+}
+async function lojaRPC(fn, body){
+  const r = await fetch(LOJA_SB_URL+'/rest/v1/rpc/'+fn, { method:'POST',
+    headers:{ apikey:LOJA_SB_KEY, Authorization:'Bearer '+LOJA_SB_KEY, 'Content-Type':'application/json' },
+    body: JSON.stringify(body) });
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return r.json();
+}
+function lojaMostrarStatus(t){ lojaStatus = t; const el = document.getElementById('loStatus'); if(el) el.textContent = t; }
+async function publicarLojaOnline(silencioso){
+  const c = lojaCfg();
+  if(!c.codigo){ if(!silencioso) showToast('Digite o código da loja primeiro.'); return; }
+  if(lojaPublicando){ agendarPublicacaoLoja(); return; }
+  if(!navigator.onLine){ if(!silencioso) showToast('Sem internet agora. Tente de novo quando a internet voltar.'); return; }
+  lojaPublicando = true; if(!silencioso) renderContent();
+  try{
+    let enviadas = {};
+    try{ enviadas = JSON.parse(localStorage.getItem(LOJA_FOTOS_KEY)||'{}')||{}; }catch(e){}
+    const s = DB.settings;
+    const logo = s.logoBase64 && s.logoBase64!==DEFAULT_LOGO_B64 ? await lojaFotoPequena(s.logoBase64) : null;
+    const config = { nome:s.storeName||'Pinheiro & Costa', endereco:s.endereco||'', telefone:s.telefone||'',
+      whatsapp:c.whatsapp||s.telefone||'', horario:c.horario, area_entrega:c.area_entrega,
+      taxa_entrega:c.taxa_entrega, pedido_minimo:c.pedido_minimo, frete_gratis_acima:c.frete_gratis_acima,
+      entrega:c.entrega, retirada:c.retirada, pagamentos:c.pagamentos, aviso:c.aviso, logo };
+    const prods = DB.products.filter(p=>p.name && (p.price||0)>0);
+    lojaMostrarStatus('⏳ Enviando dados da loja...');
+    const r1 = await lojaRPC('mercado_publicar_config', { p_slug:LOJA_SLUG, p_codigo:c.codigo, p_config:config, p_ids:prods.map(p=>p.id) });
+    if(!r1 || !r1.ok){ lojaMostrarStatus('❌ Código da loja errado. Confira o código e tente de novo.'); if(!silencioso) showToast('Código da loja errado.'); return; }
+    const novasEnviadas = {};
+    for(let i=0;i<prods.length;i+=25){
+      lojaMostrarStatus('⏳ Enviando produtos '+(i+1)+' a '+Math.min(i+25,prods.length)+' de '+prods.length+'...');
+      const lote = [];
+      for(const p of prods.slice(i,i+25)){
+        const assin = p.photoBase64 ? (p.photoBase64.length+':'+p.photoBase64.slice(-24)) : '';
+        let foto = null;
+        if(assin && enviadas[p.id]===assin) foto = '__MANTER__';
+        else if(assin) foto = await lojaFotoPequena(p.photoBase64);
+        if(assin) novasEnviadas[p.id] = assin;
+        lote.push({ id:p.id, nome:p.name, marca:p.brand||'', categoria:p.category||'', preco:p.price||0,
+          tipo_venda:p.saleType==='peso'?'peso':'unidade', estoque:p.stock||0, foto });
+      }
+      const r2 = await lojaRPC('mercado_publicar_produtos', { p_slug:LOJA_SLUG, p_codigo:c.codigo, p_produtos:lote });
+      if(!r2 || !r2.ok) throw new Error('lote');
+    }
+    try{ localStorage.setItem(LOJA_FOTOS_KEY, JSON.stringify(novasEnviadas)); }catch(e){}
+    c.ultima = nowISO();
+    await idbSet(KEYS.settings, JSON.stringify(DB.settings)).catch(()=>{});
+    try{ localStorage.setItem(KEYS.settings, JSON.stringify(DB.settings)); }catch(e){}
+    lojaMostrarStatus('✅ Loja online atualizada: '+prods.length+' produto(s) · '+new Date().toLocaleString('pt-BR'));
+    if(!silencioso) showToast('✅ Loja online atualizada!');
+  }catch(e){
+    console.error('loja online', e);
+    lojaMostrarStatus('⚠️ Não consegui atualizar agora (internet?). Tente de novo daqui a pouco.');
+    if(!silencioso) showToast('Não consegui atualizar a loja online agora.');
+  }finally{
+    lojaPublicando = false;
+    if(!silencioso && cadSubTab==='lojaonline') renderContent();
+  }
+}
+
 function renderConfigCad(){
   const printer = DB.settings.printer || {connected:false};
   const autoPrint = DB.settings.autoPrint!==false;

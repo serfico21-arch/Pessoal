@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<!--
+  Loja online do mercado Pinheiro & Costa.
+  Os produtos vêm do sistema "fcosta-gestor.html" (botão "Atualizar loja online").
+  Endereço: https://serfico21-arch.github.io/Pessoal/mercado/
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pinheiro &amp; Costa · Compre de casa</title>
+<meta name="description" content="Faça suas compras no mercado Pinheiro & Costa sem sair de casa. Escolha os produtos e envie o pedido pelo WhatsApp.">
+<meta name="theme-color" content="#0d3b2e">
+<meta property="og:title" content="Pinheiro & Costa · Compre de casa">
+<meta property="og:description" content="Escolha os produtos e envie o pedido pelo WhatsApp. Entrega ou retirada.">
+<link rel="icon" href="../favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --verde:#0d3b2e; --verde2:#125a3f; --verde3:#187a52; --amarelo:#f5c400; --amarelo2:#ffd935;
+  --fundo:#f3f5f2; --card:#ffffff; --texto:#15201b; --suave:#5b6b63; --linha:#e1e7e3; --vermelho:#c0392b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--fundo);color:var(--texto);padding-bottom:110px}
+button,input,select,textarea{font:inherit}
+img{display:block;max-width:100%}
+
+/* Topo */
+.topo{background:linear-gradient(160deg,var(--verde2),var(--verde));color:#fff;position:sticky;top:0;z-index:30;box-shadow:0 4px 18px -8px rgba(0,0,0,.45)}
+.topo-in{max-width:1100px;margin:0 auto;padding:12px 16px 12px;display:flex;align-items:center;gap:12px}
+.logo{width:48px;height:48px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;color:var(--verde);font-weight:900;font-size:18px}
+.logo img{width:100%;height:100%;object-fit:contain}
+.nome{flex:1;min-width:0}
+.nome b{display:block;font-size:20px;font-weight:900;letter-spacing:-.01em;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nome span{font-size:12px;color:var(--amarelo2);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.btn-zap-topo{background:#25d366;color:#fff;border:0;border-radius:12px;padding:10px 12px;font-weight:800;font-size:14px;display:flex;align-items:center;gap:6px;text-decoration:none;flex:none}
+.busca{max-width:1100px;margin:0 auto;padding:0 16px 12px}
+.busca input{width:100%;border:0;border-radius:14px;padding:14px 16px 14px 46px;font-size:17px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' fill='none' stroke='%235b6b63' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='10' cy='10' r='7'/%3E%3Cpath d='m20 20-4.5-4.5'/%3E%3C/svg%3E") no-repeat 14px center;color:var(--texto)}
+.busca input:focus{outline:3px solid var(--amarelo)}
+
+/* Faixa de condições */
+.faixa{max-width:1100px;margin:14px auto 0;padding:0 16px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.faixa div{background:#fff;border:1px solid var(--linha);border-radius:14px;padding:10px 8px;text-align:center;font-size:12.5px;color:var(--suave);line-height:1.3}
+.faixa b{display:block;color:var(--verde);font-size:14.5px;font-weight:800}
+.aviso{max-width:1100px;margin:10px auto 0;padding:0 16px}
+.aviso div{background:#fff8d6;border:1px solid #f0dc80;color:#5c4a00;border-radius:12px;padding:10px 14px;font-weight:600;font-size:14.5px}
+
+/* Categorias */
+.cats{max-width:1100px;margin:14px auto 0;padding:0 16px 4px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat{flex:none;border:2px solid var(--linha);background:#fff;color:var(--texto);border-radius:999px;padding:10px 16px;font-weight:700;font-size:15px;cursor:pointer}
+.cat.on{background:var(--verde);border-color:var(--verde);color:#fff}
+
+/* Produtos */
+main{max-width:1100px;margin:0 auto;padding:12px 16px}
+.titulo-sec{font-size:15px;color:var(--suave);font-weight:700;margin:6px 2px 10px}
+.grade{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:640px){.grade{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:900px){.grade{grid-template-columns:repeat(4,1fr);gap:14px}}
+.prod{background:var(--card);border-radius:16px;overflow:hidden;border:1px solid var(--linha);display:flex;flex-direction:column}
+.foto{aspect-ratio:1/1;background:#eef2ef;display:flex;align-items:center;justify-content:center;position:relative}
+.foto img{width:100%;height:100%;object-fit:contain;background:#fff}
+.foto .ini{font-size:34px;font-weight:900;color:#b8c6be;letter-spacing:.02em}
+.selo{position:absolute;left:8px;top:8px;background:var(--vermelho);color:#fff;font-size:12px;font-weight:800;padding:4px 8px;border-radius:8px}
+.info{padding:10px 10px 12px;display:flex;flex-direction:column;gap:4px;flex:1}
+.pnome{font-weight:700;font-size:15px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.5em}
+.pmarca{font-size:12.5px;color:var(--suave);min-height:1.2em}
+.preco{font-size:21px;font-weight:900;color:var(--verde);margin-top:2px}
+.preco small{font-size:13px;font-weight:700;color:var(--suave)}
+.add{margin-top:auto;border:0;border-radius:12px;background:var(--amarelo);color:#1d1600;font-weight:900;font-size:16px;padding:13px 8px;cursor:pointer;width:100%}
+.add:active{transform:scale(.98)}
+.add:disabled{background:#e4e7e5;color:#8a948f;cursor:not-allowed}
+.qtd{margin-top:auto;display:flex;align-items:center;justify-content:space-between;background:var(--verde);border-radius:12px;color:#fff}
+.qtd button{border:0;background:transparent;color:#fff;font-size:26px;font-weight:800;width:48px;height:48px;cursor:pointer}
+.qtd span{font-weight:800;font-size:16px}
+.vazio{text-align:center;padding:50px 20px;color:var(--suave);font-size:17px;line-height:1.5}
+.vazio b{display:block;color:var(--texto);font-size:20px;margin-bottom:6px}
+.carregando{text-align:center;padding:60px 0;color:var(--suave);font-weight:600}
+
+/* Rodapé informativo */
+.sobre{max-width:1100px;margin:22px auto 0;padding:0 16px}
+.sobre .caixa{background:#fff;border:1px solid var(--linha);border-radius:16px;padding:16px;font-size:15px;line-height:1.55;color:var(--suave)}
+.sobre h3{color:var(--texto);font-size:17px;margin-bottom:6px}
+.sobre p+p{margin-top:6px}
+.rodape{text-align:center;color:#8a948f;font-size:12px;padding:22px 16px 10px}
+
+/* Barra do carrinho */
+.barra{position:fixed;left:0;right:0;bottom:0;z-index:40;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(243,245,242,.95) 30%);display:none}
+.barra button{width:100%;max-width:700px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;border:0;border-radius:16px;background:var(--verde);color:#fff;padding:16px 18px;font-weight:800;font-size:17px;box-shadow:0 10px 24px -10px rgba(13,59,46,.8);cursor:pointer}
+.barra .n{background:var(--amarelo);color:#1d1600;border-radius:999px;min-width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;padding:0 8px}
+
+/* Carrinho (tela cheia no celular) */
+.tela{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.5);display:none}
+.tela.on{display:block}
+.painel{position:absolute;right:0;top:0;bottom:0;width:100%;max-width:520px;background:var(--fundo);display:flex;flex-direction:column}
+.p-topo{background:var(--verde);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px}
+.p-topo h2{flex:1;font-size:20px;font-weight:900}
+.fechar{border:0;background:rgba(255,255,255,.15);color:#fff;border-radius:12px;padding:10px 14px;font-weight:800;font-size:15px;cursor:pointer}
+.p-corpo{flex:1;overflow-y:auto;padding:14px 16px 20px}
+.bloco{background:#fff;border:1px solid var(--linha);border-radius:16px;padding:14px;margin-bottom:12px}
+.bloco h3{font-size:16px;margin-bottom:10px}
+.item{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--linha)}
+.item:last-child{border-bottom:0}
+.item .mini{width:52px;height:52px;border-radius:10px;background:#eef2ef;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:900;color:#b8c6be}
+.item .mini img{width:100%;height:100%;object-fit:contain;background:#fff}
+.item .t{flex:1;min-width:0}
+.item .t b{display:block;font-size:15px;line-height:1.25}
+.item .t span{font-size:13.5px;color:var(--suave)}
+.item .q{display:flex;align-items:center;gap:4px}
+.item .q button{width:38px;height:38px;border-radius:10px;border:2px solid var(--linha);background:#fff;font-size:20px;font-weight:800;cursor:pointer;color:var(--verde)}
+.item .q span{min-width:44px;text-align:center;font-weight:800;font-size:14px}
+.opcoes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opcoes.tres{grid-template-columns:1fr 1fr 1fr}
+.op{border:2px solid var(--linha);background:#fff;border-radius:12px;padding:13px 6px;font-weight:800;font-size:15px;cursor:pointer;color:var(--texto);text-align:center}
+.op.on{border-color:var(--verde);background:#e7f3ec;color:var(--verde)}
+.campo{margin-top:10px}
+.campo label{display:block;font-size:14px;font-weight:700;color:var(--suave);margin-bottom:5px}
+.campo input,.campo textarea{width:100%;border:2px solid var(--linha);border-radius:12px;padding:13px 14px;font-size:17px;background:#fff;color:var(--texto)}
+.campo input:focus,.campo textarea:focus{outline:none;border-color:var(--verde3)}
+.linha-tot{display:flex;justify-content:space-between;font-size:16px;padding:4px 0}
+.linha-tot.total{font-size:21px;font-weight:900;color:var(--verde);border-top:1px solid var(--linha);margin-top:6px;padding-top:10px}
+.nota{font-size:13.5px;color:var(--suave);margin-top:8px;line-height:1.45}
+.erro{background:#fdecea;border:1px solid #f3b8b1;color:#8e2418;border-radius:12px;padding:10px 12px;font-weight:700;font-size:14.5px;margin-bottom:10px;display:none}
+.p-pe{padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid var(--linha)}
+.enviar{width:100%;border:0;border-radius:16px;background:#25d366;color:#fff;font-weight:900;font-size:18px;padding:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+.enviar:disabled{background:#b9c4be}
+.limpar{display:block;margin:10px auto 0;border:0;background:none;color:var(--vermelho);font-weight:700;font-size:14px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<header class="topo">
+  <div class="topo-in">
+    <div class="logo" id="logo">P&amp;C</div>
+    <div class="nome"><b id="nomeLoja">Pinheiro &amp; Costa</b><span>Compre de casa</span></div>
+    <a class="btn-zap-topo" id="zapTopo" href="#" target="_blank" rel="noopener">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.4 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2c.1.2.1.4 0 .6l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg>
+      Ajuda
+    </a>
+  </div>
+  <div class="busca"><input id="busca" type="search" placeholder="Buscar produto (ex: arroz, leite)" autocomplete="off"></div>
+</header>
+
+<div class="faixa" id="faixa"></div>
+<div class="aviso" id="avisoBox" style="display:none"><div id="avisoTxt"></div></div>
+<nav class="cats" id="cats"></nav>
+
+<main>
+  <div class="titulo-sec" id="tituloSec"></div>
+  <div id="lista"><div class="carregando">Carregando produtos...</div></div>
+</main>
+
+<section class="sobre">
+  <div class="caixa" id="sobre"></div>
+</section>
+<div class="rodape">Pinheiro &amp; Costa · Pedido finalizado pelo WhatsApp · Feito por FCOSTA Sistemas &amp; Apps</div>
+
+<div class="barra" id="barra"><button onclick="abrirCarrinho()"><span><span class="n" id="barraN">0</span> &nbsp;Ver meu pedido</span><span id="barraTotal">R$ 0,00</span></button></div>
+
+<div class="tela" id="tela" onclick="if(event.target===this)fecharCarrinho()">
+  <div class="painel">
+    <div class="p-topo"><h2>Meu pedido</h2><button class="fechar" onclick="fecharCarrinho()">✕ Voltar</button></div>
+    <div class="p-corpo" id="pCorpo"></div>
+    <div class="p-pe">
+      <div class="erro" id="erro"></div>
+      <button class="enviar" id="btnEnviar" onclick="enviarPedido()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.4 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2c.1.2.1.4 0 .6l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg>
+        Enviar pedido pelo WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Ligação com o banco (mesmo projeto Supabase do gestor) ===== */
+const SB_URL = 'https://avvhnajfczdedlydkcrb.supabase.co';
+const SB_KEY = 'sb_publishable_y3y3sLLFrm5HrXDa2ttGTA_dl8vouP7';
+const LOJA = 'pinheiro-costa';
+
+/* Condições genéricas: valem até o mercado preencher no gestor */
+const PADRAO = {
+  nome:'Pinheiro & Costa',
+  whatsapp:'5511993509109',
+  endereco:'',
+  horario:'Segunda a sábado, 8h às 20h · Domingo, 8h às 13h',
+  entrega:true, retirada:true,
+  taxa_entrega:5, pedido_minimo:30, frete_gratis_acima:150,
+  area_entrega:'Bairros próximos ao mercado',
+  pagamentos:['Pix','Dinheiro','Cartão na entrega'],
+  aviso:''
+};
+
+let CFG = {...PADRAO};
+let PRODUTOS = [];
+let FOTOS = {};
+let categoria = 'Todos';
+let carrinho = {};
+let pedido = {modo:'entrega', pag:'Pix', nome:'', fone:'', endereco:'', troco:'', obs:''};
+try{ carrinho = JSON.parse(localStorage.getItem('pc_loja_carrinho')||'{}') || {}; }catch(e){}
+try{ Object.assign(pedido, JSON.parse(localStorage.getItem('pc_loja_cliente')||'{}')||{}); }catch(e){}
+
+const brl = v => (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+const isPeso = p => p.tipo_venda === 'peso';
+const passo = p => isPeso(p) ? 0.5 : 1;
+const fmtQtd = (p,q) => isPeso(p) ? (q<1 ? (q*1000).toFixed(0)+' g' : q.toLocaleString('pt-BR',{maximumFractionDigits:3})+' kg') : q+' un';
+const iniciais = n => String(n||'').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase();
+
+async function sb(path){
+  const r = await fetch(SB_URL+'/rest/v1/'+path,{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return r.json();
+}
+function salvarLocal(){
+  try{ localStorage.setItem('pc_loja_carrinho', JSON.stringify(carrinho)); }catch(e){}
+  try{ const {nome,fone,endereco,modo,pag} = pedido; localStorage.setItem('pc_loja_cliente', JSON.stringify({nome,fone,endereco,modo,pag})); }catch(e){}
+}
+
+async function carregar(){
+  try{
+    const [lojas, prods] = await Promise.all([
+      sb('mercado_lojas?slug=eq.'+LOJA+'&select=nome,config'),
+      sb('mercado_produtos?slug=eq.'+LOJA+'&select=id,nome,marca,categoria,preco,tipo_venda,estoque&order=nome.asc')
+    ]);
+    if(lojas[0]){
+      const c = lojas[0].config || {};
+      for(const k in c){ if(c[k]!==null && c[k]!=='' && c[k]!==undefined) CFG[k]=c[k]; }
+      if(lojas[0].nome) CFG.nome = c.nome || lojas[0].nome;
+    }
+    PRODUTOS = prods.filter(p=>Number(p.preco)>0);
+    // tira do carrinho o que não existe mais
+    for(const id in carrinho){ if(!PRODUTOS.find(p=>p.id===id)) delete carrinho[id]; }
+  }catch(e){
+    console.error(e);
+    document.getElementById('lista').innerHTML = '<div class="vazio"><b>Não consegui carregar os produtos.</b>Verifique a internet e toque para tentar de novo.<br><br><button class="add" style="max-width:260px" onclick="location.reload()">Tentar de novo</button></div>';
+  }
+  aplicarConfig();
+  desenharCats(); desenharLista(); atualizarBarra();
+  carregarFotos();
+}
+
+async function carregarFotos(){
+  // Busca as fotos em partes, para a página abrir rápido
+  const ids = PRODUTOS.map(p=>p.id);
+  for(let i=0;i<ids.length;i+=30){
+    const lote = ids.slice(i,i+30).map(x=>'"'+String(x).replace(/"/g,'')+'"').join(',');
+    try{
+      const r = await sb('mercado_produtos?slug=eq.'+LOJA+'&foto=not.is.null&id=in.('+encodeURIComponent(lote)+')&select=id,foto');
+      r.forEach(x=>{ if(x.foto && String(x.foto).startsWith('data:image')){ FOTOS[x.id]=x.foto; document.querySelectorAll('[data-foto="'+CSS.escape(x.id)+'"]').forEach(el=>{ el.innerHTML='<img alt="" loading="lazy" src="'+x.foto+'">'+(el.querySelector('.selo')?el.querySelector('.selo').outerHTML:''); }); } });
+    }catch(e){ console.warn('fotos', e); }
+  }
+}
+
+function zapLink(texto){
+  const n = String(CFG.whatsapp||'').replace(/\D/g,'');
+  const num = n.length<=11 ? '55'+n : n;
+  return 'https://wa.me/'+num+(texto?'?text='+encodeURIComponent(texto):'');
+}
+
+function aplicarConfig(){
+  document.getElementById('nomeLoja').textContent = CFG.nome;
+  document.title = CFG.nome+' · Compre de casa';
+  if(CFG.logo){ document.getElementById('logo').innerHTML = '<img alt="" src="'+CFG.logo+'">'; }
+  document.getElementById('zapTopo').href = zapLink('Olá! Vim pelo site do '+CFG.nome+'.');
+  const f = [];
+  if(CFG.entrega) f.push('<div><b>Entrega</b>'+(Number(CFG.taxa_entrega)>0?'Taxa '+brl(CFG.taxa_entrega):'Grátis')+'</div>');
+  if(CFG.retirada) f.push('<div><b>Retirada</b>Grátis na loja</div>');
+  if(Number(CFG.frete_gratis_acima)>0 && CFG.entrega && Number(CFG.taxa_entrega)>0) f.push('<div><b>Frete grátis</b>Acima de '+brl(CFG.frete_gratis_acima)+'</div>');
+  else if(Number(CFG.pedido_minimo)>0) f.push('<div><b>Pedido mínimo</b>'+brl(CFG.pedido_minimo)+'</div>');
+  const fx = document.getElementById('faixa');
+  fx.innerHTML = f.join(''); fx.style.gridTemplateColumns = 'repeat('+Math.max(f.length,1)+',1fr)';
+  if(CFG.aviso){ document.getElementById('avisoTxt').textContent = CFG.aviso; document.getElementById('avisoBox').style.display='block'; }
+  const pags = Array.isArray(CFG.pagamentos)&&CFG.pagamentos.length ? CFG.pagamentos : PADRAO.pagamentos;
+  document.getElementById('sobre').innerHTML =
+    '<h3>Como funciona</h3>'+
+    '<p>1. Escolha os produtos e toque em <b>Adicionar</b>.</p>'+
+    '<p>2. Toque em <b>Ver meu pedido</b>, escolha entrega ou retirada e a forma de pagamento.</p>'+
+    '<p>3. Toque em <b>Enviar pedido pelo WhatsApp</b>. O mercado confirma o pedido e o valor final com você.</p>'+
+    '<h3 style="margin-top:14px">Informações</h3>'+
+    (CFG.horario?'<p><b>Horário:</b> '+esc(CFG.horario)+'</p>':'')+
+    (CFG.endereco?'<p><b>Endereço:</b> '+esc(CFG.endereco)+'</p>':'')+
+    (CFG.entrega&&CFG.area_entrega?'<p><b>Entregamos em:</b> '+esc(CFG.area_entrega)+'</p>':'')+
+    '<p><b>Pagamento:</b> '+esc(pags.join(', '))+'</p>'+
+    '<p>Produtos vendidos por quilo têm o peso aproximado. O valor final é confirmado na separação.</p>'+
+    '<p>Preços e estoque podem mudar sem aviso. Imagens ilustrativas.</p>';
+  if(!CFG.entrega && pedido.modo==='entrega') pedido.modo='retirada';
+  if(!CFG.retirada && pedido.modo==='retirada') pedido.modo='entrega';
+  if(!pags.includes(pedido.pag)) pedido.pag = pags[0];
+}
+
+function desenharCats(){
+  const cs = [...new Set(PRODUTOS.map(p=>(p.categoria||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  const el = document.getElementById('cats');
+  if(!cs.length){ el.innerHTML=''; return; }
+  el.innerHTML = ['Todos',...cs].map(c=>'<button class="cat'+(c===categoria?' on':'')+'" data-c="'+esc(c)+'">'+esc(c)+'</button>').join('');
+  el.querySelectorAll('.cat').forEach(b=>b.onclick=()=>{ categoria=b.dataset.c; desenharCats(); desenharLista(); window.scrollTo({top:0,behavior:'smooth'}); });
+}
+
+function cartaoProduto(p){
+  const sem = Number(p.estoque)<=0;
+  const q = carrinho[p.id]||0;
+  const foto = FOTOS[p.id] ? '<img alt="" loading="lazy" src="'+FOTOS[p.id]+'">' : '<span class="ini">'+esc(iniciais(p.nome))+'</span>';
+  let botao;
+  if(sem) botao = '<button class="add" disabled>Esgotado</button>';
+  else if(q>0) botao = '<div class="qtd"><button aria-label="Menos" onclick="mudar(\''+p.id+'\',-1)">−</button><span>'+fmtQtd(p,q)+'</span><button aria-label="Mais" onclick="mudar(\''+p.id+'\',1)">+</button></div>';
+  else botao = '<button class="add" onclick="mudar(\''+p.id+'\',1)">Adicionar</button>';
+  return '<div class="prod"><div class="foto" data-foto="'+esc(p.id)+'">'+foto+(sem?'<span class="selo">Esgotado</span>':'')+'</div>'+
+    '<div class="info"><div class="pnome">'+esc(p.nome)+'</div><div class="pmarca">'+esc(p.marca||'')+'</div>'+
+    '<div class="preco">'+brl(p.preco)+(isPeso(p)?' <small>/kg</small>':'')+'</div>'+botao+'</div></div>';
+}
+
+function desenharLista(){
+  const termo = norm(document.getElementById('busca').value);
+  let lista = PRODUTOS.filter(p=> categoria==='Todos' || (p.categoria||'').trim()===categoria);
+  if(termo) lista = lista.filter(p=> norm(p.nome+' '+(p.marca||'')+' '+(p.categoria||'')).includes(termo));
+  lista.sort((a,b)=> (Number(a.estoque)<=0) - (Number(b.estoque)<=0) || a.nome.localeCompare(b.nome,'pt-BR'));
+  const el = document.getElementById('lista');
+  document.getElementById('tituloSec').textContent = PRODUTOS.length ? (termo ? lista.length+' resultado(s)' : (categoria==='Todos'?'Todos os produtos':categoria)+' · '+lista.length) : '';
+  if(!PRODUTOS.length){ el.innerHTML = '<div class="vazio"><b>Os produtos estão chegando!</b>Em breve você poderá fazer suas compras por aqui.<br>Enquanto isso, chame a gente no WhatsApp.</div>'; return; }
+  if(!lista.length){ el.innerHTML = '<div class="vazio"><b>Nada encontrado.</b>Tente outro nome ou fale com a gente no WhatsApp.</div>'; return; }
+  el.innerHTML = '<div class="grade">'+lista.map(cartaoProduto).join('')+'</div>';
+}
+
+function mudar(id, dir){
+  const p = PRODUTOS.find(x=>x.id===id); if(!p) return;
+  let q = (carrinho[id]||0) + dir*passo(p);
+  const max = Number(p.estoque)||0;
+  if(dir>0 && max>0 && q>max){ q = max; aviso('Só temos '+fmtQtd(p,max)+' de '+p.nome+'.'); }
+  q = Math.round(q*1000)/1000;
+  if(q<=0) delete carrinho[id]; else carrinho[id]=q;
+  salvarLocal(); desenharLista(); atualizarBarra();
+  if(document.getElementById('tela').classList.contains('on')) desenharCarrinho();
+}
+function aviso(t){
+  const e = document.getElementById('erro');
+  if(document.getElementById('tela').classList.contains('on')){ e.textContent=t; e.style.display='block'; setTimeout(()=>e.style.display='none',3500); }
+  else alertaRapido(t);
+}
+function alertaRapido(t){
+  let d=document.getElementById('toast');
+  if(!d){ d=document.createElement('div'); d.id='toast'; d.style.cssText='position:fixed;left:16px;right:16px;bottom:96px;z-index:70;background:#15201b;color:#fff;padding:14px 16px;border-radius:14px;font-weight:700;text-align:center;max-width:520px;margin:0 auto'; document.body.appendChild(d); }
+  d.textContent=t; d.style.display='block'; clearTimeout(d._t); d._t=setTimeout(()=>d.style.display='none',3000);
+}
+
+function subtotal(){ return Object.entries(carrinho).reduce((s,[id,q])=>{ const p=PRODUTOS.find(x=>x.id===id); return s+(p?p.preco*q:0); },0); }
+function taxa(){
+  if(pedido.modo!=='entrega') return 0;
+  const t = Number(CFG.taxa_entrega)||0, g = Number(CFG.frete_gratis_acima)||0;
+  return (g>0 && subtotal()>=g) ? 0 : t;
+}
+function atualizarBarra(){
+  const n = Object.keys(carrinho).length;
+  document.getElementById('barra').style.display = n ? 'block' : 'none';
+  document.getElementById('barraN').textContent = n;
+  document.getElementById('barraTotal').textContent = brl(subtotal());
+}
+
+function abrirCarrinho(){ desenharCarrinho(); document.getElementById('tela').classList.add('on'); document.body.style.overflow='hidden'; }
+function fecharCarrinho(){ document.getElementById('tela').classList.remove('on'); document.body.style.overflow=''; }
+
+function desenharCarrinho(){
+  const itens = Object.entries(carrinho).map(([id,q])=>({p:PRODUTOS.find(x=>x.id===id),q})).filter(x=>x.p);
+  const pags = Array.isArray(CFG.pagamentos)&&CFG.pagamentos.length ? CFG.pagamentos : PADRAO.pagamentos;
+  const sub = subtotal(), tx = taxa();
+  let h = '';
+  if(!itens.length){
+    h = '<div class="vazio"><b>Seu pedido está vazio.</b>Volte e toque em Adicionar nos produtos.</div>';
+  }else{
+    h += '<div class="bloco"><h3>Produtos</h3>'+itens.map(({p,q})=>
+      '<div class="item"><div class="mini">'+(FOTOS[p.id]?'<img alt="" src="'+FOTOS[p.id]+'">':esc(iniciais(p.nome)))+'</div>'+
+      '<div class="t"><b>'+esc(p.nome)+'</b><span>'+brl(p.preco)+(isPeso(p)?'/kg':'')+' · '+brl(p.preco*q)+'</span></div>'+
+      '<div class="q"><button onclick="mudar(\''+p.id+'\',-1)">−</button><span>'+fmtQtd(p,q)+'</span><button onclick="mudar(\''+p.id+'\',1)">+</button></div></div>').join('')+'</div>';
+
+    const modos = [];
+    if(CFG.entrega) modos.push(['entrega','🛵 Entrega']);
+    if(CFG.retirada) modos.push(['retirada','🏪 Retirar na loja']);
+    h += '<div class="bloco"><h3>Como quer receber?</h3><div class="opcoes">'+modos.map(([v,t])=>'<button class="op'+(pedido.modo===v?' on':'')+'" onclick="pedido.modo=\''+v+'\';salvarLocal();desenharCarrinho()">'+t+'</button>').join('')+'</div>'+
+      (pedido.modo==='entrega' && CFG.area_entrega ? '<div class="nota">Entregamos em: '+esc(CFG.area_entrega)+'.</div>' : '')+
+      (pedido.modo==='retirada' && CFG.endereco ? '<div class="nota">Retirada em: '+esc(CFG.endereco)+'.</div>' : '')+'</div>';
+
+    h += '<div class="bloco"><h3>Seus dados</h3>'+
+      '<div class="campo"><label for="cNome">Seu nome</label><input id="cNome" autocomplete="name" value="'+esc(pedido.nome)+'" oninput="pedido.nome=this.value;salvarLocal()"></div>'+
+      '<div class="campo"><label for="cFone">Seu WhatsApp</label><input id="cFone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000" value="'+esc(pedido.fone)+'" oninput="pedido.fone=this.value;salvarLocal()"></div>'+
+      (pedido.modo==='entrega' ? '<div class="campo"><label for="cEnd">Endereço de entrega</label><textarea id="cEnd" rows="2" autocomplete="street-address" placeholder="Rua, número, bairro e ponto de referência" oninput="pedido.endereco=this.value;salvarLocal()">'+esc(pedido.endereco)+'</textarea></div>' : '')+
+      '</div>';
+
+    h += '<div class="bloco"><h3>Forma de pagamento</h3><div class="opcoes'+(pags.length===3?' tres':'')+'">'+pags.map(v=>'<button class="op'+(pedido.pag===v?' on':'')+'" onclick="pedido.pag=\''+esc(v).replace(/'/g,'')+'\';salvarLocal();desenharCarrinho()">'+esc(v)+'</button>').join('')+'</div>'+
+      (pedido.pag==='Dinheiro' ? '<div class="campo"><label for="cTroco">Troco para quanto? (opcional)</label><input id="cTroco" inputmode="decimal" placeholder="Ex: 100" value="'+esc(pedido.troco)+'" oninput="pedido.troco=this.value"></div>' : '')+
+      '<div class="nota">O pagamento é feito '+(pedido.modo==='entrega'?'na entrega':'na retirada')+' ou por Pix, depois que o mercado confirmar o pedido.</div></div>';
+
+    h += '<div class="bloco"><div class="campo" style="margin-top:0"><label for="cObs">Alguma observação? (opcional)</label><textarea id="cObs" rows="2" placeholder="Ex: banana mais verde, trocar marca se faltar" oninput="pedido.obs=this.value">'+esc(pedido.obs)+'</textarea></div></div>';
+
+    h += '<div class="bloco"><div class="linha-tot"><span>Produtos</span><b>'+brl(sub)+'</b></div>'+
+      (pedido.modo==='entrega' ? '<div class="linha-tot"><span>Entrega</span><b>'+(tx>0?brl(tx):'Grátis')+'</b></div>' : '')+
+      '<div class="linha-tot total"><span>Total</span><span>'+brl(sub+tx)+'</span></div>'+
+      (pedido.modo==='entrega' && Number(CFG.frete_gratis_acima)>0 && tx>0 ? '<div class="nota">Faltam '+brl(CFG.frete_gratis_acima-sub)+' para a entrega sair grátis.</div>' : '')+
+      (itens.some(x=>isPeso(x.p)) ? '<div class="nota">Itens por quilo: o valor pode variar um pouco conforme o peso.</div>' : '')+
+      '<button class="limpar" onclick="if(confirm(\'Tirar todos os produtos do pedido?\')){carrinho={};salvarLocal();desenharCarrinho();desenharLista();atualizarBarra();}">Esvaziar pedido</button></div>';
+  }
+  document.getElementById('pCorpo').innerHTML = h;
+  document.getElementById('btnEnviar').disabled = !itens.length;
+}
+
+function enviarPedido(){
+  const e = document.getElementById('erro'); e.style.display='none';
+  const itens = Object.entries(carrinho).map(([id,q])=>({p:PRODUTOS.find(x=>x.id===id),q})).filter(x=>x.p);
+  const sub = subtotal(), tx = taxa();
+  const falha = t => { e.textContent=t; e.style.display='block'; };
+  if(!itens.length) return falha('Seu pedido está vazio.');
+  if(Number(CFG.pedido_minimo)>0 && sub < Number(CFG.pedido_minimo)) return falha('O pedido mínimo é '+brl(CFG.pedido_minimo)+'. Faltam '+brl(CFG.pedido_minimo-sub)+'.');
+  if(!pedido.nome.trim()) return falha('Escreva o seu nome.');
+  if(String(pedido.fone).replace(/\D/g,'').length<10) return falha('Escreva o seu WhatsApp com DDD.');
+  if(pedido.modo==='entrega' && pedido.endereco.trim().length<8) return falha('Escreva o endereço de entrega.');
+  const L = [];
+  L.push('*NOVO PEDIDO · '+CFG.nome+'*');
+  L.push('');
+  itens.forEach(({p,q})=> L.push('• '+fmtQtd(p,q)+' — '+p.nome+(p.marca?' ('+p.marca+')':'')+' = '+brl(p.preco*q)));
+  L.push('');
+  L.push('Produtos: '+brl(sub));
+  if(pedido.modo==='entrega') L.push('Entrega: '+(tx>0?brl(tx):'Grátis'));
+  L.push('*Total: '+brl(sub+tx)+'*');
+  L.push('');
+  L.push('*Cliente:* '+pedido.nome.trim());
+  L.push('*WhatsApp:* '+pedido.fone.trim());
+  L.push('*Receber:* '+(pedido.modo==='entrega'?'Entrega':'Retirar na loja'));
+  if(pedido.modo==='entrega') L.push('*Endereço:* '+pedido.endereco.trim());
+  L.push('*Pagamento:* '+pedido.pag+(pedido.pag==='Dinheiro'&&pedido.troco?' (troco para '+pedido.troco+')':''));
+  if(pedido.obs.trim()) L.push('*Obs:* '+pedido.obs.trim());
+  window.location.href = zapLink(L.join('\n'));
+}
+
+document.getElementById('busca').addEventListener('input', ()=>{ desenharLista(); });
+carregar();
+</script>
+</body>
+</html>
