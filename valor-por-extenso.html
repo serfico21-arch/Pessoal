@@ -402,6 +402,7 @@ function gerarExtenso() {
   document.getElementById('acoes-extenso').style.display = 'flex';
 }
 
+function juntarGrupos(p,v){var s=p[0]||'';for(var i=1;i<p.length;i++){s+=(i===p.length-1&&(v[i]<100||v[i]%100===0))?' e ':' ';s+=p[i]}return s}
 function valorPorExtenso(valor) {
   const unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
   const dezA19 = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
@@ -437,13 +438,13 @@ function valorPorExtenso(valor) {
   const milhares = Math.floor((inteiro % 1000000) / 1000);
   const resto = inteiro % 1000;
 
-  let partes = [];
-  if (milhoes) partes.push(grupo(milhoes, 'um milhão', 'milhões'));
-  if (milhares) partes.push(milhares === 1 ? 'mil' : trescentos(milhares) + ' mil');
-  if (resto) partes.push(trescentos(resto));
+  let partes = [], vals = [];
+  if (milhoes) { partes.push(grupo(milhoes, 'um milhão', 'milhões')); vals.push(milhoes); }
+  if (milhares) { partes.push(milhares === 1 ? 'mil' : trescentos(milhares) + ' mil'); vals.push(milhares); }
+  if (resto) { partes.push(trescentos(resto)); vals.push(resto); }
 
-  let textoInteiro = partes.join(' e ');
-  const palavraReais = inteiro === 1 ? 'real' : 'reais';
+  let textoInteiro = juntarGrupos(partes, vals);
+  const palavraReais = inteiro === 1 ? 'real' : (inteiro % 1000000 === 0 ? 'de reais' : 'reais');
   let resultado = inteiro > 0 ? `${textoInteiro} ${palavraReais}` : '';
 
   if (centavos > 0) {

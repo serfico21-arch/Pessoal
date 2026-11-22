@@ -173,7 +173,7 @@ function carregar() {
   try { return JSON.parse(localStorage.getItem(CHAVE)) || []; }
   catch { return []; }
 }
-function salvar(notas) { localStorage.setItem(CHAVE, JSON.stringify(notas)); }
+function salvar(notas) { try { localStorage.setItem(CHAVE, JSON.stringify(notas)); } catch (e) { alert('Não foi possível salvar: a memória do navegador está cheia. Faça uma cópia (exportar) e apague itens antigos.'); } }
 
 function formatarData(iso) {
   const d = new Date(iso);

@@ -216,7 +216,7 @@ function carregar() {
   }
   return dados;
 }
-function salvar(dados) { localStorage.setItem(CHAVE, JSON.stringify(dados)); }
+function salvar(dados) { try { localStorage.setItem(CHAVE, JSON.stringify(dados)); } catch (e) { alert('Não foi possível salvar: a memória do navegador está cheia. Faça uma cópia (exportar) e apague itens antigos.'); } }
 
 function renderizar() {
   const dados = carregar();
