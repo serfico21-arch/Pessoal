@@ -701,7 +701,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do Rodrigo <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 26</span></div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do Rodrigo <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 27</span></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -743,6 +743,7 @@ footer{border-top:1px solid var(--line)}
             <button type="button" role="tab" data-tab="config">⚙️ Ajustes</button>
             <button type="button" role="tab" data-tab="precos">✂️ Preços</button>
             <button type="button" role="tab" data-tab="ajustes">🕒 Horário</button>
+            <button type="button" role="tab" data-tab="site">📣 Site</button>
           </nav>
 
           <div class="tab" data-painel="inicio">
@@ -754,6 +755,7 @@ footer{border-top:1px solid var(--line)}
             <div class="homemini">
               <button type="button" class="btn btn-line" data-ir="caixa">💰 Caixa</button>
               <button type="button" class="btn btn-line" data-ir="config">⚙️ Ajustes</button>
+              <button type="button" class="btn btn-line" data-ir="site" style="grid-column:1/-1">📣 Postar no site (avisos, fotos, vídeos)</button>
             </div>
           </div>
 
@@ -761,7 +763,7 @@ footer{border-top:1px solid var(--line)}
             <div class="home">
               <button type="button" class="hbtn" data-ir="precos"><i>✂️</i><b>PREÇOS</b><small>Mudar serviços e valores</small></button>
               <button type="button" class="hbtn" data-ir="clientes"><i>👤</i><b>CLIENTES</b><small>VIP e anotações</small></button>
-              <button type="button" class="hbtn" data-ir="ajustes"><i>🕒</i><b>HORÁRIO E WHATSAPP</b><small>Dias de trabalho, WhatsApp, fotos</small></button>
+              <button type="button" class="hbtn" data-ir="ajustes"><i>🕒</i><b>HORÁRIO E WHATSAPP</b><small>Dias de trabalho e WhatsApp</small></button>
             </div>
             <div class="cfgbtns"><button type="button" class="btn btn-y" id="btnConvite">📤 Convidar clientes (mandar o app)</button><button type="button" class="btn btn-y" id="btnAvisos" hidden>📲 Receber avisos no celular</button><button type="button" class="btn btn-line" id="btnSom">🔊 Som ligado · desligar</button><button type="button" class="btn btn-y" id="btnInstalarAdm" hidden>📲 Instalar painel no celular</button><a class="btn btn-line" href="./" target="_blank" rel="noopener">Ver site do cliente</a><button class="btn btn-line" type="button" id="trocarSenha">Trocar senha</button><button class="btn btn-line" type="button" id="sair">Sair do painel</button></div>
           </div>
@@ -904,6 +906,37 @@ footer{border-top:1px solid var(--line)}
           </div>
           </div>
 
+          <div class="tab" data-painel="site" hidden>
+          <p class="hint" style="margin:0 0 6px">O que você colocar aqui aparece no site do cliente. Se não tiver nada, o site mostra fotos bonitas de exemplo.</p>
+          <div class="box" style="margin-top:18px">
+            <h3 class="bh">📣 Avisos e novidades</h3>
+            <p class="hint" style="margin:0 0 10px">Ex.: "Sábado abrimos às 7h", "Promoção corte + barba", "Feriado fechado".</p>
+            <div class="field"><label for="avTit">Título</label><input id="avTit" maxlength="60" placeholder="Ex.: Promoção de terça"></div>
+            <div class="field"><label for="avTxt">Texto</label><textarea id="avTxt" maxlength="400" rows="3" placeholder="Escreva o aviso"></textarea></div>
+            <button class="btn btn-sm btn-y" type="button" id="avAdd">Publicar aviso</button>
+            <p class="ok" id="avMsg" aria-live="polite"></p>
+            <div class="vidadm" id="avLista"></div>
+          </div>
+          <div class="box" style="margin-top:24px">
+            <h3 class="bh">📷 Fotos</h3>
+            <p class="hint" style="margin:0 0 10px">Escolha fotos do celular. Elas aparecem na galeria do site na hora. As mais novas ficam primeiro.</p>
+            <label class="btn btn-sm btn-y upl"><input type="file" id="fotoArq" accept="image/*" multiple> + Colocar fotos</label>
+            <p class="ok" id="fotoMsg" aria-live="polite"></p>
+            <div class="fotosadm" id="fotosAdm"></div>
+          </div>
+          <div class="box" style="margin-top:24px">
+            <h3 class="bh">🎬 Vídeos</h3>
+            <p class="hint" style="margin:0 0 10px">Poste o vídeo no YouTube, Instagram ou TikTok e cole o link aqui. Vídeo do YouTube toca dentro do site.</p>
+            <div class="vidform">
+              <div class="field"><label for="vidUrl">Link do vídeo</label><input id="vidUrl" type="url" inputmode="url" placeholder="https://youtube.com/..."></div>
+              <div class="field"><label for="vidTit">Título (opcional)</label><input id="vidTit" placeholder="Ex.: Degradê do zero"></div>
+              <button class="btn btn-sm btn-y" type="button" id="vidAdd">Colocar vídeo</button>
+            </div>
+            <p class="ok" id="vidMsg" aria-live="polite"></p>
+            <div class="vidadm" id="vidAdm"></div>
+          </div>
+          </div>
+
           <div class="tab" data-painel="ajustes" hidden>
 
           <div class="box" style="margin-top:24px">
@@ -948,24 +981,6 @@ footer{border-top:1px solid var(--line)}
               <button class="btn btn-sm btn-line" type="button" id="emailTeste">Mandar e-mail de teste</button>
             </div>
             <p class="ok" id="emailAdmMsg" aria-live="polite"></p>
-          </div>
-          <div class="box" style="margin-top:24px">
-            <h3 class="bh">Fotos da galeria</h3>
-            <p class="hint" style="margin:0 0 10px">Escolha fotos do celular. Elas aparecem na galeria do site na hora. As mais novas ficam primeiro.</p>
-            <label class="btn btn-sm btn-y upl"><input type="file" id="fotoArq" accept="image/*" multiple> + Colocar fotos</label>
-            <p class="ok" id="fotoMsg" aria-live="polite"></p>
-            <div class="fotosadm" id="fotosAdm"></div>
-          </div>
-          <div class="box" style="margin-top:24px">
-            <h3 class="bh">Vídeos</h3>
-            <p class="hint" style="margin:0 0 10px">Poste o vídeo no YouTube, Instagram ou TikTok e cole o link aqui. Vídeo do YouTube toca dentro do site.</p>
-            <div class="vidform">
-              <div class="field"><label for="vidUrl">Link do vídeo</label><input id="vidUrl" type="url" inputmode="url" placeholder="https://youtube.com/..."></div>
-              <div class="field"><label for="vidTit">Título (opcional)</label><input id="vidTit" placeholder="Ex.: Degradê do zero"></div>
-              <button class="btn btn-sm btn-y" type="button" id="vidAdd">Colocar vídeo</button>
-            </div>
-            <p class="ok" id="vidMsg" aria-live="polite"></p>
-            <div class="vidadm" id="vidAdm"></div>
           </div>
           </div>
         </div>
@@ -1224,6 +1239,7 @@ async function carregarLoja(){
   if(c.horario && c.horario.dias) horario=c.horario;
   if(Array.isArray(c.servicos) && c.servicos.length) todosServ=c.servicos;
   videos = Array.isArray(c.videos) ? c.videos : [];
+  avisos = Array.isArray(c.avisos) ? c.avisos : []; if(typeof renderAvAdm==="function") renderAvAdm();
   /* dados da barbearia ficam na chave "barbeiros" do banco (ex.: WhatsApp) */
   if(c.barbeiros && /^55\d{10,11}$/.test(c.barbeiros.whatsapp||"")){ CONFIG.whatsapp=c.barbeiros.whatsapp; mostrarZap(); }
   if(c.barbeiros && c.barbeiros.zaps && typeof c.barbeiros.zaps==="object") ZAPS=c.barbeiros.zaps;
@@ -1794,8 +1810,8 @@ $("pedRows").addEventListener("click",async e=>{
 });
 
 /* ---------- abas do painel ---------- */
-const PAI={agenda:"inicio",caixa:"inicio",config:"inicio",novo:"inicio",clientes:"config",precos:"config",ajustes:"config"};
-const TIT={agenda:"📋 Agendados",caixa:"💰 Caixa",config:"⚙️ Ajustes",novo:"＋ Agendar",clientes:"👤 Clientes",precos:"✂️ Preços",ajustes:"🕒 Horário e WhatsApp"};
+const PAI={site:"inicio",agenda:"inicio",caixa:"inicio",config:"inicio",novo:"inicio",clientes:"config",precos:"config",ajustes:"config"};
+const TIT={site:"📣 Postar no site",agenda:"📋 Agendados",caixa:"💰 Caixa",config:"⚙️ Ajustes",novo:"＋ Agendar",clientes:"👤 Clientes",precos:"✂️ Preços",ajustes:"🕒 Horário e WhatsApp"};
 let abaAtual="inicio";
 function abrirAba(t){
   pedidoAtual=null; abaAtual=t;
@@ -2015,7 +2031,7 @@ function renderFotosAdm(){
     <img src="${esc(f.img)}" alt="">
     <input data-f="leg" value="${esc(f.legenda)}" placeholder="Legenda (opcional)" aria-label="Legenda da foto">
     <button type="button" class="btn btn-sm btn-line" data-f="del">Apagar</button>
-  </div>`).join("") : `<p class="empty">O site está mostrando as 10 fotos iniciais da R-17. Para apagar, trocar a legenda ou mudar a ordem delas, toque no botão abaixo uma vez. Fotos novas você coloca no botão "+ Colocar fotos".</p><button type="button" class="btn btn-sm btn-line" id="fotosIniciais">Editar as fotos iniciais</button>`;
+  </div>`).join("") : `<p class="empty" style="grid-column:1/-1">Você ainda não colocou fotos. O site está mostrando fotos de exemplo. Quando você colocar as suas, elas aparecem no lugar.</p>`;
 }
 $("fotosAdm").addEventListener("click",async e=>{
   const b=e.target.closest("#fotosIniciais"); if(!b) return;
@@ -2044,7 +2060,6 @@ function reduzir(arq){
 $("fotoArq").addEventListener("change",async e=>{
   const arqs=[...e.target.files]; e.target.value=""; if(!arqs.length) return;
   let feitas=0;
-  if(!fotos.length){ try{ await importarIniciais(); }catch(err){ $("fotoMsg").textContent="Não foi possível enviar. Tente de novo."; return; } }
   for(const arq of arqs){
     $("fotoMsg").textContent=`Enviando foto ${feitas+1} de ${arqs.length}…`;
     try{ await adm("adm_foto_add",{p_img:await reduzir(arq),p_legenda:""}); feitas++; }
@@ -2109,6 +2124,28 @@ $("emailTeste").addEventListener("click",async()=>{
   catch(err){ $("emailAdmMsg").textContent="Não foi possível mandar. Salve o e-mail primeiro."; }
 });
 
+/* ---------- avisos no site ---------- */
+let avisos=[];
+function renderAvAdm(){
+  $("avLista").innerHTML = avisos.length ? avisos.map((a,i)=>`<div class="va" data-i="${i}"><div><b>${esc(a.titulo||"Aviso")}</b><span>${esc(a.texto||"")}</span></div><button type="button" class="btn btn-sm btn-line" data-f="del">Tirar</button></div>`).join("")
+    : `<p class="empty">Nenhum aviso. O site mostra fotos de exemplo no lugar.</p>`;
+}
+async function salvarAvisos(lista,msg){
+  try{ await adm("adm_config",{p_chave:"avisos",p_valor:lista}); avisos=lista; renderAvAdm(); $("avMsg").textContent=msg; return true; }
+  catch(err){ $("avMsg").textContent = err.codigo==="sessao" ? "" : "Não foi possível salvar. Tente de novo."; return false; }
+}
+$("avAdd").addEventListener("click",async()=>{
+  const titulo=$("avTit").value.trim(), texto=$("avTxt").value.trim();
+  if(titulo.length<2){ $("avMsg").textContent="Escreva o título do aviso."; return; }
+  const d=new Date(), data=`${pad(d.getDate())}/${pad(d.getMonth()+1)}`;
+  if(await salvarAvisos([{titulo,texto,data},...avisos].slice(0,12),"Aviso publicado no site.")){ $("avTit").value=""; $("avTxt").value=""; }
+});
+$("avLista").addEventListener("click",async e=>{
+  const b=e.target.closest('button[data-f="del"]'); if(!b) return;
+  const i=+b.closest(".va").dataset.i;
+  await salvarAvisos(avisos.filter((_,j)=>j!==i),"Aviso tirado do site.");
+});
+
 /* ---------- vídeos no painel ---------- */
 function renderVidAdm(){
   $("vidAdm").innerHTML = videos.length ? videos.map((v,i)=>`<div class="va" data-i="${i}"><div><b>${esc(v.titulo||"Vídeo")}</b><span>${esc(v.url)}</span></div><button type="button" class="btn btn-sm btn-line" data-f="del">Tirar</button></div>`).join("")
@@ -2154,7 +2191,7 @@ const ehApp = matchMedia("(display-mode: standalone)").matches || navigator.stan
 if(ehApp){ const ab=$("abertura"); ab.querySelector(".ab-logo").innerHTML=document.querySelector(".herologo").outerHTML.replace('class="herologo"','');
   ab.classList.add("on"); setTimeout(()=>{ ab.classList.add("sai"); setTimeout(()=>ab.remove(),550); },1800); }
 /* versão do site: muda a cada atualização. O app confere sozinho e atualiza. */
-const VERSAO="26";
+const VERSAO="27";
 function atualizarAgora(){ const u=new URL(location.href); u.searchParams.set("v",Date.now()); u.searchParams.delete("parar"); location.replace(u.href); }
 $("novaVersao").addEventListener("click",atualizarAgora);
 async function conferirVersao(){
