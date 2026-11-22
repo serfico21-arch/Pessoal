@@ -96,7 +96,7 @@ h2{font-family:'Manrope',sans-serif;font-size:21px;font-weight:800;margin-bottom
         <div style="font-size:34px">📂</div>
         <b>Escolher arquivo JSON</b>
         <span>Backup completo ou lista de produtos do gestor</span>
-        <input type="file" id="arquivo" accept=".json,application/json" style="display:none">
+        <input type="file" id="arquivo" style="display:none">
       </label>
     </div>
     <div class="msg" id="msgArq"></div>
@@ -250,7 +250,8 @@ function lerArquivo(f){
   const rd = new FileReader();
   rd.onload = ()=>{
     let d;
-    try{ d = JSON.parse(rd.result); }catch(e){ msg('msgArq','er','Esse arquivo não é um JSON válido. Use o arquivo baixado do gestor.'); return; }
+    if(String(rd.result).startsWith('L\u0000\u0000\u0000') || /\.lnk$/i.test(f.name)){ msg('msgArq','er','Esse arquivo é só um <b>atalho</b>, não o backup. Abra o pen drive (E:) e escolha o arquivo <b>backup-completo-fcosta-....json</b>.'); return; }
+    try{ d = JSON.parse(String(rd.result).replace(/^\uFEFF/,'')); }catch(e){ msg('msgArq','er','Esse arquivo não é o backup do gestor. Escolha o arquivo <b>backup-completo-fcosta-....json</b>.'); return; }
     let lista = null; LOJA_ARQ = null;
     if(Array.isArray(d)) lista = d;
     else if(d && Array.isArray(d.products)){
@@ -312,7 +313,7 @@ function fotoPequena(src){
 async function publicar(){
   if(!ITENS.length) return;
   const c = lerCondicoes();
-  if(c.whatsapp.replace(/\D/g,'').length<10){ msg('msgPub','er','Antes, preencha lá embaixo o <b>WhatsApp que recebe os pedidos</b>.'); $('cZap').focus(); return; }
+  if(c.whatsapp.replace(/\D/g,'').length<10) c.whatsapp = '(11) 99350-9109'; // provisório até preencher
   const lista = $('semEstoque').checked ? ITENS : ITENS.filter(p=>p.estoque>0);
   if(!lista.length){ msg('msgPub','er','Nenhum produto com estoque para colocar no site.'); return; }
   const btn = $('btnPublicar'); btn.disabled = true;
