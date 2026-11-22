@@ -490,7 +490,7 @@ footer{border-top:1px solid var(--line)}
 .tb th,.tb td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
 .tb td.n,.tb th.n{text-align:right;font-family:var(--mono);white-space:nowrap}
 .tb tfoot td{font-weight:800;border-bottom:0}
-.barbbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin:0 0 14px}.barbbar button{padding:14px 8px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink);font:800 1.05rem var(--body);cursor:pointer}.barbbar button[aria-pressed="true"]{background:var(--yellow);border-color:var(--yellow);color:#1A1208}
+.barbbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 16px;padding:14px;border-radius:18px;background:var(--bg);border:2px solid var(--yellow)}.barbbar>p{grid-column:1/-1;margin:0;font-weight:800;font-size:1.1rem}.barbbar button{padding:18px 8px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font:900 1.25rem var(--body);cursor:pointer}.barbbar button[data-bs=""]{grid-column:1/-1;font-size:1.05rem;padding:12px}.barbbar button[aria-pressed="true"]{background:var(--yellow);border-color:var(--yellow);color:#1A1208}
 .resumo{margin-top:18px}.rdia{display:flex;justify-content:space-between;gap:10px;width:100%;padding:12px 14px;margin:0 0 8px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:600 1rem var(--body);cursor:pointer;text-align:left}.rdia b{font-weight:800}.rdia.hoje{border-color:var(--yellow)}.rdia span{opacity:.85}
 .cxfiltro{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 14px;font-weight:700}
 .saidaf{display:grid;grid-template-columns:150px 170px 1fr 140px auto;gap:10px;align-items:end}
@@ -699,7 +699,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 24</span></div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 25</span></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -1570,7 +1570,7 @@ function renderAdm(){
 /* ---------- escolher barbeiro (Agenda e Caixa) ---------- */
 let barbSel = lsGet("barb-"+CONFIG.loja)||""; if(barbSel && !BARBEIROS.some(b=>b.id===barbSel)) barbSel="";
 function renderBarbBars(){
-  const html=[{id:"",nome:"👥 Todos"},...BARBEIROS].map(b=>`<button type="button" data-bs="${b.id}" aria-pressed="${barbSel===b.id}">${esc(b.id?"💈 "+nomeCurto(b):b.nome)}</button>`).join("");
+  const html=`<p>💈 Escolha o barbeiro:</p>`+BARBEIROS.map(b=>`<button type="button" data-bs="${b.id}" aria-pressed="${barbSel===b.id}">${esc(b.nome.replace(/\s*\(.*\)/,"").toUpperCase())}</button>`).join("")+`<button type="button" data-bs="" aria-pressed="${!barbSel}">👥 Ver os dois juntos</button>`;
   document.querySelectorAll("[data-barbbar]").forEach(d=>d.innerHTML=html);
 }
 function nomeCurto(b){ const m=b.nome.match(/\(([^)]+)\)/); return m?m[1]:b.nome.split(" ")[0]; }
@@ -2151,7 +2151,7 @@ const ehApp = matchMedia("(display-mode: standalone)").matches || navigator.stan
 if(ehApp){ const ab=$("abertura"); ab.querySelector(".ab-logo").innerHTML=document.querySelector(".herologo").outerHTML.replace('class="herologo"','');
   ab.classList.add("on"); setTimeout(()=>{ ab.classList.add("sai"); setTimeout(()=>ab.remove(),550); },1800); }
 /* versão do site: muda a cada atualização. O app confere sozinho e atualiza. */
-const VERSAO="24";
+const VERSAO="25";
 function atualizarAgora(){ const u=new URL(location.href); u.searchParams.set("v",Date.now()); u.searchParams.delete("parar"); location.replace(u.href); }
 $("novaVersao").addEventListener("click",atualizarAgora);
 async function conferirVersao(){
