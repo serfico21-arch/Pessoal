@@ -106,6 +106,15 @@ revoke all on function public.mercado_publicar_produtos(text,text,jsonb) from pu
 grant execute on function public.mercado_publicar_config(text,text,jsonb,jsonb) to anon, authenticated;
 grant execute on function public.mercado_publicar_produtos(text,text,jsonb) to anon, authenticated;
 
+-- 3) Entrar no painel ADM (só confere o código)
+create or replace function public.mercado_entrar(p_slug text, p_codigo text)
+returns boolean language plpgsql security definer set search_path = public, extensions as $$
+begin
+  return public.mercado_codigo_ok(p_slug, p_codigo);
+end $$;
+revoke all on function public.mercado_entrar(text,text) from public;
+grant execute on function public.mercado_entrar(text,text) to anon, authenticated;
+
 insert into public.mercado_lojas (slug, nome) values ('pinheiro-costa', 'Pinheiro & Costa') on conflict do nothing;
 -- o código de ativação é gravado à parte (não fica neste arquivo)
 insert into public.mercado_segredo (slug, codigo_hash) values ('pinheiro-costa', '$2a$10$/JDe7edpu4L6uxWfUrHO9eYN7aUKEY8CMPd0mp9aoQEw84HA.4oD.') on conflict (slug) do update set codigo_hash = excluded.codigo_hash;

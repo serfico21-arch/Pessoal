@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<!--
+  Painel ADM da loja online Pinheiro & Costa.
+  Recebe o arquivo JSON do fcosta-gestor.html e coloca os produtos no site.
+  Aceita: o BACKUP COMPLETO do gestor (com fotos) ou a LISTA DE PRODUTOS.
+  Do backup só são usados: produtos (sem preço de custo) e nome/endereço/telefone/logo da loja.
+  Endereço: https://serfico21-arch.github.io/Pessoal/mercado/painel/
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Painel ADM · Pinheiro &amp; Costa</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0b2f25">
+<link rel="icon" href="../../favicon-32.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{--verde:#0b2f25;--verde2:#114634;--verde3:#1a7a52;--lima:#c8f169;--amarelo:#f5c400;--fundo:#f5f6f3;--texto:#111a16;--suave:#5d6b64;--linha:#e3e8e4;--vermelho:#d23a2c}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--fundo);color:var(--texto);padding-bottom:40px}
+button,input,textarea{font:inherit}
+.topo{background:var(--verde);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:10}
+.topo-in{max-width:820px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.topo b{flex:1;font-family:'Manrope',sans-serif;font-size:20px;font-weight:800}
+.topo small{display:block;color:var(--lima);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;font-family:'Inter';font-weight:700}
+.sair{border:0;background:rgba(255,255,255,.15);color:#fff;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
+main{max-width:820px;margin:0 auto;padding:16px}
+.card{background:#fff;border:1px solid var(--linha);border-radius:18px;padding:18px;margin-bottom:14px}
+h1{font-family:'Manrope',sans-serif;font-size:26px;font-weight:800;margin-bottom:6px}
+h2{font-family:'Manrope',sans-serif;font-size:21px;font-weight:800;margin-bottom:6px}
+.desc{color:var(--suave);font-size:15.5px;line-height:1.5;margin-bottom:12px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:17px;font-weight:900;font-size:18px;cursor:pointer;text-decoration:none}
+.btn-am{background:var(--amarelo);color:#1d1600}
+.btn-vd{background:var(--verde3);color:#fff}
+.btn-cl{background:#eef2ef;color:var(--verde)}
+.btn:disabled{opacity:.5;cursor:default}
+.campo{margin-top:12px}
+.campo label{display:block;font-size:14.5px;font-weight:700;color:var(--suave);margin-bottom:5px}
+.campo input{width:100%;border:2px solid var(--linha);border-radius:12px;padding:13px 14px;font-size:17px;background:#fff;color:var(--texto)}
+.campo input:focus{outline:none;border-color:var(--verde3)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chk{display:flex;gap:10px;align-items:center;font-size:16px;font-weight:600;margin-top:10px}
+.chk input{width:22px;height:22px}
+.grandes{display:grid;gap:12px}
+.passo{display:flex;gap:12px;align-items:flex-start;margin-top:10px;font-size:15.5px;line-height:1.45;color:var(--suave)}
+.passo b.n{flex:none;width:30px;height:30px;border-radius:9px;background:var(--lima);color:var(--verde);display:flex;align-items:center;justify-content:center;font-weight:900}
+.drop{border:3px dashed #b9cbbf;border-radius:18px;padding:26px 16px;text-align:center;background:#f8fbf9;cursor:pointer}
+.drop b{display:block;font-size:19px;color:var(--verde);margin:6px 0 4px}
+.drop span{color:var(--suave);font-size:14.5px}
+.drop.on{border-color:var(--verde3);background:#e9f6ee}
+.res{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
+.res div{background:#f3f6f4;border-radius:14px;padding:12px 6px;text-align:center;font-size:13px;color:var(--suave)}
+.res b{display:block;font-size:24px;color:var(--verde);font-family:'Manrope'}
+.lista{max-height:340px;overflow:auto;border:1px solid var(--linha);border-radius:14px}
+.lin{display:flex;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--linha)}
+.lin:last-child{border-bottom:0}
+.lin .mini{width:44px;height:44px;border-radius:9px;background:#eef2ef;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:900;color:#b5c4bc;font-size:13px}
+.lin .mini img{width:100%;height:100%;object-fit:contain;background:#fff}
+.lin .t{flex:1;min-width:0;font-size:14.5px}
+.lin .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lin .t span{color:var(--suave);font-size:13px}
+.lin .p{font-weight:800;color:var(--verde);white-space:nowrap}
+.msg{border-radius:14px;padding:13px 14px;font-weight:700;font-size:15.5px;margin-top:12px;display:none;line-height:1.4}
+.msg.ok{background:#e6f6ec;color:#155c37;border:1px solid #b7e2c7;display:block}
+.msg.er{background:#fdecea;color:#8e2418;border:1px solid #f3b8b1;display:block}
+.msg.in{background:#fff8d6;color:#5c4a00;border:1px solid #f0dc80;display:block}
+.barra{height:12px;background:#e6ece8;border-radius:99px;overflow:hidden;margin-top:12px;display:none}
+.barra i{display:block;height:100%;width:0;background:var(--verde3);transition:width .3s}
+.oculto{display:none!important}
+</style>
+</head>
+<body>
+<div class="topo"><div class="topo-in"><b><small>Painel ADM</small>Pinheiro &amp; Costa</b><button class="sair oculto" id="btnSair" onclick="sair()">Sair</button></div></div>
+<main>
+
+<!-- ENTRAR -->
+<section id="telaEntrar" class="card">
+  <h1>Entrar no painel</h1>
+  <div class="desc">Digite o código da loja. Neste aparelho ele fica guardado, não precisa digitar de novo.</div>
+  <div class="campo"><label for="codigo">Código da loja</label><input id="codigo" placeholder="PC-XXXX-XXXX" autocapitalize="characters" autocomplete="off" style="text-transform:uppercase"></div>
+  <div style="margin-top:14px"><button class="btn btn-am" id="btnEntrar" onclick="entrar()">Entrar</button></div>
+  <div class="msg" id="msgEntrar"></div>
+</section>
+
+<!-- PAINEL -->
+<section id="telaPainel" class="oculto">
+  <div class="card">
+    <h1>Atualizar produtos do site</h1>
+    <div class="desc">Os produtos do site vêm do arquivo do <b>FCosta Gestor</b>.</div>
+    <div class="passo"><b class="n">1</b><div>No gestor, vá em <b>Cadastros → Impressora &amp; Backup</b> e toque em <b>Baixar backup (JSON)</b>. Esse arquivo leva as fotos dos produtos.</div></div>
+    <div class="passo"><b class="n">2</b><div>Aqui, toque no quadro abaixo e escolha o arquivo baixado.</div></div>
+    <div class="passo"><b class="n">3</b><div>Confira e toque em <b>Colocar no site</b>.</div></div>
+    <div style="margin-top:14px">
+      <label class="drop" id="drop">
+        <div style="font-size:34px">📂</div>
+        <b>Escolher arquivo JSON</b>
+        <span>Backup completo ou lista de produtos do gestor</span>
+        <input type="file" id="arquivo" accept=".json,application/json" style="display:none">
+      </label>
+    </div>
+    <div class="msg" id="msgArq"></div>
+    <div id="previa" class="oculto">
+      <div class="res"><div><b id="rTotal">0</b>produtos</div><div><b id="rFoto">0</b>com foto</div><div><b id="rCat">0</b>departamentos</div></div>
+      <div class="lista" id="rLista"></div>
+      <label class="chk"><input type="checkbox" id="semEstoque" checked> Mostrar no site os produtos sem estoque (aparecem como "Esgotado")</label>
+      <div style="margin-top:14px"><button class="btn btn-vd" id="btnPublicar" onclick="publicar()">✅ Colocar no site</button></div>
+      <div class="barra" id="barra"><i id="barraI"></i></div>
+      <div class="msg" id="msgPub"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Condições da loja</h2>
+    <div class="desc">Aparecem no site. Toque em <b>Salvar condições</b> depois de mudar.</div>
+    <div class="campo"><label for="cNome">Nome do mercado</label><input id="cNome"></div>
+    <div class="campo"><label for="cZap">WhatsApp que recebe os pedidos (com DDD)</label><input id="cZap" inputmode="tel" placeholder="(11) 90000-0000"></div>
+    <div class="campo"><label for="cEnd">Endereço da loja</label><input id="cEnd" placeholder="Rua, número, bairro"></div>
+    <div class="campo"><label for="cHor">Horário de funcionamento</label><input id="cHor"></div>
+    <label class="chk"><input type="checkbox" id="cEntrega"> Faz entrega</label>
+    <label class="chk"><input type="checkbox" id="cRetirada"> Cliente pode retirar na loja</label>
+    <div class="campo"><label for="cArea">Onde entrega</label><input id="cArea"></div>
+    <div class="g2">
+      <div class="campo"><label for="cTaxa">Taxa de entrega R$</label><input id="cTaxa" type="number" step="0.01" min="0" inputmode="decimal"></div>
+      <div class="campo"><label for="cMin">Pedido mínimo R$</label><input id="cMin" type="number" step="0.01" min="0" inputmode="decimal"></div>
+    </div>
+    <div class="campo"><label for="cGratis">Entrega grátis acima de R$ (0 = não usar)</label><input id="cGratis" type="number" step="0.01" min="0" inputmode="decimal"></div>
+    <div class="campo"><label>Formas de pagamento</label></div>
+    <label class="chk"><input type="checkbox" id="pg0"> Pix</label>
+    <label class="chk"><input type="checkbox" id="pg1"> Dinheiro</label>
+    <label class="chk"><input type="checkbox" id="pg2"> Cartão na entrega</label>
+    <div class="campo"><label for="cAviso">Aviso no topo do site (opcional)</label><input id="cAviso" placeholder="Ex: Promoção de carnes neste sábado!"></div>
+    <div style="margin-top:14px"><button class="btn btn-am" id="btnCond" onclick="salvarCondicoes()">💾 Salvar condições</button></div>
+    <div class="msg" id="msgCond"></div>
+  </div>
+
+  <div class="card grandes">
+    <a class="btn btn-cl" href="../?v=" id="verSite" target="_blank" rel="noopener">👀 Ver o site</a>
+    <div class="desc" id="infoSite" style="margin:0;text-align:center"></div>
+  </div>
+</section>
+</main>
+
+<script>
+const SB_URL = 'https://avvhnajfczdedlydkcrb.supabase.co';
+const SB_KEY = 'sb_publishable_y3y3sLLFrm5HrXDa2ttGTA_dl8vouP7';
+const LOJA = 'pinheiro-costa';
+const PADRAO = { nome:'Pinheiro & Costa', whatsapp:'', endereco:'', horario:'Segunda a sábado, 8h às 20h · Domingo, 8h às 13h',
+  entrega:true, retirada:true, area_entrega:'Bairros próximos ao mercado', taxa_entrega:5, pedido_minimo:30, frete_gratis_acima:150,
+  pagamentos:['Pix','Dinheiro','Cartão na entrega'], aviso:'', logo:null };
+const PAGS = ['Pix','Dinheiro','Cartão na entrega'];
+let codigo = '';
+let CFG = {...PADRAO};
+let ITENS = [];        // produtos lidos do arquivo
+let LOJA_ARQ = null;   // nome/endereço/telefone/logo vindos do backup
+
+const $ = id => document.getElementById(id);
+const brl = v => (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm = s => String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+function msg(id, tipo, t){ const e=$(id); e.className='msg '+tipo; e.innerHTML=t; }
+function limpaMsg(id){ $(id).className='msg'; }
+
+async function rpc(fn, body){
+  const r = await fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){ const t = await r.text().catch(()=> ''); throw new Error('HTTP '+r.status+' '+t.slice(0,160)); }
+  return r.json();
+}
+async function get(path){
+  const r = await fetch(SB_URL+'/rest/v1/'+path,{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return r.json();
+}
+
+/* ---------- Entrar ---------- */
+async function entrar(auto){
+  const c = (auto || $('codigo').value).trim().toUpperCase();
+  if(!c){ msg('msgEntrar','er','Digite o código da loja.'); return; }
+  $('btnEntrar').disabled = true; msg('msgEntrar','in','Conferindo...');
+  try{
+    const ok = await rpc('mercado_entrar',{p_slug:LOJA,p_codigo:c});
+    if(ok!==true){ msg('msgEntrar','er','Código errado. Confira e tente de novo.'); try{localStorage.removeItem('pc_adm_codigo');}catch(e){} return; }
+    codigo = c; try{ localStorage.setItem('pc_adm_codigo', c); }catch(e){}
+    $('telaEntrar').classList.add('oculto'); $('telaPainel').classList.remove('oculto'); $('btnSair').classList.remove('oculto');
+    await carregarLoja();
+  }catch(e){
+    console.error(e);
+    msg('msgEntrar','er', String(e.message).includes('404') ? 'O banco da loja ainda não foi criado. Abra a página <a href="../instalar.html">instalar</a> primeiro.' : 'Sem conexão agora. Tente de novo.');
+  }finally{ $('btnEntrar').disabled = false; }
+}
+function sair(){ try{localStorage.removeItem('pc_adm_codigo');}catch(e){} location.reload(); }
+
+async function carregarLoja(){
+  try{
+    const [l] = await get('mercado_lojas?slug=eq.'+LOJA+'&select=nome,config,atualizado_em');
+    const n = await get('mercado_produtos?slug=eq.'+LOJA+'&select=id');
+    if(l){ const c=l.config||{}; for(const k in c){ if(c[k]!==undefined && c[k]!==null) CFG[k]=c[k]; } CFG.nome = c.nome||l.nome||CFG.nome; }
+    $('infoSite').textContent = 'Hoje o site tem '+n.length+' produto(s).'+(l&&l.atualizado_em?' Última atualização: '+new Date(l.atualizado_em).toLocaleString('pt-BR')+'.':'');
+  }catch(e){ console.warn(e); }
+  preencherCondicoes();
+  $('verSite').href = '../?v='+Date.now();
+}
+function preencherCondicoes(){
+  $('cNome').value = CFG.nome||''; $('cZap').value = CFG.whatsapp||''; $('cEnd').value = CFG.endereco||''; $('cHor').value = CFG.horario||'';
+  $('cEntrega').checked = !!CFG.entrega; $('cRetirada').checked = !!CFG.retirada; $('cArea').value = CFG.area_entrega||'';
+  $('cTaxa').value = Number(CFG.taxa_entrega)||0; $('cMin').value = Number(CFG.pedido_minimo)||0; $('cGratis').value = Number(CFG.frete_gratis_acima)||0;
+  const pg = Array.isArray(CFG.pagamentos)?CFG.pagamentos:PAGS; PAGS.forEach((p,i)=>$('pg'+i).checked = pg.includes(p));
+  $('cAviso').value = CFG.aviso||'';
+}
+function lerCondicoes(){
+  const c = {...CFG};
+  c.nome = $('cNome').value.trim() || 'Pinheiro & Costa';
+  c.whatsapp = $('cZap').value.trim(); c.endereco = $('cEnd').value.trim(); c.horario = $('cHor').value.trim();
+  c.entrega = $('cEntrega').checked; c.retirada = $('cRetirada').checked; c.area_entrega = $('cArea').value.trim();
+  c.taxa_entrega = parseFloat($('cTaxa').value)||0; c.pedido_minimo = parseFloat($('cMin').value)||0; c.frete_gratis_acima = parseFloat($('cGratis').value)||0;
+  c.pagamentos = PAGS.filter((p,i)=>$('pg'+i).checked); if(!c.pagamentos.length) c.pagamentos=['Pix'];
+  c.aviso = $('cAviso').value.trim();
+  return c;
+}
+async function idsNoSite(){ return (await get('mercado_produtos?slug=eq.'+LOJA+'&select=id')).map(x=>x.id); }
+async function salvarCondicoes(){
+  const c = lerCondicoes();
+  if(!c.entrega && !c.retirada){ msg('msgCond','er','Marque pelo menos "Faz entrega" ou "Retirar na loja".'); return; }
+  if(c.whatsapp.replace(/\D/g,'').length<10){ msg('msgCond','er','Coloque o WhatsApp com DDD. É para ele que os pedidos vão.'); return; }
+  $('btnCond').disabled = true; msg('msgCond','in','Salvando...');
+  try{
+    const r = await rpc('mercado_publicar_config',{p_slug:LOJA,p_codigo:codigo,p_config:c,p_ids:await idsNoSite()});
+    if(!r||!r.ok) throw new Error('codigo');
+    CFG = c; msg('msgCond','ok','✅ Condições salvas. Já aparecem no site.');
+  }catch(e){ console.error(e); msg('msgCond','er','Não consegui salvar agora. Tente de novo.'); }
+  finally{ $('btnCond').disabled = false; }
+}
+
+/* ---------- Arquivo JSON do gestor ---------- */
+$('arquivo').addEventListener('change', e=>{ const f=e.target.files[0]; if(f) lerArquivo(f); e.target.value=''; });
+const drop = $('drop');
+['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('on');}));
+['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('on');}));
+drop.addEventListener('drop', e=>{ const f=e.dataTransfer.files[0]; if(f) lerArquivo(f); });
+
+function idDe(p){
+  if(p.id) return String(p.id);
+  if(p.barcode) return 'cb-'+String(p.barcode).replace(/[^0-9A-Za-z]/g,'');
+  return 'n-'+norm(p.name||p.nome).replace(/[^a-z0-9]+/g,'-').slice(0,60);
+}
+function lerArquivo(f){
+  limpaMsg('msgPub'); $('previa').classList.add('oculto');
+  if(f.size > 60*1024*1024){ msg('msgArq','er','Arquivo grande demais.'); return; }
+  msg('msgArq','in','Lendo o arquivo...');
+  const rd = new FileReader();
+  rd.onload = ()=>{
+    let d;
+    try{ d = JSON.parse(rd.result); }catch(e){ msg('msgArq','er','Esse arquivo não é um JSON válido. Use o arquivo baixado do gestor.'); return; }
+    let lista = null; LOJA_ARQ = null;
+    if(Array.isArray(d)) lista = d;
+    else if(d && Array.isArray(d.products)){
+      lista = d.products;
+      const s = d.settings||{};
+      LOJA_ARQ = { nome:s.storeName||'', endereco:s.endereco||'', telefone:s.telefone||'', logo:s.logoBase64||null };
+    }
+    else if(d && Array.isArray(d.produtos)) lista = d.produtos;
+    if(!lista){ msg('msgArq','er','Não achei produtos nesse arquivo. Use o <b>backup (JSON)</b> ou a <b>lista de produtos</b> do gestor.'); return; }
+    const vistos = new Set();
+    ITENS = lista.map(p=>({
+      id: idDe(p),
+      nome: String(p.name||p.nome||'').trim(),
+      marca: String(p.brand||p.marca||'').trim(),
+      categoria: String(p.category||p.categoria||'').trim(),
+      preco: Number(p.price ?? p.preco) || 0,
+      tipo_venda: (p.saleType||p.tipo_venda)==='peso' ? 'peso' : 'unidade',
+      estoque: Number(p.stock ?? p.estoque) || 0,
+      fotoOriginal: p.photoBase64 || p.foto || null
+    })).filter(p=> p.nome && p.preco>0 && !vistos.has(p.id) && vistos.add(p.id));
+    if(!ITENS.length){ msg('msgArq','er','O arquivo não tem produtos com nome e preço.'); return; }
+    ITENS.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+    const semPreco = lista.length - ITENS.length;
+    msg('msgArq','ok','✅ Arquivo lido: '+esc(f.name)+(semPreco>0?'<br><span style="font-weight:600">'+semPreco+' produto(s) sem preço ficaram de fora.</span>':'')+
+      (LOJA_ARQ?'':'<br><span style="font-weight:600">Dica: a lista simples não leva fotos. Para fotos, use o backup completo.</span>'));
+    $('rTotal').textContent = ITENS.length;
+    $('rFoto').textContent = ITENS.filter(p=>p.fotoOriginal).length;
+    $('rCat').textContent = new Set(ITENS.map(p=>p.categoria).filter(Boolean)).size;
+    $('rLista').innerHTML = ITENS.map(p=>'<div class="lin"><div class="mini">'+(p.fotoOriginal&&String(p.fotoOriginal).startsWith('data:image')?'<img alt="" src="'+p.fotoOriginal+'">':esc(p.nome.slice(0,2).toUpperCase()))+'</div>'+
+      '<div class="t"><b>'+esc(p.nome)+'</b><span>'+esc([p.categoria,p.marca].filter(Boolean).join(' · ')||'Sem departamento')+' · estoque '+(p.estoque||0)+'</span></div>'+
+      '<div class="p">'+brl(p.preco)+(p.tipo_venda==='peso'?'/kg':'')+'</div></div>').join('');
+    $('previa').classList.remove('oculto');
+    if(LOJA_ARQ){
+      if(LOJA_ARQ.nome && !$('cNome').value) $('cNome').value = LOJA_ARQ.nome;
+      if(LOJA_ARQ.endereco && !$('cEnd').value) $('cEnd').value = LOJA_ARQ.endereco;
+      if(LOJA_ARQ.telefone && !$('cZap').value) $('cZap').value = LOJA_ARQ.telefone;
+    }
+    $('btnPublicar').scrollIntoView({behavior:'smooth',block:'center'});
+  };
+  rd.onerror = ()=> msg('msgArq','er','Não consegui abrir o arquivo.');
+  rd.readAsText(f);
+}
+
+function fotoPequena(src){
+  return new Promise(res=>{
+    if(!src || !String(src).startsWith('data:image')) return res(null);
+    const img = new Image();
+    img.onload = ()=>{
+      const max=360, r=Math.min(1,max/Math.max(img.width,img.height));
+      const cv=document.createElement('canvas'); cv.width=Math.round(img.width*r); cv.height=Math.round(img.height*r);
+      const cx=cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height); cx.drawImage(img,0,0,cv.width,cv.height);
+      res(cv.toDataURL('image/jpeg',0.72));
+    };
+    img.onerror = ()=>res(null);
+    img.src = src;
+  });
+}
+
+async function publicar(){
+  if(!ITENS.length) return;
+  const c = lerCondicoes();
+  if(c.whatsapp.replace(/\D/g,'').length<10){ msg('msgPub','er','Antes, preencha lá embaixo o <b>WhatsApp que recebe os pedidos</b>.'); $('cZap').focus(); return; }
+  const lista = $('semEstoque').checked ? ITENS : ITENS.filter(p=>p.estoque>0);
+  if(!lista.length){ msg('msgPub','er','Nenhum produto com estoque para colocar no site.'); return; }
+  const btn = $('btnPublicar'); btn.disabled = true;
+  $('barra').style.display='block'; $('barraI').style.width='3%';
+  try{
+    if(LOJA_ARQ && LOJA_ARQ.logo){ const lg = await fotoPequena(LOJA_ARQ.logo); if(lg) c.logo = lg; }
+    msg('msgPub','in','Enviando... não feche esta página.');
+    const r1 = await rpc('mercado_publicar_config',{p_slug:LOJA,p_codigo:codigo,p_config:c,p_ids:lista.map(p=>p.id)});
+    if(!r1||!r1.ok){ msg('msgPub','er','Código da loja não aceito. Toque em Sair e entre de novo.'); return; }
+    CFG = c;
+    const T = 20;
+    for(let i=0;i<lista.length;i+=T){
+      const lote = [];
+      for(const p of lista.slice(i,i+T)){
+        lote.push({id:p.id,nome:p.nome,marca:p.marca,categoria:p.categoria,preco:p.preco,tipo_venda:p.tipo_venda,estoque:p.estoque,foto:await fotoPequena(p.fotoOriginal)});
+      }
+      const r2 = await rpc('mercado_publicar_produtos',{p_slug:LOJA,p_codigo:codigo,p_produtos:lote});
+      if(!r2||!r2.ok) throw new Error('lote');
+      const feito = Math.min(i+T,lista.length);
+      $('barraI').style.width = Math.round(feito/lista.length*100)+'%';
+      msg('msgPub','in','Enviando '+feito+' de '+lista.length+'... não feche esta página.');
+    }
+    msg('msgPub','ok','✅ Pronto! '+lista.length+' produto(s) já estão no site. <a href="../?v='+Date.now()+'" target="_blank" rel="noopener">Ver o site</a>');
+    carregarLoja();
+  }catch(e){
+    console.error(e);
+    msg('msgPub','er','A internet falhou no meio do envio. Toque em <b>Colocar no site</b> de novo.');
+  }finally{ btn.disabled = false; }
+}
+
+$('codigo').addEventListener('keydown', e=>{ if(e.key==='Enter') entrar(); });
+try{ const c = localStorage.getItem('pc_adm_codigo'); if(c){ $('codigo').value=c; entrar(c); } }catch(e){}
+</script>
+</body>
+</html>

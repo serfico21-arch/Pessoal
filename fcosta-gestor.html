@@ -3593,45 +3593,17 @@ function renderLojaOnlineCad(){
     <label style="display:flex; gap:8px; align-items:center; margin-top:10px;"><input type="checkbox" id="loAuto" ${c.automatico?'checked':''}> Atualizar sozinho quando eu mudar produtos, preços ou estoque</label>
   </div>
   <div class="card">
-    <h2>Condições da loja</h2>
-    <div class="desc">Isso aparece no site. Pode mudar quando quiser e depois tocar em "Salvar e atualizar".</div>
-    <div class="field"><label>WhatsApp que recebe os pedidos (com DDD)</label><input id="loZap" inputmode="tel" value="${escapeHtml(c.whatsapp||'')}" placeholder="(11) 90000-0000"></div>
-    <div class="field"><label>Horário de funcionamento</label><input id="loHorario" value="${escapeHtml(c.horario||'')}"></div>
-    <div style="display:flex; gap:16px; flex-wrap:wrap; margin:6px 0 10px;">
-      <label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" id="loEntrega" ${c.entrega?'checked':''}> Faz entrega</label>
-      <label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" id="loRetirada" ${c.retirada?'checked':''}> Cliente pode retirar na loja</label>
-    </div>
-    <div class="field"><label>Onde entrega</label><input id="loArea" value="${escapeHtml(c.area_entrega||'')}" placeholder="Ex: Jardim São Fernando e bairros vizinhos"></div>
-    <div class="grid2" style="gap:12px;">
-      <div class="field"><label>Taxa de entrega (R$)</label><input id="loTaxa" type="number" step="0.01" min="0" value="${Number(c.taxa_entrega)||0}"></div>
-      <div class="field"><label>Pedido mínimo (R$)</label><input id="loMin" type="number" step="0.01" min="0" value="${Number(c.pedido_minimo)||0}"></div>
-    </div>
-    <div class="field"><label>Entrega grátis acima de (R$) — 0 para não usar</label><input id="loGratis" type="number" step="0.01" min="0" value="${Number(c.frete_gratis_acima)||0}"></div>
-    <div class="field"><label>Formas de pagamento</label>
-      <div style="display:flex; gap:16px; flex-wrap:wrap;">${pg.map((p,i)=>`<label style="display:flex; gap:8px; align-items:center;"><input type="checkbox" id="loPag${i}" ${(c.pagamentos||[]).includes(p)?'checked':''}> ${p}</label>`).join('')}</div></div>
-    <div class="field"><label>Aviso no topo do site (opcional)</label><input id="loAviso" value="${escapeHtml(c.aviso||'')}" placeholder="Ex: Promoção de carnes neste sábado!"></div>
-    <div class="small-note">O nome, o endereço e o logo do site vêm de "Dados da Loja".</div>
+    <h2>Condições da loja e Painel ADM</h2>
+    <div class="desc">WhatsApp dos pedidos, taxa de entrega, horário e formas de pagamento ficam no Painel ADM da loja. Lá também dá para enviar o arquivo JSON do backup.</div>
+    <a class="btn btn-ghost" href="${LOJA_SITE}painel/" target="_blank" rel="noopener">Abrir o Painel ADM</a>
   </div>`;
 }
 async function salvarLojaOnline(publicar){
   const c = lojaCfg();
-  const v = id => (document.getElementById(id)||{}).value;
-  const ck = id => !!(document.getElementById(id)||{}).checked;
-  const novoCodigo = String(v('loCodigo')||'').trim().toUpperCase();
+  const novoCodigo = String((document.getElementById('loCodigo')||{}).value||'').trim().toUpperCase();
   if(novoCodigo !== (c.codigo||'')){ try{ localStorage.removeItem(LOJA_FOTOS_KEY); }catch(e){} }
   c.codigo = novoCodigo;
-  c.whatsapp = String(v('loZap')||'').trim();
-  c.horario = String(v('loHorario')||'').trim();
-  c.area_entrega = String(v('loArea')||'').trim();
-  c.taxa_entrega = parseFloat(v('loTaxa'))||0;
-  c.pedido_minimo = parseFloat(v('loMin'))||0;
-  c.frete_gratis_acima = parseFloat(v('loGratis'))||0;
-  c.entrega = ck('loEntrega'); c.retirada = ck('loRetirada');
-  if(!c.entrega && !c.retirada){ showToast('Marque pelo menos "Faz entrega" ou "Retirar na loja".'); return; }
-  c.pagamentos = ['Pix','Dinheiro','Cartão na entrega'].filter((p,i)=>ck('loPag'+i));
-  if(!c.pagamentos.length) c.pagamentos = ['Pix'];
-  c.aviso = String(v('loAviso')||'').trim();
-  c.automatico = ck('loAuto');
+  c.automatico = !!(document.getElementById('loAuto')||{}).checked;
   await saveKey(KEYS.settings, DB.settings);
   if(publicar) publicarLojaOnline(false);
 }
@@ -3674,12 +3646,7 @@ async function publicarLojaOnline(silencioso){
   try{
     let enviadas = {};
     try{ enviadas = JSON.parse(localStorage.getItem(LOJA_FOTOS_KEY)||'{}')||{}; }catch(e){}
-    const s = DB.settings;
-    const logo = s.logoBase64 && s.logoBase64!==DEFAULT_LOGO_B64 ? await lojaFotoPequena(s.logoBase64) : null;
-    const config = { nome:s.storeName||'Pinheiro & Costa', endereco:s.endereco||'', telefone:s.telefone||'',
-      whatsapp:c.whatsapp||s.telefone||'', horario:c.horario, area_entrega:c.area_entrega,
-      taxa_entrega:c.taxa_entrega, pedido_minimo:c.pedido_minimo, frete_gratis_acima:c.frete_gratis_acima,
-      entrega:c.entrega, retirada:c.retirada, pagamentos:c.pagamentos, aviso:c.aviso, logo };
+    const config = null; // as condições da loja ficam no Painel ADM
     const prods = DB.products.filter(p=>p.name && (p.price||0)>0);
     lojaMostrarStatus('⏳ Enviando dados da loja...');
     const r1 = await lojaRPC('mercado_publicar_config', { p_slug:LOJA_SLUG, p_codigo:c.codigo, p_config:config, p_ids:prods.map(p=>p.id) });
