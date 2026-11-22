@@ -1,6 +1,6 @@
 /* App da R-17: rede primeiro (sempre a versão mais nova); sem internet, usa a cópia guardada.
    Não guarda nada do banco (Supabase), só os arquivos do próprio site. */
-const CACHE = 'r17-v17';
+const CACHE = 'r17-v18';
 const BASICO = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './fcosta.jpg'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(BASICO)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {

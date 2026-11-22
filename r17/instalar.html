@@ -4,54 +4,52 @@
 h1{color:#E6BE6E;font-size:1.6rem}ol{font-size:1.15rem;line-height:1.7;padding-left:22px}button{font-size:1.3rem;font-weight:700;padding:16px 28px;border:0;border-radius:14px;background:#D9A84E;color:#1A1208;cursor:pointer}
 button:disabled{opacity:.4;cursor:default}label{display:block;font-weight:700;margin:14px 0 6px}input{width:100%;box-sizing:border-box;font-size:1.1rem;padding:12px;border-radius:10px;border:1px solid #3B2F27;background:#1F1814;color:#F3EADC}
 #ok{display:block;font-size:1.2rem;color:#5DBB85;font-weight:700;margin-top:12px}#err{color:#D9625A;font-weight:700}textarea{width:100%;height:120px;margin-top:20px;background:#1F1814;color:#AB9C8B;border:1px solid #3B2F27;border-radius:10px;font-size:.7rem}a{color:#E6BE6E}</style></head>
-<body><main><h1>Alarme do pedido repete até o barbeiro parar</h1>
+<body><main><h1>Serviço concluído vai direto para o caixa</h1>
 <ol><li>Clique em <b>Copiar comando</b>. Tem que aparecer "Copiado!" em verde.</li>
 <li>Abra o <a href="https://supabase.com/dashboard/project/avvhnajfczdedlydkcrb/sql/new" target="_blank" rel="noopener">SQL Editor do Supabase</a>, clique na área branca, apague o que estiver lá (Ctrl + A e Delete) e aperte <b>Ctrl + V</b>.</li>
 <li>Clique em <b>Run</b>. Tem que aparecer <b>Success</b>. Se aparecer um aviso amarelo, clique em <b>Run this query</b>.</li>
 <li>Pronto. Volte aqui e me avise.</li></ol>
 <p><button id="b">Copiar comando</button><span id="ok"></span></p>
 <p style="color:#AB9C8B;margin-top:30px">Para ligar o e-mail de recuperação, use a <a href="email.html">página do e-mail</a>.</p>
-<script type="text/plain" id="sql">-- R-17: alarme de pedido repete no celular (a cada 1 minuto) até o barbeiro parar
-create extension if not exists pg_cron;
-alter table public.pedidos add column if not exists silenciado boolean not null default false;
-alter table public.pedidos add column if not exists ultimo_aviso timestamptz;
+<script type="text/plain" id="sql">-- R-17: "Serviço concluído" entra no caixa no DIA EM QUE FOI RECEBIDO (antes contava no dia marcado)
+alter table public.agenda add column if not exists recebido_em timestamptz;
+update public.agenda set recebido_em = case when data > (now() at time zone 'America/Sao_Paulo')::date then now() else data::timestamp at time zone 'America/Sao_Paulo' end
+  where recebido and recebido_em is null;
 
-create or replace function public.push_dados() returns jsonb
-language plpgsql security definer set search_path = '' as $$
-declare r jsonb;
-begin
-  with p as (
-    update public.pedidos set avisado = true, ultimo_aviso = now()
-    where status = 'novo' and not silenciado and criado > now() - interval '30 minutes'
-      and (ultimo_aviso is null or ultimo_aviso < now() - interval '50 seconds')
-    returning id, loja_id, nome, dia, periodo, barbeiro)
-  select jsonb_build_object(
-    'pub', (select valor from public.sistema where chave = 'vapid_public'),
-    'priv', (select valor from public.sistema where chave = 'vapid_private'),
-    'itens', coalesce((select jsonb_agg(jsonb_build_object('id', p.id, 'sub', s.sub, 'nome', p.nome, 'dia', p.dia, 'periodo', p.periodo, 'barbeiro', p.barbeiro))
-      from p join public.push_subs s on s.loja_id = p.loja_id), '[]'::jsonb))
-  into r;
-  return r;
-end $$;
-revoke execute on function public.push_dados() from public, anon, authenticated;
-grant execute on function public.push_dados() to service_role;
-
--- o barbeiro tocou em "Parar alarme"
-create or replace function public.adm_silenciar(p_token uuid) returns void
+create or replace function public.adm_receber(p_token uuid, p_id uuid, p_valor numeric, p_recebido boolean) returns void
 language plpgsql security definer set search_path = '' as $$
 declare l text := public._sessao(p_token);
 begin
-  update public.pedidos set silenciado = true where loja_id = l and status = 'novo' and not silenciado;
+  update public.agenda set valor = p_valor, recebido = coalesce(p_recebido,false), status = 'confirmado',
+    recebido_em = case when coalesce(p_recebido,false) then coalesce(recebido_em, now()) else null end
+  where id = p_id and loja_id = l;
 end $$;
 
--- a cada minuto, se houver pedido sem resposta, toca de novo no celular
-select cron.schedule('r17-alarme', '* * * * *', $cron$
-  select net.http_post(
-    url := 'https://avvhnajfczdedlydkcrb.supabase.co/functions/v1/push-pedido',
-    body := '{}'::jsonb,
-    headers := '{"Content-Type":"application/json"}'::jsonb)
-  where exists (select 1 from public.pedidos where status = 'novo' and not silenciado and criado > now() - interval '30 minutes');
-$cron$);
+create or replace function public.adm_caixa(p_token uuid, p_de date, p_ate date) returns jsonb
+language plpgsql security definer set search_path = '' stable as $$
+declare l text := public._sessao(p_token);
+begin
+  return jsonb_build_object(
+    'entradas', coalesce((select jsonb_agg(jsonb_build_object('data',x.dia,'marcado',x.data,'hora',to_char(x.hora,'HH24:MI'),'servico',x.servico,'barbeiro',x.barbeiro,
+        'nome',x.nome,'valor',coalesce(x.valor,x.preco),'preco',x.preco,'vip',x.vip) order by x.dia, x.hora)
+      from (select a.*, coalesce((a.recebido_em at time zone 'America/Sao_Paulo')::date, a.data) as dia, coalesce(c.vip,false) as vip
+            from public.agenda a left join public.clientes c on c.id = a.cliente_id
+            where a.loja_id = l and a.recebido) x
+      where x.dia between p_de and p_ate), '[]'::jsonb),
+    'saidas', coalesce((select jsonb_agg(jsonb_build_object('id',s.id,'data',s.data,'descricao',s.descricao,'valor',s.valor,'barbeiro',s.barbeiro) order by s.data, s.criado)
+      from public.saidas s where s.loja_id = l and s.data between p_de and p_ate), '[]'::jsonb));
+end $$;
+
+-- visão geral: quantos clientes cada barbeiro tem nos próximos dias
+create or replace function public.adm_resumo(p_token uuid, p_de date, p_ate date)
+returns table(data date, barbeiro text, qtd bigint)
+language plpgsql security definer set search_path = '' stable as $$
+declare l text := public._sessao(p_token);
+begin
+  return query select a.data, a.barbeiro, count(*) from public.agenda a
+    where a.loja_id = l and a.data between p_de and p_ate and a.status <> 'cancelado'
+    group by a.data, a.barbeiro;
+end $$;
 </script>
 <script>
 document.getElementById("b").onclick=async()=>{

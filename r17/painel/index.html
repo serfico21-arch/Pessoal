@@ -374,7 +374,7 @@ footer{border-top:1px solid var(--line)}
 .proximo .ph{font-family:var(--mono);font-size:2.2rem;font-weight:700;color:var(--yellow);line-height:1}
 .proximo small{display:block;text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;color:var(--muted)}
 .proximo b{font-size:1.2rem}
-.agcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.agcols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.agcols.so1{grid-template-columns:1fr}
 .agcol{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--bg)}
 .agcol h4{margin:0;padding:12px 16px;font-family:var(--display);font-size:1.35rem;letter-spacing:.02em;display:flex;justify-content:space-between;align-items:center;color:#1A1208}
 .agcol h4 span{font-family:var(--body);font-size:.85rem;font-weight:700;opacity:.8}
@@ -490,6 +490,8 @@ footer{border-top:1px solid var(--line)}
 .tb th,.tb td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
 .tb td.n,.tb th.n{text-align:right;font-family:var(--mono);white-space:nowrap}
 .tb tfoot td{font-weight:800;border-bottom:0}
+.barbbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin:0 0 14px}.barbbar button{padding:14px 8px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink);font:800 1.05rem var(--body);cursor:pointer}.barbbar button[aria-pressed="true"]{background:var(--yellow);border-color:var(--yellow);color:#1A1208}
+.resumo{margin-top:18px}.rdia{display:flex;justify-content:space-between;gap:10px;width:100%;padding:12px 14px;margin:0 0 8px;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font:600 1rem var(--body);cursor:pointer;text-align:left}.rdia b{font-weight:800}.rdia.hoje{border-color:var(--yellow)}.rdia span{opacity:.85}
 .cxfiltro{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 14px;font-weight:700}
 .saidaf{display:grid;grid-template-columns:150px 170px 1fr 140px auto;gap:10px;align-items:end}
 .saidaf .field{margin:0}
@@ -697,7 +699,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 23</span></div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do dono <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 24</span></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -760,6 +762,7 @@ footer{border-top:1px solid var(--line)}
           </div>
 
           <div class="tab" data-painel="agenda" hidden>
+          <div class="barbbar" data-barbbar role="group" aria-label="Ver agenda de"></div>
           <button type="button" class="btn btn-y novohbtn" data-ir="novo">＋ Marcar horário</button>
           <div class="box pedbox" id="pedBox" hidden>
             <h3 class="bh" id="pedTit">Pedidos novos</h3>
@@ -780,7 +783,8 @@ footer{border-top:1px solid var(--line)}
           <div class="proximo" id="proximo" hidden></div>
           <p class="ok" id="agMsg" aria-live="polite"></p>
           <div class="agcols" id="rows"><p class="empty">Carregando a agenda…</p></div>
-          <p class="hint" style="margin:10px 0 0">Para marcar um cliente, toque na aba <b>＋ Novo horário</b>.</p>
+          <div class="box resumo" id="resumoBox" hidden><h3 class="bh">📋 Visão geral: próximos 7 dias</h3><p class="hint" style="margin:0 0 10px">Toque no dia para ver os clientes.</p><div id="resumo"></div></div>
+          <p class="hint" style="margin:10px 0 0">Para marcar um cliente, toque em <b>＋ Marcar horário</b> lá em cima.</p>
           <div class="box" style="margin-top:24px">
             <h3 class="bh">Horário deste dia</h3>
             <p class="hint" id="diaInfo" style="margin:0 0 10px"></p>
@@ -857,13 +861,14 @@ footer{border-top:1px solid var(--line)}
           </div>
 
           <div class="tab" data-painel="caixa" hidden>
+            <div class="barbbar" data-barbbar role="group" aria-label="Ver caixa de"></div>
             <div class="caixa-top">
               <div class="field"><label for="cxDe">De</label><input type="date" id="cxDe"></div>
               <div class="field"><label for="cxAte">Até</label><input type="date" id="cxAte"></div>
               <div class="btns" style="margin:0"><button type="button" class="btn btn-sm btn-line" data-per="hoje">Hoje</button><button type="button" class="btn btn-sm btn-line" data-per="semana">7 dias</button><button type="button" class="btn btn-sm btn-line" data-per="mes">Este mês</button><button type="button" class="btn btn-sm btn-line" data-per="mesant">Mês passado</button></div>
             </div>
             <div class="box cxtop"><h3 class="bh">💈 Total por barbeiro</h3><div id="cxBarb"></div></div>
-            <div class="cxfiltro" role="group" aria-label="Ver caixa de"><span>Ver caixa de:</span><div class="btns" id="cxBarbF" style="margin:0"></div></div>
+            <div id="cxBarbF" hidden></div>
             <div class="kpis" id="cxKpis"></div>
             <div class="cxgrid">
               <div class="box"><h3 class="bh">Por serviço</h3><div id="cxServ"></div></div>
@@ -1449,7 +1454,7 @@ function entrarPainel(){
   $("gate").hidden=true; $("admBody").hidden=false;
   if(!$("admData").value) $("admData").value=isoHoje;
   if(!$("cxDe").value) periodo("mes");
-  renderSemana(); renderServAdm(); renderFotosAdm(); renderVidAdm(); carregarEmailAdm(); ouvirAdm(); ouvirDia(); carregarClientes();
+  renderBarbBars(); renderSemana(); renderServAdm(); renderFotosAdm(); renderVidAdm(); carregarEmailAdm(); ouvirAdm(); ouvirDia(); carregarClientes();
   $("zapNovo").value=fmtZap(CONFIG.whatsapp); renderZapBarbs(); avisosEstado(true);
   if(/[?&]parar=1/.test(location.search)){ pararAoCarregar=true; pararAlarme(); history.replaceState(null,"",location.pathname+"#adm"); }
 }
@@ -1461,6 +1466,7 @@ async function ouvirAdm(){
   try{
     const [lista, pend, dia, peds] = await Promise.all([adm("adm_agenda2",{p_data:iso}), adm("adm_pendentes").catch(()=>[]), buscarDia(iso), adm("adm_pedidos").catch(()=>null)]);
     if(peds){ renderPedidos(peds); avisarNovos(peds); }
+    carregarResumo();
     if(iso!==$("admData").value) return;
     guardarDia(iso,dia,lista);
     agendaDia = lista||[]; renderAdm(); renderPend(pend||[]); renderDiaAdm();
@@ -1531,7 +1537,7 @@ function linhaAgenda(a,comData,classe){
   const cli = clienteDe(a);
   const receber = comData ? "" : a.recebido
     ? `<div class="receber pago"><span class="pago">✅ Pago ${brl(vlr(a))} · no caixa</span><button class="btn btn-sm btn-line" data-act="desfazer">Desfazer</button></div>`
-    : `<div class="receber"><div class="money"><span>R$</span><input type="number" min="0" step="1" inputmode="decimal" value="${vlr(a)}" aria-label="Valor cobrado de ${esc(a.nome)}" data-valor></div><button class="btn btn-sm btn-y" data-act="receber">✅ Feito, receber</button></div>`;
+    : `<div class="receber"><div class="money"><span>R$</span><input type="number" min="0" step="1" inputmode="decimal" value="${vlr(a)}" aria-label="Valor cobrado de ${esc(a.nome)}" data-valor></div><button class="btn btn-sm btn-y" data-act="receber">✅ Serviço concluído</button></div>`;
   return `<div class="row${pend?" pend":""}${classe?" "+classe:""}" data-id="${a.id}">
     <div class="h">${comData?`<small>${fmtCurta(a.data)}</small>`:""}${esc(a.hora)}</div>
     <div class="who"><b>${esc(a.nome)}${a.vip?` <span class="vip">⭐ VIP</span>`:""}${pend?` <span class="badge b-pend">Aguardando confirmação</span>`:""}</b><span class="svc">${comData?`<span class="bchip ${corBarb(a.barbeiro)}">${esc(nomeBarb(a.barbeiro))}</span>`:""}${esc(a.servico)} · tabela ${brl(Number(a.preco||0))}</span>${temFone?`<span><a href="${waCliente(a.fone,"Olá "+a.nome+"!")}" target="_blank" rel="noopener">${esc(a.fone)}</a></span>`:""}${cli&&cli.obs?`<span class="notacli">📝 ${esc(cli.obs)}</span>`:""}</div>
@@ -1550,16 +1556,43 @@ function renderAdm(){
   const iso=$("admData").value, ehHoje = iso===isoOf(new Date()), agora=new Date(), mAgora=agora.getHours()*60+agora.getMinutes();
   $("admDiaTxt").textContent = (ehHoje ? "Hoje, " : "") + fmtData(iso);
   const estado = a => { if(!ehHoje) return ""; const ini=toMin(a.hora), fim=ini+a.min; return fim<=mAgora ? "passou" : ini<=mAgora ? "agora" : ""; };
-  $("rows").innerHTML = BARBEIROS.map((b,i)=>{ const l=agendaDia.filter(a=>a.barbeiro===b.id);
+  $("rows").classList.toggle("so1",!!barbSel);
+  $("rows").innerHTML = BARBEIROS.map((b,i)=>[b,i]).filter(([b])=>!barbSel||b.id===barbSel).map(([b,i])=>{ const l=agendaDia.filter(a=>a.barbeiro===b.id);
     const pago=l.filter(a=>a.recebido).reduce((t,a)=>t+vlr(a),0);
     return `<div class="agcol b${i}"><h4>${esc(b.nome)}<span>${l.length===1?"1 cliente":l.length+" clientes"}${pago?" · recebido "+brl(pago):""}</span></h4>${
       l.length ? `<div class="rows">${l.map(a=>linhaAgenda(a,false,estado(a))).join("")}</div>` : `<p class="empty">Ninguém marcado com ${esc(b.nome)} neste dia.</p>`}</div>`; }).join("");
   // próximo cliente (só hoje)
-  const prox = ehHoje ? agendaDia.find(a=>toMin(a.hora)+a.min>mAgora) : null;
+  const prox = ehHoje ? agendaDia.find(a=>(!barbSel||a.barbeiro===barbSel) && toMin(a.hora)+a.min>mAgora) : null;
   $("proximo").hidden = !prox;
   if(prox){ const jaComecou = toMin(prox.hora)<=mAgora;
     $("proximo").innerHTML = `<div class="ph">${esc(prox.hora)}</div><div><small>${jaComecou?"Atendendo agora":"Próximo cliente"}</small><b>${esc(prox.nome)}</b><div><span class="bchip ${corBarb(prox.barbeiro)}">${esc(nomeBarb(prox.barbeiro))}</span>${esc(prox.servico)}</div></div>`; }
 }
+/* ---------- escolher barbeiro (Agenda e Caixa) ---------- */
+let barbSel = lsGet("barb-"+CONFIG.loja)||""; if(barbSel && !BARBEIROS.some(b=>b.id===barbSel)) barbSel="";
+function renderBarbBars(){
+  const html=[{id:"",nome:"👥 Todos"},...BARBEIROS].map(b=>`<button type="button" data-bs="${b.id}" aria-pressed="${barbSel===b.id}">${esc(b.id?"💈 "+nomeCurto(b):b.nome)}</button>`).join("");
+  document.querySelectorAll("[data-barbbar]").forEach(d=>d.innerHTML=html);
+}
+function nomeCurto(b){ const m=b.nome.match(/\(([^)]+)\)/); return m?m[1]:b.nome.split(" ")[0]; }
+function escolherBarb(id){ barbSel=id||""; lsSet("barb-"+CONFIG.loja,barbSel||null); renderBarbBars(); renderAdm(); renderResumo(); if(cxDados){ renderCxFiltro(); renderCaixa(); } }
+document.addEventListener("click",e=>{ const b=e.target.closest("[data-bs]"); if(b) escolherBarb(b.dataset.bs); });
+let resumoDados=null;
+async function carregarResumo(){
+  if(!isAdmin()) return;
+  const d=new Date(), de=isoOf(d); d.setDate(d.getDate()+6); const ate=isoOf(d);
+  try{ resumoDados=await adm("adm_resumo",{p_de:de,p_ate:ate}); resumoDados.de=de; renderResumo(); }catch(e){ $("resumoBox").hidden=true; }
+}
+function renderResumo(){
+  if(!resumoDados){ $("resumoBox").hidden=true; return; }
+  const linhas=[]; const [y,m,dd]=resumoDados.de.split("-").map(Number);
+  for(let i=0;i<7;i++){ const iso=isoOf(new Date(y,m-1,dd+i));
+    const doDia=resumoDados.filter(x=>x.data===iso && (!barbSel||x.barbeiro===barbSel));
+    const tot=doDia.reduce((t,x)=>t+Number(x.qtd),0);
+    const partes = barbSel ? [] : BARBEIROS.map(b=>{ const q=doDia.filter(x=>x.barbeiro===b.id).reduce((t,x)=>t+Number(x.qtd),0); return q?`${nomeCurto(b)} ${q}`:""; }).filter(Boolean);
+    linhas.push(`<button type="button" class="rdia${i===0?" hoje":""}" data-rdia="${iso}"><b>${i===0?"Hoje":i===1?"Amanhã":esc(fmtCurta(iso))}</b><span>${tot?(tot===1?"1 cliente":tot+" clientes")+(partes.length?" · "+partes.join(" · "):""):"livre"}</span></button>`); }
+  $("resumo").innerHTML=linhas.join(""); $("resumoBox").hidden=false;
+}
+$("resumo").addEventListener("click",e=>{ const b=e.target.closest("[data-rdia]"); if(!b) return; mudarDiaAdm(b.dataset.rdia); $("admData").scrollIntoView({behavior:"smooth",block:"center"}); });
 function mudarDiaAdm(iso){ $("admData").value=iso; $("exMsg").textContent=""; agendaDia=[]; ouvirAdm(); }
 $("diaAnt").addEventListener("click",()=>{ const [y,m,d]=$("admData").value.split("-").map(Number); mudarDiaAdm(isoOf(new Date(y,m-1,d-1))); });
 $("diaProx").addEventListener("click",()=>{ const [y,m,d]=$("admData").value.split("-").map(Number); mudarDiaAdm(isoOf(new Date(y,m-1,d+1))); });
@@ -1671,7 +1704,7 @@ async function acaoAgenda(e){
       const inp=row.querySelector("[data-valor]"), v = inp ? Number(String(inp.value).replace(",",".")) : vlr(a);
       if(act==="receber" && (inp.value==="" || isNaN(v) || v<0)){ alertaAdm("Digite o valor cobrado."); return; }
       btn.disabled=true; await adm("adm_receber",{p_id:a.id,p_valor:v,p_recebido:act==="receber"});
-      await ouvirAdm(); alertaAdm(act==="receber" ? `Recebido ${brl(v)} de ${a.nome}. Já está no caixa.` : "Recebimento desfeito."); return;
+      await ouvirAdm(); alertaAdm(act==="receber" ? `✅ ${brl(v)} de ${a.nome} já está no caixa de hoje (${nomeCurto(BARBEIROS.find(b=>b.id===a.barbeiro)||{nome:"barbearia"})}).` : "Recebimento desfeito."); return;
     }
     if(act==="cancelar"){ btn.textContent="Toque de novo para apagar"; btn.dataset.act="cancelar2"; btn.classList.add("btn-red"); return; }
     if(act==="cancelar2"){ btn.disabled=true; await adm("adm_apagar",{p_id:a.id}); await ouvirAdm(); if(a.data===$("data").value) ouvirDia(); return; }
@@ -1852,13 +1885,13 @@ document.querySelectorAll("[data-per]").forEach(b=>b.addEventListener("click",()
 function tabela(cab,linhas,rodape){
   return `<div class="tbw"><table class="tb"><thead><tr>${cab.map((c,i)=>`<th${i===cab.length-1?' class="n"':""}>${c}</th>`).join("")}</tr></thead><tbody>${linhas.join("")}</tbody>${rodape?`<tfoot>${rodape}</tfoot>`:""}</table></div>`;
 }
-let cxDados=null, cxBarb="";
+let cxDados=null;
 function renderCxFiltro(){
-  $("cxBarbF").innerHTML = [{id:"",nome:"Todos (geral)"},...BARBEIROS].map(b=>`<button type="button" class="btn btn-sm ${cxBarb===b.id?"btn-y":"btn-line"}" data-cb="${b.id}">${esc(b.nome)}</button>`).join("");
+  $("cxBarbF").innerHTML = [{id:"",nome:"Todos (geral)"},...BARBEIROS].map(b=>`<button type="button" class="btn btn-sm ${barbSel===b.id?"btn-y":"btn-line"}" data-cb="${b.id}">${esc(b.nome)}</button>`).join("");
   $("sBarb").innerHTML = `<option value="">Barbearia (geral)</option>` + BARBEIROS.map(b=>`<option value="${b.id}">${esc(b.nome)}</option>`).join("");
-  $("sBarb").value = cxBarb;
+  $("sBarb").value = barbSel;
 }
-$("cxBarbF").addEventListener("click",e=>{ const b=e.target.closest("[data-cb]"); if(!b) return; cxBarb=b.dataset.cb; renderCxFiltro(); renderCaixa(); });
+$("cxBarbF").addEventListener("click",e=>{ const b=e.target.closest("[data-cb]"); if(!b) return; escolherBarb(b.dataset.cb); });
 async function carregarCaixa(){
   if(!isAdmin()) return;
   if(!$("cxBarbF").children.length) renderCxFiltro();
@@ -1874,13 +1907,13 @@ async function carregarCaixa(){
 function renderCaixa(){
   if(!cxDados) return;
   const {de,ate}=cxDados, todasE=cxDados.entradas||[], todasS=cxDados.saidas||[];
-  const ent = cxBarb ? todasE.filter(a=>a.barbeiro===cxBarb) : todasE;
-  const sai = cxBarb ? todasS.filter(s=>(s.barbeiro||"")===cxBarb) : todasS;
+  const ent = barbSel ? todasE.filter(a=>a.barbeiro===barbSel) : todasE;
+  const sai = barbSel ? todasS.filter(s=>(s.barbeiro||"")===barbSel) : todasS;
   const soma = (l)=>l.reduce((t,x)=>t+Number(x.valor),0);
   const tEnt=soma(ent), tSai=soma(sai);
   const desc=ent.reduce((t,a)=>t+Math.max(0,Number(a.preco)-Number(a.valor)),0);
   const per = de===ate ? fmtData(de) : `${fmtCurta(de)} até ${fmtCurta(ate)}`;
-  const quem = cxBarb ? nomeBarb(cxBarb) : "toda a barbearia";
+  const quem = barbSel ? nomeBarb(barbSel) : "toda a barbearia";
   $("cxKpis").innerHTML = `<p class="hint" style="grid-column:1/-1;margin:0">Caixa de <b>${esc(quem)}</b> · ${per}</p>
     <div class="kpi ent"><small>Entradas</small><b>${brl(tEnt)}</b><span>${ent.length===1?"1 atendimento":ent.length+" atendimentos"}</span></div>
     <div class="kpi sai"><small>Saídas</small><b>${brl(tSai)}</b><span>${sai.length===1?"1 despesa":sai.length+" despesas"}</span></div>
@@ -1898,7 +1931,7 @@ function renderCaixa(){
   $("cxSaidas").innerHTML = sai.length ? tabela(["Dia","O que foi","Valor"],sai.map(s=>`<tr data-id="${s.id}"><td>${fmtCurta(s.data)}</td><td>${esc(s.descricao)}<br><small>${s.barbeiro?esc(nomeBarb(s.barbeiro)):"Barbearia (geral)"}</small></td><td class="n">${brl(Number(s.valor))} <button type="button" class="btn btn-sm btn-line" data-s="apagar" aria-label="Apagar saída">✕</button></td></tr>`),
       `<tr><td colspan="2">Total de saídas</td><td class="n">${brl(tSai)}</td></tr>`) : `<p class="empty">Nenhuma saída lançada neste período.</p>`;
   $("cxEntradas").innerHTML = ent.length ? tabela(["Cliente","Serviço","Valor"],ent.map(a=>`<tr><td>${esc(a.nome)}${a.vip?" ⭐":""}<br><small>${fmtCurta(a.data)} ${esc(a.hora)}</small></td><td>${esc(a.servico)}<br><small>${esc(nomeBarb(a.barbeiro))}</small></td><td class="n">${brl(Number(a.valor))}${Number(a.valor)!==Number(a.preco)?`<br><small>tabela ${brl(Number(a.preco))}</small>`:""}</td></tr>`))
-    : `<p class="empty">Nenhum atendimento recebido neste período. Na Agenda, depois de cada serviço, toque em "✅ Feito, receber".</p>`;
+    : `<p class="empty">Nenhum atendimento recebido neste período. Na Agenda, depois de cada serviço, toque em "✅ Serviço concluído".</p>`;
 }
 $("sAdd").addEventListener("click",async()=>{
   const d=$("sData").value, desc=$("sDesc").value.trim(), v=Number(String($("sValor").value).replace(",","."));
@@ -2118,7 +2151,7 @@ const ehApp = matchMedia("(display-mode: standalone)").matches || navigator.stan
 if(ehApp){ const ab=$("abertura"); ab.querySelector(".ab-logo").innerHTML=document.querySelector(".herologo").outerHTML.replace('class="herologo"','');
   ab.classList.add("on"); setTimeout(()=>{ ab.classList.add("sai"); setTimeout(()=>ab.remove(),550); },1800); }
 /* versão do site: muda a cada atualização. O app confere sozinho e atualiza. */
-const VERSAO="23";
+const VERSAO="24";
 function atualizarAgora(){ const u=new URL(location.href); u.searchParams.set("v",Date.now()); u.searchParams.delete("parar"); location.replace(u.href); }
 $("novaVersao").addEventListener("click",atualizarAgora);
 async function conferirVersao(){
