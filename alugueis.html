@@ -200,8 +200,8 @@ var U=["zero","um","dois","três","quatro","cinco","seis","sete","oito","nove","
 D=["","","vinte","trinta","quarenta","cinquenta","sessenta","setenta","oitenta","noventa"],
 C=["","cento","duzentos","trezentos","quatrocentos","quinhentos","seiscentos","setecentos","oitocentos","novecentos"];
 function a999(n){if(n===100)return"cem";var p=[];if(n>=100){p.push(C[Math.floor(n/100)]);n%=100}if(n>0)p.push(n<20?U[n]:D[Math.floor(n/10)]+(n%10?" e "+U[n%10]:""));return p.join(" e ")}
-function ext(n){if(n===0)return"zero";var m=Math.floor(n/1000),r=n%1000,s="";if(m)s=m===1?"mil":a999(m)+" mil";if(r)s+=(s?(r<100||r%100===0?" e ":" "):"")+a999(r);return s}
-function extenso(v){var r=Math.floor(v),c=Math.round((v-r)*100),s=ext(r)+(r===1?" real":" reais");if(c)s+=" e "+ext(c)+(c===1?" centavo":" centavos");return s}
+function ext(n){if(n===0)return"zero";var mi=Math.floor(n/1e6),m=Math.floor((n%1e6)/1000),r=n%1000,p=[],v=[];if(mi){p.push(a999(mi)+(mi===1?" milhão":" milhões"));v.push(mi)}if(m){p.push(m===1?"mil":a999(m)+" mil");v.push(m)}if(r){p.push(a999(r));v.push(r)}var s=p[0];for(var i=1;i<p.length;i++){s+=(i===p.length-1&&(v[i]<100||v[i]%100===0))?" e ":" ";s+=p[i]}return s}
+function extenso(v){var r=Math.floor(v),c=Math.round((v-r)*100),s=ext(r)+(r===1?" real":r>0&&r%1e6===0?" de reais":" reais");if(c)s=(r?s+" e ":"")+ext(c)+(c===1?" centavo":" centavos");return s}
 
 function render(){var m=document.getElementById("main");m.innerHTML=view==="list"?vList():view==="form"?vForm():vDetail();window.scrollTo(0,0)}
 

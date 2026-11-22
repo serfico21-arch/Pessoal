@@ -384,6 +384,8 @@ header{box-shadow:0 2px 14px -8px rgba(23,51,43,.25)}
 </footer>
 
 <script>
+function lerLeads(){try{return JSON.parse(localStorage.getItem('fcosta_leads')||'[]')||[]}catch(e){return []}}
+function salvarLeads(l){try{localStorage.setItem('fcosta_leads',JSON.stringify(l))}catch(e){alert('Não foi possível salvar: a memória do navegador está cheia. Faça uma cópia (exportar) e apague itens antigos.')}}
 /* ── GESTOR DE LEADS (Kanban) ──────────────────── */
 const ETAPAS_LEAD = ['Novo', 'Em contato', 'Visita agendada', 'Proposta', 'Fechado', 'Perdido'];
 
@@ -398,9 +400,9 @@ function salvarLead() {
     obs: document.getElementById('lead-obs').value.trim(),
     data: new Date().toLocaleDateString('pt-BR')
   };
-  const leads = JSON.parse(localStorage.getItem('fcosta_leads') || '[]');
+  const leads = lerLeads();
   leads.unshift(lead);
-  localStorage.setItem('fcosta_leads', JSON.stringify(leads));
+  salvarLeads(leads);
 
   document.getElementById('lead-nome').value = '';
   document.getElementById('lead-telefone').value = '';
@@ -411,7 +413,7 @@ function salvarLead() {
 }
 
 function renderizarLeads() {
-  const leads = JSON.parse(localStorage.getItem('fcosta_leads') || '[]');
+  const leads = lerLeads();
   const kanban = document.getElementById('kanban-leads');
   if (!kanban) return;
 
@@ -449,18 +451,18 @@ function renderizarLeads() {
 }
 
 function moverLead(i, direcao) {
-  const leads = JSON.parse(localStorage.getItem('fcosta_leads') || '[]');
+  const leads = lerLeads();
   const atual = ETAPAS_LEAD.indexOf(leads[i].status);
   const novoIndice = Math.min(Math.max(atual + direcao, 0), ETAPAS_LEAD.length - 1);
   leads[i].status = ETAPAS_LEAD[novoIndice];
-  localStorage.setItem('fcosta_leads', JSON.stringify(leads));
+  salvarLeads(leads);
   renderizarLeads();
 }
 
 function excluirLead(i) {
-  const leads = JSON.parse(localStorage.getItem('fcosta_leads') || '[]');
+  const leads = lerLeads();
   leads.splice(i, 1);
-  localStorage.setItem('fcosta_leads', JSON.stringify(leads));
+  salvarLeads(leads);
   renderizarLeads();
 }
 

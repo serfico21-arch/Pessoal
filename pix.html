@@ -1353,11 +1353,11 @@ function confirmarExcluirPeriodoAtual(){if(!mes)return;var nome=periodoLabel(mes
 window.confirmarExcluirPeriodoAtual=confirmarExcluirPeriodoAtual;
 
 // LOGO / ASSINATURA
-function trocarLogo(inp){if(!inp.files[0])return;var r=new FileReader();r.onload=function(e){localStorage.setItem(LS_LOGO,e.target.result);document.getElementById('logo-img').src=e.target.result;notif('✅ Logo atualizado!');};r.readAsDataURL(inp.files[0]);}
+function trocarLogo(inp){if(!inp.files[0])return;var r=new FileReader();r.onload=function(e){try{localStorage.setItem(LS_LOGO,e.target.result)}catch(x){notif('⚠️ Imagem grande demais para guardar. Use uma imagem menor.',6000);return}document.getElementById('logo-img').src=e.target.result;notif('✅ Logo atualizado!');};r.readAsDataURL(inp.files[0]);}
 window.trocarLogo=trocarLogo;
 function abrirModalAss(){document.getElementById('modal-ass').classList.add('on');}
 window.abrirModalAss=abrirModalAss;
-function salvarAssinatura(inp){if(!inp.files[0])return;var r=new FileReader();r.onload=function(e){localStorage.setItem(LS_ASS,e.target.result);document.getElementById('ass-preview').innerHTML='<img src="'+e.target.result+'" style="max-height:80px;max-width:100%">';document.getElementById('btn-ass-rem').style.display='';document.getElementById('btn-ass-upload').classList.add('has');document.getElementById('btn-ass-upload').textContent='✅ Assinatura';initAssWidget();renderFC();notif('✅ Assinatura salva!');};r.readAsDataURL(inp.files[0]);}
+function salvarAssinatura(inp){if(!inp.files[0])return;var r=new FileReader();r.onload=function(e){try{localStorage.setItem(LS_ASS,e.target.result)}catch(x){notif('⚠️ Imagem grande demais para guardar. Use uma imagem menor.',6000);return}document.getElementById('ass-preview').innerHTML='<img src="'+e.target.result+'" style="max-height:80px;max-width:100%">';document.getElementById('btn-ass-rem').style.display='';document.getElementById('btn-ass-upload').classList.add('has');document.getElementById('btn-ass-upload').textContent='✅ Assinatura';initAssWidget();renderFC();notif('✅ Assinatura salva!');};r.readAsDataURL(inp.files[0]);}
 window.salvarAssinatura=salvarAssinatura;
 function removerAssinatura(){localStorage.removeItem(LS_ASS);document.getElementById('ass-preview').innerHTML='<span style="color:var(--cinza);font-size:.75rem;font-style:italic">Nenhuma assinatura</span>';document.getElementById('btn-ass-rem').style.display='none';document.getElementById('btn-ass-upload').classList.remove('has');document.getElementById('btn-ass-upload').textContent='✍ Assinatura';initAssWidget();notif('🗑️ Removida.');}
 window.removerAssinatura=removerAssinatura;

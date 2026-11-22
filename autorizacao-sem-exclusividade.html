@@ -166,11 +166,12 @@ function extenso(n){
  const c=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
  const t=x=>{if(x===100)return 'cem';const s=[];if(x>=100){s.push(c[Math.floor(x/100)]);x%=100}
   if(x>0){if(x<20)s.push(u[x]);else{let y=d[Math.floor(x/10)];if(x%10)y+=' e '+u[x%10];s.push(y)}}return s.join(' e ')};
- const mi=Math.floor(n/1e6),mil=Math.floor((n%1e6)/1000),r=n%1000,p=[];
- if(mi)p.push(t(mi)+(mi===1?' milhão':' milhões'));
- if(mil)p.push(mil===1?'mil':t(mil)+' mil');
- if(r)p.push(t(r));
- return p.join(' e ');
+ const mi=Math.floor(n/1e6),mil=Math.floor((n%1e6)/1000),r=n%1000,p=[],v=[];
+ if(mi){p.push(t(mi)+(mi===1?' milhão':' milhões'));v.push(mi)}
+ if(mil){p.push(mil===1?'mil':t(mil)+' mil');v.push(mil)}
+ if(r){p.push(t(r));v.push(r)}
+ let s=p[0]||'';for(let i=1;i<p.length;i++){s+=(i===p.length-1&&(v[i]<100||v[i]%100===0))?' e ':' ';s+=p[i]}
+ return s;
 }
 function maskCPF(v){v=v.replace(/\D/g,'').slice(0,11);return v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2')}
 function maskMoney(v){v=v.replace(/\D/g,'');if(!v)return '';v=(parseInt(v,10)/100).toFixed(2);return v.replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.').replace(/\.(\d{2})$/,',$1').replace(/(\d)\.(\d{3},)/,'$1.$2')}
@@ -479,7 +480,7 @@ function rodape(d){
 }
 function contrato(d,ass){
  ass=ass||{};
- const reais=s=>{const n=parseInt((s||'0').replace(/\./g,'').split(',')[0],10)||0;return 'R$ '+esc(s)+' ('+extenso(n)+' reais)'};
+ const reais=s=>{const n=parseInt((s||'0').replace(/\./g,'').split(',')[0],10)||0;return 'R$ '+esc(s)+' ('+extenso(n)+(n===1?' real)':n>0&&n%1e6===0?' de reais)':' reais)')};
  const prazo=parseInt(d.n_prazo,10)||0, prot=parseInt(d.n_prot,10)||0;
  const prazoTxt=`${prazo} (${extenso(prazo)}) dias`, protTxt=`${prot} (${extenso(prot)}) dias`;
  const comN=parseFloat(String(d.n_com).replace(',','.'))||0;

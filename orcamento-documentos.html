@@ -562,6 +562,7 @@ footer {
   });
 
   /* ── NÚMERO POR EXTENSO (R$) ──────────────── */
+  function juntarGrupos(p,v){var s=p[0]||'';for(var i=1;i<p.length;i++){s+=(i===p.length-1&&(v[i]<100||v[i]%100===0))?' e ':' ';s+=p[i]}return s}
   function numeroPorExtenso(valor) {
     var unidades = ['', 'um', 'dois', 'três', 'quatro', 'cinco', 'seis', 'sete', 'oito', 'nove'];
     var dez_ = ['dez', 'onze', 'doze', 'treze', 'quatorze', 'quinze', 'dezesseis', 'dezessete', 'dezoito', 'dezenove'];
@@ -602,13 +603,13 @@ footer {
     var milhares = Math.floor((inteiro % 1000000) / 1000);
     var restoCentenas = inteiro % 1000;
 
-    var partes = [];
-    if (milhoes) partes.push(grupo(milhoes, 'milhão', 'milhões'));
-    if (milhares) partes.push(grupo(milhares, 'mil', 'mil'));
-    if (restoCentenas) partes.push(trescentos(restoCentenas));
+    var partes = [], vals = [];
+    if (milhoes) { partes.push(grupo(milhoes, 'milhão', 'milhões')); vals.push(milhoes); }
+    if (milhares) { partes.push(grupo(milhares, 'mil', 'mil')); vals.push(milhares); }
+    if (restoCentenas) { partes.push(trescentos(restoCentenas)); vals.push(restoCentenas); }
 
-    var textoInteiro = partes.filter(Boolean).join(' e ');
-    var reaisTxt = (inteiro === 1 ? 'real' : 'reais');
+    var textoInteiro = juntarGrupos(partes, vals);
+    var reaisTxt = (inteiro === 1 ? 'real' : (inteiro % 1000000 === 0 ? 'de reais' : 'reais'));
     var resultado = (textoInteiro ? textoInteiro + ' ' + reaisTxt : '');
 
     if (centavos > 0) {
