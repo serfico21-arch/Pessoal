@@ -1,6 +1,6 @@
 /* App da R-17: rede primeiro (sempre a versão mais nova); sem internet, usa a cópia guardada.
    Não guarda nada do banco (Supabase), só os arquivos do próprio site. */
-const CACHE = 'r17-v16';
+const CACHE = 'r17-v17';
 const BASICO = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './fcosta.jpg'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(BASICO)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
@@ -19,13 +19,13 @@ self.addEventListener('push', e => {
   e.waitUntil(self.registration.showNotification(d.title || '🔔 Novo pedido', {
     body: d.body || '', icon: 'icon-192.png', badge: 'icon-192.png', tag: d.tag || ('pedido-' + Date.now()), renotify: true,
     vibrate: [800, 150, 800, 150, 800, 150, 800, 150, 800], requireInteraction: true, silent: false,
-    actions: [{ action: 'parar', title: '🔕 Parar alarme' }], data: { url: './?painel=1&parar=1#adm' }
+    actions: [{ action: 'parar', title: '🔕 Parar alarme' }], data: { url: './painel/?parar=1#adm' }
   }));
 });
 self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(l => {
     for (const c of l) { if (c.url.includes('#adm') || c.url.includes('painel')) { c.postMessage({ parar: true }); return c.focus(); } }
-    return self.clients.openWindow('./?painel=1&parar=1#adm');
+    return self.clients.openWindow('./painel/?parar=1#adm');
   }));
 });

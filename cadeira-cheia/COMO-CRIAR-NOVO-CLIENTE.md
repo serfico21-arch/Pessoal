@@ -10,7 +10,7 @@ Receita feita a partir da R-17 (Espaço Barber Shop R-17), o primeiro cliente, e
 - **Site do cliente** (público): fotos, serviços e preços, endereço, e o formulário **Pedir horário**.
   O cliente final NÃO vê horários livres e NÃO marca sozinho. Ele escolhe dia, barbeiro e período
   (manhã/tarde/noite). O pedido é gravado no banco e o WhatsApp do barbeiro escolhido é aberto com a mensagem pronta.
-- **Painel do dono** (mesmo arquivo, link com `?painel=1#adm`): app separado no celular ("R-17 Painel").
+- **Painel do dono** (pasta `painel/`, gerada a partir do mesmo index.html; link `.../painel/`): app separado no celular ("R-17 Painel").
   - Abas: Agenda, Novo horário, Clientes, Caixa, Preços, Ajustes.
   - Pedido novo: sirene própria que repete a cada 2,5 s, faixa vermelha piscando e aviso no celular (push) a cada 1 minuto, até tocar em "Parar alarme".
   - Clientes VIP com anotação. "✅ Feito, receber" lança o valor no caixa.
@@ -24,7 +24,7 @@ Receita feita a partir da R-17 (Espaço Barber Shop R-17), o primeiro cliente, e
 | Item | Local |
 |---|---|
 | Site R-17 (modelo) | repositório `serfico21-arch/Pessoal`, pasta `r17/` → https://serfico21-arch.github.io/Pessoal/r17/ |
-| Painel R-17 | https://serfico21-arch.github.io/Pessoal/r17/?painel=1#adm |
+| Painel R-17 | https://serfico21-arch.github.io/Pessoal/r17/painel/ |
 | Página que gera o comando SQL | `r17/instalar.html` (atualizações de banco) e `r17/email.html` (e-mail de recuperação) |
 | Banco | Supabase projeto "variaveis", id `avvhnajfczdedlydkcrb` (região São Paulo, plano grátis) |
 | Arquivos SQL (ordem) | pasta de arquivos do projeto `barbearia/supabase/`: `instalar-banco.sql` (001), `atualizar-codigo.sql` (002/003), `004-agenda-dono-caixa.sql`, `005-pedidos.sql`, `006-saidas-barbeiro.sql`, `007-avisos-celular.sql`, `008-alarme-repete.sql` |
@@ -75,7 +75,8 @@ on conflict (loja_id) do nothing;
 6. `instalar.html` / `email.html`: trocar `'r17'` pelo id novo onde aparecer.
 7. Na Edge Function `push-pedido`, o mapa `NOMES` tem os barbeiros da R-17. Com outra barbearia,
    trocar para pegar o nome do banco ou acrescentar os ids novos, e reimplantar a função.
-8. Publicar (push na main). Esperar uns 10 minutos para o GitHub Pages atualizar.
+8. **Gerar o painel:** `python3 cadeira-cheia/receita/gerar-painel.py bigode "Bigode Painel"` cria `bigode/painel/index.html` (cópia com `<base href="../">`). Criar `bigode/painel/manifest.webmanifest` (id e start_url próprios, ícones com `../`). **Rodar o gerador de novo a cada mudança no index.html.**
+9. Publicar (push na main). Esperar uns 10 minutos para o GitHub Pages atualizar.
 
 ### 3.4 Entregar ao dono
 1. Mandar o link do painel (`.../bigode/?painel=1#adm`) e o código de ativação pelo WhatsApp.
@@ -121,6 +122,8 @@ on conflict (loja_id) do nothing;
   - Conferir também que a página não rola para o lado no celular.
 
 ## 5. Armadilhas que já aconteceram
+
+0. **App do painel abria o app do cliente:** os dois tinham o mesmo endereço. Por isso o painel mora na pasta `painel/` com manifesto próprio. A tela inicial do painel tem só 3 botões grandes (Agenda, Caixa, Ajustes), porque o dono se confundia com muita informação.
 
 1. **Pedido do cliente não chegava:** o site abria o WhatsApp antes de terminar de gravar.
    Agora grava primeiro (espera até 4 s) e depois abre o WhatsApp.
