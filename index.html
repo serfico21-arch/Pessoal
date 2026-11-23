@@ -579,6 +579,23 @@ details.mais[open] summary{margin-bottom:10px}details.mais[open] summary i{trans
   body.com-faixa #visor-bar{flex-wrap:nowrap}
   body.com-faixa #visor-bar #visor-voltar{flex:1;justify-content:center}
 }
+/* Compartilhar nas redes */
+button.destaque{width:100%;font:inherit;text-align:left;cursor:pointer}
+.destaque.dz-share{border-color:color-mix(in srgb,var(--sk) 55%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--sk) 20%,var(--card)),var(--card) 75%)}
+.destaque.dz-share .dz-ic{background:linear-gradient(135deg,var(--sk),var(--brand))}.destaque.dz-share .dz-go{background:var(--sk)}.destaque.dz-share .dz-tag{color:var(--sk)}
+.sh-passo{margin:14px 0 6px;font-weight:700;font-size:15px}
+.sh-paginas{display:grid;gap:8px}
+.sh-paginas label{display:flex;align-items:center;gap:10px;min-height:52px;padding:8px 14px;border-radius:14px;border:1px solid var(--line);background:var(--in);font-size:15px;font-weight:600;cursor:pointer}
+.sh-paginas label small{display:block;font-weight:500;font-size:13px;color:var(--texto-muted)}
+.sh-paginas input{width:22px;height:22px;flex:none;accent-color:var(--sk)}
+.sh-paginas label:has(input:checked){border-color:var(--sk);background:color-mix(in srgb,var(--sk) 12%,var(--card))}
+#sh-texto{width:100%;min-height:84px;padding:12px;border-radius:12px;border:1px solid var(--inb);background:var(--in);color:var(--tx);font:15px/1.4 'DM Sans',sans-serif;resize:vertical}
+.sh-redes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sh-redes button,.sh-mais{display:flex;align-items:center;gap:10px;min-height:56px;padding:0 14px;border-radius:14px;border:1px solid color-mix(in srgb,var(--r,var(--sk)) 45%,var(--line));background:color-mix(in srgb,var(--r,var(--sk)) 10%,var(--card));color:var(--tx);font:700 15px 'DM Sans',sans-serif;cursor:pointer}
+.sh-redes button i,.sh-mais i{font-size:24px;color:var(--r,var(--sk))}
+[data-theme=dark] .sh-redes [data-rede-sh=x] i{color:#fff}
+.sh-mais{width:100%;justify-content:center;margin-top:10px}
+.sh-aviso{min-height:22px;margin-top:10px;font-weight:700;font-size:15px;color:var(--em)}
 /* FIM DAS MELHORIAS DE LEITURA */
 
 /* ── PAINÉIS DOS MEUS SITES (aba "Meus Sites") ── */
@@ -667,6 +684,30 @@ var t0=Date.now(),fim=function(){setTimeout(function(){a.style.opacity="0";setTi
           <a href="https://www.crecisp.gov.br" target="_blank" rel="noopener"><i class="ti ti-certificate"></i>CRECI-SP</a>
         </div>
       </div>
+</div></dialog>
+<!-- COMPARTILHAR: escolha a página e a rede. Para mudar os links, edite a lista PAGINAS_SHARE no fim do arquivo. -->
+<dialog id="dlg-compartilhar" class="sheet" aria-labelledby="sh-tit"><div class="sh"><button type="button" class="icon-btn x" data-fechar aria-label="Fechar"><i class="ti ti-x"></i></button>
+  <div class="mini-card" style="--c:var(--sk)">
+    <h3 id="sh-tit"><i class="ti ti-share"></i>Compartilhar nas redes</h3>
+    <p class="sh-passo">1 · O que você quer mandar?</p>
+    <div class="sh-paginas" id="sh-paginas" role="radiogroup" aria-label="O que compartilhar"></div>
+    <p class="sh-passo">2 · A mensagem (pode mudar se quiser)</p>
+    <textarea id="sh-texto" rows="3" aria-label="Mensagem"></textarea>
+    <p class="sh-passo">3 · Toque onde quer compartilhar</p>
+    <div class="sh-redes">
+      <button type="button" data-rede-sh="whatsapp" style="--r:#25D366"><i class="ti ti-brand-whatsapp"></i>WhatsApp</button>
+      <button type="button" data-rede-sh="facebook" style="--r:#1877F2"><i class="ti ti-brand-facebook"></i>Facebook</button>
+      <button type="button" data-rede-sh="instagram" style="--r:#E1306C"><i class="ti ti-brand-instagram"></i>Instagram</button>
+      <button type="button" data-rede-sh="telegram" style="--r:#229ED9"><i class="ti ti-brand-telegram"></i>Telegram</button>
+      <button type="button" data-rede-sh="x" style="--r:#111"><i class="ti ti-brand-x"></i>X (Twitter)</button>
+      <button type="button" data-rede-sh="linkedin" style="--r:#0A66C2"><i class="ti ti-brand-linkedin"></i>LinkedIn</button>
+      <button type="button" data-rede-sh="email" style="--r:#6b7385"><i class="ti ti-mail"></i>E-mail</button>
+      <button type="button" data-rede-sh="copiar" style="--r:#b8892f"><i class="ti ti-copy"></i>Copiar link</button>
+    </div>
+    <button type="button" class="sh-mais" data-rede-sh="celular" hidden><i class="ti ti-dots"></i>Outros apps do celular</button>
+    <div class="sh-aviso" id="sh-aviso" role="status" aria-live="polite"></div>
+    <p class="dlg-dica">Para sites de anúncio (OLX, grupos, Marketplace), use <b>Copiar link</b> e cole lá.</p>
+  </div>
 </div></dialog>
 <dialog id="dlg-novo" class="sheet" aria-labelledby="dlg-titulo">
   <div class="dlg-corpo">
@@ -1238,6 +1279,10 @@ var FERRAMENTAS = [
     html += '<a class="wa-btn" href="' + (mobWa ? 'whatsapp://send' : 'https://web.whatsapp.com') + '"' + (mobWa ? '' : ' target="_blank" rel="noopener"') + '><span class="wa-ic"><i class="ti ti-brand-whatsapp"></i></span><span class="wa-tx"><h2>WhatsApp Business</h2><p>Abrir conversas e clientes agora</p></span><span class="wa-go"><span>Abrir</span><i class="ti ti-arrow-right"></i></span></a>';
     html += '<button type="button" class="destaque" data-go="paineis" style="width:100%;text-align:left;font:inherit;cursor:pointer"><span class="dz-ic"><i class="ti ti-world"></i></span><span class="dz-tx"><span class="dz-tag">Meus sites</span><h2>Painéis ADM</h2>' +
       '<p>Igreja OBPC e site FCosta: mexer nos dois sem abrir os sites</p></span><span class="dz-go"><span>Abrir</span><i class="ti ti-arrow-right"></i></span></button>';
+    /* Compartilhar em destaque: abre a janela com WhatsApp, Facebook, Instagram e outros */
+    html += '<button type="button" class="destaque dz-share" data-open="compartilhar"><span class="dz-ic"><i class="ti ti-share"></i></span><span class="dz-tx"><span class="dz-tag">Em destaque</span><h2>Compartilhar nas redes</h2>' +
+      '<p>Mande o link “Anuncie seu imóvel” no WhatsApp, Facebook, Instagram e outros sites</p></span>' +
+      '<span class="dz-go"><span>Compartilhar</span><i class="ti ti-arrow-right"></i></span></button>';
     var pdv = pubResumo();
     html += '<a class="destaque" href="divulgacao.html"><span class="dz-ic"><i class="ti ti-speakerphone"></i></span><span class="dz-tx"><span class="dz-tag">Em destaque</span><h2>Central do Publicador</h2>' +
       '<p>Publicar imóveis, textos por rede, grupos e plano do dia' + (pdv ? ' · ' + pdv.hoje + (pdv.hoje === 1 ? ' divulgação hoje' : ' divulgações hoje') : '') + '</p></span>' +
@@ -2834,6 +2879,54 @@ var FERRAMENTAS = [
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
 }
+</script>
+<script>
+/* ===== COMPARTILHAR NAS REDES =====
+   Para mudar o que aparece na janela, edite esta lista (nome, explicação, link e mensagem). */
+(function () {
+  var BASE = 'https://serfico21-arch.github.io/Pessoal/';
+  var PAGINAS_SHARE = [
+    { n: 'Anuncie seu imóvel', d: 'Página para o dono do imóvel mandar os dados', u: BASE + 'captacao-fcosta.html',
+      m: 'Quer vender ou alugar seu imóvel? Preencha em 2 minutos e me mande pelo WhatsApp. Sérgio Costa, corretor de imóveis, CRECI-SP 294791-F.' },
+    { n: 'Imóveis à venda', d: 'Minha vitrine de imóveis para o cliente', u: BASE + 'portfolio-fcosta.html',
+      m: 'Veja os imóveis que tenho à venda. Sérgio Costa, corretor de imóveis, CRECI-SP 294791-F.' },
+    { n: 'Site FCosta', d: 'fcostacorretor.com', u: 'https://fcostacorretor.com',
+      m: 'Conheça o site da FCosta Corretor de Imóveis.' }
+  ];
+  var dlg = document.getElementById('dlg-compartilhar'); if (!dlg) return;
+  var caixa = document.getElementById('sh-paginas'), texto = document.getElementById('sh-texto'), aviso = document.getElementById('sh-aviso'), atual = 0;
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  caixa.innerHTML = PAGINAS_SHARE.map(function (p, i) {
+    return '<label><input type="radio" name="sh-pg" value="' + i + '"' + (i ? '' : ' checked') + '><span>' + esc(p.n) + '<small>' + esc(p.d) + '</small></span></label>';
+  }).join('');
+  function escolher(i) { atual = i; texto.value = PAGINAS_SHARE[i].m; aviso.textContent = ''; }
+  escolher(0);
+  caixa.addEventListener('change', function (e) { if (e.target.name === 'sh-pg') escolher(+e.target.value); });
+  if (navigator.share) dlg.querySelector('.sh-mais').hidden = false;
+  function copiar(t, ok) {
+    function feito() { aviso.textContent = ok; }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(feito, velho); else velho();
+    function velho() { var a = document.createElement('textarea'); a.value = t; a.style.position = 'fixed'; a.style.opacity = '0'; dlg.appendChild(a); a.select(); try { document.execCommand('copy'); feito(); } catch (e) { aviso.textContent = 'Não consegui copiar. O link é: ' + t; } a.remove(); }
+  }
+  function abrir(u) { window.open(u, '_blank', 'noopener'); }
+  dlg.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-rede-sh]'); if (!b) return;
+    var p = PAGINAS_SHARE[atual], u = p.u, m = texto.value.trim(), e1 = encodeURIComponent(u), em = encodeURIComponent(m), tudo = m + '\n' + u;
+    switch (b.getAttribute('data-rede-sh')) {
+      case 'whatsapp': abrir('https://wa.me/?text=' + encodeURIComponent(tudo)); break;
+      case 'facebook': abrir('https://www.facebook.com/sharer/sharer.php?u=' + e1); break;
+      case 'telegram': abrir('https://t.me/share/url?url=' + e1 + '&text=' + em); break;
+      case 'x': abrir('https://twitter.com/intent/tweet?text=' + em + '&url=' + e1); break;
+      case 'linkedin': abrir('https://www.linkedin.com/sharing/share-offsite/?url=' + e1); break;
+      case 'email': location.href = 'mailto:?subject=' + encodeURIComponent(p.n) + '&body=' + encodeURIComponent(tudo); break;
+      case 'copiar': copiar(tudo, '✔ Mensagem e link copiados! Agora é só colar.'); break;
+      case 'instagram':
+        copiar(tudo, '✔ Copiado! No Instagram, cole na legenda, no story ou na bio.');
+        setTimeout(function () { abrir('https://www.instagram.com/'); }, 900); break;
+      case 'celular': navigator.share({ title: p.n, text: m, url: u }).catch(function () {}); break;
+    }
+  });
+})();
 </script>
 </body>
 </html>
