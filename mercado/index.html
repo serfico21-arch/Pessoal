@@ -903,7 +903,6 @@ function instalar(){
       'Toque em <b>Adicionar</b>. Pronto, o ícone do mercado fica na sua tela.']);
     return;
   }
-  if(EH_ANDROID && JA_INSTALADO){ mostrarAchar(); return; }
   if(EH_ANDROID){
     if(/SamsungBrowser/i.test(UA)) mostrarPassos('Instalar no celular', ['Toque no menu <b>☰</b> embaixo, à direita.', 'Escolha <b>Adicionar página a</b> e depois <b>Tela inicial</b>.', 'Toque em <b>Adicionar</b>.']);
     else mostrarPassos('Instalar no celular', ['Toque nos <b>3 pontinhos ⋮</b> no alto, à direita.', 'Escolha <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.', 'Toque em <b>Instalar</b> (ou <b>Adicionar</b>). Pronto!', 'Se instalar e o ícone não aparecer: ⋮ → <b>Adicionar à tela inicial</b> → <b>Criar atalho</b>.'],
@@ -913,7 +912,6 @@ function instalar(){
   mostrarPassos('Instalar', ['No computador, clique no ícone de instalar ⊕ no fim da barra de endereço do Chrome ou do Edge.', 'No celular, abra este mesmo link e toque em <b>Instalar</b>.']);
 }
 /* O app já está instalado, mas a pessoa não acha o ícone (alguns celulares, como Xiaomi, não põem o ícone na tela sozinhos) */
-let JA_INSTALADO = false;
 function mostrarAchar(){
   mostrarPassos('O app já está no seu celular', [
     'Na tela inicial, <b>deslize o dedo de baixo para cima</b> e procure <b>Pinheiro &amp; Costa</b> na lista de aplicativos. Achou? Segure o ícone e arraste para a tela.',
@@ -921,23 +919,14 @@ function mostrarAchar(){
     'Volte aqui no Chrome, toque nos <b>3 pontinhos ⋮</b> → <b>Adicionar à tela inicial</b> e escolha <b>Criar atalho</b> (ou <b>Adicionar</b>). Esse jeito funciona em todos os celulares.'],
     '<p class="dica">Xiaomi/Redmi/Poco: antes, libere em <b>Configurações → Apps → Chrome → Outras permissões → Atalhos na tela inicial</b>.<br>Ainda com problema? Atualize o <b>Chrome</b> na Play Store.</p>');
 }
-if(navigator.getInstalledRelatedApps) navigator.getInstalledRelatedApps().then(l=>{
-  if(!l || !l.length || JA_APP()) return;
-  JA_INSTALADO = true;
-  const b = document.getElementById('barraApp');
-  b.querySelector('span').textContent = 'O app do mercado já está no seu celular.';
-  b.querySelector('.ok').textContent = 'Onde achar?';
-  let v=null; try{ v = localStorage.getItem('pc_barra_app'); }catch(e){}
-  if(!(v && v!=='instalado' && Date.now()-Number(v) < 864e5)) b.classList.add('on');
-}).catch(()=>{});
 function fecharBarraApp(sempre){
   document.getElementById('barraApp').classList.remove('on');
-  try{ localStorage.setItem('pc_barra_app', sempre===true ? 'instalado' : String(Date.now())); }catch(e){}
+  try{ localStorage.setItem('pc_barra_app', String(Date.now())); }catch(e){}
 }
 (function(){
   if(JA_APP() || !(EH_IOS || EH_ANDROID)) return;
   let v=null; try{ v = localStorage.getItem('pc_barra_app'); }catch(e){}
-  if(v==='instalado' || (v && Date.now()-Number(v) < 3*864e5)) return; // fechou: volta a mostrar em 3 dias
+  if(v && v!=='instalado' && Date.now()-Number(v) < 2*864e5) return; // fechou: volta a mostrar em 3 dias
   document.getElementById('barraApp').classList.add('on');
 })();
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(()=>{});
