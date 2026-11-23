@@ -18,7 +18,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname.includes('/painel/')) return; // o painel não entra no app do cliente
+  if (url.pathname.includes('/painel/') || url.pathname.includes('/instalador/')) return; // a Central não entra no app do cliente
   e.respondWith(
     fetch(req).then(res => {
       if (res && res.ok) { const c = res.clone(); caches.open(CACHE).then(x => x.put(req, c)); }

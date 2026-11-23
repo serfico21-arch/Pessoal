@@ -246,6 +246,39 @@ img{display:block;max-width:100%}
 .modal li{margin:8px 0}
 .modal li svg{width:18px;height:18px;vertical-align:-3px;color:#0a84ff}
 
+
+/* ofertas e avisos instantâneos */
+.avisos{margin-top:18px}
+.avisos .cab{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.avisos h2{font-family:var(--serif);font-weight:600;font-size:24px;color:var(--verde);display:flex;align-items:center;gap:10px;letter-spacing:-.01em}
+.vivo{display:inline-flex;align-items:center;gap:6px;font-family:'Inter';font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#b3261e;background:#fdecea;border-radius:999px;padding:4px 9px}
+.vivo i{width:7px;height:7px;border-radius:50%;background:#d93025;animation:pulsa 1.4s infinite}
+@keyframes pulsa{0%{box-shadow:0 0 0 0 rgba(217,48,37,.55)}70%{box-shadow:0 0 0 8px rgba(217,48,37,0)}100%{box-shadow:0 0 0 0 rgba(217,48,37,0)}}
+.avisos .setas{display:flex;gap:6px}
+.avisos .setas button{width:36px;height:36px;border-radius:50%;border:1px solid var(--linha);background:#fff;color:var(--verde);font-size:18px;font-weight:700}
+.trilho{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin:0 -16px;padding:2px 16px 6px}
+.trilho::-webkit-scrollbar{display:none}
+.av{flex:none;width:min(82vw,340px);scroll-snap-align:start;border-radius:24px;overflow:hidden;position:relative;background:var(--verde);color:#fff;min-height:230px;display:flex;align-items:flex-end;box-shadow:var(--sombra)}
+.av.so-texto{background:radial-gradient(130% 120% at 100% 0%,#2d6a4f,#12372a 60%,#0e2e23)}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.av::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,46,35,0) 25%,rgba(14,46,35,.88) 78%)}
+.av.so-texto::after{display:none}
+.av .tx{position:relative;z-index:2;padding:16px 16px 15px;width:100%}
+.av .et{display:inline-flex;gap:6px;align-items:center;font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;background:var(--ouro);color:var(--verde);padding:4px 9px;border-radius:999px}
+.av .et.aviso{background:#fff;color:var(--verde)}
+.av h3{font-family:var(--serif);font-weight:600;font-size:23px;line-height:1.12;margin-top:8px;text-wrap:balance}
+.av p{font-size:13.5px;color:rgba(255,255,255,.85);margin-top:4px}
+.av .pr{display:flex;align-items:baseline;gap:8px;margin-top:6px}
+.av .pr s{color:rgba(255,255,255,.6);font-size:13px}
+.av .pr b{font-family:var(--serif);font-size:26px;color:var(--ouro2)}
+.av .qd{font-size:11.5px;color:rgba(255,255,255,.65);margin-top:6px}
+.pop{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top));transform:translate(-50%,-140%);z-index:85;width:min(94vw,420px);background:#fff;border:1px solid var(--ouro2);border-radius:20px;box-shadow:0 24px 50px -20px rgba(14,46,35,.6);display:flex;gap:12px;align-items:center;padding:10px;transition:transform .45s cubic-bezier(.2,.9,.3,1.2);cursor:pointer}
+.pop.on{transform:translate(-50%,0)}
+.pop .im{width:58px;height:58px;border-radius:14px;flex:none;background:var(--verde) center/cover;display:flex;align-items:center;justify-content:center;color:var(--ouro2);font-family:var(--serif);font-size:24px}
+.pop small{display:block;font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#b3261e}
+.pop b{display:block;font-family:var(--serif);font-weight:600;font-size:17px;color:var(--verde);line-height:1.2}
+.pop .x{margin-left:auto;border:0;background:none;font-size:22px;color:var(--suave);padding:4px 8px}
+@media (min-width:700px){ .av{width:340px;min-height:260px} }
 @media (min-width:700px){
   .grade,.carregando{grid-template-columns:repeat(3,1fr);gap:16px}
   .passos{grid-template-columns:repeat(3,1fr)}
@@ -288,6 +321,12 @@ img{display:block;max-width:100%}
     <input id="busca" type="search" placeholder="O que você procura hoje?" autocomplete="off" enterkeyhint="search" aria-label="Buscar produto">
   </div></div>
 </header>
+
+<section class="wrap avisos" id="avisos" hidden>
+  <div class="cab"><h2>Ofertas e avisos <span class="vivo"><i></i>Agora</span></h2>
+    <div class="setas"><button aria-label="Anterior" onclick="rolarAvisos(-1)">‹</button><button aria-label="Próximo" onclick="rolarAvisos(1)">›</button></div></div>
+  <div class="trilho" id="trilho"></div>
+</section>
 
 <section class="wrap capa">
   <div class="capa-in">
@@ -377,6 +416,7 @@ img{display:block;max-width:100%}
   </div>
 </div>
 <div class="toast" id="toast" role="status"></div>
+<div class="pop" id="pop" role="status" onclick="if(event.target.classList.contains('x')){fecharPop();return;}fecharPop();document.getElementById('avisos').scrollIntoView({behavior:'smooth'})"></div>
 
 <script src="qrcode.js"></script>
 <script>
@@ -465,7 +505,7 @@ async function carregar(){
   }
   if(DEMO && !CFG.pix_chave){ CFG.pix_chave = 'exemplo@pinheiroecosta.com.br'; CFG.pix_cidade = 'SAO PAULO'; }
   for(const id in carrinho){ if(!PRODUTOS.find(p=>p.id===id)) delete carrinho[id]; }
-  aplicarConfig(); desenharDeps(); desenharLista(); atualizarBarra();
+  aplicarConfig(); desenharDeps(); desenharLista(); atualizarBarra(); desenharAvisos(true);
   if(!DEMO) carregarFotos();
 }
 
@@ -745,7 +785,62 @@ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigato
 document.getElementById('busca').addEventListener('input', ()=>{ desenharLista(); });
 document.getElementById('busca').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.target.blur(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'}); } });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ fecharCarrinho(); document.getElementById('modalApp').classList.remove('on'); } });
-carregar();
+/* ===== Ofertas e avisos instantâneos (vêm da Central) ===== */
+const EX_AVISOS = [
+  {id:'d1', tipo:'aviso', titulo:'Pão quentinho acabou de sair!', texto:'Fornada nova de pão francês. Corre que acaba rápido.', foto:'img/loja-balcao-p.webp', criado:Date.now()-6*60000},
+  {id:'d2', tipo:'oferta', titulo:'Frango assado: ainda temos!', texto:'Inteiro, temperadinho, pronto para o almoço.', preco_de:34.9, preco_por:29.9, criado:Date.now()-25*60000},
+  {id:'d3', tipo:'oferta', titulo:'Refrigerante 2L gelado', texto:'Leve 2 e pague menos.', preco_de:10.99, preco_por:8.99, foto:'img/loja-bebidas-p.webp', criado:Date.now()-90*60000}
+];
+let vistos = {}; try{ vistos = JSON.parse(localStorage.getItem('pc_avisos_vistos')||'{}')||{}; }catch(e){}
+function avisosAtivos(){
+  let a = Array.isArray(CFG.avisos) ? CFG.avisos : [];
+  if(DEMO && !a.length) a = EX_AVISOS;
+  const ag = Date.now();
+  return a.filter(x=>x && x.titulo && (!x.expira || x.expira > ag)).sort((x,y)=>(y.criado||0)-(x.criado||0));
+}
+function haQuanto(t){
+  const m = Math.max(0, Math.round((Date.now()-(t||Date.now()))/60000));
+  if(m<1) return 'agora mesmo'; if(m<60) return 'há '+m+' min';
+  const h = Math.round(m/60); if(h<24) return 'há '+h+' h'; return 'há '+Math.round(h/24)+' dia(s)';
+}
+function desenharAvisos(primeira){
+  const a = avisosAtivos(), sec = document.getElementById('avisos');
+  sec.hidden = !a.length;
+  document.getElementById('trilho').innerHTML = a.map(x=>{
+    const foto = x.foto ? '<img alt="" src="'+esc(x.foto)+'">' : '';
+    const preco = Number(x.preco_por)>0 ? '<div class="pr">'+(Number(x.preco_de)>0?'<s>'+brl(x.preco_de)+'</s>':'')+'<b>'+brl(x.preco_por)+'</b></div>' : '';
+    return '<article class="av'+(x.foto?'':' so-texto')+'">'+foto+'<div class="tx"><span class="et '+(x.tipo==='oferta'?'':'aviso')+'">'+(x.tipo==='oferta'?'Oferta':'Aviso')+'</span>'+
+      '<h3>'+esc(x.titulo)+'</h3>'+(x.texto?'<p>'+esc(x.texto)+'</p>':'')+preco+'<div class="qd">'+haQuanto(x.criado)+'</div></div></article>';
+  }).join('');
+  const novo = a.find(x=>!vistos[x.id]);
+  if(novo && (!primeira || Date.now()-(novo.criado||0) < 3*3600000)) mostrarPop(novo);
+  a.forEach(x=>vistos[x.id]=1); try{ localStorage.setItem('pc_avisos_vistos', JSON.stringify(vistos)); }catch(e){}
+}
+function mostrarPop(x){
+  const p = document.getElementById('pop');
+  p.innerHTML = '<div class="im"'+(x.foto?' style="background-image:url(\''+esc(x.foto)+'\')"':'')+'>'+(x.foto?'':'!')+'</div><div style="min-width:0"><small>'+(x.tipo==='oferta'?'Oferta agora':'Aviso agora')+'</small><b>'+esc(x.titulo)+'</b></div><button class="x" aria-label="Fechar">×</button>';
+  setTimeout(()=>p.classList.add('on'), 600); clearTimeout(p._t); p._t = setTimeout(fecharPop, 9000);
+}
+function fecharPop(){ document.getElementById('pop').classList.remove('on'); }
+function rolarAvisos(d){ const t=document.getElementById('trilho'); t.scrollBy({left:d*(t.clientWidth*.8),behavior:'smooth'}); }
+// confere avisos novos a cada 45 segundos, buscando só a "versão" dos avisos
+let revAvisos = null;
+async function checarAvisos(){
+  if(DEMO || document.hidden) return;
+  try{
+    const r = await sb('mercado_lojas?slug=eq.'+LOJA+'&select=rev:config->avisos_rev');
+    const rev = r[0] ? r[0].rev : null;
+    if(revAvisos!==null && rev!==revAvisos){
+      const [l] = await sb('mercado_lojas?slug=eq.'+LOJA+'&select=avisos:config->avisos');
+      CFG.avisos = (l && l.avisos) || []; desenharAvisos(false);
+    }
+    revAvisos = rev;
+  }catch(e){}
+}
+setInterval(checarAvisos, 45000);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) checarAvisos(); });
+setInterval(()=>{ if(!document.getElementById('avisos').hidden) desenharAvisos(true); }, 60000);
+carregar().then(checarAvisos);
 </script>
 </body>
 </html>

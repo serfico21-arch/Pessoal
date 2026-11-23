@@ -15,6 +15,10 @@
 <meta name="theme-color" content="#12372a">
 <link rel="icon" type="image/png" href="../img/icone-192.png">
 <link rel="apple-touch-icon" href="../img/apple-icone-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Central P&amp;C">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
 <style>
 :root{--verde:#12372a;--verde2:#1c4d3b;--verde3:#2d6a4f;--lima:#e2c27a;--amarelo:#c8a04a;--fundo:#f8f5ee;--texto:#16201b;--suave:#5f6a63;--linha:#e6e0d3;--vermelho:#b3261e;--serif:'Fraunces',Georgia,serif}
@@ -60,7 +64,7 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
 .lin .mini{width:44px;height:44px;border-radius:9px;background:#eef2ef;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:900;color:#b5c4bc;font-size:13px}
 .lin .mini img{width:100%;height:100%;object-fit:contain;background:#fff}
 .lin .t{flex:1;min-width:0;font-size:14.5px}
-.lin .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lin .t b{display:block}
 .lin .t span{color:var(--suave);font-size:13px}
 .lin .p{font-weight:800;color:var(--verde);white-space:nowrap}
 .msg{border-radius:14px;padding:13px 14px;font-weight:700;font-size:15.5px;margin-top:12px;display:none;line-height:1.4}
@@ -86,6 +90,48 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
 .filtro{display:flex;gap:6px;margin-top:6px}
 .filtro button{flex:1;border:2px solid var(--linha);background:#fff;border-radius:12px;padding:10px 4px;font-weight:800;font-size:14px;cursor:pointer}
 .filtro button.on{border-color:var(--verde3);background:#e9f6ee;color:var(--verde)}
+.abas{position:sticky;top:70px;z-index:9;background:var(--fundo);padding:10px 0 6px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.abas button{border:1.5px solid var(--linha);background:#fff;border-radius:14px;padding:10px 4px 8px;font-weight:800;font-size:13px;color:var(--suave);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
+.abas button span{font-size:20px;line-height:1}
+.abas button.on{border-color:var(--verde);background:var(--verde);color:#fff}
+.abas .bol{position:absolute;top:4px;right:8px;min-width:20px;height:20px;border-radius:99px;background:var(--vermelho);color:#fff;font-size:11.5px;display:none;align-items:center;justify-content:center;padding:0 5px}
+[data-aba]{display:none}[data-aba].mostrar{display:block}
+.avf{display:grid;gap:4px}
+.tipos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.tipos button{border:2px solid var(--linha);background:#fff;border-radius:14px;padding:12px;font-weight:800;font-size:15px;cursor:pointer}
+.tipos button.on{border-color:var(--verde3);background:#e9f6ee;color:var(--verde)}
+.prontos{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.prontos button{border:1px solid var(--linha);background:#fff;border-radius:99px;padding:8px 12px;font-size:13.5px;font-weight:600;cursor:pointer}
+.fotoav{margin-top:12px;border:3px dashed #d9ccb0;border-radius:18px;min-height:150px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;cursor:pointer;background:#fffdf8;overflow:hidden;position:relative;color:var(--suave);font-weight:700}
+.fotoav img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.fotoav .tirar{position:absolute;top:8px;right:8px;z-index:2;border:0;background:rgba(0,0,0,.6);color:#fff;border-radius:99px;padding:6px 12px;font-weight:800;cursor:pointer}
+.durar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.durar button{border:2px solid var(--linha);background:#fff;border-radius:12px;padding:10px 2px;font-weight:800;font-size:13.5px;cursor:pointer}
+.durar button.on{border-color:var(--verde3);background:#e9f6ee;color:var(--verde)}
+.prev-av{margin-top:14px;border-radius:22px;overflow:hidden;position:relative;min-height:200px;background:radial-gradient(130% 120% at 100% 0%,#2d6a4f,#12372a 60%,#0e2e23);color:#fff;display:flex;align-items:flex-end}
+.prev-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.prev-av.foto::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(14,46,35,0) 25%,rgba(14,46,35,.9) 80%)}
+.prev-av .tx{position:relative;z-index:2;padding:16px}
+.prev-av .et{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;background:var(--amarelo);color:var(--verde);padding:4px 9px;border-radius:99px}
+.prev-av .et.aviso{background:#fff}
+.prev-av h3{font-family:var(--serif);font-weight:600;font-size:23px;line-height:1.15;margin-top:8px}
+.prev-av p{font-size:14px;opacity:.85;margin-top:4px}
+.prev-av .pr b{font-family:var(--serif);font-size:24px;color:var(--lima)}
+.prev-av .pr s{opacity:.6;margin-right:6px}
+.ativo{display:flex;gap:10px;align-items:center;border:1px solid var(--linha);border-radius:14px;padding:8px;margin-top:8px}
+.ativo .im{width:56px;height:56px;border-radius:12px;background:var(--verde) center/cover;flex:none}
+.ativo .t{flex:1;min-width:0}
+.ativo .t b{display:block;font-size:15px}
+.ativo .t span{font-size:12.5px;color:var(--suave)}
+.ativo button{border:0;background:#fdecea;color:var(--vermelho);border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}
+.mud{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0}
+.mud div{border-radius:12px;padding:10px 4px;text-align:center;font-size:12px;color:var(--suave);background:#f6f2e8}
+.mud b{display:block;font-size:22px;color:var(--verde);font-family:var(--serif)}
+.mud .n b{color:#1a7a52}.mud .p b{color:#a15c00}.mud .r b{color:var(--vermelho)}
+.lin .tag{font-size:11px;font-weight:800;border-radius:99px;padding:2px 7px;margin-left:4px;vertical-align:1px}
+.tag.n{background:#dcfce7;color:#14532d}.tag.p{background:#fff1d6;color:#7a4500}.tag.e{background:#e0ecff;color:#1e3a8a}
+.inst{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.inst{grid-template-columns:1fr}}
 .dev{display:flex;align-items:center;justify-content:flex-end;gap:8px;max-width:820px;margin:6px auto 0;padding:0 16px;color:var(--suave);font-size:11px;text-decoration:none}
 .dev img{width:28px;height:28px;border-radius:50%}
 .campo textarea{width:100%;border:2px solid var(--linha);border-radius:12px;padding:13px 14px;font-size:15px;background:#fff}
@@ -107,13 +153,44 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
 
 <!-- PAINEL -->
 <section id="telaPainel" class="oculto">
-  <div class="card">
+  <nav class="abas" aria-label="Partes da Central">
+    <button data-ir="pedidos" onclick="aba('pedidos')"><span>🧾</span>Pedidos<i class="bol" id="bolPed"></i></button>
+    <button data-ir="avisos" onclick="aba('avisos')"><span>📣</span>Avisos</button>
+    <button data-ir="produtos" onclick="aba('produtos')"><span>📦</span>Produtos</button>
+    <button data-ir="loja" onclick="aba('loja')"><span>🏪</span>Loja</button>
+  </nav>
+
+  <div class="card" data-aba="avisos">
+    <h1>📣 Avisos e ofertas</h1>
+    <div class="desc">Aparecem na hora, em destaque, no topo do site do cliente. Quem estiver com o site aberto vê um alerta.</div>
+    <div class="tipos"><button id="tpAviso" class="on" onclick="tipoAv('aviso')">📢 Aviso</button><button id="tpOferta" onclick="tipoAv('oferta')">🏷️ Oferta com preço</button></div>
+    <div class="campo"><label for="avTit">Título</label><input id="avTit" maxlength="60" placeholder="Ex: Pão quentinho acabou de sair!" oninput="previaAv()"></div>
+    <div class="prontos" id="prontos"></div>
+    <div class="campo"><label for="avTxt">Detalhe (opcional)</label><input id="avTxt" maxlength="110" placeholder="Ex: Fornada nova de pão francês" oninput="previaAv()"></div>
+    <div class="g2 oculto" id="avPrecos">
+      <div class="campo"><label for="avDe">De R$ (opcional)</label><input id="avDe" type="number" step="0.01" min="0" inputmode="decimal" oninput="previaAv()"></div>
+      <div class="campo"><label for="avPor">Por R$</label><input id="avPor" type="number" step="0.01" min="0" inputmode="decimal" oninput="previaAv()"></div>
+    </div>
+    <label class="fotoav" id="avFotoBox"><span style="font-size:30px">📷</span>Tirar ou escolher foto<input type="file" id="avFoto" accept="image/*" style="display:none"></label>
+    <div class="campo"><label>Mostrar por</label></div>
+    <div class="durar" id="durar"><button data-h="2">2 horas</button><button data-h="4" class="on">4 horas</button><button data-h="12">Hoje</button><button data-h="72">3 dias</button></div>
+    <div class="campo"><label>Como o cliente vai ver</label></div>
+    <div class="prev-av" id="prevAv"></div>
+    <div style="margin-top:14px"><button class="btn btn-vd" id="btnAv" onclick="publicarAviso()">📣 Publicar agora</button></div>
+    <div class="msg" id="msgAv"></div>
+  </div>
+  <div class="card" data-aba="avisos">
+    <h2>No ar agora</h2>
+    <div id="avAtivos"><div class="desc">Carregando...</div></div>
+  </div>
+
+  <div class="card" data-aba="pedidos">
     <h1>🧾 Pedidos do site</h1>
     <div class="desc">Os pedidos que os clientes fazem pelo site aparecem aqui. A lista atualiza sozinha.</div>
     <div class="filtro"><button class="on" data-f="abertos" onclick="filtroPed(this)">Em aberto</button><button data-f="todos" onclick="filtroPed(this)">Todos</button></div>
     <div id="pedidos"><div class="desc" style="margin-top:12px">Carregando...</div></div>
   </div>
-  <div class="card">
+  <div class="card" data-aba="produtos">
     <h1>Atualizar produtos do site</h1>
     <div class="desc">Os produtos do site vêm do arquivo do <b>FCosta Gestor</b>.</div>
     <div class="passo"><b class="n">1</b><div>No gestor, vá em <b>Cadastros → Impressora &amp; Backup</b> e toque em <b>Baixar backup (JSON)</b>. Esse arquivo leva as fotos dos produtos.</div></div>
@@ -130,15 +207,18 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
     <div class="msg" id="msgArq"></div>
     <div id="previa" class="oculto">
       <div class="res"><div><b id="rTotal">0</b>produtos</div><div><b id="rFoto">0</b>com foto</div><div><b id="rCat">0</b>departamentos</div></div>
+      <div class="desc" style="margin:0;font-weight:700;color:var(--verde)">Comparado com o site agora:</div>
+      <div class="mud"><div class="n"><b id="mNovo">–</b>novos</div><div class="p"><b id="mMud">–</b>mudaram</div><div class="r"><b id="mSai">–</b>vão sair</div><div><b id="mIgual">–</b>iguais</div></div>
       <div class="lista" id="rLista"></div>
-      <label class="chk"><input type="checkbox" id="semEstoque" checked> Mostrar no site os produtos sem estoque (aparecem como "Esgotado")</label>
+      <label class="chk"><input type="checkbox" id="semEstoque" checked onchange="compararSite()"> Mostrar no site os produtos sem estoque (aparecem como "Esgotado")</label>
+      <label class="chk"><input type="checkbox" id="soMudou" checked> Enviar só o que mudou (bem mais rápido)</label>
       <div style="margin-top:14px"><button class="btn btn-vd" id="btnPublicar" onclick="publicar()">✅ Colocar no site</button></div>
       <div class="barra" id="barra"><i id="barraI"></i></div>
       <div class="msg" id="msgPub"></div>
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" data-aba="loja">
     <h2>Condições da loja</h2>
     <div class="desc">Aparecem no site. Toque em <b>Salvar condições</b> depois de mudar.</div>
     <div class="campo"><label for="cNome">Nome do mercado</label><input id="cNome"></div>
@@ -168,7 +248,7 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
     <div class="msg" id="msgCond"></div>
   </div>
 
-  <div class="card">
+  <div class="card" data-aba="produtos">
     <h2>🛟 Backup do site</h2>
     <div class="desc">Guarda uma cópia de tudo o que está no site (produtos, fotos, preços e condições). Faça depois de cada atualização e guarde no pen drive.</div>
     <button class="btn btn-cl" id="btnBackup" onclick="baixarBackup()">⬇️ Baixar backup do site</button>
@@ -176,9 +256,20 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
     <div class="msg" id="msgBackup"></div>
   </div>
 
-  <div class="card grandes">
+  <div class="card grandes" data-aba="loja">
     <a class="btn btn-cl" href="../?v=" id="verSite" target="_blank" rel="noopener">👀 Ver o site</a>
     <div class="desc" id="infoSite" style="margin:0;text-align:center"></div>
+  </div>
+
+  <div class="card" data-aba="loja">
+    <h2>💻 Instalar a Central</h2>
+    <div class="desc">Use no computador e no celular. Tudo fica sincronizado: o que você faz em um aparece no outro.</div>
+    <div class="inst">
+      <a class="btn btn-am" href="../instalador/Central-Pinheiro-Costa-Instalador.exe" download>🪟 Baixar para Windows</a>
+      <button class="btn btn-cl" onclick="instalarCentral()">📱 Instalar no celular</button>
+    </div>
+    <div class="desc" style="margin:10px 0 0;font-size:13.5px">No Windows, abra o arquivo baixado e clique em <b>Avançar</b>. Se o Windows avisar "proteger o computador", clique em <b>Mais informações</b> e depois em <b>Executar assim mesmo</b>. No iPhone: Safari → Compartilhar → <b>Adicionar à Tela de Início</b>.</div>
+    <div class="msg" id="msgInst"></div>
   </div>
 </section>
 </main>
@@ -188,6 +279,28 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
 const SB_URL = 'https://avvhnajfczdedlydkcrb.supabase.co';
 const SB_KEY = 'sb_publishable_y3y3sLLFrm5HrXDa2ttGTA_dl8vouP7';
 const LOJA = 'pinheiro-costa';
+/* Modo de demonstração (?demo=1): não toca no banco, guarda tudo só nesta tela. */
+const DEMO = /[?&]demo=1/.test(location.search);
+if(DEMO){
+  const fake = { config:{nome:'Pinheiro & Costa', whatsapp:'(11) 99350-9109', pix_chave:'11993509109', pix_cidade:'São Paulo', avisos:[]},
+    produtos:[{id:'a',nome:'Arroz branco 5kg',marca:'Camil',categoria:'Mercearia',preco:27.9,tipo_venda:'unidade',estoque:12},{id:'b',nome:'Feijão carioca 1kg',marca:'Kicaldo',categoria:'Mercearia',preco:8.79,tipo_venda:'unidade',estoque:20},{id:'c',nome:'Pão francês',marca:'',categoria:'Padaria',preco:16.9,tipo_venda:'peso',estoque:30}],
+    pedidos:[{id:1043,status:'novo',criado_em:new Date(Date.now()-4*60000).toISOString(),cliente:{nome:'Maria Souza',fone:'(11) 98888-1234',modo:'entrega',endereco:'Rua das Flores, 120',pagamento:'Pix (QR no site)'},itens:[{nome:'Arroz branco 5kg',qtd:1,tipo:'unidade',total:27.9},{nome:'Pão francês',qtd:0.5,tipo:'peso',total:8.45}],taxa:5,total:41.35},
+             {id:1042,status:'confirmado',criado_em:new Date(Date.now()-50*60000).toISOString(),cliente:{nome:'João Lima',fone:'(11) 97777-0000',modo:'retirada',pagamento:'Dinheiro'},itens:[{nome:'Feijão carioca 1kg',qtd:2,tipo:'unidade',total:17.58}],taxa:0,total:17.58}] };
+  const resp = b => Promise.resolve(new Response(JSON.stringify(b),{status:200,headers:{'Content-Type':'application/json'}}));
+  const fetchReal = window.fetch.bind(window);
+  window.fetch = (url, op) => {
+    url = String(url); if(!url.startsWith(SB_URL)) return fetchReal(url, op);
+    const corpo = op && op.body ? JSON.parse(op.body) : {};
+    if(url.includes('rpc/mercado_entrar')) return resp(true);
+    if(url.includes('rpc/mercado_publicar_config')){ if(corpo.p_config) fake.config = corpo.p_config; const ids=new Set(corpo.p_ids||[]); fake.produtos = fake.produtos.filter(p=>ids.has(p.id)); return resp({ok:true}); }
+    if(url.includes('rpc/mercado_publicar_produtos')){ (corpo.p_produtos||[]).forEach(n=>{ const i=fake.produtos.findIndex(p=>p.id===n.id); if(i>=0) fake.produtos[i]={...fake.produtos[i],...n}; else fake.produtos.push(n); }); return resp({ok:true}); }
+    if(url.includes('rpc/mercado_listar_pedidos')) return resp(fake.pedidos);
+    if(url.includes('rpc/mercado_status_pedido')){ const x=fake.pedidos.find(p=>p.id===corpo.p_id); if(x) x.status=corpo.p_status; return resp(true); }
+    if(url.includes('mercado_lojas')) return resp([{nome:fake.config.nome, config:fake.config, atualizado_em:new Date().toISOString()}]);
+    if(url.includes('mercado_produtos')) return resp(fake.produtos);
+    return resp([]);
+  };
+}
 const PADRAO = { nome:'Pinheiro & Costa', whatsapp:'', endereco:'', horario:'Segunda a sábado, 8h às 20h · Domingo, 8h às 13h',
   entrega:true, retirada:true, area_entrega:'Bairros próximos ao mercado', taxa_entrega:5, pedido_minimo:30, frete_gratis_acima:150,
   pagamentos:['Pix','Dinheiro','Cartão na entrega'], aviso:'', logo:null, pix_chave:'', pix_nome:'', pix_cidade:'' };
@@ -196,6 +309,7 @@ let codigo = '';
 let CFG = {...PADRAO};
 let ITENS = [];        // produtos lidos do arquivo
 let LOJA_ARQ = null;   // nome/endereço/telefone/Pix vindos do backup
+let SITE = null;       // produtos que estão no site agora (sem foto), para comparar
 
 const $ = id => document.getElementById(id);
 const brl = v => (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -223,9 +337,10 @@ async function entrar(auto){
   try{
     const ok = await rpc('mercado_entrar',{p_slug:LOJA,p_codigo:c});
     if(ok!==true){ msg('msgEntrar','er','Código errado. Confira e tente de novo.'); try{localStorage.removeItem('pc_adm_codigo');}catch(e){} return; }
-    codigo = c; try{ localStorage.setItem('pc_adm_codigo', c); }catch(e){}
+    codigo = c; if(!DEMO) try{ localStorage.setItem('pc_adm_codigo', c); }catch(e){}
     $('telaEntrar').classList.add('oculto'); $('telaPainel').classList.remove('oculto'); $('btnSair').classList.remove('oculto');
-    await carregarLoja();
+    let ab='pedidos'; try{ ab = localStorage.getItem('pc_adm_aba')||'pedidos'; }catch(e){} aba(ab);
+    await carregarLoja(); desenharAtivos();
     carregarPedidos(); clearInterval(timerPed); timerPed = setInterval(carregarPedidos, 30000);
     document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ document.title='Painel ADM · Pinheiro & Costa'; carregarPedidos(); } });
   }catch(e){
@@ -272,6 +387,7 @@ async function salvarCondicoes(){
   if(c.whatsapp.replace(/\D/g,'').length<10){ msg('msgCond','er','Coloque o WhatsApp com DDD. É para ele que os pedidos vão.'); return; }
   $('btnCond').disabled = true; msg('msgCond','in','Salvando...');
   try{
+    await manterAvisos(c);
     const r = await rpc('mercado_publicar_config',{p_slug:LOJA,p_codigo:codigo,p_config:c,p_ids:await idsNoSite()});
     if(!r||!r.ok) throw new Error('codigo');
     CFG = c; msg('msgCond','ok','✅ Condições salvas. Já aparecem no site.');
@@ -293,6 +409,7 @@ async function carregarPedidos(){
     const maior = r.reduce((m,x)=>Math.max(m,x.id),0);
     if(ultimoMaior!==null && maior>ultimoMaior){ bip(); document.title='🔔 Novo pedido · Painel'; }
     ultimoMaior = maior;
+    const nn = r.filter(x=>x.status==='novo').length; const b=$('bolPed'); b.textContent=nn; b.style.display = nn?'flex':'none';
     desenharPedidos();
   }catch(e){
     console.warn(e);
@@ -377,6 +494,7 @@ function lerArquivo(f){
       '<div class="t"><b>'+esc(p.nome)+'</b><span>'+esc([p.categoria,p.marca].filter(Boolean).join(' · ')||'Sem departamento')+' · estoque '+(p.estoque||0)+'</span></div>'+
       '<div class="p">'+brl(p.preco)+(p.tipo_venda==='peso'?'/kg':'')+'</div></div>').join('');
     $('previa').classList.remove('oculto');
+    compararSite();
     if(LOJA_ARQ){
       if(LOJA_ARQ.nome && !$('cNome').value) $('cNome').value = LOJA_ARQ.nome;
       if(LOJA_ARQ.endereco && !$('cEnd').value) $('cEnd').value = LOJA_ARQ.endereco;
@@ -416,28 +534,164 @@ async function publicar(){
   $('barra').style.display='block'; $('barraI').style.width='3%';
   try{
     msg('msgPub','in','Enviando... não feche esta página.');
+    await manterAvisos(c);
     const r1 = await rpc('mercado_publicar_config',{p_slug:LOJA,p_codigo:codigo,p_config:c,p_ids:lista.map(p=>p.id)});
     if(!r1||!r1.ok){ msg('msgPub','er','Código da loja não aceito. Toque em Sair e entre de novo.'); return; }
     CFG = c;
+    let hashes = {}; try{ hashes = JSON.parse(localStorage.getItem('pc_adm_fotos')||'{}')||{}; }catch(e){}
+    const so = $('soMudou').checked && SITE;
+    const enviar = so ? lista.filter(p=> estado(p)!=='igual' || hashes[p.id]!==hashFoto(p.fotoOriginal)) : lista;
+    if(!enviar.length){ $('barraI').style.width='100%'; msg('msgPub','ok','✅ O site já estava igual ao gestor. Nada para enviar.'); carregarLoja(); return; }
     const T = 20;
-    for(let i=0;i<lista.length;i+=T){
+    for(let i=0;i<enviar.length;i+=T){
       const lote = [];
-      for(const p of lista.slice(i,i+T)){
-        lote.push({id:p.id,nome:p.nome,marca:p.marca,categoria:p.categoria,preco:p.preco,tipo_venda:p.tipo_venda,estoque:p.estoque,foto:p.fotoPronta?p.fotoOriginal:await fotoPequena(p.fotoOriginal)});
+      for(const p of enviar.slice(i,i+T)){
+        const h = hashFoto(p.fotoOriginal);
+        const manter = SITE && SITE[p.id] && hashes[p.id]===h;
+        lote.push({id:p.id,nome:p.nome,marca:p.marca,categoria:p.categoria,preco:p.preco,tipo_venda:p.tipo_venda,estoque:p.estoque,
+          foto: manter ? '__MANTER__' : (p.fotoPronta?p.fotoOriginal:await fotoPequena(p.fotoOriginal))});
+        hashes[p.id] = h;
       }
       const r2 = await rpc('mercado_publicar_produtos',{p_slug:LOJA,p_codigo:codigo,p_produtos:lote});
       if(!r2||!r2.ok) throw new Error('lote');
-      const feito = Math.min(i+T,lista.length);
-      $('barraI').style.width = Math.round(feito/lista.length*100)+'%';
-      msg('msgPub','in','Enviando '+feito+' de '+lista.length+'... não feche esta página.');
+      try{ localStorage.setItem('pc_adm_fotos', JSON.stringify(hashes)); }catch(e){}
+      const feito = Math.min(i+T,enviar.length);
+      $('barraI').style.width = Math.round(feito/enviar.length*100)+'%';
+      msg('msgPub','in','Enviando '+feito+' de '+enviar.length+'... não feche esta página.');
     }
-    msg('msgPub','ok','✅ Pronto! '+lista.length+' produto(s) já estão no site. <a href="../?v='+Date.now()+'" target="_blank" rel="noopener">Ver o site</a>');
+    msg('msgPub','ok','✅ Pronto! O site tem '+lista.length+' produto(s). Enviados agora: '+enviar.length+'. <a href="../?v='+Date.now()+'" target="_blank" rel="noopener">Ver o site</a>');
+    SITE = null; compararSite();
     carregarLoja();
   }catch(e){
     console.error(e);
     msg('msgPub','er','A internet falhou no meio do envio. Toque em <b>Colocar no site</b> de novo.');
   }finally{ btn.disabled = false; }
 }
+
+/* ---------- Abas ---------- */
+function aba(n){
+  document.querySelectorAll('[data-aba]').forEach(e=>e.classList.toggle('mostrar', e.dataset.aba===n));
+  document.querySelectorAll('.abas button').forEach(b=>b.classList.toggle('on', b.dataset.ir===n));
+  try{ localStorage.setItem('pc_adm_aba', n); }catch(e){}
+  if(n==='avisos') previaAv();
+  window.scrollTo({top:0});
+}
+
+/* ---------- Comparar arquivo do gestor com o site ---------- */
+function hashFoto(src){
+  if(!src) return '';
+  const t = String(src); let h = 5381;
+  for(let i=0;i<t.length;i+=97) h = ((h<<5)+h + t.charCodeAt(i))|0;
+  return t.length+'-'+(h>>>0).toString(36);
+}
+function estado(p){
+  const s = SITE && SITE[p.id]; if(!s) return 'novo';
+  const igual = s.nome===p.nome && (s.marca||'')===p.marca && (s.categoria||'')===p.categoria && Number(s.preco)===p.preco && Number(s.estoque)===p.estoque && (s.tipo_venda||'unidade')===p.tipo_venda;
+  if(igual) return 'igual';
+  return Number(s.preco)!==p.preco ? 'preco' : 'mudou';
+}
+async function compararSite(){
+  if(!ITENS.length) return;
+  try{
+    if(!SITE){ SITE = {}; (await get('mercado_produtos?slug=eq.'+LOJA+'&select=id,nome,marca,categoria,preco,tipo_venda,estoque')).forEach(x=>SITE[x.id]=x); }
+  }catch(e){ SITE = null; return; }
+  const lista = $('semEstoque').checked ? ITENS : ITENS.filter(p=>p.estoque>0);
+  const ids = new Set(lista.map(p=>p.id));
+  let n=0,m=0,i=0; lista.forEach(p=>{ const e=estado(p); if(e==='novo') n++; else if(e==='igual') i++; else m++; });
+  $('mNovo').textContent=n; $('mMud').textContent=m; $('mIgual').textContent=i;
+  $('mSai').textContent = Object.keys(SITE).filter(id=>!ids.has(id)).length;
+  document.querySelectorAll('#rLista .lin').forEach((el,k)=>{
+    const p = ITENS[k]; if(!p) return; const e = estado(p); const b = el.querySelector('.t b'); if(!b) return;
+    b.querySelectorAll('.tag').forEach(t=>t.remove());
+    if(e==='novo') b.insertAdjacentHTML('beforeend','<span class="tag n">novo</span>');
+    else if(e==='preco') b.insertAdjacentHTML('beforeend','<span class="tag p">preço '+brl(SITE[p.id].preco)+' → '+brl(p.preco)+'</span>');
+    else if(e==='mudou') b.insertAdjacentHTML('beforeend','<span class="tag e">mudou</span>');
+  });
+}
+
+/* ---------- Avisos e ofertas instantâneos ---------- */
+const PRONTOS = ['🥖 Pão quentinho acabou de sair!','🍗 Frango assado: ainda temos!','🍌 Chegou fruta fresquinha','🥩 Carne fresca no açougue','🔥 Oferta do dia','🧊 Bebida bem gelada'];
+let AV = {tipo:'aviso', foto:null, horas:4};
+$('prontos').innerHTML = PRONTOS.map(t=>'<button type="button">'+t+'</button>').join('');
+$('prontos').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('avTit').value = b.textContent.replace(/^\S+\s/,''); previaAv(); });
+document.querySelectorAll('#durar button').forEach(b=>b.onclick=()=>{ AV.horas=Number(b.dataset.h); document.querySelectorAll('#durar button').forEach(x=>x.classList.toggle('on',x===b)); });
+function tipoAv(t){ AV.tipo=t; $('tpAviso').classList.toggle('on',t==='aviso'); $('tpOferta').classList.toggle('on',t==='oferta'); $('avPrecos').classList.toggle('oculto',t!=='oferta'); previaAv(); }
+$('avFoto').addEventListener('change', async e=>{
+  const f = e.target.files[0]; e.target.value=''; if(!f) return;
+  const url = await new Promise(r=>{ const rd=new FileReader(); rd.onload=()=>r(rd.result); rd.onerror=()=>r(null); rd.readAsDataURL(f); });
+  AV.foto = await fotoAviso(url); mostrarFotoAv(); previaAv();
+});
+function mostrarFotoAv(){
+  const b = $('avFotoBox');
+  b.querySelectorAll('img,.tirar').forEach(x=>x.remove());
+  if(AV.foto){ b.insertAdjacentHTML('afterbegin','<img alt="" src="'+AV.foto+'"><button type="button" class="tirar">Tirar foto ✕</button>');
+    b.querySelector('.tirar').onclick=ev=>{ ev.preventDefault(); AV.foto=null; mostrarFotoAv(); previaAv(); }; }
+}
+function fotoAviso(src){
+  return new Promise(res=>{
+    if(!src) return res(null);
+    const img = new Image();
+    img.onload = ()=>{ const max=760, r=Math.min(1,max/Math.max(img.width,img.height)); const cv=document.createElement('canvas');
+      cv.width=Math.round(img.width*r); cv.height=Math.round(img.height*r); cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+      res(cv.toDataURL('image/jpeg',0.7)); };
+    img.onerror = ()=>res(null); img.src = src;
+  });
+}
+function lerAviso(){
+  return { tipo:AV.tipo, titulo:$('avTit').value.trim(), texto:$('avTxt').value.trim(), foto:AV.foto||null,
+    preco_de: AV.tipo==='oferta' ? (parseFloat($('avDe').value)||0) : 0, preco_por: AV.tipo==='oferta' ? (parseFloat($('avPor').value)||0) : 0 };
+}
+function cartaoAv(x){
+  const pr = Number(x.preco_por)>0 ? '<div class="pr">'+(Number(x.preco_de)>0?'<s>'+brl(x.preco_de)+'</s>':'')+'<b>'+brl(x.preco_por)+'</b></div>' : '';
+  return (x.foto?'<img alt="" src="'+x.foto+'">':'')+'<div class="tx"><span class="et '+(x.tipo==='oferta'?'':'aviso')+'">'+(x.tipo==='oferta'?'Oferta':'Aviso')+'</span><h3>'+esc(x.titulo||'Escreva o título')+'</h3>'+(x.texto?'<p>'+esc(x.texto)+'</p>':'')+pr+'</div>';
+}
+function previaAv(){ const x = lerAviso(); const el=$('prevAv'); el.className='prev-av'+(x.foto?' foto':''); el.innerHTML = cartaoAv(x); }
+async function configAtual(){ const [l] = await get('mercado_lojas?slug=eq.'+LOJA+'&select=config'); return (l&&l.config)||{}; }
+function soValidos(a){ const ag=Date.now(); return (Array.isArray(a)?a:[]).filter(x=>x && (!x.expira || x.expira>ag)); }
+async function manterAvisos(c){ try{ const atual = await configAtual(); c.avisos = soValidos(atual.avisos); c.avisos_rev = atual.avisos_rev||null; }catch(e){} }
+async function gravarAvisos(mudar){
+  const atual = await configAtual();
+  const c = {...PADRAO, ...atual};
+  c.avisos = mudar(soValidos(atual.avisos)).slice(0,10);
+  c.avisos_rev = Date.now();
+  const r = await rpc('mercado_publicar_config',{p_slug:LOJA,p_codigo:codigo,p_config:c,p_ids:await idsNoSite()});
+  if(!r||!r.ok) throw new Error('codigo');
+  CFG = {...CFG, avisos:c.avisos, avisos_rev:c.avisos_rev};
+}
+async function publicarAviso(){
+  const x = lerAviso();
+  if(!x.titulo){ msg('msgAv','er','Escreva o título do aviso.'); return; }
+  if(x.tipo==='oferta' && !(x.preco_por>0)){ msg('msgAv','er','Coloque o preço da oferta (Por R$).'); return; }
+  const b=$('btnAv'); b.disabled=true; msg('msgAv','in','Publicando...');
+  try{
+    x.id = Date.now().toString(36)+Math.random().toString(36).slice(2,6); x.criado = Date.now(); x.expira = Date.now()+AV.horas*3600000;
+    await gravarAvisos(a=>[x, ...a]);
+    msg('msgAv','ok','✅ Publicado! Já aparece no site, em destaque.');
+    $('avTit').value=''; $('avTxt').value=''; $('avDe').value=''; $('avPor').value=''; AV.foto=null; mostrarFotoAv(); previaAv(); desenharAtivos();
+  }catch(e){ console.error(e); msg('msgAv','er','Não consegui publicar agora. Verifique a internet e tente de novo.'); }
+  finally{ b.disabled=false; }
+}
+async function tirarAviso(id){
+  try{ await gravarAvisos(a=>a.filter(x=>x.id!==id)); desenharAtivos(); }
+  catch(e){ msg('msgAv','er','Não consegui tirar agora. Tente de novo.'); }
+}
+async function desenharAtivos(){
+  let a = [];
+  try{ a = soValidos((await configAtual()).avisos); }catch(e){}
+  const ate = t => new Date(t).toLocaleString('pt-BR',{weekday:'short',hour:'2-digit',minute:'2-digit'});
+  $('avAtivos').innerHTML = a.length ? a.map(x=>'<div class="ativo"><div class="im"'+(x.foto?' style="background-image:url(\''+x.foto+'\')"':'')+'></div><div class="t"><b>'+esc(x.titulo)+'</b><span>'+(x.tipo==='oferta'?'Oferta '+brl(x.preco_por)+' · ':'')+'até '+ate(x.expira)+'</span></div><button onclick="tirarAviso(\''+esc(x.id)+'\')">Tirar</button></div>').join('')
+    : '<div class="desc" style="margin:0">Nenhum aviso no ar agora.</div>';
+}
+
+/* ---------- Instalar a Central (celular) ---------- */
+let pedidoInst = null;
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); pedidoInst = e; });
+function instalarCentral(){
+  if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone){ msg('msgInst','ok','A Central já está instalada neste aparelho.'); return; }
+  if(pedidoInst){ pedidoInst.prompt(); pedidoInst = null; return; }
+  msg('msgInst','in', /iphone|ipad/i.test(navigator.userAgent) ? 'No iPhone: toque em <b>Compartilhar</b> e depois em <b>Adicionar à Tela de Início</b>.' : 'No Chrome: toque nos <b>3 pontinhos</b> e escolha <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.');
+}
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(()=>{});
 
 /* ---------- Backup do site (baixa tudo o que está publicado) ---------- */
 async function baixarBackup(){
@@ -456,7 +710,8 @@ async function baixarBackup(){
 }
 
 $('codigo').addEventListener('keydown', e=>{ if(e.key==='Enter') entrar(); });
-try{ const c = localStorage.getItem('pc_adm_codigo'); if(c){ $('codigo').value=c; entrar(c); } }catch(e){}
+if(DEMO) entrar('DEMO');
+else try{ const c = localStorage.getItem('pc_adm_codigo'); if(c){ $('codigo').value=c; entrar(c); } }catch(e){}
 </script>
 </body>
 </html>
