@@ -55,7 +55,7 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
 .grandes{display:grid;gap:12px}
 .passo{display:flex;gap:12px;align-items:flex-start;margin-top:10px;font-size:15.5px;line-height:1.45;color:var(--suave)}
 .passo b.n{flex:none;width:30px;height:30px;border-radius:9px;background:var(--lima);color:var(--verde);display:flex;align-items:center;justify-content:center;font-weight:900}
-.drop{border:3px dashed #c3c8e6;border-radius:18px;padding:26px 16px;text-align:center;background:#f7f8fd;cursor:pointer}
+.drop{display:block;width:100%;box-sizing:border-box;border:3px dashed #c3c8e6;border-radius:18px;padding:26px 16px;text-align:center;background:#f7f8fd;cursor:pointer}
 .drop b{display:block;font-size:19px;color:var(--verde);margin:6px 0 4px}
 .drop span{color:var(--suave);font-size:14.5px}
 .drop.on{border-color:var(--verde3);background:#e9ebfa}
@@ -509,7 +509,7 @@ function lerArquivo(f){
   rd.onload = ()=>{
     let d;
     const txt = String(rd.result||'');
-    if(!txt.replace(/[\s\u0000\uFEFF]/g,'').length){ msg('msgArq','er','Esse arquivo está <b>vazio ou estragado</b> (não tem nada dentro). Isso acontece quando o pen drive é tirado antes da hora ou o download não terminou.<br><br>No gestor, toque de novo em <b>Cadastros → Impressora &amp; Backup → Baixar backup completo (JSON)</b>, espere terminar e tente outra vez.'); return; }
+    if(!txt.replace(/[\s\u0000\uFEFF]/g,'').length){ msg('msgArq','er','O arquivo <b>'+esc(f.name)+'</b> ('+(f.size/1048576).toFixed(1).replace('.',',')+' MB) chegou <b>em branco</b>: por dentro só tem zeros. Isso acontece quando o pen drive é tirado antes de o Windows terminar de gravar.<br><br><b>Faça assim:</b><br>1. No gestor, toque em <b>Baixar backup completo (JSON)</b> e salve na pasta <b>Downloads</b> do computador (não no pen drive).<br>2. Aqui, escolha o arquivo pela pasta <b>Downloads</b>.<br>3. Para levar no pen drive, copie depois e use <b>Remover hardware com segurança</b> antes de tirar.'); return; }
     if(txt.startsWith('L\u0000\u0000\u0000') || /\.lnk$/i.test(f.name)){ msg('msgArq','er','Esse arquivo é só um <b>atalho</b>, não o backup. Abra o pen drive (E:) e escolha o arquivo <b>backup-completo-fcosta-....json</b>.'); return; }
     try{ d = JSON.parse(txt.replace(/^\uFEFF/,'').replace(/\u0000+$/,'')); }catch(e){ msg('msgArq','er','Esse arquivo não é o backup do gestor. Escolha o arquivo <b>backup-completo-fcosta-....json</b>.'); return; }
     let lista = null; LOJA_ARQ = null;
