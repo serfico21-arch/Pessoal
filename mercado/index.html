@@ -95,6 +95,8 @@ img{display:block;max-width:100%}
 .vant svg{width:24px;height:24px;color:var(--ouro);margin:0 auto 6px;display:block}
 .vant b{display:block;font-size:13.5px;color:var(--verde)}
 .vant span{font-size:12px;color:var(--suave)}
+.entrega-info{margin-top:12px;background:var(--folha);color:var(--verde);border:1px solid #cfe0d3;border-radius:16px;padding:12px 14px;font-size:14.5px;text-align:center}
+.entrega-info b{font-weight:800}
 .aviso{display:none;margin-top:12px;background:#fff8e6;border:1px solid var(--ouro2);color:#6b4e12;border-radius:16px;padding:12px 14px;font-weight:600;font-size:14px;gap:10px;align-items:center}
 
 /* títulos de seção */
@@ -347,6 +349,7 @@ img{display:block;max-width:100%}
   </div>
   <div class="vant" id="vant"></div>
   <div class="aviso" id="aviso"></div>
+  <div class="entrega-info" id="entregaInfo" hidden></div>
 </section>
 
 <section class="wrap">
@@ -430,8 +433,8 @@ const DEMO = /[?&]demo=1/.test(location.search);
 const PADRAO = {
   nome:'Pinheiro & Costa', whatsapp:'5511993509109', endereco:'',
   horario:'Segunda a sábado, 8h às 20h · Domingo, 8h às 13h',
-  entrega:true, retirada:true, taxa_entrega:5, pedido_minimo:30, frete_gratis_acima:150,
-  area_entrega:'Bairros próximos ao mercado', pagamentos:['Pix','Dinheiro','Cartão na entrega'], aviso:'',
+  entrega:true, retirada:true, taxa_entrega:5, pedido_minimo:30, frete_gratis_acima:200,
+  area_entrega:'Nas redondezas do mercado', pagamentos:['Pix','Dinheiro','Cartão na entrega'], aviso:'',
   pix_chave:'', pix_cidade:'', pix_nome:''
 };
 
@@ -538,11 +541,14 @@ function aplicarConfig(){
   const fx = [];
   fx.push('Compre pelo celular');
   if(pags().includes('Pix')) fx.push('<b>Pague com Pix</b>');
-  if(CFG.entrega) fx.push(Number(CFG.frete_gratis_acima)>0 && Number(CFG.taxa_entrega)>0 ? 'Entrega grátis acima de '+brl(CFG.frete_gratis_acima) : 'Entrega no bairro');
+  if(CFG.entrega) fx.push(Number(CFG.frete_gratis_acima)>0 && Number(CFG.taxa_entrega)>0 ? '<b>Entrega grátis</b> nas redondezas a partir de '+brl(CFG.frete_gratis_acima) : 'Entrega nas redondezas');
   document.getElementById('faixa').innerHTML = fx.join(' · ');
   const sv = d => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>';
   const f = [];
-  if(CFG.entrega) f.push('<div>'+sv('<path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>')+'<b>Entrega</b><span>'+(Number(CFG.taxa_entrega)>0?'Taxa '+brl(CFG.taxa_entrega):'Grátis')+'</span></div>');
+  const gr = Number(CFG.frete_gratis_acima)||0, tx0 = Number(CFG.taxa_entrega)||0;
+  if(CFG.entrega) f.push('<div>'+sv('<path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>')+'<b>'+(tx0>0&&gr>0?'Grátis a partir de '+brl(gr):'Entrega')+'</b><span>'+(tx0>0?(gr>0?'Abaixo disso, '+brl(tx0):'Taxa '+brl(tx0)):'Sempre grátis')+'</span></div>');
+  const ent = document.getElementById('entregaInfo');
+  if(ent){ ent.hidden = !(CFG.entrega && tx0>0 && gr>0); ent.innerHTML = '<b>Entrega grátis nas redondezas</b> em compras a partir de '+brl(gr)+'. Abaixo desse valor, a entrega custa '+brl(tx0)+'.'; }
   if(CFG.retirada) f.push('<div>'+sv('<path d="M4 10h16v10H4zM3 10l2-5h14l2 5M9 20v-5h6v5"/>')+'<b>Retirada</b><span>Grátis na loja</span></div>');
   f.push('<div>'+ICON_PIX.replace('width="20" height="20"','')+'<b>Pix</b><span>QR Code na hora</span></div>');
   const v = document.getElementById('vant'); v.innerHTML = f.join(''); v.style.gridTemplateColumns='repeat('+f.length+',1fr)';
@@ -669,7 +675,8 @@ function desenharCarrinho(){
     h += '<div class="bloco"><div class="lt"><span>Produtos</span><b>'+brl(sub)+'</b></div>'+
       (pedido.modo==='entrega' ? '<div class="lt"><span>Entrega</span><b>'+(tx>0?brl(tx):'Grátis')+'</b></div>' : '')+
       '<div class="lt total"><span>Total</span><span>'+brl(sub+tx)+'</span></div>'+
-      (pedido.modo==='entrega' && Number(CFG.frete_gratis_acima)>0 && tx>0 ? '<div class="nota">Faltam '+brl(CFG.frete_gratis_acima-sub)+' para a entrega sair grátis.</div>' : '')+
+      (pedido.modo==='entrega' && Number(CFG.frete_gratis_acima)>0 && tx>0 ? '<div class="nota pix">Faltam '+brl(CFG.frete_gratis_acima-sub)+' para a entrega sair grátis (compras a partir de '+brl(CFG.frete_gratis_acima)+').</div>' : '')+
+      (pedido.modo==='entrega' && Number(CFG.frete_gratis_acima)>0 && tx===0 && Number(CFG.taxa_entrega)>0 ? '<div class="nota pix">Parabéns! Sua entrega é grátis.</div>' : '')+
       (itens.some(x=>isPeso(x.p)) ? '<div class="nota">Itens por quilo: o valor pode variar um pouco conforme o peso.</div>' : '')+
       '<button class="limpar" onclick="if(confirm(\'Tirar todos os produtos da sacola?\')){carrinho={};salvarLocal();desenharCarrinho();desenharLista();atualizarBarra();}">Esvaziar sacola</button></div>';
   }

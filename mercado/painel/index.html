@@ -201,7 +201,7 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
         <div style="font-size:34px">📂</div>
         <b>Escolher arquivo JSON</b>
         <span>Backup completo ou lista de produtos do gestor</span>
-        <input type="file" id="arquivo" style="display:none">
+        <input type="file" id="arquivo" accept=".json,application/json,text/plain" style="display:none">
       </label>
     </div>
     <div class="msg" id="msgArq"></div>
@@ -229,10 +229,10 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
     <label class="chk"><input type="checkbox" id="cRetirada"> Cliente pode retirar na loja</label>
     <div class="campo"><label for="cArea">Onde entrega</label><input id="cArea"></div>
     <div class="g2">
-      <div class="campo"><label for="cTaxa">Taxa de entrega R$</label><input id="cTaxa" type="number" step="0.01" min="0" inputmode="decimal"></div>
+      <div class="campo"><label for="cTaxa">Taxa de entrega R$ (abaixo do valor grátis)</label><input id="cTaxa" type="number" step="0.01" min="0" inputmode="decimal"></div>
       <div class="campo"><label for="cMin">Pedido mínimo R$</label><input id="cMin" type="number" step="0.01" min="0" inputmode="decimal"></div>
     </div>
-    <div class="campo"><label for="cGratis">Entrega grátis acima de R$ (0 = não usar)</label><input id="cGratis" type="number" step="0.01" min="0" inputmode="decimal"></div>
+    <div class="campo"><label for="cGratis">Entrega grátis a partir de R$ (0 = não usar)</label><input id="cGratis" type="number" step="0.01" min="0" inputmode="decimal"></div>
     <div class="campo"><label>Formas de pagamento</label></div>
     <label class="chk"><input type="checkbox" id="pg0"> Pix</label>
     <label class="chk"><input type="checkbox" id="pg1"> Dinheiro</label>
@@ -302,7 +302,7 @@ if(DEMO){
   };
 }
 const PADRAO = { nome:'Pinheiro & Costa', whatsapp:'', endereco:'', horario:'Segunda a sábado, 8h às 20h · Domingo, 8h às 13h',
-  entrega:true, retirada:true, area_entrega:'Bairros próximos ao mercado', taxa_entrega:5, pedido_minimo:30, frete_gratis_acima:150,
+  entrega:true, retirada:true, area_entrega:'Nas redondezas do mercado', taxa_entrega:5, pedido_minimo:30, frete_gratis_acima:200,
   pagamentos:['Pix','Dinheiro','Cartão na entrega'], aviso:'', logo:null, pix_chave:'', pix_nome:'', pix_cidade:'' };
 const PAGS = ['Pix','Dinheiro','Cartão na entrega'];
 let codigo = '';
@@ -444,6 +444,13 @@ const drop = $('drop');
 ['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('on');}));
 drop.addEventListener('drop', e=>{ const f=e.dataTransfer.files[0]; if(f) lerArquivo(f); });
 
+// aceita número ou texto ("12,50", "R$ 1.234,56")
+function num(v){
+  if(typeof v==='number') return isFinite(v) ? v : 0;
+  let t = String(v??'').replace(/[^0-9,.-]/g,''); if(!t) return 0;
+  if(t.includes(',')) t = t.replace(/\./g,'').replace(',','.');
+  const n = parseFloat(t); return isFinite(n) ? n : 0;
+}
 function idDe(p){
   if(p.id) return String(p.id);
   if(p.barcode) return 'cb-'+String(p.barcode).replace(/[^0-9A-Za-z]/g,'');
@@ -456,9 +463,12 @@ function lerArquivo(f){
   const rd = new FileReader();
   rd.onload = ()=>{
     let d;
-    if(String(rd.result).startsWith('L\u0000\u0000\u0000') || /\.lnk$/i.test(f.name)){ msg('msgArq','er','Esse arquivo é só um <b>atalho</b>, não o backup. Abra o pen drive (E:) e escolha o arquivo <b>backup-completo-fcosta-....json</b>.'); return; }
-    try{ d = JSON.parse(String(rd.result).replace(/^\uFEFF/,'')); }catch(e){ msg('msgArq','er','Esse arquivo não é o backup do gestor. Escolha o arquivo <b>backup-completo-fcosta-....json</b>.'); return; }
+    const txt = String(rd.result||'');
+    if(!txt.replace(/[\s\u0000\uFEFF]/g,'').length){ msg('msgArq','er','Esse arquivo está <b>vazio ou estragado</b> (não tem nada dentro). Isso acontece quando o pen drive é tirado antes da hora ou o download não terminou.<br><br>No gestor, toque de novo em <b>Cadastros → Impressora &amp; Backup → Baixar backup completo (JSON)</b>, espere terminar e tente outra vez.'); return; }
+    if(txt.startsWith('L\u0000\u0000\u0000') || /\.lnk$/i.test(f.name)){ msg('msgArq','er','Esse arquivo é só um <b>atalho</b>, não o backup. Abra o pen drive (E:) e escolha o arquivo <b>backup-completo-fcosta-....json</b>.'); return; }
+    try{ d = JSON.parse(txt.replace(/^\uFEFF/,'').replace(/\u0000+$/,'')); }catch(e){ msg('msgArq','er','Esse arquivo não é o backup do gestor. Escolha o arquivo <b>backup-completo-fcosta-....json</b>.'); return; }
     let lista = null; LOJA_ARQ = null;
+    if(d && !Array.isArray(d) && !d.products && !d.produtos){ const dentro = d.backup || d.dados || d.data; if(dentro && typeof dentro==='object') d = dentro; }
     if(Array.isArray(d)) lista = d;
     else if(d && Array.isArray(d.products)){
       lista = d.products;
@@ -476,9 +486,9 @@ function lerArquivo(f){
       nome: String(p.name||p.nome||'').trim(),
       marca: String(p.brand||p.marca||'').trim(),
       categoria: String(p.category||p.categoria||'').trim(),
-      preco: Number(p.price ?? p.preco) || 0,
+      preco: num(p.price ?? p.preco ?? p.precoVenda),
       tipo_venda: (p.saleType||p.tipo_venda)==='peso' ? 'peso' : 'unidade',
-      estoque: Number(p.stock ?? p.estoque) || 0,
+      estoque: num(p.stock ?? p.estoque),
       fotoOriginal: p.photoBase64 || p.foto || null,
       fotoPronta: !!p.foto && !p.photoBase64
     })).filter(p=> p.nome && p.preco>0 && !vistos.has(p.id) && vistos.add(p.id));
