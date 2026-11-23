@@ -40,6 +40,10 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
 .btn-am{background:linear-gradient(135deg,#ffe733,#eed600);color:var(--verde)}
 .btn-vd{background:var(--verde3);color:#fff}
 .btn-cl{background:#eceef8;color:var(--verde)}
+.btn-zap{background:#25d366;color:#fff}
+.convite textarea{width:100%;min-height:250px;border:2px solid var(--linha);border-radius:12px;padding:12px 14px;font-size:14.5px;line-height:1.45;background:#fff;resize:vertical}
+.convite .g2b{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.convite .g2b .btn{font-size:16px;padding:14px}
 .btn:disabled{opacity:.5;cursor:default}
 .campo{margin-top:12px}
 .campo label{display:block;font-size:14.5px;font-weight:700;color:var(--suave);margin-bottom:5px}
@@ -257,6 +261,16 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
     <div class="msg" id="msgBackup"></div>
   </div>
 
+  <div class="card convite" data-aba="loja">
+    <h2>📲 Enviar a loja para o cliente</h2>
+    <div class="desc">Manda o link da loja com uma mensagem ensinando a instalar no celular. Pode mudar o texto se quiser.</div>
+    <div class="campo"><label for="cvFone">WhatsApp do cliente (se deixar vazio, você escolhe o contato)</label><input id="cvFone" inputmode="tel" placeholder="Ex: (11) 98888-1234"></div>
+    <div class="campo"><label for="cvTxt">Mensagem</label><textarea id="cvTxt" oninput="guardarConvite()"></textarea></div>
+    <div style="margin-top:12px"><button class="btn btn-zap" onclick="enviarConvite()">💬 Enviar pelo WhatsApp</button></div>
+    <div class="g2b"><button class="btn btn-cl" onclick="copiarConvite()">📋 Copiar</button><button class="btn btn-cl" onclick="textoConvite(true)">↩️ Texto original</button></div>
+    <div class="msg" id="msgCv"></div>
+  </div>
+
   <div class="card grandes" data-aba="loja">
     <a class="btn btn-cl" href="../?v=" id="verSite" target="_blank" rel="noopener">👀 Ver o site</a>
     <div class="desc" id="infoSite" style="margin:0;text-align:center"></div>
@@ -351,7 +365,7 @@ async function entrar(auto){
     codigo = c; if(!DEMO) try{ localStorage.setItem('pc_adm_codigo', c); }catch(e){}
     $('telaEntrar').classList.add('oculto'); $('telaPainel').classList.remove('oculto'); $('btnSair').classList.remove('oculto');
     let ab='pedidos'; try{ ab = localStorage.getItem('pc_adm_aba')||'pedidos'; }catch(e){} aba(ab);
-    await carregarLoja(); desenharAtivos();
+    await carregarLoja(); textoConvite(); desenharAtivos();
     carregarPedidos(); clearInterval(timerPed); timerPed = setInterval(carregarPedidos, 30000);
     document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ document.title='Painel ADM · Pinheiro & Costa'; carregarPedidos(); } });
   }catch(e){
@@ -401,7 +415,7 @@ async function salvarCondicoes(){
     await manterAvisos(c);
     const r = await rpc('mercado_publicar_config',{p_slug:LOJA,p_codigo:codigo,p_config:c,p_ids:await idsNoSite()});
     if(!r||!r.ok) throw new Error('codigo');
-    CFG = c; msg('msgCond','ok','✅ Condições salvas. Já aparecem no site.');
+    CFG = c; textoConvite(); msg('msgCond','ok','✅ Condições salvas. Já aparecem no site.');
   }catch(e){ console.error(e); msg('msgCond','er','Não consegui salvar agora. Tente de novo.'); }
   finally{ $('btnCond').disabled = false; }
 }
@@ -722,6 +736,48 @@ async function desenharAtivos(){
   const ate = t => new Date(t).toLocaleString('pt-BR',{weekday:'short',hour:'2-digit',minute:'2-digit'});
   $('avAtivos').innerHTML = a.length ? a.map(x=>'<div class="ativo"><div class="im"'+(x.foto?' style="background-image:url(\''+x.foto+'\')"':'')+'></div><div class="t"><b>'+esc(x.titulo)+'</b><span>'+(x.tipo==='oferta'?'Oferta '+brl(x.preco_por)+' · ':'')+'até '+ate(x.expira)+'</span></div><button onclick="tirarAviso(\''+esc(x.id)+'\')">Tirar</button></div>').join('')
     : '<div class="desc" style="margin:0">Nenhum aviso no ar agora.</div>';
+}
+
+/* ---------- Convite: enviar a loja para o cliente ---------- */
+const LINK_LOJA = 'https://serfico21-arch.github.io/Pessoal/mercado/';
+function conviteOriginal(){
+  const g = Number(CFG.frete_gratis_acima)||0, tx = Number(CFG.taxa_entrega)||0;
+  const brl = v => Number.isInteger(v) ? 'R$ '+v : 'R$ '+v.toFixed(2).replace('.',',');
+  return [
+    '🛒 *'+(CFG.nome && !/pinheiro/i.test(CFG.nome) ? CFG.nome : 'Mercado Pinheiro & Costa')+'* agora no seu celular!', '',
+    'Olá! 😊 Agora você faz suas compras com a gente pelo celular, sem sair de casa:',
+    '✅ Produtos com foto e preço',
+    '✅ Pagamento com Pix na hora',
+    CFG.entrega===false ? '🏪 Separamos tudo para você retirar na loja' : (g>0 ? '🛵 Entrega *grátis* nas redondezas a partir de '+brl(g)+(tx>0?' (abaixo disso, só '+brl(tx)+')':'') : '🛵 Entregamos nas redondezas'),
+    '🥖 Avisos do pão quentinho e das ofertas do dia', '',
+    '👉 Toque aqui para abrir a loja:', LINK_LOJA, '',
+    '📲 *Para deixar no celular, igual a um aplicativo:*',
+    '• *Android:* abra o link no Chrome e toque em *Instalar app* (ou nos 3 pontinhos ⋮ e *Adicionar à tela inicial*).',
+    '• *iPhone:* abra o link no Safari, toque em *Compartilhar* (o quadradinho com a seta ⬆️) e depois em *Adicionar à Tela de Início*.', '',
+    'Pronto! O ícone do mercado fica na sua tela. 💙💛',
+    'Qualquer dúvida, é só responder esta mensagem. Obrigado pela preferência!'
+  ].join('\n');
+}
+function textoConvite(forcar){
+  let t = ''; if(!forcar) try{ t = localStorage.getItem('pc_convite')||''; }catch(e){}
+  if(forcar) try{ localStorage.removeItem('pc_convite'); }catch(e){}
+  $('cvTxt').value = t || conviteOriginal();
+  if(forcar) msg('msgCv','ok','Texto original de volta.');
+}
+function guardarConvite(){ try{ localStorage.setItem('pc_convite', $('cvTxt').value); }catch(e){} }
+function enviarConvite(){
+  const t = $('cvTxt').value.trim(); if(!t){ textoConvite(true); return; }
+  let f = $('cvFone').value.replace(/\D/g,'');
+  if(f && f.length<10){ msg('msgCv','er','Confira o número: coloque o DDD. Ex: (11) 98888-1234.'); return; }
+  if(f && f.length<=11) f = '55'+f;
+  window.open((f ? 'https://wa.me/'+f : 'https://wa.me/')+'?text='+encodeURIComponent(t), '_blank', 'noopener');
+  msg('msgCv','ok','✅ WhatsApp aberto. É só tocar em enviar.');
+}
+async function copiarConvite(){
+  const t = $('cvTxt').value;
+  try{ await navigator.clipboard.writeText(t); }
+  catch(e){ $('cvTxt').select(); try{ document.execCommand('copy'); }catch(_){} }
+  msg('msgCv','ok','✅ Mensagem copiada. Cole no WhatsApp, Instagram ou Facebook.');
 }
 
 /* ---------- Instalar a Central (celular) ---------- */
