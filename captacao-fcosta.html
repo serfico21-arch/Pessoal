@@ -363,7 +363,7 @@ $('comodos').innerHTML = COMODOS.map((c,i)=>
   '<small class="cm-cont" id="cm-rot-' + i + '"></small>' +
   '<div class="fotos-grade" id="cm-grade-' + i + '"></div></div>').join('');
 function mostrar(i){
-  const g = $('cm-grade-' + i); g.innerHTML = '';
+  const g = $('cm-grade-' + i); g.querySelectorAll('img').forEach(im=>URL.revokeObjectURL(im.src)); g.innerHTML = '';
   fotos[i].forEach((f,k)=>{
     const fig = document.createElement('figure'), img = document.createElement('img'), x = document.createElement('button');
     img.src = URL.createObjectURL(f); img.alt = COMODOS[i][0] + ' ' + (k+1);
@@ -377,13 +377,32 @@ function mostrar(i){
   const t = total();
   $('fotos-total').textContent = t ? ('Total: ' + t + (t===1?' foto':' fotos') + ' (até ' + MAX_FOTOS + ').') : 'Nenhuma foto escolhida ainda.';
 }
-$('comodos').addEventListener('change', e=>{
+/* Diminui cada foto (lado maior 1600 px, JPEG) para não encher a memória do celular
+   e o WhatsApp aceitar todas. A foto continua boa para anúncio. */
+function diminuir(f){
+  return new Promise(ok=>{
+    const url = URL.createObjectURL(f), img = new Image();
+    img.onload = ()=>{
+      const M = 1600, k = Math.min(1, M / Math.max(img.naturalWidth, img.naturalHeight));
+      const w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      c.toBlob(b=>{ ok(b && b.size < f.size ? new File([b], f.name.replace(/\.[^.]+$/,'') + '.jpg', {type:'image/jpeg'}) : f); }, 'image/jpeg', 0.82);
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); ok(f); };
+    img.src = url;
+  });
+}
+$('comodos').addEventListener('change', async e=>{
   if(!e.target.matches('input[type=file]')) return;
   const i = +e.target.dataset.i, livre = MAX_FOTOS - total();
   const novas = [...e.target.files].filter(f=>/^image\//.test(f.type));
+  e.target.value = '';
   if(novas.length > livre) alert('Pode mandar até ' + MAX_FOTOS + ' fotos por aqui. Se tiver mais, mande depois na conversa.');
-  fotos[i] = fotos[i].concat(novas.slice(0, Math.max(0, livre)));
-  e.target.value = ''; mostrar(i); atualizarLink();
+  const rot = $('cm-rot-' + i); rot.textContent = 'Preparando as fotos…';
+  for(const f of novas.slice(0, Math.max(0, livre))) fotos[i].push(await diminuir(f));
+  mostrar(i); atualizarLink();
 });
 const semAcento = t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 function arquivos(){
