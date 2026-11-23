@@ -2434,8 +2434,8 @@ var FERRAMENTAS = [
   }
   function ctLimparCache() {
     var tf = [];
-    if ('serviceWorker' in navigator) tf.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
-    if (window.caches) tf.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+    if ('serviceWorker' in navigator) tf.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.filter(function (r) { return !/\/mercado\//.test(r.scope); }).map(function (r) { return r.unregister(); })); }));
+    if (window.caches) tf.push(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return !/^(pinheiro-costa-|central-pc-)/.test(k); }).map(function (k) { return caches.delete(k); })); }));
     Promise.all(tf).then(function () { window.__recarregar(); }, function () { window.__recarregar(); });
   }
   function ctBackup() {
@@ -2823,8 +2823,8 @@ var FERRAMENTAS = [
     if (localStorage.getItem('painel_versao_arquivo') === V) return;
     localStorage.setItem('painel_versao_arquivo', V);
     var tarefas = [];
-    if ('serviceWorker' in navigator) tarefas.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); }));
-    if (window.caches) tarefas.push(caches.keys().then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); }));
+    if ('serviceWorker' in navigator) tarefas.push(navigator.serviceWorker.getRegistrations().then(function (rs) { return Promise.all(rs.filter(function (r) { return !/\/mercado\//.test(r.scope); }).map(function (r) { return r.unregister(); })); }));
+    if (window.caches) tarefas.push(caches.keys().then(function (ks) { return Promise.all(ks.filter(function (k) { return !/^(pinheiro-costa-|central-pc-)/.test(k); }).map(function (k) { return caches.delete(k); })); }));
     Promise.all(tarefas).then(function () { if (/^https?:$/.test(location.protocol)) window.__recarregar(); }, function () {});
   } catch (e) {}
 })();
