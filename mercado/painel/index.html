@@ -197,7 +197,7 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
 
   <div class="card" data-aba="pedidos">
     <h1>🧾 Pedidos do site</h1>
-    <div class="desc">Os pedidos que os clientes fazem pelo site aparecem aqui. A lista atualiza sozinha.</div>
+    <div class="desc">Os pedidos que os clientes fazem pelo site aparecem aqui. A lista atualiza sozinha. Ao <b>Confirmar</b>, o estoque do site baixa. Quando o cliente receber ou retirar, toque em <b>✔ Entregue</b> / <b>✔ Cliente retirou</b> para o pedido sair de "Em aberto".</div>
     <div class="filtro"><button class="on" data-f="abertos" onclick="filtroPed(this)">Em aberto</button><button data-f="todos" onclick="filtroPed(this)">Todos</button></div>
     <div id="avCancel" class="msg er" style="display:none"></div>
     <div id="pedidos"><div class="desc" style="margin-top:12px">Carregando...</div></div>
@@ -466,7 +466,7 @@ function desenharPedidos(){
       '<div style="margin-top:6px"><span class="st '+esc(p.status)+'">'+esc(p.status==='cancelado'&&c.cancelado_pelo_cliente?'Cancelado pelo cliente':(ST[p.status]||p.status))+'</span></div>'+
       '<div class="cli"><b>'+esc(c.nome||'')+'</b> · '+esc(c.fone||'')+'<br>'+(c.modo==='entrega'?'🛵 Entrega: '+esc(c.endereco||''):'🏪 Retira na loja')+'<br>💳 '+esc(c.pagamento||'')+(c.troco?' (troco para '+esc(c.troco)+')':'')+(c.obs?'<br>📝 '+esc(c.obs):'')+'</div>'+
       '<ul>'+itens+'</ul><div class="tot">Total '+brl(p.total)+(Number(p.taxa)>0?' <span style="font-size:13px;color:var(--suave);font-weight:600">(entrega '+brl(p.taxa)+')</span>':'')+'</div>'+
-      '<div class="bts"><a class="zap" href="'+zap+'" target="_blank" rel="noopener">WhatsApp</a>'+(p.status==='cancelado'?'':bt('confirmado','Confirmar')+(c.modo==='entrega'?bt('saiu','Saiu'):'')+bt('entregue','Entregue')+bt('cancelado','Cancelar'))+'</div></div>';
+      '<div class="bts"><a class="zap" href="'+zap+'" target="_blank" rel="noopener">WhatsApp</a>'+(p.status==='cancelado'?'':bt('confirmado','Confirmar')+(c.modo==='entrega'?bt('saiu','Saiu'):'')+bt('entregue',c.modo==='entrega'?'✔ Entregue':'✔ Cliente retirou')+bt('cancelado','Cancelar'))+'</div></div>';
   }).join('');
 }
 async function mudarStatus(id, st){
