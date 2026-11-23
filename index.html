@@ -580,6 +580,19 @@ details.mais[open] summary{margin-bottom:10px}details.mais[open] summary i{trans
   body.com-faixa #visor-bar #visor-voltar{flex:1;justify-content:center}
 }
 /* FIM DAS MELHORIAS DE LEITURA */
+
+/* ── PAINÉIS DOS MEUS SITES (aba "Meus Sites") ── */
+.pn-card{display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:24px;margin:0 0 14px;border:1px solid color-mix(in srgb,var(--c) 45%,var(--line));background:linear-gradient(150deg,color-mix(in srgb,var(--c) 16%,var(--card)),var(--card))}
+.pn-topo{display:flex;align-items:center;gap:14px}
+.pn-ic{width:62px;height:62px;border-radius:18px;flex:none;display:grid;place-items:center;font-size:32px;color:#fff;background:var(--c)}
+.pn-card h2{font:800 clamp(19px,4vw,24px)/1.15 'Sora',sans-serif;margin:0 0 3px}
+.pn-card p{font-size:14px;color:var(--texto-muted);margin:0}
+.pn-bts{display:flex;gap:10px;flex-wrap:wrap}
+.pn-bts button,.pn-bts a{flex:1 1 180px;min-height:54px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;font:700 16px 'DM Sans',sans-serif;cursor:pointer;text-decoration:none;border:1px solid var(--line);background:var(--card2);color:var(--tx)}
+.pn-bts .pn-abrir{background:var(--c);color:#fff;border:0;font-size:17px}
+.pn-dica{display:flex;gap:10px;padding:14px 16px;border-radius:16px;background:var(--okbg);font-size:14px;line-height:1.45;margin:4px 0 16px}
+.pn-dica i{font-size:22px;color:var(--em);flex:none}
+.pn-mudar{background:none;border:0;color:var(--texto-muted);font-size:13px;text-decoration:underline;cursor:pointer;align-self:flex-start;padding:4px 0}
 </style>
 </head>
 <body data-view="inicio">
@@ -610,6 +623,7 @@ var t0=Date.now(),fim=function(){setTimeout(function(){a.style.opacity="0";setTi
   <span id="dock-extra" style="display:contents"></span>
   <a href="construtoras.html" style="--c:var(--ro)"><i class="ti ti-building-factory-2"></i>Construtoras</a>
   <button type="button" data-go="redes" style="--c:var(--sk)"><i class="ti ti-share"></i>Redes</button>
+  <button type="button" data-go="paineis" style="--c:var(--am)"><i class="ti ti-world"></i>Meus Sites</button>
   <button type="button" data-go="sumario" style="--c:var(--or)"><i class="ti ti-list-letters"></i>Sumário</button>
   <button type="button" data-go="mapa" style="--c:var(--li)"><i class="ti ti-sitemap"></i>Mapa</button>
 </nav>
@@ -1029,7 +1043,7 @@ var FERRAMENTAS = [
   /* abas principais criadas por você (guardadas no navegador) */
   function lerMundosExtra() { var l = lerStorage('painel_mundos', []); return Array.isArray(l) ? l.filter(function (x) { return x && x.id && x.n; }) : []; }
   var MUNDOS_ORIG = {}; Object.keys(MUNDOS).forEach(function (k) { MUNDOS_ORIG[k] = { n: MUNDOS[k].n, i: MUNDOS[k].i }; });
-  var DOCK_ABAS = [['inicio', 'Início'], ['controle', 'Controle'], ['favoritos', 'Favoritos'], ['sumario', 'Sumário'], ['mapa', 'Mapa'], ['redes', 'Redes'], ['construtoras', 'Construtoras']];
+  var DOCK_ABAS = [['inicio', 'Início'], ['controle', 'Controle'], ['favoritos', 'Favoritos'], ['sumario', 'Sumário'], ['mapa', 'Mapa'], ['redes', 'Redes'], ['paineis', 'Meus Sites'], ['construtoras', 'Construtoras']];
   /* nomes que você mudou: {"m:corretor":"…", "g:origem|id":"…", "d:mapa":"…"} */
   function lerNomes() { var o = lerStorage('painel_nomes', {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
   function nomeDock(k) { var p = DOCK_ABAS.filter(function (x) { return x[0] === k; })[0]; return lerNomes()['d:' + k] || (p ? p[1] : k); }
@@ -1066,7 +1080,7 @@ var FERRAMENTAS = [
   };
   var vistaEl = document.getElementById('vista');
   var modo = lerStorage('painel_vista', 'inicio');
-  if (modo !== 'inicio' && modo !== 'favoritos' && modo !== 'mapa' && modo !== 'sumario' && modo !== 'controle' && modo !== 'redes' && !MUNDOS[modo]) modo = 'inicio';
+  if (modo !== 'inicio' && modo !== 'favoritos' && modo !== 'mapa' && modo !== 'sumario' && modo !== 'controle' && modo !== 'redes' && modo !== 'paineis' && !MUNDOS[modo]) modo = 'inicio';
   var aba = null;
   var favs = lerStorage('painel_favs', null);
   if (!Array.isArray(favs)) {
@@ -1222,6 +1236,8 @@ var FERRAMENTAS = [
       '<button type="button" class="busca-pill" data-open="busca"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button></section>';
     var mobWa = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     html += '<a class="wa-btn" href="' + (mobWa ? 'whatsapp://send' : 'https://web.whatsapp.com') + '"' + (mobWa ? '' : ' target="_blank" rel="noopener"') + '><span class="wa-ic"><i class="ti ti-brand-whatsapp"></i></span><span class="wa-tx"><h2>WhatsApp Business</h2><p>Abrir conversas e clientes agora</p></span><span class="wa-go"><span>Abrir</span><i class="ti ti-arrow-right"></i></span></a>';
+    html += '<button type="button" class="destaque" data-go="paineis" style="width:100%;text-align:left;font:inherit;cursor:pointer"><span class="dz-ic"><i class="ti ti-world"></i></span><span class="dz-tx"><span class="dz-tag">Meus sites</span><h2>Painéis ADM</h2>' +
+      '<p>Igreja OBPC e site FCosta: mexer nos dois sem abrir os sites</p></span><span class="dz-go"><span>Abrir</span><i class="ti ti-arrow-right"></i></span></button>';
     var pdv = pubResumo();
     html += '<a class="destaque" href="divulgacao.html"><span class="dz-ic"><i class="ti ti-speakerphone"></i></span><span class="dz-tx"><span class="dz-tag">Em destaque</span><h2>Central do Publicador</h2>' +
       '<p>Publicar imóveis, textos por rede, grupos e plano do dia' + (pdv ? ' · ' + pdv.hoje + (pdv.hoje === 1 ? ' divulgação hoje' : ' divulgações hoje') : '') + '</p></span>' +
@@ -1348,6 +1364,7 @@ var FERRAMENTAS = [
       ORDEM.slice(ORDEM_BASE.length).map(function (m) { return rap(esc(MUNDOS[m].i), esc(MUNDOS[m].n), esc(MUNDOS[m].d), 'data-go="' + esc(m) + '"'); }).join('') +
       rap('ti-building-factory-2', esc(nomeDock('construtoras')), 'Tabelões, empreendimentos, e-books e simulador por construtora', '', 'construtoras.html') +
       rap('ti-share', esc(nomeDock('redes')), 'Instagram, Facebook, YouTube, TikTok, WhatsApp e site num lugar só', 'data-go="redes"') +
+      rap('ti-world', esc(nomeDock('paineis')), 'Painel ADM da igreja e do site FCosta, sem sair daqui', 'data-go="paineis"') +
       rap('ti-star-filled', esc(nomeDock('favoritos')), 'Suas ferramentas fixadas com ★', 'data-go="favoritos"') +
       rap('ti-list-letters', esc(nomeDock('sumario')) + ' A–Z', 'Todas as ferramentas em ordem alfabética', 'data-go="sumario"') +
       rap('ti-sitemap', esc(nomeDock('mapa')), 'Esta página, com todos os botões', 'data-go="mapa"') + '</div>';
@@ -1524,11 +1541,54 @@ var FERRAMENTAS = [
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target && e.target.id === 'rede-url') { e.preventDefault(); redeSalvar(); } });
 
+  /* ── PAINÉIS DOS MEUS SITES ──────────────────
+     Os dois painéis ADM abrem AQUI DENTRO, numa tela cheia.
+     Os dados deles ficam na nuvem (Firebase), então tudo que você
+     mudar aqui aparece no site na hora, igual a abrir o painel direto.
+     Para trocar um endereço: toque em "Trocar endereço" no cartão. */
+  var PAINEIS = [
+    { id: 'obpc', n: 'Painel da Igreja OBPC', d: 'Cultos, escala, vídeos, avisos e tudo do site da igreja', i: 'ti-building-church', c: '--pk',
+      u: 'https://obpcsaofernando199-sudo.github.io/Obpc/painel.html', site: 'https://obpcsaofernando199-sudo.github.io/Obpc/' },
+    { id: 'fcosta', n: 'Painel ADM FCosta', d: 'Imóveis, fotos, páginas e cadastros do site de corretor', i: 'ti-home', c: '--em',
+      u: 'https://fcostacorretor.com/painel_adm', site: 'https://fcostacorretor.com/' }
+  ];
+  function pnUrl(p) { var o = lerStorage('painel_paineis_url', {}); return (o && o[p.id]) || p.u; }
+  function pnAcha(id) { return PAINEIS.filter(function (p) { return p.id === id; })[0]; }
+  function htmlPaineis() {
+    return '<section class="mhead" style="--c:var(--am)"><span class="mh-ic"><i class="ti ti-world"></i></span><div><span class="nivel">Controle dos sites</span><h1>' + esc(nomeDock('paineis')) + '</h1><p>Os painéis ADM dos seus sites, sem precisar abrir os sites</p></div></section>' +
+      '<div class="pn-dica"><i class="ti ti-info-circle"></i><span>Toque em <b>Abrir aqui</b>. O painel abre nesta tela. Para voltar, toque em <b>Voltar ao painel</b>, lá no alto. ' +
+      'Tudo que você mudar vai direto para o site, igual antes. No painel FCosta, na primeira vez, entre com seu e-mail e senha.</span></div>' +
+      PAINEIS.map(function (p) {
+        return '<div class="pn-card" style="--c:var(' + p.c + ')"><div class="pn-topo"><span class="pn-ic"><i class="ti ' + p.i + '"></i></span><div><h2>' + esc(p.n) + '</h2><p>' + esc(p.d) + '</p></div></div>' +
+          '<div class="pn-bts"><button type="button" class="pn-abrir" data-pn="abrir:' + p.id + '"><i class="ti ti-player-play"></i>Abrir aqui</button>' +
+          '<a href="' + esc(p.site) + '" target="_blank" rel="noopener"><i class="ti ti-eye"></i>Ver o site</a></div>' +
+          '<button type="button" class="pn-mudar" data-pn="mudar:' + p.id + '">Trocar endereço do painel</button></div>';
+      }).join('');
+  }
+  /* abre no mesmo visor das outras ferramentas (barra "Voltar ao painel" e "Nova aba") */
+  function pnAbrir(id) {
+    var p = pnAcha(id); if (!p) return;
+    if (window.__visorAbrir) window.__visorAbrir(pnUrl(p), p.n); else window.open(pnUrl(p), '_blank', 'noopener');
+  }
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-pn]'); if (!b) return;
+    var a = b.getAttribute('data-pn').split(':');
+    if (a[0] === 'abrir') pnAbrir(a[1]);
+    else if (a[0] === 'mudar') {
+      var p = pnAcha(a[1]); if (!p) return;
+      var nv = prompt('Endereço do ' + p.n + ':\n(deixe vazio para voltar ao endereço de fábrica)', pnUrl(p)); if (nv === null) return;
+      var o = lerStorage('painel_paineis_url', {}); if (!o || typeof o !== 'object') o = {};
+      nv = nv.trim(); if (nv && !/^https?:\/\//i.test(nv)) nv = 'https://' + nv;
+      if (nv && nv !== p.u) o[p.id] = nv; else delete o[p.id];
+      gravarStorage('painel_paineis_url', o); avisar('Endereço salvo.');
+    }
+  });
+
   function render() {
     document.body.setAttribute('data-view', modo);
     [].forEach.call(document.querySelectorAll('.dock [data-go]'), function (b) { var on = b.getAttribute('data-go') === modo; b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); if (on && window.innerWidth < 900) try { var d = b.parentNode.closest('.dock') || b.parentNode; d.scrollTo({ left: b.offsetLeft - (d.clientWidth - b.offsetWidth) / 2, behavior: 'smooth' }); } catch (e) { } });
     vistaEl.classList.toggle('edmode', !!edicao && !!MUNDOS[modo]);
-    vistaEl.innerHTML = modo === 'inicio' ? htmlInicio() : modo === 'controle' ? htmlControle() : modo === 'favoritos' ? htmlFavoritos() : modo === 'mapa' ? htmlMapa() : modo === 'sumario' ? htmlSumario() : modo === 'redes' ? htmlRedes() : htmlMundo(modo);
+    vistaEl.innerHTML = modo === 'inicio' ? htmlInicio() : modo === 'controle' ? htmlControle() : modo === 'favoritos' ? htmlFavoritos() : modo === 'mapa' ? htmlMapa() : modo === 'sumario' ? htmlSumario() : modo === 'redes' ? htmlRedes() : modo === 'paineis' ? htmlPaineis() : htmlMundo(modo);
     if (modo === 'controle' && ctAba === 'sites') setTimeout(function () { ctTestarSites(); }, 60);
   }
   function aplicarModo(m) {
@@ -2555,6 +2615,7 @@ var FERRAMENTAS = [
     document.body.style.overflow = 'hidden';
     faixaAtualiza();
   }
+  window.__visorAbrir = abrir; /* usado pela aba "Meus Sites" */
   function fechar() {
     gFechar(); mFechar();
     visor.classList.remove('aberto');
