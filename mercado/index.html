@@ -72,7 +72,17 @@ img{display:block;max-width:100%}
 .busca-l{padding-bottom:12px}
 .busca{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--linha);border-radius:16px;padding:0 14px;height:50px;transition:border-color .2s,box-shadow .2s}
 .busca:focus-within{border-color:var(--ouro);box-shadow:0 0 0 4px rgba(238,214,0,.18)}
-.busca svg{width:20px;height:20px;color:var(--suave);flex:none}
+.busca-l{display:flex;gap:8px;align-items:center}
+.busca{flex:1;min-width:0;padding:0 6px 0 16px}
+.busca .lupa{flex:none;width:40px;height:40px;border:0;border-radius:12px;background:var(--verde);color:#fff;display:grid;place-items:center;cursor:pointer}
+.busca .lupa svg{width:20px;height:20px}
+.sac-busca{flex:none;display:flex;align-items:center;gap:7px;height:50px;border:0;border-radius:16px;background:var(--amarelo);color:var(--verde);padding:0 12px;font-weight:800;cursor:pointer;box-shadow:0 8px 18px -10px rgba(33,38,129,.7)}
+.sac-busca[hidden]{display:none}
+.sac-busca svg{width:22px;height:22px;flex:none}
+.sac-busca span{display:flex;flex-direction:column;line-height:1.05;text-align:left}
+.sac-busca b{font-size:15px}.sac-busca small{font-size:11.5px;font-weight:700}
+.sac-busca.pulo{animation:pulo .5s ease}
+@keyframes pulo{0%{transform:scale(1)}35%{transform:scale(1.14)}70%{transform:scale(.96)}100%{transform:scale(1)}}
 .busca input{border:0;outline:0;background:transparent;flex:1;font-size:16px;min-width:0}
 
 /* capa com a foto da loja */
@@ -240,7 +250,7 @@ img{display:block;max-width:100%}
 .pixbox .chave{font-size:13px;color:var(--suave);margin-top:6px}
 .b-verde{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;background:var(--verde);color:#fff;font-weight:800;padding:14px;font-size:15px;margin-top:10px;text-decoration:none}
 .b-zap{background:#25d366}
-.toast{display:none;position:fixed;left:50%;transform:translateX(-50%);top:calc(84px + env(safe-area-inset-top));z-index:80;background:var(--verde);color:#fff;font-weight:700;font-size:14px;padding:11px 18px;border-radius:999px;box-shadow:var(--sombra);max-width:90vw;text-align:center}
+.toast{display:none;position:fixed;left:50%;transform:translateX(-50%);top:150px;z-index:80;background:var(--verde);color:#fff;font-weight:700;font-size:14px;padding:11px 18px;border-radius:999px;box-shadow:var(--sombra);max-width:90vw;text-align:center}
 
 /* janela instalar */
 .barra-app{display:none;align-items:center;gap:10px;background:var(--verde);color:#fff;padding:9px 14px;font-size:14px;font-weight:600}
@@ -362,10 +372,12 @@ img{display:block;max-width:100%}
     </button>
   </div>
   <div class="wrap busca-l"><div class="busca">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
     <input id="busca" type="search" placeholder="O que você procura hoje?" autocomplete="off" enterkeyhint="search" aria-label="Buscar produto">
-  </div></div>
-</header>
+    <button type="button" class="lupa" onclick="irBusca()" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
+  </div>
+  <button type="button" class="sac-busca" id="sacBusca" onclick="abrirCarrinho()" hidden aria-label="Ver minha sacola"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span><b id="sacBuscaN">0</b><small id="sacBuscaT">R$ 0,00</small></span></button>
+  </div>
+  </header>
 
 <section class="wrap avisos" id="avisos" hidden>
   <div class="cab"><h2>Ofertas e avisos <span class="vivo"><i></i>Agora</span></h2>
@@ -674,13 +686,14 @@ function mudar(id, dir){
   if(q<=0) delete carrinho[id]; else carrinho[id]=q;
   const aberta = document.getElementById('tela').classList.contains('on');
   if(dir>0 && q>0 && !aberta && carrinho[id]===passo(p)){
-    toast('Na sacola: '+p.nome);
+    toast('✓ Na sacola: '+p.nome); const sb=document.getElementById('sacBusca'); sb.classList.remove('pulo'); void sb.offsetWidth; sb.classList.add('pulo');
     const s = document.getElementById('btnSacola'); s.classList.remove('pula'); void s.offsetWidth; s.classList.add('pula');
   }
   salvarLocal(); redesenharCartao(id); atualizarBarra();
   if(aberta) desenharCarrinho();
 }
-function toast(t){ const d=document.getElementById('toast'); d.textContent=t; d.style.display='block'; clearTimeout(d._t); d._t=setTimeout(()=>d.style.display='none',2200); }
+function irBusca(){ const b=document.getElementById('busca'); if(!b.value.trim()){ b.focus(); return; } b.blur(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'}); }
+function toast(t){ const d=document.getElementById('toast'); try{ const bl=document.querySelector('.busca-l').getBoundingClientRect(); d.style.top=Math.max(8,bl.bottom+6)+'px'; }catch(e){} d.textContent=t; d.style.display='block'; clearTimeout(d._t); d._t=setTimeout(()=>d.style.display='none',2200); }
 
 function itensCarrinho(){ return Object.entries(carrinho).map(([id,q])=>({p:PRODUTOS.find(x=>x.id===id),q})).filter(x=>x.p); }
 // Valor de cada item já arredondado em centavos: sacola, Pix, WhatsApp e Central mostram o mesmo total
@@ -693,9 +706,10 @@ function taxa(){
 }
 function atualizarBarra(){
   const n = itensCarrinho().length;
-  document.getElementById('barra').style.display = n ? 'block' : 'none';
+  document.getElementById('barra').style.display = 'none';
   document.getElementById('barraN').textContent = 'Ver minha sacola · '+n+(n===1?' item':' itens');
   document.getElementById('barraTotal').textContent = brl(subtotal());
+  const sb=document.getElementById('sacBusca'); sb.hidden = !n; document.getElementById('sacBuscaN').textContent = n+(n===1?' item':' itens'); document.getElementById('sacBuscaT').textContent = brl(subtotal());
   document.getElementById('bolha').textContent = n;
   document.getElementById('sacolaTotal').textContent = n ? brl(subtotal()) : 'Sacola';
 }
