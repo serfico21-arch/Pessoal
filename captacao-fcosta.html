@@ -103,6 +103,10 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--ouro);border-col
 
 .dica-fotos{margin:0;color:var(--txt)}.dica-fotos small{color:var(--txt2)}
 .escolher{gap:10px;min-height:58px;font-size:1.05rem}.escolher svg{width:26px;height:26px}
+.comodos{display:grid;gap:12px}
+.comodo{display:grid;gap:8px;padding:12px;border:1px solid var(--borda);border-radius:12px;background:var(--sup2)}
+.cm-tit b{display:block;font-size:1.05rem;color:var(--txt)}.cm-tit small{color:var(--txt2);font-size:.9rem}
+.cm-add{min-height:50px}
 .fotos-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
 .fotos-grade figure{position:relative;margin:0;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid var(--borda)}
 .fotos-grade img{width:100%;height:100%;object-fit:cover;display:block}
@@ -177,13 +181,9 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--ouro);border-col
 
   <fieldset>
     <legend>Fotos do imóvel</legend>
-    <p class="dica-fotos">Escolha até 10 fotos: fachada, sala, cozinha, quartos, banheiro e quintal. <small>(opcional, mas ajuda muito)</small></p>
-    <label class="btn linha escolher" for="fotos">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-2h6l2 2h3v12H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
-      <span id="fotos-rotulo">Escolher fotos</span>
-    </label>
-    <input type="file" id="fotos" accept="image/*" multiple hidden>
-    <div class="fotos-grade" id="fotos-grade" aria-live="polite"></div>
+    <p class="dica-fotos"><strong>Como tirar boas fotos:</strong> de dia, com as luzes acesas e as janelas abertas. Tire <strong>de vários cantos</strong> de cada lugar (da porta e do fundo), com o celular deitado. <small>Pode pular o que o imóvel não tiver.</small></p>
+    <div class="comodos" id="comodos"></div>
+    <p class="obs" id="fotos-total">Nenhuma foto escolhida ainda.</p>
   </fieldset>
 
   <div class="aviso-creci">
@@ -265,7 +265,7 @@ function mensagem(){
   if($('docs').value) l.push('Documentação: ' + $('docs').value);
   if($('obs').value.trim()) l.push('Obs.: ' + $('obs').value.trim());
   l.push('');
-  l.push('Vou mandar as fotos agora nesta conversa.');
+  l.push(window.totalFotos && window.totalFotos() ? ('Vou mandar ' + window.totalFotos() + ' fotos do imóvel em seguida, separadas por cômodo.') : 'Vou mandar as fotos agora nesta conversa.');
   l.push('Sou o proprietário ou tenho autorização dele.');
   l.push('Autorizo o uso dos meus dados conforme o Aviso de Privacidade (LGPD).');
   l.push('Estou ciente de que a Fcosta vai entrar em contato para a assinatura da autorização de venda, conforme o CRECI.');
@@ -305,40 +305,75 @@ $('rodape-aviso').addEventListener('click', e=>{ e.preventDefault(); $('privacid
 $('voltar').onclick = ()=>{ $('pronto').classList.remove('ver'); $('form').style.display = ''; };
 atualizarLink();
 
-/* ===== FOTOS: o cliente escolhe aqui e envia pelo WhatsApp (nada fica guardado na página) ===== */
-const MAX_FOTOS = 10;
-let fotos = [];
-function mostrarFotos(){
-  $('fotos-grade').innerHTML = '';
-  fotos.forEach((f,i)=>{
+/* ===== FOTOS POR CÔMODO: o cliente escolhe aqui e envia pelo WhatsApp (nada fica guardado na página) =====
+   Para mudar a lista de cômodos, edite COMODOS (nome e dica). */
+const COMODOS = [
+  ['Frente do imóvel (fachada)', 'A frente vista da rua, o portão e a calçada'],
+  ['Sala', 'Tire de 2 ou 3 cantos diferentes'],
+  ['Cozinha', 'Mostre a pia, os armários e o espaço'],
+  ['Quartos', 'Fotos de cada quarto, de cantos diferentes'],
+  ['Banheiros', 'O banheiro inteiro, com o box'],
+  ['Lavanderia / área de serviço', 'O tanque e o espaço da máquina'],
+  ['Quintal, garagem e varanda', 'A parte de fora e onde para o carro'],
+  ['Outras fotos', 'Vista da janela, piscina, churrasqueira, documentos...']
+];
+const MAX_FOTOS = 30;
+const fotos = COMODOS.map(()=>[]);
+const total = ()=>fotos.reduce((a,l)=>a+l.length,0);
+window.totalFotos = total;
+$('comodos').innerHTML = COMODOS.map((c,i)=>
+  '<div class="comodo"><div class="cm-tit"><b>' + c[0] + '</b><small>' + c[1] + '</small></div>' +
+  '<label class="btn linha cm-add" for="cm-' + i + '"><span id="cm-rot-' + i + '">+ Pôr fotos</span></label>' +
+  '<input type="file" id="cm-' + i + '" data-i="' + i + '" accept="image/*" multiple hidden>' +
+  '<div class="fotos-grade" id="cm-grade-' + i + '"></div></div>').join('');
+function mostrar(i){
+  const g = $('cm-grade-' + i); g.innerHTML = '';
+  fotos[i].forEach((f,k)=>{
     const fig = document.createElement('figure'), img = document.createElement('img'), x = document.createElement('button');
-    img.src = URL.createObjectURL(f); img.alt = 'Foto ' + (i+1);
-    x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label','Tirar a foto ' + (i+1));
-    x.onclick = ()=>{ fotos.splice(i,1); mostrarFotos(); };
-    fig.append(img, x); $('fotos-grade').append(fig);
+    img.src = URL.createObjectURL(f); img.alt = COMODOS[i][0] + ' ' + (k+1);
+    x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label','Tirar esta foto');
+    x.onclick = ()=>{ fotos[i].splice(k,1); mostrar(i); atualizarLink(); };
+    fig.append(img, x); g.append(fig);
   });
-  $('fotos-rotulo').textContent = fotos.length ? (fotos.length + (fotos.length===1?' foto escolhida':' fotos escolhidas') + ' · trocar ou juntar mais') : 'Escolher fotos';
+  $('cm-rot-' + i).textContent = fotos[i].length ? ('✔ ' + fotos[i].length + (fotos[i].length===1?' foto':' fotos') + ' · pôr mais') : '+ Pôr fotos';
+  const t = total();
+  $('fotos-total').textContent = t ? ('Total: ' + t + (t===1?' foto':' fotos') + ' (até ' + MAX_FOTOS + ').') : 'Nenhuma foto escolhida ainda.';
 }
-$('fotos').addEventListener('change', e=>{
+$('comodos').addEventListener('change', e=>{
+  if(!e.target.matches('input[type=file]')) return;
+  const i = +e.target.dataset.i, livre = MAX_FOTOS - total();
   const novas = [...e.target.files].filter(f=>/^image\//.test(f.type));
-  fotos = fotos.concat(novas).slice(0, MAX_FOTOS);
-  if(fotos.length >= MAX_FOTOS && novas.length) alert('Pode mandar até ' + MAX_FOTOS + ' fotos por aqui. Se tiver mais, mande depois na conversa.');
-  e.target.value = ''; mostrarFotos();
+  if(novas.length > livre) alert('Pode mandar até ' + MAX_FOTOS + ' fotos por aqui. Se tiver mais, mande depois na conversa.');
+  fotos[i] = fotos[i].concat(novas.slice(0, Math.max(0, livre)));
+  e.target.value = ''; mostrar(i); atualizarLink();
 });
-function podeMandarFotos(){ try { return !!(navigator.canShare && fotos.length && navigator.canShare({files: fotos})); } catch(e){ return false; } }
+const semAcento = t=>t.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+function arquivos(){
+  const out = [];
+  fotos.forEach((l,i)=>l.forEach((f,k)=>{
+    const ext = (f.name.match(/\.[a-z0-9]+$/i)||['.jpg'])[0];
+    out.push(new File([f], (i+1) + '-' + semAcento(COMODOS[i][0]) + '-' + (k+1) + ext, {type: f.type}));
+  }));
+  return out;
+}
+function legenda(){
+  return 'Fotos do imóvel - ' + ($('rua').value.trim() || 'captação Fcosta') + '\n' +
+    fotos.map((l,i)=>l.length ? '• ' + COMODOS[i][0] + ': ' + l.length + (l.length===1?' foto':' fotos') : '').filter(Boolean).join('\n');
+}
+function podeMandarFotos(){ try { const a = arquivos(); return !!(navigator.canShare && a.length && navigator.canShare({files: a})); } catch(e){ return false; } }
 function prepararPronto(){
-  const n = fotos.length;
+  const n = total();
   $('enviar-fotos-box').hidden = !n;
   $('n-fotos').textContent = n;
   if(n && podeMandarFotos()){
     $('passo-fotos').innerHTML = 'Depois, volte aqui e toque em <strong>Enviar as ' + n + ' fotos</strong>. Escolha a conversa da Fcosta no WhatsApp.';
   } else if(n){
     $('enviar-fotos-box').hidden = true;
-    $('passo-fotos').innerHTML = 'Este aparelho não deixa mandar as fotos direto daqui. Na conversa do WhatsApp, toque no <strong>clipe 📎</strong> e escolha as fotos do imóvel.';
+    $('passo-fotos').innerHTML = 'Este aparelho não deixa mandar as fotos direto daqui. Na conversa do WhatsApp, toque no <strong>clipe 📎</strong> e mande as fotos: frente, sala, cozinha, quartos, banheiro e quintal.';
   }
 }
 $('enviar-fotos').addEventListener('click', ()=>{
-  navigator.share({ files: fotos, text: 'Fotos do imóvel - ' + ($('rua').value.trim() || 'captação Fcosta') })
+  navigator.share({ files: arquivos(), text: legenda() })
     .then(()=>{ $('fotos-obs').textContent = '✔ Pronto! Se as fotos chegaram na conversa da Fcosta, está tudo certo.'; })
     .catch(()=>{});
 });
