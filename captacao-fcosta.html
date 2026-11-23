@@ -41,6 +41,7 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--fundo);color:var(--txt);font:16px/1.55 var(--corpo)}
+html{scroll-behavior:smooth}
 .wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 h1,h2,.marca{font-family:var(--titulo);font-weight:600;letter-spacing:-.005em;font-variant-numeric:lining-nums;text-wrap:balance}
 .topo{border-bottom:1px solid var(--borda)}
@@ -124,6 +125,28 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--ouro);border-col
 .rodape{border-top:1px solid var(--borda);color:var(--txt2);font-size:.88rem;text-align:center}
 .rodape .wrap{padding-block:24px}
 @media (max-width:480px){.duas{grid-template-columns:1fr}.quatro{grid-template-columns:1fr 1fr}.creci{font-size:.78rem}}
+
+/* ===== ACABAMENTO (leitura fácil e passos claros) ===== */
+.campo label,.rotulo{font-size:1rem;color:#d6cfc2}
+input::placeholder,textarea::placeholder{color:#7d776c}
+legend{display:flex;align-items:center;gap:10px;font-size:1.3rem}
+legend i{font:700 1rem var(--corpo);font-style:normal;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:var(--ouro);color:#14110a}
+fieldset{padding:22px 18px}
+.btn.comecar{margin-top:22px;background:var(--ouro);color:#14110a;min-height:56px}
+.dicas-foto{list-style:none;margin:0;padding:14px;display:grid;gap:10px;border-radius:12px;background:rgba(201,169,110,.08);border:1px solid rgba(201,169,110,.3)}
+.dicas-foto li{display:flex;gap:10px;align-items:flex-start;font-size:1rem;line-height:1.4}
+.dicas-foto span{flex:none;width:26px;text-align:center}
+.dica-pular{margin:0;color:var(--txt2);font-size:.92rem}
+.cm-cab{display:flex;align-items:center;gap:12px}
+.cm-ic{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:1.5rem;background:rgba(201,169,110,.12)}
+.cm-tit{flex:1;min-width:0}
+.cm-n{flex:none;font-weight:700;color:#7fe0a5}
+.comodo.tem{border-color:rgba(127,224,165,.55);background:linear-gradient(180deg,rgba(37,211,102,.07),var(--sup2))}
+.aceite{padding:14px;border:1px solid var(--borda);border-radius:12px;background:var(--sup);font-size:1rem}
+.aceite:has(input:checked){border-color:var(--ouro);background:rgba(201,169,110,.1)}
+.aceite input{width:28px;height:28px}
+#enviar{min-height:64px;font-size:1.2rem;box-shadow:0 12px 28px -12px rgba(37,211,102,.7)}
+@media (max-width:480px){fieldset{padding:20px 14px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -142,22 +165,23 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--ouro);border-col
     </ul>
   </div>
   <ol class="passos">
-    <li><b>1</b><span>Preencha os dados do imóvel abaixo.</span></li>
-    <li><b>2</b><span>Toque em <strong>Enviar pelo WhatsApp</strong>.</span></li>
-    <li><b>3</b><span>Escolha as fotos aqui na página e toque em <strong>Enviar as fotos</strong>.</span></li>
+    <li><b>1</b><span>Conte sobre você e o imóvel.</span></li>
+    <li><b>2</b><span>Tire ou escolha as fotos de cada cômodo.</span></li>
+    <li><b>3</b><span>Toque em <strong>Enviar pelo WhatsApp</strong>. Leva uns 3 minutos.</span></li>
   </ol>
+  <a class="btn comecar" href="#form">Começar agora ↓</a>
 </div></section>
 
 <main class="wrap">
 <form id="form" novalidate>
   <fieldset>
-    <legend>Seus dados</legend>
+    <legend><i>1</i>Seus dados</legend>
     <div class="campo"><label for="nome">Seu nome</label><input id="nome" autocomplete="name" required></div>
     <div class="campo"><label for="zap">Seu WhatsApp com DDD</label><input id="zap" type="tel" inputmode="tel" autocomplete="tel" placeholder="11 99999-9999" required></div>
   </fieldset>
 
   <fieldset>
-    <legend>O imóvel</legend>
+    <legend><i>2</i>O imóvel</legend>
     <div class="rotulo">Você quer</div>
     <div class="opcoes" role="radiogroup" aria-label="Você quer">
       <label><input type="radio" name="fin" id="fin-venda" value="Vender" checked>Vender</label>
@@ -183,8 +207,14 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--ouro);border-col
   </fieldset>
 
   <fieldset>
-    <legend>Fotos do imóvel</legend>
-    <p class="dica-fotos"><strong>Como tirar boas fotos:</strong> de dia, com as luzes acesas e as janelas abertas. Toque em <strong>📷 Tirar foto</strong> para fotografar na hora, ou em <strong>🖼️ Da galeria</strong> para usar fotos que já tem. Tire <strong>de vários cantos</strong> de cada lugar (da porta e do fundo), com o celular deitado. Se não gostar, toque em <strong>Apagar</strong>. <small>Pode pular o que o imóvel não tiver.</small></p>
+    <legend><i>3</i>Fotos do imóvel</legend>
+    <ul class="dicas-foto">
+      <li><span>☀️</span><div>Tire de dia, com as luzes acesas e as janelas abertas.</div></li>
+      <li><span>📐</span><div>Fotografe cada lugar de vários cantos: da porta e do fundo.</div></li>
+      <li><span>📱</span><div>Deite o celular (foto na horizontal).</div></li>
+      <li><span>🗑️</span><div>Não gostou? Toque em <b>Apagar</b> e tire de novo.</div></li>
+    </ul>
+    <p class="dica-pular">Pode pular o que o imóvel não tiver.</p>
     <div class="comodos" id="comodos"></div>
     <p class="obs" id="fotos-total">Nenhuma foto escolhida ainda.</p>
   </fieldset>
@@ -311,21 +341,21 @@ atualizarLink();
 /* ===== FOTOS POR CÔMODO: o cliente escolhe aqui e envia pelo WhatsApp (nada fica guardado na página) =====
    Para mudar a lista de cômodos, edite COMODOS (nome e dica). */
 const COMODOS = [
-  ['Frente do imóvel (fachada)', 'A frente vista da rua, o portão e a calçada'],
-  ['Sala', 'Tire de 2 ou 3 cantos diferentes'],
-  ['Cozinha', 'Mostre a pia, os armários e o espaço'],
-  ['Quartos', 'Fotos de cada quarto, de cantos diferentes'],
-  ['Banheiros', 'O banheiro inteiro, com o box'],
-  ['Lavanderia / área de serviço', 'O tanque e o espaço da máquina'],
-  ['Quintal, garagem e varanda', 'A parte de fora e onde para o carro'],
-  ['Outras fotos', 'Vista da janela, piscina, churrasqueira, documentos...']
+  ['Frente do imóvel (fachada)', 'A frente vista da rua, o portão e a calçada', '🏠'],
+  ['Sala', 'Tire de 2 ou 3 cantos diferentes', '🛋️'],
+  ['Cozinha', 'Mostre a pia, os armários e o espaço', '🍳'],
+  ['Quartos', 'Fotos de cada quarto, de cantos diferentes', '🛏️'],
+  ['Banheiros', 'O banheiro inteiro, com o box', '🚿'],
+  ['Lavanderia / área de serviço', 'O tanque e o espaço da máquina', '🧺'],
+  ['Quintal, garagem e varanda', 'A parte de fora e onde para o carro', '🚗'],
+  ['Outras fotos', 'Vista da janela, piscina, churrasqueira, documentos...', '➕']
 ];
 const MAX_FOTOS = 30;
 const fotos = COMODOS.map(()=>[]);
 const total = ()=>fotos.reduce((a,l)=>a+l.length,0);
 window.totalFotos = total;
 $('comodos').innerHTML = COMODOS.map((c,i)=>
-  '<div class="comodo"><div class="cm-tit"><b>' + c[0] + '</b><small>' + c[1] + '</small></div>' +
+  '<div class="comodo" id="cm-box-' + i + '"><div class="cm-cab"><span class="cm-ic" aria-hidden="true">' + c[2] + '</span><div class="cm-tit"><b>' + c[0] + '</b><small>' + c[1] + '</small></div><span class="cm-n" id="cm-n-' + i + '"></span></div>' +
   '<div class="cm-botoes"><label class="btn cm-cam" for="cm-cam-' + i + '"><span>📷 Tirar foto</span></label>' +
   '<label class="btn linha cm-add" for="cm-' + i + '"><span>🖼️ Da galeria</span></label></div>' +
   '<input type="file" id="cm-cam-' + i + '" data-i="' + i + '" accept="image/*" capture="environment" hidden>' +
@@ -342,6 +372,8 @@ function mostrar(i){
     fig.append(img, x); g.append(fig);
   });
   $('cm-rot-' + i).textContent = fotos[i].length ? ('✔ ' + fotos[i].length + (fotos[i].length===1?' foto. Não gostou? Toque em Apagar e tire de novo.':' fotos. Não gostou de alguma? Toque em Apagar e tire de novo.')) : '';
+  $('cm-box-' + i).classList.toggle('tem', fotos[i].length > 0);
+  $('cm-n-' + i).textContent = fotos[i].length ? '✔ ' + fotos[i].length : '';
   const t = total();
   $('fotos-total').textContent = t ? ('Total: ' + t + (t===1?' foto':' fotos') + ' (até ' + MAX_FOTOS + ').') : 'Nenhuma foto escolhida ainda.';
 }
