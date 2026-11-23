@@ -3796,6 +3796,9 @@ async function baixarArquivoJSON(obj, nomeArquivo){
       const writable = await handle.createWritable();
       await writable.write(conteudo);
       await writable.close();
+      // confere se o arquivo gravado abre de volta (evita backup em branco sem ninguém perceber)
+      try{ const f = await handle.getFile(); JSON.parse(await f.text()); }
+      catch(errVerif){ alert('ATENÇÃO: o backup foi salvo, mas não consegui ler de volta. Ele pode estar em branco. Salve de novo na pasta Downloads do computador.'); return false; }
       return true;
     }catch(err){
       if(err && err.name==='AbortError') return false; // usuário cancelou de propósito
@@ -3807,7 +3810,7 @@ async function baixarArquivoJSON(obj, nomeArquivo){
   const a = document.createElement('a');
   a.href = url; a.download = nomeArquivo;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  setTimeout(()=>URL.revokeObjectURL(url), 60000); // dar tempo de o download terminar (arquivos grandes)
   return true;
 }
 async function baixarBackupJSON(){
