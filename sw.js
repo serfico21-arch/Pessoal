@@ -1,7 +1,7 @@
 /* Service worker do Painel FCosta.
    Estratégia: rede primeiro (você sempre vê a versão mais nova do GitHub);
    se estiver sem internet, usa a cópia guardada. Só mexe em arquivos do próprio site. */
-const CACHE = 'painel-fcosta-v2';
+const CACHE = 'painel-fcosta-v3';
 const BASICO = ['./', './index.html', './manifest.json', './icone-tela-inicial-192.png', './icone-tela-inicial-512.png'];
 
 self.addEventListener('install', (e) => {
@@ -21,6 +21,9 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // sites externos: o navegador resolve
+  // O Mercado (pasta mercado/) tem o próprio app e a própria cópia guardada.
+  // O painel não mexe nele, senão, sem internet, o Mercado abria o painel no lugar.
+  if (url.pathname.indexOf('/mercado/') > -1 || /\/mercado$/.test(url.pathname)) return;
   e.respondWith(
     fetch(req)
       .then((res) => {
