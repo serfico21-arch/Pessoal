@@ -22,6 +22,7 @@
 <link rel="apple-touch-icon" href="img/apple-icone-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Pinheiro &amp; Costa">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -242,6 +243,15 @@ img{display:block;max-width:100%}
 .toast{display:none;position:fixed;left:50%;transform:translateX(-50%);top:calc(84px + env(safe-area-inset-top));z-index:80;background:var(--verde);color:#fff;font-weight:700;font-size:14px;padding:11px 18px;border-radius:999px;box-shadow:var(--sombra);max-width:90vw;text-align:center}
 
 /* janela instalar */
+.barra-app{display:none;align-items:center;gap:10px;background:var(--verde);color:#fff;padding:9px 14px;font-size:14px;font-weight:600}
+.barra-app.on{display:flex}
+.barra-app img{width:34px;height:34px;border-radius:9px;flex:none;background:#fff}
+.barra-app span{flex:1;line-height:1.25}
+.barra-app button{border:0;border-radius:999px;font-weight:800;font-size:14px;padding:9px 14px;cursor:pointer}
+.barra-app .ok{background:var(--amarelo);color:var(--verde)}
+.barra-app .x{background:transparent;color:#fff;font-size:20px;padding:4px 6px;opacity:.8}
+.modal .b-linha2{display:inline-flex;align-items:center;justify-content:center;width:100%;border:2px solid var(--verde);border-radius:14px;background:#fff;color:var(--verde);font-weight:800;padding:12px;font-size:15px;margin-top:10px;text-decoration:none}
+.modal .dica{margin-top:10px;font-size:13.5px;color:#5b5f78}
 .modal{position:fixed;inset:0;z-index:90;background:rgba(22,27,99,.55);display:none;align-items:flex-end;justify-content:center}
 .modal.on{display:flex}
 .modal .cx{background:var(--creme);width:100%;max-width:460px;border-radius:26px 26px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom))}
@@ -320,6 +330,7 @@ img{display:block;max-width:100%}
 <div class="demo-faixa" id="demoFaixa" style="display:none">Modo de demonstração · produtos de exemplo</div>
 <div class="faixa" id="faixa">Compre pelo celular · <b>Pague com Pix</b> · Entrega no bairro</div>
 
+<div class="barra-app" id="barraApp"><img src="img/icone-192.png" alt=""><span>Instale o app do mercado no seu celular. É grátis!</span><button class="ok" onclick="instalar()">Instalar</button><button class="x" onclick="fecharBarraApp()" aria-label="Fechar">×</button></div>
 <header class="topo">
   <div class="wrap topo-in">
     <a class="marca" href="#" aria-label="Início">
@@ -427,15 +438,7 @@ img{display:block;max-width:100%}
 </div>
 
 <div class="modal" id="modalApp" onclick="if(event.target===this)this.classList.remove('on')">
-  <div class="cx">
-    <h3>Instalar no iPhone</h3>
-    <ol>
-      <li>Abra este site no <b>Safari</b>.</li>
-      <li>Toque em <b>Compartilhar</b> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg> embaixo da tela.</li>
-      <li>Escolha <b>Adicionar à Tela de Início</b> e toque em <b>Adicionar</b>.</li>
-    </ol>
-    <button class="b-verde" onclick="document.getElementById('modalApp').classList.remove('on')">Entendi</button>
-  </div>
+  <div class="cx" id="modalAppCx"></div>
 </div>
 <div class="toast" id="toast" role="status"></div>
 <div class="pop" id="pop" role="status" onclick="if(event.target.classList.contains('x')){fecharPop();return;}fecharPop();document.getElementById('avisos').scrollIntoView({behavior:'smooth'})"></div>
@@ -828,14 +831,70 @@ async function enviarPedido(){
 
 /* ===== Instalar como aplicativo (Android e iPhone) ===== */
 let pedidoInstalar = null;
+const UA = navigator.userAgent;
+const EH_IOS = /iphone|ipad|ipod/i.test(UA) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+const EH_ANDROID = /android/i.test(UA);
+const DENTRO_APP = /FBAN|FBAV|FB_IAB|Instagram|Line\/|WhatsApp|TikTok|musical_ly|Snapchat|; wv\)|GSA\//i.test(UA); // navegador de dentro de outro app
+const JA_APP = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const ICO_COMP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M8 7l4-4 4 4"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>';
 window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); pedidoInstalar = e; });
-function instalar(){
-  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
-  if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone){ toast('O app já está instalado neste celular.'); return; }
-  if(pedidoInstalar){ pedidoInstalar.prompt(); pedidoInstalar.userChoice.finally(()=>{ pedidoInstalar=null; }); return; }
-  if(ios){ document.getElementById('modalApp').classList.add('on'); return; }
-  toast('No Chrome, toque nos 3 pontinhos e escolha "Instalar app" ou "Adicionar à tela inicial".');
+window.addEventListener('appinstalled', ()=>{ pedidoInstalar = null; fecharBarraApp(true); fecharModalApp(); toast('Pronto! O app do mercado está na sua tela.'); });
+function fecharModalApp(){ document.getElementById('modalApp').classList.remove('on'); }
+function copiarLink(){
+  const u = location.origin + location.pathname;
+  (navigator.clipboard ? navigator.clipboard.writeText(u) : Promise.reject()).then(()=>toast('Link copiado. Cole no Chrome ou no Safari.'), ()=>{ prompt('Copie o link:', u); });
 }
+function mostrarPassos(titulo, passos, extra){
+  document.getElementById('modalAppCx').innerHTML = '<h3>'+titulo+'</h3><ol>'+passos.map(t=>'<li>'+t+'</li>').join('')+'</ol>'+(extra||'')+
+    '<button class="b-verde" onclick="fecharModalApp()">Entendi</button>';
+  document.getElementById('modalApp').classList.add('on');
+}
+function instalar(){
+  if(JA_APP()){ toast('O app já está instalado neste celular.'); return; }
+  if(pedidoInstalar){
+    const ev = pedidoInstalar; pedidoInstalar = null;
+    ev.prompt();
+    ev.userChoice.then(c=>{ if(c && c.outcome==='accepted') fecharBarraApp(true); }).catch(()=>{});
+    return;
+  }
+  const link = location.origin + location.pathname;
+  if(DENTRO_APP){
+    if(EH_ANDROID){
+      const intent = 'intent://' + location.host + location.pathname + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(link) + ';end';
+      mostrarPassos('Abra no Chrome para instalar', ['Este link abriu dentro de outro aplicativo, e por aqui não dá para instalar.', 'Toque em <b>Abrir no Chrome</b> abaixo.', 'No Chrome, toque de novo em <b>Instalar</b>.'],
+        '<a class="b-verde" href="'+intent+'">Abrir no Chrome</a><button class="b-linha2" onclick="copiarLink()">Copiar o link</button><p class="dica">Também dá para tocar nos 3 pontinhos ⋮ e escolher <b>Abrir no navegador</b>.</p>');
+    } else {
+      mostrarPassos('Abra no Safari para instalar', ['Este link abriu dentro de outro aplicativo, e por aqui não dá para instalar.', 'Toque nos <b>3 pontinhos</b> ou no ícone da <b>bússola</b> 🧭 e escolha <b>Abrir no Safari</b>.', 'No Safari, toque em <b>Compartilhar</b> '+ICO_COMP+' e depois em <b>Adicionar à Tela de Início</b>.'],
+        '<button class="b-linha2" onclick="copiarLink()">Copiar o link</button><p class="dica">Se preferir, copie o link, abra o Safari e cole na barra de endereço.</p>');
+    }
+    return;
+  }
+  if(EH_IOS){
+    const outro = /CriOS|EdgiOS|FxiOS|OPiOS/i.test(UA);
+    mostrarPassos('Instalar no iPhone', [
+      outro ? 'Toque em <b>Compartilhar</b> '+ICO_COMP+' (no alto, ao lado do endereço). Se não aparecer, abra este site no <b>Safari</b>.' : 'Toque em <b>Compartilhar</b> '+ICO_COMP+' na barra de baixo do Safari.',
+      'Role a lista e escolha <b>Adicionar à Tela de Início</b>.',
+      'Toque em <b>Adicionar</b>. Pronto, o ícone do mercado fica na sua tela.']);
+    return;
+  }
+  if(EH_ANDROID){
+    if(/SamsungBrowser/i.test(UA)) mostrarPassos('Instalar no celular', ['Toque no menu <b>☰</b> embaixo, à direita.', 'Escolha <b>Adicionar página a</b> e depois <b>Tela inicial</b>.', 'Toque em <b>Adicionar</b>.']);
+    else mostrarPassos('Instalar no celular', ['Toque nos <b>3 pontinhos ⋮</b> no alto, à direita.', 'Escolha <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.', 'Toque em <b>Instalar</b> (ou <b>Adicionar</b>). Pronto!'],
+      '<p class="dica">Se não aparecer a opção, abra este link no <b>Google Chrome</b>.</p>');
+    return;
+  }
+  mostrarPassos('Instalar', ['No computador, clique no ícone de instalar ⊕ no fim da barra de endereço do Chrome ou do Edge.', 'No celular, abra este mesmo link e toque em <b>Instalar</b>.']);
+}
+function fecharBarraApp(sempre){
+  document.getElementById('barraApp').classList.remove('on');
+  try{ localStorage.setItem('pc_barra_app', sempre===true ? 'instalado' : String(Date.now())); }catch(e){}
+}
+(function(){
+  if(JA_APP() || !(EH_IOS || EH_ANDROID)) return;
+  let v=null; try{ v = localStorage.getItem('pc_barra_app'); }catch(e){}
+  if(v==='instalado' || (v && Date.now()-Number(v) < 3*864e5)) return; // fechou: volta a mostrar em 3 dias
+  document.getElementById('barraApp').classList.add('on');
+})();
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(()=>{});
 
 document.getElementById('busca').addEventListener('input', ()=>{ desenharLista(); });
