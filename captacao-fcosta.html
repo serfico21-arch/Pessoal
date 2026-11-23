@@ -106,11 +106,14 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--ouro);border-col
 .comodos{display:grid;gap:12px}
 .comodo{display:grid;gap:8px;padding:12px;border:1px solid var(--borda);border-radius:12px;background:var(--sup2)}
 .cm-tit b{display:block;font-size:1.05rem;color:var(--txt)}.cm-tit small{color:var(--txt2);font-size:.9rem}
-.cm-add{min-height:50px}
-.fotos-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.cm-botoes{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cm-add,.cm-cam{min-height:54px;font-size:1rem}
+.cm-cam{background:var(--ouro);color:#14110a}
+.cm-cont{color:var(--ouro2);font-weight:600}.cm-cont:empty{display:none}
+.fotos-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
 .fotos-grade figure{position:relative;margin:0;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid var(--borda)}
 .fotos-grade img{width:100%;height:100%;object-fit:cover;display:block}
-.fotos-grade button{position:absolute;top:4px;right:4px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(0,0,0,.7);color:#fff;font:700 18px var(--corpo);cursor:pointer}
+.fotos-grade button{position:absolute;left:0;right:0;bottom:0;min-height:40px;border:0;background:rgba(180,30,30,.92);color:#fff;font:700 .95rem var(--corpo);cursor:pointer}
 #enviar-fotos-box{display:grid;gap:8px}#enviar-fotos-box[hidden]{display:none}
 .pronto{display:none;padding-block:36px 48px}
 .pronto.ver{display:block}
@@ -181,7 +184,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--ouro);border-col
 
   <fieldset>
     <legend>Fotos do imóvel</legend>
-    <p class="dica-fotos"><strong>Como tirar boas fotos:</strong> de dia, com as luzes acesas e as janelas abertas. Tire <strong>de vários cantos</strong> de cada lugar (da porta e do fundo), com o celular deitado. <small>Pode pular o que o imóvel não tiver.</small></p>
+    <p class="dica-fotos"><strong>Como tirar boas fotos:</strong> de dia, com as luzes acesas e as janelas abertas. Toque em <strong>📷 Tirar foto</strong> para fotografar na hora, ou em <strong>🖼️ Da galeria</strong> para usar fotos que já tem. Tire <strong>de vários cantos</strong> de cada lugar (da porta e do fundo), com o celular deitado. Se não gostar, toque em <strong>Apagar</strong>. <small>Pode pular o que o imóvel não tiver.</small></p>
     <div class="comodos" id="comodos"></div>
     <p class="obs" id="fotos-total">Nenhuma foto escolhida ainda.</p>
   </fieldset>
@@ -323,19 +326,22 @@ const total = ()=>fotos.reduce((a,l)=>a+l.length,0);
 window.totalFotos = total;
 $('comodos').innerHTML = COMODOS.map((c,i)=>
   '<div class="comodo"><div class="cm-tit"><b>' + c[0] + '</b><small>' + c[1] + '</small></div>' +
-  '<label class="btn linha cm-add" for="cm-' + i + '"><span id="cm-rot-' + i + '">+ Pôr fotos</span></label>' +
+  '<div class="cm-botoes"><label class="btn cm-cam" for="cm-cam-' + i + '"><span>📷 Tirar foto</span></label>' +
+  '<label class="btn linha cm-add" for="cm-' + i + '"><span>🖼️ Da galeria</span></label></div>' +
+  '<input type="file" id="cm-cam-' + i + '" data-i="' + i + '" accept="image/*" capture="environment" hidden>' +
   '<input type="file" id="cm-' + i + '" data-i="' + i + '" accept="image/*" multiple hidden>' +
+  '<small class="cm-cont" id="cm-rot-' + i + '"></small>' +
   '<div class="fotos-grade" id="cm-grade-' + i + '"></div></div>').join('');
 function mostrar(i){
   const g = $('cm-grade-' + i); g.innerHTML = '';
   fotos[i].forEach((f,k)=>{
     const fig = document.createElement('figure'), img = document.createElement('img'), x = document.createElement('button');
     img.src = URL.createObjectURL(f); img.alt = COMODOS[i][0] + ' ' + (k+1);
-    x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label','Tirar esta foto');
+    x.type = 'button'; x.innerHTML = '🗑️ Apagar'; x.setAttribute('aria-label','Apagar esta foto');
     x.onclick = ()=>{ fotos[i].splice(k,1); mostrar(i); atualizarLink(); };
     fig.append(img, x); g.append(fig);
   });
-  $('cm-rot-' + i).textContent = fotos[i].length ? ('✔ ' + fotos[i].length + (fotos[i].length===1?' foto':' fotos') + ' · pôr mais') : '+ Pôr fotos';
+  $('cm-rot-' + i).textContent = fotos[i].length ? ('✔ ' + fotos[i].length + (fotos[i].length===1?' foto. Não gostou? Toque em Apagar e tire de novo.':' fotos. Não gostou de alguma? Toque em Apagar e tire de novo.')) : '';
   const t = total();
   $('fotos-total').textContent = t ? ('Total: ' + t + (t===1?' foto':' fotos') + ' (até ' + MAX_FOTOS + ').') : 'Nenhuma foto escolhida ainda.';
 }
