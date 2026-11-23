@@ -547,7 +547,7 @@ async function carregar(){
 async function carregarFotos(){
   const ids = PRODUTOS.map(p=>p.id);
   for(let i=0;i<ids.length;i+=30){
-    const lote = ids.slice(i,i+30).map(x=>'"'+String(x).replace(/"/g,'')+'"').join(',');
+    const lote = ids.slice(i,i+30).map(x=>'"'+String(x).replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"').join(',');
     try{
       const r = await sb('mercado_produtos?slug=eq.'+LOJA+'&foto=not.is.null&id=in.('+encodeURIComponent(lote)+')&select=id,foto');
       r.forEach(x=>{ if(x.foto && String(x.foto).startsWith('data:image')){ FOTOS[x.id]=x.foto;
@@ -602,7 +602,7 @@ function desenharDeps(){
     lista.map(c=>'<button class="dep'+(c===categoria?' on':'')+'" data-c="'+esc(c)+'"><span class="c" style="background-image:url(\''+fotoDep(c,240)+'\')"></span><span>'+esc(c)+'</span></button>').join('');
   el.querySelectorAll('.dep').forEach(b=>b.onclick=()=>{
     if(!cs.length && b.dataset.c!=='Todos'){ toast('Os produtos estão chegando!'); return; }
-    categoria=b.dataset.c; desenharDeps(); desenharLista(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'});
+    categoria=b.dataset.c; LIMITE=48; desenharDeps(); desenharLista(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'});
   });
 }
 
@@ -621,7 +621,7 @@ function cartaoProduto(p){
   const ctrl = q>0
     ? '<div class="qtd"><button aria-label="Menos" onclick="mudar('+jsq(p.id)+',-1)">−</button><span>'+fmtQtd(p,q)+'</span><button aria-label="Mais" onclick="mudar('+jsq(p.id)+',1)">+</button></div>'
     : '';
-  return '<article class="prod"><div class="foto" data-foto="'+esc(p.id)+'">'+fotoHTML(p)+'</div>'+
+  return '<article class="prod" data-id="'+esc(p.id)+'"><div class="foto" data-foto="'+esc(p.id)+'">'+fotoHTML(p)+'</div>'+
     '<div class="info">'+(p.categoria?'<div class="pcat">'+esc(p.categoria)+'</div>':'')+'<div class="pnome">'+esc(p.nome)+'</div><div class="pmarca">'+esc(p.marca||'')+'</div>'+
     '<div class="linha-p"><div class="preco">'+brl(p.preco)+(isPeso(p)?' <small>/kg</small>':'')+'</div>'+
     (q>0?'':'<button class="mais" aria-label="Colocar na sacola" '+(sem?'disabled':'')+' onclick="mudar('+jsq(p.id)+',1)">'+ICON_MAIS+'</button>')+'</div>'+ctrl+'</div></article>';
@@ -638,7 +638,16 @@ function desenharLista(){
   const el = document.getElementById('lista');
   if(!PRODUTOS.length){ el.innerHTML = '<div class="vazio"><h3>A vitrine está sendo montada</h3><p>Em poucos dias você poderá fazer suas compras por aqui. Enquanto isso, faça seu pedido pelo WhatsApp.</p><a class="b-ouro" target="_blank" rel="noopener" href="'+zapLink('Olá! Gostaria de fazer um pedido.')+'">Pedir pelo WhatsApp</a></div>'; return; }
   if(!lista.length){ el.innerHTML = '<div class="vazio"><h3>Nada encontrado</h3><p>Tente outro nome ou pergunte pelo WhatsApp, talvez a gente tenha.</p></div>'; return; }
-  el.innerHTML = '<div class="grade">'+lista.map(cartaoProduto).join('')+'</div>';
+  const resto = lista.length - LIMITE;
+  el.innerHTML = '<div class="grade">'+lista.slice(0,LIMITE).map(cartaoProduto).join('')+'</div>'+
+    (resto>0 ? '<div style="text-align:center;margin-top:18px"><button class="b-ouro" onclick="verMais()">Ver mais produtos ('+resto+')</button></div>' : '');
+}
+/* Mostra os produtos aos poucos: celular simples não trava com mil produtos */
+let LIMITE = 48;
+function verMais(){ LIMITE += 96; desenharLista(); }
+function redesenharCartao(id){
+  const p = PRODUTOS.find(x=>x.id===id); if(!p) return;
+  document.querySelectorAll('#lista article[data-id="'+CSS.escape(id)+'"]').forEach(el=>{ el.outerHTML = cartaoProduto(p); });
 }
 
 function mudar(id, dir){
@@ -653,13 +662,15 @@ function mudar(id, dir){
     toast('Na sacola: '+p.nome);
     const s = document.getElementById('btnSacola'); s.classList.remove('pula'); void s.offsetWidth; s.classList.add('pula');
   }
-  salvarLocal(); desenharLista(); atualizarBarra();
+  salvarLocal(); redesenharCartao(id); atualizarBarra();
   if(aberta) desenharCarrinho();
 }
 function toast(t){ const d=document.getElementById('toast'); d.textContent=t; d.style.display='block'; clearTimeout(d._t); d._t=setTimeout(()=>d.style.display='none',2200); }
 
 function itensCarrinho(){ return Object.entries(carrinho).map(([id,q])=>({p:PRODUTOS.find(x=>x.id===id),q})).filter(x=>x.p); }
-function subtotal(){ return itensCarrinho().reduce((s,{p,q})=>s+p.preco*q,0); }
+// Valor de cada item já arredondado em centavos: sacola, Pix, WhatsApp e Central mostram o mesmo total
+const valorItem = (p,q) => Math.round(Number(p.preco)*q*100 + 1e-6)/100;
+function subtotal(){ return Math.round(itensCarrinho().reduce((s,{p,q})=>s+valorItem(p,q)*100,0))/100; }
 function taxa(){
   if(pedido.modo!=='entrega') return 0;
   const t = Number(CFG.taxa_entrega)||0, g = Number(CFG.frete_gratis_acima)||0;
@@ -686,7 +697,7 @@ function desenharCarrinho(){
   }else{
     h += '<div class="bloco"><h3>Produtos</h3>'+itens.map(({p,q})=>
       '<div class="item"><div class="mini">'+(FOTOS[p.id]?'<img alt="" src="'+FOTOS[p.id]+'">':esc(iniciais(p.nome)))+'</div>'+
-      '<div class="t"><b>'+esc(p.nome)+'</b><span>'+brl(p.preco*q)+'</span></div>'+
+      '<div class="t"><b>'+esc(p.nome)+'</b><span>'+brl(valorItem(p,q))+'</span></div>'+
       '<div class="q"><button aria-label="Menos" onclick="mudar('+jsq(p.id)+',-1)">−</button><span>'+fmtQtd(p,q)+'</span><button aria-label="Mais" onclick="mudar('+jsq(p.id)+',1)">+</button></div></div>').join('')+'</div>';
     const modos = [];
     if(CFG.entrega) modos.push(['entrega','Entrega']);
@@ -783,7 +794,7 @@ async function enviarPedido(){
     try{
       const r = await sb('rpc/mercado_fazer_pedido', {p_slug:LOJA, p_pedido:{
         cliente:{nome:pedido.nome.trim(), fone:pedido.fone.trim(), modo:pedido.modo, endereco:pedido.modo==='entrega'?pedido.endereco.trim():'', pagamento:pedido.pag+(comPix?' (QR no site)':''), troco:pedido.pag==='Dinheiro'?pedido.troco:'', obs:pedido.obs.trim()},
-        itens: itens.map(({p,q})=>({id:p.id, nome:p.nome, marca:p.marca||'', qtd:q, tipo:p.tipo_venda, preco:Number(p.preco), total:Math.round(p.preco*q*100)/100})),
+        itens: itens.map(({p,q})=>({id:p.id, nome:p.nome, marca:p.marca||'', qtd:q, tipo:p.tipo_venda, preco:Number(p.preco), total:valorItem(p,q)})),
         subtotal:Math.round(sub*100)/100, taxa:tx, total, segredo }});
       if(r && r.ok) numero = r.numero;
     }catch(err){ console.warn('pedido não gravado, segue pelo WhatsApp', err); }
@@ -793,7 +804,7 @@ async function enviarPedido(){
   // 2) mensagem do WhatsApp
   const L = [];
   L.push('*NOVO PEDIDO'+(numero?' Nº '+numero:'')+' · '+CFG.nome+'*', '');
-  itens.forEach(({p,q})=> L.push('• '+fmtQtd(p,q)+' — '+p.nome+(p.marca?' ('+p.marca+')':'')+' = '+brl(p.preco*q)));
+  itens.forEach(({p,q})=> L.push('• '+fmtQtd(p,q)+' — '+p.nome+(p.marca?' ('+p.marca+')':'')+' = '+brl(valorItem(p,q))));
   L.push('', 'Produtos: '+brl(sub));
   if(pedido.modo==='entrega') L.push('Entrega: '+(tx>0?brl(tx):'Grátis'));
   L.push('*Total: '+brl(total)+'*', '');
@@ -897,7 +908,7 @@ function fecharBarraApp(sempre){
 })();
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(()=>{});
 
-document.getElementById('busca').addEventListener('input', ()=>{ desenharLista(); });
+document.getElementById('busca').addEventListener('input', ()=>{ LIMITE=48; desenharLista(); });
 document.getElementById('busca').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.target.blur(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'}); } });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ fecharCarrinho(); document.getElementById('modalApp').classList.remove('on'); } });
 /* ===== Meus pedidos: o cliente acompanha e pode cancelar (o cancelamento aparece na Central) ===== */
