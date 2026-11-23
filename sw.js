@@ -11,7 +11,7 @@ self.addEventListener('install', (e) => {
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
-      .then((nomes) => Promise.all(nomes.filter((n) => n !== CACHE).map((n) => caches.delete(n))))
+      .then((nomes) => Promise.all(nomes.filter((n) => n.startsWith('painel-fcosta-') && n !== CACHE).map((n) => caches.delete(n))))
       .then(() => self.clients.claim())
   );
 });
