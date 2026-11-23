@@ -10,30 +10,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Painel ADM · Pinheiro &amp; Costa</title>
+<title>Central · Pinheiro &amp; Costa</title>
 <meta name="robots" content="noindex">
-<meta name="theme-color" content="#0b2f25">
-<link rel="icon" href="../../favicon-32.png">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#212681">
+<link rel="icon" type="image/png" href="../img/icone-192.png">
+<link rel="apple-touch-icon" href="../img/apple-icone-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Central P&amp;C">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
 <style>
-:root{--verde:#0b2f25;--verde2:#114634;--verde3:#1a7a52;--lima:#c8f169;--amarelo:#f5c400;--fundo:#f5f6f3;--texto:#111a16;--suave:#5d6b64;--linha:#e3e8e4;--vermelho:#d23a2c}
+:root{--verde:#212681;--verde2:#2b3399;--verde3:#3a47c0;--lima:#eed600;--amarelo:#eed600;--fundo:#f7f6f1;--texto:#16201b;--suave:#5f6a63;--linha:#e3e2d9;--vermelho:#b3261e;--serif:'Fraunces',Georgia,serif}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--fundo);color:var(--texto);padding-bottom:40px}
 button,input,textarea{font:inherit}
 .topo{background:var(--verde);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:10}
 .topo-in{max-width:820px;margin:0 auto;display:flex;align-items:center;gap:12px}
-.topo b{flex:1;font-family:'Manrope',sans-serif;font-size:20px;font-weight:800}
+.topo b{flex:1;font-family:var(--serif);font-size:21px;font-weight:600}
+.topo .selo{height:48px;width:auto;flex:none;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
 .topo small{display:block;color:var(--lima);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;font-family:'Inter';font-weight:700}
 .sair{border:0;background:rgba(255,255,255,.15);color:#fff;border-radius:12px;padding:10px 14px;font-weight:800;cursor:pointer}
 main{max-width:820px;margin:0 auto;padding:16px}
 .card{background:#fff;border:1px solid var(--linha);border-radius:18px;padding:18px;margin-bottom:14px}
-h1{font-family:'Manrope',sans-serif;font-size:26px;font-weight:800;margin-bottom:6px}
-h2{font-family:'Manrope',sans-serif;font-size:21px;font-weight:800;margin-bottom:6px}
+h1{font-family:var(--serif);font-size:26px;font-weight:800;margin-bottom:6px}
+h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
 .desc{color:var(--suave);font-size:15.5px;line-height:1.5;margin-bottom:12px}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;padding:17px;font-weight:900;font-size:18px;cursor:pointer;text-decoration:none}
-.btn-am{background:var(--amarelo);color:#1d1600}
+.btn-am{background:linear-gradient(135deg,#ffe733,#eed600);color:var(--verde)}
 .btn-vd{background:var(--verde3);color:#fff}
-.btn-cl{background:#eef2ef;color:var(--verde)}
+.btn-cl{background:#eceef8;color:var(--verde)}
+.btn-zap{background:#25d366;color:#fff}
+.convite textarea{width:100%;min-height:250px;border:2px solid var(--linha);border-radius:12px;padding:12px 14px;font-size:14.5px;line-height:1.45;background:#fff;resize:vertical}
+.convite .g2b{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.convite .g2b .btn{font-size:16px;padding:14px}
 .btn:disabled{opacity:.5;cursor:default}
 .campo{margin-top:12px}
 .campo label{display:block;font-size:14.5px;font-weight:700;color:var(--suave);margin-bottom:5px}
@@ -45,27 +55,27 @@ h2{font-family:'Manrope',sans-serif;font-size:21px;font-weight:800;margin-bottom
 .grandes{display:grid;gap:12px}
 .passo{display:flex;gap:12px;align-items:flex-start;margin-top:10px;font-size:15.5px;line-height:1.45;color:var(--suave)}
 .passo b.n{flex:none;width:30px;height:30px;border-radius:9px;background:var(--lima);color:var(--verde);display:flex;align-items:center;justify-content:center;font-weight:900}
-.drop{border:3px dashed #b9cbbf;border-radius:18px;padding:26px 16px;text-align:center;background:#f8fbf9;cursor:pointer}
+.drop{border:3px dashed #c3c8e6;border-radius:18px;padding:26px 16px;text-align:center;background:#f7f8fd;cursor:pointer}
 .drop b{display:block;font-size:19px;color:var(--verde);margin:6px 0 4px}
 .drop span{color:var(--suave);font-size:14.5px}
-.drop.on{border-color:var(--verde3);background:#e9f6ee}
+.drop.on{border-color:var(--verde3);background:#e9ebfa}
 .res{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}
-.res div{background:#f3f6f4;border-radius:14px;padding:12px 6px;text-align:center;font-size:13px;color:var(--suave)}
-.res b{display:block;font-size:24px;color:var(--verde);font-family:'Manrope'}
+.res div{background:#f1f2f9;border-radius:14px;padding:12px 6px;text-align:center;font-size:13px;color:var(--suave)}
+.res b{display:block;font-size:24px;color:var(--verde);font-family:var(--serif)}
 .lista{max-height:340px;overflow:auto;border:1px solid var(--linha);border-radius:14px}
 .lin{display:flex;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--linha)}
 .lin:last-child{border-bottom:0}
-.lin .mini{width:44px;height:44px;border-radius:9px;background:#eef2ef;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:900;color:#b5c4bc;font-size:13px}
+.lin .mini{width:44px;height:44px;border-radius:9px;background:#eceef8;flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;font-weight:900;color:#b5c4bc;font-size:13px}
 .lin .mini img{width:100%;height:100%;object-fit:contain;background:#fff}
 .lin .t{flex:1;min-width:0;font-size:14.5px}
-.lin .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lin .t b{display:block}
 .lin .t span{color:var(--suave);font-size:13px}
 .lin .p{font-weight:800;color:var(--verde);white-space:nowrap}
 .msg{border-radius:14px;padding:13px 14px;font-weight:700;font-size:15.5px;margin-top:12px;display:none;line-height:1.4}
 .msg.ok{background:#e6f6ec;color:#155c37;border:1px solid #b7e2c7;display:block}
 .msg.er{background:#fdecea;color:#8e2418;border:1px solid #f3b8b1;display:block}
 .msg.in{background:#fff8d6;color:#5c4a00;border:1px solid #f0dc80;display:block}
-.barra{height:12px;background:#e6ece8;border-radius:99px;overflow:hidden;margin-top:12px;display:none}
+.barra{height:12px;background:#e4e6f2;border-radius:99px;overflow:hidden;margin-top:12px;display:none}
 .barra i{display:block;height:100%;width:0;background:var(--verde3);transition:width .3s}
 .oculto{display:none!important}
 .ped{border:1px solid var(--linha);border-radius:16px;padding:14px;margin-top:10px}
@@ -77,17 +87,63 @@ h2{font-family:'Manrope',sans-serif;font-size:21px;font-weight:800;margin-bottom
 .ped ul{margin:8px 0 0 18px;font-size:14.5px;line-height:1.5}
 .ped .tot{font-weight:900;font-size:18px;color:var(--verde);margin-top:6px}
 .st{display:inline-block;border-radius:99px;padding:4px 10px;font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
-.st.novo{background:var(--amarelo);color:#1d1600}.st.confirmado{background:#dbeafe;color:#1e3a8a}.st.saiu{background:#ede9fe;color:#4c1d95}.st.entregue{background:#dcfce7;color:#14532d}.st.cancelado{background:#fee2e2;color:#7f1d1d}
+.st.novo{background:var(--amarelo);color:var(--verde)}.st.confirmado{background:#dbeafe;color:#1e3a8a}.st.saiu{background:#ede9fe;color:#4c1d95}.st.entregue{background:#dcfce7;color:#14532d}.st.cancelado{background:#fee2e2;color:#7f1d1d}
 .bts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.bts button,.bts a{flex:1;min-width:30%;border:0;border-radius:12px;padding:12px 6px;font-weight:800;font-size:14px;cursor:pointer;text-align:center;text-decoration:none;background:#eef2ef;color:var(--verde)}
+.bts button,.bts a{flex:1;min-width:30%;border:0;border-radius:12px;padding:12px 6px;font-weight:800;font-size:14px;cursor:pointer;text-align:center;text-decoration:none;background:#eceef8;color:var(--verde)}
 .bts .zap{background:#25d366;color:#fff}
 .filtro{display:flex;gap:6px;margin-top:6px}
 .filtro button{flex:1;border:2px solid var(--linha);background:#fff;border-radius:12px;padding:10px 4px;font-weight:800;font-size:14px;cursor:pointer}
-.filtro button.on{border-color:var(--verde3);background:#e9f6ee;color:var(--verde)}
+.filtro button.on{border-color:var(--verde3);background:#e9ebfa;color:var(--verde)}
+.abas{position:sticky;top:70px;z-index:9;background:var(--fundo);padding:10px 0 6px;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.abas button{border:1.5px solid var(--linha);background:#fff;border-radius:14px;padding:10px 4px 8px;font-weight:800;font-size:13px;color:var(--suave);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
+.abas button span{font-size:20px;line-height:1}
+.abas button.on{border-color:var(--verde);background:var(--verde);color:#fff}
+.abas .bol{position:absolute;top:4px;right:8px;min-width:20px;height:20px;border-radius:99px;background:var(--vermelho);color:#fff;font-size:11.5px;display:none;align-items:center;justify-content:center;padding:0 5px}
+[data-aba]{display:none}[data-aba].mostrar{display:block}
+.avf{display:grid;gap:4px}
+.tipos{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.tipos button{border:2px solid var(--linha);background:#fff;border-radius:14px;padding:12px;font-weight:800;font-size:15px;cursor:pointer}
+.tipos button.on{border-color:var(--verde3);background:#e9ebfa;color:var(--verde)}
+.prontos{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.prontos button{border:1px solid var(--linha);background:#fff;border-radius:99px;padding:8px 12px;font-size:13.5px;font-weight:600;cursor:pointer}
+.fotoav{margin-top:12px;border:3px dashed #d6d3c2;border-radius:18px;min-height:150px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;cursor:pointer;background:#fdfcf7;overflow:hidden;position:relative;color:var(--suave);font-weight:700}
+.fotoav img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.fotoav .tirar{position:absolute;top:8px;right:8px;z-index:2;border:0;background:rgba(0,0,0,.6);color:#fff;border-radius:99px;padding:6px 12px;font-weight:800;cursor:pointer}
+.durar{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.durar button{border:2px solid var(--linha);background:#fff;border-radius:12px;padding:10px 2px;font-weight:800;font-size:13.5px;cursor:pointer}
+.durar button.on{border-color:var(--verde3);background:#e9ebfa;color:var(--verde)}
+.prev-av{margin-top:14px;border-radius:22px;overflow:hidden;position:relative;min-height:200px;background:radial-gradient(130% 120% at 100% 0%,#3a47c0,#212681 60%,#161b63);color:#fff;display:flex;align-items:flex-end}
+.prev-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.prev-av.foto::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,27,99,0) 25%,rgba(22,27,99,.9) 80%)}
+.prev-av .tx{position:relative;z-index:2;padding:16px}
+.prev-av .et{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;background:var(--amarelo);color:var(--verde);padding:4px 9px;border-radius:99px}
+.prev-av .et.aviso{background:#fff}
+.prev-av h3{font-family:var(--serif);font-weight:600;font-size:23px;line-height:1.15;margin-top:8px}
+.prev-av p{font-size:14px;opacity:.85;margin-top:4px}
+.prev-av .pr b{font-family:var(--serif);font-size:24px;color:var(--lima)}
+.prev-av .pr s{opacity:.6;margin-right:6px}
+.ativo{display:flex;gap:10px;align-items:center;border:1px solid var(--linha);border-radius:14px;padding:8px;margin-top:8px}
+.ativo .im{width:56px;height:56px;border-radius:12px;background:var(--verde) center/cover;flex:none}
+.ativo .t{flex:1;min-width:0}
+.ativo .t b{display:block;font-size:15px}
+.ativo .t span{font-size:12.5px;color:var(--suave)}
+.ativo button{border:0;background:#fdecea;color:var(--vermelho);border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer}
+.mud{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0}
+.mud div{border-radius:12px;padding:10px 4px;text-align:center;font-size:12px;color:var(--suave);background:#f2f1ea}
+.mud b{display:block;font-size:22px;color:var(--verde);font-family:var(--serif)}
+.mud .n b{color:#1a7a52}.mud .p b{color:#a15c00}.mud .r b{color:var(--vermelho)}
+.lin .tag{font-size:11px;font-weight:800;border-radius:99px;padding:2px 7px;margin-left:4px;vertical-align:1px}
+.tag.n{background:#dcfce7;color:#14532d}.tag.p{background:#fff1d6;color:#7a4500}.tag.e{background:#e0ecff;color:#1e3a8a}
+.inst{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.inst{grid-template-columns:1fr}}
+.dev{display:flex;align-items:center;justify-content:flex-end;gap:8px;max-width:820px;margin:6px auto 0;padding:0 16px;color:var(--suave);font-size:11px;text-decoration:none}
+.dev img{width:28px;height:28px;border-radius:50%}
+.campo textarea{width:100%;border:2px solid var(--linha);border-radius:12px;padding:13px 14px;font-size:15px;background:#fff}
+.pixok{display:flex;gap:10px;align-items:center;background:#eef5ef;border-radius:14px;padding:12px;margin-top:12px;font-size:14.5px;color:var(--verde);font-weight:600}
 </style>
 </head>
 <body>
-<div class="topo"><div class="topo-in"><b><small>Painel ADM</small>Pinheiro &amp; Costa</b><button class="sair oculto" id="btnSair" onclick="sair()">Sair</button></div></div>
+<div class="topo"><div class="topo-in"><img class="selo" src="../img/logo-mercado-p.webp" alt="Mercado Pinheiro &amp; Costa"><b><small>Central da loja</small>Pinheiro &amp; Costa</b><button class="sair oculto" id="btnSair" onclick="sair()">Sair</button></div></div>
 <main>
 
 <!-- ENTRAR -->
@@ -101,13 +157,45 @@ h2{font-family:'Manrope',sans-serif;font-size:21px;font-weight:800;margin-bottom
 
 <!-- PAINEL -->
 <section id="telaPainel" class="oculto">
-  <div class="card">
+  <nav class="abas" aria-label="Partes da Central">
+    <button data-ir="pedidos" onclick="aba('pedidos')"><span>🧾</span>Pedidos<i class="bol" id="bolPed"></i></button>
+    <button data-ir="avisos" onclick="aba('avisos')"><span>📣</span>Avisos</button>
+    <button data-ir="produtos" onclick="aba('produtos')"><span>📦</span>Produtos</button>
+    <button data-ir="loja" onclick="aba('loja')"><span>🏪</span>Loja</button>
+  </nav>
+
+  <div class="card" data-aba="avisos">
+    <h1>📣 Avisos e ofertas</h1>
+    <div class="desc">Aparecem na hora, em destaque, no topo do site do cliente. Quem estiver com o site aberto vê um alerta.</div>
+    <div class="tipos"><button id="tpAviso" class="on" onclick="tipoAv('aviso')">📢 Aviso</button><button id="tpOferta" onclick="tipoAv('oferta')">🏷️ Oferta com preço</button></div>
+    <div class="campo"><label for="avTit">Título</label><input id="avTit" maxlength="60" placeholder="Ex: Pão quentinho acabou de sair!" oninput="previaAv()"></div>
+    <div class="prontos" id="prontos"></div>
+    <div class="campo"><label for="avTxt">Detalhe (opcional)</label><input id="avTxt" maxlength="110" placeholder="Ex: Fornada nova de pão francês" oninput="previaAv()"></div>
+    <div class="g2 oculto" id="avPrecos">
+      <div class="campo"><label for="avDe">De R$ (opcional)</label><input id="avDe" type="number" step="0.01" min="0" inputmode="decimal" oninput="previaAv()"></div>
+      <div class="campo"><label for="avPor">Por R$</label><input id="avPor" type="number" step="0.01" min="0" inputmode="decimal" oninput="previaAv()"></div>
+    </div>
+    <label class="fotoav" id="avFotoBox"><span style="font-size:30px">📷</span>Tirar ou escolher foto<input type="file" id="avFoto" accept="image/*" style="display:none"></label>
+    <div class="campo"><label>Mostrar por</label></div>
+    <div class="durar" id="durar"><button data-h="2">2 horas</button><button data-h="4" class="on">4 horas</button><button data-h="12">Hoje</button><button data-h="72">3 dias</button></div>
+    <div class="campo"><label>Como o cliente vai ver</label></div>
+    <div class="prev-av" id="prevAv"></div>
+    <div style="margin-top:14px"><button class="btn btn-vd" id="btnAv" onclick="publicarAviso()">📣 Publicar agora</button></div>
+    <div class="msg" id="msgAv"></div>
+  </div>
+  <div class="card" data-aba="avisos">
+    <h2>No ar agora</h2>
+    <div id="avAtivos"><div class="desc">Carregando...</div></div>
+  </div>
+
+  <div class="card" data-aba="pedidos">
     <h1>🧾 Pedidos do site</h1>
     <div class="desc">Os pedidos que os clientes fazem pelo site aparecem aqui. A lista atualiza sozinha.</div>
     <div class="filtro"><button class="on" data-f="abertos" onclick="filtroPed(this)">Em aberto</button><button data-f="todos" onclick="filtroPed(this)">Todos</button></div>
+    <div id="avCancel" class="msg er" style="display:none"></div>
     <div id="pedidos"><div class="desc" style="margin-top:12px">Carregando...</div></div>
   </div>
-  <div class="card">
+  <div class="card" data-aba="produtos">
     <h1>Atualizar produtos do site</h1>
     <div class="desc">Os produtos do site vêm do arquivo do <b>FCosta Gestor</b>.</div>
     <div class="passo"><b class="n">1</b><div>No gestor, vá em <b>Cadastros → Impressora &amp; Backup</b> e toque em <b>Baixar backup (JSON)</b>. Esse arquivo leva as fotos dos produtos.</div></div>
@@ -118,21 +206,24 @@ h2{font-family:'Manrope',sans-serif;font-size:21px;font-weight:800;margin-bottom
         <div style="font-size:34px">📂</div>
         <b>Escolher arquivo JSON</b>
         <span>Backup completo ou lista de produtos do gestor</span>
-        <input type="file" id="arquivo" style="display:none">
+        <input type="file" id="arquivo" accept=".json,application/json,text/plain" style="display:none">
       </label>
     </div>
     <div class="msg" id="msgArq"></div>
     <div id="previa" class="oculto">
       <div class="res"><div><b id="rTotal">0</b>produtos</div><div><b id="rFoto">0</b>com foto</div><div><b id="rCat">0</b>departamentos</div></div>
+      <div class="desc" style="margin:0;font-weight:700;color:var(--verde)">Comparado com o site agora:</div>
+      <div class="mud"><div class="n"><b id="mNovo">–</b>novos</div><div class="p"><b id="mMud">–</b>mudaram</div><div class="r"><b id="mSai">–</b>vão sair</div><div><b id="mIgual">–</b>iguais</div></div>
       <div class="lista" id="rLista"></div>
-      <label class="chk"><input type="checkbox" id="semEstoque" checked> Mostrar no site os produtos sem estoque (aparecem como "Esgotado")</label>
+      <label class="chk"><input type="checkbox" id="semEstoque" checked onchange="compararSite()"> Mostrar no site os produtos sem estoque (aparecem como "Esgotado")</label>
+      <label class="chk"><input type="checkbox" id="soMudou" checked> Enviar só o que mudou (bem mais rápido)</label>
       <div style="margin-top:14px"><button class="btn btn-vd" id="btnPublicar" onclick="publicar()">✅ Colocar no site</button></div>
       <div class="barra" id="barra"><i id="barraI"></i></div>
       <div class="msg" id="msgPub"></div>
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" data-aba="loja">
     <h2>Condições da loja</h2>
     <div class="desc">Aparecem no site. Toque em <b>Salvar condições</b> depois de mudar.</div>
     <div class="campo"><label for="cNome">Nome do mercado</label><input id="cNome"></div>
@@ -143,38 +234,99 @@ h2{font-family:'Manrope',sans-serif;font-size:21px;font-weight:800;margin-bottom
     <label class="chk"><input type="checkbox" id="cRetirada"> Cliente pode retirar na loja</label>
     <div class="campo"><label for="cArea">Onde entrega</label><input id="cArea"></div>
     <div class="g2">
-      <div class="campo"><label for="cTaxa">Taxa de entrega R$</label><input id="cTaxa" type="number" step="0.01" min="0" inputmode="decimal"></div>
+      <div class="campo"><label for="cTaxa">Taxa de entrega R$ (abaixo do valor grátis)</label><input id="cTaxa" type="number" step="0.01" min="0" inputmode="decimal"></div>
       <div class="campo"><label for="cMin">Pedido mínimo R$</label><input id="cMin" type="number" step="0.01" min="0" inputmode="decimal"></div>
     </div>
-    <div class="campo"><label for="cGratis">Entrega grátis acima de R$ (0 = não usar)</label><input id="cGratis" type="number" step="0.01" min="0" inputmode="decimal"></div>
+    <div class="campo"><label for="cGratis">Entrega grátis a partir de R$ (0 = não usar)</label><input id="cGratis" type="number" step="0.01" min="0" inputmode="decimal"></div>
     <div class="campo"><label>Formas de pagamento</label></div>
     <label class="chk"><input type="checkbox" id="pg0"> Pix</label>
     <label class="chk"><input type="checkbox" id="pg1"> Dinheiro</label>
     <label class="chk"><input type="checkbox" id="pg2"> Cartão na entrega</label>
+    <div class="campo"><label for="cPix">Chave Pix (vem do gestor: Cadastros → Dados da loja)</label><input id="cPix" oninput="mostrarPixComo()" placeholder="CPF/CNPJ, e-mail, telefone ou chave aleatória" autocomplete="off"></div>
+    <div class="g2">
+      <div class="campo"><label for="cPixNome">Nome no Pix</label><input id="cPixNome" placeholder="Pinheiro e Costa"></div>
+      <div class="campo"><label for="cPixCidade">Cidade do Pix</label><input id="cPixCidade" placeholder="São Paulo"></div>
+    </div>
+    <div class="desc" style="margin-top:6px;font-size:13.5px">Com a chave Pix, o site mostra ao cliente o QR Code e o Copia e Cola com o valor do pedido. <span id="pixComo" style="font-weight:700;color:var(--verde)"></span></div>
     <div class="campo"><label for="cAviso">Aviso no topo do site (opcional)</label><input id="cAviso" placeholder="Ex: Promoção de carnes neste sábado!"></div>
     <div style="margin-top:14px"><button class="btn btn-am" id="btnCond" onclick="salvarCondicoes()">💾 Salvar condições</button></div>
     <div class="msg" id="msgCond"></div>
   </div>
 
-  <div class="card grandes">
+  <div class="card" data-aba="produtos">
+    <h2>🛟 Backup do site</h2>
+    <div class="desc">Guarda uma cópia de tudo o que está no site (produtos, fotos, preços e condições). Faça depois de cada atualização e guarde no pen drive.</div>
+    <button class="btn btn-cl" id="btnBackup" onclick="baixarBackup()">⬇️ Baixar backup do site</button>
+    <div class="desc" style="margin-top:12px;margin-bottom:0">Para <b>restaurar</b>, escolha o arquivo <b>backup-site-pinheiro-costa-....json</b> no quadro de cima ("Escolher arquivo JSON") e toque em <b>Colocar no site</b>.</div>
+    <div class="msg" id="msgBackup"></div>
+  </div>
+
+  <div class="card convite" data-aba="loja">
+    <h2>📲 Enviar a loja para o cliente</h2>
+    <div class="desc">Manda o link da loja com uma mensagem ensinando a instalar no celular. Pode mudar o texto se quiser.</div>
+    <div class="campo"><label for="cvFone">WhatsApp do cliente (se deixar vazio, você escolhe o contato)</label><input id="cvFone" inputmode="tel" placeholder="Ex: (11) 98888-1234"></div>
+    <div class="campo"><label for="cvTxt">Mensagem</label><textarea id="cvTxt" oninput="guardarConvite()"></textarea></div>
+    <div style="margin-top:12px"><button class="btn btn-zap" onclick="enviarConvite()">💬 Enviar pelo WhatsApp</button></div>
+    <div class="g2b"><button class="btn btn-cl" onclick="copiarConvite()">📋 Copiar</button><button class="btn btn-cl" onclick="textoConvite(true)">↩️ Texto original</button></div>
+    <div class="msg" id="msgCv"></div>
+  </div>
+
+  <div class="card grandes" data-aba="loja">
     <a class="btn btn-cl" href="../?v=" id="verSite" target="_blank" rel="noopener">👀 Ver o site</a>
     <div class="desc" id="infoSite" style="margin:0;text-align:center"></div>
   </div>
+
+  <div class="card" data-aba="loja">
+    <h2>💻 Instalar a Central</h2>
+    <div class="desc">Use no computador e no celular. Tudo fica sincronizado: o que você faz em um aparece no outro.</div>
+    <div class="inst">
+      <a class="btn btn-am" href="../instalador/Central-Pinheiro-Costa-Instalador.exe" download>🪟 Baixar para Windows</a>
+      <button class="btn btn-cl" onclick="instalarCentral()">📱 Instalar no celular</button>
+    </div>
+    <div class="desc" style="margin:10px 0 0;font-size:13.5px">No Windows, abra o arquivo baixado e clique em <b>Avançar</b>. Se o Windows avisar "proteger o computador", clique em <b>Mais informações</b> e depois em <b>Executar assim mesmo</b>. No iPhone: Safari → Compartilhar → <b>Adicionar à Tela de Início</b>.</div>
+    <div class="msg" id="msgInst"></div>
+  </div>
 </section>
 </main>
+<a class="dev" href="https://wa.me/5511993509109" target="_blank" rel="noopener"><span>Desenvolvido por <b>FCOSTA</b> Sistemas &amp; Apps</span><img src="../img/fcosta-sistemas-96.png" alt="FCOSTA Sistemas &amp; Apps"></a>
 
 <script>
 const SB_URL = 'https://avvhnajfczdedlydkcrb.supabase.co';
 const SB_KEY = 'sb_publishable_y3y3sLLFrm5HrXDa2ttGTA_dl8vouP7';
 const LOJA = 'pinheiro-costa';
+/* Modo de demonstração (?demo=1): não toca no banco, guarda tudo só nesta tela. */
+const DEMO = /[?&]demo=1/.test(location.search);
+if(DEMO){
+  const fake = { config:{nome:'Pinheiro & Costa', whatsapp:'(11) 99350-9109', pix_chave:'11993509109', pix_cidade:'São Paulo', avisos:[]},
+    produtos:[{id:'a',nome:'Arroz branco 5kg',marca:'Camil',categoria:'Mercearia',preco:27.9,tipo_venda:'unidade',estoque:12},{id:'b',nome:'Feijão carioca 1kg',marca:'Kicaldo',categoria:'Mercearia',preco:8.79,tipo_venda:'unidade',estoque:20},{id:'c',nome:'Pão francês',marca:'',categoria:'Padaria',preco:16.9,tipo_venda:'peso',estoque:30}],
+    pedidos:[{id:1043,status:'novo',criado_em:new Date(Date.now()-4*60000).toISOString(),cliente:{nome:'Maria Souza',fone:'(11) 98888-1234',modo:'entrega',endereco:'Rua das Flores, 120',pagamento:'Pix (QR no site)'},itens:[{nome:'Arroz branco 5kg',qtd:1,tipo:'unidade',total:27.9},{nome:'Pão francês',qtd:0.5,tipo:'peso',total:8.45}],taxa:5,total:41.35},
+             {id:1042,status:'confirmado',criado_em:new Date(Date.now()-50*60000).toISOString(),cliente:{nome:'João Lima',fone:'(11) 97777-0000',modo:'retirada',pagamento:'Dinheiro'},itens:[{nome:'Feijão carioca 1kg',qtd:2,tipo:'unidade',total:17.58}],taxa:0,total:17.58},
+             {id:1041,status:'cancelado',criado_em:new Date(Date.now()-90*60000).toISOString(),cliente:{nome:'Ana Paula',fone:'(11) 96666-2222',modo:'entrega',endereco:'Rua Ipê, 45',pagamento:'Dinheiro',cancelado_pelo_cliente:true},itens:[{nome:'Pão francês',qtd:1,tipo:'peso',total:16.9}],taxa:5,total:21.9}] };
+  window.demoClienteCancela = id => { const x=fake.pedidos.find(p=>p.id===id); if(x){ x.status='cancelado'; x.cliente={...x.cliente,cancelado_pelo_cliente:true}; } };
+  const resp = b => Promise.resolve(new Response(JSON.stringify(b),{status:200,headers:{'Content-Type':'application/json'}}));
+  const fetchReal = window.fetch.bind(window);
+  window.fetch = (url, op) => {
+    url = String(url); if(!url.startsWith(SB_URL)) return fetchReal(url, op);
+    const corpo = op && op.body ? JSON.parse(op.body) : {};
+    if(url.includes('rpc/mercado_entrar')) return resp(true);
+    if(url.includes('rpc/mercado_publicar_config')){ if(corpo.p_config) fake.config = corpo.p_config; const ids=new Set(corpo.p_ids||[]); fake.produtos = fake.produtos.filter(p=>ids.has(p.id)); return resp({ok:true}); }
+    if(url.includes('rpc/mercado_publicar_produtos')){ (corpo.p_produtos||[]).forEach(n=>{ const i=fake.produtos.findIndex(p=>p.id===n.id); if(i>=0) fake.produtos[i]={...fake.produtos[i],...n}; else fake.produtos.push(n); }); return resp({ok:true}); }
+    if(url.includes('rpc/mercado_listar_pedidos')) return resp(JSON.parse(JSON.stringify(fake.pedidos)));
+    if(url.includes('rpc/mercado_status_pedido')){ const x=fake.pedidos.find(p=>p.id===corpo.p_id); if(x) x.status=corpo.p_status; return resp(true); }
+    if(url.includes('mercado_lojas')) return resp([{nome:fake.config.nome, config:fake.config, atualizado_em:new Date().toISOString()}]);
+    if(url.includes('mercado_produtos')) return resp(fake.produtos);
+    return resp([]);
+  };
+}
 const PADRAO = { nome:'Pinheiro & Costa', whatsapp:'', endereco:'', horario:'Segunda a sábado, 8h às 20h · Domingo, 8h às 13h',
-  entrega:true, retirada:true, area_entrega:'Bairros próximos ao mercado', taxa_entrega:5, pedido_minimo:30, frete_gratis_acima:150,
-  pagamentos:['Pix','Dinheiro','Cartão na entrega'], aviso:'', logo:null };
+  entrega:true, retirada:true, area_entrega:'Nas redondezas do mercado', taxa_entrega:5, pedido_minimo:30, frete_gratis_acima:200,
+  pagamentos:['Pix','Dinheiro','Cartão na entrega'], aviso:'', logo:null, pix_chave:'', pix_nome:'', pix_cidade:'' };
 const PAGS = ['Pix','Dinheiro','Cartão na entrega'];
 let codigo = '';
 let CFG = {...PADRAO};
 let ITENS = [];        // produtos lidos do arquivo
-let LOJA_ARQ = null;   // nome/endereço/telefone/logo vindos do backup
+let LOJA_ARQ = null;   // nome/endereço/telefone/Pix vindos do backup
+let SITE = null;       // produtos que estão no site agora (sem foto), para comparar
 
 const $ = id => document.getElementById(id);
 const brl = v => (Number(v)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -187,6 +339,14 @@ async function rpc(fn, body){
   const r = await fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!r.ok){ const t = await r.text().catch(()=> ''); throw new Error('HTTP '+r.status+' '+t.slice(0,160)); }
   return r.json();
+}
+async function getTodos(path, lote){
+  lote = lote || 1000; const out = [];
+  for(let ini=0; ini<100000; ini+=lote){
+    const r = await get(path+(path.includes('order=')?'':'&order=id.asc')+'&limit='+lote+'&offset='+ini);
+    out.push(...r); if(r.length < lote) break;
+  }
+  return out;
 }
 async function get(path){
   const r = await fetch(SB_URL+'/rest/v1/'+path,{headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY}});
@@ -202,9 +362,10 @@ async function entrar(auto){
   try{
     const ok = await rpc('mercado_entrar',{p_slug:LOJA,p_codigo:c});
     if(ok!==true){ msg('msgEntrar','er','Código errado. Confira e tente de novo.'); try{localStorage.removeItem('pc_adm_codigo');}catch(e){} return; }
-    codigo = c; try{ localStorage.setItem('pc_adm_codigo', c); }catch(e){}
+    codigo = c; if(!DEMO) try{ localStorage.setItem('pc_adm_codigo', c); }catch(e){}
     $('telaEntrar').classList.add('oculto'); $('telaPainel').classList.remove('oculto'); $('btnSair').classList.remove('oculto');
-    await carregarLoja();
+    let ab='pedidos'; try{ ab = localStorage.getItem('pc_adm_aba')||'pedidos'; }catch(e){} aba(ab);
+    await carregarLoja(); textoConvite(); desenharAtivos();
     carregarPedidos(); clearInterval(timerPed); timerPed = setInterval(carregarPedidos, 30000);
     document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ document.title='Painel ADM · Pinheiro & Costa'; carregarPedidos(); } });
   }catch(e){
@@ -217,7 +378,7 @@ function sair(){ try{localStorage.removeItem('pc_adm_codigo');}catch(e){} locati
 async function carregarLoja(){
   try{
     const [l] = await get('mercado_lojas?slug=eq.'+LOJA+'&select=nome,config,atualizado_em');
-    const n = await get('mercado_produtos?slug=eq.'+LOJA+'&select=id');
+    const n = await getTodos('mercado_produtos?slug=eq.'+LOJA+'&select=id');
     if(l){ const c=l.config||{}; for(const k in c){ if(c[k]!==undefined && c[k]!==null) CFG[k]=c[k]; } CFG.nome = c.nome||l.nome||CFG.nome; }
     $('infoSite').textContent = 'Hoje o site tem '+n.length+' produto(s).'+(l&&l.atualizado_em?' Última atualização: '+new Date(l.atualizado_em).toLocaleString('pt-BR')+'.':'');
   }catch(e){ console.warn(e); }
@@ -230,6 +391,7 @@ function preencherCondicoes(){
   $('cTaxa').value = Number(CFG.taxa_entrega)||0; $('cMin').value = Number(CFG.pedido_minimo)||0; $('cGratis').value = Number(CFG.frete_gratis_acima)||0;
   const pg = Array.isArray(CFG.pagamentos)?CFG.pagamentos:PAGS; PAGS.forEach((p,i)=>$('pg'+i).checked = pg.includes(p));
   $('cAviso').value = CFG.aviso||'';
+  $('cPix').value = CFG.pix_chave||''; $('cPixNome').value = CFG.pix_nome||''; $('cPixCidade').value = CFG.pix_cidade||''; mostrarPixComo();
 }
 function lerCondicoes(){
   const c = {...CFG};
@@ -239,25 +401,28 @@ function lerCondicoes(){
   c.taxa_entrega = parseFloat($('cTaxa').value)||0; c.pedido_minimo = parseFloat($('cMin').value)||0; c.frete_gratis_acima = parseFloat($('cGratis').value)||0;
   c.pagamentos = PAGS.filter((p,i)=>$('pg'+i).checked); if(!c.pagamentos.length) c.pagamentos=['Pix'];
   c.aviso = $('cAviso').value.trim();
+  c.pix_chave = $('cPix').value.trim(); c.pix_nome = $('cPixNome').value.trim(); c.pix_cidade = $('cPixCidade').value.trim();
+  if(c.pagamentos.includes('Pix') && !c.pix_chave) c.pix_chave = '';
   return c;
 }
-async function idsNoSite(){ return (await get('mercado_produtos?slug=eq.'+LOJA+'&select=id')).map(x=>x.id); }
+async function idsNoSite(){ return (await getTodos('mercado_produtos?slug=eq.'+LOJA+'&select=id')).map(x=>x.id); }
 async function salvarCondicoes(){
   const c = lerCondicoes();
   if(!c.entrega && !c.retirada){ msg('msgCond','er','Marque pelo menos "Faz entrega" ou "Retirar na loja".'); return; }
   if(c.whatsapp.replace(/\D/g,'').length<10){ msg('msgCond','er','Coloque o WhatsApp com DDD. É para ele que os pedidos vão.'); return; }
   $('btnCond').disabled = true; msg('msgCond','in','Salvando...');
   try{
+    await manterAvisos(c);
     const r = await rpc('mercado_publicar_config',{p_slug:LOJA,p_codigo:codigo,p_config:c,p_ids:await idsNoSite()});
     if(!r||!r.ok) throw new Error('codigo');
-    CFG = c; msg('msgCond','ok','✅ Condições salvas. Já aparecem no site.');
+    CFG = c; textoConvite(); msg('msgCond','ok','✅ Condições salvas. Já aparecem no site.');
   }catch(e){ console.error(e); msg('msgCond','er','Não consegui salvar agora. Tente de novo.'); }
   finally{ $('btnCond').disabled = false; }
 }
 
 
 /* ---------- Pedidos do site ---------- */
-let PEDIDOS = [], filtroP = 'abertos', ultimoMaior = null, timerPed = null;
+let PEDIDOS = [], filtroP = 'abertos', ultimoMaior = null, timerPed = null, stAnt = null;
 const ST = {novo:'Novo',confirmado:'Confirmado',saiu:'Saiu p/ entrega',entregue:'Entregue',cancelado:'Cancelado'};
 function filtroPed(b){ filtroP=b.dataset.f; document.querySelectorAll('.filtro button').forEach(x=>x.classList.toggle('on',x===b)); desenharPedidos(); }
 function bip(){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); [0,0.25].forEach(t=>{ const o=c.createOscillator(),g=c.createGain(); o.frequency.value=880; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(.25,c.currentTime+t); o.start(c.currentTime+t); o.stop(c.currentTime+t+0.18); }); }catch(e){} }
@@ -269,6 +434,14 @@ async function carregarPedidos(){
     const maior = r.reduce((m,x)=>Math.max(m,x.id),0);
     if(ultimoMaior!==null && maior>ultimoMaior){ bip(); document.title='🔔 Novo pedido · Painel'; }
     ultimoMaior = maior;
+    /* Cliente cancelou pelo site: avisa com som e tira da lista em aberto */
+    const novosCanc = stAnt ? r.filter(x=>x.status==='cancelado' && stAnt[x.id] && stAnt[x.id]!=='cancelado' && (x.cliente||{}).cancelado_pelo_cliente) : [];
+    stAnt = Object.fromEntries(r.map(x=>[x.id,x.status]));
+    if(novosCanc.length){
+      bip(); document.title='❌ Pedido cancelado · Painel';
+      const a=$('avCancel'); a.innerHTML='❌ O cliente cancelou '+(novosCanc.length>1?'os pedidos Nº ':'o pedido Nº ')+novosCanc.map(x=>x.id).join(', ')+' pelo site. Não precisa separar. <button onclick="this.parentNode.style.display=\'none\'" style="margin-left:6px">OK</button>'; a.style.display='block';
+    }
+    const nn = r.filter(x=>x.status==='novo').length; const b=$('bolPed'); b.textContent=nn; b.style.display = nn?'flex':'none';
     desenharPedidos();
   }catch(e){
     console.warn(e);
@@ -284,10 +457,10 @@ function desenharPedidos(){
     const itens = (p.itens||[]).map(i=>'<li>'+esc((i.tipo==='peso'?(i.qtd<1?Math.round(i.qtd*1000)+' g':i.qtd+' kg'):i.qtd+' un')+' — '+i.nome+(i.marca?' ('+i.marca+')':''))+' · '+brl(i.total)+'</li>').join('');
     const bt = (st,t)=> p.status===st ? '' : '<button onclick="mudarStatus('+p.id+',\''+st+'\')">'+t+'</button>';
     return '<div class="ped '+(p.status==='novo'?'novo':'')+'"><div class="ped-top"><b>Pedido Nº '+p.id+'</b><span>'+new Date(p.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</span></div>'+
-      '<div style="margin-top:6px"><span class="st '+esc(p.status)+'">'+esc(ST[p.status]||p.status)+'</span></div>'+
+      '<div style="margin-top:6px"><span class="st '+esc(p.status)+'">'+esc(p.status==='cancelado'&&c.cancelado_pelo_cliente?'Cancelado pelo cliente':(ST[p.status]||p.status))+'</span></div>'+
       '<div class="cli"><b>'+esc(c.nome||'')+'</b> · '+esc(c.fone||'')+'<br>'+(c.modo==='entrega'?'🛵 Entrega: '+esc(c.endereco||''):'🏪 Retira na loja')+'<br>💳 '+esc(c.pagamento||'')+(c.troco?' (troco para '+esc(c.troco)+')':'')+(c.obs?'<br>📝 '+esc(c.obs):'')+'</div>'+
       '<ul>'+itens+'</ul><div class="tot">Total '+brl(p.total)+(Number(p.taxa)>0?' <span style="font-size:13px;color:var(--suave);font-weight:600">(entrega '+brl(p.taxa)+')</span>':'')+'</div>'+
-      '<div class="bts"><a class="zap" href="'+zap+'" target="_blank" rel="noopener">WhatsApp</a>'+bt('confirmado','Confirmar')+(c.modo==='entrega'?bt('saiu','Saiu'):'')+bt('entregue','Entregue')+bt('cancelado','Cancelar')+'</div></div>';
+      '<div class="bts"><a class="zap" href="'+zap+'" target="_blank" rel="noopener">WhatsApp</a>'+(p.status==='cancelado'?'':bt('confirmado','Confirmar')+(c.modo==='entrega'?bt('saiu','Saiu'):'')+bt('entregue','Entregue')+bt('cancelado','Cancelar'))+'</div></div>';
   }).join('');
 }
 async function mudarStatus(id, st){
@@ -303,6 +476,26 @@ const drop = $('drop');
 ['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('on');}));
 drop.addEventListener('drop', e=>{ const f=e.dataTransfer.files[0]; if(f) lerArquivo(f); });
 
+// aceita número ou texto ("12,50", "R$ 1.234,56")
+function num(v){
+  if(typeof v==='number') return isFinite(v) ? v : 0;
+  let t = String(v??'').replace(/[^0-9,.-]/g,''); if(!t) return 0;
+  if(t.includes(',')) t = t.replace(/\./g,'').replace(',','.');
+  const n = parseFloat(t); return isFinite(n) ? n : 0;
+}
+function pixChave(k){
+  k = String(k||'').trim(); if(!k) return '';
+  if(k.includes('@')) return k.toLowerCase();
+  if(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(k)) return k.toLowerCase();
+  const d = k.replace(/\D/g,''), cpf = c => { if(/^(\d)\1{10}$/.test(c)) return false; const dv=n=>{let s=0;for(let i=0;i<n;i++)s+=+c[i]*(n+1-i);const r=(s*10)%11;return r===10?0:r;}; return dv(9)===+c[9]&&dv(10)===+c[10]; };
+  if(k.startsWith('+')) return '+'+d;
+  if(d.length===14) return d;
+  if(d.length===11 && cpf(d) && !/[()\s-]{2,}/.test(k)) return d;
+  if(d.length===10 || d.length===11) return '+55'+d;
+  if(d.length===12 || d.length===13) return '+'+d;
+  return k;
+}
+function mostrarPixComo(){ const k = pixChave($('cPix').value); $('pixComo').textContent = k ? 'No Pix vai como: '+k : ''; }
 function idDe(p){
   if(p.id) return String(p.id);
   if(p.barcode) return 'cb-'+String(p.barcode).replace(/[^0-9A-Za-z]/g,'');
@@ -315,16 +508,22 @@ function lerArquivo(f){
   const rd = new FileReader();
   rd.onload = ()=>{
     let d;
-    if(String(rd.result).startsWith('L\u0000\u0000\u0000') || /\.lnk$/i.test(f.name)){ msg('msgArq','er','Esse arquivo é só um <b>atalho</b>, não o backup. Abra o pen drive (E:) e escolha o arquivo <b>backup-completo-fcosta-....json</b>.'); return; }
-    try{ d = JSON.parse(String(rd.result).replace(/^\uFEFF/,'')); }catch(e){ msg('msgArq','er','Esse arquivo não é o backup do gestor. Escolha o arquivo <b>backup-completo-fcosta-....json</b>.'); return; }
+    const txt = String(rd.result||'');
+    if(!txt.replace(/[\s\u0000\uFEFF]/g,'').length){ msg('msgArq','er','Esse arquivo está <b>vazio ou estragado</b> (não tem nada dentro). Isso acontece quando o pen drive é tirado antes da hora ou o download não terminou.<br><br>No gestor, toque de novo em <b>Cadastros → Impressora &amp; Backup → Baixar backup completo (JSON)</b>, espere terminar e tente outra vez.'); return; }
+    if(txt.startsWith('L\u0000\u0000\u0000') || /\.lnk$/i.test(f.name)){ msg('msgArq','er','Esse arquivo é só um <b>atalho</b>, não o backup. Abra o pen drive (E:) e escolha o arquivo <b>backup-completo-fcosta-....json</b>.'); return; }
+    try{ d = JSON.parse(txt.replace(/^\uFEFF/,'').replace(/\u0000+$/,'')); }catch(e){ msg('msgArq','er','Esse arquivo não é o backup do gestor. Escolha o arquivo <b>backup-completo-fcosta-....json</b>.'); return; }
     let lista = null; LOJA_ARQ = null;
+    if(d && !Array.isArray(d) && !d.products && !d.produtos){ const dentro = d.backup || d.dados || d.data; if(dentro && typeof dentro==='object') d = dentro; }
     if(Array.isArray(d)) lista = d;
     else if(d && Array.isArray(d.products)){
       lista = d.products;
       const s = d.settings||{};
-      LOJA_ARQ = { nome:s.storeName||'', endereco:s.endereco||'', telefone:s.telefone||'', logo:s.logoBase64||null };
+      LOJA_ARQ = { nome:s.storeName||'', endereco:s.endereco||'', telefone:s.telefone||'', pix:s.pixKey||'', pixCidade:s.pixCidade||'' };
     }
-    else if(d && Array.isArray(d.produtos)) lista = d.produtos;
+    else if(d && Array.isArray(d.produtos)){
+      lista = d.produtos;
+      if(d.config && typeof d.config==='object'){ CFG = {...PADRAO, ...d.config}; preencherCondicoes(); LOJA_ARQ = {restaurado:true}; }
+    }
     if(!lista){ msg('msgArq','er','Não achei produtos nesse arquivo. Use o <b>backup (JSON)</b> ou a <b>lista de produtos</b> do gestor.'); return; }
     const vistos = new Set();
     ITENS = lista.map(p=>({
@@ -332,10 +531,11 @@ function lerArquivo(f){
       nome: String(p.name||p.nome||'').trim(),
       marca: String(p.brand||p.marca||'').trim(),
       categoria: String(p.category||p.categoria||'').trim(),
-      preco: Number(p.price ?? p.preco) || 0,
+      preco: Math.round(num(p.price ?? p.preco ?? p.precoVenda)*100)/100,
       tipo_venda: (p.saleType||p.tipo_venda)==='peso' ? 'peso' : 'unidade',
-      estoque: Number(p.stock ?? p.estoque) || 0,
-      fotoOriginal: p.photoBase64 || p.foto || null
+      estoque: Math.round(num(p.stock ?? p.estoque)*1000)/1000,
+      fotoOriginal: p.photoBase64 || p.foto || null,
+      fotoPronta: !!p.foto && !p.photoBase64
     })).filter(p=> p.nome && p.preco>0 && !vistos.has(p.id) && vistos.add(p.id));
     if(!ITENS.length){ msg('msgArq','er','O arquivo não tem produtos com nome e preço.'); return; }
     ITENS.sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
@@ -349,10 +549,14 @@ function lerArquivo(f){
       '<div class="t"><b>'+esc(p.nome)+'</b><span>'+esc([p.categoria,p.marca].filter(Boolean).join(' · ')||'Sem departamento')+' · estoque '+(p.estoque||0)+'</span></div>'+
       '<div class="p">'+brl(p.preco)+(p.tipo_venda==='peso'?'/kg':'')+'</div></div>').join('');
     $('previa').classList.remove('oculto');
+    compararSite();
     if(LOJA_ARQ){
       if(LOJA_ARQ.nome && !$('cNome').value) $('cNome').value = LOJA_ARQ.nome;
       if(LOJA_ARQ.endereco && !$('cEnd').value) $('cEnd').value = LOJA_ARQ.endereco;
       if(LOJA_ARQ.telefone && !$('cZap').value) $('cZap').value = LOJA_ARQ.telefone;
+      if(LOJA_ARQ.pix){ $('cPix').value = LOJA_ARQ.pix; mostrarPixComo(); if(LOJA_ARQ.pixCidade) $('cPixCidade').value = LOJA_ARQ.pixCidade; if(!$('cPixNome').value) $('cPixNome').value = LOJA_ARQ.nome || $('cNome').value; }
+      if(LOJA_ARQ.restaurado) msg('msgArq','ok','✅ Backup do site lido. Confira e toque em <b>Colocar no site</b> para restaurar.');
+      else if(LOJA_ARQ.pix) msg('msgArq','ok', $('msgArq').innerHTML + '<br>💠 Chave Pix do gestor encontrada: <b>'+esc(LOJA_ARQ.pix)+'</b>');
     }
     $('btnPublicar').scrollIntoView({behavior:'smooth',block:'center'});
   };
@@ -384,24 +588,34 @@ async function publicar(){
   const btn = $('btnPublicar'); btn.disabled = true;
   $('barra').style.display='block'; $('barraI').style.width='3%';
   try{
-    if(LOJA_ARQ && LOJA_ARQ.logo){ const lg = await fotoPequena(LOJA_ARQ.logo); if(lg) c.logo = lg; }
     msg('msgPub','in','Enviando... não feche esta página.');
+    await manterAvisos(c);
     const r1 = await rpc('mercado_publicar_config',{p_slug:LOJA,p_codigo:codigo,p_config:c,p_ids:lista.map(p=>p.id)});
     if(!r1||!r1.ok){ msg('msgPub','er','Código da loja não aceito. Toque em Sair e entre de novo.'); return; }
     CFG = c;
+    let hashes = {}; try{ hashes = JSON.parse(localStorage.getItem('pc_adm_fotos')||'{}')||{}; }catch(e){}
+    const so = $('soMudou').checked && SITE;
+    const enviar = so ? lista.filter(p=> estado(p)!=='igual' || hashes[p.id]!==hashFoto(p.fotoOriginal)) : lista;
+    if(!enviar.length){ $('barraI').style.width='100%'; msg('msgPub','ok','✅ O site já estava igual ao gestor. Nada para enviar.'); carregarLoja(); return; }
     const T = 20;
-    for(let i=0;i<lista.length;i+=T){
+    for(let i=0;i<enviar.length;i+=T){
       const lote = [];
-      for(const p of lista.slice(i,i+T)){
-        lote.push({id:p.id,nome:p.nome,marca:p.marca,categoria:p.categoria,preco:p.preco,tipo_venda:p.tipo_venda,estoque:p.estoque,foto:await fotoPequena(p.fotoOriginal)});
+      for(const p of enviar.slice(i,i+T)){
+        const h = hashFoto(p.fotoOriginal);
+        const manter = SITE && SITE[p.id] && hashes[p.id]===h;
+        lote.push({id:p.id,nome:p.nome,marca:p.marca,categoria:p.categoria,preco:p.preco,tipo_venda:p.tipo_venda,estoque:p.estoque,
+          foto: manter ? '__MANTER__' : (p.fotoPronta?p.fotoOriginal:await fotoPequena(p.fotoOriginal))});
+        hashes[p.id] = h;
       }
       const r2 = await rpc('mercado_publicar_produtos',{p_slug:LOJA,p_codigo:codigo,p_produtos:lote});
       if(!r2||!r2.ok) throw new Error('lote');
-      const feito = Math.min(i+T,lista.length);
-      $('barraI').style.width = Math.round(feito/lista.length*100)+'%';
-      msg('msgPub','in','Enviando '+feito+' de '+lista.length+'... não feche esta página.');
+      try{ localStorage.setItem('pc_adm_fotos', JSON.stringify(hashes)); }catch(e){}
+      const feito = Math.min(i+T,enviar.length);
+      $('barraI').style.width = Math.round(feito/enviar.length*100)+'%';
+      msg('msgPub','in','Enviando '+feito+' de '+enviar.length+'... não feche esta página.');
     }
-    msg('msgPub','ok','✅ Pronto! '+lista.length+' produto(s) já estão no site. <a href="../?v='+Date.now()+'" target="_blank" rel="noopener">Ver o site</a>');
+    msg('msgPub','ok','✅ Pronto! O site tem '+lista.length+' produto(s). Enviados agora: '+enviar.length+'. <a href="../?v='+Date.now()+'" target="_blank" rel="noopener">Ver o site</a>');
+    SITE = null; compararSite();
     carregarLoja();
   }catch(e){
     console.error(e);
@@ -409,8 +623,192 @@ async function publicar(){
   }finally{ btn.disabled = false; }
 }
 
+/* ---------- Abas ---------- */
+function aba(n){
+  document.querySelectorAll('[data-aba]').forEach(e=>e.classList.toggle('mostrar', e.dataset.aba===n));
+  document.querySelectorAll('.abas button').forEach(b=>b.classList.toggle('on', b.dataset.ir===n));
+  try{ localStorage.setItem('pc_adm_aba', n); }catch(e){}
+  if(n==='avisos') previaAv();
+  window.scrollTo({top:0});
+}
+
+/* ---------- Comparar arquivo do gestor com o site ---------- */
+function hashFoto(src){
+  if(!src) return '';
+  const t = String(src); let h = 5381;
+  for(let i=0;i<t.length;i+=97) h = ((h<<5)+h + t.charCodeAt(i))|0;
+  return t.length+'-'+(h>>>0).toString(36);
+}
+function estado(p){
+  const s = SITE && SITE[p.id]; if(!s) return 'novo';
+  const igual = s.nome===p.nome && (s.marca||'')===p.marca && (s.categoria||'')===p.categoria && Number(s.preco)===p.preco && Number(s.estoque)===p.estoque && (s.tipo_venda||'unidade')===p.tipo_venda;
+  if(igual) return 'igual';
+  return Number(s.preco)!==p.preco ? 'preco' : 'mudou';
+}
+async function compararSite(){
+  if(!ITENS.length) return;
+  try{
+    if(!SITE){ SITE = {}; (await getTodos('mercado_produtos?slug=eq.'+LOJA+'&select=id,nome,marca,categoria,preco,tipo_venda,estoque')).forEach(x=>SITE[x.id]=x); }
+  }catch(e){ SITE = null; return; }
+  const lista = $('semEstoque').checked ? ITENS : ITENS.filter(p=>p.estoque>0);
+  const ids = new Set(lista.map(p=>p.id));
+  let n=0,m=0,i=0; lista.forEach(p=>{ const e=estado(p); if(e==='novo') n++; else if(e==='igual') i++; else m++; });
+  $('mNovo').textContent=n; $('mMud').textContent=m; $('mIgual').textContent=i;
+  $('mSai').textContent = Object.keys(SITE).filter(id=>!ids.has(id)).length;
+  document.querySelectorAll('#rLista .lin').forEach((el,k)=>{
+    const p = ITENS[k]; if(!p) return; const e = estado(p); const b = el.querySelector('.t b'); if(!b) return;
+    b.querySelectorAll('.tag').forEach(t=>t.remove());
+    if(e==='novo') b.insertAdjacentHTML('beforeend','<span class="tag n">novo</span>');
+    else if(e==='preco') b.insertAdjacentHTML('beforeend','<span class="tag p">preço '+brl(SITE[p.id].preco)+' → '+brl(p.preco)+'</span>');
+    else if(e==='mudou') b.insertAdjacentHTML('beforeend','<span class="tag e">mudou</span>');
+  });
+}
+
+/* ---------- Avisos e ofertas instantâneos ---------- */
+const PRONTOS = ['🥖 Pão quentinho acabou de sair!','🍗 Frango assado: ainda temos!','🍌 Chegou fruta fresquinha','🥩 Carne fresca no açougue','🔥 Oferta do dia','🧊 Bebida bem gelada'];
+let AV = {tipo:'aviso', foto:null, horas:4};
+$('prontos').innerHTML = PRONTOS.map(t=>'<button type="button">'+t+'</button>').join('');
+$('prontos').querySelectorAll('button').forEach(b=>b.onclick=()=>{ $('avTit').value = b.textContent.replace(/^\S+\s/,''); previaAv(); });
+document.querySelectorAll('#durar button').forEach(b=>b.onclick=()=>{ AV.horas=Number(b.dataset.h); document.querySelectorAll('#durar button').forEach(x=>x.classList.toggle('on',x===b)); });
+function tipoAv(t){ AV.tipo=t; $('tpAviso').classList.toggle('on',t==='aviso'); $('tpOferta').classList.toggle('on',t==='oferta'); $('avPrecos').classList.toggle('oculto',t!=='oferta'); previaAv(); }
+$('avFoto').addEventListener('change', async e=>{
+  const f = e.target.files[0]; e.target.value=''; if(!f) return;
+  const url = await new Promise(r=>{ const rd=new FileReader(); rd.onload=()=>r(rd.result); rd.onerror=()=>r(null); rd.readAsDataURL(f); });
+  AV.foto = await fotoAviso(url); mostrarFotoAv(); previaAv();
+});
+function mostrarFotoAv(){
+  const b = $('avFotoBox');
+  b.querySelectorAll('img,.tirar').forEach(x=>x.remove());
+  if(AV.foto){ b.insertAdjacentHTML('afterbegin','<img alt="" src="'+AV.foto+'"><button type="button" class="tirar">Tirar foto ✕</button>');
+    b.querySelector('.tirar').onclick=ev=>{ ev.preventDefault(); AV.foto=null; mostrarFotoAv(); previaAv(); }; }
+}
+function fotoAviso(src){
+  return new Promise(res=>{
+    if(!src) return res(null);
+    const img = new Image();
+    img.onload = ()=>{ const max=760, r=Math.min(1,max/Math.max(img.width,img.height)); const cv=document.createElement('canvas');
+      cv.width=Math.round(img.width*r); cv.height=Math.round(img.height*r); cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+      res(cv.toDataURL('image/jpeg',0.7)); };
+    img.onerror = ()=>res(null); img.src = src;
+  });
+}
+function lerAviso(){
+  return { tipo:AV.tipo, titulo:$('avTit').value.trim(), texto:$('avTxt').value.trim(), foto:AV.foto||null,
+    preco_de: AV.tipo==='oferta' ? (parseFloat($('avDe').value)||0) : 0, preco_por: AV.tipo==='oferta' ? (parseFloat($('avPor').value)||0) : 0 };
+}
+function cartaoAv(x){
+  const pr = Number(x.preco_por)>0 ? '<div class="pr">'+(Number(x.preco_de)>0?'<s>'+brl(x.preco_de)+'</s>':'')+'<b>'+brl(x.preco_por)+'</b></div>' : '';
+  return (x.foto?'<img alt="" src="'+x.foto+'">':'')+'<div class="tx"><span class="et '+(x.tipo==='oferta'?'':'aviso')+'">'+(x.tipo==='oferta'?'Oferta':'Aviso')+'</span><h3>'+esc(x.titulo||'Escreva o título')+'</h3>'+(x.texto?'<p>'+esc(x.texto)+'</p>':'')+pr+'</div>';
+}
+function previaAv(){ const x = lerAviso(); const el=$('prevAv'); el.className='prev-av'+(x.foto?' foto':''); el.innerHTML = cartaoAv(x); }
+async function configAtual(){ const [l] = await get('mercado_lojas?slug=eq.'+LOJA+'&select=config'); return (l&&l.config)||{}; }
+function soValidos(a){ const ag=Date.now(); return (Array.isArray(a)?a:[]).filter(x=>x && (!x.expira || x.expira>ag)); }
+async function manterAvisos(c){ try{ const atual = await configAtual(); c.avisos = soValidos(atual.avisos); c.avisos_rev = atual.avisos_rev||null; }catch(e){} }
+async function gravarAvisos(mudar){
+  const atual = await configAtual();
+  const c = {...PADRAO, ...atual};
+  c.avisos = mudar(soValidos(atual.avisos)).slice(0,10);
+  c.avisos_rev = Date.now();
+  const r = await rpc('mercado_publicar_config',{p_slug:LOJA,p_codigo:codigo,p_config:c,p_ids:await idsNoSite()});
+  if(!r||!r.ok) throw new Error('codigo');
+  CFG = {...CFG, avisos:c.avisos, avisos_rev:c.avisos_rev};
+}
+async function publicarAviso(){
+  const x = lerAviso();
+  if(!x.titulo){ msg('msgAv','er','Escreva o título do aviso.'); return; }
+  if(x.tipo==='oferta' && !(x.preco_por>0)){ msg('msgAv','er','Coloque o preço da oferta (Por R$).'); return; }
+  const b=$('btnAv'); b.disabled=true; msg('msgAv','in','Publicando...');
+  try{
+    x.id = Date.now().toString(36)+Math.random().toString(36).slice(2,6); x.criado = Date.now(); x.expira = Date.now()+AV.horas*3600000;
+    await gravarAvisos(a=>[x, ...a]);
+    msg('msgAv','ok','✅ Publicado! Já aparece no site, em destaque.');
+    $('avTit').value=''; $('avTxt').value=''; $('avDe').value=''; $('avPor').value=''; AV.foto=null; mostrarFotoAv(); previaAv(); desenharAtivos();
+  }catch(e){ console.error(e); msg('msgAv','er','Não consegui publicar agora. Verifique a internet e tente de novo.'); }
+  finally{ b.disabled=false; }
+}
+async function tirarAviso(id){
+  try{ await gravarAvisos(a=>a.filter(x=>x.id!==id)); desenharAtivos(); }
+  catch(e){ msg('msgAv','er','Não consegui tirar agora. Tente de novo.'); }
+}
+async function desenharAtivos(){
+  let a = [];
+  try{ a = soValidos((await configAtual()).avisos); }catch(e){}
+  const ate = t => new Date(t).toLocaleString('pt-BR',{weekday:'short',hour:'2-digit',minute:'2-digit'});
+  $('avAtivos').innerHTML = a.length ? a.map(x=>'<div class="ativo"><div class="im"'+(x.foto?' style="background-image:url(\''+x.foto+'\')"':'')+'></div><div class="t"><b>'+esc(x.titulo)+'</b><span>'+(x.tipo==='oferta'?'Oferta '+brl(x.preco_por)+' · ':'')+'até '+ate(x.expira)+'</span></div><button onclick="tirarAviso(\''+esc(x.id)+'\')">Tirar</button></div>').join('')
+    : '<div class="desc" style="margin:0">Nenhum aviso no ar agora.</div>';
+}
+
+/* ---------- Convite: enviar a loja para o cliente ---------- */
+const LINK_LOJA = 'https://serfico21-arch.github.io/Pessoal/mercado/';
+function conviteOriginal(){
+  const g = Number(CFG.frete_gratis_acima)||0, tx = Number(CFG.taxa_entrega)||0;
+  const brl = v => Number.isInteger(v) ? 'R$ '+v : 'R$ '+v.toFixed(2).replace('.',',');
+  return [
+    '🛒 *'+(CFG.nome && !/pinheiro/i.test(CFG.nome) ? CFG.nome : 'Mercado Pinheiro & Costa')+'* agora no seu celular!', '',
+    'Olá! 😊 Agora você faz suas compras com a gente pelo celular, sem sair de casa:',
+    '✅ Produtos com foto e preço',
+    '✅ Pagamento com Pix na hora',
+    CFG.entrega===false ? '🏪 Separamos tudo para você retirar na loja' : (g>0 ? '🛵 Entrega *grátis* nas redondezas a partir de '+brl(g)+(tx>0?' (abaixo disso, só '+brl(tx)+')':'') : '🛵 Entregamos nas redondezas'),
+    '🥖 Avisos do pão quentinho e das ofertas do dia', '',
+    '👉 Toque aqui para abrir a loja:', LINK_LOJA, '',
+    '📲 *Para deixar no celular, igual a um aplicativo:*',
+    '• *Android:* abra o link no Chrome e toque em *Instalar app* (ou nos 3 pontinhos ⋮ e *Adicionar à tela inicial*).',
+    '• *iPhone:* abra o link no Safari, toque em *Compartilhar* (o quadradinho com a seta ⬆️) e depois em *Adicionar à Tela de Início*.', '',
+    'Pronto! O ícone do mercado fica na sua tela. 💙💛',
+    'Qualquer dúvida, é só responder esta mensagem. Obrigado pela preferência!'
+  ].join('\n');
+}
+function textoConvite(forcar){
+  let t = ''; if(!forcar) try{ t = localStorage.getItem('pc_convite')||''; }catch(e){}
+  if(forcar) try{ localStorage.removeItem('pc_convite'); }catch(e){}
+  $('cvTxt').value = t || conviteOriginal();
+  if(forcar) msg('msgCv','ok','Texto original de volta.');
+}
+function guardarConvite(){ try{ localStorage.setItem('pc_convite', $('cvTxt').value); }catch(e){} }
+function enviarConvite(){
+  const t = $('cvTxt').value.trim(); if(!t){ textoConvite(true); return; }
+  let f = $('cvFone').value.replace(/\D/g,'');
+  if(f && f.length<10){ msg('msgCv','er','Confira o número: coloque o DDD. Ex: (11) 98888-1234.'); return; }
+  if(f && f.length<=11) f = '55'+f;
+  window.open((f ? 'https://wa.me/'+f : 'https://wa.me/')+'?text='+encodeURIComponent(t), '_blank', 'noopener');
+  msg('msgCv','ok','✅ WhatsApp aberto. É só tocar em enviar.');
+}
+async function copiarConvite(){
+  const t = $('cvTxt').value;
+  try{ await navigator.clipboard.writeText(t); }
+  catch(e){ $('cvTxt').select(); try{ document.execCommand('copy'); }catch(_){} }
+  msg('msgCv','ok','✅ Mensagem copiada. Cole no WhatsApp, Instagram ou Facebook.');
+}
+
+/* ---------- Instalar a Central (celular) ---------- */
+let pedidoInst = null;
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); pedidoInst = e; });
+function instalarCentral(){
+  if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone){ msg('msgInst','ok','A Central já está instalada neste aparelho.'); return; }
+  if(pedidoInst){ pedidoInst.prompt(); pedidoInst = null; return; }
+  msg('msgInst','in', /iphone|ipad/i.test(navigator.userAgent) ? 'No iPhone: toque em <b>Compartilhar</b> e depois em <b>Adicionar à Tela de Início</b>.' : 'No Chrome: toque nos <b>3 pontinhos</b> e escolha <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.');
+}
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+/* ---------- Backup do site (baixa tudo o que está publicado) ---------- */
+async function baixarBackup(){
+  const b = $('btnBackup'); b.disabled = true; msg('msgBackup','in','Juntando os produtos e fotos...');
+  try{
+    const [l] = await get('mercado_lojas?slug=eq.'+LOJA+'&select=nome,config');
+    const produtos = await getTodos('mercado_produtos?slug=eq.'+LOJA+'&select=id,nome,marca,categoria,preco,tipo_venda,estoque,foto&order=id.asc', 200);
+    const dados = { tipo:'backup-site-pinheiro-costa', versao:1, criado_em:new Date().toISOString(), config:(l&&l.config)||CFG, produtos };
+    const blob = new Blob([JSON.stringify(dados)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'backup-site-pinheiro-costa-'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+    msg('msgBackup','ok','✅ Backup baixado com '+produtos.length+' produto(s). Guarde no pen drive.');
+  }catch(e){ console.error(e); msg('msgBackup','er','Não consegui baixar agora. Verifique a internet e tente de novo.'); }
+  finally{ b.disabled = false; }
+}
+
 $('codigo').addEventListener('keydown', e=>{ if(e.key==='Enter') entrar(); });
-try{ const c = localStorage.getItem('pc_adm_codigo'); if(c){ $('codigo').value=c; entrar(c); } }catch(e){}
+if(DEMO) entrar('DEMO');
+else try{ const c = localStorage.getItem('pc_adm_codigo'); if(c){ $('codigo').value=c; entrar(c); } }catch(e){}
 </script>
 </body>
 </html>
