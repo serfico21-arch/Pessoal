@@ -747,6 +747,7 @@ function desenharCarrinho(){
     h += '<div class="bloco"><div class="lt"><span>Produtos</span><b>'+brl(sub)+'</b></div>'+
       (pedido.modo==='entrega' ? '<div class="lt"><span>Entrega</span><b>'+(tx>0?brl(tx):'Grátis')+'</b></div>' : '')+
       '<div class="lt total"><span>Total</span><span>'+brl(sub+tx)+'</span></div>'+
+      (pedido.modo==='entrega' && Number(CFG.pedido_minimo)>0 && sub<Number(CFG.pedido_minimo) ? '<div class="nota">Pedido mínimo para entrega: '+brl(CFG.pedido_minimo)+'.'+(CFG.retirada?' Para <b>retirar na loja</b> não tem mínimo.':'')+'</div>' : '')+
       (pedido.modo==='entrega' && Number(CFG.frete_gratis_acima)>0 && tx>0 ? '<div class="nota pix">Faltam '+brl(CFG.frete_gratis_acima-sub)+' para a entrega sair grátis (compras a partir de '+brl(CFG.frete_gratis_acima)+').</div>' : '')+
       (pedido.modo==='entrega' && Number(CFG.frete_gratis_acima)>0 && tx===0 && Number(CFG.taxa_entrega)>0 ? '<div class="nota pix">Parabéns! Sua entrega é grátis.</div>' : '')+
       (itens.some(x=>isPeso(x.p)) ? '<div class="nota">Itens por quilo: o valor pode variar um pouco conforme o peso.</div>' : '')+
@@ -808,7 +809,7 @@ async function enviarPedido(){
   const itens = itensCarrinho(), sub = subtotal(), tx = taxa();
   const falha = t => { e.textContent=t; e.style.display='block'; };
   if(!itens.length) return falha('Sua sacola está vazia.');
-  if(Number(CFG.pedido_minimo)>0 && sub < Number(CFG.pedido_minimo)) return falha('O pedido mínimo é '+brl(CFG.pedido_minimo)+'. Faltam '+brl(CFG.pedido_minimo-sub)+'.');
+  if(pedido.modo==='entrega' && Number(CFG.pedido_minimo)>0 && sub < Number(CFG.pedido_minimo)) return falha('O pedido mínimo para entrega é '+brl(CFG.pedido_minimo)+'. Faltam '+brl(CFG.pedido_minimo-sub)+'. Se preferir, escolha Retirar na loja: aí não tem mínimo.');
   if(!pedido.nome.trim()) return falha('Escreva o seu nome.');
   if(String(pedido.fone).replace(/\D/g,'').length<10) return falha('Escreva o seu WhatsApp com DDD.');
   if(pedido.modo==='entrega' && pedido.endereco.trim().length<8) return falha('Escreva o endereço de entrega.');
