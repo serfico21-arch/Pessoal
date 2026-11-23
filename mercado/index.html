@@ -247,6 +247,11 @@ img{display:block;max-width:100%}
 .pixbox .qr{width:220px;height:220px;margin:10px auto;border-radius:12px;overflow:hidden;border:1px solid var(--linha)}
 .pixbox .qr svg{width:100%;height:100%}
 .pixbox textarea{width:100%;font-size:11.5px;font-family:ui-monospace,monospace;border:1px solid var(--linha);border-radius:12px;padding:10px;resize:none;background:var(--creme);color:var(--suave)}
+.b-pix{font-size:17px;padding:17px;background:#0f8a5f}
+.passos-pix{text-align:left;margin:12px 0 8px 22px;font-size:14px;line-height:1.5}
+.b-cl{width:100%;border:1px solid var(--linha);background:#fff;color:var(--verde);border-radius:14px;padding:12px;font-weight:800;font-size:14px;margin-top:8px;cursor:pointer}
+.qr-det{margin-top:10px;font-size:13px;color:var(--suave)}
+.qr-det summary{cursor:pointer;font-weight:700;padding:6px}
 .pixbox .chave{font-size:13px;color:var(--suave);margin-top:6px}
 .b-verde{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:14px;background:var(--verde);color:#fff;font-weight:800;padding:14px;font-size:15px;margin-top:10px;text-decoration:none}
 .b-zap{background:#25d366}
@@ -425,7 +430,7 @@ img{display:block;max-width:100%}
   <div class="tit" id="como" style="scroll-margin-top:140px"><div><small>Simples assim</small><h2>Como funciona</h2></div></div>
   <div class="passos">
     <div class="passo"><i>01</i><h3>Escolha os produtos</h3><p>Toque no <b>+</b> e eles vão para a sua sacola, lá no topo.</p></div>
-    <div class="passo"><i>02</i><h3>Pague com Pix</h3><p>O site mostra o QR Code e o código Copia e Cola com o valor certinho.</p></div>
+    <div class="passo"><i>02</i><h3>Pague com Pix</h3><p>Um toque copia o código Pix com o valor certinho. É só colar no app do banco.</p></div>
     <div class="passo"><i>03</i><h3>Receba em casa</h3><p>O pedido chega na hora no mercado e confirmamos pelo WhatsApp.</p></div>
   </div>
 
@@ -741,7 +746,7 @@ function desenharCarrinho(){
     const pg = pags();
     h += '<div class="bloco"><h3>Forma de pagamento</h3><div class="opcoes'+(pg.length===3?' tres':'')+'">'+pg.map((v,i)=>'<button class="op'+(pedido.pag===v?' on':'')+'" onclick="pedido.pag=pags()['+i+'];salvarLocal();desenharCarrinho()">'+esc(v)+'</button>').join('')+'</div>'+
       (pedido.pag==='Dinheiro' ? '<div class="campo"><label for="cTroco">Troco para quanto? (opcional)</label><input id="cTroco" inputmode="decimal" placeholder="Ex: 100" value="'+esc(pedido.troco)+'" oninput="pedido.troco=this.value"></div>' : '')+
-      (pedido.pag==='Pix' && temPix() ? '<div class="nota pix">'+ICON_PIX+'<span>Ao finalizar, aparece o QR Code e o Pix Copia e Cola com o valor do pedido.</span></div>'
+      (pedido.pag==='Pix' && temPix() ? '<div class="nota pix">'+ICON_PIX+'<span>Ao finalizar, você copia o código Pix com o valor do pedido e cola no app do seu banco.</span></div>'
         : '<div class="nota">O pagamento é feito '+(pedido.modo==='entrega'?'na entrega':'na retirada')+(pedido.pag==='Pix'?', por Pix, depois que o mercado confirmar.':'.')+'</div>')+'</div>';
     h += '<div class="bloco"><div class="campo" style="margin-top:0"><label for="cObs">Observação (opcional)</label><textarea id="cObs" rows="2" placeholder="Ex: banana mais verde, pode trocar a marca se faltar" oninput="pedido.obs=this.value">'+esc(pedido.obs)+'</textarea></div></div>';
     h += '<div class="bloco"><div class="lt"><span>Produtos</span><b>'+brl(sub)+'</b></div>'+
@@ -798,6 +803,9 @@ function qrSVG(texto){
     return '<svg viewBox="0 0 '+t+' '+t+'" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg"><rect width="'+t+'" height="'+t+'" fill="#fff"/><path d="'+d+'" fill="#212681"/></svg>';
   }catch(e){ return ''; }
 }
+const EH_CEL = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+async function copiarTexto(v){ try{ await navigator.clipboard.writeText(v); return true; }catch(e){ const t=document.createElement('textarea'); t.value=v; document.body.appendChild(t); t.select(); const ok=document.execCommand('copy'); t.remove(); return ok; } }
+async function copiarChave(){ const k = pixChave(CFG.pix_chave); if(!k) return; await copiarTexto(k); toast('Chave Pix copiada! No banco, cole a chave e digite o valor.'); }
 async function copiarPix(){
   const t = document.getElementById('pixCod'); if(!t) return;
   try{ await navigator.clipboard.writeText(t.value); }catch(e){ t.select(); document.execCommand('copy'); }
@@ -853,10 +861,11 @@ async function enviarPedido(){
     document.getElementById('pCorpo').innerHTML = '<div class="ok-tela">'+ck+
       '<h3>Pedido recebido!</h3><p>'+(numero?'Pedido <b>Nº '+numero+'</b>. ':'')+'Agora é só pagar com Pix.</p>'+
       '<div class="pixbox"><div style="font-size:12px;font-weight:800;letter-spacing:.14em;color:var(--ouro);text-transform:uppercase">Valor a pagar</div><div class="valor">'+brl(total)+'</div>'+
-      '<div class="qr">'+qrSVG(cod)+'</div>'+
-      '<p style="font-size:13.5px">Abra o app do seu banco, escolha <b>Pix</b> e leia o QR Code. Ou copie o código abaixo:</p>'+
-      '<textarea id="pixCod" rows="3" readonly onclick="this.select()">'+esc(cod)+'</textarea>'+
-      '<button class="b-verde" onclick="copiarPix()">'+ICON_PIX+' Copiar código Pix</button>'+
+      '<button class="b-verde b-pix" onclick="copiarPix()">'+ICON_PIX+' Copiar código Pix</button>'+
+      '<ol class="passos-pix"><li>Toque no botão acima (o valor já vai junto).</li><li>Abra o <b>app do seu banco</b> e entre em <b>Pix</b>.</li><li>Escolha <b>Pix Copia e Cola</b>, cole e confirme.</li></ol>'+
+      '<textarea id="pixCod" rows="2" readonly onclick="this.select()" aria-label="Código Pix">'+esc(cod)+'</textarea>'+
+      '<button class="b-cl" onclick="copiarChave()">Copiar só a chave Pix</button>'+
+      '<details class="qr-det"'+(EH_CEL?'':' open')+'><summary>Mostrar QR Code (para pagar com outro celular)</summary><div class="qr">'+qrSVG(cod)+'</div></details>'+
       '<div class="chave">Recebedor: '+esc(CFG.pix_nome||CFG.nome)+' · Chave: '+esc(pixChave(CFG.pix_chave))+'</div></div>'+
       '<p style="margin-top:16px">Depois de pagar, envie o comprovante no WhatsApp:</p>'+
       '<a class="b-verde b-zap" href="'+link+'" target="_blank" rel="noopener">'+ICON_ZAP+' Já paguei, enviar no WhatsApp</a>'+
