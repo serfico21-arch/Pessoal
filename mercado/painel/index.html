@@ -188,6 +188,7 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
     <h1>🧾 Pedidos do site</h1>
     <div class="desc">Os pedidos que os clientes fazem pelo site aparecem aqui. A lista atualiza sozinha.</div>
     <div class="filtro"><button class="on" data-f="abertos" onclick="filtroPed(this)">Em aberto</button><button data-f="todos" onclick="filtroPed(this)">Todos</button></div>
+    <div id="avCancel" class="msg er" style="display:none"></div>
     <div id="pedidos"><div class="desc" style="margin-top:12px">Carregando...</div></div>
   </div>
   <div class="card" data-aba="produtos">
@@ -285,7 +286,9 @@ if(DEMO){
   const fake = { config:{nome:'Pinheiro & Costa', whatsapp:'(11) 99350-9109', pix_chave:'11993509109', pix_cidade:'São Paulo', avisos:[]},
     produtos:[{id:'a',nome:'Arroz branco 5kg',marca:'Camil',categoria:'Mercearia',preco:27.9,tipo_venda:'unidade',estoque:12},{id:'b',nome:'Feijão carioca 1kg',marca:'Kicaldo',categoria:'Mercearia',preco:8.79,tipo_venda:'unidade',estoque:20},{id:'c',nome:'Pão francês',marca:'',categoria:'Padaria',preco:16.9,tipo_venda:'peso',estoque:30}],
     pedidos:[{id:1043,status:'novo',criado_em:new Date(Date.now()-4*60000).toISOString(),cliente:{nome:'Maria Souza',fone:'(11) 98888-1234',modo:'entrega',endereco:'Rua das Flores, 120',pagamento:'Pix (QR no site)'},itens:[{nome:'Arroz branco 5kg',qtd:1,tipo:'unidade',total:27.9},{nome:'Pão francês',qtd:0.5,tipo:'peso',total:8.45}],taxa:5,total:41.35},
-             {id:1042,status:'confirmado',criado_em:new Date(Date.now()-50*60000).toISOString(),cliente:{nome:'João Lima',fone:'(11) 97777-0000',modo:'retirada',pagamento:'Dinheiro'},itens:[{nome:'Feijão carioca 1kg',qtd:2,tipo:'unidade',total:17.58}],taxa:0,total:17.58}] };
+             {id:1042,status:'confirmado',criado_em:new Date(Date.now()-50*60000).toISOString(),cliente:{nome:'João Lima',fone:'(11) 97777-0000',modo:'retirada',pagamento:'Dinheiro'},itens:[{nome:'Feijão carioca 1kg',qtd:2,tipo:'unidade',total:17.58}],taxa:0,total:17.58},
+             {id:1041,status:'cancelado',criado_em:new Date(Date.now()-90*60000).toISOString(),cliente:{nome:'Ana Paula',fone:'(11) 96666-2222',modo:'entrega',endereco:'Rua Ipê, 45',pagamento:'Dinheiro',cancelado_pelo_cliente:true},itens:[{nome:'Pão francês',qtd:1,tipo:'peso',total:16.9}],taxa:5,total:21.9}] };
+  window.demoClienteCancela = id => { const x=fake.pedidos.find(p=>p.id===id); if(x){ x.status='cancelado'; x.cliente={...x.cliente,cancelado_pelo_cliente:true}; } };
   const resp = b => Promise.resolve(new Response(JSON.stringify(b),{status:200,headers:{'Content-Type':'application/json'}}));
   const fetchReal = window.fetch.bind(window);
   window.fetch = (url, op) => {
@@ -294,7 +297,7 @@ if(DEMO){
     if(url.includes('rpc/mercado_entrar')) return resp(true);
     if(url.includes('rpc/mercado_publicar_config')){ if(corpo.p_config) fake.config = corpo.p_config; const ids=new Set(corpo.p_ids||[]); fake.produtos = fake.produtos.filter(p=>ids.has(p.id)); return resp({ok:true}); }
     if(url.includes('rpc/mercado_publicar_produtos')){ (corpo.p_produtos||[]).forEach(n=>{ const i=fake.produtos.findIndex(p=>p.id===n.id); if(i>=0) fake.produtos[i]={...fake.produtos[i],...n}; else fake.produtos.push(n); }); return resp({ok:true}); }
-    if(url.includes('rpc/mercado_listar_pedidos')) return resp(fake.pedidos);
+    if(url.includes('rpc/mercado_listar_pedidos')) return resp(JSON.parse(JSON.stringify(fake.pedidos)));
     if(url.includes('rpc/mercado_status_pedido')){ const x=fake.pedidos.find(p=>p.id===corpo.p_id); if(x) x.status=corpo.p_status; return resp(true); }
     if(url.includes('mercado_lojas')) return resp([{nome:fake.config.nome, config:fake.config, atualizado_em:new Date().toISOString()}]);
     if(url.includes('mercado_produtos')) return resp(fake.produtos);
@@ -405,7 +408,7 @@ async function salvarCondicoes(){
 
 
 /* ---------- Pedidos do site ---------- */
-let PEDIDOS = [], filtroP = 'abertos', ultimoMaior = null, timerPed = null;
+let PEDIDOS = [], filtroP = 'abertos', ultimoMaior = null, timerPed = null, stAnt = null;
 const ST = {novo:'Novo',confirmado:'Confirmado',saiu:'Saiu p/ entrega',entregue:'Entregue',cancelado:'Cancelado'};
 function filtroPed(b){ filtroP=b.dataset.f; document.querySelectorAll('.filtro button').forEach(x=>x.classList.toggle('on',x===b)); desenharPedidos(); }
 function bip(){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); [0,0.25].forEach(t=>{ const o=c.createOscillator(),g=c.createGain(); o.frequency.value=880; o.connect(g); g.connect(c.destination); g.gain.setValueAtTime(.25,c.currentTime+t); o.start(c.currentTime+t); o.stop(c.currentTime+t+0.18); }); }catch(e){} }
@@ -417,6 +420,13 @@ async function carregarPedidos(){
     const maior = r.reduce((m,x)=>Math.max(m,x.id),0);
     if(ultimoMaior!==null && maior>ultimoMaior){ bip(); document.title='🔔 Novo pedido · Painel'; }
     ultimoMaior = maior;
+    /* Cliente cancelou pelo site: avisa com som e tira da lista em aberto */
+    const novosCanc = stAnt ? r.filter(x=>x.status==='cancelado' && stAnt[x.id] && stAnt[x.id]!=='cancelado' && (x.cliente||{}).cancelado_pelo_cliente) : [];
+    stAnt = Object.fromEntries(r.map(x=>[x.id,x.status]));
+    if(novosCanc.length){
+      bip(); document.title='❌ Pedido cancelado · Painel';
+      const a=$('avCancel'); a.innerHTML='❌ O cliente cancelou '+(novosCanc.length>1?'os pedidos Nº ':'o pedido Nº ')+novosCanc.map(x=>x.id).join(', ')+' pelo site. Não precisa separar. <button onclick="this.parentNode.style.display=\'none\'" style="margin-left:6px">OK</button>'; a.style.display='block';
+    }
     const nn = r.filter(x=>x.status==='novo').length; const b=$('bolPed'); b.textContent=nn; b.style.display = nn?'flex':'none';
     desenharPedidos();
   }catch(e){
@@ -433,10 +443,10 @@ function desenharPedidos(){
     const itens = (p.itens||[]).map(i=>'<li>'+esc((i.tipo==='peso'?(i.qtd<1?Math.round(i.qtd*1000)+' g':i.qtd+' kg'):i.qtd+' un')+' — '+i.nome+(i.marca?' ('+i.marca+')':''))+' · '+brl(i.total)+'</li>').join('');
     const bt = (st,t)=> p.status===st ? '' : '<button onclick="mudarStatus('+p.id+',\''+st+'\')">'+t+'</button>';
     return '<div class="ped '+(p.status==='novo'?'novo':'')+'"><div class="ped-top"><b>Pedido Nº '+p.id+'</b><span>'+new Date(p.criado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+'</span></div>'+
-      '<div style="margin-top:6px"><span class="st '+esc(p.status)+'">'+esc(ST[p.status]||p.status)+'</span></div>'+
+      '<div style="margin-top:6px"><span class="st '+esc(p.status)+'">'+esc(p.status==='cancelado'&&c.cancelado_pelo_cliente?'Cancelado pelo cliente':(ST[p.status]||p.status))+'</span></div>'+
       '<div class="cli"><b>'+esc(c.nome||'')+'</b> · '+esc(c.fone||'')+'<br>'+(c.modo==='entrega'?'🛵 Entrega: '+esc(c.endereco||''):'🏪 Retira na loja')+'<br>💳 '+esc(c.pagamento||'')+(c.troco?' (troco para '+esc(c.troco)+')':'')+(c.obs?'<br>📝 '+esc(c.obs):'')+'</div>'+
       '<ul>'+itens+'</ul><div class="tot">Total '+brl(p.total)+(Number(p.taxa)>0?' <span style="font-size:13px;color:var(--suave);font-weight:600">(entrega '+brl(p.taxa)+')</span>':'')+'</div>'+
-      '<div class="bts"><a class="zap" href="'+zap+'" target="_blank" rel="noopener">WhatsApp</a>'+bt('confirmado','Confirmar')+(c.modo==='entrega'?bt('saiu','Saiu'):'')+bt('entregue','Entregue')+bt('cancelado','Cancelar')+'</div></div>';
+      '<div class="bts"><a class="zap" href="'+zap+'" target="_blank" rel="noopener">WhatsApp</a>'+(p.status==='cancelado'?'':bt('confirmado','Confirmar')+(c.modo==='entrega'?bt('saiu','Saiu'):'')+bt('entregue','Entregue')+bt('cancelado','Cancelar'))+'</div></div>';
   }).join('');
 }
 async function mudarStatus(id, st){

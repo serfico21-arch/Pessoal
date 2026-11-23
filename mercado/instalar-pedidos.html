@@ -22,6 +22,8 @@ create table if not exists public.mercado_pedidos (
   total numeric(12,2) default 0
 );
 create index if not exists mercado_pedidos_slug_idx on public.mercado_pedidos(slug, criado_em desc);
+-- senha do pedido (só o celular do cliente sabe): permite ele ver e cancelar o próprio pedido
+alter table public.mercado_pedidos add column if not exists segredo text;
 alter table public.mercado_pedidos enable row level security;
 revoke all on public.mercado_pedidos from anon, authenticated;
 
@@ -38,9 +40,10 @@ begin
   end if;
   select count(*) into recentes from public.mercado_pedidos where slug = p_slug and criado_em > now() - interval '1 minute';
   if recentes > 20 then return jsonb_build_object('ok', false); end if;
-  insert into public.mercado_pedidos (slug, cliente, itens, subtotal, taxa, total)
+  insert into public.mercado_pedidos (slug, cliente, itens, subtotal, taxa, total, segredo)
   values (p_slug, coalesce(p_pedido->'cliente','{}'::jsonb), p_pedido->'itens',
-          coalesce((p_pedido->>'subtotal')::numeric,0), coalesce((p_pedido->>'taxa')::numeric,0), coalesce((p_pedido->>'total')::numeric,0))
+          coalesce((p_pedido->>'subtotal')::numeric,0), coalesce((p_pedido->>'taxa')::numeric,0), coalesce((p_pedido->>'total')::numeric,0),
+          nullif(left(coalesce(p_pedido->>'segredo',''),64),''))
   returning id into n;
   return jsonb_build_object('ok', true, 'numero', n);
 end $$;
@@ -63,6 +66,38 @@ begin
   update public.mercado_pedidos set status = p_status where slug = p_slug and id = p_id;
   return found;
 end $$;
+
+-- O cliente vê a situação do próprio pedido (precisa do número e da senha do pedido)
+create or replace function public.mercado_ver_pedido(p_slug text, p_id bigint, p_segredo text)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare st text;
+begin
+  select status into st from public.mercado_pedidos
+   where slug = p_slug and id = p_id and segredo is not null and segredo = p_segredo;
+  if st is null then return jsonb_build_object('ok', false); end if;
+  return jsonb_build_object('ok', true, 'status', st);
+end $$;
+
+-- O cliente cancela o próprio pedido enquanto ele não saiu para entrega; a Central mostra "Cancelado pelo cliente"
+create or replace function public.mercado_cancelar_pedido(p_slug text, p_id bigint, p_segredo text)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare st text;
+begin
+  select status into st from public.mercado_pedidos
+   where slug = p_slug and id = p_id and segredo is not null and segredo = p_segredo;
+  if st is null then return jsonb_build_object('ok', false); end if;
+  if st not in ('novo','confirmado') then return jsonb_build_object('ok', false, 'status', st); end if;
+  update public.mercado_pedidos
+     set status = 'cancelado',
+         cliente = cliente || jsonb_build_object('cancelado_pelo_cliente', true, 'cancelado_em', now())
+   where slug = p_slug and id = p_id;
+  return jsonb_build_object('ok', true, 'status', 'cancelado');
+end $$;
+
+revoke all on function public.mercado_ver_pedido(text,bigint,text) from public;
+revoke all on function public.mercado_cancelar_pedido(text,bigint,text) from public;
+grant execute on function public.mercado_ver_pedido(text,bigint,text) to anon, authenticated;
+grant execute on function public.mercado_cancelar_pedido(text,bigint,text) to anon, authenticated;
 
 revoke all on function public.mercado_fazer_pedido(text,jsonb) from public;
 revoke all on function public.mercado_listar_pedidos(text,text,int) from public;

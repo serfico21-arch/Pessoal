@@ -283,6 +283,20 @@ img{display:block;max-width:100%}
 .pop b{display:block;font-family:var(--serif);font-weight:600;font-size:17px;color:var(--verde);line-height:1.2}
 .pop .x{margin-left:auto;border:0;background:none;font-size:22px;color:var(--suave);padding:4px 8px}
 @media (min-width:700px){ .av{width:340px;min-height:260px} }
+
+/* meus pedidos */
+.meu{background:#fff;border:1px solid var(--linha);border-radius:18px;padding:14px;margin-bottom:12px}
+.meu .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.meu .top b{font-family:var(--serif);font-size:19px;color:var(--verde)}
+.meu .st{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:4px 9px;background:var(--folha);color:var(--verde)}
+.meu .st.cancelado{background:#fdecea;color:var(--vermelho)}
+.meu .st.entregue{background:#e3f5e9;color:#16623a}
+.meu .st.novo{background:#fff6c2;color:#6b5a00}
+.meu p{font-size:13px;color:var(--suave);margin-top:6px}
+.meu .acoes2{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.meu .acoes2 button{flex:1;border:1.5px solid var(--linha);background:#fff;border-radius:12px;padding:10px;font-weight:800;font-size:13.5px;color:var(--verde)}
+.meu .acoes2 .cx{border-color:#f3b8b1;color:var(--vermelho)}
+.meu .acoes2 .cx.sim{background:var(--vermelho);color:#fff;border-color:var(--vermelho)}
 @media (min-width:700px){
   .grade,.carregando{grid-template-columns:repeat(3,1fr);gap:16px}
   .passos{grid-template-columns:repeat(3,1fr)}
@@ -315,6 +329,7 @@ img{display:block;max-width:100%}
     <a class="ic" id="zapTopo" href="#" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
       <svg viewBox="0 0 24 24" fill="#1a8f4b"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.4 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.9 2c.1.2.1.4 0 .6l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3Z"/></svg>
     </a>
+    <button class="ic" id="btnMeus" onclick="abrirMeus()" aria-label="Meus pedidos" hidden><svg viewBox="0 0 24 24" fill="none" stroke="#212681" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10a1 1 0 0 1 1 1v17l-3-2-3 2-3-2-3 2V4a1 1 0 0 1 1-1Z"/><path d="M9 8h6M9 12h6"/></svg></button>
     <button class="sacola" id="btnSacola" onclick="abrirCarrinho()" aria-label="Minha sacola">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
       <span class="st" id="sacolaTotal">Sacola</span>
@@ -757,6 +772,7 @@ async function enviarPedido(){
   const btn = document.getElementById('btnEnviar'); btn.disabled = true; btn.textContent = 'Enviando...';
   const total = Math.round((sub+tx)*100)/100;
   const comPix = pedido.pag==='Pix' && temPix();
+  const segredo = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2)).replace(/-/g,'');
 
   // 1) guarda o pedido no sistema do mercado (Painel e gestor)
   let numero = null;
@@ -765,10 +781,11 @@ async function enviarPedido(){
       const r = await sb('rpc/mercado_fazer_pedido', {p_slug:LOJA, p_pedido:{
         cliente:{nome:pedido.nome.trim(), fone:pedido.fone.trim(), modo:pedido.modo, endereco:pedido.modo==='entrega'?pedido.endereco.trim():'', pagamento:pedido.pag+(comPix?' (QR no site)':''), troco:pedido.pag==='Dinheiro'?pedido.troco:'', obs:pedido.obs.trim()},
         itens: itens.map(({p,q})=>({id:p.id, nome:p.nome, marca:p.marca||'', qtd:q, tipo:p.tipo_venda, preco:Number(p.preco), total:Math.round(p.preco*q*100)/100})),
-        subtotal:Math.round(sub*100)/100, taxa:tx, total }});
+        subtotal:Math.round(sub*100)/100, taxa:tx, total, segredo }});
       if(r && r.ok) numero = r.numero;
     }catch(err){ console.warn('pedido não gravado, segue pelo WhatsApp', err); }
   }else numero = 1000 + Math.floor(Math.random()*900);
+  if(numero) guardarMeuPedido({numero, segredo, total, criado:Date.now(), status:'novo', itens:itens.map(({p,q})=>fmtQtd(p,q)+' '+p.nome)});
 
   // 2) mensagem do WhatsApp
   const L = [];
@@ -799,13 +816,13 @@ async function enviarPedido(){
       '<div class="chave">Recebedor: '+esc(CFG.pix_nome||CFG.nome)+' · Chave: '+esc(pixChave(CFG.pix_chave))+'</div></div>'+
       '<p style="margin-top:16px">Depois de pagar, envie o comprovante no WhatsApp:</p>'+
       '<a class="b-verde b-zap" href="'+link+'" target="_blank" rel="noopener">'+ICON_ZAP+' Já paguei, enviar no WhatsApp</a>'+
-      '<p style="margin-top:14px"><button class="fechar" onclick="fecharCarrinho()">Voltar para a loja</button></p></div>';
+      '<p style="margin-top:14px"><button class="fechar" onclick="abrirMeus()">Meus pedidos</button> <button class="fechar" onclick="fecharCarrinho()">Voltar para a loja</button></p></div>';
     return;
   }
   document.getElementById('pCorpo').innerHTML = '<div class="ok-tela">'+ck+
     '<h3>Pedido enviado!</h3><p>'+(numero?'Seu pedido é o <b>Nº '+numero+'</b>. ':'')+'Agora confirme pelo WhatsApp. Se ele não abriu sozinho, toque no botão abaixo.</p>'+
     '<a class="b-verde b-zap" style="margin-top:18px" href="'+link+'" target="_blank" rel="noopener">'+ICON_ZAP+' Abrir WhatsApp</a>'+
-    '<p style="margin-top:16px"><button class="fechar" onclick="fecharCarrinho()">Voltar para a loja</button></p></div>';
+    '<p style="margin-top:16px"><button class="fechar" onclick="abrirMeus()">Meus pedidos</button> <button class="fechar" onclick="fecharCarrinho()">Voltar para a loja</button></p><p class="nota" style="margin-top:12px">Mudou de ideia? Em <b>Meus pedidos</b> você pode cancelar enquanto o pedido não saiu.</p></div>';
   if(!DEMO) window.location.href = link;
 }
 
@@ -824,6 +841,49 @@ if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigato
 document.getElementById('busca').addEventListener('input', ()=>{ desenharLista(); });
 document.getElementById('busca').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.target.blur(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'}); } });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ fecharCarrinho(); document.getElementById('modalApp').classList.remove('on'); } });
+/* ===== Meus pedidos: o cliente acompanha e pode cancelar (o cancelamento aparece na Central) ===== */
+const ST_CLI = {novo:'Recebido', confirmado:'Confirmado', saiu:'Saiu para entrega', entregue:'Entregue', cancelado:'Cancelado'};
+function meusPedidos(){ try{ return JSON.parse(localStorage.getItem('pc_meus_pedidos')||'[]')||[]; }catch(e){ return []; } }
+function salvarMeus(l){ try{ localStorage.setItem('pc_meus_pedidos', JSON.stringify(l.slice(0,15))); }catch(e){} document.getElementById('btnMeus').hidden = !l.length; }
+function guardarMeuPedido(x){ salvarMeus([x, ...meusPedidos().filter(y=>y.numero!==x.numero)]); }
+let confirmando = null;
+async function abrirMeus(){
+  document.getElementById('pPe').style.display='none';
+  document.getElementById('tela').classList.add('on'); document.body.style.overflow='hidden';
+  desenharMeus();
+  if(DEMO) return;
+  const l = meusPedidos();
+  await Promise.all(l.filter(x=>!['entregue','cancelado'].includes(x.status) && Date.now()-x.criado < 7*864e5).map(async x=>{
+    try{ const r = await sb('rpc/mercado_ver_pedido',{p_slug:LOJA,p_id:x.numero,p_segredo:x.segredo}); if(r && r.status) x.status = r.status; }catch(e){}
+  }));
+  salvarMeus(l); desenharMeus();
+}
+function desenharMeus(){
+  const l = meusPedidos();
+  const h = l.length ? l.map(x=>{
+    const pode = ['novo','confirmado'].includes(x.status);
+    const conf = confirmando===x.numero;
+    return '<div class="meu"><div class="top"><b>Pedido Nº '+esc(x.numero)+'</b><span class="st '+esc(x.status)+'">'+esc(ST_CLI[x.status]||x.status)+'</span></div>'+
+      '<p>'+new Date(x.criado).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' · <b style="color:var(--verde)">'+brl(x.total)+'</b><br>'+esc((x.itens||[]).slice(0,4).join(', '))+((x.itens||[]).length>4?'…':'')+'</p>'+
+      (pode ? '<div class="acoes2">'+(conf ? '<button onclick="confirmando=null;desenharMeus()">Não, manter</button><button class="cx sim" onclick="cancelarPedido('+Number(x.numero)+')">Sim, cancelar</button>'
+                                          : '<button class="cx" onclick="confirmando='+Number(x.numero)+';desenharMeus()">Cancelar pedido</button>')+'</div>' : '')+
+      (x.status==='saiu' ? '<p>Já saiu para entrega. Para mudar algo, fale com a gente no WhatsApp.</p>' : '')+'</div>';
+  }).join('') : '<div class="vazio"><h3>Nenhum pedido ainda</h3><p>Os pedidos que você fizer neste celular aparecem aqui.</p></div>';
+  document.getElementById('pCorpo').innerHTML = '<div class="bloco" style="background:var(--folha);border:0"><b style="color:var(--verde)">Meus pedidos</b><div class="nota" style="margin-top:2px">Você pode cancelar enquanto o pedido não saiu para entrega.</div></div>'+h+
+    '<p style="text-align:center"><button class="fechar" onclick="fecharCarrinho()">Voltar para a loja</button></p>';
+}
+async function cancelarPedido(n){
+  const l = meusPedidos(), x = l.find(y=>y.numero===n); if(!x) return;
+  confirmando = null;
+  try{
+    let ok = DEMO;
+    if(!DEMO){ const r = await sb('rpc/mercado_cancelar_pedido',{p_slug:LOJA,p_id:x.numero,p_segredo:x.segredo}); ok = r && r.ok; if(r && r.status) x.status = r.status; }
+    if(ok){ x.status='cancelado'; salvarMeus(l); desenharMeus(); toast('Pedido Nº '+n+' cancelado. O mercado já foi avisado.'); }
+    else { salvarMeus(l); desenharMeus(); toast(x.status==='saiu'||x.status==='entregue' ? 'Esse pedido já saiu. Fale com a gente no WhatsApp.' : 'Não consegui cancelar agora. Tente de novo.'); }
+  }catch(e){ toast('Sem internet agora. Tente de novo.'); }
+}
+salvarMeus(meusPedidos());
+
 /* ===== Ofertas e avisos instantâneos (vêm da Central) ===== */
 const EX_AVISOS = [
   {id:'d1', tipo:'aviso', titulo:'Pão quentinho acabou de sair!', texto:'Fornada nova de pão francês. Corre que acaba rápido.', foto:'img/loja-balcao-p.webp', criado:Date.now()-6*60000},
