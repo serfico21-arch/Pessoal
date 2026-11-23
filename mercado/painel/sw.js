@@ -1,5 +1,5 @@
 /* Central Pinheiro & Costa: rede primeiro, cópia guardada só para abrir sem internet. */
-const CACHE = 'central-pc-v1';
+const CACHE = 'central-pc-v2';
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['./', './index.html', './manifest.webmanifest', '../img/icone-192.png'])).then(() => self.skipWaiting()));
 });
