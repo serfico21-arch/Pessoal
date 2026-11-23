@@ -101,6 +101,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--ouro);border-col
 .btn:focus-visible{outline:3px solid var(--ouro2);outline-offset:2px}
 .obs{font-size:.88rem;color:var(--txt2);text-align:center;margin:0}
 
+.dica-fotos{margin:0;color:var(--txt)}.dica-fotos small{color:var(--txt2)}
+.escolher{gap:10px;min-height:58px;font-size:1.05rem}.escolher svg{width:26px;height:26px}
+.fotos-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px}
+.fotos-grade figure{position:relative;margin:0;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid var(--borda)}
+.fotos-grade img{width:100%;height:100%;object-fit:cover;display:block}
+.fotos-grade button{position:absolute;top:4px;right:4px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(0,0,0,.7);color:#fff;font:700 18px var(--corpo);cursor:pointer}
+#enviar-fotos-box{display:grid;gap:8px}#enviar-fotos-box[hidden]{display:none}
 .pronto{display:none;padding-block:36px 48px}
 .pronto.ver{display:block}
 .pronto .cartao{background:var(--sup);border:1px solid var(--borda);border-radius:14px;padding:24px;display:grid;gap:16px}
@@ -130,7 +137,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--ouro);border-col
   <ol class="passos">
     <li><b>1</b><span>Preencha os dados do imóvel abaixo.</span></li>
     <li><b>2</b><span>Toque em <strong>Enviar pelo WhatsApp</strong>.</span></li>
-    <li><b>3</b><span>Na mesma conversa, mande as fotos do imóvel.</span></li>
+    <li><b>3</b><span>Escolha as fotos aqui na página e toque em <strong>Enviar as fotos</strong>.</span></li>
   </ol>
 </div></section>
 
@@ -166,6 +173,17 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--ouro);border-col
     <div class="campo"><label for="docs">Documentação</label>
       <select id="docs"><option value="">Não sei</option><option>Escritura registrada</option><option>Contrato de compra e venda</option><option>Financiado</option><option>CDHU / COHAB</option><option>Herança / inventário</option></select></div>
     <div class="campo"><label for="obs">Algo mais que queira contar <small>(opcional)</small></label><textarea id="obs" placeholder="Ex.: aceita financiamento, tem quintal, reformado..."></textarea></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Fotos do imóvel</legend>
+    <p class="dica-fotos">Escolha até 10 fotos: fachada, sala, cozinha, quartos, banheiro e quintal. <small>(opcional, mas ajuda muito)</small></p>
+    <label class="btn linha escolher" for="fotos">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h3l2-2h6l2 2h3v12H4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+      <span id="fotos-rotulo">Escolher fotos</span>
+    </label>
+    <input type="file" id="fotos" accept="image/*" multiple hidden>
+    <div class="fotos-grade" id="fotos-grade" aria-live="polite"></div>
   </fieldset>
 
   <div class="aviso-creci">
@@ -205,9 +223,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--ouro);border-col
     <h2>Quase pronto!</h2>
     <ol>
       <li>No WhatsApp, toque em <strong>enviar</strong> na mensagem que abriu.</li>
-      <li>Na mesma conversa, mande as <strong>fotos do imóvel</strong> (fachada, sala, cozinha, quartos, banheiro e quintal).</li>
+      <li id="passo-fotos">Na mesma conversa, mande as <strong>fotos do imóvel</strong> (fachada, sala, cozinha, quartos, banheiro e quintal).</li>
       <li>Entraremos em contato para a <strong>assinatura da autorização de venda</strong>, conforme determinação do CRECI.</li>
     </ol>
+    <div id="enviar-fotos-box" hidden>
+      <button type="button" class="btn zap" id="enviar-fotos"><span>Enviar as <b id="n-fotos">0</b> fotos</span></button>
+      <p class="obs" id="fotos-obs">Depois de enviar a mensagem, volte aqui e toque no botão. Na lista do WhatsApp, escolha a conversa da <strong>Fcosta</strong> (é a primeira, a mais recente).</p>
+    </div>
     <div>
       <div class="rotulo">Se o WhatsApp não abriu, chame neste número:</div>
       <div class="numero">(11) 99350-9109</div>
@@ -282,6 +304,45 @@ $('abrir-aviso').addEventListener('click', e=>{ e.preventDefault(); $('privacida
 $('rodape-aviso').addEventListener('click', e=>{ e.preventDefault(); $('privacidade').open = true; $('privacidade').scrollIntoView({block:'start'}) });
 $('voltar').onclick = ()=>{ $('pronto').classList.remove('ver'); $('form').style.display = ''; };
 atualizarLink();
+
+/* ===== FOTOS: o cliente escolhe aqui e envia pelo WhatsApp (nada fica guardado na página) ===== */
+const MAX_FOTOS = 10;
+let fotos = [];
+function mostrarFotos(){
+  $('fotos-grade').innerHTML = '';
+  fotos.forEach((f,i)=>{
+    const fig = document.createElement('figure'), img = document.createElement('img'), x = document.createElement('button');
+    img.src = URL.createObjectURL(f); img.alt = 'Foto ' + (i+1);
+    x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label','Tirar a foto ' + (i+1));
+    x.onclick = ()=>{ fotos.splice(i,1); mostrarFotos(); };
+    fig.append(img, x); $('fotos-grade').append(fig);
+  });
+  $('fotos-rotulo').textContent = fotos.length ? (fotos.length + (fotos.length===1?' foto escolhida':' fotos escolhidas') + ' · trocar ou juntar mais') : 'Escolher fotos';
+}
+$('fotos').addEventListener('change', e=>{
+  const novas = [...e.target.files].filter(f=>/^image\//.test(f.type));
+  fotos = fotos.concat(novas).slice(0, MAX_FOTOS);
+  if(fotos.length >= MAX_FOTOS && novas.length) alert('Pode mandar até ' + MAX_FOTOS + ' fotos por aqui. Se tiver mais, mande depois na conversa.');
+  e.target.value = ''; mostrarFotos();
+});
+function podeMandarFotos(){ try { return !!(navigator.canShare && fotos.length && navigator.canShare({files: fotos})); } catch(e){ return false; } }
+function prepararPronto(){
+  const n = fotos.length;
+  $('enviar-fotos-box').hidden = !n;
+  $('n-fotos').textContent = n;
+  if(n && podeMandarFotos()){
+    $('passo-fotos').innerHTML = 'Depois, volte aqui e toque em <strong>Enviar as ' + n + ' fotos</strong>. Escolha a conversa da Fcosta no WhatsApp.';
+  } else if(n){
+    $('enviar-fotos-box').hidden = true;
+    $('passo-fotos').innerHTML = 'Este aparelho não deixa mandar as fotos direto daqui. Na conversa do WhatsApp, toque no <strong>clipe 📎</strong> e escolha as fotos do imóvel.';
+  }
+}
+$('enviar-fotos').addEventListener('click', ()=>{
+  navigator.share({ files: fotos, text: 'Fotos do imóvel - ' + ($('rua').value.trim() || 'captação Fcosta') })
+    .then(()=>{ $('fotos-obs').textContent = '✔ Pronto! Se as fotos chegaram na conversa da Fcosta, está tudo certo.'; })
+    .catch(()=>{});
+});
+$('enviar').addEventListener('click', ()=>{ if(!problema()) prepararPronto(); });
 </script>
 
 </body></html>
