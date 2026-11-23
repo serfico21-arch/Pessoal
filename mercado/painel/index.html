@@ -136,7 +136,9 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
 .mud .n b{color:#1a7a52}.mud .p b{color:#a15c00}.mud .r b{color:var(--vermelho)}
 .lin .tag{font-size:11px;font-weight:800;border-radius:99px;padding:2px 7px;margin-left:4px;vertical-align:1px}
 .tag.n{background:#dcfce7;color:#14532d}.tag.p{background:#fff1d6;color:#7a4500}.tag.e{background:#e0ecff;color:#1e3a8a}
-.inst{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.inst{display:grid;grid-template-columns:1fr;gap:10px}
+.instTopo{margin-top:16px;padding-top:14px;border-top:1px dashed #d9d6c8}
+.instTopo .btn{width:100%}
 @media (max-width:520px){.inst{grid-template-columns:1fr}}
 .dev{display:flex;align-items:center;justify-content:flex-end;gap:8px;max-width:820px;margin:6px auto 0;padding:0 16px;color:var(--suave);font-size:11px;text-decoration:none}
 .dev img{width:28px;height:28px;border-radius:50%}
@@ -155,6 +157,7 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
   <div class="campo"><label for="codigo">Código da loja</label><input id="codigo" placeholder="PC-XXXX-XXXX" autocapitalize="characters" autocomplete="off" style="text-transform:uppercase"></div>
   <div style="margin-top:14px"><button class="btn btn-am" id="btnEntrar" onclick="entrar()">Entrar</button></div>
   <div class="msg" id="msgEntrar"></div>
+  <div class="instTopo" id="instTopo"><button class="btn btn-cl" onclick="instalarCentral('msgInstTopo')">💻 Instalar a Central neste aparelho</button><div class="msg" id="msgInstTopo"></div></div>
 </section>
 
 <!-- PAINEL -->
@@ -284,10 +287,9 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
     <h2>💻 Instalar a Central</h2>
     <div class="desc">Use no computador e no celular. Tudo fica sincronizado: o que você faz em um aparece no outro.</div>
     <div class="inst">
-      <a class="btn btn-am" href="../instalador/Central-Pinheiro-Costa-Instalador.exe" download>🪟 Baixar para Windows</a>
-      <button class="btn btn-cl" onclick="instalarCentral()">📱 Instalar no celular</button>
+      <button class="btn btn-am" onclick="instalarCentral()">💻 Instalar neste aparelho</button>
     </div>
-    <div class="desc" style="margin:10px 0 0;font-size:13.5px">No Windows, abra o arquivo baixado e clique em <b>Avançar</b>. Se o Windows avisar "proteger o computador", clique em <b>Mais informações</b> e depois em <b>Executar assim mesmo</b>. No iPhone: Safari → Compartilhar → <b>Adicionar à Tela de Início</b>.</div>
+    <div class="desc" style="margin:10px 0 0;font-size:13.5px"><b>No computador:</b> abra este link no <b>Chrome</b> ou no <b>Edge</b> e clique no botão acima. Se não abrir a janela, clique no ícone <b>Instalar</b> (um monitor com seta ⤓) no fim da barra de endereço. No Edge também: <b>⋯ → Aplicativos → Instalar este site como aplicativo</b>. Aparece o ícone na Área de Trabalho e no Menu Iniciar, sem baixar arquivo.<br><b>Android:</b> Chrome → 3 pontinhos → <b>Instalar app</b>. <b>iPhone:</b> Safari → Compartilhar → <b>Adicionar à Tela de Início</b>.<br><span style="opacity:.75">Opcional: <a href="../instalador/Central-Pinheiro-Costa-Instalador.exe" download>instalador .exe</a> (o Windows pode avisar que não reconhece o arquivo).</span></div>
     <div class="msg" id="msgInst"></div>
   </div>
 </section>
@@ -798,13 +800,24 @@ async function copiarConvite(){
   msg('msgCv','ok','✅ Mensagem copiada. Cole no WhatsApp, Instagram ou Facebook.');
 }
 
-/* ---------- Instalar a Central (celular) ---------- */
+/* ---------- Instalar a Central (computador e celular, sem .exe) ---------- */
 let pedidoInst = null;
+const CENTRAL_APP = () => window.matchMedia('(display-mode: standalone)').matches || window.matchMedia('(display-mode: window-controls-overlay)').matches || navigator.standalone;
 window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); pedidoInst = e; });
-function instalarCentral(){
-  if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone){ msg('msgInst','ok','A Central já está instalada neste aparelho.'); return; }
-  if(pedidoInst){ pedidoInst.prompt(); pedidoInst = null; return; }
-  msg('msgInst','in', /iphone|ipad/i.test(navigator.userAgent) ? 'No iPhone: toque em <b>Compartilhar</b> e depois em <b>Adicionar à Tela de Início</b>.' : 'No Chrome: toque nos <b>3 pontinhos</b> e escolha <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.');
+window.addEventListener('appinstalled', ()=>{ pedidoInst = null; ['msgInst','msgInstTopo'].forEach(i=>{ if($(i)) msg(i,'ok','✅ Central instalada! Procure o ícone <b>Central P&amp;C</b> na Área de Trabalho, no Menu Iniciar ou na tela do celular.'); }); });
+if(CENTRAL_APP()){ const t=document.getElementById('instTopo'); if(t) t.style.display='none'; }
+function instalarCentral(alvo){
+  alvo = alvo || 'msgInst';
+  if(CENTRAL_APP()){ msg(alvo,'ok','A Central já está instalada e aberta como aplicativo.'); return; }
+  if(pedidoInst){ const p = pedidoInst; pedidoInst = null; p.prompt(); return; }
+  const ua = navigator.userAgent;
+  let t;
+  if(/iphone|ipad/i.test(ua)) t = 'No iPhone: abra no <b>Safari</b>, toque em <b>Compartilhar</b> e depois em <b>Adicionar à Tela de Início</b>.';
+  else if(/android/i.test(ua)) t = 'No Chrome: toque nos <b>3 pontinhos ⋮</b> e escolha <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.';
+  else if(/Edg\//.test(ua)) t = 'No Edge: clique em <b>⋯</b> (canto de cima) → <b>Aplicativos</b> → <b>Instalar este site como aplicativo</b> → <b>Instalar</b>.';
+  else if(/Chrome\//.test(ua)) t = 'No Chrome: clique no ícone <b>Instalar</b> (monitor com seta ⤓) no fim da barra de endereço, ou em <b>⋮ → Transmitir, salvar e compartilhar → Instalar página como app</b>.';
+  else t = 'Abra este link no <b>Chrome</b> ou no <b>Edge</b> para instalar a Central como aplicativo.';
+  msg(alvo,'in',t);
 }
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(()=>{});
 
