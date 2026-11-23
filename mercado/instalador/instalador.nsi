@@ -24,8 +24,10 @@ VIAddVersionKey /LANG=1046 "LegalCopyright" "FCOSTA Sistemas & Apps"
 !define MUI_ICON "icone.ico"
 !define MUI_UNICON "icone.ico"
 !define MUI_ABORTWARNING
+!define MUI_WELCOMEFINISHPAGE_BITMAP "lateral.bmp"
+!define MUI_UNWELCOMEFINISHPAGE_BITMAP "lateral.bmp"
 !define MUI_WELCOMEPAGE_TITLE "Central Pinheiro & Costa"
-!define MUI_WELCOMEPAGE_TEXT "Este programa instala a Central da loja Pinheiro & Costa: pedidos do site, avisos e ofertas, produtos do gestor e condições da loja.$\r$\n$\r$\nPrecisa de internet para funcionar.$\r$\n$\r$\nClique em Avançar."
+!define MUI_WELCOMEPAGE_TEXT "Este programa instala a Central da loja Pinheiro & Costa: pedidos do site, avisos e ofertas, produtos do gestor e condições da loja.$\r$\n$\r$\nPrecisa de internet para funcionar.$\r$\n$\r$\nClique em Avançar.$\r$\n$\r$\nDesenvolvido por FCOSTA Sistemas & Apps."
 !define MUI_FINISHPAGE_RUN
 !define MUI_FINISHPAGE_RUN_FUNCTION AbrirAgora
 !define MUI_FINISHPAGE_RUN_TEXT "Abrir a Central agora"
