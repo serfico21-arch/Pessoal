@@ -113,6 +113,8 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
 .durar button{border:2px solid var(--linha);background:#fff;border-radius:12px;padding:10px 2px;font-weight:800;font-size:13.5px;cursor:pointer}
 .durar button.on{border-color:var(--verde3);background:#e9ebfa;color:var(--verde)}
 .prev-av{margin-top:14px;border-radius:22px;overflow:hidden;position:relative;min-height:200px;background:radial-gradient(130% 120% at 100% 0%,#3a47c0,#212681 60%,#161b63);color:#fff;display:flex;align-items:flex-end}
+@keyframes brilhoAv{0%,100%{box-shadow:0 0 0 4px #eed600}50%{box-shadow:0 0 0 4px #e53935}}
+.prev-av.alerta{animation:brilhoAv 1s ease-in-out infinite}
 .prev-av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .prev-av.foto::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(22,27,99,0) 25%,rgba(22,27,99,.9) 80%)}
 .prev-av .tx{position:relative;z-index:2;padding:16px}
@@ -178,6 +180,8 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
     <label class="fotoav" id="avFotoBox"><span style="font-size:30px">📷</span>Tirar ou escolher foto<input type="file" id="avFoto" accept="image/*" style="display:none"></label>
     <div class="campo"><label>Mostrar por</label></div>
     <div class="durar" id="durar"><button data-h="2">2 horas</button><button data-h="4" class="on">4 horas</button><button data-h="12">Hoje</button><button data-h="72">3 dias</button></div>
+    <label class="chk" style="margin-top:12px"><input type="checkbox" id="avAlerta" checked onchange="previaAv()"> 🔔 Chamar atenção: piscar e tocar som no celular do cliente</label>
+    <div style="margin-top:8px"><button type="button" class="btn btn-cl" style="padding:11px;font-size:15px" onclick="ouvirSom()">🔊 Ouvir o som do aviso</button></div>
     <div class="campo"><label>Como o cliente vai ver</label></div>
     <div class="prev-av" id="prevAv"></div>
     <div style="margin-top:14px"><button class="btn btn-vd" id="btnAv" onclick="publicarAviso()">📣 Publicar agora</button></div>
@@ -694,13 +698,26 @@ function fotoAviso(src){
 }
 function lerAviso(){
   return { tipo:AV.tipo, titulo:$('avTit').value.trim(), texto:$('avTxt').value.trim(), foto:AV.foto||null,
-    preco_de: AV.tipo==='oferta' ? (parseFloat($('avDe').value)||0) : 0, preco_por: AV.tipo==='oferta' ? (parseFloat($('avPor').value)||0) : 0 };
+    preco_de: AV.tipo==='oferta' ? (parseFloat($('avDe').value)||0) : 0, preco_por: AV.tipo==='oferta' ? (parseFloat($('avPor').value)||0) : 0,
+    alerta: $('avAlerta').checked };
 }
 function cartaoAv(x){
   const pr = Number(x.preco_por)>0 ? '<div class="pr">'+(Number(x.preco_de)>0?'<s>'+brl(x.preco_de)+'</s>':'')+'<b>'+brl(x.preco_por)+'</b></div>' : '';
   return (x.foto?'<img alt="" src="'+x.foto+'">':'')+'<div class="tx"><span class="et '+(x.tipo==='oferta'?'':'aviso')+'">'+(x.tipo==='oferta'?'Oferta':'Aviso')+'</span><h3>'+esc(x.titulo||'Escreva o título')+'</h3>'+(x.texto?'<p>'+esc(x.texto)+'</p>':'')+pr+'</div>';
 }
-function previaAv(){ const x = lerAviso(); const el=$('prevAv'); el.className='prev-av'+(x.foto?' foto':''); el.innerHTML = cartaoAv(x); }
+function previaAv(){ const x = lerAviso(); const el=$('prevAv'); el.className='prev-av'+(x.foto?' foto':'')+(x.alerta?' alerta':''); el.innerHTML = cartaoAv(x); }
+/* o mesmo ding-dong que toca no celular do cliente */
+function ouvirSom(){
+  try{
+    const c = new (window.AudioContext||window.webkitAudioContext)(); const t0 = c.currentTime + .05;
+    [[1318.5,0],[987.8,.32],[1318.5,.9],[987.8,1.22]].forEach(([f,d])=>{
+      const o=c.createOscillator(), g=c.createGain(); o.type='sine'; o.frequency.value=f;
+      g.gain.setValueAtTime(0,t0+d); g.gain.linearRampToValueAtTime(.32,t0+d+.012); g.gain.exponentialRampToValueAtTime(.0008,t0+d+.75);
+      o.connect(g).connect(c.destination); o.start(t0+d); o.stop(t0+d+.8);
+    });
+    setTimeout(()=>c.close(), 2600);
+  }catch(e){}
+}
 async function configAtual(){ const [l] = await get('mercado_lojas?slug=eq.'+LOJA+'&select=config'); return (l&&l.config)||{}; }
 function soValidos(a){ const ag=Date.now(); return (Array.isArray(a)?a:[]).filter(x=>x && (!x.expira || x.expira>ag)); }
 async function manterAvisos(c){ try{ const atual = await configAtual(); c.avisos = soValidos(atual.avisos); c.avisos_rev = atual.avisos_rev||null; }catch(e){} }
@@ -721,7 +738,7 @@ async function publicarAviso(){
   try{
     x.id = Date.now().toString(36)+Math.random().toString(36).slice(2,6); x.criado = Date.now(); x.expira = Date.now()+AV.horas*3600000;
     await gravarAvisos(a=>[x, ...a]);
-    msg('msgAv','ok','✅ Publicado! Já aparece no site, em destaque.');
+    msg('msgAv','ok','✅ Publicado! Já aparece no site, em destaque'+(x.alerta?', piscando e com som. Quem está com a loja aberta recebe em até meio minuto.':'.'));
     $('avTit').value=''; $('avTxt').value=''; $('avDe').value=''; $('avPor').value=''; AV.foto=null; mostrarFotoAv(); previaAv(); desenharAtivos();
   }catch(e){ console.error(e); msg('msgAv','er','Não consegui publicar agora. Verifique a internet e tente de novo.'); }
   finally{ b.disabled=false; }
