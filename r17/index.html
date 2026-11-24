@@ -6,6 +6,7 @@
 <title>Espaço Barber Shop R-17</title>
 <meta name="description" content="Barbearia no Jardim Kemel, Itaim Paulista. Corte, barba e estilo. Agende seu horário pelo WhatsApp.">
 <link rel="manifest" href="manifest.webmanifest">
+<script>/* o app do cliente vale só para index.html (assim não engole o painel em ./painel/) */ if(/\/r17\/$/.test(location.pathname) && location.hash!=="#adm" && !/[?&]painel/.test(location.search)) location.replace("index.html"+location.search+location.hash);</script>
 <script>/* o painel do dono mora em ./painel/. Links antigos vão para lá. */ if(location.hash==="#adm"||/[?&]painel/.test(location.search)) { const q=location.search.replace(/[?&]painel=?[^&]*/,"").replace(/^&/,"?"); location.replace("painel/"+(q&&q!=="?"?q:"")+"#adm"); }</script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Espaço Barber Shop R-17">
@@ -439,7 +440,7 @@ $("btnInst").addEventListener("click",async()=>{
 });
 
 /* versão do site: muda a cada atualização. O app confere sozinho e atualiza. */
-const VERSAO="29";
+const VERSAO="30";
 async function conferirVersao(){
   try{ const t=await (await fetch("index.html?nv="+Date.now(),{cache:"no-store"})).text();
     const m=t.match(/const VERSAO="(\d+)"/); if(!m || m[1]===VERSAO) return;
