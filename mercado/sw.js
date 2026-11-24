@@ -1,7 +1,7 @@
 /* App do cliente Pinheiro & Costa.
    Rede primeiro: o cliente sempre vê preços e produtos novos.
    Sem internet, abre a última cópia guardada. Não guarda nada do banco (Supabase). */
-const CACHE = 'pinheiro-costa-v15';
+const CACHE = 'pinheiro-costa-v16';
 const BASICO = ['./', './index.html', './qrcode.js', './manifest.webmanifest',
   './img/icone-192.png', './img/loja-mercearia-p.webp', './img/fcosta-sistemas-96.png'];
 
