@@ -153,7 +153,7 @@ img{display:block;max-width:100%}
 .dep span:last-child{font-size:12px;font-weight:600;color:var(--suave);text-align:center;line-height:1.2}
 .dep.on .c{border-color:var(--ouro);box-shadow:0 0 0 3px rgba(238,214,0,.25)}
 .dep.on span:last-child{color:var(--verde);font-weight:800}
-.dep.todos .c{background:var(--folha)}
+.dep.todos .c{background-color:var(--folha)}
 .dep .c.ic{background:#fff;font-size:32px;line-height:1}
 .ver-todos{text-align:center;margin:22px 0 6px}
 .ver-todos p{color:var(--suave);font-size:15px;margin:0 0 12px}
@@ -691,7 +691,7 @@ function desenharDeps(){
   const vis = PRODUTOS.filter(p=>Number(p.estoque)>0);
   const conta = {}; vis.forEach(p=>{ const d=deptoDe(p).n; conta[d]=(conta[d]||0)+1; });
   const lista = [...DEPTOS, DEP_OUTROS].filter(d=>conta[d.n] || !vis.length);
-  el.innerHTML = '<button class="dep todos'+(categoria==='Todos'?' on':'')+'" data-c="Todos"><span class="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></span><span>Início</span></button>'+
+  el.innerHTML = '<button class="dep todos'+(categoria==='Todos'?' on':'')+'" data-c="Todos"><span class="c" style="background-image:url(img/loja-balcao-p.webp)"></span><span>Início</span></button>'+
     lista.map(d=>'<button class="dep'+(d.n===categoria?' on':'')+'" data-c="'+esc(d.n)+'"><span class="c" style="background-image:url(\''+fundoDep(d.n)+'\')"></span><span>'+esc(d.n)+'</span></button>').join('');
   el.querySelectorAll('.dep').forEach(b=>b.onclick=()=>{
     if(!vis.length && b.dataset.c!=='Todos'){ toast('Os produtos estão chegando!'); return; }
