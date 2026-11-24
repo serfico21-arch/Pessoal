@@ -173,7 +173,7 @@ img{display:block;max-width:100%}
 .foto .ini{font-family:var(--serif);font-size:34px;font-weight:600;color:var(--ouro)}
 .tag{position:absolute;top:8px;left:8px;background:var(--verde);color:#fff;font-size:10.5px;font-weight:800;padding:4px 8px;border-radius:999px;letter-spacing:.03em}
 .tag.esg{background:var(--vermelho);left:auto;right:8px}
-.tag.ilu{top:auto;bottom:6px;left:6px;background:rgba(255,255,255,.88);color:var(--suave);font-weight:600;font-size:9.5px}
+.tag.ilu{top:auto;bottom:6px;left:6px;background:rgba(0,0,0,.62);color:#fff;font-weight:700;font-size:10.5px}
 .info{padding:11px 12px 12px;display:flex;flex-direction:column;flex:1}
 .pcat{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ouro)}
 .pnome{font-weight:700;font-size:14.5px;line-height:1.25;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -702,7 +702,7 @@ function desenharDeps(){
 function fotoHTML(p){
   const sem = Number(p.estoque)<=0;
   let h;
-  if(FOTOS[p.id]) h = '<img class="real" alt="'+esc(p.nome)+'" loading="lazy" src="'+esc(FOTOS[p.id])+'" onerror="fotoFalhou('+jsq(p.id)+')">'+(/#ilustrativa$/.test(FOTOS[p.id])?'<span class="tag ilu">Imagem ilustrativa</span>':'');
+  if(FOTOS[p.id]) h = '<img class="real" alt="'+esc(p.nome)+'" loading="lazy" src="'+esc(FOTOS[p.id])+'" onerror="fotoFalhou('+jsq(p.id)+')">'+(/^https:\/\/images\.openfoodfacts\.org\//.test(FOTOS[p.id])?'<span class="tag ilu">Imagem ilustrativa</span>':'');
   else h = ilustra(p);
   if(sem) h += '<span class="tag esg">Esgotado</span>';
   else if(isPeso(p)) h += '<span class="tag">Por kg</span>';
@@ -734,7 +734,7 @@ function fundoProduto(p){
 }
 function fotoFalhou(id){ delete FOTOS[id]; document.querySelectorAll('[data-foto="'+CSS.escape(id)+'"]').forEach(el=>{ el.innerHTML = fotoHTML(PRODUTOS.find(p=>p.id===id)); }); }
 function ilustra(p){
-  return '<span class="ilu"><img src="'+fundoProduto(p)+'" alt="" loading="lazy" aria-hidden="true"><small>Foto da nossa loja</small></span>';
+  return '<span class="ilu"><img src="'+fundoProduto(p)+'" alt="" loading="lazy" aria-hidden="true"><small>Imagem ilustrativa</small></span>';
 }
 function cartaoProduto(p){
   const sem = Number(p.estoque)<=0, q = carrinho[p.id]||0;
