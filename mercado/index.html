@@ -137,6 +137,9 @@ img{display:block;max-width:100%}
 .dep.on .c{border-color:var(--ouro);box-shadow:0 0 0 3px rgba(238,214,0,.25)}
 .dep.on span:last-child{color:var(--verde);font-weight:800}
 .dep.todos .c{background:var(--folha)}
+.dep .c.ic{background:#fff;font-size:32px;line-height:1}
+.ver-todos{text-align:center;margin:22px 0 6px}
+.ver-todos p{color:var(--suave);font-size:15px;margin:0 0 12px}
 
 /* produtos */
 .grade{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
@@ -516,6 +519,29 @@ const DEPS = [
   {n:'Limpeza', re:/limp|higien|lavand|sabao|deterg|desinf|perfum|papel/, f:'1550963295-019d8a8a61c5'},
 ];
 const FOTO_GERAL = '1578916171728-46686eac8d58';
+/* Departamento automático: o gestor quase não manda categoria, então a loja descobre pelo nome */
+const DEPTOS = [
+  {n:'Higiene e beleza', e:'🧼', re:/absorvente|intimus|always|sempre livre|shampoo|condicionador|elseve|pantene|sabonete|creme dental|closeup|colgate|sorriso|escova de dente|escova dental|desodorant|chupeta|herbissimo|hidratante|cotonete|algodao|aparelho de barbear|prestobarba|gillette|fralda|lenco umedecido|talco|gel de cabelo|muriel|curativo|papel higi|baby soft/},
+  {n:'Limpeza', e:'🧴', re:/sabao|sapao|lava roupa|lava-roupa|detergente|amaciante|downy|confort|comfort|desinfetante|desinfetanta|agua sanitaria|cloro|limpa|multi ?uso|veja\b|cif\b|limpol|ype|omo\b|alcool|palha de aco|bombril|assolan|esponja|lustra|inseticida|saco de lixo|vassoura|rodo\b|pa de plastico|iris\b|coala|pinho/},
+  {n:'Padaria e biscoitos', e:'🍞', re:/\bpao|paes|bisnag|baguete|torrada|bolo\b|bolinho|rosca|biscoito|bolacha|wafer|cookie|negresco|passatempo|trakinas|choco biscuit|chambinho|chokynho/},
+  {n:'Bebidas', e:'🥤', re:/refri|refrigerante|coca|guarana|guaraviton|guara viton|fanta|sprite|pepsi|suco|del valle|limonada|agua|maguary|frutap|marata|tonica|cerveja|vinho|vodka|cachaca|whisky|energ|monster|red ?bull|furioso|gatorade|isotonico|fruit shoot|cha gelado|h2oh|tubaina|convencao|chopp/},
+  {n:'Frios e laticínios', e:'🧀', re:/leite|iogurte|iorgute|queijo|mussarela|mucarela|requeij|presunto|mortadela|salame|apresuntado|margarina|manteiga|creme de leite|bebida lactea|mistura lactea|milk mix|danone|yakult|nata\b/},
+  {n:'Açougue', e:'🥩', re:/carne|frango|bife|contrafil|picanha|alcatra|costela|patinho|acem|coxao|maminha|fraldinha|linguica|salsicha|hamburg|bacon|peixe|file de|asa de|coxa|sobrecoxa|moida/},
+  {n:'Hortifruti', e:'🥬', re:/banana|tomate|alface|batata|cebola|alho\b|cenoura|laranja|limao|maca\b|mamao|uva\b|abacaxi|melancia|legume|verdura|couve|repolho|pimentao|abobrinha|chuchu|ovos?\b|amora/},
+  {n:'Doces', e:'🍫', re:/chocolate|choc\b|choc\/|bombom|bm bom|kit kat|diamante negro|m&m|doce|bala\b|balas|drops|halls|chiclete|pirulito|fini|marshmallow|mallows|marsh|goiabada|pacoca|pacoquita|gelatina|geleia|moranguete|beijos|sorvete|picole|mel\b|amendoim|tutti|especialidades nestle|chocolatto|achocolatado|nescau|toddy|go jelly|dentadura/},
+  {n:'Temperos', e:'🧄', re:/tempero|sal\b|sal refinado|pimenta|oregano|cominho|colorau|acafrao|acafao|louro|canela|cravo|alecrim|baunilha|camomila|caldo de|caldo knorr|sazon|lemon pepper|mais sabor|eucalipto\b|ervas/},
+  {n:'Mercearia', e:'🍚', re:/arroz|feijao|oleo|azeite|acucar|adocante|adocyl|sacarina|cafe|cha\b|cha de|matte|farinha|fuba|flocao|milharina|maiscerta|aveia|polvilho|trigo|macarrao|macarao|lasanha|espaguete|espaquete|parafuso|parafuuso|massa|miojo|lamen|cup noodles|nissin|molho|extrato|catchup|ketchup|maionese|maioinese|mostarda|azeitona|milho|ervilha|sardinha|atum|conserva|farofa|canjica|canjao|fermento|bicarbonato|coco ralado|ducoco|leite condensado|granulado|graulado|ninho|adria|creme de arroz|salgadinho|doritos|batata palha|pipoca/},
+  {n:'Utilidades', e:'🧺', re:/copo|prato desc|guardanapo|filme de pvc|papel aluminio|papel toalha|filtro de papel|filtro de papael|lampada|pilha|fita|isqueiro|irsqueiro|fosforo|carvao|vela\b|cola\b|cola instant|caneta|varal|prendedor|palito|saco plast|lusafilm|leitor|mat inset|citronela|repelente/},
+];
+const DEP_OUTROS = {n:'Outros', e:'🛒'};
+function deptoDe(p){
+  if(p._dep) return p._dep;
+  const t = norm(p.nome+' '+(p.marca||'')), c = norm(p.categoria||'');
+  let d = (c && DEPTOS.find(x=>x.re.test(c) || norm(x.n)===c)) || DEPTOS.find(x=>x.re.test(t)) || DEP_OUTROS;
+  return (p._dep = d);
+}
+/* Mais procurados: o que o cliente costuma buscar primeiro */
+const BASICOS = [/^arroz/,/^feijao/,/^oleo/,/^acucar/,/^cafe/,/^leite/,/^(macarrao|macarao|espaguete|dona benta esp)/,/^farinha/,/ovos\b/,/^(sabao|lava roupa)|omo\b/,/^papel higi/,/^(refri|coca|guarana)/,/^detergente/,/^margarina/,/^(biscoito|bolacha)/,/^sal\b/];
 const depDe = nome => { const n = norm(nome); return DEPS.find(d=>d.re.test(n)); };
 const fotoDep = (nome, w) => U((depDe(nome)||{}).f || FOTO_GERAL)+(w||300);
 
@@ -583,7 +609,11 @@ async function carregar(){
     else document.getElementById('lista').innerHTML = '<div class="vazio"><h3>Sem conexão</h3><p>Não consegui carregar os produtos. Verifique a internet.</p><button class="b-ouro" onclick="location.reload()">Tentar de novo</button></div>';
   }
   if(DEMO && !CFG.pix_chave){ CFG.pix_chave = 'exemplo@pinheiroecosta.com.br'; CFG.pix_cidade = 'SAO PAULO'; }
-  for(const id in carrinho){ if(!PRODUTOS.find(p=>p.id===id)) delete carrinho[id]; }
+  /* Sacola guardada no celular: tira o que saiu do site ou acabou, e ajusta ao estoque atual */
+  for(const id in carrinho){ const p = PRODUTOS.find(x=>x.id===id);
+    if(!p || Number(p.estoque)<=0 || !(carrinho[id]>0)) delete carrinho[id];
+    else if(carrinho[id] > Number(p.estoque)) carrinho[id] = Number(p.estoque); }
+  salvarLocal();
   aplicarConfig(); desenharDeps(); desenharLista(); atualizarBarra(); desenharAvisos(true);
   if(!DEMO) carregarFotos();
 }
@@ -639,14 +669,15 @@ function aplicarConfig(){
 }
 
 function desenharDeps(){
-  const cs = [...new Set(PRODUTOS.map(p=>(p.categoria||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
   const el = document.getElementById('deps');
-  const lista = cs.length ? cs : DEPS.map(d=>d.n);
-  el.innerHTML = '<button class="dep todos'+(categoria==='Todos'?' on':'')+'" data-c="Todos"><span class="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></span><span>Todos</span></button>'+
-    lista.map(c=>'<button class="dep'+(c===categoria?' on':'')+'" data-c="'+esc(c)+'"><span class="c" style="background-image:url(\''+fotoDep(c,240)+'\')"></span><span>'+esc(c)+'</span></button>').join('');
+  const vis = PRODUTOS.filter(p=>Number(p.estoque)>0);
+  const conta = {}; vis.forEach(p=>{ const d=deptoDe(p).n; conta[d]=(conta[d]||0)+1; });
+  const lista = [...DEPTOS, DEP_OUTROS].filter(d=>conta[d.n] || !vis.length);
+  el.innerHTML = '<button class="dep todos'+(categoria==='Todos'?' on':'')+'" data-c="Todos"><span class="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></span><span>Início</span></button>'+
+    lista.map(d=>'<button class="dep'+(d.n===categoria?' on':'')+'" data-c="'+esc(d.n)+'"><span class="c ic">'+d.e+'</span><span>'+esc(d.n)+'</span></button>').join('');
   el.querySelectorAll('.dep').forEach(b=>b.onclick=()=>{
-    if(!cs.length && b.dataset.c!=='Todos'){ toast('Os produtos estão chegando!'); return; }
-    categoria=b.dataset.c; LIMITE=48; desenharDeps(); desenharLista(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'});
+    if(!vis.length && b.dataset.c!=='Todos'){ toast('Os produtos estão chegando!'); return; }
+    categoria=b.dataset.c; verTudo=false; LIMITE=48; document.getElementById('busca').value=''; desenharDeps(); desenharLista(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'});
   });
 }
 
@@ -661,7 +692,8 @@ function fotoHTML(p){
 }
 /* Produto sem foto: fundo com a foto da prateleira do próprio mercado + ícone do tipo de produto */
 const ICONES = [
-  [/sab[aã]o|detergente|amaciante|desinfetante|[aá]gua sanit|limpa|esponja|cloro/,'🧴'],[/papel higi|guardanapo|papel toalha/,'🧻'],
+  [/biscoito|bolacha|cookie|wafer|negresco|choco biscuit/,'🍪'],[/margarina|manteiga/,'🧈'],[/agua sanit/,'🧴'],[/\bagua\b|água/,'💧'],[/suco|maguary|frutap|marata/,'🧃'],
+  [/sab[aã]o|detergente|amaciante|desinfetante|[aá]gua sanit|limpa|esponja|cloro/,'🧴'],[/papel higi|guardanapo|papel toalha/,'🧻'],[/absorvente|intimus|always|sempre livre/,'🌸'],[/achocolatado|nescau|toddy/,'🍫'],[/energ|monster|furioso|red ?bull/,'⚡'],[/gelatina/,'🍮'],[/amendoim|pacoc/,'🥜'],[/copo/,'🥤'],[/lampada/,'💡'],[/fermento/,'🧁'],[/azeitona/,'🫒'],[/[aá]lcool/,'🧴'],
   [/\barroz/,'🍚'],[/feij[aã]o/,'🫘'],[/azeite/,'🫒'],[/[oó]leo/,'OLEO'],[/a[cç][uú]car/,'ACUCAR'],[/\bsal\b|tempero|alho|cebola/,'🧄'],[/caf[eé]/,'☕'],
   [/leite|iogurte|bebida l[aá]ctea/,'🥛'],[/queijo|mussarela|requeij/,'🧀'],[/presunto|mortadela|salame|frios|apresuntado/,'🥓'],
   [/p[aã]o|bisnag|baguete|torrada|bolo|rosca/,'🍞'],[/biscoito|bolacha|wafer|cookie/,'🍪'],[/macarr[aã]o|espaguete|massa|miojo|lamen/,'🍝'],
@@ -673,7 +705,7 @@ const ICONES = [
   [/cigarro|isqueiro|f[oó]sforo/,'🔥'],[/g[aá]s/,'🔥']
 ];
 const DESENHOS = {OLEO:'<svg viewBox="0 0 64 64" width="64" height="64"><path d="M27 6h10v6H27z" fill="#c0392b"/><path d="M28 12h8v5l5 6v33a4 4 0 0 1-4 4H27a4 4 0 0 1-4-4V23l5-6z" fill="#f4c20d"/><path d="M28 12h8v5l5 6v33a4 4 0 0 1-4 4H27a4 4 0 0 1-4-4V23l5-6z" fill="none" stroke="#b8860b" stroke-width="1.5"/><rect x="25" y="32" width="14" height="14" rx="2" fill="#fff"/><text x="32" y="42" font-size="6" font-family="Arial" font-weight="700" text-anchor="middle" fill="#2a2f8f">ÓLEO</text><path d="M27 24v26" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/></svg>', ACUCAR:'<svg viewBox="0 0 64 64" width="64" height="64"><path d="M16 12h32l-2 44a3 3 0 0 1-3 3H21a3 3 0 0 1-3-3z" fill="#fff" stroke="#2a2f8f" stroke-width="2"/><path d="M16 12l3-5h26l3 5" fill="#e8ecff" stroke="#2a2f8f" stroke-width="2"/><rect x="19" y="24" width="26" height="14" rx="2" fill="#2a2f8f"/><text x="32" y="34" font-size="5.5" font-family="Arial" font-weight="700" text-anchor="middle" fill="#fff">AÇÚCAR</text><circle cx="26" cy="47" r="2.2" fill="#d9dde8"/><circle cx="32" cy="50" r="2.2" fill="#d9dde8"/><circle cx="38" cy="46" r="2.2" fill="#d9dde8"/></svg>'};
-function iconeProduto(p){ const t = norm(p.nome+' '+(p.categoria||'')); for(const [r,i] of ICONES) if(r.test(t)) return i; return '🛒'; }
+function iconeProduto(p){ const t = norm(p.nome+' '+(p.categoria||'')); for(const [r,i] of ICONES) if(r.test(t)) return i; return deptoDe(p).e; }
 function fundoProduto(p){
   const t = norm(p.nome+' '+(p.categoria||''));
   if(/sanit|sabao|deterg|limpa|amaciante/.test(t)) return 'img/loja-mercearia-p.webp';
@@ -695,21 +727,39 @@ function cartaoProduto(p){
     (q>0?'':'<button class="mais" aria-label="Colocar na sacola" '+(sem?'disabled':'')+' onclick="mudar('+jsq(p.id)+',1)">'+ICON_MAIS+'</button>')+'</div>'+ctrl+'</div></article>';
 }
 
+let verTudo = false;
+function verTodos(){ verTudo = true; LIMITE = 48; desenharLista(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'}); }
+function voltarInicio(){ verTudo = false; categoria = 'Todos'; document.getElementById('busca').value=''; desenharDeps(); desenharLista(); }
 function desenharLista(){
-  const termo = norm(document.getElementById('busca').value);
+  const termo = norm(document.getElementById('busca').value).trim();
   /* Produto sem estoque não aparece para o cliente (evita mostrar o que o mercado não tem) */
-  let lista = PRODUTOS.filter(p=> Number(p.estoque)>0 && (categoria==='Todos' || (p.categoria||'').trim()===categoria));
-  if(termo) lista = lista.filter(p=> norm(p.nome+' '+(p.marca||'')+' '+(p.categoria||'')).includes(termo));
-  lista.sort((a,b)=> (Number(a.estoque)<=0) - (Number(b.estoque)<=0) || a.nome.localeCompare(b.nome,'pt-BR'));
-  document.getElementById('tituloSec').textContent = termo ? 'Resultado da busca' : (categoria==='Todos'?'Produtos':categoria);
-  document.getElementById('subTit').textContent = termo ? 'Você buscou' : (categoria==='Todos'?'Nossa seleção':'Departamento');
-  document.getElementById('contaSec').textContent = PRODUTOS.length ? lista.length+(lista.length===1?' item':' itens') : '';
+  const vis = PRODUTOS.filter(p=> Number(p.estoque)>0);
+  const inicio = !termo && categoria==='Todos' && !verTudo;
+  let lista = vis.filter(p=> categoria==='Todos' || deptoDe(p).n===categoria);
+  if(termo){
+    const pal = termo.split(/\s+/).filter(Boolean);
+    lista = lista.filter(p=>{ const t = norm(p.nome+' '+(p.marca||'')+' '+deptoDe(p).n); return pal.every(w=>t.includes(w)); });
+    const comeca = p => norm(p.nome).startsWith(pal[0]) ? 0 : 1;
+    lista.sort((a,b)=> comeca(a)-comeca(b) || a.nome.localeCompare(b.nome,'pt-BR'));
+  } else lista.sort((a,b)=> a.nome.localeCompare(b.nome,'pt-BR'));
+  if(inicio){
+    const esc1 = [];
+    BASICOS.forEach(r=>{ const a = vis.find(p=>!esc1.includes(p) && FOTOS[p.id] && r.test(norm(p.nome))) || vis.find(p=>!esc1.includes(p) && r.test(norm(p.nome))); if(a) esc1.push(a); });
+    vis.forEach(p=>{ if(FOTOS[p.id] && !esc1.includes(p) && esc1.length<16) esc1.push(p); });
+    lista = esc1.slice(0,16);
+  }
+  const sec = termo ? 'Resultado da busca' : (categoria!=='Todos' ? categoria : (inicio ? 'Mais procurados' : 'Todos os produtos'));
+  document.getElementById('tituloSec').textContent = sec;
+  document.getElementById('subTit').textContent = termo ? 'Você buscou' : (categoria!=='Todos' ? 'Departamento' : (inicio ? 'Comece por aqui' : 'De A a Z'));
+  document.getElementById('contaSec').textContent = PRODUTOS.length && !inicio ? lista.length+(lista.length===1?' item':' itens') : '';
   const el = document.getElementById('lista');
   if(!PRODUTOS.length){ el.innerHTML = '<div class="vazio"><h3>A vitrine está sendo montada</h3><p>Em poucos dias você poderá fazer suas compras por aqui. Enquanto isso, faça seu pedido pelo WhatsApp.</p><a class="b-ouro" target="_blank" rel="noopener" href="'+zapLink('Olá! Gostaria de fazer um pedido.')+'">Pedir pelo WhatsApp</a></div>'; return; }
-  if(!lista.length){ el.innerHTML = '<div class="vazio"><h3>Nada encontrado</h3><p>Tente outro nome ou pergunte pelo WhatsApp, talvez a gente tenha.</p></div>'; return; }
+  const voltar = inicio ? '' : '<div style="text-align:center;margin-top:18px"><button class="b-cl" onclick="voltarInicio()">← Voltar ao início</button></div>';
+  if(!lista.length){ el.innerHTML = '<div class="vazio"><h3>Nada encontrado</h3><p>Tente outro nome ou pergunte pelo WhatsApp, talvez a gente tenha.</p></div>'+voltar; return; }
   const resto = lista.length - LIMITE;
   el.innerHTML = '<div class="grade">'+lista.slice(0,LIMITE).map(cartaoProduto).join('')+'</div>'+
-    (resto>0 ? '<div style="text-align:center;margin-top:18px"><button class="b-ouro" onclick="verMais()">Ver mais produtos ('+resto+')</button></div>' : '');
+    (inicio ? '<div class="ver-todos"><p>Não achou? Use a busca lá em cima ou escolha um departamento.</p><button class="b-ouro" onclick="verTodos()">Ver todos os '+vis.length+' produtos</button></div>'
+            : (resto>0 ? '<div style="text-align:center;margin-top:18px"><button class="b-ouro" onclick="verMais()">Ver mais produtos ('+resto+')</button></div>' : '') + voltar);
 }
 /* Mostra os produtos aos poucos: celular simples não trava com mil produtos */
 let LIMITE = 48;
@@ -999,7 +1049,7 @@ function fecharBarraApp(sempre){
 })();
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(()=>{});
 
-document.getElementById('busca').addEventListener('input', ()=>{ LIMITE=48; desenharLista(); });
+document.getElementById('busca').addEventListener('input', ()=>{ LIMITE=48; if(categoria!=='Todos'){ categoria='Todos'; desenharDeps(); } desenharLista(); });
 document.getElementById('busca').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.target.blur(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'}); } });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ fecharCarrinho(); document.getElementById('modalApp').classList.remove('on'); } });
 /* ===== Meus pedidos: o cliente acompanha e pode cancelar (o cancelamento aparece na Central) ===== */
