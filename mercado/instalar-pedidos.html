@@ -105,6 +105,59 @@ revoke all on function public.mercado_status_pedido(text,text,bigint,text) from 
 grant execute on function public.mercado_fazer_pedido(text,jsonb) to anon, authenticated;
 grant execute on function public.mercado_listar_pedidos(text,text,int) to anon, authenticated;
 grant execute on function public.mercado_status_pedido(text,text,bigint,text) to anon, authenticated;
+-- Baixa o estoque do site quando o pedido é confirmado/sai/entregue, e devolve se for cancelado depois.
+alter table public.mercado_pedidos add column if not exists estoque_baixado boolean not null default false;
+
+create or replace function public.mercado_mexer_estoque(p_slug text, p_id bigint, p_sinal int)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  update public.mercado_produtos pr
+     set estoque = greatest(0, coalesce(pr.estoque,0) - p_sinal * t.q),
+         atualizado_em = now()
+    from (select it->>'id' as id, sum(coalesce((it->>'qtd')::numeric,0)) as q
+            from public.mercado_pedidos pe, jsonb_array_elements(pe.itens) it
+           where pe.slug = p_slug and pe.id = p_id
+           group by 1) t
+   where pr.slug = p_slug and pr.id = t.id and pr.estoque is not null;
+end $$;
+revoke all on function public.mercado_mexer_estoque(text,bigint,int) from public, anon, authenticated;
+
+create or replace function public.mercado_status_pedido(p_slug text, p_codigo text, p_id bigint, p_status text)
+returns boolean language plpgsql security definer set search_path = public, extensions as $$
+declare b boolean;
+begin
+  if not public.mercado_codigo_ok(p_slug, p_codigo) then return false; end if;
+  if p_status not in ('novo','confirmado','saiu','entregue','cancelado') then return false; end if;
+  select estoque_baixado into b from public.mercado_pedidos where slug = p_slug and id = p_id for update;
+  if not found then return false; end if;
+  if p_status in ('confirmado','saiu','entregue') and not b then
+    perform public.mercado_mexer_estoque(p_slug, p_id, 1);
+    update public.mercado_pedidos set estoque_baixado = true where slug = p_slug and id = p_id;
+  elsif p_status in ('novo','cancelado') and b then
+    perform public.mercado_mexer_estoque(p_slug, p_id, -1);
+    update public.mercado_pedidos set estoque_baixado = false where slug = p_slug and id = p_id;
+  end if;
+  update public.mercado_pedidos set status = p_status where slug = p_slug and id = p_id;
+  return true;
+end $$;
+
+create or replace function public.mercado_cancelar_pedido(p_slug text, p_id bigint, p_segredo text)
+returns jsonb language plpgsql security definer set search_path = public as $$
+declare st text; b boolean;
+begin
+  select status, estoque_baixado into st, b from public.mercado_pedidos
+   where slug = p_slug and id = p_id and segredo is not null and segredo = p_segredo for update;
+  if st is null then return jsonb_build_object('ok', false); end if;
+  if st not in ('novo','confirmado') then return jsonb_build_object('ok', false, 'status', st); end if;
+  if b then
+    perform public.mercado_mexer_estoque(p_slug, p_id, -1);
+  end if;
+  update public.mercado_pedidos
+     set status = 'cancelado', estoque_baixado = false,
+         cliente = cliente || jsonb_build_object('cancelado_pelo_cliente', true, 'cancelado_em', now())
+   where slug = p_slug and id = p_id;
+  return jsonb_build_object('ok', true, 'status', 'cancelado');
+end $$;
 </script>
 <script>
 document.getElementById("b").onclick=async()=>{
