@@ -1,7 +1,7 @@
 /* App da R-17: rede primeiro (sempre a versão mais nova); sem internet, usa a cópia guardada.
    Não guarda nada do banco (Supabase), só os arquivos do próprio site. */
-const CACHE = 'r17-v20';
-const BASICO = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './fcosta.jpg', './painel/', './painel/manifest.webmanifest'];
+const CACHE = 'r17-v21';
+const BASICO = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './fcosta.jpg', './painel/', './painel/adm.webmanifest'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(BASICO)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(n => Promise.all(n.filter(x => x.startsWith('r17-') && x !== CACHE).map(x => caches.delete(x)))).then(() => self.clients.claim()));
