@@ -223,6 +223,7 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
       <div class="mud"><div class="n"><b id="mNovo">–</b>novos</div><div class="p"><b id="mMud">–</b>mudaram</div><div class="r"><b id="mSai">–</b>vão sair</div><div><b id="mIgual">–</b>iguais</div></div>
       <div class="lista" id="rLista"></div>
       <label class="chk"><input type="checkbox" id="semEstoque" checked onchange="compararSite()"> Mandar também os produtos sem estoque (ficam escondidos na loja e aparecem sozinhos quando tiver estoque)</label>
+      <label class="chk"><input type="checkbox" id="fotosNet" checked> Buscar na internet a foto da embalagem dos produtos sem foto (pelo código de barras do gestor)</label>
       <label class="chk"><input type="checkbox" id="soMudou" checked> Enviar só o que mudou (bem mais rápido)</label>
       <div style="margin-top:14px"><button class="btn btn-vd" id="btnPublicar" onclick="publicar()">✅ Colocar no site</button></div>
       <div class="barra" id="barra"><i id="barraI"></i></div>
@@ -552,6 +553,7 @@ function lerArquivo(f){
       preco: Math.round(num(p.price ?? p.preco ?? p.precoVenda)*100)/100,
       tipo_venda: (p.saleType||p.tipo_venda)==='peso' ? 'peso' : 'unidade',
       estoque: Math.round(num(p.stock ?? p.estoque)*1000)/1000,
+      ean: String(p.barcode||p.codigoBarras||p.codigo_barras||p.ean||p.gtin||'').replace(/\D/g,''),
       fotoOriginal: p.photoBase64 || p.foto || null,
       fotoPronta: !!p.foto && !p.photoBase64
     })).filter(p=> p.nome && p.preco>0 && !vistos.has(p.id) && vistos.add(p.id));
@@ -597,6 +599,32 @@ function fotoPequena(src){
   });
 }
 
+/* Foto da embalagem pelo código de barras (Open Food Facts, banco aberto e grátis). Guarda o resultado para não buscar de novo. */
+const OFF_ORIGEM = 'https://images.openfoodfacts.org/';
+async function buscarFotosNet(lista){
+  let cache = {}; try{ cache = JSON.parse(localStorage.getItem('pc_adm_off')||'{}')||{}; }catch(e){}
+  const eanOk = e => /^\d{8,14}$/.test(e) && !/^0+$/.test(e);
+  const faltam = lista.filter(p=>!p.fotoOriginal && eanOk(p.ean));
+  const novos = faltam.filter(p=>!(p.ean in cache));
+  let feitos = 0, achou = 0;
+  for(const p of novos){
+    msg('msgPub','in','📷 Procurando fotos das embalagens na internet: '+(++feitos)+' de '+novos.length+'... (só demora assim na primeira vez)');
+    try{
+      const r = await fetch('https://world.openfoodfacts.org/api/v2/product/'+p.ean+'.json?fields=image_front_url,image_front_small_url,image_url');
+      if(r.status===429){ await new Promise(ok=>setTimeout(ok,20000)); feitos--; novos.push(p); continue; }
+      const j = r.ok ? await r.json() : null;
+      const pr = j && j.status===1 && j.product || {};
+      const u = pr.image_front_url || pr.image_url || pr.image_front_small_url || '';
+      cache[p.ean] = String(u).startsWith(OFF_ORIGEM) ? u : '';
+    }catch(e){ /* sem internet para esse: tenta de novo na próxima vez */ }
+    if(feitos%20===0) try{ localStorage.setItem('pc_adm_off', JSON.stringify(cache)); }catch(e){}
+    await new Promise(ok=>setTimeout(ok,650));
+  }
+  try{ localStorage.setItem('pc_adm_off', JSON.stringify(cache)); }catch(e){}
+  for(const p of faltam){ if(cache[p.ean]){ p.fotoOriginal = cache[p.ean]; p.fotoPronta = true; achou++; } }
+  return achou;
+}
+
 async function publicar(){
   if(!ITENS.length) return;
   const c = lerCondicoes();
@@ -609,6 +637,8 @@ async function publicar(){
   const btn = $('btnPublicar'); btn.disabled = true;
   $('barra').style.display='block'; $('barraI').style.width='3%';
   try{
+    let fotosAchadas = 0;
+    if($('fotosNet').checked) fotosAchadas = await buscarFotosNet(lista);
     msg('msgPub','in','Enviando... não feche esta página.');
     await manterAvisos(c);
     const r1 = await rpc('mercado_publicar_config',{p_slug:LOJA,p_codigo:codigo,p_config:c,p_ids:lista.map(p=>p.id)});
@@ -641,7 +671,7 @@ async function publicar(){
       msg('msgPub','in','Enviando '+feito+' de '+enviar.length+'... não feche esta página.');
     }
     const pulados = ruins.map(p=>p.nome).concat(falhos);
-    msg('msgPub', pulados.length?'in':'ok', '✅ Pronto! O site tem '+(lista.length-falhos.length)+' produto(s). Enviados agora: '+(enviar.length-falhos.length)+'. <a href="../?v='+Date.now()+'" target="_blank" rel="noopener">Ver o site</a>'+
+    msg('msgPub', pulados.length?'in':'ok', '✅ Pronto! O site tem '+(lista.length-falhos.length)+' produto(s). Enviados agora: '+(enviar.length-falhos.length)+'. '+(fotosAchadas?'📷 '+fotosAchadas+' produto(s) ganharam foto da embalagem. ':'')+'<a href="../?v='+Date.now()+'" target="_blank" rel="noopener">Ver o site</a>'+
       (pulados.length ? '<br><br>⚠️ <b>'+pulados.length+' produto(s) ficaram de fora</b> porque o preço ou o estoque no gestor está com um número estranho (muito grande, talvez o código de barras foi digitado no lugar). Corrija no gestor e envie de novo:<br>• '+pulados.slice(0,30).map(esc).join('<br>• ')+(pulados.length>30?'<br>• e mais '+(pulados.length-30)+'...':'') : ''));
     SITE = null; compararSite();
     carregarLoja();

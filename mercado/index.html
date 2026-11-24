@@ -639,7 +639,7 @@ async function carregarFotos(){
     const lote = ids.slice(i,i+30).map(x=>'"'+String(x).replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"').join(',');
     try{
       const r = await sb('mercado_produtos?slug=eq.'+LOJA+'&foto=not.is.null&id=in.('+encodeURIComponent(lote)+')&select=id,foto');
-      r.forEach(x=>{ if(x.foto && String(x.foto).startsWith('data:image')){ FOTOS[x.id]=x.foto;
+      r.forEach(x=>{ if(x.foto && (String(x.foto).startsWith('data:image') || String(x.foto).startsWith('https://images.openfoodfacts.org/'))){ FOTOS[x.id]=x.foto;
         document.querySelectorAll('[data-foto="'+CSS.escape(x.id)+'"]').forEach(el=>{ el.innerHTML = fotoHTML(PRODUTOS.find(p=>p.id===x.id)); }); } });
     }catch(e){ console.warn('fotos', e); }
   }
@@ -699,7 +699,7 @@ function desenharDeps(){
 function fotoHTML(p){
   const sem = Number(p.estoque)<=0;
   let h;
-  if(FOTOS[p.id]) h = '<img alt="'+esc(p.nome)+'" loading="lazy" src="'+FOTOS[p.id]+'">';
+  if(FOTOS[p.id]) h = '<img class="real" alt="'+esc(p.nome)+'" loading="lazy" src="'+esc(FOTOS[p.id])+'" onerror="fotoFalhou('+jsq(p.id)+')">';
   else h = ilustra(p);
   if(sem) h += '<span class="tag esg">Esgotado</span>';
   else if(isPeso(p)) h += '<span class="tag">Por kg</span>';
@@ -728,6 +728,7 @@ function fundoProduto(p){
   if(/p[aã]o|bolo|rosca|queijo|presunto|mortadela|frios|salame|padaria|biscoito/.test(t)) return 'img/loja-balcao-p.webp';
   return 'img/loja-mercearia-p.webp';
 }
+function fotoFalhou(id){ delete FOTOS[id]; document.querySelectorAll('[data-foto="'+CSS.escape(id)+'"]').forEach(el=>{ el.innerHTML = fotoHTML(PRODUTOS.find(p=>p.id===id)); }); }
 function ilustra(p){
   return '<span class="ilu"><img src="'+fundoProduto(p)+'" alt="" loading="lazy" aria-hidden="true"><i>'+(DESENHOS[iconeProduto(p)]||iconeProduto(p))+'</i><small>Foto ilustrativa</small></span>';
 }
