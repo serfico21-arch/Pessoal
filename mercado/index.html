@@ -72,7 +72,21 @@ img{display:block;max-width:100%}
 .busca-l{padding-bottom:12px}
 .busca{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--linha);border-radius:16px;padding:0 14px;height:50px;transition:border-color .2s,box-shadow .2s}
 .busca:focus-within{border-color:var(--ouro);box-shadow:0 0 0 4px rgba(238,214,0,.18)}
-.busca-l{display:flex;gap:8px;align-items:center}
+.busca-l{display:flex;gap:8px;align-items:center;position:relative}
+.sugest{position:absolute;left:16px;right:16px;top:calc(100% - 4px);background:#fff;border:1px solid var(--linha);border-radius:16px;box-shadow:0 18px 40px -12px rgba(20,24,80,.35);max-height:min(62vh,520px);overflow-y:auto;z-index:40;padding:6px}
+.sugest .sg{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:12px;cursor:pointer}
+.sugest .sg:active,.sugest .sg:hover{background:var(--creme2)}
+.sugest .sg .e{flex:none;width:42px;height:42px;border-radius:50%;background:var(--creme2);display:grid;place-items:center;font-size:24px;overflow:hidden}
+.sugest .sg .e svg{width:32px;height:32px}
+.sugest .sg .e img{width:100%;height:100%;object-fit:cover}
+.sugest .sg .t{flex:1;min-width:0;font-size:16px;line-height:1.25;color:var(--tinta,#1b1b2f)}
+.sugest .sg .t b{color:var(--verde)}
+.sugest .sg .t small{display:block;font-size:15px;font-weight:800;color:var(--verde);margin-top:2px}
+.sugest .sg .ad{flex:none;width:42px;height:42px;border-radius:50%;border:0;background:var(--verde);color:#fff;display:grid;place-items:center}
+.sugest .sg .ad svg{width:20px;height:20px}
+.sugest .sg .ad.ja{background:var(--ouro);color:var(--verde);font-weight:800;font-size:15px}
+.sugest .todos{display:block;width:100%;border:0;background:var(--folha,#eef0fb);color:var(--verde);font-weight:800;font-size:16px;padding:13px;border-radius:12px;margin-top:4px}
+.sugest .nada{padding:14px 10px;color:var(--suave);font-size:16px}
 .busca{flex:1;min-width:0;padding:0 6px 0 16px}
 .busca .lupa{flex:none;width:40px;height:40px;border:0;border-radius:12px;background:var(--verde);color:#fff;display:grid;place-items:center;cursor:pointer}
 .busca .lupa svg{width:20px;height:20px}
@@ -395,6 +409,7 @@ img{display:block;max-width:100%}
     <input id="busca" type="search" placeholder="O que você procura hoje?" autocomplete="off" enterkeyhint="search" aria-label="Buscar produto">
     <button type="button" class="lupa" onclick="irBusca()" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
   </div>
+  <div class="sugest" id="sugest" hidden></div>
   <button type="button" class="sac-busca" id="sacBusca" onclick="abrirCarrinho()" hidden aria-label="Ver minha sacola"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span><b id="sacBuscaN">0</b><small id="sacBuscaT">R$ 0,00</small></span></button>
   </div>
   </header>
@@ -696,7 +711,7 @@ const ICONES = [
   [/sab[aã]o|detergente|amaciante|desinfetante|[aá]gua sanit|limpa|esponja|cloro/,'🧴'],[/papel higi|guardanapo|papel toalha/,'🧻'],[/absorvente|intimus|always|sempre livre/,'🌸'],[/achocolatado|nescau|toddy/,'🍫'],[/energ|monster|furioso|red ?bull/,'⚡'],[/gelatina/,'🍮'],[/amendoim|pacoc/,'🥜'],[/copo/,'🥤'],[/lampada/,'💡'],[/fermento/,'🧁'],[/azeitona/,'🫒'],[/[aá]lcool/,'🧴'],
   [/\barroz/,'🍚'],[/feij[aã]o/,'🫘'],[/azeite/,'🫒'],[/[oó]leo/,'OLEO'],[/a[cç][uú]car/,'ACUCAR'],[/\bsal\b|tempero|alho|cebola/,'🧄'],[/caf[eé]/,'☕'],
   [/leite|iogurte|bebida l[aá]ctea/,'🥛'],[/queijo|mussarela|requeij/,'🧀'],[/presunto|mortadela|salame|frios|apresuntado/,'🥓'],
-  [/p[aã]o|bisnag|baguete|torrada|bolo|rosca/,'🍞'],[/biscoito|bolacha|wafer|cookie/,'🍪'],[/macarr[aã]o|espaguete|massa|miojo|lamen/,'🍝'],
+  [/\bp[aã]o|bisnag|baguete|torrada|bolo|rosca/,'🍞'],[/biscoito|bolacha|wafer|cookie/,'🍪'],[/macarr[aã]o|espaguete|massa|miojo|lamen/,'🍝'],
   [/farinha|fub[aá]|aveia|polvilho|trigo/,'🌾'],[/\bovos?\b/,'🥚'],[/frango|coxa|asa|peito/,'🍗'],[/carne|bife|contrafil|picanha|alcatra|costela|patinho|ac[eé]m|cox[aã]o|maminha|fraldinha|lingui[cç]a|salsicha|hamb[uú]rg/,'🥩'],[/peixe|sardinha|atum/,'🐟'],
   [/cerveja/,'🍺'],[/vinho/,'🍷'],[/refri|coca|guaran|soda|suco|[aá]gua|energ[eé]tico|ch[aá] gelado/,'🥤'],
   [/chocolate|bombom|doce|bala|chiclete|pirulito/,'🍫'],[/sorvete|picol[eé]/,'🍦'],[/banana/,'🍌'],[/laranja|tangerina|mexerica/,'🍊'],[/lim[aã]o/,'🍋'],[/uva/,'🍇'],[/abacaxi/,'🍍'],[/melancia/,'🍉'],[/ma[cç][aã]|fruta|mam[aã]o|pera/,'🍎'],
@@ -728,6 +743,33 @@ function cartaoProduto(p){
 }
 
 let verTudo = false;
+/* Busca: cada palavra digitada tem que ser o começo de alguma palavra do produto (funciona já na 1ª letra) */
+function buscar(lista, termo){
+  const pal = norm(termo).trim().split(/\s+/).filter(Boolean); if(!pal.length) return lista;
+  const pals = p => p._pals || (p._pals = norm(p.nome+' '+(p.marca||'')+' '+deptoDe(p).n).split(/[^a-z0-9]+/).filter(Boolean));
+  const ok = lista.filter(p=>{ const ws = pals(p); return pal.every(w=>ws.some(x=>x.startsWith(w))); });
+  const nota = p => norm(p.nome).startsWith(pal[0]) ? 0 : 1;
+  return ok.sort((a,b)=> nota(a)-nota(b) || a.nome.localeCompare(b.nome,'pt-BR'));
+}
+function desenharSugest(){
+  const el = document.getElementById('sugest'), v = document.getElementById('busca').value;
+  if(!v.trim() || !PRODUTOS.length){ el.hidden = true; return; }
+  const achados = buscar(PRODUTOS.filter(p=>Number(p.estoque)>0), v);
+  const pal = norm(v).trim().split(/\s+/)[0];
+  const marca = n => { const i = norm(n).indexOf(pal); return i<0 ? esc(n) : esc(n.slice(0,i))+'<b>'+esc(n.slice(i,i+pal.length))+'</b>'+esc(n.slice(i+pal.length)); };
+  el.innerHTML = !achados.length ? '<div class="nada">Nada com "'+esc(v)+'". Tente outro nome.</div>' :
+    achados.slice(0,8).map(p=>{ const q = carrinho[p.id]||0;
+      return '<div class="sg" onclick="escolherSugest('+jsq(p.id)+')"><span class="e">'+(FOTOS[p.id]?'<img alt="" src="'+FOTOS[p.id]+'">':(DESENHOS[iconeProduto(p)]||iconeProduto(p)))+'</span>'+
+        '<span class="t">'+marca(p.nome)+'<small>'+brl(p.preco)+(isPeso(p)?' /kg':'')+'</small></span>'+
+        '<button class="ad'+(q?' ja':'')+'" aria-label="Colocar na sacola" onclick="event.stopPropagation();mudar('+jsq(p.id)+',1);desenharSugest()">'+(q?fmtQtd(p,q):ICON_MAIS)+'</button></div>'; }).join('')+
+    (achados.length>8 ? '<button class="todos" onclick="fecharSugest(true)">Ver todos os '+achados.length+' resultados</button>' : '');
+  el.hidden = false;
+}
+function fecharSugest(rolar){ document.getElementById('sugest').hidden = true; if(rolar){ document.getElementById('busca').blur(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'}); } }
+function escolherSugest(id){
+  const p = PRODUTOS.find(x=>x.id===id); if(!p) return;
+  document.getElementById('busca').value = p.nome; LIMITE=48; desenharLista(); fecharSugest(true);
+}
 function verTodos(){ verTudo = true; LIMITE = 48; desenharLista(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'}); }
 function voltarInicio(){ verTudo = false; categoria = 'Todos'; document.getElementById('busca').value=''; desenharDeps(); desenharLista(); }
 function desenharLista(){
@@ -737,10 +779,7 @@ function desenharLista(){
   const inicio = !termo && categoria==='Todos' && !verTudo;
   let lista = vis.filter(p=> categoria==='Todos' || deptoDe(p).n===categoria);
   if(termo){
-    const pal = termo.split(/\s+/).filter(Boolean);
-    lista = lista.filter(p=>{ const t = norm(p.nome+' '+(p.marca||'')+' '+deptoDe(p).n); return pal.every(w=>t.includes(w)); });
-    const comeca = p => norm(p.nome).startsWith(pal[0]) ? 0 : 1;
-    lista.sort((a,b)=> comeca(a)-comeca(b) || a.nome.localeCompare(b.nome,'pt-BR'));
+    lista = buscar(lista, termo);
   } else lista.sort((a,b)=> a.nome.localeCompare(b.nome,'pt-BR'));
   if(inicio){
     const esc1 = [];
@@ -778,13 +817,13 @@ function mudar(id, dir){
   if(q<=0) delete carrinho[id]; else carrinho[id]=q;
   const aberta = document.getElementById('tela').classList.contains('on');
   if(dir>0 && q>0 && !aberta && carrinho[id]===passo(p)){
-    toast('✓ Na sacola: '+p.nome); const sb=document.getElementById('sacBusca'); sb.classList.remove('pulo'); void sb.offsetWidth; sb.classList.add('pulo');
+    if(document.getElementById('sugest').hidden) toast('✓ Na sacola: '+p.nome); const sb=document.getElementById('sacBusca'); sb.classList.remove('pulo'); void sb.offsetWidth; sb.classList.add('pulo');
     const s = document.getElementById('btnSacola'); s.classList.remove('pula'); void s.offsetWidth; s.classList.add('pula');
   }
   salvarLocal(); redesenharCartao(id); atualizarBarra();
   if(aberta) desenharCarrinho();
 }
-function irBusca(){ const b=document.getElementById('busca'); if(!b.value.trim()){ b.focus(); return; } b.blur(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'}); }
+function irBusca(){ const b=document.getElementById('busca'); if(!b.value.trim()){ b.focus(); return; } fecharSugest(true); }
 function toast(t){ const d=document.getElementById('toast'); try{ const bl=document.querySelector('.busca-l').getBoundingClientRect(); d.style.top=Math.max(8,bl.bottom+6)+'px'; }catch(e){} d.textContent=t; d.style.display='block'; clearTimeout(d._t); d._t=setTimeout(()=>d.style.display='none',2200); }
 
 function itensCarrinho(){ return Object.entries(carrinho).map(([id,q])=>({p:PRODUTOS.find(x=>x.id===id),q})).filter(x=>x.p); }
@@ -1049,7 +1088,10 @@ function fecharBarraApp(sempre){
 })();
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(()=>{});
 
-document.getElementById('busca').addEventListener('input', ()=>{ LIMITE=48; if(categoria!=='Todos'){ categoria='Todos'; desenharDeps(); } desenharLista(); });
+document.getElementById('busca').addEventListener('input', ()=>{ LIMITE=48; if(categoria!=='Todos'){ categoria='Todos'; desenharDeps(); } desenharLista(); desenharSugest(); });
+document.getElementById('busca').addEventListener('focus', desenharSugest);
+document.getElementById('busca').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); fecharSugest(true); } if(e.key==='Escape') fecharSugest(); });
+document.addEventListener('click', e=>{ if(!e.target.closest('.busca-l')) fecharSugest(); });
 document.getElementById('busca').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.target.blur(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'}); } });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ fecharCarrinho(); document.getElementById('modalApp').classList.remove('on'); } });
 /* ===== Meus pedidos: o cliente acompanha e pode cancelar (o cancelamento aparece na Central) ===== */
