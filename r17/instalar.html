@@ -11,7 +11,7 @@ button:disabled{opacity:.4;cursor:default}label{display:block;font-weight:700;ma
 <li>Pronto. Volte aqui e me avise.</li></ol>
 <p><button id="b">Copiar comando</button><span id="ok"></span></p>
 <p style="color:#AB9C8B;margin-top:30px">Para ligar o e-mail de recuperação, use a <a href="email.html">página do e-mail</a>.</p>
-<script type="text/plain" id="sql">-- R-17: "Serviço concluído" entra no caixa no DIA EM QUE FOI RECEBIDO (antes contava no dia marcado)
+<script type="text/plain" id="sql">-- R-17 (v32): "EXECUTADO" entra no caixa no DIA DO ATENDIMENTO (data da agenda), mesmo se marcado depois
 alter table public.agenda add column if not exists recebido_em timestamptz;
 update public.agenda set recebido_em = case when data > (now() at time zone 'America/Sao_Paulo')::date then now() else data::timestamp at time zone 'America/Sao_Paulo' end
   where recebido and recebido_em is null;
@@ -30,12 +30,11 @@ language plpgsql security definer set search_path = '' stable as $$
 declare l text := public._sessao(p_token);
 begin
   return jsonb_build_object(
-    'entradas', coalesce((select jsonb_agg(jsonb_build_object('data',x.dia,'marcado',x.data,'hora',to_char(x.hora,'HH24:MI'),'servico',x.servico,'barbeiro',x.barbeiro,
-        'nome',x.nome,'valor',coalesce(x.valor,x.preco),'preco',x.preco,'vip',x.vip) order by x.dia, x.hora)
-      from (select a.*, coalesce((a.recebido_em at time zone 'America/Sao_Paulo')::date, a.data) as dia, coalesce(c.vip,false) as vip
+    'entradas', coalesce((select jsonb_agg(jsonb_build_object('data',x.data,'marcado',x.data,'recebido_em',x.recebido_em,'hora',to_char(x.hora,'HH24:MI'),'servico',x.servico,'barbeiro',x.barbeiro,
+        'nome',x.nome,'valor',coalesce(x.valor,x.preco),'preco',x.preco,'vip',x.vip) order by x.data, x.hora)
+      from (select a.*, coalesce(c.vip,false) as vip
             from public.agenda a left join public.clientes c on c.id = a.cliente_id
-            where a.loja_id = l and a.recebido) x
-      where x.dia between p_de and p_ate), '[]'::jsonb),
+            where a.loja_id = l and a.recebido and a.data between p_de and p_ate) x), '[]'::jsonb),
     'saidas', coalesce((select jsonb_agg(jsonb_build_object('id',s.id,'data',s.data,'descricao',s.descricao,'valor',s.valor,'barbeiro',s.barbeiro) order by s.data, s.criado)
       from public.saidas s where s.loja_id = l and s.data between p_de and p_ate), '[]'::jsonb));
 end $$;

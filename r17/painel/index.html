@@ -1724,7 +1724,7 @@ async function acaoAgenda(e){
       const inp=row.querySelector("[data-valor]"), v = inp ? Number(String(inp.value).replace(",",".")) : vlr(a);
       if(act==="receber" && (inp.value==="" || isNaN(v) || v<0)){ alertaAdm("Digite o valor cobrado."); return; }
       btn.disabled=true; await adm("adm_receber",{p_id:a.id,p_valor:v,p_recebido:act==="receber"});
-      await ouvirAdm(); alertaAdm(act==="receber" ? `✅ ${brl(v)} de ${a.nome} já está no caixa de hoje (${nomeCurto(BARBEIROS.find(b=>b.id===a.barbeiro)||{nome:"barbearia"})}).` : "Recebimento desfeito."); return;
+      await ouvirAdm(); alertaAdm(act==="receber" ? `✅ ${brl(v)} de ${a.nome} foi para o caixa do dia ${fmtCurta(a.data)} (${nomeCurto(BARBEIROS.find(b=>b.id===a.barbeiro)||{nome:"barbearia"})}).` : "Recebimento desfeito."); return;
     }
     if(act==="cancelar"){ btn.textContent="Toque de novo para apagar"; btn.dataset.act="cancelar2"; btn.classList.add("btn-red"); return; }
     if(act==="cancelar2"){ btn.disabled=true; await adm("adm_apagar",{p_id:a.id}); await ouvirAdm(); if(a.data===$("data").value) ouvirDia(); return; }
@@ -2192,7 +2192,7 @@ const ehApp = matchMedia("(display-mode: standalone)").matches || navigator.stan
 if(ehApp){ const ab=$("abertura"); ab.querySelector(".ab-logo").innerHTML=document.querySelector(".herologo").outerHTML.replace('class="herologo"','');
   ab.classList.add("on"); setTimeout(()=>{ ab.classList.add("sai"); setTimeout(()=>ab.remove(),550); },1800); }
 /* versão do site: muda a cada atualização. O app confere sozinho e atualiza. */
-const VERSAO="31";
+const VERSAO="32";
 function atualizarAgora(){ const u=new URL(location.href); u.searchParams.set("v",Date.now()); u.searchParams.delete("parar"); location.replace(u.href); }
 $("novaVersao").addEventListener("click",atualizarAgora);
 async function conferirVersao(){
