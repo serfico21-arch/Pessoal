@@ -624,21 +624,27 @@ async function buscarFotosNet(lista){
   for(const p of faltam){ if(cache[p.ean]){ p.fotoOriginal = cache[p.ean]; p.fotoPronta = true; achou++; } }
   /* Sem código ou não achado: foto de um produto parecido (mesmo tipo), marcada como ilustrativa na loja */
   const resto = lista.filter(p=>!p.fotoOriginal && !(SITE && SITE[p.id])); // só produto novo: o que já está no site mantém a foto
-  const chave = p => { const w = String(p.nome).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z ]/g,' ').split(/\s+/).filter(x=>x.length>2 && !/^(kg|ml|und?|unidades?|pct|pacote|com|sem|tipo|de|da|do)$/.test(x)); const k = w.slice(0,2).join(' '); return k==='feijao' ? 'feijao carioca' : k==='oleo' ? 'oleo soja' : k; };
-  const tipos = [...new Set(resto.map(chave).filter(Boolean))].filter(k=>!(('n:'+k) in cache));
+  const PARA = /^(kg|ml|lt|und?|unid|unidades?|pct|pacote|com|sem|tipo|de|da|do|das|dos|em)$/;
+  const semAc = t => String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  const palavras = t => String(t||'').toLowerCase().split(/[^0-9a-zà-ÿ]+/).filter(x=>x && x.length>1 && !PARA.test(semAc(x)) && !/^\d+[a-z]*$/.test(semAc(x)));
+  const chave = p => { let w = palavras(p.nome).slice(0,3).map(semAc); if(w.length===1 && w[0]==='feijao') w=['feijao','carioca']; if(w.length===1 && w[0]==='oleo') w=['oleo','soja']; return w.join(' '); };
+  const consulta = {}; resto.forEach(p=>{ const k=chave(p); if(k && !consulta[k]) consulta[k] = palavras(p.nome).slice(0,3).join(' ') || k; });
+  const tipos = Object.keys(consulta).filter(k=>!(('n:'+k) in cache));
   let n = 0;
   for(const k of tipos){
-    msg('msgPub','in','📷 Procurando foto parecida para os produtos sem código de barras: '+(++n)+' de '+tipos.length+'... (só demora na primeira vez)');
+    msg('msgPub','in','📷 Procurando foto para os produtos novos sem código de barras: '+(++n)+' de '+tipos.length+'...');
+    const tk = k.split(' '), precisa = Math.min(2, tk.length);
     const tenta = async q => { const r = await fetch('https://search.openfoodfacts.org/search?q='+encodeURIComponent(q)+'&page_size=12&fields=product_name,brands,code,image_front_url,image_front_small_url,countries_tags');
       if(!r.ok) throw new Error(String(r.status)); const j = await r.json();
-      const pal = q.split(' '), precisa = Math.min(2, pal.length);
       const a = (j.hits||[]).find(x=>{ const img = String(x.image_front_url||x.image_front_small_url||''); if(!img.startsWith(OFF_ORIGEM)) return false;
         const br = /^(789|790)/.test(String(x.code||'')) || (x.countries_tags||[]).some(c=>/brazil/.test(c)); if(!br) return false;
-        const t = String((x.product_name||'')+' '+(x.brands||[]).join(' ')).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-        return pal.slice(0,2).filter(w=>t.includes(w)).length >= precisa; });
+        const nome = palavras(x.product_name).map(semAc), marca = palavras((x.brands||[]).join(' ').replace(/xx:/g,'')).map(semAc), tudo = new Set(nome.concat(marca));
+        const m = tk.slice(0,2).filter(w=>tudo.has(w)).length, sobra = nome.filter(w=>!tk.includes(w) && !marca.includes(w)).length;
+        return m >= precisa || (m >= 1 && !sobra); });
       return a ? (a.image_front_url||a.image_front_small_url) : ''; };
     try{
-      let u = await tenta(k);
+      let u = await tenta(consulta[k]);
+      if(!u && tk.length>2){ await new Promise(ok=>setTimeout(ok,1500)); u = await tenta(consulta[k].split(' ').slice(0,2).join(' ')); }
       cache['n:'+k] = u;
     }catch(e){ if(String(e.message)==='429') await new Promise(ok=>setTimeout(ok,60000)); }
     if(n%5===0) try{ localStorage.setItem('pc_adm_off', JSON.stringify(cache)); }catch(e){}
