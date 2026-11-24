@@ -583,6 +583,7 @@ details.mais[open] summary{margin-bottom:10px}details.mais[open] summary i{trans
 .destaque.dz-capt .dz-ic{background:linear-gradient(135deg,var(--em),var(--cy))}.destaque.dz-capt .dz-go{background:var(--em)}.destaque.dz-capt .dz-tag{color:var(--em)}
 /* Compartilhar nas redes */
 button.destaque{width:100%;font:inherit;text-align:left;cursor:pointer}
+.dz-ver{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 0 14px;padding:10px;font-weight:700;font-size:15px;color:var(--em);text-decoration:none}
 .destaque.dz-share{border-color:color-mix(in srgb,var(--sk) 55%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--sk) 20%,var(--card)),var(--card) 75%)}
 .destaque.dz-share .dz-ic{background:linear-gradient(135deg,var(--sk),var(--brand))}.destaque.dz-share .dz-go{background:var(--sk)}.destaque.dz-share .dz-tag{color:var(--sk)}
 .sh-passo{margin:14px 0 6px;font-weight:700;font-size:15px}
@@ -1281,13 +1282,14 @@ var FERRAMENTAS = [
     html += '<a class="wa-btn" href="' + (mobWa ? 'whatsapp://send' : 'https://web.whatsapp.com') + '"' + (mobWa ? '' : ' target="_blank" rel="noopener"') + '><span class="wa-ic"><i class="ti ti-brand-whatsapp"></i></span><span class="wa-tx"><h2>WhatsApp Business</h2><p>Abrir conversas e clientes agora</p></span><span class="wa-go"><span>Abrir</span><i class="ti ti-arrow-right"></i></span></a>';
     html += '<button type="button" class="destaque" data-go="paineis" style="width:100%;text-align:left;font:inherit;cursor:pointer"><span class="dz-ic"><i class="ti ti-world"></i></span><span class="dz-tx"><span class="dz-tag">Meus sites</span><h2>Painéis ADM</h2>' +
       '<p>Igreja OBPC e site FCosta: mexer nos dois sem abrir os sites</p></span><span class="dz-go"><span>Abrir</span><i class="ti ti-arrow-right"></i></span></button>';
-    /* Captação em destaque: abre a página pública "Anuncie seu imóvel" */
-    html += '<a class="destaque dz-capt" href="captacao-fcosta.html"><span class="dz-ic"><i class="ti ti-home-plus"></i></span><span class="dz-tx"><span class="dz-tag">Em destaque</span><h2>Captação de imóveis</h2>' +
-      '<p>Página onde o dono manda os dados e as fotos do imóvel pelo WhatsApp</p></span>' +
-      '<span class="dz-go"><span>Abrir</span><i class="ti ti-arrow-right"></i></span></a>';
+    /* Captação em destaque: manda o link "Anuncie seu imóvel" para o cliente (abre a janela de compartilhar já na captação) */
+    html += '<button type="button" class="destaque dz-capt" data-open="compartilhar" data-sh-pg="0"><span class="dz-ic"><i class="ti ti-home-plus"></i></span><span class="dz-tx"><span class="dz-tag">Captação de imóveis</span><h2>Mandar para o cliente</h2>' +
+      '<p>O cliente preenche, tira as fotos e devolve tudo para você no WhatsApp</p></span>' +
+      '<span class="dz-go"><span>Mandar</span><i class="ti ti-send"></i></span></button>' +
+      '<a class="dz-ver" href="captacao-fcosta.html"><i class="ti ti-eye"></i>Ver a página como o cliente vê</a>';
     /* Compartilhar em destaque: abre a janela com WhatsApp, Facebook, Instagram e outros */
     html += '<button type="button" class="destaque dz-share" data-open="compartilhar"><span class="dz-ic"><i class="ti ti-share"></i></span><span class="dz-tx"><span class="dz-tag">Em destaque</span><h2>Compartilhar nas redes</h2>' +
-      '<p>Mande o link “Anuncie seu imóvel” no WhatsApp, Facebook, Instagram e outros sites</p></span>' +
+      '<p>Mande a captação, seus imóveis à venda ou o site no WhatsApp, Facebook, Instagram e outros</p></span>' +
       '<span class="dz-go"><span>Compartilhar</span><i class="ti ti-arrow-right"></i></span></button>';
     var pdv = pubResumo();
     html += '<a class="destaque" href="divulgacao.html"><span class="dz-ic"><i class="ti ti-speakerphone"></i></span><span class="dz-tx"><span class="dz-tag">Em destaque</span><h2>Central do Publicador</h2>' +
@@ -2907,6 +2909,12 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   }).join('');
   function escolher(i) { atual = i; texto.value = PAGINAS_SHARE[i].m; aviso.textContent = ''; }
   escolher(0);
+  /* Botão com data-sh-pg: já abre na página certa (ex.: Captação) */
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-open="compartilhar"]'); if (!b) return;
+    var i = +(b.getAttribute('data-sh-pg') || 0), r = caixa.querySelector('input[value="' + i + '"]');
+    if (r) r.checked = true; escolher(i);
+  }, true);
   caixa.addEventListener('change', function (e) { if (e.target.name === 'sh-pg') escolher(+e.target.value); });
   if (navigator.share) dlg.querySelector('.sh-mais').hidden = false;
   function copiar(t, ok) {
