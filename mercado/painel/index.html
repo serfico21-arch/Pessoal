@@ -222,7 +222,7 @@ h2{font-family:var(--serif);font-size:21px;font-weight:800;margin-bottom:6px}
       <div class="desc" style="margin:0;font-weight:700;color:var(--verde)">Comparado com o site agora:</div>
       <div class="mud"><div class="n"><b id="mNovo">–</b>novos</div><div class="p"><b id="mMud">–</b>mudaram</div><div class="r"><b id="mSai">–</b>vão sair</div><div><b id="mIgual">–</b>iguais</div></div>
       <div class="lista" id="rLista"></div>
-      <label class="chk"><input type="checkbox" id="semEstoque" checked onchange="compararSite()"> Mostrar no site os produtos sem estoque (aparecem como "Esgotado")</label>
+      <label class="chk"><input type="checkbox" id="semEstoque" checked onchange="compararSite()"> Mandar também os produtos sem estoque (ficam escondidos na loja e aparecem sozinhos quando tiver estoque)</label>
       <label class="chk"><input type="checkbox" id="soMudou" checked> Enviar só o que mudou (bem mais rápido)</label>
       <div style="margin-top:14px"><button class="btn btn-vd" id="btnPublicar" onclick="publicar()">✅ Colocar no site</button></div>
       <div class="barra" id="barra"><i id="barraI"></i></div>
@@ -345,6 +345,18 @@ async function rpc(fn, body){
   const r = await fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(!r.ok){ const t = await r.text().catch(()=> ''); throw new Error('HTTP '+r.status+' '+t.slice(0,160)); }
   return r.json();
+}
+/* Envia com até 3 tentativas se a internet piscar. Erro 400 (dado estranho) não adianta repetir: devolve {dado:true}. */
+async function rpcTentar(fn, body){
+  for(let t=1;;t++){
+    try{ return await rpc(fn, body); }
+    catch(e){
+      const m = String(e&&e.message);
+      if(/^HTTP 4\d\d/.test(m) && !/^HTTP 40[18]|^HTTP 429/.test(m)) return {dado:true, erro:m};
+      if(t>=3) throw e;
+      await new Promise(r=>setTimeout(r, 1500*t));
+    }
+  }
 }
 async function getTodos(path, lote){
   lote = lote || 1000; const out = [];
@@ -589,7 +601,10 @@ async function publicar(){
   if(!ITENS.length) return;
   const c = lerCondicoes();
   if(c.whatsapp.replace(/\D/g,'').length<10) c.whatsapp = '(11) 99350-9109'; // provisório até preencher
-  const lista = $('semEstoque').checked ? ITENS : ITENS.filter(p=>p.estoque>0);
+  const numRuim = p => !(Number(p.preco)>=0 && Number(p.preco)<1e7) || (p.estoque!=null && p.estoque!=='' && !(Math.abs(Number(p.estoque))<1e8));
+  const ruins = ITENS.filter(numRuim);
+  const lista = ($('semEstoque').checked ? ITENS : ITENS.filter(p=>p.estoque>0)).filter(p=>!numRuim(p));
+  const falhos = [];
   if(!lista.length){ msg('msgPub','er','Nenhum produto com estoque para colocar no site.'); return; }
   const btn = $('btnPublicar'); btn.disabled = true;
   $('barra').style.display='block'; $('barraI').style.width='3%';
@@ -613,19 +628,26 @@ async function publicar(){
           foto: manter ? '__MANTER__' : (p.fotoPronta?p.fotoOriginal:await fotoPequena(p.fotoOriginal))});
         hashes[p.id] = h;
       }
-      const r2 = await rpc('mercado_publicar_produtos',{p_slug:LOJA,p_codigo:codigo,p_produtos:lote});
+      let r2 = await rpcTentar('mercado_publicar_produtos',{p_slug:LOJA,p_codigo:codigo,p_produtos:lote});
+      if(r2 && r2.dado){
+        /* um produto com dado estranho estragou o lote: manda um por um e pula só o ruim */
+        for(const um of lote){ const r3 = await rpcTentar('mercado_publicar_produtos',{p_slug:LOJA,p_codigo:codigo,p_produtos:[um]}); if(!r3 || r3.dado || !r3.ok){ falhos.push(um.nome); delete hashes[um.id]; } }
+        r2 = {ok:true};
+      }
       if(!r2||!r2.ok) throw new Error('lote');
       try{ localStorage.setItem('pc_adm_fotos', JSON.stringify(hashes)); }catch(e){}
       const feito = Math.min(i+T,enviar.length);
       $('barraI').style.width = Math.round(feito/enviar.length*100)+'%';
       msg('msgPub','in','Enviando '+feito+' de '+enviar.length+'... não feche esta página.');
     }
-    msg('msgPub','ok','✅ Pronto! O site tem '+lista.length+' produto(s). Enviados agora: '+enviar.length+'. <a href="../?v='+Date.now()+'" target="_blank" rel="noopener">Ver o site</a>');
+    const pulados = ruins.map(p=>p.nome).concat(falhos);
+    msg('msgPub', pulados.length?'in':'ok', '✅ Pronto! O site tem '+(lista.length-falhos.length)+' produto(s). Enviados agora: '+(enviar.length-falhos.length)+'. <a href="../?v='+Date.now()+'" target="_blank" rel="noopener">Ver o site</a>'+
+      (pulados.length ? '<br><br>⚠️ <b>'+pulados.length+' produto(s) ficaram de fora</b> porque o preço ou o estoque no gestor está com um número estranho (muito grande, talvez o código de barras foi digitado no lugar). Corrija no gestor e envie de novo:<br>• '+pulados.slice(0,30).map(esc).join('<br>• ')+(pulados.length>30?'<br>• e mais '+(pulados.length-30)+'...':'') : ''));
     SITE = null; compararSite();
     carregarLoja();
   }catch(e){
     console.error(e);
-    msg('msgPub','er','A internet falhou no meio do envio. Toque em <b>Colocar no site</b> de novo.');
+    msg('msgPub','er', /Failed to fetch|NetworkError|Load failed/i.test(String(e&&e.message)) ? 'A internet falhou no meio do envio. Toque em <b>Colocar no site</b> de novo. O que já foi enviado fica salvo.' : 'Não consegui terminar o envio ('+esc(String(e&&e.message||'erro').slice(0,90))+'). Toque em <b>Colocar no site</b> de novo; o que já foi enviado fica salvo. Se repetir, me mande um print desta tela.');
   }finally{ btn.disabled = false; }
 }
 

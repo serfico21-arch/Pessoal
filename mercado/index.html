@@ -667,7 +667,8 @@ function cartaoProduto(p){
 
 function desenharLista(){
   const termo = norm(document.getElementById('busca').value);
-  let lista = PRODUTOS.filter(p=> categoria==='Todos' || (p.categoria||'').trim()===categoria);
+  /* Produto sem estoque não aparece para o cliente (evita mostrar o que o mercado não tem) */
+  let lista = PRODUTOS.filter(p=> Number(p.estoque)>0 && (categoria==='Todos' || (p.categoria||'').trim()===categoria));
   if(termo) lista = lista.filter(p=> norm(p.nome+' '+(p.marca||'')+' '+(p.categoria||'')).includes(termo));
   lista.sort((a,b)=> (Number(a.estoque)<=0) - (Number(b.estoque)<=0) || a.nome.localeCompare(b.nome,'pt-BR'));
   document.getElementById('tituloSec').textContent = termo ? 'Resultado da busca' : (categoria==='Todos'?'Produtos':categoria);
@@ -973,7 +974,15 @@ document.getElementById('busca').addEventListener('keydown', e=>{ if(e.key==='En
 document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ fecharCarrinho(); document.getElementById('modalApp').classList.remove('on'); } });
 /* ===== Meus pedidos: o cliente acompanha e pode cancelar (o cancelamento aparece na Central) ===== */
 const ST_CLI = {novo:'Recebido', confirmado:'Confirmado', saiu:'Saiu para entrega', entregue:'Entregue', cancelado:'Cancelado'};
-function meusPedidos(){ try{ return JSON.parse(localStorage.getItem('pc_meus_pedidos')||'[]')||[]; }catch(e){ return []; } }
+function meusPedidos(){
+  let l; try{ l = JSON.parse(localStorage.getItem('pc_meus_pedidos')||'[]')||[]; }catch(e){ return []; }
+  /* pedido entregue ou cancelado some sozinho depois de 2 dias */
+  const lim = Date.now() - 2*864e5, fim = x=> ['entregue','cancelado'].includes(x.status);
+  const f = l.filter(x=> !(fim(x) && new Date(x.criado).getTime() < lim));
+  if(f.length !== l.length) try{ localStorage.setItem('pc_meus_pedidos', JSON.stringify(f)); }catch(e){}
+  return f;
+}
+function apagarMeu(n){ const l = meusPedidos().filter(x=>x.numero!==n); salvarMeus(l); desenharMeus(); toast('Pedido apagado do seu celular.'); }
 function salvarMeus(l){ try{ localStorage.setItem('pc_meus_pedidos', JSON.stringify(l.slice(0,15))); }catch(e){} document.getElementById('btnMeus').hidden = !l.length; }
 function guardarMeuPedido(x){ salvarMeus([x, ...meusPedidos().filter(y=>y.numero!==x.numero)]); }
 let confirmando = null;
@@ -997,9 +1006,10 @@ function desenharMeus(){
       '<p>'+new Date(x.criado).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})+' · <b style="color:var(--verde)">'+brl(x.total)+'</b><br>'+esc((x.itens||[]).slice(0,4).join(', '))+((x.itens||[]).length>4?'…':'')+'</p>'+
       (pode ? '<div class="acoes2">'+(conf ? '<button onclick="confirmando=null;desenharMeus()">Não, manter</button><button class="cx sim" onclick="cancelarPedido('+Number(x.numero)+')">Sim, cancelar</button>'
                                           : '<button class="cx" onclick="confirmando='+Number(x.numero)+';desenharMeus()">Cancelar pedido</button>')+'</div>' : '')+
-      (x.status==='saiu' ? '<p>Já saiu para entrega. Para mudar algo, fale com a gente no WhatsApp.</p>' : '')+'</div>';
+      (x.status==='saiu' ? '<p>Já saiu para entrega. Para mudar algo, fale com a gente no WhatsApp.</p>' : '')+
+      (['entregue','cancelado'].includes(x.status) ? '<div class="acoes2"><button onclick="apagarMeu('+Number(x.numero)+')">🗑️ Apagar da lista</button></div>' : '')+'</div>';
   }).join('') : '<div class="vazio"><h3>Nenhum pedido ainda</h3><p>Os pedidos que você fizer neste celular aparecem aqui.</p></div>';
-  document.getElementById('pCorpo').innerHTML = '<div class="bloco" style="background:var(--folha);border:0"><b style="color:var(--verde)">Meus pedidos</b><div class="nota" style="margin-top:2px">Você pode cancelar enquanto o pedido não saiu para entrega.</div></div>'+h+
+  document.getElementById('pCorpo').innerHTML = '<div class="bloco" style="background:var(--folha);border:0"><b style="color:var(--verde)">Meus pedidos</b><div class="nota" style="margin-top:2px">Você pode cancelar enquanto o pedido não saiu para entrega. Pedidos entregues ou cancelados somem sozinhos depois de 2 dias, ou toque em Apagar.</div></div>'+h+
     '<p style="text-align:center"><button class="fechar" onclick="fecharCarrinho()">Voltar para a loja</button></p>';
 }
 async function cancelarPedido(n){
