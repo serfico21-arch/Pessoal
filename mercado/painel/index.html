@@ -622,6 +622,27 @@ async function buscarFotosNet(lista){
   }
   try{ localStorage.setItem('pc_adm_off', JSON.stringify(cache)); }catch(e){}
   for(const p of faltam){ if(cache[p.ean]){ p.fotoOriginal = cache[p.ean]; p.fotoPronta = true; achou++; } }
+  /* Sem código ou não achado: foto de um produto parecido (mesmo tipo), marcada como ilustrativa na loja */
+  const resto = lista.filter(p=>!p.fotoOriginal);
+  const chave = p => { const w = String(p.nome).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z ]/g,' ').split(/\s+/).filter(x=>x.length>2 && !/^(kg|ml|und?|unidades?|pct|pacote|com|sem|tipo|de|da|do)$/.test(x)); return w.slice(0,2).join(' '); };
+  const tipos = [...new Set(resto.map(chave).filter(Boolean))].filter(k=>!(('t:'+k) in cache));
+  let n = 0;
+  for(const k of tipos){
+    msg('msgPub','in','📷 Procurando foto parecida para os produtos sem código de barras: '+(++n)+' de '+tipos.length+'... (só demora assim na primeira vez)');
+    const tenta = async q => { const r = await fetch('https://world.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(q)+'&search_simple=1&action=process&json=1&page_size=8&fields=image_front_url,image_front_small_url&tagtype_0=countries&tag_contains_0=contains&tag_0=brazil');
+      if(r.status===429) throw new Error('429'); const j = r.ok ? await r.json() : {};
+      const a = (j.products||[]).find(x=>String(x.image_front_url||x.image_front_small_url||'').startsWith(OFF_ORIGEM));
+      return a ? (a.image_front_url||a.image_front_small_url) : ''; };
+    try{
+      let u = await tenta(k);
+      if(!u && k.includes(' ')){ await new Promise(ok=>setTimeout(ok,6500)); u = await tenta(k.split(' ')[0]); }
+      cache['t:'+k] = u;
+    }catch(e){ if(String(e.message)==='429') await new Promise(ok=>setTimeout(ok,60000)); }
+    if(n%5===0) try{ localStorage.setItem('pc_adm_off', JSON.stringify(cache)); }catch(e){}
+    await new Promise(ok=>setTimeout(ok,6500)); // o banco aceita 10 buscas por minuto
+  }
+  try{ localStorage.setItem('pc_adm_off', JSON.stringify(cache)); }catch(e){}
+  for(const p of resto){ const u = cache['t:'+chave(p)]; if(u){ p.fotoOriginal = u+'#ilustrativa'; p.fotoPronta = true; achou++; } }
   return achou;
 }
 
@@ -671,7 +692,7 @@ async function publicar(){
       msg('msgPub','in','Enviando '+feito+' de '+enviar.length+'... não feche esta página.');
     }
     const pulados = ruins.map(p=>p.nome).concat(falhos);
-    msg('msgPub', pulados.length?'in':'ok', '✅ Pronto! O site tem '+(lista.length-falhos.length)+' produto(s). Enviados agora: '+(enviar.length-falhos.length)+'. '+(fotosAchadas?'📷 '+fotosAchadas+' produto(s) ganharam foto da embalagem. ':'')+'<a href="../?v='+Date.now()+'" target="_blank" rel="noopener">Ver o site</a>'+
+    msg('msgPub', pulados.length?'in':'ok', '✅ Pronto! O site tem '+(lista.length-falhos.length)+' produto(s). Enviados agora: '+(enviar.length-falhos.length)+'. '+(fotosAchadas?'📷 '+fotosAchadas+' produto(s) ganharam foto da internet. ':'')+'<a href="../?v='+Date.now()+'" target="_blank" rel="noopener">Ver o site</a>'+
       (pulados.length ? '<br><br>⚠️ <b>'+pulados.length+' produto(s) ficaram de fora</b> porque o preço ou o estoque no gestor está com um número estranho (muito grande, talvez o código de barras foi digitado no lugar). Corrija no gestor e envie de novo:<br>• '+pulados.slice(0,30).map(esc).join('<br>• ')+(pulados.length>30?'<br>• e mais '+(pulados.length-30)+'...':'') : ''));
     SITE = null; compararSite();
     carregarLoja();

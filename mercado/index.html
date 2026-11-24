@@ -699,7 +699,7 @@ function desenharDeps(){
 function fotoHTML(p){
   const sem = Number(p.estoque)<=0;
   let h;
-  if(FOTOS[p.id]) h = '<img class="real" alt="'+esc(p.nome)+'" loading="lazy" src="'+esc(FOTOS[p.id])+'" onerror="fotoFalhou('+jsq(p.id)+')">';
+  if(FOTOS[p.id]) h = '<img class="real" alt="'+esc(p.nome)+'" loading="lazy" src="'+esc(FOTOS[p.id])+'" onerror="fotoFalhou('+jsq(p.id)+')">'+(/#ilustrativa$/.test(FOTOS[p.id])?'<span class="tag ilu">Imagem ilustrativa</span>':'');
   else h = ilustra(p);
   if(sem) h += '<span class="tag esg">Esgotado</span>';
   else if(isPeso(p)) h += '<span class="tag">Por kg</span>';
