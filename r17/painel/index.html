@@ -8,8 +8,8 @@
 <title>Espaço Barber Shop R-17</title>
 <meta name="description" content="Barbearia no Jardim Kemel, Itaim Paulista. Agende seu horário online.">
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="manifest" id="mf" href="painel/manifest.webmanifest">
-<script>document.getElementById("mf").href="painel/manifest.webmanifest"; document.title='R-17 Painel'; document.documentElement.classList.add("modo-painel"); if(location.hash!=="#adm") history.replaceState(null,"",location.pathname+location.search+"#adm");</script>
+<link rel="manifest" id="mf" href="painel/adm.webmanifest">
+<script>document.getElementById("mf").href="painel/adm.webmanifest"; document.title='R-17 ADM'; document.documentElement.classList.add("modo-painel"); if(location.hash!=="#adm") history.replaceState(null,"",location.pathname+location.search+"#adm");</script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Espaço Barber Shop R-17">
 <meta property="og:description" content="Instale nosso site no celular e agende seu horário em 1 minuto.">
@@ -19,12 +19,12 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0F0B09">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="painel/icon-192.png">
+<link rel="apple-touch-icon" href="painel/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="R-17 Painel">
+<meta name="apple-mobile-web-app-title" content="R-17 ADM">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sancreek&family=Oswald:wght@600&family=Big+Shoulders+Display:wght@700;800;900&family=Manrope:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
 /* Layout: abertura preta com amarelo da fachada e listra de barbeiro; seções em coluna larga; agenda em cartão; painel ADM só para quem administra */
@@ -1648,7 +1648,7 @@ async function avisosEstado(salvar){
 }
 $("btnAvisos").addEventListener("click",async()=>{
   const bt=$("btnAvisos");
-  if(!pushOk()){ $("instPassos").innerHTML=`<li>No iPhone os avisos só funcionam com o app instalado.</li><li>Toque em <b>📲 Instalar painel no celular</b> e siga os passos.</li><li>Abra o app <b>R-17 Painel</b> pela tela inicial e toque em <b>Receber avisos no celular</b>.</li>`; $("instAjuda").hidden=false; return; }
+  if(!pushOk()){ $("instPassos").innerHTML=`<li>No iPhone os avisos só funcionam com o app instalado.</li><li>Toque em <b>📲 Instalar painel no celular</b> e siga os passos.</li><li>Abra o app <b>R-17 ADM</b> pela tela inicial e toque em <b>Receber avisos no celular</b>.</li>`; $("instAjuda").hidden=false; return; }
   try{
     const perm = await Notification.requestPermission();
     if(perm!=="granted"){ alertaAdm("O celular bloqueou os avisos. Libere as notificações deste site nas configurações do navegador."); return; }
@@ -2192,7 +2192,7 @@ const ehApp = matchMedia("(display-mode: standalone)").matches || navigator.stan
 if(ehApp){ const ab=$("abertura"); ab.querySelector(".ab-logo").innerHTML=document.querySelector(".herologo").outerHTML.replace('class="herologo"','');
   ab.classList.add("on"); setTimeout(()=>{ ab.classList.add("sai"); setTimeout(()=>ab.remove(),550); },1800); }
 /* versão do site: muda a cada atualização. O app confere sozinho e atualiza. */
-const VERSAO="30";
+const VERSAO="31";
 function atualizarAgora(){ const u=new URL(location.href); u.searchParams.set("v",Date.now()); u.searchParams.delete("parar"); location.replace(u.href); }
 $("novaVersao").addEventListener("click",atualizarAgora);
 async function conferirVersao(){
@@ -2224,7 +2224,7 @@ setTimeout(mostrarBtnInstalar,2500);
 async function instalarApp(){
   const painel=ehPainel();
   if(pedidoInstalar){ pedidoInstalar.prompt(); const r=await pedidoInstalar.userChoice.catch(()=>null); pedidoInstalar=null; if(r && r.outcome==="accepted"){ $("btnInstalar").hidden=true; $("btnInstalarAdm").hidden=true; } return; }
-  const nome = painel ? "R-17 Painel" : "R-17";
+  const nome = painel ? "R-17 ADM" : "R-17";
   $("instPassos").innerHTML = (ehIOS
     ? `<li>Abra este site no <b>Safari</b>.</li><li>Toque no botão <b>Compartilhar</b> (o quadrado com a setinha para cima ⬆).</li><li>Role e toque em <b>Adicionar à Tela de Início</b>.</li><li>Toque em <b>Adicionar</b>. Pronto, o ícone <b>${nome}</b> aparece no celular.</li>`
     : `<li>Toque nos <b>3 pontinhos ⋮</b> no canto de cima do navegador.</li><li>Toque em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.</li><li>Confirme. Pronto, o ícone <b>${nome}</b> aparece no celular.</li>`)
