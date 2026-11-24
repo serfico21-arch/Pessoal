@@ -98,6 +98,9 @@ img{display:block;max-width:100%}
 .sac-busca.pulo{animation:pulo .5s ease}
 @keyframes pulo{0%{transform:scale(1)}35%{transform:scale(1.14)}70%{transform:scale(.96)}100%{transform:scale(1)}}
 .busca input{border:0;outline:0;background:transparent;flex:1;font-size:16px;min-width:0}
+.busca input::-webkit-search-cancel-button{display:none}
+.busca .limpar{flex:none;height:36px;border:0;border-radius:10px;background:#e9e6dc;color:#333;font-weight:800;font-size:14px;padding:0 10px;cursor:pointer}
+.busca .limpar[hidden]{display:none}
 
 /* capa com a foto da loja */
 .capa{margin-top:16px}
@@ -162,12 +165,11 @@ img{display:block;max-width:100%}
 .foto{position:relative;aspect-ratio:1/1;background:linear-gradient(160deg,#fbfaf6,#ecebe3);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .foto img{width:100%;height:100%;object-fit:contain;padding:8px;mix-blend-mode:multiply}
 .foto img.ilus{object-fit:cover;padding:0;mix-blend-mode:normal;opacity:.9}
-.foto .ilu{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-.foto .ilu img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.9) blur(1.5px);transform:scale(1.06)}
-.foto .ilu::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(33,38,129,.25),rgba(33,38,129,.55))}
-.foto .ilu i{position:relative;z-index:1;font-style:normal;font-size:62px;line-height:1;width:112px;height:112px;border-radius:50%;background:rgba(255,255,255,.94);display:grid;place-items:center;box-shadow:0 10px 24px -8px rgba(0,0,0,.45),0 0 0 4px rgba(238,214,0,.85)}
-.foto .ilu i svg{width:72px;height:72px}
-.foto .ilu small{position:absolute;z-index:1;bottom:8px;left:50%;transform:translateX(-50%);font-size:10.5px;font-weight:700;letter-spacing:.04em;color:#fff;background:rgba(0,0,0,.35);padding:3px 9px;border-radius:99px;white-space:nowrap}
+.foto .ilu{position:absolute;inset:0;display:flex;align-items:flex-end;overflow:hidden}
+.foto .ilu img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;padding:0;mix-blend-mode:normal}
+.foto .ilu::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 70%,rgba(10,14,60,.6) 100%)}
+.foto .ilu b{position:relative;z-index:1;color:#fff;font-size:15px;font-weight:800;line-height:1.2;padding:10px 10px 26px;text-shadow:0 1px 3px rgba(0,0,0,.5);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;text-transform:uppercase;letter-spacing:.01em}
+.foto .ilu small{position:absolute;z-index:1;bottom:7px;left:10px;font-size:10px;font-weight:700;letter-spacing:.04em;color:rgba(255,255,255,.85)}
 .foto .ini{font-family:var(--serif);font-size:34px;font-weight:600;color:var(--ouro)}
 .tag{position:absolute;top:8px;left:8px;background:var(--verde);color:#fff;font-size:10.5px;font-weight:800;padding:4px 8px;border-radius:999px;letter-spacing:.03em}
 .tag.esg{background:var(--vermelho);left:auto;right:8px}
@@ -407,6 +409,7 @@ img{display:block;max-width:100%}
   </div>
   <div class="wrap busca-l"><div class="busca">
     <input id="busca" type="search" placeholder="O que você procura hoje?" autocomplete="off" enterkeyhint="search" aria-label="Buscar produto">
+    <button type="button" class="limpar" id="limparBusca" onclick="limparBusca()" hidden aria-label="Apagar a busca">✕ Apagar</button>
     <button type="button" class="lupa" onclick="irBusca()" aria-label="Buscar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
   </div>
   <div class="sugest" id="sugest" hidden></div>
@@ -689,10 +692,10 @@ function desenharDeps(){
   const conta = {}; vis.forEach(p=>{ const d=deptoDe(p).n; conta[d]=(conta[d]||0)+1; });
   const lista = [...DEPTOS, DEP_OUTROS].filter(d=>conta[d.n] || !vis.length);
   el.innerHTML = '<button class="dep todos'+(categoria==='Todos'?' on':'')+'" data-c="Todos"><span class="c"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></span><span>Início</span></button>'+
-    lista.map(d=>'<button class="dep'+(d.n===categoria?' on':'')+'" data-c="'+esc(d.n)+'"><span class="c ic">'+d.e+'</span><span>'+esc(d.n)+'</span></button>').join('');
+    lista.map(d=>'<button class="dep'+(d.n===categoria?' on':'')+'" data-c="'+esc(d.n)+'"><span class="c" style="background-image:url(\''+fundoDep(d.n)+'\')"></span><span>'+esc(d.n)+'</span></button>').join('');
   el.querySelectorAll('.dep').forEach(b=>b.onclick=()=>{
     if(!vis.length && b.dataset.c!=='Todos'){ toast('Os produtos estão chegando!'); return; }
-    categoria=b.dataset.c; verTudo=false; LIMITE=48; document.getElementById('busca').value=''; desenharDeps(); desenharLista(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'});
+    categoria=b.dataset.c; verTudo=false; LIMITE=48; document.getElementById('busca').value=''; document.getElementById('limparBusca').hidden=true; desenharDeps(); desenharLista(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'});
   });
 }
 
@@ -721,6 +724,7 @@ const ICONES = [
 ];
 const DESENHOS = {OLEO:'<svg viewBox="0 0 64 64" width="64" height="64"><path d="M27 6h10v6H27z" fill="#c0392b"/><path d="M28 12h8v5l5 6v33a4 4 0 0 1-4 4H27a4 4 0 0 1-4-4V23l5-6z" fill="#f4c20d"/><path d="M28 12h8v5l5 6v33a4 4 0 0 1-4 4H27a4 4 0 0 1-4-4V23l5-6z" fill="none" stroke="#b8860b" stroke-width="1.5"/><rect x="25" y="32" width="14" height="14" rx="2" fill="#fff"/><text x="32" y="42" font-size="6" font-family="Arial" font-weight="700" text-anchor="middle" fill="#2a2f8f">ÓLEO</text><path d="M27 24v26" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/></svg>', ACUCAR:'<svg viewBox="0 0 64 64" width="64" height="64"><path d="M16 12h32l-2 44a3 3 0 0 1-3 3H21a3 3 0 0 1-3-3z" fill="#fff" stroke="#2a2f8f" stroke-width="2"/><path d="M16 12l3-5h26l3 5" fill="#e8ecff" stroke="#2a2f8f" stroke-width="2"/><rect x="19" y="24" width="26" height="14" rx="2" fill="#2a2f8f"/><text x="32" y="34" font-size="5.5" font-family="Arial" font-weight="700" text-anchor="middle" fill="#fff">AÇÚCAR</text><circle cx="26" cy="47" r="2.2" fill="#d9dde8"/><circle cx="32" cy="50" r="2.2" fill="#d9dde8"/><circle cx="38" cy="46" r="2.2" fill="#d9dde8"/></svg>'};
 function iconeProduto(p){ const t = norm(p.nome+' '+(p.categoria||'')); for(const [r,i] of ICONES) if(r.test(t)) return i; return deptoDe(p).e; }
+function fundoDep(n){ return fundoProduto({nome:n}); }
 function fundoProduto(p){
   const t = norm(p.nome+' '+(p.categoria||''));
   if(/sanit|sabao|deterg|limpa|amaciante/.test(t)) return 'img/loja-mercearia-p.webp';
@@ -730,7 +734,7 @@ function fundoProduto(p){
 }
 function fotoFalhou(id){ delete FOTOS[id]; document.querySelectorAll('[data-foto="'+CSS.escape(id)+'"]').forEach(el=>{ el.innerHTML = fotoHTML(PRODUTOS.find(p=>p.id===id)); }); }
 function ilustra(p){
-  return '<span class="ilu"><img src="'+fundoProduto(p)+'" alt="" loading="lazy" aria-hidden="true"><i>'+(DESENHOS[iconeProduto(p)]||iconeProduto(p))+'</i><small>Foto ilustrativa</small></span>';
+  return '<span class="ilu"><img src="'+fundoProduto(p)+'" alt="" loading="lazy" aria-hidden="true"><small>Foto da nossa loja</small></span>';
 }
 function cartaoProduto(p){
   const sem = Number(p.estoque)<=0, q = carrinho[p.id]||0;
@@ -760,19 +764,20 @@ function desenharSugest(){
   const marca = n => { const i = norm(n).indexOf(pal); return i<0 ? esc(n) : esc(n.slice(0,i))+'<b>'+esc(n.slice(i,i+pal.length))+'</b>'+esc(n.slice(i+pal.length)); };
   el.innerHTML = !achados.length ? '<div class="nada">Nada com "'+esc(v)+'". Tente outro nome.</div>' :
     achados.slice(0,8).map(p=>{ const q = carrinho[p.id]||0;
-      return '<div class="sg" onclick="escolherSugest('+jsq(p.id)+')"><span class="e">'+(FOTOS[p.id]?'<img alt="" src="'+FOTOS[p.id]+'">':(DESENHOS[iconeProduto(p)]||iconeProduto(p)))+'</span>'+
+      return '<div class="sg" onclick="escolherSugest('+jsq(p.id)+')"><span class="e">'+'<img alt="" src="'+esc(FOTOS[p.id]||fundoProduto(p))+'">'+'</span>'+
         '<span class="t">'+marca(p.nome)+'<small>'+brl(p.preco)+(isPeso(p)?' /kg':'')+'</small></span>'+
         '<button class="ad'+(q?' ja':'')+'" aria-label="Colocar na sacola" onclick="event.stopPropagation();mudar('+jsq(p.id)+',1);desenharSugest()">'+(q?fmtQtd(p,q):ICON_MAIS)+'</button></div>'; }).join('')+
     (achados.length>8 ? '<button class="todos" onclick="fecharSugest(true)">Ver todos os '+achados.length+' resultados</button>' : '');
   el.hidden = false;
 }
+function limparBusca(){ const b=document.getElementById('busca'); b.value=''; document.getElementById('limparBusca').hidden=true; fecharSugest(); voltarInicio(); }
 function fecharSugest(rolar){ document.getElementById('sugest').hidden = true; if(rolar){ document.getElementById('busca').blur(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'}); } }
 function escolherSugest(id){
   const p = PRODUTOS.find(x=>x.id===id); if(!p) return;
-  document.getElementById('busca').value = p.nome; LIMITE=48; desenharLista(); fecharSugest(true);
+  document.getElementById('busca').value = p.nome; document.getElementById('limparBusca').hidden=false; LIMITE=48; desenharLista(); fecharSugest(true);
 }
 function verTodos(){ verTudo = true; LIMITE = 48; desenharLista(); document.getElementById('produtos').scrollIntoView({behavior:'smooth'}); }
-function voltarInicio(){ verTudo = false; categoria = 'Todos'; document.getElementById('busca').value=''; desenharDeps(); desenharLista(); }
+function voltarInicio(){ verTudo = false; categoria = 'Todos'; document.getElementById('busca').value=''; document.getElementById('limparBusca').hidden=true; desenharDeps(); desenharLista(); }
 function desenharLista(){
   const termo = norm(document.getElementById('busca').value).trim();
   /* Produto sem estoque não aparece para o cliente (evita mostrar o que o mercado não tem) */
@@ -1089,7 +1094,7 @@ function fecharBarraApp(sempre){
 })();
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(()=>{});
 
-document.getElementById('busca').addEventListener('input', ()=>{ LIMITE=48; if(categoria!=='Todos'){ categoria='Todos'; desenharDeps(); } desenharLista(); desenharSugest(); });
+document.getElementById('busca').addEventListener('input', ()=>{ LIMITE=48; if(categoria!=='Todos'){ categoria='Todos'; desenharDeps(); } desenharLista(); desenharSugest(); document.getElementById('limparBusca').hidden = !document.getElementById('busca').value; });
 document.getElementById('busca').addEventListener('focus', desenharSugest);
 document.getElementById('busca').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); fecharSugest(true); } if(e.key==='Escape') fecharSugest(); });
 document.addEventListener('click', e=>{ if(!e.target.closest('.busca-l')) fecharSugest(); });
