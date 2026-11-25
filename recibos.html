@@ -236,4 +236,16 @@ D.rec=D.rec.filter(function(r){return!(r.inq==i.id&&T.test(r.ref)&&r.ref<s0)});
 D.rec.forEach(function(r){if(r.inq==i.id&&T.test(r.ref)){r.data=due(i,r.ref);r.num=numFor(i,r.ref)}})}
 function fixOnce(){if(D.fx1)return;var ch=0,lg=[];[["wilder","2026-03-14",14],["adalto","2026-03-05",5]].forEach(function(c){D.inq.forEach(function(i){if(String(i.nome).toLowerCase().indexOf(c[0])>-1){refaz(i,c[1],c[2],1);ch=1;lg.push(i.nome+": início "+c[1].split("-").reverse().join("/")+" · parcela 01 vence "+due(i,c[1].slice(0,7)).split("-").reverse().join("/"))}})});D.fx1=1;if(ch){auto();sv();alert("Correção aplicada:\n\n"+lg.join("\n"))}}
 var n0=leg();fixOnce();fixDue();auto();lst();if(D.inq.length)ab(D.inq[0].id);else $("mn").innerHTML='<div class="cd"><h3>Comece por aqui</h3><p>Nenhum inquilino encontrado neste navegador. Cadastre o primeiro em <b>+ Novo inquilino</b>, ou traga os que já existem em <b>⬆ Importar JSON</b> (lista de inquilinos, backup do Painel ou backup dos recibos).</p></div>';
+/* RECIBO POR LINK: abre recibos.html#rec=... e guarda o recibo com 1 toque (pede confirmação, nunca apaga nem troca recibo que já existe) */
+function recLink(){var h=location.hash.match(/[#&]rec=([^&]+)/);if(!h)return;try{history.replaceState(null,"",location.pathname+location.search)}catch(e){}
+var o;try{var b=h[1].replace(/-/g,"+").replace(/_/g,"/");while(b.length%4)b+="=";o=JSON.parse(decodeURIComponent(escape(atob(b))))}catch(e){return alert("Este link de recibo está com defeito. Nada foi mudado.")}
+var cd=function(x){return String(x||"").replace(/\D/g,"")},c=cd(o.cpf),i=D.inq.filter(function(z){return c.length>=11&&cd(z.cpf)==c})[0]||D.inq.filter(function(z){return nm(z.nome)==nm(o.nome)})[0];
+var tt=+o.total||((+o.aluguel||0)+(+o.cond||0)+(+o.iptu||0)+(+o.agua||0)+(+o.outros||0));
+if(i){var ex=D.rec.filter(function(r){return r.inq==i.id&&r.tipo!="cauc"&&((o.num&&String(r.num)==String(o.num))||(o.ref&&r.ref==o.ref))})[0];if(ex){alert("O recibo nº "+ex.num+" ("+mref(ex.ref)+") de "+i.nome+" já está guardado.\n\nNada foi mudado.");ab(i.id);ver(ex.id);return}}
+if(!confirm("Guardar este recibo no sistema?\n\n"+(o.nome||"")+"\nRecibo nº "+(o.num||"?")+" · "+mref(o.ref||"")+"\nValor: "+R(tt)+(o.obs?"\n"+o.obs:"")+(i?"":"\n\n(Inquilino novo: será cadastrado.)")+"\n\nNada do que já existe será apagado."))return;
+try{localStorage.setItem(K+"_antes_link",JSON.stringify({quando:new Date().toISOString(),dados:D}))}catch(e){}
+if(!i){i={id:"i"+Date.now(),nome:o.nome||"(sem nome)",cpf:o.cpf||"",tel:"",end:o.end||"",contrato:o.contrato||"",aluguel:+o.aluguel||0,cond:0,iptu:0,venc:"",obs:""};D.inq.push(i)}
+var r={id:"r"+Date.now()+"_lk",inq:i.id,num:String(o.num||prox()),ref:o.ref||"",data:o.data||hojeISO(),aluguel:+o.aluguel||0,cond:+o.cond||0,iptu:+o.iptu||0,agua:+o.agua||0,outros:+o.outros||0,multa:0,juros:0,corr:0,total:+tt.toFixed(2),forma:o.forma||"",obs:o.obs||""};
+D.rec.push(r);sv();lst();ab(i.id);ver(r.id);alert("Recibo guardado! ✅")}
+setTimeout(recLink,300);window.addEventListener("hashchange",recLink);
 </script></body></html>
