@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulado — Aconselhamento Pastoral</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Lato:wght@300;400;700&display=swap');
+
+  :root {
+    --bg: #0f0e17;
+    --surface: #1a1929;
+    --surface2: #221f35;
+    --accent: #e8c96d;
+    --accent2: #7c6cfc;
+    --green: #4caf82;
+    --red: #e05f5f;
+    --text: #ede8f5;
+    --muted: #9087b0;
+    --border: rgba(232,201,109,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lato', Georgia, serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  body::before {
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.25) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.18) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 10%, rgba(255,255,255,0.22) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 75%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 90%, rgba(255,255,255,0.15) 0%, transparent 100%),
+      radial-gradient(1px 1px at 5% 50%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 92% 30%, rgba(255,255,255,0.18) 0%, transparent 100%),
+      radial-gradient(2px 2px at 45% 45%, rgba(232,201,109,0.12) 0%, transparent 100%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 720px;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .top-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    animation: fadeDown 0.6s ease;
+  }
+  .top-header .eyebrow {
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .top-header h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 32px;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .top-header p { font-size: 13px; color: var(--muted); font-weight: 300; }
+
+  #stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+  .stat-box {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 8px;
+    text-align: center;
+  }
+  .stat-box .num { font-size: 22px; font-weight: 700; }
+  .stat-box .lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+  .stat-box.acerto .num { color: var(--green); }
+  .stat-box.erro .num { color: var(--red); }
+
+  #progress-wrap {
+    margin-bottom: 1.8rem;
+  }
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .progress-track {
+    background: var(--surface2);
+    border-radius: 99px;
+    height: 6px;
+    overflow: hidden;
+  }
+  #prog {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 99px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .q-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 1.8rem;
+    animation: fadeUp 0.4s ease;
+  }
+  .round-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(124,108,252,0.15);
+    border: 0.5px solid rgba(124,108,252,0.35);
+    color: #a99dff;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 99px;
+    margin-bottom: 1.2rem;
+  }
+  .q-num { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+  .q-text {
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt-btn {
+    background: var(--surface2);
+    border: 0.5px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 13px 16px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Lato', Georgia, serif;
+    cursor: pointer;
+    text-align: left;
+    line-height: 1.5;
+    transition: all 0.18s;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .opt-btn .letter {
+    min-width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: 0.5px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    margin-top: 1px;
+    flex-shrink: 0;
+    transition: all 0.18s;
+  }
+  .opt-btn:hover:not(:disabled) {
+    background: rgba(124,108,252,0.12);
+    border-color: rgba(124,108,252,0.4);
+    transform: translateX(3px);
+  }
+  .opt-btn:hover:not(:disabled) .letter {
+    background: rgba(124,108,252,0.25);
+    border-color: rgba(124,108,252,0.6);
+    color: #c4baff;
+  }
+  .opt-btn:disabled { cursor: default; }
+  .opt-btn.correct {
+    background: rgba(76,175,130,0.15);
+    border-color: rgba(76,175,130,0.5);
+    color: #a3ddc0;
+  }
+  .opt-btn.correct .letter { background: rgba(76,175,130,0.3); border-color: var(--green); color: #a3ddc0; }
+  .opt-btn.wrong {
+    background: rgba(224,95,95,0.12);
+    border-color: rgba(224,95,95,0.4);
+    color: #f0a0a0;
+  }
+  .opt-btn.wrong .letter { background: rgba(224,95,95,0.25); border-color: var(--red); color: #f0a0a0; }
+  .opt-btn.reveal-correct {
+    background: rgba(76,175,130,0.08);
+    border-color: rgba(76,175,130,0.3);
+    color: #a3ddc0;
+  }
+
+  .feedback-box {
+    margin-top: 1.2rem;
+    padding: 14px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+    animation: fadeUp 0.3s ease;
+  }
+  .feedback-box.ok { background: rgba(76,175,130,0.12); border: 0.5px solid rgba(76,175,130,0.35); color: #a3ddc0; }
+  .feedback-box.err { background: rgba(224,95,95,0.1); border: 0.5px solid rgba(224,95,95,0.3); color: #f0a0a0; }
+  .feedback-box strong { display: block; margin-bottom: 4px; font-size: 14px; }
+
+  .next-btn {
+    width: 100%;
+    margin-top: 1.2rem;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent2), #9b8ffc);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-family: 'Lato', Georgia, serif;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s, transform 0.15s;
+    animation: fadeUp 0.3s ease;
+  }
+  .next-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+
+  .result-screen {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    animation: fadeUp 0.5s ease;
+  }
+  .result-screen .medal { font-size: 56px; margin-bottom: 1rem; }
+  .result-screen h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 26px;
+    margin-bottom: 8px;
+  }
+  .result-screen .score {
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 1rem 0;
+    line-height: 1;
+  }
+  .result-screen .score span { font-size: 20px; color: var(--muted); }
+  .result-screen .result-msg { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem; }
+  .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+  .result-stat { background: var(--surface2); border-radius: 10px; padding: 14px; }
+  .result-stat .n { font-size: 24px; font-weight: 700; }
+  .result-stat .l { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .result-stat.g .n { color: var(--green); }
+  .result-stat.r .n { color: var(--red); }
+
+  .round-result {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    animation: fadeUp 0.4s ease;
+  }
+  .round-result h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 22px; margin-bottom: 8px; }
+  .round-result .rs { font-size: 44px; font-weight: 700; color: var(--accent); margin: 12px 0; }
+  .round-result p { font-size: 14px; color: var(--muted); margin-bottom: 1.5rem; }
+
+  .start-screen {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    animation: fadeUp 0.5s ease;
+  }
+  .start-screen .icon { font-size: 52px; margin-bottom: 1rem; }
+  .start-screen h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 24px; margin-bottom: 10px; }
+  .start-screen p { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem; }
+  .info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 1.5rem; }
+  .info-box { background: var(--surface2); border-radius: 10px; padding: 14px 8px; }
+  .info-box .n { font-size: 22px; font-weight: 700; color: var(--accent); }
+  .info-box .l { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .big-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent2), #9b8ffc);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 16px;
+    font-family: 'Lato', Georgia, serif;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .big-btn:hover { opacity: 0.88; transform: translateY(-2px); }
+  .big-btn.gold { background: linear-gradient(135deg, #b8922a, var(--accent)); }
+
+  @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+  @keyframes fadeDown { from { opacity:0; transform:translateY(-12px); } to { opacity:1; transform:none; } }
+
+  /* ===== TABS + RECAP/PROVA (padrão Administração Eclesiástica) ===== */
+  .tabs-nav{display:flex;gap:8px;max-width:760px;width:100%;margin:16px auto 0;padding:0 16px;position:relative;z-index:1;}
+  .tab-btn{flex:1;padding:13px 8px;border-radius:10px;border:1.5px solid #c9a84c;background:#1a1814;color:#e8c96a;font-weight:700;font-size:13.5px;cursor:pointer;font-family:'Lato',Georgia,serif;transition:all .15s;letter-spacing:.2px;}
+  .tab-btn:hover{background:#2e2a22;}
+  .tab-btn.active{background:#c9a84c;color:#1a1410;box-shadow:0 2px 8px rgba(201,168,76,.35);}
+  .tab-content{display:none;width:100%;}
+  .tab-content.active{display:flex;flex-direction:column;align-items:center;}
+
+  .prova-real-section{max-width:760px;width:100%;margin:0 auto;padding:18px 16px 40px;font-family:Georgia,serif;position:relative;z-index:1;}
+  .prova-real-banner{background:linear-gradient(135deg,#7a1f1f,#a82c2c);color:#fff8e8;border-radius:14px;padding:18px 20px;margin-bottom:16px;text-align:center;box-shadow:0 4px 18px rgba(168,44,44,.35);}
+  .prova-real-banner.recap-banner{background:linear-gradient(135deg,#1e3a5f,#2d5a8f);box-shadow:0 4px 18px rgba(30,58,95,.35);}
+  .prova-real-banner h2{font-size:1.25rem;margin:0 0 4px;letter-spacing:.03em;}
+  .prova-real-banner p{font-size:.82rem;opacity:.9;margin:0;}
+  .prova-real-list{display:flex;flex-direction:column;gap:10px;margin-bottom:22px;}
+  .prova-real-q{background:#fff8e8;border:2px solid #c9a84c;border-radius:10px;padding:14px 16px;}
+  .prova-real-q summary{cursor:pointer;font-weight:700;color:#3a2a10;list-style:none;display:flex;gap:8px;align-items:flex-start;}
+  .prova-real-q summary::before{content:"▸";color:#a82c2c;flex-shrink:0;transition:transform .2s;}
+  .prova-real-q[open] summary::before{transform:rotate(90deg);}
+  .prova-real-q summary::-webkit-details-marker{display:none;}
+  .prova-real-tag{display:inline-block;font-size:.65rem;background:#a82c2c;color:#fff;padding:2px 8px;border-radius:99px;margin-bottom:6px;letter-spacing:.05em;}
+  .prova-real-answer{margin-top:10px;padding-top:10px;border-top:1px dashed #c9a84c;color:#2a2a28;font-size:.92rem;line-height:1.5;}
+  .prova-real-answer b{color:#1e6b3a;}
+  .prova-real-answer .err{color:#a82c2c;text-decoration:line-through;opacity:.7;}
+  .prova-real-answer .ok{color:#1e6b3a;font-weight:700;}
+  .prova-real-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.88rem;}
+  .prova-real-table td{padding:5px 8px;border-bottom:1px solid #e8dcc0;}
+  .prova-real-divider{text-align:center;margin:30px 0 18px;position:relative;}
+  .prova-real-divider span{background:rgba(20,15,5,.85);color:#f5d77a;padding:6px 18px;font-size:.85rem;letter-spacing:.08em;border:1px solid #c9a84c;border-radius:99px;}
+  .recap-chapter-tag{display:inline-block;font-size:.7rem;background:#1e3a5f;color:#dce8f5;padding:3px 10px;border-radius:99px;margin:14px 0 8px;letter-spacing:.04em;font-weight:600;}
+  .recap-chapter-tag:first-child{margin-top:0;}
+</style>
+</head>
+<body>
+
+<div class="tabs-nav">
+  <button class="tab-btn" id="tabbtn-simulado" onclick="showTab('simulado')">📝 Simulado</button>
+  <button class="tab-btn" id="tabbtn-recap" onclick="showTab('recap')">📖 Recapitulação</button>
+  <button class="tab-btn" id="tabbtn-prova" onclick="showTab('prova')">🎯 Prova</button>
+</div>
+
+<!-- ===================== ABA: PROVA ===================== -->
+<div class="tab-content" id="view-prova">
+<div class="prova-real-section">
+  <div class="prova-real-banner">
+    <h2>🎯 O QUE CAI NA PROVA</h2>
+    <p>Questões exatas do gabarito oficial de revisão geral — Aconselhamento Pastoral (IBBC Ferraz-Centro)</p>
+  </div>
+  <div class="prova-real-list">
+
+    <details class="prova-real-q"><summary>1. Qual destas características o conselheiro deve evitar?</summary>
+      <div class="prova-real-answer"><span class="ok">Resposta:</span> Ser intrometido.</div></details>
+
+    <details class="prova-real-q"><summary>2. Defina o que é Aconselhamento preventivo e Aconselhamento reativo</summary>
+      <div class="prova-real-answer"><b>Preventivo:</b> antes da crise, para evitá-la ou preparar a pessoa.<br><b>Reativo:</b> durante/depois da crise, ajudando a lidar com os efeitos.</div></details>
+
+    <details class="prova-real-q"><summary>3. Por que tem aconselhamentos pastorais que são ineficazes?</summary>
+      <div class="prova-real-answer">Falta clareza do papel do conselheiro — erros comuns: julgar, rotular, dar conselhos prontos e desistir diante da discordância.</div></details>
+
+    <details class="prova-real-q"><summary>4. Mencione três técnicas usadas no Aconselhamento</summary>
+      <div class="prova-real-answer">Ex.: atenção, ouvir e refletir (das 9: atenção, ouvir, responder, refletir, perguntar, confrontar, informar, apoiar, ensinar).</div></details>
+
+    <details class="prova-real-q"><summary>5. Assinale a alternativa correta usada no aconselhamento</summary>
+      <div class="prova-real-answer"><span class="ok">Resposta:</span> O conselheiro deve ter atenção.</div></details>
+
+    <details class="prova-real-q"><summary>6. Personalidade é caráter? Explique</summary>
+      <div class="prova-real-answer">Não. Personalidade = "persona", a máscara do ator (papel social). Caráter = as qualidades morais que definem a pessoa.</div></details>
+
+    <details class="prova-real-q">
+      <summary>7. Complete com (V) para verdadeiro e (F) para falso</summary>
+      <div class="prova-real-answer">
+        <table class="prova-real-table">
+          <tr><td class="ok">(V)</td><td>Entre as técnicas que se pode utilizar no aconselhamento estão esclarecimento e a reflexão</td></tr>
+          <tr><td class="err">(F)</td><td>O Aconselhador deve resolver o problema do aconselhado, buscando soluções para ele</td></tr>
+          <tr><td class="ok">(V)</td><td>O conselheiro tem obrigação de manter em segredo as informações confidenciais</td></tr>
+          <tr><td class="err">(F)</td><td>Jesus não fez uso de nenhuma técnica de aconselhamento, afinal ele era Deus</td></tr>
+          <tr><td class="err">(F)</td><td>O Aconselhamento não visa a comunicação e nem o apoio, pois as pessoas são capazes de se virar sozinhas</td></tr>
+          <tr><td class="ok">(V)</td><td>O conselheiro é um educador, ensinando as pessoas a lidar com os problemas da vida</td></tr>
+          <tr><td class="err">(F)</td><td>A Personalidade é um caráter</td></tr>
+          <tr><td class="ok">(V)</td><td>Os sintomas do paranoico são: desconfiança, extremamente defensivo, e na maioria das vezes agressivo — personalidade construída em lares com atmosfera de dúvidas, medos e incertezas</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details class="prova-real-q"><summary>8. Como se manifesta a esquizoide?</summary>
+      <div class="prova-real-answer">Timidez, hipersensibilidade e fuga de relações íntimas — presente no corpo, mas com mente e alma distantes (pensamento autista).</div></details>
+
+    <details class="prova-real-q">
+      <summary>9. Enumere a segunda coluna com as correspondentes da primeira</summary>
+      <div class="prova-real-answer">
+        <table class="prova-real-table">
+          <tr><td>5. Histérico</td><td>→ As pessoas egocêntricas, superficiais e fantasiosas e mentem com facilidade</td></tr>
+          <tr><td>1. Ciclotímico</td><td>→ Expressões na atuação do indivíduo, com períodos alternados e repetitivos de orgulho e depressão</td></tr>
+          <tr><td>2. Paranoico</td><td>→ Desconfiados, extremamente defensivos e na maioria das vezes agressivos</td></tr>
+          <tr><td>6. Depressão</td><td>→ Baixa autoestima e retraimento, levando-a até o suicídio muitas vezes</td></tr>
+          <tr><td>4. Neuroses</td><td>→ Distorcem a realidade e surgem com aumento das responsabilidades</td></tr>
+          <tr><td>3. Personalidade</td><td>→ Os gregos entendiam como algo concreto, a máscara usada para determinado papel</td></tr>
+        </table>
+      </div>
+    </details>
+
+    <details class="prova-real-q"><summary>10. Qual é a principal causa da culpa?</summary>
+      <div class="prova-real-answer"><span class="ok">Resposta:</span> A relação à experiência passada e não confessada.</div></details>
+
+    <details class="prova-real-q"><summary>11. Quais os dois campos da Ansiedade?</summary>
+      <div class="prova-real-answer">Um vem de repressões da formação (vida reprimida); o outro surge das situações, levando a fugas/lutas exageradas (baixa autoestima).</div></details>
+
+    <details class="prova-real-q"><summary>12. Mencione três técnicas usadas no aconselhamento (reforço)</summary>
+      <div class="prova-real-answer">Atenção, ouvir e responder (3 das 9 técnicas do cap. 8.3).</div></details>
+
+    <details class="prova-real-q"><summary>13. Qual o principal papel do aconselhamento pastoral?</summary>
+      <div class="prova-real-answer"><span class="ok">Resposta:</span> Cuidar do rebanho, pois esta é a tarefa confiada ao obreiro.</div></details>
+
+  </div>
+</div>
+</div>
+
+<!-- ===================== ABA: RECAPITULAÇÃO ===================== -->
+<div class="tab-content" id="view-recap">
+<div class="prova-real-section">
+  <div class="prova-real-banner recap-banner">
+    <h2>📖 RECAPITULAÇÕES DA APOSTILA</h2>
+    <p>Questões de fixação ao final de cada capítulo — Recapitulações 1 a 11 + Anexo</p>
+  </div>
+  <div class="prova-real-list">
+
+    <span class="recap-chapter-tag">CAP. 1 — O Aconselhamento Pastoral (RECAPITULAÇÃO 1)</span>
+
+    <details class="prova-real-q"><summary>1R1. Defina o que é: Aconselhamento preventivo</summary>
+      <div class="prova-real-answer">É buscado pela liderança pastoral a fim de prevenir o surgimento do momento de crise, ou proporcionar aos membros o conhecimento necessário para passá-las da forma menos dolorosa e traumática possível — ocorre antes do problema surgir.</div></details>
+
+    <details class="prova-real-q"><summary>1R1. Defina o que é: Aconselhamento reativo</summary>
+      <div class="prova-real-answer">Ocorre durante ou posteriormente a uma crise já instalada, auxiliando a pessoa a ajustar-se consigo e com o meio em que vive, ajudando-a a resolver seus conflitos (Albert Friesen, 2004).</div></details>
+
+    <span class="recap-chapter-tag">CAP. 2 — O Aconselhamento Pastoral e a Necessidade do Ouvir (RECAPITULAÇÃO 2)</span>
+
+    <details class="prova-real-q"><summary>1R2. Ouvir uma "ovelha" é saber que há um "outro" que fala tanto ou mais do que as palavras estão dizendo (Ouvir com neutralidade)</summary>
+      <div class="prova-real-answer">A habilidade de escuta baseia-se na não censura, no olhar, no respeito e na empatia com o outro. Apenas ouça a "ovelha" nesse primeiro momento, sem julgamento ou interrupção.</div></details>
+
+    <details class="prova-real-q"><summary>2R2. Outra voz a ser ouvida nesse momento é a do Espírito de Deus, cujo agir é imprevisível no momento e na direção que Ele quer dar para aquela pessoa</summary>
+      <div class="prova-real-answer">O conselheiro deve estar atento também à manifestação do Espírito Santo durante a escuta, confiando que Seu agir é imprevisível e soberano — Ele conduz a ovelha e o próprio conselheiro no momento certo.</div></details>
+
+    <details class="prova-real-q"><summary>3R2. O que é "atenção flutuante"?</summary>
+      <div class="prova-real-answer">É a capacidade que o conselheiro deve obter para ouvir tudo sem selecionar, focar ou se concentrar em partes da fala para análise paralela na mente enquanto escuta o outro — é oferecer escuta integral a toda a fala, sem se prender a uma parte dela para análise ou reflexão antecipada.</div></details>
+
+    <span class="recap-chapter-tag">CAP. 3 — A Necessidade do Conhecimento Teórico Bíblico e Psicológico (RECAPITULAÇÃO 3)</span>
+
+    <details class="prova-real-q"><summary>1R3. O conselheiro pode fazer perguntas? Explique</summary>
+      <div class="prova-real-answer">Sim, mas apenas as perguntas necessárias — para esclarecer o que se passa nos detalhes, sem interromper a fala da ovelha antes da hora. As perguntas devem indagar sobre o melhor caminho com base na Bíblia, estimulando a pessoa a encontrar a própria solução para a sua questão.</div></details>
+
+    <details class="prova-real-q"><summary>2R3. Em que momento do aconselhamento o pastor/conselheiro pode fazer oração?</summary>
+      <div class="prova-real-answer">A oração pode ser realizada no meio do processo de aconselhamento pastoral, antes dos questionamentos, ou logo depois da fala inicial da ovelha. Orem e depois continuem o processo — muitas vezes, uma oração no meio do aconselhamento pode possibilitar ao Espírito ajudar o Pastor a realizar sua função (Jo 14.26).</div></details>
+
+    <span class="recap-chapter-tag">CAP. 4 — Esclarecimento, Reflexão, Confrontação e Silêncio (RECAPITULAÇÃO 4)</span>
+
+    <details class="prova-real-q"><summary>1R4. Por que tem aconselhamentos pastorais que são ineficazes?</summary>
+      <div class="prova-real-answer">Porque o conselheiro acaba cometendo erros comuns no processo — não controla suas reações, julga o que ouve, cataloga o aconselhado em "tipos", fecha-se em diagnósticos precoces, dá conselhos prontos em vez de orientar, ou deixa de ajudar diante da discordância da ovelha.</div></details>
+
+    <details class="prova-real-q"><summary>2R4. Entre as técnicas que se pode utilizar no aconselhamento, estão a do esclarecimento e de reflexão</summary>
+      <div class="prova-real-answer">A técnica de esclarecimento visa descrever o que se passa nos detalhes, buscando "os porquês" e "os pra quês". Já a técnica de confrontação visa corrigir a fala da ovelha e trazer à consciência, de forma mais clara, algum comportamento inadequado e não cristão. A técnica do silêncio comunica à ovelha: "pense nisso agora".</div></details>
+
+    <span class="recap-chapter-tag">CAP. 5 — O Ambiente, a Frequência e as Características do Aconselhador (Cap. 5)</span>
+
+    <details class="prova-real-q"><summary>O ambiente do aconselhamento deve ser adequado com o objetivo desejado</summary>
+      <div class="prova-real-answer">Deve ser um ambiente reservado, com privacidade e sem interrupções, em que o diálogo possa acontecer desejado. A frequência do aconselhamento depende do assunto e de sua gravidade, podendo ser semanal, quinzenal ou mensal — sem que isso signifique menor importância.</div></details>
+
+    <details class="prova-real-q"><summary>4R5/5R8/4R8. Complete: o conselheiro precisa de três características</summary>
+      <div class="prova-real-answer"><b>Ter coragem</b> — para apontar verdades difíceis com amor.<br><b>Ter compaixão</b> — para se colocar no lugar do aconselhado.<br><b>Ser imparcial</b> — para não julgar nem tomar partido.</div></details>
+
+    <span class="recap-chapter-tag">CAP. 6 — Erros Mais Comuns no Aconselhamento (RECAPITULAÇÃO 5)</span>
+
+    <details class="prova-real-q"><summary>1R5. No transcorrer do aconselhamento, quais são as coisas que o conselheiro deve evitar?</summary>
+      <div class="prova-real-answer">Segundo Patterson/Eisenberg (1998): a) ser incapaz de controlar suas reações; b) fazer julgamento de valor sobre aquilo que ouve; c) catalogar o aconselhado, criando "tipos" de pessoas e problemas; d) fechar-se em diagnósticos obtidos sem se permitir mudar de opinião; e) dar conselhos prontos; f) deixar de ajudar mesmo perante a discordância do aconselhado.</div></details>
+
+    <details class="prova-real-q"><summary>2R5. Quando um conselheiro fica sabendo que está dando aula no aconselhamento?</summary>
+      <div class="prova-real-answer">Quando, em vez de ouvir e orientar, passa a apenas instruir/preletar sobre o tema, sem permitir que o aconselhado fale de seus pensamentos, sua vivência e seus próprios sentimentos — o aconselhamento deixa de ser um diálogo e vira uma aula unilateral.</div></details>
+
+    <details class="prova-real-q"><summary>3R5. O ambiente do aconselhamento</summary>
+      <div class="prova-real-answer">Deve ser adequado com o objetivo desejado — um ambiente em que o diálogo possa acontecer sem interrupções.</div></details>
+
+    <span class="recap-chapter-tag">CAP. 7 — A Ética no Aconselhamento (RECAPITULAÇÃO 6)</span>
+
+    <details class="prova-real-q"><summary>1R6. Quando a conversa acontece, o aconselhado pode fazer colocações sobre...</summary>
+      <div class="prova-real-answer">Seus pensamentos, sua ética, sua vivência, coisas que pretende fazer, fez, fará, sonhos, ambições, etc. — e cabe ao conselheiro controlar suas próprias reações diante dessas colocações, mesmo que firam seus sentimentos ou lhe lembrem algo doloroso do passado.</div></details>
+
+    <details class="prova-real-q"><summary>2R6. Dar conselhos parece a coisa mais esperada por parte daquele que é chamado de "aconselhador"</summary>
+      <div class="prova-real-answer">Acontece que o termo "aconselhador" vem do fato de estar numa sessão de "aconselhamento" — mas dar conselhos prontos é um dos erros mais comuns, pois retira do aconselhado a responsabilidade e a oportunidade de chegar à sua própria decisão.</div></details>
+
+    <details class="prova-real-q"><summary>Confidencialidade</summary>
+      <div class="prova-real-answer">Tudo o que o aconselhado fala é uma confidência que deve ser respeitada. O conselheiro deve manter sigilo, salvo quando há risco de o aconselhado ferir a si mesmo ou a outrem — caso em que deve agir para evitar o risco.</div></details>
+
+    <details class="prova-real-q"><summary>Respeito à decisão tomada / Deixar de ajudar mesmo perante a discordância</summary>
+      <div class="prova-real-answer">Depois de orientar e mostrar as consequências de cada opção, a decisão e a responsabilidade cabem ao aconselhado, não ao aconselhador. Mesmo que o aconselhador discorde do caminho escolhido, deve prosseguir auxiliando — pois talvez essa seja a melhor solução na opinião do aconselhado, e o aconselhador só perceba isso depois. Se o aconselhador deixar de ajudar diante da discordância, o processo deixa de ser aconselhamento e vira um guia decisório, no qual o outro é mero executante.</div></details>
+
+    <span class="recap-chapter-tag">CAP. 8 — O Procedimento de Jesus como Aconselhador (RECAPITULAÇÃO 7)</span>
+
+    <details class="prova-real-q"><summary>1R7. A confidencialidade de toda a peça eclesiástica...</summary>
+      <div class="prova-real-answer">...não a peça explicitamente, mas existe mesmo que o aconselhado não a peça explicitamente — é um dever ético do conselheiro, decorrente do vínculo de confiança da igreja local.</div></details>
+
+    <details class="prova-real-q"><summary>2R7. Jesus era absolutamente humano e espiritualmente...</summary>
+      <div class="prova-real-answer">...profundamente compassivo, altamente espiritualmente e buscou ajudar as pessoas necessitadas a se reconciliarem com Deus, onde quer que pudessem encontrar paz, esperança e cura.</div></details>
+
+    <details class="prova-real-q"><summary>3R7. Os grupos de discípulos e perturbados da igreja local podem...</summary>
+      <div class="prova-real-answer">...oferecer apoio aos membros, e as pessoas tomam apoio à maturidade e seguem em direção à maturidade, quando os recursos espirituais e psicológicos do grupo são bem direcionados.</div></details>
+
+    <details class="prova-real-q"><summary>8.3 Técnicas usadas no aconselhamento (lista completa)</summary>
+      <div class="prova-real-answer">a) <b>Atenção</b> — conceder atenção integral ao aconselhado. b) <b>Ouvir</b> — para ele, através da conversa, expressar suas mágoas e desabafar. c) <b>Responder</b> — de maneira a redirecionar a conversa. d) <b>Refletir</b> — dizer frases que refletem o que está acontecendo no aconselhamento. e) <b>Perguntar</b> — com habilidade, para extrair informações úteis sem constrangimento. f) <b>Confrontar</b> — apresentar uma ideia que o aconselhado talvez não percebesse de outro modo. g) <b>Informar</b> — apresentar fatos aos que precisam de informação. h) <b>Apoiar e encorajar</b> — orientar o aconselhado a avaliar seus recursos espirituais e psicológicos. i) <b>Ensinar</b> — o conselheiro é um educador, que ensina o aconselhado a enfrentar os problemas da vida.</div></details>
+
+    <details class="prova-real-q"><summary>8.4 Fatores que atrapalham a motivação para aconselhar</summary>
+      <div class="prova-real-answer">a) Visita em lugar de aconselhar; b) Pressa em lugar de deliberação; c) Desrespeito em lugar de imparcialidade; d) Condenação em lugar de impessoalidade; e) Subterfúgio em lugar de autenticidade; f) Sobrecarregar em lugar de moderar o aconselhamento; g) Ser diretivo ao invés de interpretativo; h) Envolver-se emocionalmente ao invés de permanecer objetivo; i) Atitude de defesa em lugar de empatia.</div></details>
+
+    <span class="recap-chapter-tag">CAP. 8.5 — Fatores que Tornam Vulnerável a Pessoa do Aconselhador (RECAPITULAÇÃO 8)</span>
+
+    <details class="prova-real-q"><summary>1R8. Mencione três técnicas usadas no aconselhamento</summary>
+      <div class="prova-real-answer">Atenção, ouvir e responder (entre as nove técnicas: atenção, ouvir, responder, refletir, perguntar, confrontar, informar, apoiar e encorajar, ensinar).</div></details>
+
+    <details class="prova-real-q"><summary>2R8. Mencione quatro fatores que atrapalham a motivação para aconselhar</summary>
+      <div class="prova-real-answer">Visita em lugar de aconselhar; pressa em lugar de deliberação; desrespeito em lugar de imparcialidade; condenação em lugar de impessoalidade (ou: subterfúgio, sobrecarga, ser diretivo, envolver-se emocionalmente, atitude de defesa).</div></details>
+
+    <details class="prova-real-q"><summary>3R8. Quais são os dois fatores que tornam vulnerável a pessoa do aconselhador?</summary>
+      <div class="prova-real-answer"><b>Manipulação:</b> os conselheiros manipulados sempre têm pouca utilidade, pois o aconselhado impõe a sua vontade. <b>Resistência:</b> o alívio permanente pode exigir tempo e o paciente não quer perder atenção pessoal — e também aqueles que adquirem um senso de poder e realização quando conseguem frustrar os esforços dos outros.</div></details>
+
+    <span class="recap-chapter-tag">ANEXO — Maturidade e Padrões de Desajustamento (Pr. José Hélio de Lima e Pb. Fabiana Gomes)</span>
+
+    <details class="prova-real-q"><summary>O que é Personalidade?</summary>
+      <div class="prova-real-answer">Não é caráter, mas a maneira como o caráter se manifesta na organização do modo de ser do indivíduo. Na Filosofia, religião e Biologia, hoje fica mais ao processo de individualização da pessoa, que recebe importante contribuição dos traços psíquicos, recebem destacar, recebem importância social do meio de convivência.</div></details>
+
+    <details class="prova-real-q"><summary>Personalidade Desajustada</summary>
+      <div class="prova-real-answer">Desajustamento é um distúrbio caracterizado por conduta desajustada, e nem por isso são mais apropriadas ao mundo. Na categoria de personalidade desajustada apresenta-se: paranoico, ciclotímico, esquizoide.</div></details>
+
+    <span class="recap-chapter-tag">Personalidade Paranoica, Ciclotímica e Esquizoide (RECAPITULAÇÃO 9)</span>
+
+    <details class="prova-real-q"><summary>Paranoico (pergunta) — Essas pessoas não precisam de conceitos com base na ciência?</summary>
+      <div class="prova-real-answer">As características da personalidade paranoica são: desconfiança extrema, postura extremamente defensiva e, na maioria das vezes, agressividade — uma vez que enxerga ameaças nas mais simples atitudes alheias. Irrita-se e foge facilmente, mantém-se em posição rígida diante das pessoas, e por isso tem muitos relacionamentos difíceis.</div></details>
+
+    <details class="prova-real-q"><summary>Ciclotímico</summary>
+      <div class="prova-real-answer">Personalidade caracterizada na atuação do indivíduo em situações ambíguas em que apresentam períodos alternados e repetitivos de orgulho e depressão. Traz-se de uma anomalia emocional definem que a criança e a pessoa se decidam como: "Você pode fazer isso, mas já sabe o que vai acontecer."</div></details>
+
+    <details class="prova-real-q"><summary>Esquizoide</summary>
+      <div class="prova-real-answer">Comportamento que se manifesta nas pessoas com timidez, hipersensibilidade, afastamento e fuga das relações íntimas ou competitivas. A postura é semelhante ao narcisista — tomando formas que ofereçam satisfações próprias. Os pensamentos são autistas: a pessoa está presente no corpo, mas a mente e a alma distantes.</div></details>
+
+    <details class="prova-real-q"><summary>1R9. Personalidade e caráter? Explique</summary>
+      <div class="prova-real-answer">Não são a mesma coisa. Personalidade é o conjunto de traços/máscara que apresentamos ao mundo; caráter são as qualidades morais e éticas reais da pessoa.</div></details>
+
+    <details class="prova-real-q"><summary>2R9. Desajustamento é um distúrbio. Esta frase é falsa ou verdadeira? Justifique</summary>
+      <div class="prova-real-answer">Verdadeira — desajustamento é um distúrbio de conduta na qual a pessoa não se adapta adequadamente às situações ambíguas e cotidianas, manifestando-se de formas variadas (paranoia, ciclotimia, esquizoidia, etc.).</div></details>
+
+    <details class="prova-real-q"><summary>3R9. Quais são as características de uma pessoa com personalidade ciclotímica?</summary>
+      <div class="prova-real-answer">Apresenta períodos alternados e repetitivos de orgulho e depressão, com uma anomalia emocional que faz a pessoa oscilar de humor de forma intensa diante de situações do cotidiano.</div></details>
+
+    <span class="recap-chapter-tag">Histérico, Passivo-Agressivo e Explosivo (Neuroses)</span>
+
+    <details class="prova-real-q"><summary>Histérico</summary>
+      <div class="prova-real-answer">Pessoas egocêntricas, superficiais e fantasiosas, que mentem com facilidade e expressam suas emoções de modo dramático e exagerado, buscando sempre atenção e admiração alheia.</div></details>
+
+    <details class="prova-real-q"><summary>Passivo-Agressivo</summary>
+      <div class="prova-real-answer">Pessoas que assumem postura de hostilidade e resistência de modo indireto — atrasos, esquecimentos propositais, teimosia — em vez de expressar abertamente sua agressividade ou desacordo.</div></details>
+
+    <details class="prova-real-q"><summary>Explosivo</summary>
+      <div class="prova-real-answer">Comportamento caracterizado por explosões repentinas de raiva, desproporcionais ao estímulo, com dificuldade de controlar impulsos diante da frustração.</div></details>
+
+    <details class="prova-real-q"><summary>Terapia Redentiva</summary>
+      <div class="prova-real-answer">A ciência afirma que todo comportamento diante do sexo oposto é apresentado diante de uma homossexualidade reprimida, principalmente quando há mistura de desejos. Em todos os casos, segundo a orientação de Paulo aos Coríntios, a igreja não é alheia a estes temas, ajuda na restauração através da conversão a Cristo e da prática diária da disciplina e da entrega de sentimentos.</div></details>
+
+    <span class="recap-chapter-tag">Ansiedade, Solidão e Neuroses de Ansiedade (RECAPITULAÇÃO 10)</span>
+
+    <details class="prova-real-q"><summary>1R10. Como se manifesta a esquizoide?</summary>
+      <div class="prova-real-answer">Por timidez, hipersensibilidade, afastamento e fuga das relações íntimas e competitivas, com tendência ao isolamento mesmo em meio à multidão.</div></details>
+
+    <details class="prova-real-q"><summary>2R10. Qual é a patologia onde as pessoas podem ficar excitadas diante de pressões ambientais e circunstâncias variáveis, com impossibilidade de manter o controle?</summary>
+      <div class="prova-real-answer">A Ansiedade — reação psíquica e física diante de uma ameaça real ou vivida, ou ainda diante de impulsos e desejos associados a afetos e fantasias inconscientes do próprio neurótico.</div></details>
+
+    <details class="prova-real-q"><summary>3R10. Quais são as características de uma pessoa neurótica?</summary>
+      <div class="prova-real-answer">Sintomas psíquicos e físicos: irritabilidade, mau humor, fadiga, eletricidade (como se estivesse prestes a explodir); fisicamente o sono pode ser alterado com pesadelos, ranger de dentes, discursos noturnos; tonturas ou vertigens, queimações estomacais, náuseas, secura na boca, aperto na garganta, peso e pressão na cabeça, respiração ofegante, palpitações cardíacas, suor nas mãos e tremores generalizados pelo corpo.</div></details>
+
+    <details class="prova-real-q"><summary>Etiopatogenia da Ansiedade</summary>
+      <div class="prova-real-answer">Psicofisiologicamente, a reação de ansiedade se parece com um medo. O medo é resposta a uma ameaça real à vida, já a ansiedade é resposta a um estímulo interno (impulsos ou desejos associados a afetos e fantasias inconscientes) ou a um estímulo externo percebido distorcidamente pelo neurótico.</div></details>
+
+    <details class="prova-real-q"><summary>Solidão</summary>
+      <div class="prova-real-answer">A solidão está voltada ao tratamento sociológico, que faz vai isolado, a multidão pode invadir. São figuras bíblicas como Elias, Jeremias, Jonas, João e mais que viveram a solidão e tiveram homens que andaram com Deus, como Moisés. "Não é bom que o homem fique só" (Gn 2.18) — a comunhão e o convívio são necessários, evitando o isolamento e a distância de Deus e das pessoas.</div></details>
+
+    <span class="recap-chapter-tag">Depressão, Culpa e Reações Morais (RECAPITULAÇÃO 11 + Conclusão)</span>
+
+    <details class="prova-real-q"><summary>1R11. Quais são os dois campos da ansiedade?</summary>
+      <div class="prova-real-answer">Um campo ligado à baixa autoestima, bem como à dificuldade de se relacionar e manter o controle; outro ligado à psicologia da solidão, com pensamentos altamente competitivos e até mesmo busca possessiva de bens, na competição com os outros.</div></details>
+
+    <details class="prova-real-q"><summary>2R11. Na psicologia, a solidão ligada à baixa autoestima, bem como a dificuldade...</summary>
+      <div class="prova-real-answer">...de se relacionar e até mesmo pensamentos altamente competitivos, levando a agirem na busca possessiva de bens, na competição, na dependência psicológica.</div></details>
+
+    <details class="prova-real-q"><summary>3R11. Qual é a principal causa da culpa?</summary>
+      <div class="prova-real-answer">A relação com a experiência passada e não confessada — discernir a natureza do problema, analisando o histórico de vida da pessoa, e partir para a educação moral, que pode ser classificado como método direto de cumprimento e aceitação ou não da causa da culpa, e pôr fim conduzido pela ação do Espírito Santo ao arrependimento e perdão.</div></details>
+
+    <details class="prova-real-q"><summary>Depressão</summary>
+      <div class="prova-real-answer">Pode ter causa biológica ou psicológica. No primeiro caso, a causa é física, o que pode resultar da insuficiência ou excesso de produção de hormônios — no caso das mulheres, a depressão pós-parto (TPM) como também pós-parto. No segundo, a causa está em conflitos psicológicos, perdas e frustrações mal elaboradas.</div></details>
+
+    <details class="prova-real-q"><summary>Culpa</summary>
+      <div class="prova-real-answer">A culpa pode ser compreendida pela ótica teológica/filosófica (a percepção de transgressão diante de Deus, que conduz ao arrependimento) e pela ótica psicológica (sentimento ligado a normas internalizadas, podendo ser saudável ou patológica quando paralisa a pessoa em vez de levá-la à mudança).</div></details>
+
+    <details class="prova-real-q"><summary>O conselheiro deve apoiar e ajudar o aconselhado a...</summary>
+      <div class="prova-real-answer">Elaborar um plano de ataque contra os próprios sentimentos e pensamentos, junto a Deus que vê o que Deus faz, com fé. Quando, onde o paciente quiser, o conselheiro deve apontar e caminhar — não deixando o aconselhado sozinho diante do processo.</div></details>
+
+    <span class="recap-chapter-tag">Revisão Geral (final da apostila)</span>
+
+    <details class="prova-real-q"><summary>1. O que é "atenção flutuante"?</summary>
+      <div class="prova-real-answer">É a capacidade do conselheiro de ouvir tudo sem selecionar, focando-se integralmente na fala do outro, sem se concentrar antecipadamente em uma parte dela para análise.</div></details>
+
+    <details class="prova-real-q"><summary>2. O conselheiro pode fazer perguntas? Explique</summary>
+      <div class="prova-real-answer">Sim, mas apenas as necessárias, para esclarecer detalhes e ajudar o aconselhado a refletir — sem conduzir a conversa nem antecipar soluções.</div></details>
+
+    <details class="prova-real-q"><summary>3. Em que momento do aconselhamento o pastor/conselheiro pode fazer oração?</summary>
+      <div class="prova-real-answer">No meio do processo, antes dos questionamentos ou logo após a fala inicial da ovelha — a oração pode possibilitar ao Espírito Santo ajudar o pastor a realizar sua função (Jo 14.26).</div></details>
+
+    <details class="prova-real-q"><summary>4. Por que tem aconselhamentos pastorais que são ineficazes?</summary>
+      <div class="prova-real-answer">Porque o conselheiro comete erros comuns — não controla reações, julga o que ouve, cataloga o aconselhado, fecha-se em diagnósticos, dá conselhos prontos e deixa de ajudar diante da discordância.</div></details>
+
+    <details class="prova-real-q"><summary>5. Quando um conselheiro fica sabendo que está dando aula no aconselhamento?</summary>
+      <div class="prova-real-answer">Quando percebe que está apenas instruindo/preletando, sem dar espaço para o aconselhado falar de si mesmo, transformando o diálogo numa aula unilateral.</div></details>
+
+    <details class="prova-real-q"><summary>6. Complete: O conselheiro precisa — Ter coragem / Ter compaixão / Ser imparcial</summary>
+      <div class="prova-real-answer"><b>Ter coragem</b> — para apontar verdades difíceis com amor.<br><b>Ter compaixão</b> — para se colocar no lugar do aconselhado.<br><b>Ser imparcial</b> — para não julgar nem tomar partido.</div></details>
+
+    <details class="prova-real-q"><summary>7. Dar [conselhos] parece a coisa mais esperada por parte daquele que é "aconselhador". Acontece que o termo "aconselhador" vem do fato de...</summary>
+      <div class="prova-real-answer">...estar numa sessão de "aconselhamento" — mas o papel correto do conselheiro não é dar conselhos prontos, e sim orientar o aconselhado a encontrar sua própria solução.</div></details>
+
+  </div>
+</div>
+</div>
+
+<!-- ===================== ABA: SIMULADO ===================== -->
+<div class="tab-content" id="view-simulado">
+<div id="app">
+  <div class="top-header">
+    <div class="eyebrow">Teologia Pastoral</div>
+    <h1>Simulado de Aconselhamento Pastoral</h1>
+    <p>Fundamentos, técnicas e tipos de personalidade no aconselhamento bíblico</p>
+  </div>
+
+  <div id="stats-bar" style="display:none">
+    <div class="stat-box">
+      <div class="num" id="s-rodada">1/4</div>
+      <div class="lbl">Rodada</div>
+    </div>
+    <div class="stat-box">
+      <div class="num" id="s-q">1/10</div>
+      <div class="lbl">Questão</div>
+    </div>
+    <div class="stat-box acerto">
+      <div class="num" id="s-acertos">0</div>
+      <div class="lbl">Acertos</div>
+    </div>
+    <div class="stat-box erro">
+      <div class="num" id="s-erros">0</div>
+      <div class="lbl">Erros</div>
+    </div>
+  </div>
+
+  <div id="progress-wrap" style="display:none">
+    <div class="progress-labels">
+      <span>Progresso</span>
+      <span id="prog-label">0 / 25</span>
+    </div>
+    <div class="progress-track">
+      <div id="prog"></div>
+    </div>
+  </div>
+
+  <div id="main"></div>
+</div>
+</div>
+
+<script>
+const ROUND_NAMES = ["Fundamentos do Aconselhamento","Técnicas de Aconselhamento","Personalidade e Caráter","Personalidade, Ansiedade e Culpa"];
+
+const QUESTIONS = [
+[
+{q:"Qual destas características o conselheiro deve EVITAR?",
+ opts:["Ter coragem","Ser imparcial","Ser intrometido","Ser paciente"],
+ c:2, exp:"O conselheiro deve EVITAR ser intrometido. Ele escuta e orienta, mas respeita os limites — não invade a vida do aconselhado."},
+
+{q:"Assinale a alternativa correta sobre a postura do conselheiro:",
+ opts:["O conselheiro deve ter atenção","O conselheiro não precisa confrontar","O conselheiro tem que falar ao invés de ouvir","O conselheiro deve resolver os problemas pelo aconselhado"],
+ c:0, exp:"O conselheiro deve ter ATENÇÃO — a escuta ativa é a principal ferramenta do aconselhamento pastoral."},
+
+{q:"Qual a diferença entre Aconselhamento Preventivo e Aconselhamento Reativo?",
+ opts:["Preventivo ocorre após o problema surgir; reativo ocorre antes","Preventivo ocorre antes do problema surgir, preparando a pessoa; reativo ocorre depois, ajudando a lidar com a crise já instalada","Ambos só se aplicam após o pecado já ter sido cometido","Preventivo é exclusivo para aconselhamento conjugal; reativo é para todos os casos"],
+ c:1, exp:"PREVENTIVO: ocorre antes do problema surgir — orienta, fortalece e prepara a pessoa (ex.: aconselhamento pré-matrimonial). REATIVO: ocorre após o problema já ter surgido — ajuda a pessoa a lidar com a crise, sofrimento ou pecado já instalado."},
+
+{q:"Segundo a apostila, por que alguns aconselhamentos pastorais são ineficazes?",
+ opts:["Porque os aconselhados não têm fé suficiente","Porque o conselheiro fala mais do que ouve, resolve pelo aconselhado, não mantém confidencialidade e comete erros comuns de postura","Porque a Bíblia não trata de problemas emocionais","Porque o aconselhamento deve ser feito somente por psicólogos"],
+ c:1, exp:"Porque o conselheiro: não controla suas reações / julga o que ouve / cataloga o aconselhado / fecha-se em diagnósticos obtidos / dá conselhos prontos / deixa de ajudar diante da discordância."},
+
+{q:"Qual o principal papel do aconselhamento pastoral?",
+ opts:["Saber o que as ovelhas fazem no seu dia a dia","Ter o rebanho sob o conselho pastoral, pois somente eles valem","Cuidar do rebanho, pois esta é a tarefa confiada ao obreiro","Impor regras rígidas ao rebanho"],
+ c:2, exp:"O principal papel é CUIDAR do rebanho — tarefa confiada ao obreiro por Deus (Jo 21.15-17; 1Pe 5.2-3)."},
+
+{q:"O ambiente do aconselhamento deve ser, principalmente:",
+ opts:["Público, para que todos vejam a transparência do processo","Reservado, com privacidade e sem interrupções","Sempre dentro do templo, durante o culto","Virtual, nunca presencial"],
+ c:1, exp:"O ambiente do aconselhamento deve ser reservado, com privacidade e sem interrupções, em que o diálogo possa acontecer livremente."},
+
+{q:"Quais são as três características que o conselheiro precisa ter, segundo a apostila?",
+ opts:["Riqueza, eloquência e popularidade","Coragem, compaixão e imparcialidade","Autoridade, rigidez e formalidade","Timidez, neutralidade total e silêncio"],
+ c:1, exp:"O conselheiro precisa: ter coragem (apontar verdades com amor), ter compaixão (colocar-se no lugar do outro) e ser imparcial (não julgar nem tomar partido)."}
+],
+
+[
+{q:"Quais são três técnicas usadas no aconselhamento, segundo a apostila?",
+ opts:["Repreensão, punição e silêncio total","Atenção, ouvir e responder","Hipnose, sugestão e indução","Apenas oração, sem nenhuma técnica humana"],
+ c:1, exp:"Entre as nove técnicas do capítulo 8.3: atenção, ouvir, responder, refletir, perguntar, confrontar, informar, apoiar/encorajar e ensinar."},
+
+{q:"Qual destas é uma técnica verdadeira de aconselhamento, segundo a apostila?",
+ opts:["O esclarecimento e a reflexão","A repreensão pública","A imposição de regras","O silêncio total durante toda a sessão"],
+ c:0, exp:"VERDADEIRO. Esclarecimento e reflexão são técnicas fundamentais do aconselhamento — ajudam o aconselhado a entender sua situação e a se ouvir."},
+
+{q:"Sobre a técnica do silêncio, é correto afirmar que:",
+ opts:["Nunca deve ser usada, pois é sinal de despreparo do conselheiro","Pode ser usada em momentos de confrontação ou quando a ovelha precisa elaborar por si mesma a dor que sente","Deve substituir toda a conversa do aconselhamento","Só pode ser usada por psicólogos, nunca por pastores"],
+ c:1, exp:"A técnica do silêncio comunica à ovelha 'pense nisso agora' — pode ser usada na confrontação e em momentos de pranto, quando ela precisa aprender a elaborar a própria dor."},
+
+{q:"Qual é o papel correto do conselheiro diante do problema do aconselhado?",
+ opts:["Resolver o problema por ele, buscando soluções prontas","Orientar o aconselhado a encontrar suas próprias soluções","Ignorar o problema até que se resolva sozinho","Encaminhar sempre a outro pastor"],
+ c:1, exp:"FALSO que o conselheiro deve resolver pelo aconselhado. Ele orienta o aconselhado a encontrar suas próprias soluções. Resolver pelo outro gera dependência e não promove crescimento."},
+
+{q:"Sobre a confidencialidade no aconselhamento, o que é correto afirmar?",
+ opts:["O conselheiro deve manter segredo, exceto quando há risco de o aconselhado ferir a si mesmo ou a outrem","O conselheiro pode contar tudo livremente para a igreja","Não existe nenhuma exceção ao sigilo, nem em caso de risco de vida","O sigilo só vale para aconselhamento conjugal"],
+ c:0, exp:"VERDADEIRO. O conselheiro tem obrigação de manter em segredo as informações confidenciais. A única exceção é quando há risco de o aconselhado ferir a si mesmo ou a outrem."},
+
+{q:"É correto afirmar que Jesus usou técnicas de aconselhamento?",
+ opts:["Não, pois Ele era Deus e não precisava de técnicas","Sim, Ele usou perguntas, escuta ativa e confrontação gentil, sendo o modelo perfeito de conselheiro","Sim, mas apenas a técnica do silêncio","Não há registro bíblico disso"],
+ c:1, exp:"FALSO que Jesus não usou nenhuma técnica. Jesus usou várias: perguntas, escuta ativa, reflexão, confrontação gentil. Ele é o modelo perfeito de conselheiro."},
+
+{q:"O que o aconselhamento visa, segundo a apostila?",
+ opts:["Apenas dar conselhos rápidos sem envolvimento","A comunicação e o apoio, pois ninguém é uma ilha","Substituir a oração pessoal","Evitar qualquer tipo de proximidade emocional"],
+ c:1, exp:"FALSO que o aconselhamento não visa comunicação nem apoio. Ele visa exatamente isso — ninguém é uma ilha. Todos precisam de ajuda em algum momento da vida."},
+
+{q:"Qual o papel educativo do conselheiro, segundo a apostila?",
+ opts:["Ensinar princípios bíblicos e estratégias para lidar com os problemas da vida","Apenas escutar sem ensinar nada","Dar lições de teologia sistemática","Corrigir publicamente os erros do aconselhado"],
+ c:0, exp:"VERDADEIRO. O conselheiro é um educador — ensina o aconselhado a enfrentar os problemas da vida (técnica 'i' do cap. 8.3)."},
+
+{q:"Quais são fatores que atrapalham a motivação para aconselhar?",
+ opts:["Visita em lugar de aconselhar, pressa em lugar de deliberação, desrespeito em lugar de imparcialidade","Excesso de oração e jejum","Falta de recursos financeiros na igreja","Excesso de tempo disponível"],
+ c:0, exp:"Entre os fatores: visita em vez de aconselhar; pressa em vez de deliberação; desrespeito em vez de imparcialidade; condenação em vez de impessoalidade; sobrecarregar; ser diretivo; envolver-se emocionalmente; atitude de defesa em vez de empatia."}
+],
+
+[
+{q:"Personalidade e caráter são a mesma coisa?",
+ opts:["Sim, são sinônimos perfeitos","Não — personalidade é a 'máscara social' que mostramos; caráter são as qualidades morais que realmente somos","Não, pois caráter é genético e personalidade é espiritual","Sim, ambos mudam apenas com a idade"],
+ c:1, exp:"NÃO. São conceitos distintos. PERSONALIDADE: vem do grego 'persona' (máscara usada por atores) — é o conjunto de traços que apresentamos ao mundo. CARÁTER: é o conjunto de qualidades morais e éticas que definem quem realmente somos por dentro."},
+
+{q:"Personalidade e caráter, segundo a apostila, são:",
+ opts:["A mesma coisa, apenas com nomes diferentes","Conceitos distintos — a personalidade é o que mostramos, o caráter é o que realmente somos","Ambos determinados unicamente pela genética","Irrelevantes para o aconselhamento"],
+ c:1, exp:"FALSO que personalidade é caráter. São conceitos distintos: a personalidade (máscara social) e o caráter (qualidades morais internas)."},
+
+{q:"Qual a origem/definição grega do termo 'Personalidade'?",
+ opts:["Vem do hebraico e significa 'alma viva'","Os gregos entendiam como algo concreto, ou a máscara usada por um ator para determinado papel","Significa apenas o caráter moral da pessoa","É um termo exclusivamente bíblico, sem origem grega"],
+ c:1, exp:"GABARITO: os gregos entendiam 'persona' como algo concreto, a máscara usada por um ator para determinado papel — daí vem o termo 'personalidade'."},
+
+{q:"O que caracteriza a personalidade Ciclotímica?",
+ opts:["Períodos alternados e repetitivos de orgulho e depressão","Desconfiança extrema e agressividade","Egocentrismo e fantasia, mentindo com facilidade","Baixa autoestima levando ao suicídio"],
+ c:0, exp:"GABARITO: Ciclotímico = períodos alternados e repetitivos de orgulho e depressão."},
+
+{q:"O que caracteriza a personalidade Paranoica, segundo a apostila?",
+ opts:["Distorção da realidade ao aumentarem as responsabilidades","Desconfiança, postura extremamente defensiva e, na maioria das vezes, agressividade","Períodos alternados de orgulho e depressão","Máscara usada para um papel social"],
+ c:1, exp:"VERDADEIRO. Os sintomas do paranoico são: desconfiança, extremamente defensivo, e na maioria das vezes agressivo — geralmente formada em lares com atmosfera de dúvidas, medos e incertezas."},
+
+{q:"O que caracteriza a personalidade Esquizoide, segundo a apostila?",
+ opts:["Extroversão excessiva e busca por atenção","Timidez, hipersensibilidade, afastamento e fuga das relações íntimas ou competitivas","Alegria constante e otimismo exagerado","Agressividade explosiva e impulsividade"],
+ c:1, exp:"A esquizoide se manifesta com timidez, hipersensibilidade, afastamento e fuga das relações íntimas ou competitivas, com tendência ao isolamento mesmo em meio à multidão."},
+
+{q:"O que caracteriza as Neuroses, segundo a apostila?",
+ opts:["Distorcem a realidade e surgem com o aumento das responsabilidades","Egocentrismo e superficialidade","Desconfiança extrema","Timidez e fuga das relações íntimas"],
+ c:0, exp:"GABARITO: Neuroses = distorcem a realidade e surge com aumento das responsabilidades."},
+
+{q:"O que caracteriza a personalidade Histérica?",
+ opts:["Pessoas egocêntricas, superficiais e fantasiosas, que mentem com facilidade","Pessoas tímidas que fogem de relações íntimas","Pessoas com baixa autoestima e tendência suicida","Pessoas desconfiadas e agressivas"],
+ c:0, exp:"GABARITO: Histérico = pessoas egocêntricas, superficiais e fantasiosas, mentem com facilidade."},
+
+{q:"O que caracteriza o quadro de Depressão, segundo a apostila?",
+ opts:["Alegria excessiva e euforia constante","Baixa autoestima e retraimento, podendo levar até o suicídio","Desconfiança extrema dos outros","Fantasia e mentira fácil"],
+ c:1, exp:"GABARITO: Depressão = baixa autoestima e retraimento, levando-a até o suicídio muitas vezes."}
+],
+
+[
+{q:"Como se manifesta a personalidade esquizoide, segundo a apostila?",
+ opts:["Com extroversão excessiva e busca constante por atenção","Com timidez, hipersensibilidade, afastamento e fuga das relações íntimas ou competitivas","Com agressividade extrema e desconfiança","Com alternância entre orgulho e depressão"],
+ c:1, exp:"O esquizoide é um comportamento que se manifesta nas pessoas com timidez, hipersensibilidade, afastamento e fuga das relações íntimas ou competitivas. A pessoa tende ao isolamento, evita conflitos e demonstra pouca ou nenhuma agressividade."},
+
+{q:"Qual é a principal causa da culpa, segundo a apostila?",
+ opts:["A alegria quando se lembra do incidente ocorrido","Vergonha dos amigos pelo resto da vida","A relação com a experiência passada e não confessada","Falta de oração diária"],
+ c:2, exp:"A principal causa da culpa é a relação com experiências passadas não confessadas — pecados ou situações não resolvidas que pesam na consciência."},
+
+{q:"Quais são os dois campos da Ansiedade, segundo a apostila?",
+ opts:["Ansiedade física e ansiedade espiritual","Um ligado à baixa autoestima e dificuldade de se relacionar e manter o controle; outro ligado à psicologia da solidão e à busca possessiva de bens","Ansiedade infantil e ansiedade adulta","Ansiedade causada apenas por traumas familiares"],
+ c:1, exp:"Há dois campos na ansiedade: um ligado à baixa autoestima, à dificuldade de se relacionar e de manter o controle; e outro ligado à psicologia da solidão, com pensamentos altamente competitivos e busca possessiva de bens."},
+
+{q:"Quais são os sintomas característicos da personalidade paranoica?",
+ opts:["Desconfiança, postura extremamente defensiva e, na maioria das vezes, agressividade","Timidez extrema e isolamento total","Alegria constante e otimismo exagerado","Alternância entre orgulho e depressão"],
+ c:0, exp:"VERDADEIRO. Os sintomas do paranoico são: desconfiança, extremamente defensivo, e na maioria das vezes agressivo."},
+
+{q:"O que é a Etiopatogenia da ansiedade, segundo a apostila?",
+ opts:["A cura definitiva e imediata da ansiedade","A explicação de que a reação de ansiedade se parece com um medo, mas o medo é resposta a uma ameaça real, enquanto a ansiedade é resposta a um estímulo interno ou externo distorcido","A genética como única causa da ansiedade","A ausência total de sintomas físicos"],
+ c:1, exp:"Psicofisiologicamente, a reação de ansiedade se parece com um medo. O medo é resposta a uma ameaça real à vida; já a ansiedade é resposta a um estímulo interno (impulsos/desejos inconscientes) ou a um estímulo externo percebido distorcidamente pelo neurótico."},
+
+{q:"Segundo a apostila, a Depressão pode ter origem:",
+ opts:["Apenas espiritual","Biológica (hormonal) ou psicológica (conflitos, perdas e frustrações mal elaboradas)","Apenas hereditária, sem nenhuma influência emocional","Exclusivamente alimentar"],
+ c:1, exp:"A depressão pode ter causa biológica (insuficiência ou excesso de hormônios, como na depressão pós-parto) ou causa psicológica (conflitos, perdas e frustrações mal elaboradas)."}
+]
+];
+
+const TOTAL_Q = 7+9+9+6;
+const N_ROUNDS = 4;
+
+let round = 0, qIdx = 0, answered = false;
+let totalAcertos = 0, totalErros = 0;
+let roundAcertos = 0;
+let qDoneBefore = 0; // questions completed in previous rounds
+const LETTERS = ['A','B','C','D'];
+
+function getEl(id){ return document.getElementById(id); }
+
+function roundSize(r){ return QUESTIONS[r].length; }
+
+function updateStats(){
+  const totalQ = qDoneBefore + qIdx;
+  const pct = totalQ / TOTAL_Q * 100;
+  getEl('prog').style.width = pct + '%';
+  getEl('prog-label').textContent = totalQ + ' / ' + TOTAL_Q;
+  getEl('s-rodada').textContent = (round+1)+'/'+N_ROUNDS;
+  getEl('s-q').textContent = (qIdx+1)+'/'+roundSize(round);
+  getEl('s-acertos').textContent = totalAcertos;
+  getEl('s-erros').textContent = totalErros;
+}
+
+function showHUD(visible){
+  getEl('stats-bar').style.display = visible ? 'grid' : 'none';
+  getEl('progress-wrap').style.display = visible ? 'block' : 'none';
+}
+
+function showStart(){
+  showHUD(false);
+  getEl('main').innerHTML = `
+    <div class="start-screen">
+      <div class="icon">🤝</div>
+      <h2>Simulado de Aconselhamento Pastoral</h2>
+      <p>Fundamentos, técnicas e tipos de personalidade no aconselhamento bíblico</p>
+      <div class="info-grid">
+        <div class="info-box"><div class="n">${N_ROUNDS}</div><div class="l">Rodadas</div></div>
+        <div class="info-box"><div class="n">${TOTAL_Q}</div><div class="l">Questões</div></div>
+        <div class="info-box"><div class="n">~15</div><div class="l">Minutos</div></div>
+      </div>
+      <button class="big-btn" onclick="startQuiz()">Começar o Simulado →</button>
+    </div>`;
+}
+
+function startQuiz(){
+  round = 0; qIdx = 0; totalAcertos = 0; totalErros = 0; roundAcertos = 0; qDoneBefore = 0;
+  showHUD(true);
+  showQuestion();
+}
+
+function showQuestion(){
+  answered = false;
+  updateStats();
+  const q = QUESTIONS[round][qIdx];
+  const rSize = roundSize(round);
+
+  const optsHTML = q.opts.map((o,i) => `
+    <button class="opt-btn" id="opt${i}" onclick="answer(${i})">
+      <span class="letter">${LETTERS[i]}</span>
+      <span>${o}</span>
+    </button>`).join('');
+
+  getEl('main').innerHTML = `
+    <div class="q-card">
+      <div class="round-badge">Rodada ${round+1} — ${ROUND_NAMES[round]}</div>
+      <div class="q-num">Questão ${qIdx+1} de ${rSize}</div>
+      <div class="q-text">${q.q}</div>
+      <div class="options">${optsHTML}</div>
+      <div id="feedback"></div>
+    </div>`;
+}
+
+function answer(idx){
+  if(answered) return;
+  answered = true;
+  const q = QUESTIONS[round][qIdx];
+  const correct = idx === q.c;
+  if(correct){ totalAcertos++; roundAcertos++; }
+  else { totalErros++; }
+  updateStats();
+
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach(b => b.disabled = true);
+  btns[idx].classList.add(correct ? 'correct' : 'wrong');
+  if(!correct) btns[q.c].classList.add('reveal-correct');
+
+  const icon = correct ? '✓ Correto!' : '✗ Incorreto';
+  const cls = correct ? 'ok' : 'err';
+  const rSize = roundSize(round);
+  getEl('feedback').innerHTML = `
+    <div class="feedback-box ${cls}">
+      <strong>${icon}</strong>
+      ${q.exp}
+    </div>
+    <button class="next-btn" onclick="nextQuestion()">
+      ${qIdx < rSize-1 ? 'Próxima questão →' : 'Ver resultado da rodada →'}
+    </button>`;
+}
+
+function nextQuestion(){
+  const rSize = roundSize(round);
+  if(qIdx < rSize-1){
+    qIdx++;
+    showQuestion();
+  } else {
+    showRoundResult();
+  }
+}
+
+function showRoundResult(){
+  const rSize = roundSize(round);
+  const pct = Math.round(roundAcertos / rSize * 100);
+  let emoji = pct >= 80 ? '🏆' : pct >= 60 ? '👍' : '📚';
+  let msg = pct >= 80 ? 'Excelente! Você domina este tema.' : pct >= 60 ? 'Bom resultado! Continue estudando.' : 'Estude mais este conteúdo antes de prosseguir.';
+
+  getEl('main').innerHTML = `
+    <div class="round-result">
+      <div style="font-size:48px;margin-bottom:12px">${emoji}</div>
+      <h2>Resultado da Rodada ${round+1}</h2>
+      <div class="rs">${roundAcertos}/${rSize}</div>
+      <p>${pct}% de acertos — ${msg}</p>
+      ${round < N_ROUNDS-1 ? `<button class="big-btn" onclick="nextRound()">Próxima Rodada →</button>` : `<button class="big-btn gold" onclick="showFinalResult()">Ver Resultado Final 🏁</button>`}
+    </div>`;
+}
+
+function nextRound(){
+  qDoneBefore += roundSize(round);
+  round++;
+  qIdx = 0;
+  roundAcertos = 0;
+  showQuestion();
+}
+
+function showFinalResult(){
+  const pct = Math.round(totalAcertos / TOTAL_Q * 100);
+  let medal = pct >= 90 ? '🥇' : pct >= 75 ? '🥈' : pct >= 60 ? '🥉' : '📚';
+  let msg = pct >= 90 ? 'Parabéns! Você tem um domínio excelente do conteúdo. Está pronto para a prova!'
+    : pct >= 75 ? 'Muito bom! Revise os tópicos em que errou e você estará pronto.'
+    : pct >= 60 ? 'Bom esforço! Recomendamos reler os capítulos com mais erros.'
+    : 'Continue estudando! Releia o material com calma e refaça o simulado.';
+
+  getEl('prog').style.width = '100%';
+  getEl('prog-label').textContent = TOTAL_Q + ' / ' + TOTAL_Q;
+  getEl('s-rodada').textContent = N_ROUNDS+'/'+N_ROUNDS;
+  getEl('s-acertos').textContent = totalAcertos;
+  getEl('s-erros').textContent = totalErros;
+
+  getEl('main').innerHTML = `
+    <div class="result-screen">
+      <div class="medal">${medal}</div>
+      <h2>Simulado Concluído!</h2>
+      <div class="score">${totalAcertos}<span>/${TOTAL_Q}</span></div>
+      <div class="result-grid">
+        <div class="result-stat g"><div class="n">${totalAcertos}</div><div class="l">Acertos</div></div>
+        <div class="result-stat r"><div class="n">${totalErros}</div><div class="l">Erros</div></div>
+        <div class="result-stat"><div class="n">${pct}%</div><div class="l">Aproveitamento</div></div>
+        <div class="result-stat"><div class="n">${N_ROUNDS}</div><div class="l">Rodadas</div></div>
+      </div>
+      <div class="result-msg">${msg}</div>
+      <button class="big-btn" onclick="location.reload()" style="margin-bottom:12px">Refazer o Simulado 🔄</button>
+    </div>`;
+}
+
+showStart();
+</script>
+
+<script>
+function showTab(name) {
+  ['simulado','recap','prova'].forEach(t => {
+    document.getElementById('view-' + t).classList.toggle('active', t === name);
+    document.getElementById('tabbtn-' + t).classList.toggle('active', t === name);
+  });
+  window.scrollTo(0,0);
+}
+showTab('simulado');
+</script>
+</body>
+</html>
