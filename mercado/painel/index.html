@@ -550,9 +550,9 @@ function lerArquivo(f){
       nome: String(p.name||p.nome||'').trim(),
       marca: String(p.brand||p.marca||'').trim(),
       categoria: String(p.category||p.categoria||'').trim(),
-      preco: Math.round(num(p.price ?? p.preco ?? p.precoVenda)*100)/100,
+      preco: Math.round(num(p.price ?? p.preco ?? p.precoVenda)*((p.saleType==='peso' && p.preco100g) ? 10 : 1)*100)/100, // frios com preço por 100 g: o site mostra por kg
       tipo_venda: (p.saleType||p.tipo_venda)==='peso' ? 'peso' : 'unidade',
-      estoque: Math.round(num(p.stock ?? p.estoque)*1000)/1000,
+      estoque: p.semEstoque ? 999 : Math.round(num(p.stock ?? p.estoque)*1000)/1000, // "Não controlar estoque" no gestor: sempre disponível
       ean: String(p.barcode||p.codigoBarras||p.codigo_barras||p.ean||p.gtin||'').replace(/\D/g,''),
       fotoOriginal: p.photoBase64 || p.foto || null,
       fotoPronta: !!p.foto && !p.photoBase64
