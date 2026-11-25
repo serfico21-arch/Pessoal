@@ -611,7 +611,7 @@ button.destaque{width:100%;font:inherit;text-align:left;cursor:pointer}
 [data-theme=dark] .sh-redes [data-rede-sh=x] i{color:#fff}
 .sh-mais{width:100%;justify-content:center;margin-top:10px}
 .sh-aviso{min-height:22px;margin-top:10px;font-weight:700;font-size:15px;color:var(--em)}
-/* FIM DAS MELHORIAS DE LEITURA */
+FIM DAS MELHORIAS DE LEITURA
 
 /* ── PAINÉIS DOS MEUS SITES (aba "Meus Sites") ── */
 .pn-card{display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:24px;margin:0 0 14px;border:1px solid color-mix(in srgb,var(--c) 45%,var(--line));background:linear-gradient(150deg,color-mix(in srgb,var(--c) 16%,var(--card)),var(--card))}
@@ -625,6 +625,16 @@ button.destaque{width:100%;font:inherit;text-align:left;cursor:pointer}
 .pn-dica{display:flex;gap:10px;padding:14px 16px;border-radius:16px;background:var(--okbg);font-size:14px;line-height:1.45;margin:4px 0 16px}
 .pn-dica i{font-size:22px;color:var(--em);flex:none}
 .pn-mudar{background:none;border:0;color:var(--texto-muted);font-size:13px;text-decoration:underline;cursor:pointer;align-self:flex-start;padding:4px 0}
+
+/* SUB-ABAS (Divulgação › Redes Sociais) */
+.sub-abas{display:grid;gap:10px;margin:10px 0 6px}
+@media(min-width:700px){.sub-abas{grid-template-columns:1fr 1fr}}
+.sub-aba{display:flex;align-items:center;gap:14px;width:100%;padding:16px 18px;border-radius:18px;border:1px solid color-mix(in srgb,var(--c) 45%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--c) 16%,var(--card)),var(--card) 80%);color:inherit;font:inherit;text-align:left;cursor:pointer;min-height:68px}
+.sub-aba>i:first-child{font-size:28px;color:var(--c);flex:none}
+.sub-aba span{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.sub-aba b{font-size:18px}.sub-aba small{font-size:14px;color:var(--texto-muted)}
+.sub-aba>i:last-child{color:var(--texto-muted);font-size:22px}
+.voltar-sub{display:inline-flex;align-items:center;gap:8px;margin:4px 0 10px;padding:10px 16px;min-height:46px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:inherit;font:700 15px/1 inherit;cursor:pointer}
 </style>
 </head>
 <body data-view="inicio">
@@ -647,15 +657,18 @@ var t0=Date.now(),fim=function(){setTimeout(function(){a.style.opacity="0";setTi
 <nav class="dock" aria-label="Áreas do painel">
   <button type="button" data-go="inicio" style="--c:var(--brand)"><i class="ti ti-layout-dashboard"></i>Início</button>
   <button type="button" data-go="favoritos" style="--c:var(--am)"><i class="ti ti-star"></i>Favoritos</button>
-  <button type="button" data-go="controle" style="--c:var(--sl)"><i class="ti ti-adjustments-horizontal"></i>Controle</button>
   <button type="button" data-go="corretor" style="--c:var(--em)"><i class="ti ti-building-skyscraper"></i>Corretor</button>
+  <button type="button" data-go="divulgacao" style="--c:var(--or)"><i class="ti ti-speakerphone"></i>Divulgação</button>
+  <button type="button" data-go="midia" style="--c:var(--ro)"><i class="ti ti-camera"></i>Fotos e Vídeos</button>
   <button type="button" data-go="contratos" style="--c:var(--vi)"><i class="ti ti-file-certificate"></i>Contratos</button>
+  <button type="button" data-go="documentos" style="--c:var(--sk)"><i class="ti ti-folders"></i>Documentos</button>
+  <button type="button" data-go="ia" style="--c:var(--li)"><i class="ti ti-brain"></i>I.A.</button>
   <button type="button" data-go="pessoal" style="--c:var(--cy)"><i class="ti ti-user"></i>Pessoal</button>
   <button type="button" data-go="pastor" style="--c:var(--pk)"><i class="ti ti-book-2"></i>Pastor</button>
   <span id="dock-extra" style="display:contents"></span>
   <a href="construtoras.html" style="--c:var(--ro)"><i class="ti ti-building-factory-2"></i>Construtoras</a>
-  <button type="button" data-go="redes" style="--c:var(--sk)"><i class="ti ti-share"></i>Redes</button>
   <button type="button" data-go="paineis" style="--c:var(--am)"><i class="ti ti-world"></i>Meus Sites</button>
+  <button type="button" data-go="controle" style="--c:var(--sl)"><i class="ti ti-adjustments-horizontal"></i>Controle</button>
   <button type="button" data-go="sumario" style="--c:var(--or)"><i class="ti ti-list-letters"></i>Sumário</button>
   <button type="button" data-go="mapa" style="--c:var(--li)"><i class="ti ti-sitemap"></i>Mapa</button>
 </nav>
@@ -838,21 +851,27 @@ var t0=Date.now(),fim=function(){setTimeout(function(){a.style.opacity="0";setTi
      b = selo, ex.: "Novo" (opcional)
    ═══════════════════════════════════════════════════════════════════ */
 var GRUPOS = {
+  /* d = aba principal onde a categoria aparece (divulgacao, midia, contratos, documentos, ia). Sem d = aba Corretor. */
   corretor: [
-    { id: "anuncios",   n: "Publicações",                      i: "ti-send",             c: "--am", s: "Central do Publicador: publicar, divulgar e controlar os posts" },
-    { id: "criar",      n: "Criar Material de Divulgação",     i: "ti-photo-edit",       c: "--or", s: "Banner, texto, QR Code, vídeo, voz e foto editor" },
-    { id: "clientes",   n: "Clientes e Visitas",               i: "ti-users",            c: "--sk", s: "Leads, visitas e contato com o cliente" },
+    { id: "clientes",   n: "Clientes e Visitas",               i: "ti-users",            c: "--sk", s: "Leads, visitas, captação e contato com o cliente" },
     { id: "consulta",   n: "Consultas: Imóvel e Locatário",    i: "ti-file-search",      c: "--or", s: "Matrícula, mapa, IPTU, cartórios e análise do locatário" },
     { id: "avaliacao",  n: "Avaliação e Vistoria",             i: "ti-home-search",      c: "--cy", s: "Preço, áreas e vistoria do imóvel" },
     { id: "calculos",   n: "Cálculos e Simulações",            i: "ti-calculator",       c: "--em", s: "Comissão, impostos, financiamento e valores" },
     { id: "correspondente", n: "Correspondente Bancário",      i: "ti-building-bank",    c: "--am", s: "Financiamento: simulador, bancos, MCMV, FGTS e documentos" },
-    { id: "contratos",  n: "Contratos e Autorizações",         i: "ti-file-certificate", c: "--vi", s: "Autorizações de venda e editor de contratos" },
-    { id: "documentos", n: "Documentação e Arquivos",          i: "ti-folders",          c: "--cy", s: "Checklists, orçamento de documentos e meus arquivos" },
     { id: "cdhu",       n: "CDHU: Cessão e Venda de Imóvel",   i: "ti-building-community", c: "--am", s: "Painel, guia, contratos de cessão e recibos de imóveis CDHU" },
     { id: "locacao",    n: "Locação: Recibos e Aluguéis",      i: "ti-key",              c: "--em", s: "Inquilinos, recibos, vencimentos e controle de aluguéis" },
-    { id: "financas",   n: "Finanças e Metas",                 i: "ti-report-money",     c: "--or", s: "Controle financeiro e metas do mês" },
-    { id: "ia",         n: "I.A.: Agentes, Ferramentas e Cursos", i: "ti-brain",            c: "--ro", s: "Agentes de atendimento, ferramentas, guias e apostilas de inteligência artificial" },
-    { id: "utilidades", n: "Utilidades e Sites",               i: "ti-tool",             c: "--sk", s: "Assinatura, senhas e sites" }
+    { id: "financas",   n: "Finanças e Metas",                 i: "ti-report-money",     c: "--or", s: "Controle financeiro, comissões e metas do mês" },
+    { id: "utilidades", n: "Utilidades e Sites",               i: "ti-tool",             c: "--sk", s: "Senhas e sites" },
+    { id: "anuncios",   n: "Publicar e Anunciar",              i: "ti-send",             c: "--am", d: "divulgacao", s: "Central do Publicador, vitrine, captação, portais e tráfego pago" },
+    { id: "redes",      n: "Redes Sociais",                    i: "ti-share",            c: "--sk", d: "divulgacao", s: "WhatsApp, Facebook e automação das redes" },
+    { id: "textos",     n: "Textos, QR Code e Assinatura",     i: "ti-writing",          c: "--or", d: "divulgacao", s: "Texto do anúncio, contador, QR Code e assinatura" },
+    { id: "fotos",      n: "Fotos e Imagens",                  i: "ti-photo-edit",       c: "--ro", d: "midia", s: "Editar fotos, colocar a logo e fazer banner" },
+    { id: "videos",     n: "Vídeos e Voz",                     i: "ti-movie",            c: "--vi", d: "midia", s: "Tour em vídeo, TV FCosta, gravador e voz" },
+    { id: "contratos",  n: "Venda e Autorizações",             i: "ti-file-certificate", c: "--vi", d: "contratos", s: "Autorizações de venda assinadas pelo celular" },
+    { id: "documentos", n: "Documentação e Arquivos",          i: "ti-folders",          c: "--cy", d: "documentos", s: "Checklists, orçamento de documentos e meus arquivos" },
+    { id: "ia",         n: "Agentes de Atendimento",           i: "ti-robot",            c: "--li", d: "ia", s: "Os agentes que atendem e acompanham os clientes" },
+    { id: "ia-ferramentas", n: "Ferramentas de I.A.",          i: "ti-brain",            c: "--ro", d: "ia", s: "Modelo, valor do m², automação e IAs gratuitas" },
+    { id: "ia-cursos",  n: "Cursos e Apostilas de I.A.",       i: "ti-school",           c: "--cy", d: "ia", s: "Aprender a usar a inteligência artificial" }
   ],
   contratos: [
     { id: "residencial", n: "Locação Residencial", i: "ti-home",           c: "--em", s: "Casas, apartamentos e kitnets" },
@@ -876,19 +895,29 @@ var GRUPOS = {
 };
 
 var FERRAMENTAS = [
+  {m:"corretor", g:"anuncios", t:"Painel de Divulgação", s:"O que divulgar hoje", i:"ti-speakerphone", h:"painel-divulgacao.html", k:"divulgar hoje plano posts", b:"Novo"},
+  {m:"corretor", g:"anuncios", t:"Onde Anunciar", s:"Atalhos para portais, sites e redes onde anunciar", i:"ti-world-share", h:"anunciar.html", k:"portais zap olx viva real anunciar sites", b:"Novo"},
+  {m:"corretor", g:"anuncios", t:"Tráfego Pago", s:"Anúncios pagos no Facebook, Instagram e Google", i:"ti-chart-arrows-vertical", h:"trafego.html", k:"trafego pago anuncio patrocinado meta ads google ads", b:"Novo"},
+  {m:"corretor", g:"anuncios", t:"Vitrine de Imóveis", s:"Página dos imóveis à venda para mandar ao cliente", i:"ti-building-store", h:"portfolio-fcosta.html", k:"portfolio vitrine imoveis venda cliente", b:"Novo"},
+  {m:"corretor", g:"anuncios", t:"Anuncie seu Imóvel (Captação)", s:"Página onde o dono manda os dados e as fotos do imóvel", i:"ti-home-plus", h:"captacao-fcosta.html", k:"captacao proprietario anuncie fotos dono", b:"Novo"},
+  {m:"corretor", g:"fotos", t:"Fotos e Book", s:"Editar fotos e colocar a sua logo", i:"ti-photo-edit", h:"foto-editor.html", k:"foto editor book logo marca dagua imagem", b:"Novo"},
+  {m:"corretor", g:"videos", t:"Tour de Imóveis", s:"Fazer um vídeo do imóvel a partir das fotos", i:"ti-movie", h:"tour-imoveis.html", k:"video tour fotos reels", b:"Novo"},
+  {m:"corretor", g:"videos", t:"TV FCosta", s:"Seus imóveis em vídeo, num canal só", i:"ti-device-tv", h:"tv-fcosta.html", k:"tv videos canal imoveis", b:"Novo"},
+  {m:"corretor", g:"videos", t:"Gravador com Teleprompter", s:"Grave vídeo lendo o roteiro na tela", i:"ti-video", h:"gravador-teleprompter.html", k:"gravar video roteiro teleprompter"},
+  {m:"corretor", g:"clientes", t:"Gestor de Leads", s:"Contatos interessados e o andamento de cada um", i:"ti-address-book", h:"gestor-leads.html", k:"leads contatos interessados", b:"Novo"},
+  {m:"corretor", g:"clientes", t:"Agenda de Visitas", s:"Visitas marcadas aos imóveis", i:"ti-calendar-time", h:"agenda-visitas.html", k:"agenda visitas imoveis", b:"Novo"},
   {m:"corretor", g:"ia", t:"Atendimento FCosta", s:"Página principal dos agentes: atendimento a novos clientes, mensagens, follow-up, áudio no WhatsApp e listas", i:"ti-robot", h:"atendimento-fcosta.html", k:"ia i.a inteligência artificial agentes atendimento fcosta corretor agentes novo cliente áudio weseller prospecção whatsapp follow-up roteiro ligação linkedin e-mail lista limpar mailchimp voz narração ia divulgação mensagens", b:"Novo", d:1},
   {m:"corretor", g:"ia", t:"Bancada de Agentes", s:"Abrir direto a bancada e usar os agentes", i:"ti-layout-dashboard", h:"atendimento-fcosta.html#bancada", k:"ia i.a inteligência artificial agentes bancada agentes fcosta corretor usar abrir"},
   {m:"corretor", g:"ia", t:"Os 17 Agentes", s:"Ver a lista completa dos agentes", i:"ti-users-group", h:"atendimento-fcosta.html#agentes", k:"ia i.a inteligência artificial agentes 17 agentes lista atendimento fcosta corretor"},
   {m:"corretor", g:"ia", t:"Como Funciona", s:"Passo a passo dos agentes", i:"ti-help-circle", h:"atendimento-fcosta.html#como", k:"ia i.a inteligência artificial agentes como funciona agentes fcosta corretor passo a passo ajuda"},
-  {m:"corretor", g:"criar", t:"Gerador de QR Code", s:"Para anúncios de imóveis", i:"ti-qrcode", h:"gerador-qrcode.html", k:"gerador qr code anúncio imóveis"},
-  {m:"corretor", g:"criar", t:"Descrição de Imóvel", s:"Gerar texto de anúncio", i:"ti-file-text", h:"descricao-imovel.html", k:"descrição de imóvel gerar texto anúncio"},
-  {m:"corretor", g:"criar", t:"Banner de Imóvel", s:"Anúncio com foto e preço", i:"ti-photo", h:"banner-imovel.html", k:"banner de imóvel anúncio foto preço stories"},
-  {m:"corretor", g:"criar", t:"Contador de Caracteres", s:"Para textos de anúncio", i:"ti-text-size", h:"contador-caracteres.html", k:"contador de caracteres olx instagram"},
-  {m:"corretor", g:"criar", t:"Texto em Voz", s:"Ouvir qualquer texto, com download", i:"ti-microphone", h:"texto-em-voz.html", k:"texto em voz narração áudio"},
+  {m:"corretor", g:"textos", t:"Gerador de QR Code", s:"Para anúncios de imóveis", i:"ti-qrcode", h:"gerador-qrcode.html", k:"gerador qr code anúncio imóveis"},
+  {m:"corretor", g:"textos", t:"Descrição de Imóvel", s:"Gerar texto de anúncio", i:"ti-file-text", h:"descricao-imovel.html", k:"descrição de imóvel gerar texto anúncio"},
+  {m:"corretor", g:"fotos", t:"Banner de Imóvel", s:"Anúncio com foto e preço", i:"ti-photo", h:"banner-imovel.html", k:"banner de imóvel anúncio foto preço stories"},
+  {m:"corretor", g:"textos", t:"Contador de Caracteres", s:"Para textos de anúncio", i:"ti-text-size", h:"contador-caracteres.html", k:"contador de caracteres olx instagram"},
+  {m:"corretor", g:"videos", t:"Texto em Voz", s:"Ouvir qualquer texto, com download", i:"ti-microphone", h:"texto-em-voz.html", k:"texto em voz narração áudio"},
   {m:"corretor", g:"anuncios", t:"Central do Publicador", s:"Publicar imóveis, textos por rede, grupos, plano do dia e ferramentas de divulgação", i:"ti-send", h:"divulgacao.html", k:"publicações publicacao publicador central divulgação divulgar anunciar tráfego tour foto editor tv kit portfólio painel adm redes sociais grupos", d:1, b:"Novo"},
   {m:"corretor", g:"anuncios", t:"Portfólio editor", s:"Cadastrar e editar imóveis e exportar a vitrine", i:"ti-settings", h:"portfolio-admin.html", k:"portfólio portfolio painel admin cadastrar editar imóveis exportar vitrine"},
   {m:"corretor", g:"correspondente", t:"Central do Correspondente", s:"Simulador SAC/Price, bancos, MCMV, FGTS, documentos e guia", i:"ti-building-bank", h:"https://fcostacorretor.com/correspondente", k:"central do correspondente bancário financiamento simulador sac price mcmv minha casa minha vida fgts subsídio caixa aqui cca bancos taxas renda mínima documentos certificação febraban abecip aneps", b:"Novo"},
-  {m:"corretor", g:"Financiamento", t:"Correspondente Bancário", s:"Simulador SAC/Price, bancos, MCMV, FGTS e documentos", i:"ti-building-bank", h:"https://fcostacorretor.com/correspondente", k:"financiamento central do correspondente bancário simulador sac price mcmv fgts subsídio bancos taxas", b:"Novo"},
   {m:"corretor", g:"avaliacao", t:"Central do Avaliador", s:"PTAM, laudos, planilhas e ferramentas", i:"ti-file-certificate", h:"https://fcostacorretor.com/ptam-pro", k:"central do avaliador ptam parecer técnico avaliação mercadológica laudo judicial planilha comparativo homogeneização evolutivo depreciação renda involutivo honorários recibo", b:"Novo"},
   {m:"corretor", g:"avaliacao", t:"Precificação", s:"Estimativa por comparáveis", i:"ti-tag", h:"precificacao-imovel.html", k:"precificação estimativa comparáveis laudo avaliação"},
   {m:"corretor", g:"avaliacao", t:"Checklist de Vistoria", s:"Antes de fechar negócio", i:"ti-clipboard-check", h:"checklist-vistoria.html", k:"checklist de vistoria"},
@@ -907,15 +936,13 @@ var FERRAMENTAS = [
   {m:"corretor", g:"calculos", t:"Valor por Extenso", s:"Para contratos", i:"ti-cash", h:"valor-por-extenso.html", k:"valor por extenso contratos"},
   {m:"corretor", g:"calculos", t:"Simulador de Financiamento", s:"MCMV x SBPE, sistema Price ou SAC", i:"ti-percentage", h:"simulador-financiamento-fcosta.html", k:"simulador de financiamento mcmv sbpe price sac juros parcela"},
   {m:"corretor", g:"calculos", t:"Tabela de Honorários", s:"Corretagem, estruturador e perícia", i:"ti-receipt-2", h:"honorarios.html", k:"tabela de honorários corretagem estruturador perícia"},
-  {m:"corretor", g:"clientes", t:"Link WhatsApp", s:"Mensagem pronta pro cliente", i:"ti-brand-whatsapp", h:"link-whatsapp.html", k:"link whatsapp mensagem pronta cliente"},
+  {m:"corretor", g:"redes", t:"Link WhatsApp", s:"Mensagem pronta pro cliente", i:"ti-brand-whatsapp", h:"link-whatsapp.html", k:"link whatsapp mensagem pronta cliente"},
   {m:"corretor", g:"clientes", t:"Central FCosta", s:"Controle de clientes e imóveis", i:"ti-layout-dashboard", h:"central-fcosta.html", k:"central fcosta controle clientes imóveis planilha"},
   {m:"corretor", g:"documentos", t:"Documentação Imobiliária", s:"Checklist de documentos por transação", i:"ti-file-certificate", h:"documentacao-imoveis.html", k:"documentação imobiliária acesso pessoal"},
   {m:"corretor", g:"documentos", t:"Orçamento de Documentos", s:"Calcule a taxa de levantamento documental", i:"ti-calculator", h:"orcamento-documentos.html", k:"orçamento levantamento documental matrícula certidões taxa"},
   {m:"corretor", g:"documentos", t:"Documentos para Comprar Imóvel", s:"Checklist dos 9 documentos e onde tirar cada um", i:"ti-checklist", h:"documentos-compra-imovel.html", k:"documentos para comprar imóvel checklist matrícula certidões ônus reais protesto iptu quitação condominial laudo vistoria onde tirar", b:"Novo"},
   {m:"corretor", g:"contratos", t:"Autorização de Venda — Exclusiva", s:"Vendedor preenche e assina pelo celular", i:"ti-file-certificate", h:"autorizacao-exclusiva.html", k:"autorização de venda com exclusividade contrato intermediação assinatura"},
   {m:"corretor", g:"contratos", t:"Autorização de Venda — Sem exclusividade", s:"Vendedor preenche e assina pelo celular", i:"ti-file-text", h:"autorizacao-sem-exclusividade.html", k:"autorização de venda sem exclusividade contrato intermediação assinatura"},
-  {m:"corretor", g:"contratos", t:"Contratos Modelo CRECI-SP", s:"Modelos de documentos — área restrita", i:"ti-file-text", h:"https://www.crecisp.gov.br/arearestrita/modelodedocumentos", k:"contratos modelo creci sp modelo de documentos"},
-  {m:"corretor", g:"contratos", t:"Contratos CRECI", s:"Editor único: locação, venda, autorizações e acordo particular", i:"ti-file-certificate", h:"contratos-editor.html", k:"contratos creci editor contrato locação compra e venda administração autorização exclusividade comodato temporada built to suit acordo particular sem corretagem word pdf", d:1, b:"Novo"},
   {m:"corretor", g:"documentos", t:"Meus Arquivos", s:"Suba pastas e arquivos do PC e deixe guardados aqui", i:"ti-folder", h:"meus-arquivos.html", k:"meus arquivos pastas documentos upload subir pasta pc guardar arquivo", b:"Novo"},
   {m:"corretor", g:"locacao", t:"Recibos e Inquilinos", s:"Inquilinos cadastrados e histórico de recibos", i:"ti-receipt", h:"recibos.html", k:"recibos recibo inquilinos locatários aluguel mora multa juros imprimir pdf whatsapp", b:"Novo"},
   {m:"corretor", g:"consulta", t:"Consulta de Locatário", s:"Triagem completa do candidato: certidões e parecer final", i:"ti-user-search", h:"consulta_locatario.html", k:"consulta locatário inquilino análise ficha cadastro fiador locação aluguel", b:"Novo"},
@@ -932,14 +959,14 @@ var FERRAMENTAS = [
   {m:"corretor", g:"clientes", t:"Follow-up de Clientes", s:"Clientes, etapas, visitas, WhatsApp, e-mail e Google Agenda", i:"ti-users", h:"followup-leads.html", k:"follow-up followup clientes leads funil etapas retorno visitas agenda whatsapp email contatos", d:1, b:"Principal"},
   {m:"corretor", g:"financas", t:"Metas do Mês", s:"Leads, visitas e fechamentos", i:"ti-target-arrow", h:"metas.html", k:"metas do mês leads visitas fechamentos"},
   {m:"corretor", g:"locacao", t:"Controle de Aluguéis", s:"Locatários, recibos e vencimentos", i:"ti-key", h:"alugueis.html", k:"aluguéis locatários recibos contratos vencimento controle de aluguéis"},
-  {m:"corretor", g:"ia", t:"Apostila: Claude na Prática", s:"Imersão de 4 aulas: chat, Cowork, Claude Code, prompts prontos e projetos de renda extra", i:"ti-book-2", h:"Apostila_Claude_na_Pratica.html", k:"apostila claude na prática imersão curso aulas ia i.a inteligência artificial anthropic cowork claude code prompt prompts token skill claude.md projeto renda extra chatbot site automação estudo guia", d:1, b:"Novo"},
-  {m:"corretor", g:"ia", t:"Modelo I.A", s:"Crie a modelo: imagem, voz, vídeo e avatar falando", i:"ti-sparkles", h:"modelo-i-a.html", k:"modelo ia i.a inteligência artificial personagem imagem voz vídeo avatar book prompt fcosta chatgpt gemini flow", d:1, b:"Novo"},
-  {m:"corretor", g:"ia", t:"Academy", s:"Dicas para corretores", i:"ti-school", h:"academy-corretor.html", k:"academy dicas corretores"},
-  {m:"corretor", g:"ia", t:"Tijolo.IA", s:"Automação no Facebook: grupos, posts e vitrine de imóveis (site externo)", i:"ti-bricks", h:"https://tijoloia.com.br/corretor/sergio-fernandes-da-costa", k:"tijolo ia tijoloia automação facebook grupos posts prospecção leads corretor", b:"Novo"},
-  {m:"corretor", g:"ia", t:"Abrir CORRETOR.IA", s:"Painel completo (site externo, plano premium)", i:"ti-robot", h:"https://corretoriaferramentas.lovable.app/dashboard", k:"corretor ia painel completo premium"},
-  {m:"corretor", g:"ia", t:"Guia de IAs Gratuitas", s:"Qwen, Kimi, MiniMax, DeepSeek e mais", i:"ti-brain", h:"guia-ias-gratuitas.html", k:"guia de ias gratuitas qwen kimi minimax deepseek"},
+  {m:"corretor", g:"ia-cursos", t:"Apostila: Claude na Prática", s:"Imersão de 4 aulas: chat, Cowork, Claude Code, prompts prontos e projetos de renda extra", i:"ti-book-2", h:"Apostila_Claude_na_Pratica.html", k:"apostila claude na prática imersão curso aulas ia i.a inteligência artificial anthropic cowork claude code prompt prompts token skill claude.md projeto renda extra chatbot site automação estudo guia", d:1, b:"Novo"},
+  {m:"corretor", g:"ia-ferramentas", t:"Modelo I.A", s:"Crie a modelo: imagem, voz, vídeo e avatar falando", i:"ti-sparkles", h:"modelo-i-a.html", k:"modelo ia i.a inteligência artificial personagem imagem voz vídeo avatar book prompt fcosta chatgpt gemini flow", d:1, b:"Novo"},
+  {m:"corretor", g:"ia-cursos", t:"Academy", s:"Dicas para corretores", i:"ti-school", h:"academy-corretor.html", k:"academy dicas corretores"},
+  {m:"corretor", g:"redes", t:"Tijolo.IA", s:"Automação no Facebook: grupos, posts e vitrine de imóveis (site externo)", i:"ti-bricks", h:"https://tijoloia.com.br/corretor/sergio-fernandes-da-costa", k:"tijolo ia tijoloia automação facebook grupos posts prospecção leads corretor", b:"Novo"},
+  {m:"corretor", g:"ia-ferramentas", t:"Abrir CORRETOR.IA", s:"Painel completo (site externo, plano premium)", i:"ti-robot", h:"https://corretoriaferramentas.lovable.app/dashboard", k:"corretor ia painel completo premium"},
+  {m:"corretor", g:"ia-ferramentas", t:"Guia de IAs Gratuitas", s:"Qwen, Kimi, MiniMax, DeepSeek e mais", i:"ti-brain", h:"guia-ias-gratuitas.html", k:"guia de ias gratuitas qwen kimi minimax deepseek"},
   {m:"corretor", g:"utilidades", t:"Gerador de Senhas", s:"Criar e guardar senhas", i:"ti-key", h:"gerador-senhas.html", k:"gerador de senhas cofre criar guardar"},
-  {m:"corretor", g:"utilidades", t:"Assinatura Profissional", s:"Pronta para copiar", i:"ti-signature", h:"assinatura-profissional.html", k:"assinatura profissional e-mail carimbo"},
+  {m:"corretor", g:"textos", t:"Assinatura Profissional", s:"Pronta para copiar", i:"ti-signature", h:"assinatura-profissional.html", k:"assinatura profissional e-mail carimbo"},
   {m:"corretor", g:"utilidades", t:"Site FCosta", s:"fcostacorretor.com", i:"ti-world", h:"https://fcostacorretor.com", k:"site fcosta fcostacorretor.com"},
 
   {m:"contratos", g:"residencial", t:"Contrato Residencial", s:"Editável, com base legal em cada cláusula", i:"ti-home", h:"contrato-locacao-residencial.html", k:"contrato locação residencial aluguel casa apartamento lei do inquilinato 8245 editável imprimir pdf", d:1, b:"Novo"},
@@ -968,7 +995,7 @@ var FERRAMENTAS = [
   /* ── Novas ferramentas ── */
   {m:"corretor", g:"clientes", t:"Captação de Imóveis", s:"Proprietários, imóveis captados, comissão potencial e situação", i:"ti-home-plus", h:"captacao-imoveis.html", k:"captação captar imóveis proprietário carteira exclusividade angariação"},
   {m:"corretor", g:"financas", t:"Comissões a Receber", s:"Negócios fechados, sua parte e data de recebimento", i:"ti-coin", h:"comissoes-receber.html", k:"comissões comissão receber recebimento fechamento ganhos"},
-  {m:"corretor", g:"ia", t:"Opinião de Valor (m²)", s:"Valor do m² por CEP ou endereço, com IA", i:"ti-map-search", h:"opiniao-valor-ovm.html", k:"opinião de valor ovm preço metro quadrado cep pesquisa ia i.a inteligência artificial avaliação"},
+  {m:"corretor", g:"ia-ferramentas", t:"Opinião de Valor (m²)", s:"Valor do m² por CEP ou endereço, com IA", i:"ti-map-search", h:"opiniao-valor-ovm.html", k:"opinião de valor ovm preço metro quadrado cep pesquisa ia i.a inteligência artificial avaliação"},
   {m:"pessoal", g:"agenda", t:"Aniversariantes", s:"Família, membros, amigos e clientes, com mensagem pronta", i:"ti-cake", h:"aniversarios.html", k:"aniversariantes aniversário datas parabéns família amigos clientes"},
   {m:"pessoal", g:"casa", t:"Contas a Pagar", s:"Vencimentos, valores e o que já foi pago", i:"ti-wallet", h:"contas-a-pagar.html", k:"contas a pagar vencimento boleto casa despesas"},
   {m:"pastor", g:"cuidado", t:"Visitas e Aconselhamento", s:"Quem visitar, quando e o que foi combinado", i:"ti-heart-handshake", h:"visitas-pastorais.html", k:"visitas pastorais aconselhamento hospital luto cuidado ovelhas"},
@@ -1050,9 +1077,9 @@ var FERRAMENTAS = [
   function lerGruposExtra() { var l = lerStorage('painel_grupos', []); return Array.isArray(l) ? l.filter(function (x) { return x && x.id && x.n && x.m; }) : []; }
   function resolverGrupos(itens) {
     var mv = lerGMove(), g = [], nomes = lerNomes(), ocultos = lerStorage('painel_goculto', []); if (!Array.isArray(ocultos)) ocultos = [];
-    function dest(mo, id) { var d = mv[mo + '|' + id]; return d && MUNDOS[d] ? d : (MUNDOS[mo] ? mo : 'corretor'); }
+    function dest(mo, id, pad) { var d = mv[mo + '|' + id]; return d && MUNDOS[d] ? d : (pad && MUNDOS[pad] ? pad : (MUNDOS[mo] ? mo : 'corretor')); }
     function novo(mo, o, custom) {
-      var x = { id: o.id, on: o.n, n: nomes['g:' + mo + '|' + o.id] || o.n, i: nomes['gi:' + mo + '|' + o.id] || o.i || 'ti-folder', c: o.c || '--sk', s: o.s || '', mo: mo, m: dest(mo, o.id), custom: !!custom, oculta: ocultos.indexOf(mo + '|' + o.id) > -1 };
+      var x = { id: o.id, on: o.n, n: nomes['g:' + mo + '|' + o.id] || o.n, i: nomes['gi:' + mo + '|' + o.id] || o.i || 'ti-folder', c: o.c || '--sk', s: o.s || '', mo: mo, m: dest(mo, o.id, o.d), custom: !!custom, oculta: ocultos.indexOf(mo + '|' + o.id) > -1 };
       g.push(x); return x;
     }
     ORDEM.forEach(function (m) { (GRUPOS[m] || []).forEach(function (o) { novo(m, o, false); }); });
@@ -1088,18 +1115,22 @@ var FERRAMENTAS = [
   }
 
   /* ── NAVEGAÇÃO: INÍCIO + 3 ÁREAS ─────────── */
-  var ORDEM_BASE = ['corretor', 'contratos', 'pessoal', 'pastor'];
+  var ORDEM_BASE = ['corretor', 'divulgacao', 'midia', 'contratos', 'documentos', 'ia', 'pessoal', 'pastor'];
   var ORDEM = ORDEM_BASE.slice();
   var MUNDOS = {
-    corretor: { n: 'Corretor', i: 'ti-building-skyscraper', c: '--em', d: 'Imóveis, clientes, contratos e cálculos' },
-    contratos: { n: 'Contratos', i: 'ti-file-certificate', c: '--vi', d: 'Contratos de locação por finalidade' },
+    corretor: { n: 'Corretor', i: 'ti-building-skyscraper', c: '--em', d: 'Clientes, consultas, avaliação, cálculos e locação' },
+    divulgacao: { n: 'Divulgação', i: 'ti-speakerphone', c: '--or', d: 'Publicar, anunciar e redes sociais' },
+    midia: { n: 'Fotos e Vídeos', i: 'ti-camera', c: '--ro', d: 'Editar fotos, banners, vídeos e voz' },
+    contratos: { n: 'Contratos', i: 'ti-file-certificate', c: '--vi', d: 'Autorizações de venda e contratos de locação' },
+    documentos: { n: 'Documentos', i: 'ti-folders', c: '--sk', d: 'Checklists, orçamento de documentos e arquivos' },
+    ia: { n: 'I.A.', i: 'ti-brain', c: '--li', d: 'Agentes, ferramentas e cursos de inteligência artificial' },
     pessoal: { n: 'Pessoal', i: 'ti-user', c: '--cy', d: 'Agenda, notas e o carro' },
     pastor: { n: 'Pastor', i: 'ti-book-2', c: '--pk', d: 'Igreja, pregação e estudos' }
   };
   /* abas principais criadas por você (guardadas no navegador) */
   function lerMundosExtra() { var l = lerStorage('painel_mundos', []); return Array.isArray(l) ? l.filter(function (x) { return x && x.id && x.n; }) : []; }
   var MUNDOS_ORIG = {}; Object.keys(MUNDOS).forEach(function (k) { MUNDOS_ORIG[k] = { n: MUNDOS[k].n, i: MUNDOS[k].i }; });
-  var DOCK_ABAS = [['inicio', 'Início'], ['controle', 'Controle'], ['favoritos', 'Favoritos'], ['sumario', 'Sumário'], ['mapa', 'Mapa'], ['redes', 'Redes'], ['paineis', 'Meus Sites'], ['construtoras', 'Construtoras']];
+  var DOCK_ABAS = [['inicio', 'Início'], ['controle', 'Controle'], ['favoritos', 'Favoritos'], ['sumario', 'Sumário'], ['mapa', 'Mapa'], ['redes', 'Redes Sociais'], ['paineis', 'Meus Sites'], ['construtoras', 'Construtoras']];
   /* nomes que você mudou: {"m:corretor":"…", "g:origem|id":"…", "d:mapa":"…"} */
   function lerNomes() { var o = lerStorage('painel_nomes', {}); return o && typeof o === 'object' && !Array.isArray(o) ? o : {}; }
   function nomeDock(k) { var p = DOCK_ABAS.filter(function (x) { return x[0] === k; })[0]; return lerNomes()['d:' + k] || (p ? p[1] : k); }
@@ -1145,6 +1176,12 @@ var FERRAMENTAS = [
     gravarStorage('painel_favs', favs);
   }
   function chave(it) { return (it._mo || it.m) + '|' + it.t; }
+  /* nov/2026: itens repetidos saíram; o favorito passa para o item igual que ficou */
+  (function () {
+    var MIG = { 'corretor|Contratos CRECI': 'contratos|Contratos CRECI (editor único)', 'corretor|Contratos Modelo CRECI-SP': 'contratos|Modelos CRECI-SP', 'corretor|Correspondente Bancário': 'corretor|Central do Correspondente' }, mudou = false;
+    favs = favs.map(function (k) { if (MIG[k]) { mudou = true; return MIG[k]; } return k; }).filter(function (k, i, a) { return a.indexOf(k) === i; });
+    if (mudou) gravarStorage('painel_favs', favs);
+  })();
   function ligar(itens) { resolverGrupos(itens); return itens; }
 
   function item(it) {
@@ -1481,6 +1518,10 @@ var FERRAMENTAS = [
     var cab = '<section class="mhead" style="--c:var(' + M.c + ')"><span class="mh-ic' + (m === 'corretor' ? ' logo' : '') + '">' + (m === 'corretor' ? '<img src="' + logoSrc() + '" alt="FCosta" />' : '<i class="ti ' + esc(M.i) + '"></i>') + '</span><div><small class="nivel">Aba</small><h1>' + esc(M.n) + '<button type="button" class="lapis" data-ed="nome-m:' + esc(m) + '" title="Mudar o nome desta aba" aria-label="Renomear a aba ' + esc(M.n) + '"><i class="ti ti-pencil"></i></button></h1><p>' + esc(M.d) + '</p></div>' +
       '<button type="button" class="btn-mini" data-ed="toggle"><i class="ti ti-' + (edicao ? 'check' : 'edit') + '"></i>' + (edicao ? 'Pronto' : 'Editar') + '</button></section>';
     var html = cab + (edicao ? '' : '<button type="button" class="busca-pill" data-open="busca" style="margin-bottom:6px"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button>');
+    /* Divulgação: sub-abas grandes no topo (Redes Sociais e Compartilhar) */
+    if (m === 'divulgacao' && !edicao) html += '<div class="sub-abas">' +
+      '<button type="button" class="sub-aba" data-go="redes" style="--c:var(--sk)"><i class="ti ti-share"></i><span><b>Redes Sociais</b><small>Instagram, Facebook, YouTube, TikTok e WhatsApp</small></span><i class="ti ti-chevron-right"></i></button>' +
+      '<button type="button" class="sub-aba" data-open="compartilhar" data-sh-pg="0" style="--c:var(--em)"><i class="ti ti-send"></i><span><b>Mandar a captação</b><small>O cliente preenche e devolve no seu WhatsApp</small></span><i class="ti ti-chevron-right"></i></button></div>';
     if (edicao) {
       html += '<div class="ed-topo" style="--c:var(' + M.c + ')"><span class="et">Modo editar: <b>' + esc(M.n) + '</b>. Toque no que quiser mudar. Quando terminar, toque em <b>Pronto</b>.</span>' +
         '<button type="button" data-ed="nome-m:' + esc(m) + '"><i class="ti ti-pencil"></i>Nome da aba</button>' +
@@ -1559,7 +1600,8 @@ var FERRAMENTAS = [
       });
       body += '</div>';
     });
-    return '<section class="mhead" style="--c:var(--sk)"><span class="mh-ic"><i class="ti ti-share"></i></span><div><span class="nivel">Presença digital</span><h1>' + esc(nomeDock('redes')) + '</h1><p>' +
+    return '<button type="button" class="voltar-sub" data-go="divulgacao"><i class="ti ti-arrow-left"></i>Voltar para Divulgação</button>' +
+      '<section class="mhead" style="--c:var(--sk)"><span class="mh-ic"><i class="ti ti-share"></i></span><div><span class="nivel">Divulgação › Redes Sociais</span><h1>' + esc(nomeDock('redes')) + '</h1><p>' +
       ok + ' de ' + total + (total === 1 ? ' rede preenchida' : ' redes preenchidas') + ' · toque para abrir, copie ou edite o endereço</p></div></section>' +
       '<div class="dlg-acoes" style="margin:6px 0 4px"><button type="button" class="btn-sec" data-rede="copiartudo"><i class="ti ti-copy"></i>Copiar todos os links</button>' +
       '<button type="button" class="btn-mini" data-rede="nova"><i class="ti ti-plus"></i>Adicionar outra rede</button></div>' + body;
@@ -1651,7 +1693,7 @@ var FERRAMENTAS = [
 
   function render() {
     document.body.setAttribute('data-view', modo);
-    [].forEach.call(document.querySelectorAll('.dock [data-go]'), function (b) { var on = b.getAttribute('data-go') === modo; b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); if (on && window.innerWidth < 900) try { var d = b.parentNode.closest('.dock') || b.parentNode; d.scrollTo({ left: b.offsetLeft - (d.clientWidth - b.offsetWidth) / 2, behavior: 'smooth' }); } catch (e) { } });
+    [].forEach.call(document.querySelectorAll('.dock [data-go]'), function (b) { var on = b.getAttribute('data-go') === (modo === 'redes' ? 'divulgacao' : modo); b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); if (on && window.innerWidth < 900) try { var d = b.parentNode.closest('.dock') || b.parentNode; d.scrollTo({ left: b.offsetLeft - (d.clientWidth - b.offsetWidth) / 2, behavior: 'smooth' }); } catch (e) { } });
     vistaEl.classList.toggle('edmode', !!edicao && !!MUNDOS[modo]);
     vistaEl.innerHTML = modo === 'inicio' ? htmlInicio() : modo === 'controle' ? htmlControle() : modo === 'favoritos' ? htmlFavoritos() : modo === 'mapa' ? htmlMapa() : modo === 'sumario' ? htmlSumario() : modo === 'redes' ? htmlRedes() : modo === 'paineis' ? htmlPaineis() : htmlMundo(modo);
     if (modo === 'controle' && ctAba === 'sites') setTimeout(function () { ctTestarSites(); }, 60);
