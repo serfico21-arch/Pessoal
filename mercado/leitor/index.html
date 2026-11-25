@@ -17,46 +17,58 @@ header{background:var(--azul);color:#fff;padding:16px;text-align:center}
 header h1{margin:0;font-size:1.35rem}
 header p{margin:4px 0 0;color:var(--amarelo);font-weight:700;font-size:.95rem}
 main{max-width:560px;margin:auto;padding:16px}
-.card{background:#fff;border-radius:16px;padding:16px;box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:14px}
-button,.btn{display:block;width:100%;font-size:1.25rem;font-weight:800;padding:18px;border:0;border-radius:14px;background:var(--amarelo);color:#1d1600;cursor:pointer;margin-top:10px}
+.card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:14px}
+button{display:block;width:100%;font-size:1.3rem;font-weight:800;padding:22px 18px;border:0;border-radius:16px;background:var(--amarelo);color:#1d1600;cursor:pointer;margin-top:10px}
 button.sec{background:#e9e9f3;color:var(--azul);font-size:1.05rem;padding:14px}
+button.link{background:none;color:#555;font-size:.95rem;font-weight:600;padding:8px;text-decoration:underline}
 input{width:100%;font-size:1.15rem;padding:14px;border:2px solid #cfd0e0;border-radius:12px;margin-top:8px}
 label{font-weight:700}
+h2{margin:0 0 8px;font-size:1.2rem;color:var(--azul)}
+ol{margin:8px 0 0;padding-left:22px;font-size:1.05rem;line-height:1.6}
 #cam{display:none;position:fixed;inset:0;background:#000;z-index:10}
 #cam video{width:100%;height:100%;object-fit:cover}
 #mira{position:absolute;left:10%;right:10%;top:28%;height:44%;border:4px solid var(--amarelo);border-radius:18px;box-shadow:0 0 0 2000px rgba(0,0,0,.35)}
 #camTxt{position:absolute;left:0;right:0;top:12px;text-align:center;color:#fff;font-size:1.1rem;font-weight:700;padding:8px 16px}
 #camFechar{position:absolute;left:16px;right:16px;bottom:24px;width:auto;background:#fff;color:var(--azul)}
-#msg{font-size:1.15rem;font-weight:700;text-align:center;min-height:1.4em;margin:6px 0}
+#msg{font-size:1.2rem;font-weight:700;text-align:center;min-height:1.4em;margin:10px 0 0}
 .ok{color:var(--verde)} .erro{color:var(--vermelho)}
+.ligado{background:#e6f4ea;color:var(--verde);border-radius:12px;padding:10px;text-align:center;font-weight:800;margin-bottom:4px}
 .hist div{padding:10px 0;border-bottom:1px solid #eee;font-size:.95rem}
 .hist small{color:#777}
-.dica{font-size:.92rem;color:#555;line-height:1.5}
+.dica{font-size:.95rem;color:#555;line-height:1.5}
+#digitar{display:none}
 </style>
 </head>
 <body>
 <header><h1>📷 Leitor de notas</h1><p>Mercado Pinheiro &amp; Costa · manda direto para o gestor</p></header>
 <main>
-  <div class="card" id="cardCodigo" style="display:none">
-    <label for="codigo">Código da loja</label>
-    <input id="codigo" autocomplete="off" autocapitalize="characters" placeholder="Ex.: PC-XXXX-XXXX">
-    <p class="dica">É o mesmo código que você usa na Central. Só precisa colocar uma vez.</p>
-    <button onclick="salvarCodigo()">Salvar</button>
+  <!-- Ainda não ligado -->
+  <div class="card" id="cardLigar" style="display:none">
+    <h2>Ligar com o gestor (só uma vez)</h2>
+    <ol>
+      <li>No computador, abra o gestor em <b>Estoque › Entrada de Mercadoria</b>.</li>
+      <li>Lá aparece um <b>quadrado amarelo com um QR</b>.</li>
+      <li>Toque no botão abaixo e aponte para esse QR.</li>
+    </ol>
+    <button onclick="abrirCamera()">📷 Ler o QR do gestor</button>
+    <div id="msgLigar" class="erro" style="margin-top:10px;font-weight:700;text-align:center"></div>
   </div>
 
+  <!-- Ligado -->
   <div id="tudo" style="display:none">
     <div class="card">
-      <button onclick="abrirCamera()">📷 Ler QR do cupom ou código do DANFE</button>
+      <div class="ligado">✅ Ligado ao gestor</div>
+      <button onclick="abrirCamera()">📷 Ler nota ou cupom</button>
       <div id="msg"></div>
-      <p class="dica">Aponte para o <b>QR Code do cupom fiscal</b> ou para o <b>código de barras grande do DANFE</b>. Ele lê e manda sozinho. No computador, deixe o gestor aberto em <b>Estoque › Entrada de Mercadoria</b>.</p>
-    </div>
-    <div class="card">
-      <label for="chave">Ou digite a chave (44 números)</label>
-      <input id="chave" inputmode="numeric" placeholder="Números da chave de acesso">
-      <button class="sec" onclick="enviarDigitado()">Enviar para o gestor</button>
+      <p class="dica">Aponte para o <b>QR do cupom</b> ou para o <b>código de barras grande da nota (DANFE)</b>. Ele lê e manda sozinho. O gestor abre a entrada na hora.</p>
+      <button class="link" onclick="mostrarDigitar()">Não leu? Digitar os números</button>
+      <div id="digitar">
+        <input id="chave" inputmode="numeric" placeholder="44 números da chave">
+        <button class="sec" onclick="enviarDigitado()">Enviar para o gestor</button>
+      </div>
     </div>
     <div class="card hist"><label>Últimos enviados</label><div id="hist"><p class="dica">Nada enviado ainda.</p></div></div>
-    <button class="sec" onclick="trocarCodigo()">Trocar código da loja</button>
+    <button class="link" onclick="desligar()">Ligar com outro computador</button>
   </div>
 </main>
 
@@ -69,29 +81,34 @@ label{font-weight:700}
 
 <script src="jsqr.min.js"></script>
 <script>
-const SB_URL = 'https://avvhnajfczdedlydkcrb.supabase.co';
+const FN = 'https://avvhnajfczdedlydkcrb.supabase.co/functions/v1/leitor-nota';
 const SB_KEY = 'sb_publishable_y3y3sLLFrm5HrXDa2ttGTA_dl8vouP7';
-const LOJA = 'pinheiro-costa';
 const UF = {11:'RO',12:'AC',13:'AM',14:'RR',15:'PA',16:'AP',17:'TO',21:'MA',22:'PI',23:'CE',24:'RN',25:'PB',26:'PE',27:'AL',28:'SE',29:'BA',31:'MG',32:'ES',33:'RJ',35:'SP',41:'PR',42:'SC',43:'RS',50:'MS',51:'MT',52:'GO',53:'DF'};
 
 function ler(k,d){ try{ const v = localStorage.getItem(k); return v===null ? d : JSON.parse(v); }catch(e){ return d; } }
 function gravar(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
-let codigo = ler('leitor_codigo','');
+let par = ler('leitor_par','');
+
+// Pega o código de ligação de um link do gestor (…/leitor/#p=XXXX)
+function parDe(txt){ const m = String(txt||'').match(/#p=([A-Za-z0-9]{24,64})/); return m ? m[1] : ''; }
+function parDoEndereco(){
+  const p = parDe(location.hash);
+  if(p){ par = p; gravar('leitor_par', p); try{ history.replaceState(null,'',location.pathname); }catch(e){} }
+  return !!p;
+}
+parDoEndereco();
+window.addEventListener('hashchange', ()=>{ if(parDoEndereco()){ iniciar(); msg('✅ Ligado! Agora leia a nota ou o cupom.', 'ok'); } });
 
 function iniciar(){
-  document.getElementById('cardCodigo').style.display = codigo ? 'none' : 'block';
-  document.getElementById('tudo').style.display = codigo ? 'block' : 'none';
+  document.getElementById('cardLigar').style.display = par ? 'none' : 'block';
+  document.getElementById('tudo').style.display = par ? 'block' : 'none';
   mostrarHist();
 }
-function salvarCodigo(){
-  const v = document.getElementById('codigo').value.trim().toUpperCase();
-  if(v.length < 6){ alert('Digite o código da loja.'); return; }
-  codigo = v; gravar('leitor_codigo', v); iniciar();
-}
-function trocarCodigo(){ codigo=''; gravar('leitor_codigo',''); document.getElementById('codigo').value=''; iniciar(); }
+function desligar(){ if(!confirm('Ligar com outro computador?')) return; par=''; gravar('leitor_par',''); iniciar(); }
+function mostrarDigitar(){ document.getElementById('digitar').style.display='block'; document.getElementById('chave').focus(); }
 
 function dv(c43){ let s=0,p=2; for(let i=c43.length-1;i>=0;i--){ s+=Number(c43[i])*p; p=p===9?2:p+1; } const r=s%11; return (r<2)?0:11-r; }
-function chaveValida(ch){ return /^\d{44}$/.test(ch) && dv(ch.slice(0,43))===Number(ch[43]) && UF[Number(ch.slice(0,2))]; }
+function chaveValida(ch){ return /^\d{44}$/.test(ch) && dv(ch.slice(0,43))===Number(ch[43]) && !!UF[Number(ch.slice(0,2))]; }
 // Devolve {conteudo, chave} se for DANFE ou cupom; senão null
 function entender(txt){
   txt = String(txt||'').trim();
@@ -109,18 +126,20 @@ async function enviar(info){
   if(enviando) return false; enviando = true;
   msg('Enviando...', '');
   try{
-    const r = await fetch(SB_URL+'/rest/v1/rpc/mercado_enviar_leitura', {method:'POST',
+    const r = await fetch(FN, {method:'POST',
       headers:{apikey:SB_KEY, Authorization:'Bearer '+SB_KEY, 'Content-Type':'application/json'},
-      body: JSON.stringify({p_slug:LOJA, p_codigo:codigo, p_conteudo:info.conteudo})});
-    const ok = r.ok ? await r.json() : false;
-    if(ok===true){
-      msg('✅ Enviado para o gestor: '+descrever(info.chave), 'ok');
+      body: JSON.stringify({acao:'enviar', par, conteudo:info.conteudo})});
+    const j = await r.json().catch(()=>({}));
+    if(j.ok){
+      msg('✅ Enviado! Olhe o computador: '+descrever(info.chave), 'ok');
       if(navigator.vibrate) navigator.vibrate(200);
       const h = ler('leitor_hist', []); h.unshift({ch:info.chave, em:new Date().toISOString()}); gravar('leitor_hist', h.slice(0,10)); mostrarHist();
       return true;
     }
-    if(r.status===404) msg('❌ O leitor ainda não foi ligado no Supabase. Fale com o suporte.', 'erro');
-    else msg('❌ Não foi. Confira o código da loja (botão no fim da página).', 'erro');
+    if(j.erro==='par'){ msg('❌ Precisa ligar de novo com o gestor.', 'erro'); par=''; gravar('leitor_par',''); setTimeout(iniciar, 1500); }
+    else if(j.erro==='nao-e-nota') msg('❌ Esse código não é de nota.', 'erro');
+    else if(j.erro==='muitos') msg('❌ Muitas leituras seguidas. Espere 1 minuto.', 'erro');
+    else msg('❌ Não foi. Tente de novo.', 'erro');
     return false;
   }catch(e){ msg('❌ Sem internet. Tente de novo.', 'erro'); return false; }
   finally{ enviando = false; }
@@ -131,22 +150,24 @@ function mostrarHist(){
   el.innerHTML = h.map(x=>'<div>'+descrever(x.ch)+'<br><small>'+new Date(x.em).toLocaleString('pt-BR')+'</small></div>').join('');
 }
 async function enviarDigitado(){
-  const v = document.getElementById('chave').value;
-  const info = entender(v);
-  if(!info){ msg('❌ Essa chave não confere. Confira os 44 números.', 'erro'); return; }
+  const info = entender(document.getElementById('chave').value);
+  if(!info){ msg('❌ Esses números não conferem. Confira os 44 números.', 'erro'); return; }
   if(await enviar(info)) document.getElementById('chave').value = '';
 }
 
-/* Câmera */
+/* Câmera: lê o QR do gestor (para ligar) ou a nota/cupom */
 let stream = null, laco = null, detector = null;
 async function abrirCamera(){
-  msg('');
+  if(par) msg('');
   try{
     stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}, width:{ideal:1920}, height:{ideal:1080}}, audio:false});
-  }catch(e){ msg('❌ Não consegui abrir a câmera. Deixe o navegador usar a câmera e tente de novo.', 'erro'); return; }
+  }catch(e){
+    const t = '❌ Não consegui abrir a câmera. Deixe o navegador usar a câmera e tente de novo.';
+    if(par) msg(t,'erro'); else document.getElementById('msgLigar').textContent = t; return;
+  }
   const v = document.getElementById('video'); v.srcObject = stream; await v.play().catch(()=>{});
   document.getElementById('cam').style.display = 'block';
-  document.getElementById('camTxt').textContent = 'Aponte para o QR do cupom ou o código do DANFE';
+  document.getElementById('camTxt').textContent = par ? 'Aponte para o QR do cupom ou o código grande da nota' : 'Aponte para o QR amarelo do gestor';
   detector = null;
   if('BarcodeDetector' in window){
     try{ const f = await BarcodeDetector.getSupportedFormats(); const quero = ['qr_code','code_128'].filter(x=>f.includes(x)); if(quero.length) detector = new BarcodeDetector({formats:quero}); }catch(e){}
@@ -168,12 +189,14 @@ async function abrirCamera(){
       }
     }catch(e){}
     for(const a of achados){
-      const info = entender(a);
-      if(info){ fecharCamera(); await enviar(info); return; }
-      if(Date.now()-ultimoAviso > 2500){ ultimoAviso = Date.now(); document.getElementById('camTxt').textContent = 'Esse código não é de nota. Aponte para o QR do cupom ou o código grande do DANFE.'; }
+      const p = parDe(a);
+      if(p){ fecharCamera(); par = p; gravar('leitor_par', p); iniciar(); msg('✅ Ligado! Agora leia a nota ou o cupom.', 'ok'); if(navigator.vibrate) navigator.vibrate(200); return; }
+      if(par){ const info = entender(a); if(info){ fecharCamera(); await enviar(info); return; } }
+      if(Date.now()-ultimoAviso > 2500){ ultimoAviso = Date.now();
+        document.getElementById('camTxt').textContent = par ? 'Esse código não é de nota. Aponte para o QR do cupom ou o código grande da nota.' : 'Esse não é o QR do gestor. Aponte para o quadrado amarelo do gestor.'; }
     }
   }, 300);
-  if(!detector) setTimeout(()=>{ if(stream) document.getElementById('camTxt').textContent = 'Neste celular a câmera lê o QR do cupom. Para o DANFE, digite a chave se não ler.'; }, 6000);
+  if(!detector && par) setTimeout(()=>{ if(stream) document.getElementById('camTxt').textContent = 'Neste celular a câmera lê bem o QR do cupom. Para a nota, se não ler, feche e digite os números.'; }, 6000);
 }
 function fecharCamera(){
   if(laco){ clearInterval(laco); laco = null; }
