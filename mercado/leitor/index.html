@@ -37,11 +37,19 @@ ol{margin:8px 0 0;padding-left:22px;font-size:1.05rem;line-height:1.6}
 .hist small{color:#777}
 .dica{font-size:.95rem;color:#555;line-height:1.5}
 #digitar{display:none}
+#inst{background:#212681;color:#fff;border-radius:16px;padding:14px 16px;margin-bottom:14px}
+#inst button{background:var(--amarelo);margin-top:8px;padding:16px;font-size:1.15rem}
+#instMsg{margin-top:10px;font-size:1rem;line-height:1.5}
 </style>
 </head>
 <body>
 <header><h1>📷 Leitor de notas</h1><p>Mercado Pinheiro &amp; Costa · manda direto para o gestor</p></header>
 <main>
+  <div id="inst" style="display:none">
+    <b>📲 Coloque o leitor na tela do celular</b><br><span style="font-size:.95rem">Fica um ícone igual a um aplicativo. Não precisa achar o link de novo.</span>
+    <button onclick="instalar()">📲 Instalar no celular</button>
+    <div id="instMsg"></div>
+  </div>
   <!-- Ainda não ligado -->
   <div class="card" id="cardLigar" style="display:none">
     <h2>Ligar com o gestor (só uma vez)</h2>
@@ -203,6 +211,23 @@ function fecharCamera(){
   if(stream){ stream.getTracks().forEach(t=>t.stop()); stream = null; }
   document.getElementById('cam').style.display = 'none';
 }
+/* Instalar como aplicativo */
+let pedidoInst = null;
+const EH_APP = () => window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+function mostrarInst(){ document.getElementById('inst').style.display = EH_APP() ? 'none' : 'block'; }
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); pedidoInst = e; });
+window.addEventListener('appinstalled', ()=>{ pedidoInst = null; document.getElementById('instMsg').innerHTML = '✅ Instalado! Procure o ícone <b>Leitor notas</b> na tela do celular.'; });
+async function instalar(){
+  const el = document.getElementById('instMsg');
+  if(EH_APP()){ el.textContent = 'Já está instalado.'; return; }
+  if(pedidoInst){ const p = pedidoInst; pedidoInst = null; p.prompt(); try{ const r = await p.userChoice; if(r && r.outcome==='accepted') el.innerHTML = '✅ Instalado! Procure o ícone <b>Leitor notas</b> na tela do celular.'; }catch(e){} return; }
+  const ua = navigator.userAgent;
+  if(/iphone|ipad/i.test(ua)) el.innerHTML = 'No iPhone: abra no <b>Safari</b>, toque em <b>Compartilhar</b> (quadrado com seta ⬆) e depois em <b>Adicionar à Tela de Início</b>.<br>Depois de instalar, abra pelo ícone e leia de novo o quadrado amarelo do gestor (só uma vez).';
+  else if(/android/i.test(ua)) el.innerHTML = 'No Chrome: toque nos <b>3 pontinhos ⋮</b> (canto de cima) e escolha <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.';
+  else el.innerHTML = 'Abra este link no celular, no <b>Chrome</b> (Android) ou no <b>Safari</b> (iPhone).';
+}
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(()=>{});
+mostrarInst();
 iniciar();
 </script>
 </body>
