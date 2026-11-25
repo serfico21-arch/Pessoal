@@ -1,11 +1,14 @@
 ; Instalador da Central Pinheiro & Costa (Windows). Construir com: makensis instalador.nsi
 ; Instala só para o usuário (não pede senha de administrador) e cria atalhos na Área de Trabalho e no Menu Iniciar.
+; Desde a 1.1.0 não usa mais script .vbs (antivírus desconfiam de instalador que grava script):
+; o atalho abre o Edge/Chrome direto com --app, ou um atalho de internet (.url) se não achar.
 Unicode true
 SetCompressor /SOLID lzma
 !include "MUI2.nsh"
 
 !define APP_NOME "Central Pinheiro & Costa"
-!define APP_VERSAO "1.0.0"
+!define APP_VERSAO "1.1.0"
+!define URL_CENTRAL "https://serfico21-arch.github.io/Pessoal/mercado/painel/"
 
 Name "${APP_NOME}"
 OutFile "Central-Pinheiro-Costa-Instalador.exe"
@@ -20,6 +23,9 @@ VIAddVersionKey /LANG=1046 "FileDescription" "Instalador da ${APP_NOME}"
 VIAddVersionKey /LANG=1046 "FileVersion" "${APP_VERSAO}"
 VIAddVersionKey /LANG=1046 "ProductVersion" "${APP_VERSAO}"
 VIAddVersionKey /LANG=1046 "LegalCopyright" "FCOSTA Sistemas & Apps"
+VIAddVersionKey /LANG=1046 "OriginalFilename" "Central-Pinheiro-Costa-Instalador.exe"
+VIAddVersionKey /LANG=1046 "InternalName" "Central-Pinheiro-Costa-Instalador"
+VIAddVersionKey /LANG=1046 "Comments" "Cria atalhos para abrir a Central da loja (${URL_CENTRAL})"
 
 !define MUI_ICON "icone.ico"
 !define MUI_UNICON "icone.ico"
@@ -39,18 +45,54 @@ VIAddVersionKey /LANG=1046 "LegalCopyright" "FCOSTA Sistemas & Apps"
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_LANGUAGE "PortugueseBR"
 
+Var NAVEGADOR
+
+; Procura o Edge (vem no Windows 10/11) ou o Chrome para abrir a Central em janela própria.
+Function AcharNavegador
+  StrCpy $NAVEGADOR ""
+  IfFileExists "$PROGRAMFILES32\Microsoft\Edge\Application\msedge.exe" 0 +3
+    StrCpy $NAVEGADOR "$PROGRAMFILES32\Microsoft\Edge\Application\msedge.exe"
+    Return
+  IfFileExists "$PROGRAMFILES64\Microsoft\Edge\Application\msedge.exe" 0 +3
+    StrCpy $NAVEGADOR "$PROGRAMFILES64\Microsoft\Edge\Application\msedge.exe"
+    Return
+  IfFileExists "$PROGRAMFILES64\Google\Chrome\Application\chrome.exe" 0 +3
+    StrCpy $NAVEGADOR "$PROGRAMFILES64\Google\Chrome\Application\chrome.exe"
+    Return
+  IfFileExists "$PROGRAMFILES32\Google\Chrome\Application\chrome.exe" 0 +3
+    StrCpy $NAVEGADOR "$PROGRAMFILES32\Google\Chrome\Application\chrome.exe"
+    Return
+  IfFileExists "$LOCALAPPDATA\Google\Chrome\Application\chrome.exe" 0 +2
+    StrCpy $NAVEGADOR "$LOCALAPPDATA\Google\Chrome\Application\chrome.exe"
+FunctionEnd
+
+; Cria um atalho no lugar indicado (pilha: caminho do .lnk sem extensão)
+!macro CriarAtalho ONDE
+  StrCmp $NAVEGADOR "" +3
+    CreateShortcut "${ONDE}.lnk" "$NAVEGADOR" "--app=${URL_CENTRAL}" "$INSTDIR\icone.ico"
+    Goto +4
+  WriteINIStr "${ONDE}.url" "InternetShortcut" "URL" "${URL_CENTRAL}"
+  WriteINIStr "${ONDE}.url" "InternetShortcut" "IconFile" "$INSTDIR\icone.ico"
+  WriteINIStr "${ONDE}.url" "InternetShortcut" "IconIndex" "0"
+!macroend
+
 Function AbrirAgora
-  ExecShell "" "$SYSDIR\wscript.exe" '"$INSTDIR\abrir-central.vbs"'
+  StrCmp $NAVEGADOR "" 0 +3
+    ExecShell "open" "${URL_CENTRAL}"
+    Return
+  Exec '"$NAVEGADOR" --app=${URL_CENTRAL}'
 FunctionEnd
 
 Section "Instalar"
   SetOutPath "$INSTDIR"
-  File "abrir-central.vbs"
+  ; tira o script antigo da versão 1.0.0, se existir
+  Delete "$INSTDIR\abrir-central.vbs"
   File "icone.ico"
   WriteUninstaller "$INSTDIR\Desinstalar.exe"
-  CreateShortcut "$DESKTOP\Central Pinheiro & Costa.lnk" "$SYSDIR\wscript.exe" '"$INSTDIR\abrir-central.vbs"' "$INSTDIR\icone.ico"
+  Call AcharNavegador
+  !insertmacro CriarAtalho "$DESKTOP\Central Pinheiro & Costa"
   CreateDirectory "$SMPROGRAMS\Central Pinheiro & Costa"
-  CreateShortcut "$SMPROGRAMS\Central Pinheiro & Costa\Central Pinheiro & Costa.lnk" "$SYSDIR\wscript.exe" '"$INSTDIR\abrir-central.vbs"' "$INSTDIR\icone.ico"
+  !insertmacro CriarAtalho "$SMPROGRAMS\Central Pinheiro & Costa\Central Pinheiro & Costa"
   CreateShortcut "$SMPROGRAMS\Central Pinheiro & Costa\Desinstalar.lnk" "$INSTDIR\Desinstalar.exe"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\CentralPinheiroCosta" "DisplayName" "${APP_NOME}"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\CentralPinheiroCosta" "UninstallString" '"$INSTDIR\Desinstalar.exe"'
@@ -63,6 +105,8 @@ SectionEnd
 
 Section "Uninstall"
   Delete "$DESKTOP\Central Pinheiro & Costa.lnk"
+  Delete "$DESKTOP\Central Pinheiro & Costa.url"
+  Delete "$SMPROGRAMS\Central Pinheiro & Costa\Central Pinheiro & Costa.url"
   Delete "$SMPROGRAMS\Central Pinheiro & Costa\Central Pinheiro & Costa.lnk"
   Delete "$SMPROGRAMS\Central Pinheiro & Costa\Desinstalar.lnk"
   RMDir "$SMPROGRAMS\Central Pinheiro & Costa"
