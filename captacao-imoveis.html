@@ -56,7 +56,7 @@ campos:[{k:'nome',n:'Proprietário'},{k:'tel',n:'Telefone (WhatsApp)',t:'tel'},{
 {k:'obs',n:'Observação',t:'area'}],
 ordem:function(o){return['Em negociação','Anunciado','Autorizado','Avaliar','Para visitar','Vendido','Perdido'].indexOf(o.sit)},
 info:function(o){var c=N(o.valor)*N(o.perc)/100;return{linha:[o.tipo,o.end,M(N(o.valor)),'comissão '+M(c),o.excl].filter(Boolean),tag:[o.sit,o.sit=='Vendido'?'o':o.sit=='Perdido'?'x':'a']}},
-msg:function(o){return 'Olá, '+o.nome.split(' ')[0]+'! Aqui é o Sérgio Costa, corretor (CRECI-SP 29479-F). Sobre o seu imóvel'+(o.end?' na '+o.end:'')+', posso passar as novidades?'},
+msg:function(o){return 'Olá, '+o.nome.split(' ')[0]+'! Aqui é o Sérgio Costa, corretor (CRECI-SP 294791-F). Sobre o seu imóvel'+(o.end?' na '+o.end:'')+', posso passar as novidades?'},
 kpis:function(D){var at=D.filter(function(o){return o.sit!='Vendido'&&o.sit!='Perdido'}),v=at.reduce(function(t,o){return t+N(o.valor)},0),c=at.reduce(function(t,o){return t+N(o.valor)*N(o.perc)/100},0);return[['Imóveis ativos',at.length],['Carteira (VGV)',M(v)],['Comissão potencial',M(c)]]}};
 
 function venc(s){var d=dd(s);return d?Math.round((d-hoje())/864e5):null}
