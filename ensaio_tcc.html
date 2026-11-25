@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ensaio — A Pena de Morte à Luz da Ética Cristã</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;1,400;1,600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --fundo: #f6f1e6;
+    --superficie: #fffdf8;
+    --tinta: #3a3126;
+    --tinta2: #2b241c;
+    --gold: #a9812f;
+    --gold-deep: #7a5c22;
+    --gold-light: #e7cf94;
+    --sage: #6d8f6a;
+    --sage-deep: #4d6b4b;
+    --sage-light: #cddac4;
+    --slate: rgba(58,49,38,0.58);
+    --slate-dim: rgba(58,49,38,0.32);
+    --line: rgba(169,129,47,0.28);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--fundo);
+    background-image: radial-gradient(ellipse 800px 480px at 12% -8%, rgba(169,129,47,0.07), transparent 60%),
+                       radial-gradient(ellipse 700px 460px at 100% 108%, rgba(109,143,106,0.08), transparent 60%);
+    color:var(--tinta);
+    font-family:'Inter',system-ui,sans-serif;
+    overflow:hidden;
+  }
+  .stage{
+    position:relative;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+
+  /* ── BARRA DO ARCO ARGUMENTATIVO — Lei → Graça ─────────── */
+  .arc{
+    flex-shrink:0;
+    padding:16px 40px 0 40px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .arc-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9.5px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--slate);
+    flex-shrink:0;
+  }
+  .arc-label.end{ color:var(--sage-deep); }
+  .arc-label.start{ color:var(--gold-deep); }
+  .arc-track{
+    position:relative;
+    flex:1;
+    height:3px;
+    border-radius:2px;
+    background:linear-gradient(90deg, var(--gold-light), var(--sage-light));
+  }
+  .arc-marker{
+    position:absolute;
+    top:50%;
+    width:11px; height:11px;
+    border-radius:50%;
+    background:var(--superficie);
+    border:2px solid var(--gold-deep);
+    transform:translate(-50%,-50%);
+    transition:left .4s ease, border-color .4s ease;
+    box-shadow:0 2px 6px rgba(58,49,38,0.18);
+  }
+
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 40px 0 40px;
+    flex-shrink:0;
+  }
+  .brand{
+    font-size:11px;
+    letter-spacing:0.14em;
+    color:var(--gold-deep);
+    font-weight:600;
+    text-transform:uppercase;
+  }
+  .modebtn{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    background:var(--superficie);
+    border:1px solid var(--line);
+    color:var(--slate);
+    font-family:'Inter',sans-serif;
+    font-size:12px;
+    letter-spacing:0.03em;
+    padding:8px 16px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:all .2s ease;
+  }
+  .modebtn svg{ width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.7; }
+  .modebtn:hover, .modebtn.active{
+    border-color:var(--sage);
+    color:var(--sage-deep);
+  }
+
+  .slidewrap{
+    flex:1;
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0 90px;
+  }
+  .slide{
+    max-width:960px;
+    width:100%;
+    opacity:0;
+    transform:translateY(14px);
+    transition:opacity .45s ease, transform .45s ease;
+    pointer-events:none;
+    position:absolute;
+    max-height:calc(100vh - 190px);
+    overflow-y:auto;
+  }
+  .slide.active{
+    opacity:1;
+    transform:translateY(0);
+    pointer-events:auto;
+    position:relative;
+  }
+
+  .slide-head{
+    display:flex;
+    align-items:flex-start;
+    gap:26px;
+    margin-bottom:6px;
+  }
+  .medallion{
+    width:92px; height:92px;
+    border-radius:50%;
+    flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    box-shadow:0 0 0 1px var(--m-ring, rgba(169,129,47,.35)), 0 8px 18px var(--m-shadow, rgba(169,129,47,.2));
+  }
+  .medallion::before{
+    content:'';
+    position:absolute;
+    inset:6px;
+    border-radius:50%;
+    border:1px dashed var(--m-dash, rgba(255,253,248,.55));
+  }
+  .medallion svg{ width:42px; height:42px; position:relative; z-index:1; stroke:var(--m-ink,#fffdf8); fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+
+  .tone-lei{ background:radial-gradient(circle at 32% 28%, var(--gold-light), var(--gold) 55%, var(--gold-deep) 100%); }
+  .tone-graca{ background:radial-gradient(circle at 32% 28%, var(--sage-light), var(--sage) 55%, var(--sage-deep) 100%); }
+  .tone-transicao{ background:linear-gradient(135deg, var(--gold) 0%, var(--sage) 100%); }
+  .tone-neutro{ background:radial-gradient(circle at 32% 28%, #ddd3bd, #a99872 55%, #756642 100%); }
+
+  .eyebrow{
+    color:var(--gold-deep);
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.22em;
+    text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  h1{
+    font-family:'Source Serif 4', Georgia, serif;
+    font-weight:600;
+    font-size:38px;
+    line-height:1.16;
+    margin:0;
+    color:var(--tinta2);
+  }
+
+  /* ── SELOS DE BASE BÍBLICA ─────────────────────────────── */
+  .chiprow{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:7px;
+    margin:16px 0 20px 0;
+  }
+  .chiprow .chip-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:9.5px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--slate);
+    margin-right:2px;
+  }
+  .chip{
+    font-size:11.5px;
+    font-weight:500;
+    color:var(--gold-deep);
+    background:rgba(169,129,47,0.09);
+    border:1px solid rgba(169,129,47,0.28);
+    border-radius:20px;
+    padding:3.5px 11px;
+  }
+  .chip.sage{ color:var(--sage-deep); background:rgba(109,143,106,0.1); border-color:rgba(109,143,106,0.3); }
+
+  .quote{
+    font-family:'Source Serif 4', Georgia, serif;
+    font-style:italic;
+    font-size:21px;
+    line-height:1.5;
+    color:var(--gold-deep);
+    margin:6px 0 4px 0;
+    max-width:660px;
+  }
+  .ref{
+    font-size:11px;
+    letter-spacing:0.12em;
+    color:var(--slate);
+    text-transform:uppercase;
+    margin-bottom:18px;
+  }
+  .body p{
+    font-size:16px;
+    line-height:1.62;
+    color:var(--tinta);
+    max-width:690px;
+    margin:0 0 13px 0;
+  }
+  .body strong{ color:var(--tinta2); }
+
+  /* ── CALLOUT — TESE DEFENDIDA ───────────────────────────── */
+  .tese{
+    margin:18px 0 6px 0;
+    padding:16px 20px;
+    max-width:690px;
+    background:rgba(109,143,106,0.08);
+    border-left:3px solid var(--sage);
+    border-radius:6px;
+  }
+  .tese-label{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--sage-deep);
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .tese p{ font-size:15.5px; line-height:1.6; color:var(--tinta2); margin:0; font-weight:500; }
+
+  .cue{
+    margin-top:22px;
+    padding:14px 18px;
+    background:rgba(169,129,47,0.07);
+    border:1px solid var(--line);
+    border-radius:10px;
+    max-width:690px;
+  }
+  .cue-label{
+    font-size:10px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    font-weight:700;
+    margin-bottom:5px;
+  }
+  .cue-text{
+    font-size:13.5px;
+    line-height:1.55;
+    color:var(--gold-deep);
+  }
+
+  /* ── REVISÃO (recordação ativa) ─────────────────────────── */
+  .quiz-prompt{ display:none; }
+  .reveal-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top:16px;
+    background:var(--sage);
+    color:#fffdf8;
+    border:none;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:0.02em;
+    padding:9px 18px;
+    border-radius:999px;
+    cursor:pointer;
+    transition:background .18s ease, transform .12s ease;
+  }
+  .reveal-btn:hover{ background:var(--sage-deep); }
+  .reveal-btn:active{ transform:scale(0.96); }
+
+  body.review .quote, body.review .ref, body.review .body, body.review .cue{ display:none; }
+  body.review .slide.revealed .quote,
+  body.review .slide.revealed .ref,
+  body.review .slide.revealed .body,
+  body.review .slide.revealed .cue{
+    display:block;
+    animation:fadeContent .35s ease both;
+  }
+  @keyframes fadeContent{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+  body.review .quiz-prompt{
+    display:block;
+    padding:20px 22px;
+    max-width:660px;
+    background:var(--superficie);
+    border:1px solid var(--sage-card-border, rgba(109,143,106,.3));
+    border-radius:12px;
+    margin-top:6px;
+  }
+  body.review .slide.revealed .quiz-prompt{ display:none; }
+  .quiz-q{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:10px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--sage-deep);
+    font-weight:700;
+    margin-bottom:8px;
+  }
+  .quiz-text{
+    font-family:'Source Serif 4', Georgia, serif;
+    font-style:italic;
+    font-size:18px;
+    line-height:1.5;
+    color:var(--tinta2);
+    margin:0;
+  }
+
+  .navzone{
+    position:absolute;
+    top:0; bottom:0;
+    width:90px;
+    display:flex;
+    align-items:center;
+    cursor:pointer;
+    background:transparent;
+    border:none;
+    color:var(--slate-dim);
+    font-size:22px;
+    z-index:5;
+  }
+  .navzone:hover{ color:var(--gold-deep); }
+  .navzone.left{ left:0; justify-content:flex-start; padding-left:24px; }
+  .navzone.right{ right:0; justify-content:flex-end; padding-right:24px; }
+
+  .bottombar{
+    flex-shrink:0;
+    padding:0 40px 24px 40px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+  }
+  .progress{
+    display:flex;
+    gap:6px;
+  }
+  .dot{
+    width:22px;
+    height:3px;
+    border-radius:2px;
+    background:var(--slate-dim);
+    cursor:pointer;
+    transition:background .2s ease;
+  }
+  .dot.active{ background:var(--gold-deep); }
+  .dot.done{ background:var(--sage); }
+  .counter{
+    font-size:12px;
+    color:var(--slate);
+    letter-spacing:0.08em;
+    font-variant-numeric: tabular-nums;
+    white-space:nowrap;
+  }
+  .review-count{
+    font-size:11px;
+    color:var(--sage-deep);
+    letter-spacing:0.04em;
+    white-space:nowrap;
+    display:none;
+  }
+  body.review .review-count{ display:inline; }
+  .hint{
+    font-size:11px;
+    color:var(--slate-dim);
+    letter-spacing:0.03em;
+    text-align:right;
+  }
+
+  @media (max-width:720px){
+    .slidewrap{ padding:0 24px; }
+    h1{ font-size:26px; }
+    .quote{ font-size:17px; }
+    .topbar{ padding-left:20px; padding-right:20px; }
+    .arc{ padding-left:20px; padding-right:20px; }
+    .bottombar{ padding-left:20px; padding-right:20px; flex-wrap:wrap; }
+    .hint{ display:none; }
+    .navzone{ width:36px; }
+    .slide-head{ gap:16px; }
+    .medallion{ width:64px; height:64px; }
+    .medallion svg{ width:30px; height:30px; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <div class="arc" aria-hidden="true">
+    <span class="arc-label start">Lei</span>
+    <div class="arc-track"><div class="arc-marker" id="arcMarker"></div></div>
+    <span class="arc-label end">Graça</span>
+  </div>
+
+  <div class="topbar">
+    <div class="brand">IBBC · Extensão de Ferraz de Vasconcelos</div>
+    <button class="modebtn" id="modeBtn" aria-pressed="false">
+      <svg id="modeIcon" viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+      <span id="modeLabel">Apresentação</span>
+    </button>
+  </div>
+
+  <div class="slidewrap" id="slidewrap">
+    <button class="navzone left" id="prevBtn" aria-label="Slide anterior">‹</button>
+
+    <!-- Slide 1 — Capa -->
+    <section class="slide" data-idx="0">
+      <div class="slide-head">
+        <div class="medallion tone-transicao">
+          <svg viewBox="0 0 48 48"><path d="M24 6v30M15 14h18"/><path d="M10 30c3-6 8-9 14-9M38 30c-3-6-8-9-14-9"/><path d="M10 30l-2 4M38 30l2 4"/></svg>
+        </div>
+        <div>
+          <div class="eyebrow">Capa</div>
+          <h1>A Pena de Morte à Luz da Ética Cristã</h1>
+        </div>
+      </div>
+      <div class="body">
+        <p>Uma análise bíblico-teológica sobre justiça, graça e o valor da vida humana.</p>
+      </div>
+      <div class="tese">
+        <div class="tese-label">Tese defendida</div>
+        <p>A revelação plena de Deus em Cristo desloca a justiça da retribuição para a graça — por isso a pena de morte não deve ser sustentada como prática da justiça cristã.</p>
+      </div>
+      <div class="cue">
+        <div class="cue-label">Cue de abertura</div>
+        <div class="cue-text">Apresente-se, o curso e a disciplina. Diga em uma frase qual é a tese central antes de entrar no conteúdo — isso ancora a plateia desde o início.</div>
+      </div>
+      <div class="quiz-prompt">
+        <div class="quiz-q">Antes de começar</div>
+        <p class="quiz-text">Consegue enunciar, de memória, a tese central deste trabalho em uma frase?</p>
+        <button class="reveal-btn" type="button">Revelar resposta</button>
+      </div>
+    </section>
+
+    <!-- Slide 2 — Introdução -->
+    <section class="slide" data-idx="1">
+      <div class="slide-head">
+        <div class="medallion tone-transicao">
+          <svg viewBox="0 0 48 48"><path d="M10 14c0-3 3-3 3-3v26s-3 0-3-3M38 14c0-3-3-3-3-3v26s3 0 3-3"/><path d="M13 14h22M13 34h22"/><path d="M18 20h12M18 24h12M18 28h8"/></svg>
+        </div>
+        <div>
+          <div class="eyebrow">02 · Introdução</div>
+          <h1>Um debate antigo, uma pergunta atual</h1>
+        </div>
+      </div>
+      <div class="chiprow"><span class="chip-label">Base bíblica</span><span class="chip">Mateus 5:17</span></div>
+      <div class="quote">"Não creias que vim abolir a Lei ou os Profetas... vim para cumprir."</div>
+      <div class="ref">Mateus 5:17</div>
+      <div class="body">
+        <p>A pena de morte atravessa a história da igreja: praticada, defendida e, em muitas tradições, hoje reconsiderada. Este trabalho parte de um pressuposto simples — a Bíblia deve ser interpretada como um todo, à luz de sua revelação plena em Cristo.</p>
+      </div>
+      <div class="tese">
+        <div class="tese-label">Tese defendida</div>
+        <p>A posição defendida aqui é contrária à pena de morte como prática da justiça humana, sustentada em três eixos: o caráter de Deus revelado em Cristo, o valor da vida como imagem divina, e o chamado da igreja à graça e à restauração.</p>
+      </div>
+      <div class="cue">
+        <div class="cue-label">Cue de fala</div>
+        <div class="cue-text">Anuncie os três eixos como um roteiro mental para a plateia: caráter de Deus em Cristo → imagem divina → graça e restauração. Cada um vira um bloco do TCC.</div>
+      </div>
+      <div class="quiz-prompt">
+        <div class="quiz-q">Pergunta-guia</div>
+        <p class="quiz-text">Quais são os três eixos que sustentam a tese contrária à pena de morte?</p>
+        <button class="reveal-btn" type="button">Revelar resposta</button>
+      </div>
+    </section>
+
+    <!-- Slide 3 — AT tradicional -->
+    <section class="slide" data-idx="2">
+      <div class="slide-head">
+        <div class="medallion tone-lei">
+          <svg viewBox="0 0 48 48"><path d="M10 40V16l8-8 8 8v24M10 16h16"/><path d="M22 40V16l8-8 8 8v24M22 16h16"/><path d="M14 22h4M14 27h4M14 32h4M26 22h4M26 27h4M26 32h4"/></svg>
+        </div>
+        <div>
+          <div class="eyebrow">03 · O argumento tradicional</div>
+          <h1>O que o Antigo Testamento de fato apresenta</h1>
+        </div>
+      </div>
+      <div class="chiprow"><span class="chip-label">Base bíblica</span><span class="chip">Gênesis 9:6</span><span class="chip">Êxodo 21:12–14</span><span class="chip">Números 35:30–34</span></div>
+      <div class="body">
+        <p><strong>Gênesis 9:6</strong> — base do argumento pró-pena: quem derramar sangue humano, pelo homem terá seu sangue derramado, fundamento na dignidade da imagem de Deus.</p>
+        <p><strong>Êxodo 21:12–14</strong> — a lei mosaica prevê pena capital para homicídio doloso, dentro de um sistema judicial com cidades de refúgio e distinção de intenção.</p>
+        <p><strong>Números 35:30–34</strong> — exige múltiplas testemunhas e proíbe resgate financeiro: um sistema de garantias, não de vingança sumária.</p>
+      </div>
+      <div class="cue">
+        <div class="cue-label">Cue de fala</div>
+        <div class="cue-text">Trate esse bloco com honestidade intelectual: reconheça o peso real desses textos antes de argumentar contra a pena de morte. Frase-ponte: "reconhecer isso é o ponto de partida, não o de chegada".</div>
+      </div>
+      <div class="quiz-prompt">
+        <div class="quiz-q">Pergunta-guia</div>
+        <p class="quiz-text">Quais textos do Antigo Testamento sustentam o argumento pró-pena de morte, e o que cada um exige de fato?</p>
+        <button class="reveal-btn" type="button">Revelar resposta</button>
+      </div>
+    </section>
+
+    <!-- Slide 4 — Continuidade -->
+    <section class="slide" data-idx="3">
+      <div class="slide-head">
+        <div class="medallion tone-transicao">
+          <svg viewBox="0 0 48 48"><path d="M6 40C14 30 18 24 24 24s10 6 18-4"/><path d="M24 24V8M20 12h8"/><path d="M14 40h6M28 40h6"/></svg>
+        </div>
+        <div>
+          <div class="eyebrow">04 · Continuidade e cumprimento</div>
+          <h1>A Lei aponta para Cristo, não o contrário</h1>
+        </div>
+      </div>
+      <div class="chiprow"><span class="chip-label">Base bíblica</span><span class="chip">Mateus 5:38–39</span></div>
+      <div class="body">
+        <p><strong>Lei civil de Israel ≠ ética normativa universal.</strong> As penas do código mosaico regiam uma teocracia específica, com propósitos pedagógicos e de contenção — não um modelo transposto diretamente a qualquer Estado.</p>
+        <p><strong>Cristo reinterpreta a Lei de dentro para fora.</strong> Em Mateus 5, Jesus repetidamente eleva o padrão da Lei ("ouvistes que foi dito... eu, porém, vos digo"), deslocando o eixo da retribuição para o coração.</p>
+        <p><strong>A lei de talião é explicitamente superada.</strong> Mateus 5:38–39 — "olho por olho" é citado por Jesus só para ser substituído por um chamado à não-retaliação.</p>
+      </div>
+      <div class="cue">
+        <div class="cue-label">Cue de fala</div>
+        <div class="cue-text">Deixe claro que você não está descartando o Antigo Testamento, mas lendo-o à luz do cumprimento em Cristo. Esse é o pivô teológico do trabalho.</div>
+      </div>
+      <div class="quiz-prompt">
+        <div class="quiz-q">Pergunta-guia</div>
+        <p class="quiz-text">Como Jesus reinterpreta a lei de talião em Mateus 5, e o que isso muda no eixo da justiça?</p>
+        <button class="reveal-btn" type="button">Revelar resposta</button>
+      </div>
+    </section>
+
+    <!-- Slide 5 — João 8 -->
+    <section class="slide" data-idx="4">
+      <div class="slide-head">
+        <div class="medallion tone-graca">
+          <svg viewBox="0 0 48 48"><path d="M8 30c0-8 6-13 13-13h6c5 0 9 4 9 9"/><path d="M13 30v4M19 30v4M25 30v4M31 30v4"/><circle cx="31" cy="10" r="3"/><path d="M31 13v6"/></svg>
+        </div>
+        <div>
+          <div class="eyebrow">05 · O caso central — João 8:1–11</div>
+          <h1>A pena capital diante da própria Lei</h1>
+        </div>
+      </div>
+      <div class="chiprow"><span class="chip-label">Base bíblica</span><span class="chip">João 8:1–11</span><span class="chip">Levítico 20:10</span></div>
+      <div class="quote">"Quem dentre vós está sem pecado, seja o primeiro a atirar pedra."</div>
+      <div class="ref">João 8:7</div>
+      <div class="body">
+        <p>A mulher é levada a Jesus sob acusação que, pela Lei de Moisés (Lv 20:10), exigia morte. É o único episódio em que Jesus é confrontado diretamente com a aplicação da pena capital — e Ele não a executa, não a delega e não a legitima.</p>
+        <p>Jesus não anula a gravidade do pecado ("vai e não peques mais"), mas desloca a autoridade de julgar e executar para um padrão que nenhum ser humano pode cumprir: a ausência de pecado.</p>
+      </div>
+      <div class="cue">
+        <div class="cue-label">Cue de fala</div>
+        <div class="cue-text">Este é o clímax argumentativo — dê tempo a esse slide. Marque a diferença entre "não anula o pecado" e "não executa a pena": é a virada de toda a apresentação.</div>
+      </div>
+      <div class="quiz-prompt">
+        <div class="quiz-q">Pergunta-guia</div>
+        <p class="quiz-text">O que Jesus faz — e deliberadamente não faz — diante de uma mulher que a Lei condenava à morte?</p>
+        <button class="reveal-btn" type="button">Revelar resposta</button>
+      </div>
+    </section>
+
+    <!-- Slide 6 — Imago Dei -->
+    <section class="slide" data-idx="5">
+      <div class="slide-head">
+        <div class="medallion tone-graca">
+          <svg viewBox="0 0 48 48"><path d="M24 40C10 30 8 22 8 16c0-5 4-8 8-8 4 0 6 3 8 6 2-3 4-6 8-6 4 0 8 3 8 8 0 6-2 14-16 24Z"/><path d="M18 20c2 2 4 2 6 0s4-2 6 0"/></svg>
+        </div>
+        <div>
+          <div class="eyebrow">06 · Sacralidade da vida</div>
+          <h1>A imagem de Deus como argumento contra, não a favor</h1>
+        </div>
+      </div>
+      <div class="chiprow"><span class="chip-label">Base bíblica</span><span class="chip">Gênesis 9:6</span><span class="chip">Ezequiel 18:23</span></div>
+      <div class="quote">"Porventura tenho eu prazer na morte do ímpio? diz o Senhor DEUS. Não seria antes que se convertesse dos seus caminhos, e vivesse?"</div>
+      <div class="ref">Ezequiel 18:23</div>
+      <div class="body">
+        <p>Gênesis 9:6 é lido tradicionalmente como fundamento da pena capital — mas o mesmo texto pode ser lido como afirmação inegociável do valor da vida humana, tão grave que até o homicida permanece portador da imagem de Deus.</p>
+        <p>Se a Imago Dei é a razão para proteger a vida, ela não desaparece no momento em que alguém erra — inclusive gravemente. A tradição profética mostra um Deus que não tem prazer na morte do ímpio, mas em sua conversão.</p>
+      </div>
+      <div class="cue">
+        <div class="cue-label">Cue de fala</div>
+        <div class="cue-text">Explicite a inversão de leitura: o mesmo texto (Gn 9:6) sustenta os dois lados do debate. A diferença está em qual atributo divino você enfatiza — justiça retributiva ou valor inegociável da vida.</div>
+      </div>
+      <div class="quiz-prompt">
+        <div class="quiz-q">Pergunta-guia</div>
+        <p class="quiz-text">Como Gênesis 9:6 pode ser lido como argumento contra, e não a favor, da pena de morte?</p>
+        <button class="reveal-btn" type="button">Revelar resposta</button>
+      </div>
+    </section>
+
+    <!-- Slide 7 — Ética NT -->
+    <section class="slide" data-idx="6">
+      <div class="slide-head">
+        <div class="medallion tone-graca">
+          <svg viewBox="0 0 48 48"><path d="M24 10c-8 4-8 12-8 16 0 6 4 10 8 12 4-2 8-6 8-12 0-4 0-12-8-16Z"/><path d="M20 24c1 3 3 5 4 5s3-2 4-5"/></svg>
+        </div>
+        <div>
+          <div class="eyebrow">07 · Ética do Novo Testamento</div>
+          <h1>Vingança, ira e o lugar da igreja</h1>
+        </div>
+      </div>
+      <div class="chiprow"><span class="chip-label">Base bíblica</span><span class="chip">Romanos 12:19</span><span class="chip">Mateus 5:43–44</span><span class="chip">Romanos 13:1–4</span></div>
+      <div class="body">
+        <p><strong>Romanos 12:19</strong> — "Não vos vingueis a vós mesmos... a vingança é minha, diz o Senhor." A retribuição final é reservada a Deus, não delegada à comunidade de fé.</p>
+        <p><strong>Mateus 5:43–44</strong> — "Amai os vossos inimigos... orai pelos que vos perseguem." O padrão do Reino inverte a lógica da retaliação proporcional.</p>
+        <p><strong>Romanos 13:1–4</strong> — o texto mais citado a favor da pena de morte fala do Estado, não da igreja, e mesmo assim não é uma prescrição, mas uma descrição da função de conter o mal.</p>
+      </div>
+      <div class="cue">
+        <div class="cue-label">Cue de fala</div>
+        <div class="cue-text">Antecipe a objeção mais comum ("mas Romanos 13 autoriza o Estado a matar") e responda no próprio slide: descrição de função ≠ prescrição de método.</div>
+      </div>
+      <div class="quiz-prompt">
+        <div class="quiz-q">Pergunta-guia</div>
+        <p class="quiz-text">O que Romanos 12 e 13 dizem sobre vingança pessoal e o papel do Estado — e por que isso não é a mesma coisa?</p>
+        <button class="reveal-btn" type="button">Revelar resposta</button>
+      </div>
+    </section>
+
+    <!-- Slide 8 — Irreversibilidade -->
+    <section class="slide" data-idx="7">
+      <div class="slide-head">
+        <div class="medallion tone-neutro">
+          <svg viewBox="0 0 48 48"><path d="M14 8h20M14 40h20M16 8c0 8 6 10 8 12 2-2 8-4 8-12M16 40c0-8 6-10 8-12 2 2 8 4 8 12"/><path d="M20 20l3 3-3 3"/></svg>
+        </div>
+        <div>
+          <div class="eyebrow">08 · Uma objeção prática</div>
+          <h1>A irreversibilidade do erro</h1>
+        </div>
+      </div>
+      <div class="chiprow"><span class="chip-label">Argumento complementar</span></div>
+      <div class="body">
+        <p>Para além do argumento bíblico direto, a teologia também dialoga com a realidade da justiça humana: sistemas falíveis, testemunhas falhas, vieses sociais — e uma pena que não admite correção.</p>
+        <p><strong>Nenhuma</strong> possibilidade de correção após a execução.</p>
+        <p><strong>Nenhum</strong> espaço para arrependimento e restauração pós-sentença.</p>
+        <p><strong>Toda</strong> justiça humana permanece sujeita a erro e parcialidade.</p>
+      </div>
+      <div class="cue">
+        <div class="cue-label">Cue de fala</div>
+        <div class="cue-text">Esse é o argumento "extra-bíblico" que reforça os anteriores — trate-o como suporte, não como base principal da tese, para manter a coerência teológica do trabalho.</div>
+      </div>
+      <div class="quiz-prompt">
+        <div class="quiz-q">Pergunta-guia</div>
+        <p class="quiz-text">Por que a irreversibilidade da pena de morte é um problema teológico, e não apenas prático?</p>
+        <button class="reveal-btn" type="button">Revelar resposta</button>
+      </div>
+    </section>
+
+    <!-- Slide 9 — Restaurativa -->
+    <section class="slide" data-idx="8">
+      <div class="slide-head">
+        <div class="medallion tone-graca">
+          <svg viewBox="0 0 48 48"><path d="M14 12c-2 2-2 5 0 7M34 12c2 2 2 5 0 7"/><ellipse cx="14" cy="16" rx="4" ry="5"/><ellipse cx="34" cy="16" rx="4" ry="5"/><path d="M24 40V22"/><path d="M24 22c0-4 3-6 6-6M24 28c0-3-3-5-6-5"/></svg>
+        </div>
+        <div>
+          <div class="eyebrow">09 · O chamado da igreja</div>
+          <h1>De retributiva a restaurativa</h1>
+        </div>
+      </div>
+      <div class="chiprow"><span class="chip-label">Base bíblica</span><span class="chip">Ezequiel 18:23</span><span class="chip">Lucas 15</span><span class="chip">Mateus 25:36</span></div>
+      <div class="body">
+        <p>A missão da igreja não é replicar a lógica retributiva do mundo, mas testemunhar um evangelho em que justiça e graça se encontram — sem negar a gravidade do pecado nem fechar a porta à redenção.</p>
+        <p><strong>Retributiva:</strong> busca equivalência entre ofensa e pena. Fecha o caso, mas não transforma o ofensor nem restaura a vítima ou a comunidade.</p>
+        <p><strong>Restaurativa:</strong> busca reparação, responsabilização e possibilidade real de mudança — coerente com a ênfase bíblica na conversão (Ez 18:23; Lc 15).</p>
+        <p><strong>Papel da igreja:</strong> acompanhar vítimas, visitar presos (Mt 25:36) e defender sistemas de justiça que preservem a dignidade humana.</p>
+      </div>
+      <div class="cue">
+        <div class="cue-label">Cue de fala</div>
+        <div class="cue-text">Puxe a aplicação prática: isso não é uma tese abstrata, é um chamado concreto para a igreja local. Cite Mateus 25:36 como ponte para a conclusão.</div>
+      </div>
+      <div class="quiz-prompt">
+        <div class="quiz-q">Pergunta-guia</div>
+        <p class="quiz-text">Qual a diferença entre justiça retributiva e restaurativa, e qual delas o Novo Testamento chama a igreja a testemunhar?</p>
+        <button class="reveal-btn" type="button">Revelar resposta</button>
+      </div>
+    </section>
+
+    <!-- Slide 10 — Conclusão -->
+    <section class="slide" data-idx="9">
+      <div class="slide-head">
+        <div class="medallion tone-graca">
+          <svg viewBox="0 0 48 48"><path d="M8 26c4-6 10-6 14-2 2 2 2 2 4 0 4-4 10-4 14 2-6 8-12 12-16 14-4-2-10-6-16-14Z"/><path d="M26 22l6-6M32 16h5M32 16v5"/><path d="M6 34h4M8 32v4"/></svg>
+        </div>
+        <div>
+          <div class="eyebrow">10 · Conclusão</div>
+          <h1>A vida como último argumento</h1>
+        </div>
+      </div>
+      <div class="chiprow"><span class="chip-label">Base bíblica</span><span class="chip">Efésios 4:32</span><span class="chip">Mateus 5:17</span></div>
+      <div class="quote">"Antes sede uns para com os outros benignos, misericordiosos, perdoando-vos uns aos outros, como também Deus vos perdoou em Cristo."</div>
+      <div class="ref">Efésios 4:32</div>
+      <div class="body">
+        <p>Ler a Bíblia como unidade — do código mosaico ao evangelho — leva a uma conclusão coerente: a revelação plena em Cristo desloca a justiça da retribuição para a graça, sem negar a seriedade do mal.</p>
+        <p>Defender a vida do condenado não é minimizar a dor da vítima, mas recusar-se a responder à morte com mais morte — testemunhando, mesmo diante do pior crime, que nenhuma vida está fora do alcance da graça.</p>
+      </div>
+      <div class="tese">
+        <div class="tese-label">Síntese</div>
+        <p>Nenhuma vida está fora do alcance da graça — inclusive a do condenado. É esse o testemunho que a igreja é chamada a dar.</p>
+      </div>
+      <div class="cue">
+        <div class="cue-label">Cue de fala</div>
+        <div class="cue-text">Feche retomando a frase de abertura (Mt 5:17 — "vim para cumprir"). Termine com a frase-síntese: nenhuma vida está fora do alcance da graça. Pausa antes de agradecer.</div>
+      </div>
+      <div class="quiz-prompt">
+        <div class="quiz-q">Pergunta-guia</div>
+        <p class="quiz-text">Qual é a síntese final do trabalho: como a graça revelada em Cristo redefine a ideia de justiça?</p>
+        <button class="reveal-btn" type="button">Revelar resposta</button>
+      </div>
+    </section>
+
+    <button class="navzone right" id="nextBtn" aria-label="Próximo slide">›</button>
+  </div>
+
+  <div class="bottombar">
+    <div class="progress" id="progress"></div>
+    <div class="counter" id="counter">01 / 10</div>
+    <div class="review-count" id="reviewCount">0/10 revisados</div>
+    <div class="hint">← → para navegar · clique no slide ou no botão para revelar</div>
+  </div>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let current = 0;
+  let revealedSet = new Set();
+
+  const progressEl = document.getElementById('progress');
+  const counterEl = document.getElementById('counter');
+  const reviewCountEl = document.getElementById('reviewCount');
+  const modeBtn = document.getElementById('modeBtn');
+  const modeLabel = document.getElementById('modeLabel');
+  const arcMarker = document.getElementById('arcMarker');
+
+  slides.forEach((s, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'dot';
+    dot.addEventListener('click', () => goTo(i));
+    progressEl.appendChild(dot);
+  });
+
+  function render(){
+    slides.forEach((s,i) => {
+      s.classList.toggle('active', i === current);
+      s.classList.toggle('revealed', revealedSet.has(i));
+    });
+    Array.from(progressEl.children).forEach((d,i) => {
+      d.classList.toggle('active', i === current);
+      d.classList.toggle('done', revealedSet.has(i) && i !== current);
+    });
+    counterEl.textContent = String(current+1).padStart(2,'0') + ' / ' + String(total).padStart(2,'0');
+    reviewCountEl.textContent = revealedSet.size + '/' + total + ' revisados';
+    const pct = (current/(total-1))*100;
+    arcMarker.style.left = pct + '%';
+    arcMarker.style.borderColor = pct < 50 ? 'var(--gold-deep)' : 'var(--sage-deep)';
+  }
+
+  function goTo(i){
+    current = (i + total) % total;
+    render();
+  }
+
+  function revealCurrent(){
+    revealedSet.add(current);
+    render();
+  }
+
+  document.getElementById('nextBtn').addEventListener('click', () => goTo(current+1));
+  document.getElementById('prevBtn').addEventListener('click', () => goTo(current-1));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { goTo(current+1); }
+    if (e.key === 'ArrowLeft') { goTo(current-1); }
+  });
+
+  // modo revisão: clique no slide ou no botão revela o conteúdo daquele slide
+  document.body.addEventListener('click', (e) => {
+    if (!document.body.classList.contains('review')) return;
+    const activeSlide = document.querySelector('.slide.active');
+    if (!activeSlide || !activeSlide.contains(e.target)) return;
+    if (e.target.closest('.navzone')) return;
+    revealCurrent();
+  });
+
+  modeBtn.addEventListener('click', () => {
+    const on = document.body.classList.toggle('review');
+    modeBtn.classList.toggle('active', on);
+    modeBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    modeLabel.textContent = on ? 'Revisão ativa' : 'Apresentação';
+    revealedSet = new Set();
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>
