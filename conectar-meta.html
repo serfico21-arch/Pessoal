@@ -65,6 +65,16 @@ a{color:var(--az)}
 <li>Lá em cima você vê:<ul><li><b>ID do app</b>: um número grande, tipo <code>1234567890123456</code>. Copie e cole no campo <b>ID do app</b> aqui embaixo.</li><li><b>Chave secreta do app</b>: toque em <b>Mostrar</b>, digite sua senha, copie e cole no campo <b>Chave secreta</b> aqui embaixo.</li></ul></li></ol>
 <a class="btn" href="https://developers.facebook.com/apps/" target="_blank" rel="noopener">Abrir "Meus apps"</a></div>
 
+<div class="card"><h2><span class="n">★</span>Liberar esta página no app (só 1 vez)</h2>
+<p>Isso deixa você usar o botão fácil <b>Entrar com Facebook</b> no passo 5, sem precisar do código grande.</p>
+<ol><li>Cole o <b>ID do app</b> no passo 5 (lá embaixo) e volte aqui.</li>
+<li>Toque em <b>📋 Copiar endereço</b>.</li>
+<li>Toque em <b>Abrir configuração do login</b>. Se pedir para adicionar o <b>Login do Facebook</b>, toque em <b>Configurar</b>.</li>
+<li>No campo <b>URIs de redirecionamento do OAuth válidos</b>, segure o dedo e <b>Cole</b>. Toque em <b>Salvar alterações</b>. Pronto!</li></ol>
+<input id="volta" readonly aria-label="Endereço desta página">
+<button class="btn ok" id="cpvolta">📋 Copiar endereço</button>
+<a class="btn" id="abrelogin" href="https://developers.facebook.com/apps/" target="_blank" rel="noopener">Abrir configuração do login</a></div>
+
 <div class="card"><h2><span class="n">4</span>Pegar o <u>código grande</u> (token)</h2>
 <ol><li>Toque no botão abaixo. Abre o <b>Explorador da Graph API</b>.</li>
 <li>À direita, em <b>App da Meta</b>, escolha o seu app (<b>Divulga Fcosta</b>).</li>
@@ -89,8 +99,13 @@ a{color:var(--az)}
 <div class="card"><h2><span class="n">5</span>Colar aqui e conectar</h2>
 <label for="app">ID do app <span class="mut">(passo 3, ajuda mas não é obrigatório)</span></label><input id="app" inputmode="numeric" autocomplete="off" placeholder="1234567890123456">
 <label for="sec">Chave secreta do app <span class="mut">(passo 3, ajuda mas não é obrigatório)</span></label><input id="sec" autocomplete="off" placeholder="letras e números">
+<div class="dica"><b>Jeito fácil:</b> com o ID do app (e a chave secreta) preenchidos acima, toque aqui e entre com o seu Facebook. Não precisa do código grande.</div>
+<button class="btn" id="entrar">🔵 Entrar com Facebook</button>
+<p class="mut">Se o Facebook mostrar <b>Invalid Scopes</b>, toque <a href="#" id="entrar2">aqui</a>.</p>
+<p class="mut">Ou, do jeito antigo, cole o código grande abaixo e toque em Conectar.</p>
 <label for="tok">Código grande <span class="mut">(passo 4, começa com EAA)</span></label><textarea id="tok" rows="3" autocomplete="off" placeholder="EAA..."></textarea>
 <button class="btn" id="ir">🔌 Conectar</button>
+<button class="btn" id="testar" style="background:#666">🔎 Testar este código</button>
 <div id="msg"></div>
 <div id="pag" class="hide"><label for="sel">Qual é a sua Página?</label><select id="sel"></select><button class="btn" id="usar">Usar esta Página</button></div>
 </div>
@@ -108,7 +123,7 @@ a{color:var(--az)}
 </main>
 <script>
 (function(){"use strict";
-var G="https://graph.facebook.com/v23.0",paginas=[];
+var G="https://graph.facebook.com/v27.0",paginas=[],VOLTA="https://serfico21-arch.github.io/Pessoal/conectar-meta.html";
 function $(i){return document.getElementById(i)}
 function msg(t,ok){$("msg").innerHTML='<div class="'+(ok?"dica":"aviso")+'">'+t+'</div>'}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -117,7 +132,7 @@ function get(u){return fetch(u).then(function(r){return r.json()}).then(function
    Por isso: ao colar, o campo é trocado inteiro; e na hora de conectar usamos só o ÚLTIMO código que começa com EAA. */
 function pegaToken(v){v=String(v||"").replace(/\s/g,"");var p=v.split(/(?=EAA)/).filter(function(x){return /^EAA[A-Za-z0-9]{50,}$/.test(x)});return p.length?p[p.length-1]:v}
 $("tok").addEventListener("paste",function(e){var c=(e.clipboardData||window.clipboardData);if(!c)return;var x=c.getData("text");if(!x)return;e.preventDefault();this.value=x.trim()});
-$("ir").onclick=function(){var a=$("app").value.replace(/\D/g,""),s=$("sec").value.replace(/\s/g,""),t=pegaToken($("tok").value);
+function conectar(){var a=$("app").value.replace(/\D/g,""),s=$("sec").value.replace(/\s/g,""),t=pegaToken($("tok").value);
  if(!t){msg("Cole o código grande (passo 4).");return}
  msg("⏳ Conectando…",true);
  /* 1) troca o código de 1 hora por um de 60 dias. Tenta do jeito novo (POST) e do jeito antigo (GET).
@@ -142,7 +157,31 @@ $("ir").onclick=function(){var a=$("app").value.replace(/\D/g,""),s=$("sec").val
   $("pag").classList.remove("hide");msg("✅ Conectou! Agora escolha a sua Página.",true)})
  .catch(function(e){if(e.message==="FALTA_ESTENDER"){msg('Falta um passinho: <ol><li>Toque em <a href="https://developers.facebook.com/tools/debug/accesstoken/" target="_blank" rel="noopener"><b>Abrir o Depurador</b></a>.</li><li>Cole o <b>código grande</b> e toque em <b>Depurar</b>.</li><li>Lá embaixo, toque em <b>Estender token de acesso</b> (Extend Access Token) e digite sua senha.</li><li>Copie o código novo que aparece, cole no campo <b>Código grande</b> aqui e toque em <b>Conectar</b> de novo.</li></ol>');return}
  if(/^CODIGO_RUIM:/.test(e.message)){msg("O <b>código grande</b> não foi aceito pela Meta ("+esc(e.message.slice(12))+").<br>Faça assim: toque no campo do código, aperte <b>Ctrl + A</b> e <b>Delete</b> para apagar tudo. No Explorador, toque em <b>Generate Access Token</b>, copie pelo ícone de copiar e cole no campo vazio. Toque em Conectar logo em seguida.");return}
- msg("Não deu certo: "+esc(e.message)+"<br>Confira o ID e a chave secreta (passo 3) e gere o código de novo no passo 4 (ele vence em 1 hora).")})};
+ msg("Não deu certo: "+esc(e.message)+"<br>Confira o ID e a chave secreta (passo 3) e gere o código de novo no passo 4 (ele vence em 1 hora).")})}
+$("ir").onclick=conectar;
+/* Diagnóstico: abre a resposta da própria Meta numa aba nova. */
+$("testar").onclick=function(){var t=pegaToken($("tok").value);if(!t){msg("Cole o código grande primeiro.");return}
+ window.open(G+"/me?fields=id,name&access_token="+encodeURIComponent(t),"_blank","noopener");
+ msg("Abriu uma aba nova. Se lá aparecer o <b>seu nome</b>, o código está bom. Se aparecer <b>error</b>, tire um print <b>só da frase do erro</b> (sem o código) e mande para o Claude.",true)};
+/* Jeito fácil: Entrar com Facebook (volta para esta página com o código no endereço). */
+$("volta").value=VOLTA;
+$("cpvolta").onclick=function(){var a=$("volta");a.select();try{document.execCommand("copy")}catch(e){}try{navigator.clipboard.writeText(VOLTA)}catch(e){}this.textContent="✅ Copiado!"};
+function linkLogin(){var a=$("app").value.replace(/\D/g,"");$("abrelogin").href=a?"https://developers.facebook.com/apps/"+a+"/fb-login/settings/":"https://developers.facebook.com/apps/"}
+$("app").addEventListener("input",linkLogin);
+function PERM(velho){return "pages_show_list,pages_manage_posts,pages_read_engagement,instagram_basic,"+(velho?"instagram_content_publish":"instagram_manage_contents")+",business_management"}
+function entrar(velho){var a=$("app").value.replace(/\D/g,"");if(!a){msg("Cole o <b>ID do app</b> (passo 3) no primeiro campo.");return}
+ try{sessionStorage.setItem("fc_login",JSON.stringify({app:a,sec:$("sec").value.replace(/\s/g,""),tgtok:$("tgtok").value.trim(),tgchat:$("tgchat").value.trim()}))}catch(e){}
+ location.href="https://www.facebook.com/v27.0/dialog/oauth?"+new URLSearchParams({client_id:a,redirect_uri:VOLTA,response_type:"token",scope:PERM(velho),state:"fc"})}
+$("entrar").onclick=function(){entrar(false)};
+$("entrar2").onclick=function(e){e.preventDefault();entrar(true)};
+(function voltou(){var h=new URLSearchParams(location.hash.slice(1)),q=new URLSearchParams(location.search),t=h.get("access_token"),erro=h.get("error_description")||q.get("error_description")||q.get("error_message");
+ if(!t&&!erro)return;
+ try{history.replaceState(null,"",location.pathname)}catch(e){}
+ var g={};try{g=JSON.parse(sessionStorage.getItem("fc_login")||"{}");sessionStorage.removeItem("fc_login")}catch(e){}
+ if(g.app)$("app").value=g.app;if(g.sec)$("sec").value=g.sec;if(g.tgtok)$("tgtok").value=g.tgtok;if(g.tgchat)$("tgchat").value=g.tgchat;linkLogin();
+ $("ir").scrollIntoView({block:"center"});
+ if(!t){msg("O Facebook não deixou entrar ("+esc(erro)+").<br>Confira o quadro <b>★ Liberar esta página no app</b> e tente de novo.");return}
+ $("tok").value=t;conectar()})();
 $("usar").onclick=function(){var p=paginas[+$("sel").value];if(!p)return;
  var c=Object.assign({token:p.access_token,page:p.id,ig:p.instagram_business_account?p.instagram_business_account.id:""},base());
  $("chave").value=JSON.stringify(c);$("fim").classList.remove("hide");
