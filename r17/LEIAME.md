@@ -96,7 +96,7 @@ O botão verde do WhatsApp também fica fixo embaixo da tela.
 
 Toda vez que mudar o site ou o painel:
 
-1. Aumentar o número em `const VERSAO="29"` (ex.: para `"30"`) em **dois arquivos**:
+1. Aumentar o número em `const VERSAO="34"` (ex.: para `"35"`) em **dois arquivos**:
    - `r17/index.html` (site)
    - `r17/painel/index.html` (painel)
 2. Aumentar também o número do cache em `r17/sw.js` (ex.: `r17-v19` para `r17-v20`).
@@ -137,3 +137,9 @@ Resumo (o passo a passo completo está em `cadeira-cheia/COMO-CRIAR-NOVO-CLIENTE
 ---
 
 **FCOSTA Sistemas & Apps**: Sérgio Costa, CRECI-SP 294791-F.
+
+## Loja R-17 (Versão 34)
+
+Botão azul **LOJA R-17** no painel. É separado do caixa da barbearia.
+Dentro: Vender (ou anotar fiado), Fiado (marcar PAGOU), Produtos e estoque (cadastrar, "Chegou" mercadoria), Caixa da loja (entradas e saídas) e o Total do mês.
+Banco: tabelas `lj_produtos`, `lj_movs`, `lj_fiado` e funções `lj_*` (arquivo `loja-r17.sql`). Nada é apagado: cancelar só risca e devolve ao estoque.

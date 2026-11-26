@@ -506,6 +506,30 @@ footer{border-top:1px solid var(--line)}
 .modo-painel #painel{padding-top:0!important;min-height:100vh}
 .modo-painel .painel-bar{display:flex;align-items:center;gap:10px;padding:14px 0 18px;font-family:var(--display,inherit);font-weight:800;font-size:1.1rem;letter-spacing:.04em}
 .modo-painel .painel-bar img{width:36px;height:36px;border-radius:10px}
+/* ---------- LOJA R-17 (cor azul própria, separada da barbearia) ---------- */
+:root{--lj:#3FA9F5;--lj2:#1B6FD1;--ljbg:rgba(63,169,245,.10)}
+.hbtn.hloja{margin-top:14px;width:100%;border-color:var(--lj);background:linear-gradient(135deg,#6EC4FF,#2F8CEB 55%,#1B5FB8);color:#fff;padding:26px 20px}
+.hbtn.hloja b{font-size:1.9rem;color:#fff}.hbtn.hloja small{color:#E6F3FF}.hbtn.hloja i{font-style:normal}
+.lj{--yellow:var(--lj)}
+.lj .ljtopo{background:linear-gradient(135deg,#2F8CEB,#1B5FB8);color:#fff;border-radius:16px;padding:14px 16px;margin-bottom:14px;font-weight:800}
+.lj .ljtopo small{display:block;font-weight:500;opacity:.9}
+.lj .btn-b{background:linear-gradient(135deg,#6EC4FF,#2F8CEB 55%,#1B5FB8);color:#fff;box-shadow:0 12px 30px -12px rgba(47,140,235,.7)}
+.lj .box{border-color:var(--lj);background:var(--ljbg)}
+.lj .bh{color:var(--lj)}
+.ljmes{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}.ljmes input{width:auto}
+.ljk{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.ljk .kpi{border-color:var(--lj)}.ljk .kpi b{font-size:1.25rem}
+.ljk .kpi.sal b{color:var(--lj)}.ljk .kpi.fi b{color:#F0A93B}
+.ljsub{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.ljsub .btn{justify-content:center;padding:16px 10px;font-size:1.05rem;box-shadow:inset 0 0 0 2px var(--lj);color:var(--ink);background:transparent}
+.ljsub .btn[aria-pressed="true"]{background:linear-gradient(135deg,#6EC4FF,#2F8CEB 55%,#1B5FB8);color:#fff;box-shadow:none}
+.ljgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.ljgrid .full{grid-column:1/-1}
+.ljfi{display:flex;align-items:center;gap:10px;font-weight:700;margin:0 0 14px;cursor:pointer}.ljfi input{width:26px;height:26px}
+.lj .pouco{color:var(--red);font-weight:800}
+.lj tr.canc td{opacity:.45;text-decoration:line-through}
+.lj .mais{color:var(--ok)}.lj .menos{color:var(--red)}
+.ljacoes{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.ljacoes .btn{white-space:nowrap}
+@media(max-width:600px){.ljk{grid-template-columns:1fr 1fr}.ljgrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -702,7 +726,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do Rodrigo <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 29</span></div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do Rodrigo <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 34</span></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -753,11 +777,95 @@ footer{border-top:1px solid var(--line)}
               <button type="button" class="hbtn hbig" data-ir="novo"><i>＋</i><b>AGENDAR</b><small>Marcar um horário para o cliente</small></button>
               <button type="button" class="hbtn hbig" data-ir="agenda"><i>📋</i><b>AGENDADOS</b><small>Ver os clientes marcados</small></button>
             </div>
+            <button type="button" class="hbtn hloja" data-ir="loja"><i>🛍️</i><b>LOJA R-17</b><small>Produtos, estoque, vendas, fiado e caixa da loja</small></button>
             <div class="homemini">
               <button type="button" class="btn btn-line" data-ir="caixa">💰 Caixa</button>
               <button type="button" class="btn btn-line" data-ir="config">⚙️ Ajustes</button>
               <button type="button" class="btn btn-line" data-ir="site" style="grid-column:1/-1">📣 Postar no site (avisos, fotos, vídeos)</button>
               <button type="button" class="btn btn-y" id="homeConvite" style="grid-column:1/-1">📤 Mandar o site para o cliente</button>
+            </div>
+          </div>
+
+          <div class="tab lj" data-painel="loja" hidden>
+            <div class="ljtopo">🛍️ LOJA R-17<small>Produtos que a barbearia vende. Este caixa é separado do caixa da barbearia.</small></div>
+            <div class="ljmes"><label for="ljMes"><b>Mês:</b></label><input type="month" id="ljMes"><button type="button" class="btn btn-sm btn-line" id="ljHoje">Este mês</button></div>
+            <div class="ljk" id="ljKpis"><p class="empty">Carregando…</p></div>
+            <div class="ljsub" id="ljSub">
+              <button type="button" class="btn" data-lj="vender" aria-pressed="true">🛒 Vender</button>
+              <button type="button" class="btn" data-lj="fiado" aria-pressed="false">📝 Fiado</button>
+              <button type="button" class="btn" data-lj="produtos" aria-pressed="false">📦 Produtos e estoque</button>
+              <button type="button" class="btn" data-lj="caixa" aria-pressed="false">💵 Caixa da loja</button>
+            </div>
+
+            <div data-ljp="vender">
+              <div class="box">
+                <h3 class="bh">🛒 Registrar venda</h3>
+                <div class="ljgrid">
+                  <div class="field full"><label for="lj_vProd">Produto</label><select id="lj_vProd"></select></div>
+                  <div class="field"><label for="lj_vQtd">Quantidade</label><input id="lj_vQtd" type="number" min="1" step="1" value="1" inputmode="numeric"></div>
+                  <div class="field"><label for="lj_vValor">Valor total (R$)</label><input id="lj_vValor" inputmode="decimal"></div>
+                  <div class="field"><label for="lj_vData">Dia</label><input id="lj_vData" type="date"></div>
+                </div>
+                <label class="ljfi"><input type="checkbox" id="lj_vFiado"> É fiado (vai pagar depois)</label>
+                <div class="field" id="lj_vNomeF" hidden><label for="lj_vNome">Nome de quem está devendo</label><input id="lj_vNome" maxlength="80" placeholder="Ex.: Carlos da padaria"></div>
+                <button type="button" class="btn btn-b" id="lj_vSalvar">✔ Registrar venda</button>
+                <p class="ok" id="lj_vMsg" aria-live="polite"></p>
+              </div>
+              <h3 class="bh">Produtos vendidos no mês</h3>
+              <div id="ljVendidos"></div>
+            </div>
+
+            <div data-ljp="fiado" hidden>
+              <div class="box">
+                <h3 class="bh">📝 Quem está devendo</h3>
+                <p class="hint" style="margin:0 0 10px">Para anotar um fiado novo, vá em <b>Vender</b> e marque <b>É fiado</b>. Quando a pessoa pagar, toque em <b>PAGOU</b>: o valor entra no caixa da loja.</p>
+                <button type="button" class="btn btn-b" id="lj_fNovo">＋ Anotar fiado</button>
+              </div>
+              <div id="ljFiados"></div>
+              <p class="ok" id="lj_fMsg" aria-live="polite"></p>
+            </div>
+
+            <div data-ljp="produtos" hidden>
+              <div class="box">
+                <h3 class="bh" id="lj_pTit">📦 Cadastrar produto</h3>
+                <div class="ljgrid">
+                  <div class="field full"><label for="lj_pNome">Nome do produto</label><input id="lj_pNome" maxlength="80" placeholder="Ex.: Pomada modeladora"></div>
+                  <div class="field"><label for="lj_pQtd">Quantidade em estoque</label><input id="lj_pQtd" type="number" min="0" step="1" inputmode="numeric"></div>
+                  <div class="field"><label for="lj_pCusto">Custo (quanto pagou, cada)</label><input id="lj_pCusto" inputmode="decimal" placeholder="0,00"></div>
+                  <div class="field"><label for="lj_pPreco">Preço de venda (cada)</label><input id="lj_pPreco" inputmode="decimal" placeholder="0,00"></div>
+                </div>
+                <div class="btns" style="margin-top:0"><button type="button" class="btn btn-b" id="lj_pSalvar">✔ Salvar produto</button><button type="button" class="btn btn-line" id="lj_pCancelar" hidden>Cancelar</button></div>
+                <p class="ok" id="lj_pMsg" aria-live="polite"></p>
+              </div>
+              <div class="box" id="lj_rBox" hidden>
+                <h3 class="bh">➕ Chegou mercadoria: <span id="lj_rNome"></span></h3>
+                <div class="ljgrid">
+                  <div class="field"><label for="lj_rQtd">Quantas chegaram</label><input id="lj_rQtd" type="number" min="1" step="1" inputmode="numeric"></div>
+                  <div class="field"><label for="lj_rValor">Quanto pagou no total (sai do caixa da loja)</label><input id="lj_rValor" inputmode="decimal"></div>
+                </div>
+                <div class="btns" style="margin-top:0"><button type="button" class="btn btn-b" id="lj_rSalvar">✔ Somar no estoque</button><button type="button" class="btn btn-line" id="lj_rCancelar">Cancelar</button></div>
+              </div>
+              <h3 class="bh">Estoque</h3>
+              <div id="ljProdutos"></div>
+            </div>
+
+            <div data-ljp="caixa" hidden>
+              <div class="box">
+                <h3 class="bh">💵 Lançar entrada ou saída</h3>
+                <div class="ljsub" id="lj_mTipo" style="margin-bottom:12px">
+                  <button type="button" class="btn" data-t="entrada" aria-pressed="false">⬆ Entrada</button>
+                  <button type="button" class="btn" data-t="saida" aria-pressed="true">⬇ Saída</button>
+                </div>
+                <div class="ljgrid">
+                  <div class="field full"><label for="lj_mDesc">O que foi</label><input id="lj_mDesc" maxlength="120" placeholder="Ex.: sacolinhas, troco inicial"></div>
+                  <div class="field"><label for="lj_mValor">Valor (R$)</label><input id="lj_mValor" inputmode="decimal"></div>
+                  <div class="field"><label for="lj_mData">Dia</label><input id="lj_mData" type="date"></div>
+                </div>
+                <button type="button" class="btn btn-b" id="lj_mSalvar">✔ Lançar</button>
+                <p class="ok" id="lj_mMsg" aria-live="polite"></p>
+              </div>
+              <h3 class="bh">Movimento do mês</h3>
+              <div id="ljMovs"></div>
             </div>
           </div>
 
@@ -1812,8 +1920,8 @@ $("pedRows").addEventListener("click",async e=>{
 });
 
 /* ---------- abas do painel ---------- */
-const PAI={site:"inicio",agenda:"inicio",caixa:"inicio",config:"inicio",novo:"inicio",clientes:"config",precos:"config",ajustes:"config"};
-const TIT={site:"📣 Postar no site",agenda:"📋 Agendados",caixa:"💰 Caixa",config:"⚙️ Ajustes",novo:"＋ Agendar",clientes:"👤 Clientes",precos:"✂️ Preços",ajustes:"🕒 Horário e WhatsApp"};
+const PAI={loja:"inicio",site:"inicio",agenda:"inicio",caixa:"inicio",config:"inicio",novo:"inicio",clientes:"config",precos:"config",ajustes:"config"};
+const TIT={loja:"🛍️ Loja R-17",site:"📣 Postar no site",agenda:"📋 Agendados",caixa:"💰 Caixa",config:"⚙️ Ajustes",novo:"＋ Agendar",clientes:"👤 Clientes",precos:"✂️ Preços",ajustes:"🕒 Horário e WhatsApp"};
 let abaAtual="inicio";
 function abrirAba(t){
   pedidoAtual=null; abaAtual=t;
@@ -1824,6 +1932,7 @@ function abrirAba(t){
   if(t==="novo"){ $("doneBox").hidden=true; carregarClientes(); ouvirDia(); }
   if(t==="clientes") carregarClientes();
   if(t==="caixa") carregarCaixa();
+  if(t==="loja") ljCarregar();
   window.scrollTo(0,0);
 }
 $("voltar").addEventListener("click",()=>abrirAba(PAI[abaAtual]||"inicio"));
@@ -1974,6 +2083,132 @@ $("cxSaidas").addEventListener("click",async e=>{
   catch(err){ b.disabled=false; }
 });
 $("cxImprimir").addEventListener("click",()=>window.print());
+
+/* ---------- LOJA R-17 (separada do caixa da barbearia) ---------- */
+let ljD=null, ljAba="vender", ljEdit=null, ljRepor=null, ljTipo="saida";
+const ljNum = s => { const v=Number(String(s??"").trim().replace(/\./g,"").replace(",",".")); return isNaN(v)?NaN:v; };
+const ljNumPlain = s => { const t=String(s??"").trim(); return t.includes(",") ? ljNum(t) : Number(t); };
+const ljMesAtual = () => isoOf(new Date()).slice(0,7);
+function ljPeriodo(){ const m=$("ljMes").value||ljMesAtual(); const [y,mm]=m.split("-").map(Number); return {de:`${m}-01`, ate:isoOf(new Date(y,mm,0))}; }
+function ljMostrar(a){ ljAba=a; document.querySelectorAll("#ljSub [data-lj]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.lj===a))); document.querySelectorAll("[data-ljp]").forEach(d=>d.hidden=d.dataset.ljp!==a); }
+async function ljCarregar(){
+  if(!isAdmin()) return;
+  if(!$("ljMes").value) $("ljMes").value=ljMesAtual();
+  ["lj_vData","lj_mData"].forEach(id=>{ if(!$(id).value) $(id).value=isoOf(new Date()); });
+  const {de,ate}=ljPeriodo();
+  try{ ljD = await adm("lj_dados",{p_de:de,p_ate:ate}); }
+  catch(e){ if(e.codigo!=="sessao") $("ljKpis").innerHTML=`<p class="empty">Não foi possível abrir a loja agora. Confira a internet.</p>`; return; }
+  ljRender();
+}
+function ljRender(){
+  if(!ljD) return;
+  const prods=ljD.produtos||[], movs=(ljD.movs||[]).filter(m=>!m.cancelado), fiados=ljD.fiados||[];
+  const soma=l=>l.reduce((t,x)=>t+Number(x.valor),0);
+  const vend=movs.filter(m=>m.tipo==="venda"), ent=movs.filter(m=>m.tipo==="entrada"), sai=movs.filter(m=>m.tipo==="saida");
+  const tV=soma(vend), tE=soma(ent), tS=soma(sai), lucro=vend.reduce((t,m)=>t+Number(m.valor)-Number(m.custo_unit)*Number(m.qtd),0);
+  const abertos=fiados.filter(f=>!f.pago), tF=soma(abertos);
+  const {de}=ljPeriodo(); const nomeMes=new Date(de+"T12:00").toLocaleDateString("pt-BR",{month:"long",year:"numeric"});
+  $("ljKpis").innerHTML=`<p class="hint" style="grid-column:1/-1;margin:0">Total do mês de <b>${esc(nomeMes)}</b></p>
+    <div class="kpi ent"><small>Vendas</small><b>${brl(tV)}</b><span>${vend.reduce((t,m)=>t+Number(m.qtd),0)} produto(s)</span></div>
+    <div class="kpi ent"><small>Outras entradas</small><b>${brl(tE)}</b></div>
+    <div class="kpi sai"><small>Saídas</small><b>${brl(tS)}</b></div>
+    <div class="kpi sal"><small>Saldo do mês</small><b>${brl(tV+tE-tS)}</b><span>entradas menos saídas</span></div>
+    <div class="kpi"><small>Lucro dos produtos</small><b>${brl(lucro)}</b><span>venda menos custo</span></div>
+    <div class="kpi fi"><small>Fiado a receber</small><b>${brl(tF)}</b><span>${abertos.length} anotação(ões)</span></div>`;
+  // select de produtos
+  const sel=$("lj_vProd").value;
+  const ativos=prods.filter(p=>p.ativo);
+  $("lj_vProd").innerHTML = ativos.length ? `<option value="">Escolha o produto…</option>`+ativos.map(p=>`<option value="${p.id}">${esc(p.nome)} · ${brl(Number(p.preco))} · estoque ${p.qtd}</option>`).join("") : `<option value="">Cadastre um produto primeiro (em Produtos e estoque)</option>`;
+  if(ativos.some(p=>p.id===sel)) $("lj_vProd").value=sel;
+  // vendidos
+  $("ljVendidos").innerHTML = (ljD.movs||[]).some(m=>m.tipo==="venda") ? tabela(["Dia","Produto","Valor"],(ljD.movs||[]).filter(m=>m.tipo==="venda").map(m=>`<tr data-id="${m.id}" class="${m.cancelado?"canc":""}"><td>${fmtCurta(m.data)}</td><td>${m.qtd}× ${esc(m.produto)}${m.descricao?`<br><small>${esc(m.descricao)}</small>`:""}</td><td class="n">${brl(Number(m.valor))}${m.cancelado?"<br><small>cancelada</small>":` <button type="button" class="btn btn-sm btn-line" data-mc="1" aria-label="Cancelar venda">✕</button>`}</td></tr>`),`<tr><td colspan="2">Total vendido</td><td class="n">${brl(tV)}</td></tr>`) : `<p class="empty">Nenhuma venda neste mês.</p>`;
+  // fiado
+  const pagos=fiados.filter(f=>f.pago);
+  $("ljFiados").innerHTML = (abertos.length ? tabela(["Quem deve","Produto","Valor"],abertos.map(f=>`<tr data-id="${f.id}"><td><b>${esc(f.nome)}</b><br><small>${fmtCurta(f.data)}</small></td><td>${f.qtd}× ${esc(f.produto)}</td><td class="n">${brl(Number(f.valor))}<div class="ljacoes" style="justify-content:flex-end"><button type="button" class="btn btn-sm btn-zap" data-f="pagar">✔ PAGOU</button><button type="button" class="btn btn-sm btn-line" data-f="cancelar" aria-label="Cancelar anotação">✕</button></div></td></tr>`),`<tr><td colspan="2">Total devendo</td><td class="n">${brl(tF)}</td></tr>`) : `<p class="empty">Ninguém devendo. 👍</p>`)
+    + (pagos.length ? `<h3 class="bh" style="margin-top:18px">Fiados pagos neste mês</h3>`+tabela(["Quem","Produto","Valor"],pagos.map(f=>`<tr><td>${esc(f.nome)}<br><small>pagou ${fmtCurta(f.pago_em)}</small></td><td>${f.qtd}× ${esc(f.produto)}</td><td class="n">${brl(Number(f.valor))}</td></tr>`)) : "");
+  // produtos
+  $("ljProdutos").innerHTML = prods.length ? tabela(["Produto","Estoque","Custo / Venda"],prods.map(p=>`<tr data-id="${p.id}" class="${p.ativo?"":"canc"}"><td><b>${esc(p.nome)}</b>${p.ativo?"":"<br><small>desativado</small>"}<div class="ljacoes"><button type="button" class="btn btn-sm btn-b" data-p="repor">＋ Chegou</button><button type="button" class="btn btn-sm btn-line" data-p="editar">Editar</button><button type="button" class="btn btn-sm btn-line" data-p="ativo">${p.ativo?"Desativar":"Ativar"}</button></div></td><td class="${p.qtd<=2?"pouco":""}">${p.qtd}${p.qtd<=2?" ⚠️":""}</td><td class="n">${brl(Number(p.custo))}<br><b>${brl(Number(p.preco))}</b></td></tr>`),
+      `<tr><td>Valor em estoque (custo)</td><td></td><td class="n">${brl(prods.filter(p=>p.ativo).reduce((t,p)=>t+Math.max(0,p.qtd)*Number(p.custo),0))}</td></tr>`) : `<p class="empty">Nenhum produto cadastrado ainda.</p>`;
+  // movimento
+  const todos=ljD.movs||[];
+  $("ljMovs").innerHTML = todos.length ? tabela(["Dia","O que foi","Valor"],todos.map(m=>{ const mais=m.tipo!=="saida"; const txt=m.tipo==="venda"?`Venda: ${m.qtd}× ${esc(m.produto)}${m.descricao?` (${esc(m.descricao)})`:""}`:esc(m.descricao||"");
+      return `<tr data-id="${m.id}" class="${m.cancelado?"canc":""}"><td>${fmtCurta(m.data)}</td><td>${txt}</td><td class="n ${mais?"mais":"menos"}">${mais?"+":"−"} ${brl(Number(m.valor))}${m.cancelado?"<br><small>cancelado</small>":` <button type="button" class="btn btn-sm btn-line" data-mc="1" aria-label="Cancelar lançamento">✕</button>`}</td></tr>`; }),
+      `<tr><td colspan="2">Saldo do mês</td><td class="n">${brl(tV+tE-tS)}</td></tr>`) : `<p class="empty">Nada lançado neste mês.</p>`;
+}
+function ljValorSug(){ const p=(ljD?.produtos||[]).find(x=>x.id===$("lj_vProd").value); const q=Number($("lj_vQtd").value)||1; if(p) $("lj_vValor").value=(Number(p.preco)*q).toFixed(2).replace(".",","); }
+$("lj_vProd").addEventListener("change",ljValorSug); $("lj_vQtd").addEventListener("input",ljValorSug);
+$("lj_vFiado").addEventListener("change",()=>{ $("lj_vNomeF").hidden=!$("lj_vFiado").checked; $("lj_vSalvar").textContent=$("lj_vFiado").checked?"✔ Anotar fiado":"✔ Registrar venda"; if($("lj_vFiado").checked) $("lj_vNome").focus(); });
+$("ljSub").addEventListener("click",e=>{ const b=e.target.closest("[data-lj]"); if(b) ljMostrar(b.dataset.lj); });
+$("ljMes").addEventListener("change",ljCarregar);
+$("ljHoje").addEventListener("click",()=>{ $("ljMes").value=ljMesAtual(); ljCarregar(); });
+$("lj_fNovo").addEventListener("click",()=>{ ljMostrar("vender"); $("lj_vFiado").checked=true; $("lj_vFiado").dispatchEvent(new Event("change")); $("lj_vProd").focus(); });
+$("lj_vSalvar").addEventListener("click",async()=>{
+  const pid=$("lj_vProd").value, q=parseInt($("lj_vQtd").value,10), v=ljNumPlain($("lj_vValor").value), fi=$("lj_vFiado").checked, nome=$("lj_vNome").value.trim();
+  if(!pid){ $("lj_vMsg").textContent="Escolha o produto."; return; }
+  if(!(q>=1)){ $("lj_vMsg").textContent="Digite a quantidade."; return; }
+  if(isNaN(v)||v<0||$("lj_vValor").value===""){ $("lj_vMsg").textContent="Digite o valor."; return; }
+  if(fi && nome.length<2){ $("lj_vMsg").textContent="Escreva o nome de quem está devendo."; return; }
+  const p=ljD.produtos.find(x=>x.id===pid);
+  $("lj_vSalvar").disabled=true;
+  try{ await adm("lj_vender",{p_data:$("lj_vData").value||isoOf(new Date()),p_produto:pid,p_qtd:q,p_valor:v,p_fiado:fi?nome:""});
+    $("lj_vMsg").textContent = fi ? `Fiado anotado: ${nome}, ${q}× ${p.nome}, ${brl(v)}.` : `Venda registrada: ${q}× ${p.nome}, ${brl(v)}.`;
+    $("lj_vQtd").value="1"; $("lj_vValor").value=""; $("lj_vNome").value=""; $("lj_vProd").value=""; $("lj_vFiado").checked=false; $("lj_vFiado").dispatchEvent(new Event("change")); await ljCarregar(); }
+  catch(e){ if(e.codigo!=="sessao") $("lj_vMsg").textContent="Não foi possível registrar. Tente de novo."; }
+  $("lj_vSalvar").disabled=false;
+});
+function ljLimparProd(){ ljEdit=null; ["lj_pNome","lj_pQtd","lj_pCusto","lj_pPreco"].forEach(id=>$(id).value=""); $("lj_pTit").textContent="📦 Cadastrar produto"; $("lj_pCancelar").hidden=true; }
+$("lj_pCancelar").addEventListener("click",ljLimparProd);
+$("lj_pSalvar").addEventListener("click",async()=>{
+  const nome=$("lj_pNome").value.trim(), q=parseInt($("lj_pQtd").value||"0",10), c=ljNumPlain($("lj_pCusto").value||"0"), pr=ljNumPlain($("lj_pPreco").value||"0");
+  if(nome.length<2){ $("lj_pMsg").textContent="Escreva o nome do produto."; return; }
+  if(isNaN(c)||c<0||isNaN(pr)||pr<0){ $("lj_pMsg").textContent="Confira o custo e o preço."; return; }
+  if(pr<=0){ $("lj_pMsg").textContent="Digite o preço de venda."; return; }
+  $("lj_pSalvar").disabled=true;
+  try{ await adm("lj_produto_salvar",{p_id:ljEdit,p_nome:nome,p_qtd:isNaN(q)?0:q,p_custo:c,p_preco:pr}); $("lj_pMsg").textContent=`Produto salvo: ${nome}.`; ljLimparProd(); await ljCarregar(); }
+  catch(e){ if(e.codigo!=="sessao") $("lj_pMsg").textContent="Não foi possível salvar. Tente de novo."; }
+  $("lj_pSalvar").disabled=false;
+});
+$("ljProdutos").addEventListener("click",async e=>{
+  const b=e.target.closest("[data-p]"); if(!b) return; const p=ljD.produtos.find(x=>x.id===b.closest("tr").dataset.id); if(!p) return;
+  if(b.dataset.p==="editar"){ ljEdit=p.id; $("lj_pNome").value=p.nome; $("lj_pQtd").value=p.qtd; $("lj_pCusto").value=Number(p.custo).toFixed(2).replace(".",","); $("lj_pPreco").value=Number(p.preco).toFixed(2).replace(".",","); $("lj_pTit").textContent="✏️ Editar produto"; $("lj_pCancelar").hidden=false; $("lj_pMsg").textContent=""; window.scrollTo({top:$("lj_pTit").getBoundingClientRect().top+scrollY-90,behavior:"smooth"}); return; }
+  if(b.dataset.p==="repor"){ ljRepor=p.id; $("lj_rNome").textContent=p.nome; $("lj_rQtd").value=""; $("lj_rValor").value=""; $("lj_rBox").hidden=false; window.scrollTo({top:$("lj_rBox").getBoundingClientRect().top+scrollY-90,behavior:"smooth"}); $("lj_rQtd").focus(); return; }
+  if(b.dataset.p==="ativo"){ b.disabled=true; try{ await adm("lj_produto_ativo",{p_id:p.id,p_ativo:!p.ativo}); await ljCarregar(); }catch(err){ b.disabled=false; } }
+});
+$("lj_rQtd").addEventListener("input",()=>{ const p=(ljD?.produtos||[]).find(x=>x.id===ljRepor); const q=Number($("lj_rQtd").value)||0; if(p&&q) $("lj_rValor").value=(Number(p.custo)*q).toFixed(2).replace(".",","); });
+$("lj_rCancelar").addEventListener("click",()=>{ $("lj_rBox").hidden=true; ljRepor=null; });
+$("lj_rSalvar").addEventListener("click",async()=>{
+  const q=parseInt($("lj_rQtd").value,10), v=ljNumPlain($("lj_rValor").value||"0");
+  if(!(q>=1)){ $("lj_pMsg").textContent=""; $("lj_rQtd").focus(); return; }
+  $("lj_rSalvar").disabled=true;
+  try{ await adm("lj_repor",{p_id:ljRepor,p_qtd:q,p_valor:isNaN(v)?0:v,p_data:isoOf(new Date())}); $("lj_rBox").hidden=true; $("lj_pMsg").textContent=`Estoque somado: +${q}.`; ljRepor=null; await ljCarregar(); }
+  catch(e){ if(e.codigo!=="sessao") $("lj_pMsg").textContent="Não foi possível somar. Tente de novo."; }
+  $("lj_rSalvar").disabled=false;
+});
+$("lj_mTipo").addEventListener("click",e=>{ const b=e.target.closest("[data-t]"); if(!b) return; ljTipo=b.dataset.t; document.querySelectorAll("#lj_mTipo [data-t]").forEach(x=>x.setAttribute("aria-pressed",String(x===b))); });
+$("lj_mSalvar").addEventListener("click",async()=>{
+  const d=$("lj_mDesc").value.trim(), v=ljNumPlain($("lj_mValor").value);
+  if(d.length<2){ $("lj_mMsg").textContent="Escreva o que foi."; return; }
+  if(isNaN(v)||v<=0){ $("lj_mMsg").textContent="Digite o valor."; return; }
+  $("lj_mSalvar").disabled=true;
+  try{ await adm("lj_mov_add",{p_data:$("lj_mData").value||isoOf(new Date()),p_tipo:ljTipo,p_descricao:d,p_valor:v}); $("lj_mMsg").textContent=`${ljTipo==="saida"?"Saída":"Entrada"} lançada: ${d}, ${brl(v)}.`; $("lj_mDesc").value=""; $("lj_mValor").value=""; await ljCarregar(); }
+  catch(e){ if(e.codigo!=="sessao") $("lj_mMsg").textContent="Não foi possível lançar. Tente de novo."; }
+  $("lj_mSalvar").disabled=false;
+});
+// cancelar lançamento (toque 2 vezes). Não apaga: fica riscado. Venda cancelada volta pro estoque.
+["ljVendidos","ljMovs"].forEach(id=>$(id).addEventListener("click",async e=>{
+  const b=e.target.closest("[data-mc]"); if(!b) return;
+  if(b.dataset.mc==="1"){ b.textContent="Cancelar?"; b.dataset.mc="2"; b.classList.add("btn-red"); return; }
+  b.disabled=true; try{ await adm("lj_mov_cancelar",{p_id:b.closest("tr").dataset.id}); await ljCarregar(); }catch(err){ b.disabled=false; }
+}));
+$("ljFiados").addEventListener("click",async e=>{
+  const b=e.target.closest("[data-f]"); if(!b) return; const id=b.closest("tr").dataset.id; const f=ljD.fiados.find(x=>x.id===id);
+  if(b.dataset.f==="cancelar"){ b.textContent="Cancelar?"; b.dataset.f="cancelar2"; b.classList.add("btn-red"); return; }
+  b.disabled=true;
+  try{ if(b.dataset.f==="pagar"){ await adm("lj_fiado_pagar",{p_id:id,p_data:isoOf(new Date())}); $("lj_fMsg").textContent=`${f?f.nome:"Fiado"} pagou ${f?brl(Number(f.valor)):""}. Entrou no caixa da loja.`; }
+       else { await adm("lj_fiado_cancelar",{p_id:id}); $("lj_fMsg").textContent="Anotação cancelada e produto voltou ao estoque."; }
+       await ljCarregar(); }
+  catch(err){ b.disabled=false; }
+});
 
 /* ---------- serviços no painel ---------- */
 let rascunho=[], servSujo=false;
@@ -2193,7 +2428,8 @@ const ehApp = matchMedia("(display-mode: standalone)").matches || navigator.stan
 if(ehApp){ const ab=$("abertura"); ab.querySelector(".ab-logo").innerHTML=document.querySelector(".herologo").outerHTML.replace('class="herologo"','');
   ab.classList.add("on"); setTimeout(()=>{ ab.classList.add("sai"); setTimeout(()=>ab.remove(),550); },1800); }
 /* versão do site: muda a cada atualização. O app confere sozinho e atualiza. */
-const VERSAO="33";
+const VERSAO="34";
+$("versaoTag").textContent="Versão "+VERSAO;
 function atualizarAgora(){ const u=new URL(location.href); u.searchParams.set("v",Date.now()); u.searchParams.delete("parar"); location.replace(u.href); }
 $("novaVersao").addEventListener("click",atualizarAgora);
 async function conferirVersao(){
