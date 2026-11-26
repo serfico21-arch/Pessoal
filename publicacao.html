@@ -101,13 +101,13 @@ var LISTAS={
  msg:{nome:"Contatos do Messenger",um:"contato",ic:"💬",cor:"fb",ex:"Maria https://m.me/maria.silva",dica:"Cole o link do perfil de quem você quer mandar no Messenger (m.me/nome ou facebook.com/nome). Um por linha."},
  wac:{nome:"Contatos de WhatsApp",um:"contato",ic:"📱",cor:"wa",ex:"João 11 98888-7777",dica:"Cole nome e telefone com DDD. Um por linha. A mensagem já vai escrita para cada um."}
 };
-var S={listas:{fb:[],wag:[],msg:[],wac:[]},cfg:{nome:"Sérgio Costa",creci:"CRECI-SP 294791-F",whats:"11993509109",fbpag:"SergioCostaRCM",insta:"f.cost.a_corretor",site:SITE,utm:true},hist:{},auto:{},dia:{d:"",n:0,feito:{}},pos:{},v:0,mig:0,ult:""};
+var S={listas:{fb:[],wag:[],msg:[],wac:[]},cfg:{nome:"Sérgio Costa",creci:"CRECI-SP 294791-F",whats:"11993509109",fbpag:"SergioCostaRCM",insta:"f.costa_corretor",site:SITE,utm:true},hist:{},auto:{},dia:{d:"",n:0,feito:{}},pos:{},v:0,mig:0,ult:""};
 var IM=[],cur=null,tab="div",lt="fb",fotosProntas=[],msgLista="";
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function hojeS(){var d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()}
-function load(){try{var o=JSON.parse(localStorage.getItem(KEY)||"null");if(o&&typeof o==="object"){if(o.listas)Object.keys(S.listas).forEach(function(k){if(Array.isArray(o.listas[k]))S.listas[k]=o.listas[k]});if(o.cfg)S.cfg=Object.assign(S.cfg,o.cfg);["hist","pos","auto"].forEach(function(k){if(o[k]&&typeof o[k]==="object")S[k]=o[k]});if(o.dia)S.dia=o.dia;S.v=+o.v||0;S.mig=o.mig||0;S.ult=o.ult||""}}catch(e){}}
+function load(){try{var o=JSON.parse(localStorage.getItem(KEY)||"null");if(o&&typeof o==="object"){if(o.listas)Object.keys(S.listas).forEach(function(k){if(Array.isArray(o.listas[k]))S.listas[k]=o.listas[k]});if(o.cfg)S.cfg=Object.assign(S.cfg,o.cfg);if(S.cfg.insta==="f.cost.a_corretor")S.cfg.insta="f.costa_corretor";/* nome antigo errado (nov/2026) */["hist","pos","auto"].forEach(function(k){if(o[k]&&typeof o[k]==="object")S[k]=o[k]});if(o.dia)S.dia=o.dia;S.v=+o.v||0;S.mig=o.mig||0;S.ult=o.ult||""}}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("Não consegui salvar neste navegador")}}
 var tt;function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(tt);tt=setTimeout(function(){t.style.display="none"},2600)}
 
@@ -318,7 +318,7 @@ function telaListas(){var L=LISTAS[lt],lst=S.listas[lt];
  +'<div class="card"><h3>Trazer do publicador antigo</h3><p class="mut">Busca os grupos que você tinha cadastrado nas versões antigas deste publicador.</p><button class="btn" data-a="migrar">↪️ Trazer grupos antigos</button></div>';
  return h}
 function telaCfg(){var c=S.cfg;function f(k,l,ph){return'<label for="c_'+k+'">'+l+'</label><input id="c_'+k+'" value="'+esc(c[k]||"")+'" placeholder="'+esc(ph||"")+'">'}
- return'<div class="card"><h2>⚙️ Meus dados</h2><p class="mut">Aparecem nos textos dos anúncios.</p>'+f("nome","Seu nome")+f("creci","CRECI")+f("whats","Seu WhatsApp (com DDD)","11 99350-9109")+f("fbpag","Sua página do Facebook (o que vem depois de facebook.com/)","SergioCostaRCM")+f("insta","Seu Instagram (sem @)","f.cost.a_corretor")
+ return'<div class="card"><h2>⚙️ Meus dados</h2><p class="mut">Aparecem nos textos dos anúncios.</p>'+f("nome","Seu nome")+f("creci","CRECI")+f("whats","Seu WhatsApp (com DDD)","11 99350-9109")+f("fbpag","Sua página do Facebook (o que vem depois de facebook.com/)","SergioCostaRCM")+f("insta","Seu Instagram (sem @)","f.costa_corretor")
  +'<label><input type="checkbox" id="c_utm" style="width:auto;margin-right:8px"'+(c.utm?" checked":"")+'>Marcar os links para saber de qual rede veio cada visita (recomendado)</label><button class="btn pri big" data-a="salvacfg" style="margin-top:12px">💾 Salvar meus dados</button></div>'
  +'<div class="card"><h3>🚀 Redes do "Divulgar em tudo"</h3><p class="mut">Marque onde você quer divulgar. O botão passa por elas nesta ordem.</p>'+TUDO_NOMES.map(function(r){return'<label style="font-weight:400"><input type="checkbox" class="ctudo" value="'+r[0]+'" style="width:auto;margin-right:8px"'+(tudoSel().indexOf(r[0])>-1?" checked":"")+'>'+r[1]+' '+esc(r[2])+'</label>'}).join("")+'<button class="btn pri big" data-a="salvatudo" style="margin-top:12px">💾 Salvar redes</button></div>'
  +'<div class="card"><h3>Usar em outro aparelho (backup)</h3><p class="mut">Os grupos ficam guardados neste aparelho. Para levar para o celular ou computador novo: baixe o backup aqui e abra lá em "Restaurar".</p><div class="row"><button class="btn" data-a="bkp">⬇️ Baixar backup</button><label class="btn" style="margin:0">⬆️ Restaurar<input type="file" id="rest" accept=".json,application/json" class="hide"></label></div></div>'
