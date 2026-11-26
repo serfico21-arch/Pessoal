@@ -113,16 +113,27 @@ function $(i){return document.getElementById(i)}
 function msg(t,ok){$("msg").innerHTML='<div class="'+(ok?"dica":"aviso")+'">'+t+'</div>'}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function get(u){return fetch(u).then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return j})}
-$("ir").onclick=function(){var a=$("app").value.trim(),s=$("sec").value.trim(),t=$("tok").value.trim();
+$("ir").onclick=function(){var a=$("app").value.replace(/\D/g,""),s=$("sec").value.replace(/\s/g,""),t=$("tok").value.replace(/\s/g,"");
  if(!a||!s||!t){msg("Preencha os três campos.");return}
  msg("⏳ Conectando…",true);
- get(G+"/oauth/access_token?grant_type=fb_exchange_token&client_id="+encodeURIComponent(a)+"&client_secret="+encodeURIComponent(s)+"&fb_exchange_token="+encodeURIComponent(t))
- .then(function(j){return get(G+"/me/accounts?fields=id,name,access_token,instagram_business_account{id,username}&limit=50&access_token="+encodeURIComponent(j.access_token))})
+ /* 1) troca o código de 1 hora por um de 60 dias. Tenta do jeito novo (POST) e do jeito antigo (GET).
+    2) Se a Meta recusar a troca, usa o código como está e confere a validade. */
+ var q={grant_type:"fb_exchange_token",client_id:a,client_secret:s,fb_exchange_token:t};
+ function post(u,d){return fetch(u,{method:"POST",body:new URLSearchParams(d)}).then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return j})}
+ post(G+"/oauth/access_token",q)
+ .catch(function(){return get(G+"/oauth/access_token?"+new URLSearchParams(q))})
+ .then(function(j){return j.access_token},function(e){console.log("troca falhou:",e.message);
+  return get(G+"/debug_token?input_token="+encodeURIComponent(t)+"&access_token="+encodeURIComponent(a+"|"+s)).then(function(d){d=d.data||{};
+   if(d.is_valid===false)throw new Error("o código grande não vale mais. Gere de novo no passo 4.");
+   if(d.expires_at&&d.expires_at*1000-Date.now()<3*864e5)throw new Error("FALTA_ESTENDER");
+   return t},function(){throw new Error("FALTA_ESTENDER")})})
+ .then(function(lt){return get(G+"/me/accounts?fields=id,name,access_token,instagram_business_account{id,username}&limit=50&access_token="+encodeURIComponent(lt))})
  .then(function(j){paginas=j.data||[];if(!paginas.length){msg("Não achei nenhuma Página. Confira se você marcou a sua Página quando o Facebook perguntou, e gere o código de novo (passo 4).");return}
   $("sel").innerHTML=paginas.map(function(p,i){return'<option value="'+i+'">'+esc(p.name)+(p.instagram_business_account?" + Instagram @"+esc(p.instagram_business_account.username||""):" (sem Instagram)")+'</option>'}).join("");
   var k=paginas.findIndex(function(p){return /costa|fcosta|rcm/i.test(p.name)});if(k>-1)$("sel").value=k;
   $("pag").classList.remove("hide");msg("✅ Conectou! Agora escolha a sua Página.",true)})
- .catch(function(e){msg("Não deu certo: "+esc(e.message)+"<br>Confira o ID, a chave secreta e gere o código de novo no passo 4 (ele vence em 1 hora).")})};
+ .catch(function(e){if(e.message==="FALTA_ESTENDER"){msg('Falta um passinho: <ol><li>Toque em <a href="https://developers.facebook.com/tools/debug/accesstoken/" target="_blank" rel="noopener"><b>Abrir o Depurador</b></a>.</li><li>Cole o <b>código grande</b> e toque em <b>Depurar</b>.</li><li>Lá embaixo, toque em <b>Estender token de acesso</b> (Extend Access Token) e digite sua senha.</li><li>Copie o código novo que aparece, cole no campo <b>Código grande</b> aqui e toque em <b>Conectar</b> de novo.</li></ol>');return}
+ msg("Não deu certo: "+esc(e.message)+"<br>Confira o ID e a chave secreta (passo 3) e gere o código de novo no passo 4 (ele vence em 1 hora).")})};
 $("usar").onclick=function(){var p=paginas[+$("sel").value];if(!p)return;
  var c=Object.assign({token:p.access_token,page:p.id,ig:p.instagram_business_account?p.instagram_business_account.id:""},base());
  $("chave").value=JSON.stringify(c);$("fim").classList.remove("hide");
