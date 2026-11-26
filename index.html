@@ -635,6 +635,26 @@ FIM DAS MELHORIAS DE LEITURA
 .sub-aba b{font-size:18px}.sub-aba small{font-size:14px;color:var(--texto-muted)}
 .sub-aba>i:last-child{color:var(--texto-muted);font-size:22px}
 .voltar-sub{display:inline-flex;align-items:center;gap:8px;margin:4px 0 10px;padding:10px 16px;min-height:46px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:inherit;font:700 15px/1 inherit;cursor:pointer}
+/* ═══ PAINEL SIMPLES (nov/2026): botões grandes do início ═══ */
+.simples-tit{margin-top:18px}
+.simples{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:10px 0 14px}
+.simples-btn{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-height:128px;padding:16px;border-radius:20px;border:2px solid color-mix(in srgb,var(--c) 45%,var(--line));background:linear-gradient(150deg,color-mix(in srgb,var(--c) 18%,var(--card)),var(--card) 80%);color:var(--tx);font:inherit;text-align:left;text-decoration:none;cursor:pointer;box-shadow:var(--sombra,none)}
+.simples-btn i{font-size:36px;color:var(--c)}
+.simples-btn b{font:800 19px/1.2 'Sora',system-ui,sans-serif}
+.simples-btn small{font-size:15px;line-height:1.3;color:var(--texto-muted)}
+.simples-btn:active{transform:scale(.97)}
+.simples-btn:focus-visible{outline:3px solid var(--c);outline-offset:2px}
+@media(max-width:899px){.simples{grid-template-columns:repeat(2,1fr);gap:10px}.simples-btn{min-height:118px;padding:14px}.simples-btn b{font-size:18px}}
+.mais-tudo{margin:18px 0 6px}
+.mais-tudo>summary{list-style:none;display:flex;align-items:center;gap:14px;padding:18px;border-radius:20px;border:2px dashed var(--line);background:var(--card);cursor:pointer;font-size:16px}
+.mais-tudo>summary::-webkit-details-marker{display:none}
+.mais-tudo>summary>i:first-child{font-size:30px;color:var(--brand,var(--sk))}
+.mais-tudo>summary span{flex:1;display:flex;flex-direction:column;gap:2px}
+.mais-tudo>summary b{font:800 19px/1.2 'Sora',system-ui,sans-serif}
+.mais-tudo>summary small{font-size:15px;color:var(--texto-muted)}
+.mais-tudo>summary .seta{font-size:26px;transition:transform .2s}
+.mais-tudo[open]>summary .seta{transform:rotate(180deg)}
+.mais-tudo[open]>summary{margin-bottom:10px}
 </style>
 </head>
 <body data-view="inicio">
@@ -1339,7 +1359,27 @@ var FERRAMENTAS = [
     var acoes = [['comissao', 'ti-calculator', 'Comissão', '--em'], ['followup', 'ti-users', 'Follow-up', '--sk'],
       ['atalhos', 'ti-bolt', 'Atalhos', '--am'], ['novo', 'ti-pencil', 'Edição', '--vi']];
     var html = '<section class="hero"><p class="eyebrow">' + esc(data) + '</p><h1>' + saud + ', <span class="grad">Sérgio</span></h1>' +
-      '<button type="button" class="busca-pill" data-open="busca"><i class="ti ti-search"></i><span>Buscar ferramenta ou página…</span><kbd>/</kbd></button></section>';
+      '</section>';
+    /* ═══ PAINEL SIMPLES (nov/2026): poucos botões grandes no topo. Tudo o que existia continua em "Mais coisas" logo abaixo.
+       Para trocar um botão, mude uma linha da lista PRINCIPAIS: [ícone, nome, explicação, cor, tipo, destino]
+       tipo: "link" = abre a página · "go" = abre a aba do painel · "open" = abre a janela (busca, compartilhar) ═══ */
+    var mobWa0 = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    var PRINCIPAIS = [
+      ['ti-receipt', 'Recibos e Inquilinos', 'Fazer o recibo do mês', '--em', 'link', 'recibos.html'],
+      ['ti-file-certificate', 'Contratos', 'Locação, venda e autorizações', '--vi', 'go', 'contratos'],
+      ['ti-home-plus', 'Captar imóvel', 'Mandar o link para o cliente', '--or', 'open', 'compartilhar'],
+      ['ti-speakerphone', 'Publicar imóveis', 'Anunciar nas redes e grupos', '--am', 'link', 'divulgacao.html'],
+      ['ti-brand-whatsapp', 'WhatsApp', 'Falar com os clientes', '--em', 'link', mobWa0 ? 'whatsapp://send' : 'https://web.whatsapp.com'],
+      ['ti-calendar-event', 'Agenda de Visitas', 'Visitas marcadas', '--sk', 'link', 'agenda-visitas.html'],
+      ['ti-book-2', 'Pastor', 'Sermões, Bíblia e igreja', '--pk', 'go', 'pastor'],
+      ['ti-search', 'Procurar', 'Achar qualquer ferramenta', '--sl', 'open', 'busca']
+    ];
+    var topo = html + '<h2 class="sec simples-tit">O que você quer fazer?</h2><div class="simples">' + PRINCIPAIS.map(function (b) {
+      var miolo = '<i class="ti ' + b[0] + '"></i><b>' + esc(b[1]) + '</b><small>' + esc(b[2]) + '</small>', st = ' style="--c:var(' + b[3] + ')"';
+      if (b[4] === 'link') return '<a class="simples-btn"' + st + ' href="' + esc(b[5]) + '"' + (b[5].indexOf('http') === 0 ? ' target="_blank" rel="noopener"' : '') + '>' + miolo + '</a>';
+      return '<button type="button" class="simples-btn"' + st + (b[4] === 'go' ? ' data-go="' : ' data-open="') + b[5] + '"' + (b[5] === 'compartilhar' ? ' data-sh-pg="0"' : '') + '>' + miolo + '</button>';
+    }).join('') + '</div>' + ctAlertasHtml();
+    html = '';
     var mobWa = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     html += '<a class="wa-btn" href="' + (mobWa ? 'whatsapp://send' : 'https://web.whatsapp.com') + '"' + (mobWa ? '' : ' target="_blank" rel="noopener"') + '><span class="wa-ic"><i class="ti ti-brand-whatsapp"></i></span><span class="wa-tx"><h2>WhatsApp Business</h2><p>Abrir conversas e clientes agora</p></span><span class="wa-go"><span>Abrir</span><i class="ti ti-arrow-right"></i></span></a>';
     html += '<button type="button" class="destaque" data-go="paineis" style="width:100%;text-align:left;font:inherit;cursor:pointer"><span class="dz-ic"><i class="ti ti-world"></i></span><span class="dz-tx"><span class="dz-tag">Meus sites</span><h2>Painéis ADM</h2>' +
@@ -1371,7 +1411,7 @@ var FERRAMENTAS = [
       if (a[0] === 'followup') return '<a class="acao" style="--c:var(' + a[3] + ')" href="followup-leads.html"><i class="ti ' + a[1] + '"></i>' + a[2] + '</a>';
       return '<button type="button" class="acao" style="--c:var(' + a[3] + ')" data-open="' + a[0] + '"><i class="ti ' + a[1] + '"></i>' + a[2] + '</button>';
     }).join('') + '</div>';
-    html += ctFaixa() + ctAlertasHtml();
+    html += ctFaixa();
     html += '<h2 class="sec">Suas áreas</h2><div class="mundos">' + ORDEM.map(function (m) {
       var M = MUNDOS[m], q = itens.filter(function (i) { return i.m === m; }).length;
       return '<button type="button" class="mundo" style="--c:var(' + M.c + ')" data-go="' + m + '"><i class="ti ' + M.i + ' big"></i>' +
@@ -1399,7 +1439,9 @@ var FERRAMENTAS = [
     /* UX: mostra só as 4 primeiras novidades; o resto abre em "Ver mais" */
     if (novos.length) html += '<h2 class="sec">Novidades</h2><div class="lista">' + novos.slice(0, 4).map(item).join('') + '</div>' +
       (novos.length > 4 ? '<details class="mais"><summary><i class="ti ti-chevron-down"></i>Ver mais ' + (novos.length - 4) + ' novidades</summary><div class="lista">' + novos.slice(4).map(item).join('') + '</div></details>' : '');
-    return html;
+    /* "Mais coisas": tudo o que já existia na tela inicial, guardado numa gaveta. Lembra se ficou aberta (painel_inicio_mais). */
+    var maisAberto = lerStorage('painel_inicio_mais', false) === true;
+    return topo + '<details class="mais-tudo" id="mais-tudo"' + (maisAberto ? ' open' : '') + '><summary><i class="ti ti-layout-grid"></i><span><b>Mais coisas</b><small>Todas as outras ferramentas, áreas, favoritos e novidades</small></span><i class="ti ti-chevron-down seta"></i></summary>' + html + '</details>';
   }
 
   function htmlFavoritos() {
@@ -1788,6 +1830,11 @@ var FERRAMENTAS = [
       if (d && (!l.target || d.id === 'dlg-busca')) fecharDlg(d);
     } else if (e.target.tagName === 'DIALOG') fecharDlg(e.target);
   });
+
+  /* Painel simples: lembra se a gaveta "Mais coisas" ficou aberta ou fechada */
+  document.addEventListener('toggle', function (e) {
+    if (e.target && e.target.id === 'mais-tudo') gravarStorage('painel_inicio_mais', e.target.open);
+  }, true);
 
   /* ── TEMA CLARO / ESCURO ─────────────────── */
   var tema = lerStorage('painel_tema2', 'light');
