@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conectar Meta - FCosta</title>
+<script type="text/javascript" src="https://me.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=Ap9TMgxIg_Omd9CrlHLFurt6TcMG5hLAmXOUGfuMu04kJmjp1QMbH7QyryattGG-Fa81y1BeneJl9hI-MNkvrzmRKIDub_u0L3dfvcjb-lQsHTCu9MR_JR0e619yBN3l6FWaD3de9ADYLi2J7iRpJdfwL9JLpgADhPGpUpZaDQKL_F5sR8Ut_CBB_X8VBgCZWjKvy8yRQpFcPSbeTyEIVsn4spjrsB_bnNdLSWaugGGQrEagFVsuS_g39Zilym5zmN_k-cZIgpfKRg_Qwv7mzg" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://me.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly8xNDUyNTM3NDQ0NjE2MDExLmEubWV0YWFpdXNlcmNvbnRlbnQuY29tL2h0bWw_YXJ0aWZhY3RfdXVpZD0wMTZiMzdhNi00NDE1LTQ0ZWUtOWZmYi1kZTlkMDBkY2VmNTYmZG93bmxvYWQ9Q29uZWN0YXItTWV0YS5odG1sJmV4dD0xNzk1ODA5NjAwJmhhc2g9UTVmcERBRzVRT1JGSmtubTBvT200THNCcVZoTQ"/><style>
+body{font-family:system-ui,Arial;padding:20px;max-width:700px;margin:auto;background:#f5f5f5}
+.card{background:#fff;padding:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.08);margin-bottom:16px}
+input{width:100%;padding:10px;margin:8px 0;border:1px solid #ccc;border-radius:8px;box-sizing:border-box}
+button{padding:12px 18px;border:0;border-radius:8px;background:#1877f2;color:#fff;font-weight:700;cursor:pointer;width:100%;margin-top:8px}
+button.sec{background:#42b72a}
+pre{background:#111;color:#0f0;padding:12px;border-radius:8px;overflow:auto;white-space:pre-wrap;word-break:break-all}
+.small{font-size:12px;color:#666}
+</style>
+</head>
+<body>
+<h2>🔌 Conectar Meta - FCosta Corretor</h2>
+
+<div class="card">
+<h3>Passo 1 - Dados do App</h3>
+<p class="small">Copie de developers.facebook.com > Seu App Divulga Fcosta > Configurações > Básico</p>
+<label>ID do App</label>
+<input id="appId" placeholder="1169481185588897" value="1169481185588897">
+<label>Chave Secreta do App (App Secret)</label>
+<input id="appSecret" placeholder="cole aqui" type="password">
+<label>Token EAA (gerado no Graph Explorer - opcional se usar botão)</label>
+<input id="bigCode" placeholder="EAA... (se tiver, cole aqui. Se não, deixe vazio e use o botão)">
+<p class="small">Se você colar o token EAA, deixe o campo Código grande vazio. Esse campo antigo é o que causa o erro input_token.</p>
+</div>
+
+<div class="card">
+<h3>Passo 2 - Conectar</h3>
+<button onclick="conectarComToken()">🔌 Conectar com Token EAA colado</button>
+<button class="sec" onclick="entrarComFacebook()">📘 Entrar com Facebook (corrige o erro input_token)</button>
+<pre id="log">Aguardando...</pre>
+</div>
+
+<div class="card">
+<h3>Resultado</h3>
+<pre id="result"></pre>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+function log(t){ $('log').textContent = t; console.log(t); }
+function result(t){ $('result').textContent = typeof t==='string'?t:JSON.stringify(t,null,2); }
+
+function getRedirectUri(){
+  // usa a URL atual sem parâmetros
+  return location.origin + location.pathname;
+}
+
+// Se voltou do Facebook com ?code=...
+window.addEventListener('load', async ()=>{
+  const params = new URLSearchParams(location.search);
+  const code = params.get('code');
+  if(code){
+    log('Código detectado, trocando por token...');
+    await trocarCodePorToken(code);
+  }
+});
+
+async function trocarCodePorToken(code){
+  const appId = $('appId').value.trim();
+  const appSecret = $('appSecret').value.trim();
+  const redirectUri = getRedirectUri();
+  if(!appId || !appSecret){ log('Preencha ID e Chave secreta antes'); return; }
+
+  try{
+    // 1. Troca CODE por TOKEN (isso faltava no seu código antigo)
+    const urlToken = `https://graph.facebook.com/v20.0/oauth/access_token?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&client_secret=${appSecret}&code=${encodeURIComponent(code)}`;
+    log('Trocando código por token...\n' + urlToken);
+    const r1 = await fetch(urlToken);
+    const j1 = await r1.json();
+    result(j1);
+    if(!j1.access_token){ log('Erro ao trocar code por token: ' + JSON.stringify(j1)); return; }
+
+    const userToken = j1.access_token;
+    log('Token de usuário obtido! Validando...');
+    await validarToken(userToken, appId, appSecret);
+
+  }catch(e){ log('Erro: '+e.message); }
+}
+
+async function conectarComToken(){
+  const appId = $('appId').value.trim();
+  const appSecret = $('appSecret').value.trim();
+  let token = $('bigCode').value.trim();
+  if(!token){ log('Cole o token que começa com EAA no campo Token EAA'); return; }
+  if(!appId || !appSecret){ log('Preencha ID e Chave secreta'); return; }
+  await validarToken(token, appId, appSecret);
+}
+
+async function validarToken(input_token, appId, appSecret){
+  try{
+    const urlDebug = `https://graph.facebook.com/debug_token?input_token=${encodeURIComponent(input_token)}&access_token=${appId}|${appSecret}`;
+    log('Validando token...\n' + urlDebug);
+    const r = await fetch(urlDebug);
+    const j = await r.json();
+    result(j);
+
+    if(j.data && j.data.is_valid){
+      log('✅ SUCESSO! Token válido.\nUser ID: ' + j.data.user_id + '\nEscopos: ' + (j.data.scopes||[]).join(', '));
+      // Aqui você salva onde precisa (localStorage, etc)
+      localStorage.setItem('fcosta_meta_token', input_token);
+      localStorage.setItem('fcosta_meta_app_id', appId);
+    }else{
+      log('❌ Token inválido: ' + JSON.stringify(j.data||j));
+    }
+  }catch(e){ log('Erro na validação: '+e.message); }
+}
+
+function entrarComFacebook(){
+  const appId = $('appId').value.trim();
+  if(!appId){ log('Preencha o ID do App'); return; }
+  const redirectUri = getRedirectUri();
+  const scope = 'pages_show_list,pages_manage_posts,pages_read_engagement,instagram_basic,instagram_content_publish,business_management';
+  const url = `https://www.facebook.com/v20.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&response_type=code`;
+  log('Redirecionando para o Facebook...');
+  location.href = url;
+}
+</script>
+</body>
+</html>
