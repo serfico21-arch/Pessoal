@@ -736,7 +736,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do Rodrigo <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 37</span></div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do Rodrigo <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 38</span></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -2117,7 +2117,8 @@ let ljD=null, ljAba="inicio", ljEdit=null, ljRepor=null, ljTipo="saida";
 const ljNum = s => { const v=Number(String(s??"").trim().replace(/\./g,"").replace(",",".")); return isNaN(v)?NaN:v; };
 const ljNumPlain = s => { const t=String(s??"").trim(); return t.includes(",") ? ljNum(t) : Number(t); };
 const LJ_PIX = "Rocabelor17@gmail.com";
-const ljMsgPix = (nome,qtd,prod,data,valor,fiado) => `Olá${nome?" "+nome:""}! 🛍️ *Loja R-17* (Espaço Barber Shop R-17)\n\n${fiado?"Lembrete da sua compra no fiado:":"Sua compra:"}\n• ${qtd}× ${prod}\n• Dia: ${fmtCurta(data)}\n\n*Valor: ${brl(Number(valor))}*\n\n💠 Pague pelo *Pix*\nChave (e-mail): ${LJ_PIX}\n\nDepois é só mandar o comprovante por aqui. Obrigado! 🙏`;
+const ljMsgPix = (nome,qtd,prod,data,valor,fiado) => `Olá${nome?" "+nome:""}! 🛍️ *Loja R-17* (Espaço Barber Shop R-17)\n\n${fiado?"Lembrete da sua compra no fiado:":"Sua compra:"}\n• ${qtd}× ${prod}\n• Dia: ${fmtCurta(data)}\n\n*Valor: ${brl(Number(valor))}*\n\n💠 Para pagar no *Pix*, toque no link abaixo e depois em *COPIAR PIX*. No app do banco, use *Pix Copia e Cola* (o valor já vem certo):\n${ljPixLink(valor,qtd+"× "+prod)}\n\nDepois é só mandar o comprovante por aqui. Obrigado! 🙏`;
+function ljPixLink(valor,d){ const u=new URL("pix.html",document.baseURI); u.searchParams.set("v",Number(valor).toFixed(2)); u.searchParams.set("d",d); return u.href; }
 const ljZapLink = (fone,txt) => String(fone||"").replace(/\D/g,"").length>=10 ? waCliente(fone,txt) : "https://wa.me/?text="+encodeURIComponent(txt);
 const ljB = (x,t) => `<button type="button" class="btn btn-sm btn-line" data-x="${x}">${t}</button>`;
 const ljMesAtual = () => isoOf(new Date()).slice(0,7);
@@ -2488,7 +2489,7 @@ const ehApp = matchMedia("(display-mode: standalone)").matches || navigator.stan
 if(ehApp){ const ab=$("abertura"); ab.querySelector(".ab-logo").innerHTML=document.querySelector(".herologo").outerHTML.replace('class="herologo"','');
   ab.classList.add("on"); setTimeout(()=>{ ab.classList.add("sai"); setTimeout(()=>ab.remove(),550); },1800); }
 /* versão do site: muda a cada atualização. O app confere sozinho e atualiza. */
-const VERSAO="37";
+const VERSAO="38";
 $("versaoTag").textContent="Versão "+VERSAO;
 function atualizarAgora(){ const u=new URL(location.href); u.searchParams.set("v",Date.now()); u.searchParams.delete("parar"); location.replace(u.href); }
 $("novaVersao").addEventListener("click",atualizarAgora);

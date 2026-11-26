@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Pagar com Pix · Loja R-17</title>
+<link rel="icon" href="favicon-32.png">
+<style>
+:root{--bg:#15100D;--card:#1F1814;--ink:#F3EADC;--muted:#AB9C8B;--line:#3B2F27;--azul:#2F8CEB;--ok:#5DBB85}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:20px 16px}
+main{width:100%;max-width:460px}
+.topo{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.topo img{width:48px;height:48px;border-radius:12px}
+.topo b{font-size:1.25rem;display:block}.topo small{color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px 18px;text-align:center}
+.valor{font-size:2.6rem;font-weight:900;margin:2px 0 4px}
+.desc{color:var(--muted);margin:0 0 18px}
+button{width:100%;border:0;border-radius:16px;padding:20px 16px;font:800 1.25rem system-ui,sans-serif;cursor:pointer;color:#fff;background:linear-gradient(135deg,#6EC4FF,#2F8CEB 55%,#1B5FB8);margin-top:10px}
+button.sec{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--line);font-size:1.05rem;padding:16px}
+button.ok{background:var(--ok);color:#0E1A12}
+ol{text-align:left;margin:20px 0 0;padding-left:22px;color:var(--ink)}ol li{margin:6px 0}
+.cod{word-break:break-all;font:12px/1.4 ui-monospace,Menlo,monospace;color:var(--muted);background:var(--bg);border-radius:10px;padding:10px;margin-top:14px;text-align:left;user-select:all}
+.chave{font-weight:700;user-select:all}
+</style>
+</head>
+<body>
+<main>
+  <div class="topo"><img src="icon-192.png" alt=""><div><b>Loja R-17</b><small>Espaço Barber Shop R-17</small></div></div>
+  <div class="card">
+    <div>Valor a pagar</div>
+    <div class="valor" id="valor">—</div>
+    <p class="desc" id="desc"></p>
+    <button type="button" id="copiar">📋 COPIAR PIX</button>
+    <ol>
+      <li>Toque em <b>COPIAR PIX</b>.</li>
+      <li>Abra o app do seu banco e vá em <b>Pix</b>.</li>
+      <li>Escolha <b>Pix Copia e Cola</b> e cole. O valor já vem preenchido.</li>
+      <li>Depois, mande o comprovante pelo WhatsApp. Obrigado!</li>
+    </ol>
+    <div class="cod" id="cod"></div>
+    <p class="desc" style="margin:18px 0 0">Prefere usar a chave? Chave Pix (e-mail):<br><span class="chave" id="chave"></span></p>
+    <button type="button" class="sec" id="copiarChave">Copiar só a chave</button>
+  </div>
+</main>
+<script>
+const CHAVE = "rocabelor17@gmail.com", NOME = "BARBER SHOP R17", CIDADE = "SAO PAULO";
+const q = new URLSearchParams(location.search);
+const valor = Math.max(0, Number(String(q.get("v")||"0").replace(",", "."))) || 0;
+const desc = (q.get("d")||"").slice(0,120);
+function campo(id, v){ return id + String(v.length).padStart(2,"0") + v; }
+function crc16(s){ let c=0xFFFF; for(let i=0;i<s.length;i++){ c^=s.charCodeAt(i)<<8; for(let j=0;j<8;j++) c = (c&0x8000) ? ((c<<1)^0x1021)&0xFFFF : (c<<1)&0xFFFF; } return c.toString(16).toUpperCase().padStart(4,"0"); }
+function pix(){
+  let p = campo("00","01") + campo("26", campo("00","br.gov.bcb.pix") + campo("01",CHAVE)) + campo("52","0000") + campo("53","986")
+    + (valor>0 ? campo("54", valor.toFixed(2)) : "") + campo("58","BR") + campo("59",NOME) + campo("60",CIDADE) + campo("62", campo("05","***")) + "6304";
+  return p + crc16(p);
+}
+const codigo = pix();
+document.getElementById("valor").textContent = valor>0 ? valor.toLocaleString("pt-BR",{style:"currency",currency:"BRL"}) : "Combinar";
+document.getElementById("desc").textContent = desc;
+document.getElementById("cod").textContent = codigo;
+document.getElementById("chave").textContent = CHAVE;
+async function copiar(txt, btn, msg){
+  let ok=false;
+  try{ await navigator.clipboard.writeText(txt); ok=true; }catch(e){}
+  if(!ok){ const t=document.createElement("textarea"); t.value=txt; t.style.position="fixed"; t.style.opacity="0"; document.body.appendChild(t); t.select(); try{ ok=document.execCommand("copy"); }catch(e){} t.remove(); }
+  const antes=btn.textContent; btn.textContent = ok ? msg : "Segure o dedo no código abaixo para copiar"; btn.classList.toggle("ok",ok);
+  setTimeout(()=>{ btn.textContent=antes; btn.classList.remove("ok"); }, 3500);
+}
+document.getElementById("copiar").addEventListener("click", e=>copiar(codigo, e.currentTarget, "✅ COPIADO! Agora cole no banco"));
+document.getElementById("copiarChave").addEventListener("click", e=>copiar(CHAVE, e.currentTarget, "✅ Chave copiada"));
+</script>
+</body>
+</html>
