@@ -166,3 +166,8 @@ grant execute on function public.lj_dados(uuid,date,date), public.lj_produto_sal
   public.lj_repor(uuid,uuid,integer,numeric,date), public.lj_produto_ativo(uuid,uuid,boolean),
   public.lj_vender(uuid,date,uuid,integer,numeric,text), public.lj_mov_add(uuid,date,text,text,numeric),
   public.lj_mov_cancelar(uuid,uuid), public.lj_fiado_pagar(uuid,uuid,date), public.lj_fiado_cancelar(uuid,uuid) to anon, authenticated;
+
+-- Versão 36: editar e excluir (excluir só esconde; dados ficam guardados)
+alter table public.lj_produtos add column if not exists excluido boolean not null default false;
+-- lj_dados passou a esconder produtos excluídos e lançamentos cancelados.
+-- Funções novas: lj_produto_excluir(token,id), lj_mov_editar(token,id,data,descricao,valor), lj_fiado_editar(token,id,nome,data,valor).

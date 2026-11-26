@@ -528,7 +528,7 @@ footer{border-top:1px solid var(--line)}
 .lj .pouco{color:var(--red);font-weight:800}
 .lj tr.canc td{opacity:.45;text-decoration:line-through}
 .lj .mais{color:var(--ok)}.lj .menos{color:var(--red)}
-.ljacoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.ljacoes .btn{white-space:nowrap}
+.ljacoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}.lj tr.ljlinha td{border-top:0;padding-top:0}.lj .ljed{border-width:3px}.lj [data-x="excluir"]{color:var(--red)}.lj [data-x="excluir"].btn-red{color:#fff}.ljacoes .btn{white-space:nowrap}
 .ljtiles{display:grid;gap:14px}
 .ljtile{display:grid;grid-template-columns:64px 1fr;grid-template-rows:auto auto;align-items:center;text-align:left;gap:2px 14px;padding:26px 20px;border-radius:20px;border:0;background:linear-gradient(135deg,#6EC4FF,#2F8CEB 55%,#1B5FB8);color:#fff;cursor:pointer;font-family:var(--body);box-shadow:0 14px 30px -14px rgba(47,140,235,.8)}
 .ljtile i{grid-row:1/3;font-size:2.6rem;font-style:normal;text-align:center}.ljtile b{font-size:1.7rem;font-weight:900;letter-spacing:.02em}.ljtile small{font-size:1rem;color:#E6F3FF}
@@ -735,7 +735,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do Rodrigo <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 35</span></div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do Rodrigo <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 36</span></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -807,6 +807,18 @@ footer{border-top:1px solid var(--line)}
               </div>
             </div>
 
+            <div class="box ljed" id="ljEd" hidden>
+              <h3 class="bh" id="lj_eTit">✏️ Editar</h3>
+              <div class="ljgrid">
+                <div class="field full" id="lj_eNomeF"><label for="lj_eNome">Nome de quem deve</label><input id="lj_eNome" maxlength="80"></div>
+                <div class="field full" id="lj_eDescF"><label for="lj_eDesc">O que foi</label><input id="lj_eDesc" maxlength="120"></div>
+                <div class="field"><label for="lj_eValor">Valor (R$)</label><input id="lj_eValor" inputmode="decimal"></div>
+                <div class="field"><label for="lj_eData">Dia</label><input id="lj_eData" type="date"></div>
+              </div>
+              <button type="button" class="btn btn-b" id="lj_eSalvar">✔ Salvar mudança</button>
+              <button type="button" class="btn btn-line" id="lj_eCancelar" style="width:100%;margin-top:10px;padding:16px">Cancelar</button>
+              <p class="err" id="lj_eMsg" role="alert"></p>
+            </div>
             <div data-ljp="vender" hidden>
               <div class="box">
                 <h3 class="bh">🛒 Registrar venda</h3>
@@ -2100,10 +2112,11 @@ $("cxImprimir").addEventListener("click",()=>window.print());
 let ljD=null, ljAba="inicio", ljEdit=null, ljRepor=null, ljTipo="saida";
 const ljNum = s => { const v=Number(String(s??"").trim().replace(/\./g,"").replace(",",".")); return isNaN(v)?NaN:v; };
 const ljNumPlain = s => { const t=String(s??"").trim(); return t.includes(",") ? ljNum(t) : Number(t); };
+const ljB = (x,t) => `<button type="button" class="btn btn-sm btn-line" data-x="${x}">${t}</button>`;
 const ljMesAtual = () => isoOf(new Date()).slice(0,7);
 function ljPeriodo(){ const m=$("ljMes").value||ljMesAtual(); const [y,mm]=m.split("-").map(Number); return {de:`${m}-01`, ate:isoOf(new Date(y,mm,0))}; }
 const LJTIT={vender:"🛒 Vender",fiado:"📝 Fiado",produtos:"📦 Produtos",caixa:"💵 Caixa da loja"};
-function ljMostrar(a){ ljAba=a; $("ljHome").hidden=a!=="inicio"; document.querySelectorAll("[data-ljp]").forEach(d=>d.hidden=d.dataset.ljp!==a); $("voltaTit").textContent = a==="inicio" ? "🛍️ Loja R-17" : LJTIT[a]; window.scrollTo(0,0); }
+function ljMostrar(a){ ljAba=a; if($("ljEd")) $("ljEd").hidden=true; $("ljHome").hidden=a!=="inicio"; document.querySelectorAll("[data-ljp]").forEach(d=>d.hidden=d.dataset.ljp!==a); $("voltaTit").textContent = a==="inicio" ? "🛍️ Loja R-17" : LJTIT[a]; window.scrollTo(0,0); }
 async function ljCarregar(){
   if(!isAdmin()) return;
   if(!$("ljMes").value) $("ljMes").value=ljMesAtual();
@@ -2135,22 +2148,23 @@ function ljRender(){
     <div class="kpi fi"><small>Fiado a receber</small><b>${brl(tF)}</b><span>${abertos.length} anotação(ões)</span></div>`;
   // select de produtos
   const sel=$("lj_vProd").value;
-  const ativos=prods.filter(p=>p.ativo);
+  const ativos=prods;
   $("lj_vProd").innerHTML = ativos.length ? `<option value="">Escolha o produto…</option>`+ativos.map(p=>`<option value="${p.id}">${esc(p.nome)} · ${brl(Number(p.preco))} · estoque ${p.qtd}</option>`).join("") : `<option value="">Cadastre um produto primeiro (em Produtos e estoque)</option>`;
   if(ativos.some(p=>p.id===sel)) $("lj_vProd").value=sel;
   // vendidos
-  $("ljVendidos").innerHTML = (ljD.movs||[]).some(m=>m.tipo==="venda") ? tabela(["Dia","Produto","Valor"],(ljD.movs||[]).filter(m=>m.tipo==="venda").map(m=>`<tr data-id="${m.id}" class="${m.cancelado?"canc":""}"><td>${fmtCurta(m.data)}</td><td>${m.qtd}× ${esc(m.produto)}${m.descricao?`<br><small>${esc(m.descricao)}</small>`:""}</td><td class="n">${brl(Number(m.valor))}${m.cancelado?"<br><small>cancelada</small>":` <button type="button" class="btn btn-sm btn-line" data-mc="1" aria-label="Cancelar venda">✕</button>`}</td></tr>`),`<tr><td colspan="2">Total vendido</td><td class="n">${brl(tV)}</td></tr>`) : `<p class="empty">Nenhuma venda neste mês.</p>`;
+  const vendas=(ljD.movs||[]).filter(m=>m.tipo==="venda");
+  $("ljVendidos").innerHTML = vendas.length ? tabela(["Dia","Produto","Valor"],vendas.map(m=>`<tr data-id="${m.id}"><td>${fmtCurta(m.data)}</td><td>${m.qtd}× ${esc(m.produto)}${m.descricao?`<br><small>${esc(m.descricao)}</small>`:""}<div class="ljacoes">${ljB("editar","✏️ Editar")}${ljB("excluir","🗑️ Excluir")}</div></td><td class="n">${brl(Number(m.valor))}</td></tr>`),`<tr><td colspan="2">Total vendido</td><td class="n">${brl(tV)}</td></tr>`) : `<p class="empty">Nenhuma venda neste mês.</p>`;
   // fiado
   const pagos=fiados.filter(f=>f.pago);
-  $("ljFiados").innerHTML = (abertos.length ? tabela(["Quem deve","Produto","Valor"],abertos.map(f=>`<tr data-id="${f.id}"><td><b>${esc(f.nome)}</b><br><small>${fmtCurta(f.data)}</small></td><td>${f.qtd}× ${esc(f.produto)}</td><td class="n">${brl(Number(f.valor))}<div class="ljacoes" style="justify-content:flex-end"><button type="button" class="btn btn-sm btn-zap" data-f="pagar">✔ PAGOU</button><button type="button" class="btn btn-sm btn-line" data-f="cancelar" aria-label="Cancelar anotação">✕</button></div></td></tr>`),`<tr><td colspan="2">Total devendo</td><td class="n">${brl(tF)}</td></tr>`) : `<p class="empty">Ninguém devendo. 👍</p>`)
+  $("ljFiados").innerHTML = (abertos.length ? tabela(["Quem deve","Produto","Valor"],abertos.map(f=>`<tr data-id="${f.id}"><td><b>${esc(f.nome)}</b><br><small>${fmtCurta(f.data)}</small></td><td>${f.qtd}× ${esc(f.produto)}</td><td class="n">${brl(Number(f.valor))}</td></tr><tr data-id="${f.id}" class="ljlinha"><td colspan="3"><div class="ljacoes"><button type="button" class="btn btn-zap" data-f="pagar">✔ PAGOU</button>${ljB("editar","✏️ Editar")}${ljB("excluir","🗑️ Excluir")}</div></td></tr>`),`<tr><td colspan="2">Total devendo</td><td class="n">${brl(tF)}</td></tr>`) : `<p class="empty">Ninguém devendo. 👍</p>`)
     + (pagos.length ? `<h3 class="bh" style="margin-top:18px">Fiados pagos neste mês</h3>`+tabela(["Quem","Produto","Valor"],pagos.map(f=>`<tr><td>${esc(f.nome)}<br><small>pagou ${fmtCurta(f.pago_em)}</small></td><td>${f.qtd}× ${esc(f.produto)}</td><td class="n">${brl(Number(f.valor))}</td></tr>`)) : "");
   // produtos
-  $("ljProdutos").innerHTML = prods.length ? tabela(["Produto","Estoque","Custo / Venda"],prods.map(p=>`<tr data-id="${p.id}" class="${p.ativo?"":"canc"}"><td><b>${esc(p.nome)}</b>${p.ativo?"":"<br><small>desativado</small>"}<div class="ljacoes"><button type="button" class="btn btn-sm btn-b" data-p="repor">＋ Chegou</button><button type="button" class="btn btn-sm btn-line" data-p="editar">Editar</button><button type="button" class="btn btn-sm btn-line" data-p="ativo">${p.ativo?"Desativar":"Ativar"}</button></div></td><td class="${p.qtd<=2?"pouco":""}">${p.qtd}${p.qtd<=2?" ⚠️":""}</td><td class="n">${brl(Number(p.custo))}<br><b>${brl(Number(p.preco))}</b></td></tr>`),
-      `<tr><td>Valor em estoque (custo)</td><td></td><td class="n">${brl(prods.filter(p=>p.ativo).reduce((t,p)=>t+Math.max(0,p.qtd)*Number(p.custo),0))}</td></tr>`) : `<p class="empty">Nenhum produto cadastrado ainda.</p>`;
+  $("ljProdutos").innerHTML = prods.length ? tabela(["Produto","Estoque","Custo / Venda"],prods.map(p=>`<tr data-id="${p.id}"><td><b>${esc(p.nome)}</b><div class="ljacoes"><button type="button" class="btn btn-sm btn-b" data-x="repor">＋ Chegou</button>${ljB("editar","✏️ Editar")}${ljB("excluir","🗑️ Excluir")}</div></td><td class="${p.qtd<=2?"pouco":""}">${p.qtd}${p.qtd<=2?" ⚠️":""}</td><td class="n">${brl(Number(p.custo))}<br><b>${brl(Number(p.preco))}</b></td></tr>`),
+      `<tr><td>Valor em estoque (custo)</td><td></td><td class="n">${brl(prods.reduce((t,p)=>t+Math.max(0,p.qtd)*Number(p.custo),0))}</td></tr>`) : `<p class="empty">Nenhum produto cadastrado ainda.</p>`;
   // movimento
   const todos=ljD.movs||[];
   $("ljMovs").innerHTML = todos.length ? tabela(["Dia","O que foi","Valor"],todos.map(m=>{ const mais=m.tipo!=="saida"; const txt=m.tipo==="venda"?`Venda: ${m.qtd}× ${esc(m.produto)}${m.descricao?` (${esc(m.descricao)})`:""}`:esc(m.descricao||"");
-      return `<tr data-id="${m.id}" class="${m.cancelado?"canc":""}"><td>${fmtCurta(m.data)}</td><td>${txt}</td><td class="n ${mais?"mais":"menos"}">${mais?"+":"−"} ${brl(Number(m.valor))}${m.cancelado?"<br><small>cancelado</small>":` <button type="button" class="btn btn-sm btn-line" data-mc="1" aria-label="Cancelar lançamento">✕</button>`}</td></tr>`; }),
+      return `<tr data-id="${m.id}"><td>${fmtCurta(m.data)}</td><td>${txt}<div class="ljacoes">${ljB("editar","✏️ Editar")}${ljB("excluir","🗑️ Excluir")}</div></td><td class="n ${mais?"mais":"menos"}">${mais?"+":"−"} ${brl(Number(m.valor))}</td></tr>`; }),
       `<tr><td colspan="2">Saldo do mês</td><td class="n">${brl(tV+tE-tS)}</td></tr>`) : `<p class="empty">Nada lançado neste mês.</p>`;
 }
 function ljValorSug(){ const p=(ljD?.produtos||[]).find(x=>x.id===$("lj_vProd").value); const q=Number($("lj_vQtd").value)||1; if(p) $("lj_vValor").value=(Number(p.preco)*q).toFixed(2).replace(".",","); }
@@ -2174,7 +2188,7 @@ $("lj_vSalvar").addEventListener("click",async()=>{
   catch(e){ if(e.codigo!=="sessao") $("lj_vMsg").textContent="Não foi possível registrar. Tente de novo."; }
   $("lj_vSalvar").disabled=false;
 });
-function ljLimparProd(){ ljEdit=null; ["lj_pNome","lj_pQtd","lj_pCusto","lj_pPreco"].forEach(id=>$(id).value=""); $("lj_pTit").textContent="📦 Cadastrar produto"; $("lj_pCancelar").hidden=true; }
+function ljLimparProd(){ ljEdit=null; $("lj_pSalvar").textContent="✔ Salvar produto"; ["lj_pNome","lj_pQtd","lj_pCusto","lj_pPreco"].forEach(id=>$(id).value=""); $("lj_pTit").textContent="📦 Cadastrar produto"; $("lj_pCancelar").hidden=true; }
 $("lj_pCancelar").addEventListener("click",ljLimparProd);
 $("lj_pSalvar").addEventListener("click",async()=>{
   const nome=$("lj_pNome").value.trim(), q=parseInt($("lj_pQtd").value||"0",10), c=ljNumPlain($("lj_pCusto").value||"0"), pr=ljNumPlain($("lj_pPreco").value||"0");
@@ -2186,11 +2200,12 @@ $("lj_pSalvar").addEventListener("click",async()=>{
   catch(e){ if(e.codigo!=="sessao") $("lj_pMsg").textContent="Não foi possível salvar. Tente de novo."; }
   $("lj_pSalvar").disabled=false;
 });
+function ljConfirma(b){ if(b.dataset.ok) return true; b.dataset.ok="1"; b.textContent="Tem certeza? Toque de novo"; b.classList.add("btn-red"); setTimeout(()=>{ if(b.isConnected){ delete b.dataset.ok; b.textContent="🗑️ Excluir"; b.classList.remove("btn-red"); } },5000); return false; }
 $("ljProdutos").addEventListener("click",async e=>{
-  const b=e.target.closest("[data-p]"); if(!b) return; const p=ljD.produtos.find(x=>x.id===b.closest("tr").dataset.id); if(!p) return;
-  if(b.dataset.p==="editar"){ ljEdit=p.id; $("lj_pNome").value=p.nome; $("lj_pQtd").value=p.qtd; $("lj_pCusto").value=Number(p.custo).toFixed(2).replace(".",","); $("lj_pPreco").value=Number(p.preco).toFixed(2).replace(".",","); $("lj_pTit").textContent="✏️ Editar produto"; $("lj_pCancelar").hidden=false; $("lj_pMsg").textContent=""; window.scrollTo({top:$("lj_pTit").getBoundingClientRect().top+scrollY-90,behavior:"smooth"}); return; }
-  if(b.dataset.p==="repor"){ ljRepor=p.id; $("lj_rNome").textContent=p.nome; $("lj_rQtd").value=""; $("lj_rValor").value=""; $("lj_rBox").hidden=false; window.scrollTo({top:$("lj_rBox").getBoundingClientRect().top+scrollY-90,behavior:"smooth"}); $("lj_rQtd").focus(); return; }
-  if(b.dataset.p==="ativo"){ b.disabled=true; try{ await adm("lj_produto_ativo",{p_id:p.id,p_ativo:!p.ativo}); await ljCarregar(); }catch(err){ b.disabled=false; } }
+  const b=e.target.closest("[data-x]"); if(!b) return; const p=ljD.produtos.find(x=>x.id===b.closest("tr").dataset.id); if(!p) return;
+  if(b.dataset.x==="editar"){ ljEdit=p.id; $("lj_pNome").value=p.nome; $("lj_pQtd").value=p.qtd; $("lj_pCusto").value=Number(p.custo).toFixed(2).replace(".",","); $("lj_pPreco").value=Number(p.preco).toFixed(2).replace(".",","); $("lj_pTit").textContent="✏️ Editar produto"; $("lj_pSalvar").textContent="✔ Salvar mudança"; $("lj_pCancelar").hidden=false; $("lj_pMsg").textContent=""; window.scrollTo({top:$("lj_pTit").getBoundingClientRect().top+scrollY-90,behavior:"smooth"}); return; }
+  if(b.dataset.x==="repor"){ ljRepor=p.id; $("lj_rNome").textContent=p.nome; $("lj_rQtd").value=""; $("lj_rValor").value=""; $("lj_rBox").hidden=false; window.scrollTo({top:$("lj_rBox").getBoundingClientRect().top+scrollY-90,behavior:"smooth"}); $("lj_rQtd").focus(); return; }
+  if(b.dataset.x==="excluir"){ if(!ljConfirma(b)) return; b.disabled=true; try{ await adm("lj_produto_excluir",{p_id:p.id}); $("lj_pMsg").textContent=`Produto excluído: ${p.nome}.`; await ljCarregar(); }catch(err){ b.disabled=false; } }
 });
 $("lj_rQtd").addEventListener("input",()=>{ const p=(ljD?.produtos||[]).find(x=>x.id===ljRepor); const q=Number($("lj_rQtd").value)||0; if(p&&q) $("lj_rValor").value=(Number(p.custo)*q).toFixed(2).replace(".",","); });
 $("lj_rCancelar").addEventListener("click",()=>{ $("lj_rBox").hidden=true; ljRepor=null; });
@@ -2212,20 +2227,40 @@ $("lj_mSalvar").addEventListener("click",async()=>{
   catch(e){ if(e.codigo!=="sessao") $("lj_mMsg").textContent="Não foi possível lançar. Tente de novo."; }
   $("lj_mSalvar").disabled=false;
 });
-// cancelar lançamento (toque 2 vezes). Não apaga: fica riscado. Venda cancelada volta pro estoque.
+// editar / excluir lançamento. Excluir uma venda devolve o produto ao estoque.
 ["ljVendidos","ljMovs"].forEach(id=>$(id).addEventListener("click",async e=>{
-  const b=e.target.closest("[data-mc]"); if(!b) return;
-  if(b.dataset.mc==="1"){ b.textContent="Cancelar?"; b.dataset.mc="2"; b.classList.add("btn-red"); return; }
-  b.disabled=true; try{ await adm("lj_mov_cancelar",{p_id:b.closest("tr").dataset.id}); await ljCarregar(); }catch(err){ b.disabled=false; }
+  const b=e.target.closest("[data-x]"); if(!b) return; const m=(ljD.movs||[]).find(x=>x.id===b.closest("tr").dataset.id); if(!m) return;
+  if(b.dataset.x==="editar"){ ljEdAbrir({tit: m.tipo==="venda"?`✏️ Editar venda: ${m.qtd}× ${m.produto}`:"✏️ Editar lançamento", desc: m.tipo==="venda"?null:(m.descricao||""), valor:m.valor, data:m.data,
+      salvar:v=>adm("lj_mov_editar",{p_id:m.id,p_data:v.data,p_descricao:v.desc||"",p_valor:v.valor}) }); return; }
+  if(b.dataset.x==="excluir"){ if(!ljConfirma(b)) return; b.disabled=true; try{ await adm("lj_mov_cancelar",{p_id:m.id}); await ljCarregar(); }catch(err){ b.disabled=false; } }
 }));
 $("ljFiados").addEventListener("click",async e=>{
-  const b=e.target.closest("[data-f]"); if(!b) return; const id=b.closest("tr").dataset.id; const f=ljD.fiados.find(x=>x.id===id);
-  if(b.dataset.f==="cancelar"){ b.textContent="Cancelar?"; b.dataset.f="cancelar2"; b.classList.add("btn-red"); return; }
+  const b=e.target.closest("[data-f],[data-x]"); if(!b) return; const id=b.closest("tr").dataset.id; const f=ljD.fiados.find(x=>x.id===id); if(!f) return;
+  if(b.dataset.x==="editar"){ ljEdAbrir({tit:`✏️ Editar fiado: ${f.qtd}× ${f.produto}`, nome:f.nome, valor:f.valor, data:f.data, salvar:v=>adm("lj_fiado_editar",{p_id:f.id,p_nome:v.nome,p_data:v.data,p_valor:v.valor}) }); return; }
+  if(b.dataset.x==="excluir" && !ljConfirma(b)) return;
   b.disabled=true;
-  try{ if(b.dataset.f==="pagar"){ await adm("lj_fiado_pagar",{p_id:id,p_data:isoOf(new Date())}); $("lj_fMsg").textContent=`${f?f.nome:"Fiado"} pagou ${f?brl(Number(f.valor)):""}. Entrou no caixa da loja.`; }
-       else { await adm("lj_fiado_cancelar",{p_id:id}); $("lj_fMsg").textContent="Anotação cancelada e produto voltou ao estoque."; }
+  try{ if(b.dataset.f==="pagar"){ await adm("lj_fiado_pagar",{p_id:id,p_data:isoOf(new Date())}); $("lj_fMsg").textContent=`${f.nome} pagou ${brl(Number(f.valor))}. Entrou no caixa da loja.`; }
+       else { await adm("lj_fiado_cancelar",{p_id:id}); $("lj_fMsg").textContent="Fiado excluído. O produto voltou ao estoque."; }
        await ljCarregar(); }
   catch(err){ b.disabled=false; }
+});
+// caixinha de editar (serve para venda, fiado e lançamento)
+let ljEdCfg=null;
+function ljEdAbrir(c){ ljEdCfg=c; $("lj_eTit").textContent=c.tit; $("lj_eNomeF").hidden=c.nome==null; $("lj_eDescF").hidden=c.desc==null;
+  $("lj_eNome").value=c.nome||""; $("lj_eDesc").value=c.desc||""; $("lj_eValor").value=Number(c.valor).toFixed(2).replace(".",","); $("lj_eData").value=c.data; $("lj_eMsg").textContent="";
+  $("ljEd").hidden=false; window.scrollTo({top:$("ljEd").getBoundingClientRect().top+scrollY-90,behavior:"smooth"}); }
+function ljEdFechar(){ $("ljEd").hidden=true; ljEdCfg=null; }
+$("lj_eCancelar").addEventListener("click",ljEdFechar);
+$("lj_eSalvar").addEventListener("click",async()=>{
+  if(!ljEdCfg) return; const v={nome:$("lj_eNome").value.trim(), desc:$("lj_eDesc").value.trim(), valor:ljNumPlain($("lj_eValor").value), data:$("lj_eData").value};
+  if(ljEdCfg.nome!=null && v.nome.length<2){ $("lj_eMsg").textContent="Escreva o nome."; return; }
+  if(ljEdCfg.desc!=null && v.desc.length<2){ $("lj_eMsg").textContent="Escreva o que foi."; return; }
+  if(isNaN(v.valor)||v.valor<0||$("lj_eValor").value===""){ $("lj_eMsg").textContent="Digite o valor."; return; }
+  if(!v.data){ $("lj_eMsg").textContent="Escolha o dia."; return; }
+  $("lj_eSalvar").disabled=true;
+  try{ await ljEdCfg.salvar(v); ljEdFechar(); await ljCarregar(); }
+  catch(e){ if(e.codigo!=="sessao") $("lj_eMsg").textContent="Não foi possível salvar. Tente de novo."; }
+  $("lj_eSalvar").disabled=false;
 });
 
 /* ---------- serviços no painel ---------- */
@@ -2446,7 +2481,7 @@ const ehApp = matchMedia("(display-mode: standalone)").matches || navigator.stan
 if(ehApp){ const ab=$("abertura"); ab.querySelector(".ab-logo").innerHTML=document.querySelector(".herologo").outerHTML.replace('class="herologo"','');
   ab.classList.add("on"); setTimeout(()=>{ ab.classList.add("sai"); setTimeout(()=>ab.remove(),550); },1800); }
 /* versão do site: muda a cada atualização. O app confere sozinho e atualiza. */
-const VERSAO="35";
+const VERSAO="36";
 $("versaoTag").textContent="Versão "+VERSAO;
 function atualizarAgora(){ const u=new URL(location.href); u.searchParams.set("v",Date.now()); u.searchParams.delete("parar"); location.replace(u.href); }
 $("novaVersao").addEventListener("click",atualizarAgora);
