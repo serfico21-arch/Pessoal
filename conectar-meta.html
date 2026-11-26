@@ -113,7 +113,11 @@ function $(i){return document.getElementById(i)}
 function msg(t,ok){$("msg").innerHTML='<div class="'+(ok?"dica":"aviso")+'">'+t+'</div>'}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function get(u){return fetch(u).then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return j})}
-$("ir").onclick=function(){var a=$("app").value.replace(/\D/g,""),s=$("sec").value.replace(/\s/g,""),t=$("tok").value.replace(/\s/g,"");
+/* Se colar por cima de um código antigo, os dois ficam grudados e a Meta recusa.
+   Por isso: ao colar, o campo é trocado inteiro; e na hora de conectar usamos só o ÚLTIMO código que começa com EAA. */
+function pegaToken(v){v=String(v||"").replace(/\s/g,"");var p=v.split(/(?=EAA)/).filter(function(x){return /^EAA[A-Za-z0-9]{50,}$/.test(x)});return p.length?p[p.length-1]:v}
+$("tok").addEventListener("paste",function(e){var c=(e.clipboardData||window.clipboardData);if(!c)return;var x=c.getData("text");if(!x)return;e.preventDefault();this.value=x.trim()});
+$("ir").onclick=function(){var a=$("app").value.replace(/\D/g,""),s=$("sec").value.replace(/\s/g,""),t=pegaToken($("tok").value);
  if(!t){msg("Cole o código grande (passo 4).");return}
  msg("⏳ Conectando…",true);
  /* 1) troca o código de 1 hora por um de 60 dias. Tenta do jeito novo (POST) e do jeito antigo (GET).
@@ -137,7 +141,7 @@ $("ir").onclick=function(){var a=$("app").value.replace(/\D/g,""),s=$("sec").val
   var k=paginas.findIndex(function(p){return /costa|fcosta|rcm/i.test(p.name)});if(k>-1)$("sel").value=k;
   $("pag").classList.remove("hide");msg("✅ Conectou! Agora escolha a sua Página.",true)})
  .catch(function(e){if(e.message==="FALTA_ESTENDER"){msg('Falta um passinho: <ol><li>Toque em <a href="https://developers.facebook.com/tools/debug/accesstoken/" target="_blank" rel="noopener"><b>Abrir o Depurador</b></a>.</li><li>Cole o <b>código grande</b> e toque em <b>Depurar</b>.</li><li>Lá embaixo, toque em <b>Estender token de acesso</b> (Extend Access Token) e digite sua senha.</li><li>Copie o código novo que aparece, cole no campo <b>Código grande</b> aqui e toque em <b>Conectar</b> de novo.</li></ol>');return}
- if(/^CODIGO_RUIM:/.test(e.message)){msg("O <b>código grande</b> não foi aceito pela Meta ("+esc(e.message.slice(12))+").<br>Faça assim: no Explorador (passo 4), confira se em <b>App da Meta</b> está o <b>seu app</b> (Divulga Fcosta) e não o \"Graph API Explorer\". Toque em <b>Generate Access Token</b> de novo, copie pelo ícone de copiar e cole aqui. Não precisa mudar o ID nem a chave.");return}
+ if(/^CODIGO_RUIM:/.test(e.message)){msg("O <b>código grande</b> não foi aceito pela Meta ("+esc(e.message.slice(12))+").<br>Faça assim: toque no campo do código, aperte <b>Ctrl + A</b> e <b>Delete</b> para apagar tudo. No Explorador, toque em <b>Generate Access Token</b>, copie pelo ícone de copiar e cole no campo vazio. Toque em Conectar logo em seguida.");return}
  msg("Não deu certo: "+esc(e.message)+"<br>Confira o ID e a chave secreta (passo 3) e gere o código de novo no passo 4 (ele vence em 1 hora).")})};
 $("usar").onclick=function(){var p=paginas[+$("sel").value];if(!p)return;
  var c=Object.assign({token:p.access_token,page:p.id,ig:p.instagram_business_account?p.instagram_business_account.id:""},base());
