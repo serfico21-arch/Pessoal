@@ -229,10 +229,10 @@ function telaSimples(){var i=cur,a=S.auto[i.id],h='<div class="card" style="bord
  var lig=ROBO&&ROBO.conectado;
  if(ROBO&&!lig)h+='<div class="aviso">🔌 A postagem automática no Facebook e Instagram ainda não está ligada. <a href="conectar-meta.html"><b>Ligar agora (uma vez só)</b></a></div>';
  h+='<button class="btn ok big" id="bdiv" data-a="divulgar" style="min-height:84px;font-size:26px">📣 DIVULGAR</button>';
- h+='<p class="mut" style="margin-top:8px">Posta sozinho na sua <b>Página do Facebook</b> e no <b>Instagram</b>: post com fotos + story.</p>';
+ h+='<p class="mut" style="margin-top:8px">Posta sozinho na sua <b>Página do Facebook</b> e no <b>Instagram</b> (post com fotos + story)'+(ROBO&&ROBO.redes&&ROBO.redes.tg?' e no seu <b>canal do Telegram</b>':'')+'.</p>';
  if(a){var it=ROBO&&ROBO.itens&&ROBO.itens[a.k],esp=!it;
   h+='<p style="margin:10px 0 0"><b>Enviado '+quando(a.t)+' às '+new Date(a.t).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+'</b>'+(esp?' · o robô posta em até 15 minutos':'')+'</p><ul class="lst">'
-  +linhaRede("📘 Facebook (post)",it&&it.fb,esp)+linhaRede("📘 Facebook (story)",it&&it.fbs,esp)+linhaRede("📸 Instagram (post)",it&&it.ig,esp)+linhaRede("📸 Instagram (story)",it&&it.igs,esp)+'</ul>'+(it&&it.erro?'<div class="aviso">'+esc(it.erro)+'</div>':'')}
+  +linhaRede("📘 Facebook (post)",it&&it.fb,esp)+linhaRede("📘 Facebook (story)",it&&it.fbs,esp)+linhaRede("📸 Instagram (post)",it&&it.ig,esp)+linhaRede("📸 Instagram (story)",it&&it.igs,esp)+((it&&it.tg)||(esp&&ROBO&&ROBO.redes&&ROBO.redes.tg)?linhaRede("✈️ Telegram",it&&it.tg,esp):"")+'</ul>'+(it&&it.erro?'<div class="aviso">'+esc(it.erro)+'</div>':'')}
  h+='<h3 style="margin-top:16px">Também com 1 toque:</h3><div class="row">'
  +(navigator.share?'<button class="btn wa" data-a="zapshare">🟢 WhatsApp<br><small style="font-weight:400;font-size:13px">status e grupos, com fotos</small></button>':'<a class="btn wa" data-rede="wa" href="#">🟢 WhatsApp</a>')
  +'<a class="btn fb" data-rede="msgr" href="#">💬 Messenger</a></div></div>';

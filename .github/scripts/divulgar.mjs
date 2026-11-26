@@ -14,12 +14,14 @@ const MAX_IDADE = 2 * 864e5; // pedidos com mais de 2 dias são ignorados
 
 let cfg = {};
 try { cfg = JSON.parse(process.env.META_CONFIG || "{}"); } catch { console.log("META_CONFIG inválido"); }
-const conectado = !!(cfg.token && cfg.page);
+const temFB = !!(cfg.token && cfg.page), temTG = !!(cfg.tgToken && cfg.tgChat);
+const conectado = temFB || temTG;
 
 let st = { conectado: false, atualizado: "", itens: {} };
 try { st = Object.assign(st, JSON.parse(fs.readFileSync(ARQ, "utf8"))); } catch {}
 const antes = JSON.stringify(st);
 st.conectado = conectado;
+st.redes = { fb: temFB, ig: !!(temFB && cfg.ig), tg: temTG };
 
 const espera = (ms) => new Promise((r) => setTimeout(r, ms));
 async function jget(u) { const r = await fetch(u); if (!r.ok) throw new Error("HTTP " + r.status + " " + u.split("?")[0]); return r.json(); }
@@ -105,6 +107,22 @@ async function storyInstagram(foto) {
   await gpost("/" + cfg.ig + "/media_publish", { creation_id: c.id });
 }
 
+/* ---------- Telegram (canal) ---------- */
+async function tg(metodo, corpo) {
+  const r = await fetch("https://api.telegram.org/bot" + cfg.tgToken + "/" + metodo, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corpo) });
+  const j = await r.json().catch(() => ({}));
+  if (!j.ok) throw new Error(j.description || "HTTP " + r.status);
+  return j.result;
+}
+async function postTelegram(fts, txt) {
+  const chat = cfg.tgChat;
+  if (!fts.length) { await tg("sendMessage", { chat_id: chat, text: txt.slice(0, 4000) }); return ""; }
+  const cap = txt.length > 1000 ? txt.slice(0, 1000).replace(/\s\S*$/, "") + "…" : txt;
+  if (fts.length === 1) await tg("sendPhoto", { chat_id: chat, photo: jpg(fts[0], 1600), caption: cap });
+  else await tg("sendMediaGroup", { chat_id: chat, media: fts.slice(0, 10).map((u, i) => Object.assign({ type: "photo", media: jpg(u, 1600) }, i ? {} : { caption: cap })) });
+  return /^@/.test(chat) ? "https://t.me/" + chat.slice(1) : "";
+}
+
 /* ---------- Principal ---------- */
 async function tenta(nome, fn) { try { const r = await fn(); console.log("✅", nome); return { ok: true, link: r || "" }; } catch (e) { console.log("❌", nome, e.message); return { ok: false, erro: String(e.message).slice(0, 200) }; } }
 
@@ -118,9 +136,10 @@ if (conectado) {
     const it = { imovelId: p.imovelId, titulo: p.titulo || "", quando: new Date().toISOString() };
     if (!d) { it.erro = "Imóvel não encontrado no Painel ADM"; st.itens[k] = it; continue; }
     const fts = fotos(d), tx = textos(p.imovelId, d), quer = p.redes || {};
-    if (quer.fb !== false) it.fb = await tenta("Facebook post", () => postFacebook(fts, tx.fb, link(p.imovelId, d, "facebook")));
-    if (quer.fbs !== false && fts.length) it.fbs = await tenta("Facebook story", () => storyFacebook(fts[0]));
-    if (cfg.ig && fts.length) {
+    if (temFB && quer.fb !== false) it.fb = await tenta("Facebook post", () => postFacebook(fts, tx.fb, link(p.imovelId, d, "facebook")));
+    if (temFB && quer.fbs !== false && fts.length) it.fbs = await tenta("Facebook story", () => storyFacebook(fts[0]));
+    if (temTG && quer.tg !== false) it.tg = await tenta("Telegram", () => postTelegram(fts, tx.fb));
+    if (temFB && cfg.ig && fts.length) {
       if (quer.ig !== false) it.ig = await tenta("Instagram post", () => postInstagram(fts, tx.ig));
       if (quer.igs !== false) it.igs = await tenta("Instagram story", () => storyInstagram(fts[0]));
     }
