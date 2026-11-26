@@ -120,9 +120,12 @@ $("ir").onclick=function(){var a=$("app").value.replace(/\D/g,""),s=$("sec").val
     2) Se a Meta recusar a troca, usa o código como está e confere a validade. */
  var q={grant_type:"fb_exchange_token",client_id:a,client_secret:s,fb_exchange_token:t};
  function post(u,d){return fetch(u,{method:"POST",body:new URLSearchParams(d)}).then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return j})}
- post(G+"/oauth/access_token",q)
- .catch(function(){return get(G+"/oauth/access_token?"+new URLSearchParams(q))})
- .then(function(j){return j.access_token},function(e){console.log("troca falhou:",e.message);
+ /* 0) primeiro confere se o código grande vale (se não valer, a Meta diz por quê) */
+ get(G+"/me?fields=id,name&access_token="+encodeURIComponent(t)).catch(function(e){throw new Error("CODIGO_RUIM:"+e.message)})
+ .then(function(){return post(G+"/oauth/access_token",q)})
+ .catch(function(e){if(/^CODIGO_RUIM:/.test(e.message))throw e;return get(G+"/oauth/access_token?"+new URLSearchParams(q))})
+ .then(function(j){if(j&&j.access_token)return j.access_token;throw new Error("sem token longo")})
+ .catch(function(e){if(/^CODIGO_RUIM:/.test(e.message))throw e;console.log("troca falhou:",e.message);
   return get(G+"/debug_token?input_token="+encodeURIComponent(t)+"&access_token="+encodeURIComponent(a+"|"+s)).then(function(d){d=d.data||{};
    if(d.is_valid===false)throw new Error("o código grande não vale mais. Gere de novo no passo 4.");
    if(d.expires_at&&d.expires_at*1000-Date.now()<3*864e5)throw new Error("FALTA_ESTENDER");
@@ -133,6 +136,7 @@ $("ir").onclick=function(){var a=$("app").value.replace(/\D/g,""),s=$("sec").val
   var k=paginas.findIndex(function(p){return /costa|fcosta|rcm/i.test(p.name)});if(k>-1)$("sel").value=k;
   $("pag").classList.remove("hide");msg("✅ Conectou! Agora escolha a sua Página.",true)})
  .catch(function(e){if(e.message==="FALTA_ESTENDER"){msg('Falta um passinho: <ol><li>Toque em <a href="https://developers.facebook.com/tools/debug/accesstoken/" target="_blank" rel="noopener"><b>Abrir o Depurador</b></a>.</li><li>Cole o <b>código grande</b> e toque em <b>Depurar</b>.</li><li>Lá embaixo, toque em <b>Estender token de acesso</b> (Extend Access Token) e digite sua senha.</li><li>Copie o código novo que aparece, cole no campo <b>Código grande</b> aqui e toque em <b>Conectar</b> de novo.</li></ol>');return}
+ if(/^CODIGO_RUIM:/.test(e.message)){msg("O <b>código grande</b> não foi aceito pela Meta ("+esc(e.message.slice(12))+").<br>Faça assim: no Explorador (passo 4), confira se em <b>App da Meta</b> está o <b>seu app</b> (Divulga Fcosta) e não o \"Graph API Explorer\". Toque em <b>Generate Access Token</b> de novo, copie pelo ícone de copiar e cole aqui. Não precisa mudar o ID nem a chave.");return}
  msg("Não deu certo: "+esc(e.message)+"<br>Confira o ID e a chave secreta (passo 3) e gere o código de novo no passo 4 (ele vence em 1 hora).")})};
 $("usar").onclick=function(){var p=paginas[+$("sel").value];if(!p)return;
  var c=Object.assign({token:p.access_token,page:p.id,ig:p.instagram_business_account?p.instagram_business_account.id:""},base());
