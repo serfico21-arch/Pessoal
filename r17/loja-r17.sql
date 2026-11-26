@@ -171,3 +171,7 @@ grant execute on function public.lj_dados(uuid,date,date), public.lj_produto_sal
 alter table public.lj_produtos add column if not exists excluido boolean not null default false;
 -- lj_dados passou a esconder produtos excluídos e lançamentos cancelados.
 -- Funções novas: lj_produto_excluir(token,id), lj_mov_editar(token,id,data,descricao,valor), lj_fiado_editar(token,id,nome,data,valor).
+
+-- Versão 37: WhatsApp de quem deve no fiado (para cobrar com Pix)
+alter table public.lj_fiado add column if not exists fone text;
+-- Funções novas: lj_vender2(...,p_fone) e lj_fiado_editar2(...,p_fone). As antigas continuam iguais.

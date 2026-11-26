@@ -485,6 +485,7 @@ footer{border-top:1px solid var(--line)}
 .agcol .row .receber{grid-column:1/-1}
 .tb small{color:var(--muted)}
 .btn-zap{background:#25D366;color:#06301A;border:0;font-weight:800}
+.blembra{background:#F0A93B!important;color:#1A1208!important}
 .tbw{overflow-x:auto;max-width:100%}
 .vip{color:#1A1208!important;opacity:1!important}
 @media (max-width:820px){.saidaf{grid-template-columns:1fr 1fr}.saidaf .field:nth-child(2){grid-column:1/-1;order:-1}}
@@ -537,7 +538,7 @@ footer{border-top:1px solid var(--line)}
 .lj .btn-b{width:100%;padding:20px;font-size:1.3rem;border-radius:16px;margin-top:4px}
 .lj .ljacoes .btn-b,.lj .ljacoes .btn{width:auto;padding:12px 16px;font-size:1rem;margin:0}
 .lj label{font-size:1.05rem;font-weight:700}.lj input,.lj select{font-size:1.15rem;padding:14px}
-.lj [data-f="pagar"]{padding:14px 18px;font-size:1.1rem}
+.lj .ljacoes .ljcobrar{width:100%;justify-content:center;padding:16px;font-size:1.15rem;background:#128C7E;color:#fff}.lj [data-f="pagar"]{padding:14px 18px;font-size:1.1rem}
 @media(max-width:600px){.ljk{grid-template-columns:1fr 1fr}.ljgrid{grid-template-columns:1fr}}
 </style>
 </head>
@@ -735,7 +736,7 @@ footer{border-top:1px solid var(--line)}
 
   <section id="painel" style="padding-top:0" hidden>
     <div class="wrap">
-      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do Rodrigo <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 36</span></div>
+      <div class="painel-bar"><img src="icon-192.png" alt="">R-17 · Painel do Rodrigo <span id="versaoTag" style="margin-left:auto;background:#5DBB85;color:#0E1A12;font-weight:900;font-size:1.05rem;padding:6px 12px;border-radius:10px">Versão 37</span></div>
       <div class="adm">
         <div id="gate">
           <div class="eyebrow">Área do barbeiro</div>
@@ -811,6 +812,7 @@ footer{border-top:1px solid var(--line)}
               <h3 class="bh" id="lj_eTit">✏️ Editar</h3>
               <div class="ljgrid">
                 <div class="field full" id="lj_eNomeF"><label for="lj_eNome">Nome de quem deve</label><input id="lj_eNome" maxlength="80"></div>
+                <div class="field full" id="lj_eFoneF"><label for="lj_eFone">WhatsApp de quem deve</label><input id="lj_eFone" type="tel" inputmode="tel" maxlength="20"></div>
                 <div class="field full" id="lj_eDescF"><label for="lj_eDesc">O que foi</label><input id="lj_eDesc" maxlength="120"></div>
                 <div class="field"><label for="lj_eValor">Valor (R$)</label><input id="lj_eValor" inputmode="decimal"></div>
                 <div class="field"><label for="lj_eData">Dia</label><input id="lj_eData" type="date"></div>
@@ -830,6 +832,7 @@ footer{border-top:1px solid var(--line)}
                 </div>
                 <label class="ljfi"><input type="checkbox" id="lj_vFiado"> É fiado (vai pagar depois)</label>
                 <div class="field" id="lj_vNomeF" hidden><label for="lj_vNome">Nome de quem está devendo</label><input id="lj_vNome" maxlength="80" placeholder="Ex.: Carlos da padaria"></div>
+                <div class="field" id="lj_vFoneF" hidden><label for="lj_vFone">WhatsApp de quem deve (para cobrar)</label><input id="lj_vFone" type="tel" inputmode="tel" maxlength="20" placeholder="(11) 90000-0000"></div>
                 <button type="button" class="btn btn-b" id="lj_vSalvar">✔ Registrar venda</button>
                 <p class="ok" id="lj_vMsg" aria-live="polite"></p>
               </div>
@@ -1680,6 +1683,7 @@ function opcoesHora(iso,dur,barb,atual,ignorar,occ){
 function ocupAgenda(){ const occ={}; agendaDia.forEach(a=>{(occ[a.barbeiro]||(occ[a.barbeiro]=[])).push(...cobre(toMin(a.hora),a.min));}); return occ; }
 const corBarb = id => "b"+Math.max(0,BARBEIROS.findIndex(b=>b.id===id));
 const ENDERECO = "Rua Desembargador Flávio Torres, 230, Jardim Kemel, Itaim Paulista, SP";
+const msgLembrete = (nome,serv,iso,hora) => `Olá ${nome}! ⏰ Lembrete da *Espaço Barber Shop R-17*\n\nSeu horário é ${iso===isoOf(new Date())?"*hoje*":fmtData(iso)} às *${hora}*\n💈 ${serv}\n\nPor favor, chegue no horário. Se atrasar, você corre o risco de perder a vez, porque temos outros clientes agendados logo depois. 🙏\n\nSe precisar, avise por aqui. Obrigado!`;
 const msgConfirma = (nome,serv,barb,iso,hora) => `Olá ${nome}! ✂️ Seu horário na *Espaço Barber Shop R-17* está confirmado:\n\n📅 ${fmtData(iso)}\n🕒 ${hora}\n💈 ${serv} com ${nomeBarb(barb)}\n📍 ${ENDERECO}\n\nSe não puder vir, por favor avise por aqui. Até lá!`;
 const vlr = a => a.valor!==null && a.valor!==undefined ? Number(a.valor) : Number(a.preco||0);
 function linhaAgenda(a,comData,classe){
@@ -1695,7 +1699,7 @@ function linhaAgenda(a,comData,classe){
     <div class="h">${comData?`<small>${fmtCurta(a.data)}</small>`:""}${esc(a.hora)}</div>
     <div class="who"><b>${esc(a.nome)}${a.vip?` <span class="vip">⭐ VIP</span>`:""}${pend?` <span class="badge b-pend">Aguardando confirmação</span>`:""}</b><span class="svc">${comData?`<span class="bchip ${corBarb(a.barbeiro)}">${esc(nomeBarb(a.barbeiro))}</span>`:""}${esc(a.servico)} · tabela ${brl(Number(a.preco||0))}</span>${temFone?`<span><a href="${waCliente(a.fone,"Olá "+a.nome+"!")}" target="_blank" rel="noopener">${esc(a.fone)}</a></span>`:""}${cli&&cli.obs?`<span class="notacli">📝 ${esc(cli.obs)}</span>`:""}</div>
     ${receber}
-    <div class="act">${pend?`<button class="btn btn-sm btn-y" data-act="confirmar">Confirmar</button>`:temFone?`<a class="btn btn-sm btn-zap" href="${esc(waCliente(a.fone,txt))}" target="_blank" rel="noopener">📲 Enviar confirmação no WhatsApp</a>`:""}${comData||a.recebido?"":`<button class="btn btn-sm btn-line" data-act="editar">Mudar dia/horário</button>`}${comData?"":`<button class="btn btn-sm btn-line" data-act="nota">📝 Anotação</button>`}<button class="btn btn-sm btn-line" data-act="cancelar">Apagar</button></div>
+    <div class="act">${pend||a.recebido?"":`<a class="btn btn-sm btn-zap blembra" href="${esc(temFone?waCliente(a.fone,msgLembrete(a.nome,a.servico,a.data,a.hora)):"https://wa.me/?text="+encodeURIComponent(msgLembrete(a.nome,a.servico,a.data,a.hora)))}" target="_blank" rel="noopener">⏰ Lembrar horário no Zap</a>`}${pend?`<button class="btn btn-sm btn-y" data-act="confirmar">Confirmar</button>`:temFone?`<a class="btn btn-sm btn-zap" href="${esc(waCliente(a.fone,txt))}" target="_blank" rel="noopener">📲 Enviar confirmação no WhatsApp</a>`:""}${comData||a.recebido?"":`<button class="btn btn-sm btn-line" data-act="editar">Mudar dia/horário</button>`}${comData?"":`<button class="btn btn-sm btn-line" data-act="nota">📝 Anotação</button>`}<button class="btn btn-sm btn-line" data-act="cancelar">Apagar</button></div>
   </div>`;
 }
 let pendentes=[];
@@ -2112,6 +2116,9 @@ $("cxImprimir").addEventListener("click",()=>window.print());
 let ljD=null, ljAba="inicio", ljEdit=null, ljRepor=null, ljTipo="saida";
 const ljNum = s => { const v=Number(String(s??"").trim().replace(/\./g,"").replace(",",".")); return isNaN(v)?NaN:v; };
 const ljNumPlain = s => { const t=String(s??"").trim(); return t.includes(",") ? ljNum(t) : Number(t); };
+const LJ_PIX = "Rocabelor17@gmail.com";
+const ljMsgPix = (nome,qtd,prod,data,valor,fiado) => `Olá${nome?" "+nome:""}! 🛍️ *Loja R-17* (Espaço Barber Shop R-17)\n\n${fiado?"Lembrete da sua compra no fiado:":"Sua compra:"}\n• ${qtd}× ${prod}\n• Dia: ${fmtCurta(data)}\n\n*Valor: ${brl(Number(valor))}*\n\n💠 Pague pelo *Pix*\nChave (e-mail): ${LJ_PIX}\n\nDepois é só mandar o comprovante por aqui. Obrigado! 🙏`;
+const ljZapLink = (fone,txt) => String(fone||"").replace(/\D/g,"").length>=10 ? waCliente(fone,txt) : "https://wa.me/?text="+encodeURIComponent(txt);
 const ljB = (x,t) => `<button type="button" class="btn btn-sm btn-line" data-x="${x}">${t}</button>`;
 const ljMesAtual = () => isoOf(new Date()).slice(0,7);
 function ljPeriodo(){ const m=$("ljMes").value||ljMesAtual(); const [y,mm]=m.split("-").map(Number); return {de:`${m}-01`, ate:isoOf(new Date(y,mm,0))}; }
@@ -2153,10 +2160,10 @@ function ljRender(){
   if(ativos.some(p=>p.id===sel)) $("lj_vProd").value=sel;
   // vendidos
   const vendas=(ljD.movs||[]).filter(m=>m.tipo==="venda");
-  $("ljVendidos").innerHTML = vendas.length ? tabela(["Dia","Produto","Valor"],vendas.map(m=>`<tr data-id="${m.id}"><td>${fmtCurta(m.data)}</td><td>${m.qtd}× ${esc(m.produto)}${m.descricao?`<br><small>${esc(m.descricao)}</small>`:""}<div class="ljacoes">${ljB("editar","✏️ Editar")}${ljB("excluir","🗑️ Excluir")}</div></td><td class="n">${brl(Number(m.valor))}</td></tr>`),`<tr><td colspan="2">Total vendido</td><td class="n">${brl(tV)}</td></tr>`) : `<p class="empty">Nenhuma venda neste mês.</p>`;
+  $("ljVendidos").innerHTML = vendas.length ? tabela(["Dia","Produto","Valor"],vendas.map(m=>`<tr data-id="${m.id}"><td>${fmtCurta(m.data)}</td><td>${m.qtd}× ${esc(m.produto)}${m.descricao?`<br><small>${esc(m.descricao)}</small>`:""}<div class="ljacoes"><a class="btn btn-sm btn-zap" target="_blank" rel="noopener" href="${esc(ljZapLink("",ljMsgPix("",m.qtd,m.produto,m.data,m.valor,false)))}">📲 Pix no Zap</a>${ljB("editar","✏️ Editar")}${ljB("excluir","🗑️ Excluir")}</div></td><td class="n">${brl(Number(m.valor))}</td></tr>`),`<tr><td colspan="2">Total vendido</td><td class="n">${brl(tV)}</td></tr>`) : `<p class="empty">Nenhuma venda neste mês.</p>`;
   // fiado
   const pagos=fiados.filter(f=>f.pago);
-  $("ljFiados").innerHTML = (abertos.length ? tabela(["Quem deve","Produto","Valor"],abertos.map(f=>`<tr data-id="${f.id}"><td><b>${esc(f.nome)}</b><br><small>${fmtCurta(f.data)}</small></td><td>${f.qtd}× ${esc(f.produto)}</td><td class="n">${brl(Number(f.valor))}</td></tr><tr data-id="${f.id}" class="ljlinha"><td colspan="3"><div class="ljacoes"><button type="button" class="btn btn-zap" data-f="pagar">✔ PAGOU</button>${ljB("editar","✏️ Editar")}${ljB("excluir","🗑️ Excluir")}</div></td></tr>`),`<tr><td colspan="2">Total devendo</td><td class="n">${brl(tF)}</td></tr>`) : `<p class="empty">Ninguém devendo. 👍</p>`)
+  $("ljFiados").innerHTML = (abertos.length ? tabela(["Quem deve","Produto","Valor"],abertos.map(f=>`<tr data-id="${f.id}"><td><b>${esc(f.nome)}</b><br><small>${fmtCurta(f.data)}</small></td><td>${f.qtd}× ${esc(f.produto)}</td><td class="n">${brl(Number(f.valor))}</td></tr><tr data-id="${f.id}" class="ljlinha"><td colspan="3"><div class="ljacoes"><a class="btn btn-zap ljcobrar" target="_blank" rel="noopener" href="${esc(ljZapLink(f.fone,ljMsgPix(f.nome,f.qtd,f.produto,f.data,f.valor,true)))}">📲 Cobrar no Zap (Pix)</a><button type="button" class="btn btn-zap" data-f="pagar">✔ PAGOU</button>${ljB("editar","✏️ Editar")}${ljB("excluir","🗑️ Excluir")}</div></td></tr>`),`<tr><td colspan="2">Total devendo</td><td class="n">${brl(tF)}</td></tr>`) : `<p class="empty">Ninguém devendo. 👍</p>`)
     + (pagos.length ? `<h3 class="bh" style="margin-top:18px">Fiados pagos neste mês</h3>`+tabela(["Quem","Produto","Valor"],pagos.map(f=>`<tr><td>${esc(f.nome)}<br><small>pagou ${fmtCurta(f.pago_em)}</small></td><td>${f.qtd}× ${esc(f.produto)}</td><td class="n">${brl(Number(f.valor))}</td></tr>`)) : "");
   // produtos
   $("ljProdutos").innerHTML = prods.length ? tabela(["Produto","Estoque","Custo / Venda"],prods.map(p=>`<tr data-id="${p.id}"><td><b>${esc(p.nome)}</b><div class="ljacoes"><button type="button" class="btn btn-sm btn-b" data-x="repor">＋ Chegou</button>${ljB("editar","✏️ Editar")}${ljB("excluir","🗑️ Excluir")}</div></td><td class="${p.qtd<=2?"pouco":""}">${p.qtd}${p.qtd<=2?" ⚠️":""}</td><td class="n">${brl(Number(p.custo))}<br><b>${brl(Number(p.preco))}</b></td></tr>`),
@@ -2169,7 +2176,7 @@ function ljRender(){
 }
 function ljValorSug(){ const p=(ljD?.produtos||[]).find(x=>x.id===$("lj_vProd").value); const q=Number($("lj_vQtd").value)||1; if(p) $("lj_vValor").value=(Number(p.preco)*q).toFixed(2).replace(".",","); }
 $("lj_vProd").addEventListener("change",ljValorSug); $("lj_vQtd").addEventListener("input",ljValorSug);
-$("lj_vFiado").addEventListener("change",()=>{ $("lj_vNomeF").hidden=!$("lj_vFiado").checked; $("lj_vSalvar").textContent=$("lj_vFiado").checked?"✔ Anotar fiado":"✔ Registrar venda"; if($("lj_vFiado").checked) $("lj_vNome").focus(); });
+$("lj_vFiado").addEventListener("change",()=>{ $("lj_vNomeF").hidden=$("lj_vFoneF").hidden=!$("lj_vFiado").checked; $("lj_vSalvar").textContent=$("lj_vFiado").checked?"✔ Anotar fiado":"✔ Registrar venda"; if($("lj_vFiado").checked) $("lj_vNome").focus(); });
 $("ljSub").addEventListener("click",e=>{ const b=e.target.closest("[data-lj]"); if(b) ljMostrar(b.dataset.lj); });
 $("ljMes").addEventListener("change",ljCarregar);
 $("ljHoje").addEventListener("click",()=>{ $("ljMes").value=ljMesAtual(); ljCarregar(); });
@@ -2182,9 +2189,9 @@ $("lj_vSalvar").addEventListener("click",async()=>{
   if(fi && nome.length<2){ $("lj_vMsg").textContent="Escreva o nome de quem está devendo."; return; }
   const p=ljD.produtos.find(x=>x.id===pid);
   $("lj_vSalvar").disabled=true;
-  try{ await adm("lj_vender",{p_data:$("lj_vData").value||isoOf(new Date()),p_produto:pid,p_qtd:q,p_valor:v,p_fiado:fi?nome:""});
+  try{ await adm("lj_vender2",{p_data:$("lj_vData").value||isoOf(new Date()),p_produto:pid,p_qtd:q,p_valor:v,p_fiado:fi?nome:"",p_fone:fi?$("lj_vFone").value:""});
     $("lj_vMsg").textContent = fi ? `Fiado anotado: ${nome}, ${q}× ${p.nome}, ${brl(v)}.` : `Venda registrada: ${q}× ${p.nome}, ${brl(v)}.`;
-    $("lj_vQtd").value="1"; $("lj_vValor").value=""; $("lj_vNome").value=""; $("lj_vProd").value=""; $("lj_vFiado").checked=false; $("lj_vFiado").dispatchEvent(new Event("change")); await ljCarregar(); }
+    $("lj_vQtd").value="1"; $("lj_vValor").value=""; $("lj_vNome").value=""; $("lj_vFone").value=""; $("lj_vProd").value=""; $("lj_vFiado").checked=false; $("lj_vFiado").dispatchEvent(new Event("change")); await ljCarregar(); }
   catch(e){ if(e.codigo!=="sessao") $("lj_vMsg").textContent="Não foi possível registrar. Tente de novo."; }
   $("lj_vSalvar").disabled=false;
 });
@@ -2236,7 +2243,7 @@ $("lj_mSalvar").addEventListener("click",async()=>{
 }));
 $("ljFiados").addEventListener("click",async e=>{
   const b=e.target.closest("[data-f],[data-x]"); if(!b) return; const id=b.closest("tr").dataset.id; const f=ljD.fiados.find(x=>x.id===id); if(!f) return;
-  if(b.dataset.x==="editar"){ ljEdAbrir({tit:`✏️ Editar fiado: ${f.qtd}× ${f.produto}`, nome:f.nome, valor:f.valor, data:f.data, salvar:v=>adm("lj_fiado_editar",{p_id:f.id,p_nome:v.nome,p_data:v.data,p_valor:v.valor}) }); return; }
+  if(b.dataset.x==="editar"){ ljEdAbrir({tit:`✏️ Editar fiado: ${f.qtd}× ${f.produto}`, nome:f.nome, fone:f.fone||"", valor:f.valor, data:f.data, salvar:v=>adm("lj_fiado_editar2",{p_id:f.id,p_nome:v.nome,p_data:v.data,p_valor:v.valor,p_fone:v.fone}) }); return; }
   if(b.dataset.x==="excluir" && !ljConfirma(b)) return;
   b.disabled=true;
   try{ if(b.dataset.f==="pagar"){ await adm("lj_fiado_pagar",{p_id:id,p_data:isoOf(new Date())}); $("lj_fMsg").textContent=`${f.nome} pagou ${brl(Number(f.valor))}. Entrou no caixa da loja.`; }
@@ -2246,13 +2253,13 @@ $("ljFiados").addEventListener("click",async e=>{
 });
 // caixinha de editar (serve para venda, fiado e lançamento)
 let ljEdCfg=null;
-function ljEdAbrir(c){ ljEdCfg=c; $("lj_eTit").textContent=c.tit; $("lj_eNomeF").hidden=c.nome==null; $("lj_eDescF").hidden=c.desc==null;
+function ljEdAbrir(c){ ljEdCfg=c; $("lj_eTit").textContent=c.tit; $("lj_eNomeF").hidden=c.nome==null; $("lj_eFoneF").hidden=c.fone==null; $("lj_eFone").value=c.fone||""; $("lj_eDescF").hidden=c.desc==null;
   $("lj_eNome").value=c.nome||""; $("lj_eDesc").value=c.desc||""; $("lj_eValor").value=Number(c.valor).toFixed(2).replace(".",","); $("lj_eData").value=c.data; $("lj_eMsg").textContent="";
   $("ljEd").hidden=false; window.scrollTo({top:$("ljEd").getBoundingClientRect().top+scrollY-90,behavior:"smooth"}); }
 function ljEdFechar(){ $("ljEd").hidden=true; ljEdCfg=null; }
 $("lj_eCancelar").addEventListener("click",ljEdFechar);
 $("lj_eSalvar").addEventListener("click",async()=>{
-  if(!ljEdCfg) return; const v={nome:$("lj_eNome").value.trim(), desc:$("lj_eDesc").value.trim(), valor:ljNumPlain($("lj_eValor").value), data:$("lj_eData").value};
+  if(!ljEdCfg) return; const v={fone:$("lj_eFone").value.trim(), nome:$("lj_eNome").value.trim(), desc:$("lj_eDesc").value.trim(), valor:ljNumPlain($("lj_eValor").value), data:$("lj_eData").value};
   if(ljEdCfg.nome!=null && v.nome.length<2){ $("lj_eMsg").textContent="Escreva o nome."; return; }
   if(ljEdCfg.desc!=null && v.desc.length<2){ $("lj_eMsg").textContent="Escreva o que foi."; return; }
   if(isNaN(v.valor)||v.valor<0||$("lj_eValor").value===""){ $("lj_eMsg").textContent="Digite o valor."; return; }
@@ -2481,7 +2488,7 @@ const ehApp = matchMedia("(display-mode: standalone)").matches || navigator.stan
 if(ehApp){ const ab=$("abertura"); ab.querySelector(".ab-logo").innerHTML=document.querySelector(".herologo").outerHTML.replace('class="herologo"','');
   ab.classList.add("on"); setTimeout(()=>{ ab.classList.add("sai"); setTimeout(()=>ab.remove(),550); },1800); }
 /* versão do site: muda a cada atualização. O app confere sozinho e atualiza. */
-const VERSAO="36";
+const VERSAO="37";
 $("versaoTag").textContent="Versão "+VERSAO;
 function atualizarAgora(){ const u=new URL(location.href); u.searchParams.set("v",Date.now()); u.searchParams.delete("parar"); location.replace(u.href); }
 $("novaVersao").addEventListener("click",atualizarAgora);
