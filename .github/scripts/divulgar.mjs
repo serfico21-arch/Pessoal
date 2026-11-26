@@ -8,7 +8,7 @@ import fs from "node:fs";
 
 const DB = "https://fcosta2026-847c3-default-rtdb.firebaseio.com";
 const SITE = "https://fcostacorretor.com";
-const G = "https://graph.facebook.com/v23.0";
+const G = "https://graph.facebook.com/v27.0";
 const ARQ = "divulgar/status.json";
 const MAX_IDADE = 2 * 864e5; // pedidos com mais de 2 dias são ignorados
 
