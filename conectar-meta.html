@@ -1,209 +1,153 @@
-<!DOCTYPE html><!--
-  AJUDA — conectar-meta.html
-  Liga a postagem automática do Publicador na Página do Facebook e no Instagram.
-  Faz-se UMA VEZ só. Tudo roda neste navegador: as senhas vão só para o Facebook,
-  não ficam salvas aqui. No fim, a "chave" é colada no GitHub, no segredo META_CONFIG.
-  Quem posta é o robô .github/workflows/divulgar-auto.yml.
--->
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ligar postagem automática</title>
 <meta name="robots" content="noindex">
-<style>
+<script type="text/javascript" src="https://me.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=JzcXG55ICJxvNqRgPVj5AN5HZfh1a50lA-yti3yjPOq8qAIYx_VnxOMYpoTEsQahUTJ9_HW2Gkw2_VSYwq1CM26bywn_UuhWN7xtIL4aIQPPrkhorhsP787uFDWXLNLi9eCOsSLrq-hgLJqslmoxItKjg6yPqQBepTK8CQY4qlCwuCGsVMyrOZ-SU0b9Q8aUPigis6KkNhncNSbddcC3yyKY-xSnD7LIVehu5TY2Ie5ht38bObS3A6pQ2nUTNWjbhIQ8dRe0yYTLGC4G2gk0YA" charset="UTF-8"></script><link rel="stylesheet" crossorigin="anonymous" href="https://me.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly8xNDUyNTYzMjg3OTQ2NzYwLmEubWV0YWFpdXNlcmNvbnRlbnQuY29tL2h0bWw_YXJ0aWZhY3RfdXVpZD05OTFlZDI1NC00NjNkLTQ5YzItOGZjYi1iYzc3YWY4YTcwYWQmZG93bmxvYWQ9Q29uZWN0YXItTWV0YS1GaW5hbC5odG1sJmV4dD0xNzk1ODEzMjAwJmhhc2g9UTVmcERBR3hMR0VQMnY1VFpBMzJZc19NN1NXTA"/><style>
 :root{--bg:#f1f5fa;--c:#fff;--tx:#0d1b2e;--m:#4f5d75;--l:#d3dce8;--az:#1d6fb8;--ok:#0a7d3b;--okbg:#e5f6ec;--am:#9a5b00;--ambg:#fff4dd;--er:#b42318}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--c:#131d30;--tx:#eef3ff;--m:#a4b0c8;--l:#2a3854;--az:#5aa8ec;--ok:#4ade80;--okbg:#10291b;--am:#fbbf24;--ambg:#2b2110;--er:#f87171}}
-:root[data-theme="dark"]{--bg:#0b1220;--c:#131d30;--tx:#eef3ff;--m:#a4b0c8;--l:#2a3854;--az:#5aa8ec;--ok:#4ade80;--okbg:#10291b;--am:#fbbf24;--ambg:#2b2110;--er:#f87171}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:19px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--tx);font:19px/1.5 system-ui,sans-serif}
 header{background:#1E3A5F;color:#fff;padding:14px 16px}
-header h1{margin:0;font-size:21px;max-width:760px;margin:0 auto}
 main{max-width:760px;margin:0 auto;padding:14px 16px 40px}
 .card{background:var(--c);border:1px solid var(--l);border-radius:16px;padding:16px;margin-bottom:14px}
 .n{display:inline-flex;width:38px;height:38px;border-radius:50%;background:var(--az);color:#fff;font-weight:800;align-items:center;justify-content:center;margin-right:8px}
 h2{font-size:20px;margin:0 0 10px;display:flex;align-items:center}
-ol,ul{padding-left:22px;margin:6px 0}li{margin-bottom:6px}
-.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;border-radius:14px;border:0;background:var(--az);color:#fff;font:700 18px system-ui,sans-serif;text-decoration:none;cursor:pointer;margin-top:10px;padding:8px 12px;text-align:center}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;border-radius:14px;border:0;background:var(--az);color:#fff;font:700 18px system-ui,sans-serif;cursor:pointer;margin-top:10px}
 .btn.ok{background:var(--ok)}
 label{display:block;font-weight:700;margin:12px 0 4px}
 input,textarea,select{width:100%;font:inherit;font-size:17px;padding:12px;border:1px solid var(--l);border-radius:12px;background:var(--bg);color:var(--tx)}
-code{background:var(--bg);border:1px solid var(--l);border-radius:6px;padding:1px 6px;font-size:16px}
 .aviso{background:var(--ambg);border:1px solid var(--am);border-radius:12px;padding:12px;margin-top:10px}
 .dica{background:var(--okbg);border:1px solid var(--ok);border-radius:12px;padding:12px;margin-top:10px}
-.mut{color:var(--m);font-size:16px}
-a{color:var(--az)}
-.hide{display:none}
+.mut{color:var(--m);font-size:16px} .hide{display:none}
 </style>
 </head>
 <body>
-<header><h1>🔌 Ligar a postagem automática</h1></header>
 <main>
-<div class="card"><p>Faça isto <b>uma vez só</b>. Depois, é só tocar em <b>📣 DIVULGAR</b> no Publicador e o robô posta sozinho na sua <b>Página do Facebook</b> e no <b>Instagram</b> (post e story).</p>
-<p class="mut">Se travar em algum passo, chame o Claude que ele faz junto com você.</p></div>
-
-<div class="card"><p class="mut">💡 Dica: faça pelo <b>computador</b>, é mais fácil. Deixe esta página aberta numa aba e abra os links em outra aba. Cada passo tem um botão azul que leva direto ao lugar certo.</p></div>
-
-<div class="card"><h2><span class="n">1</span>Instagram ligado à Página</h2>
-<p>O robô só consegue postar no Instagram se ele for <b>profissional</b> e estiver <b>ligado à sua Página do Facebook</b>.</p>
-<ol><li>No <b>celular</b>, abra o Instagram › toque na sua foto (embaixo, à direita) › <b>☰</b> (em cima, à direita) › <b>Tipo de conta e ferramentas</b> › <b>Mudar para conta profissional</b> › escolha <b>Empresa</b>. Se aparecer "Mudar para conta pessoal", já está certo.</li>
-<li>Agora ligue à Página: toque no botão abaixo › <b>Conectar conta</b> › entre com o Instagram <code>f.costa_corretor</code>.</li></ol>
-<a class="btn" href="https://www.facebook.com/settings/?tab=linked_instagram" target="_blank" rel="noopener">Ligar o Instagram à Página</a>
-<p class="mut">Se esse botão não abrir, use: <a href="https://business.facebook.com/latest/settings/instagram_account" target="_blank" rel="noopener">Meta Business Suite › Contas do Instagram</a>.</p></div>
-
-<div class="card"><h2><span class="n">2</span>Virar "desenvolvedor" (só a 1ª vez)</h2>
-<ol><li>Toque no botão abaixo e entre com o <b>seu Facebook</b> (o mesmo que administra a Página).</li>
-<li>Toque em <b>Começar</b> › <b>Continuar</b> ›, confirme seu e-mail ou telefone e escolha <b>Desenvolvedor</b>. Toque em <b>Concluir</b>.</li></ol>
-<a class="btn" href="https://developers.facebook.com/async/registration/" target="_blank" rel="noopener">Abrir o cadastro de desenvolvedor</a>
-<p class="mut">Se aparecer direto a lista "Meus apps", você já é desenvolvedor. Pule para o passo 3.</p></div>
-
-<div class="card"><h2><span class="n">3</span>Criar o app e pegar o <u>ID</u> e a <u>Chave secreta</u></h2>
-<ol><li>Toque no botão abaixo › <b>Criar app</b>.</li>
-<li>Nome do app: escreva <code>Divulga Fcosta</code> (qualquer nome serve; se já criou com outro nome, use o que criou). E-mail: o seu. Toque em <b>Avançar</b>.</li>
-<li>Quando perguntar o que o app vai fazer (casos de uso), escolha <b>Outro</b> e depois <b>Empresa</b>. Se não tiver essas, escolha a que fala em <b>gerenciar Página</b> ou <b>Instagram</b>. Vá em <b>Avançar</b> › <b>Criar app</b> (pode pedir sua senha do Facebook).</li>
-<li>Já dentro do app, no menu da esquerda: <b>Configurações do app</b> › <b>Básico</b>.</li>
-<li>Lá em cima você vê:<ul><li><b>ID do app</b>: um número grande, tipo <code>1234567890123456</code>. Copie e cole no campo <b>ID do app</b> aqui embaixo.</li><li><b>Chave secreta do app</b>: toque em <b>Mostrar</b>, digite sua senha, copie e cole no campo <b>Chave secreta</b> aqui embaixo.</li></ul></li></ol>
-<a class="btn" href="https://developers.facebook.com/apps/" target="_blank" rel="noopener">Abrir "Meus apps"</a></div>
-
-<div class="card"><h2><span class="n">★</span>Liberar esta página no app (só 1 vez)</h2>
-<p>Isso deixa você usar o botão fácil <b>Entrar com Facebook</b> no passo 5, sem precisar do código grande.</p>
-<ol><li>Cole o <b>ID do app</b> no passo 5 (lá embaixo) e volte aqui.</li>
-<li>Toque em <b>📋 Copiar endereço</b>.</li>
-<li>Toque em <b>Abrir configuração do login</b>. Se pedir para adicionar o <b>Login do Facebook</b> (ou <b>Login do Facebook para Empresas</b>), toque em <b>Configurar</b>.</li>
-<li>No campo <b>URIs de redirecionamento do OAuth válidos</b>, segure o dedo e <b>Cole</b>. Toque em <b>Salvar alterações</b>. Pronto!</li></ol>
-<input id="volta" readonly aria-label="Endereço desta página">
-<button class="btn ok" id="cpvolta">📋 Copiar endereço</button>
-<a class="btn" id="abrelogin" href="https://developers.facebook.com/apps/" target="_blank" rel="noopener">Abrir configuração do login</a></div>
-
-<div class="card"><h2><span class="n">4</span>Pegar o <u>código grande</u> (token)</h2>
-<ol><li>Toque no botão abaixo. Abre o <b>Explorador da Graph API</b>.</li>
-<li>À direita, em <b>App da Meta</b>, escolha o seu app (<b>Divulga Fcosta</b>).</li>
-<li>Em <b>Usuário ou Página</b>, deixe <b>Token do usuário</b>.</li>
-<li>Em <b>Permissões</b>, toque em <b>Adicionar uma permissão</b> e marque estas 6 (dá para digitar o nome para achar). Se aparecer o botão <b>+ Adicionar</b> ao lado, toque nele:<br><code>pages_show_list</code> <code>pages_manage_posts</code> <code>pages_read_engagement</code> <code>instagram_basic</code> <code>instagram_manage_contents</code> (nas telas antigas o nome era <code>instagram_content_publish</code>: marque o que aparecer) <code>business_management</code></li>
-<li>Toque no botão azul <b>Generate Access Token</b> (Gerar token). Abre uma janela do Facebook: toque em <b>Continuar</b> ›, marque <b>a sua Página</b> e <b>o seu Instagram</b> › <b>Salvar</b> › <b>OK</b>.</li>
-<li>Em cima aparece o campo <b>Token de acesso</b> com um código bem grande (começa com <code>EAA</code>). Toque no ícone de copiar ao lado e cole no campo <b>Código grande</b> aqui embaixo.</li></ol>
-<a class="btn" href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener">Abrir o Explorador</a>
-<div class="aviso">⏰ Esse código vence em <b>1 hora</b>. Cole aqui e toque em Conectar logo em seguida. Se vencer, é só gerar de novo.</div></div>
-
-<div class="card"><h2><span class="n">+</span>Telegram (opcional)</h2>
-<p>Se você tem um <b>canal no Telegram</b>, o robô posta lá também. Se não tem, pule este quadro.</p>
-<ol><li>No Telegram, procure <b>@BotFather</b> (tem um ✔️ azul) e toque em <b>Iniciar</b>.</li>
-<li>Mande <code>/newbot</code>. Ele pede um nome: mande <code>Divulgar FCosta</code>. Depois pede um apelido terminado em bot: mande, por exemplo, <code>divulgarfcosta_bot</code>.</li>
-<li>Ele responde com um <b>código</b> (tipo <code>123456:ABC-xyz…</code>). Copie e cole no campo <b>Código do robô do Telegram</b> abaixo.</li>
-<li>Abra o seu <b>canal</b> › toque no nome dele › <b>Administradores</b> › <b>Adicionar administrador</b> › procure o robô que você criou e deixe ele <b>postar mensagens</b>.</li>
-<li>No campo <b>Endereço do canal</b>, escreva o @ do canal (ex.: <code>@imoveisfcosta</code>).</li></ol>
-<label for="tgtok">Código do robô do Telegram</label><input id="tgtok" autocomplete="off" placeholder="123456:ABC-...">
-<label for="tgchat">Endereço do canal</label><input id="tgchat" autocomplete="off" placeholder="@meucanal">
-<p class="mut" id="tgmsg">Só quer o Telegram, sem Facebook? Preencha aqui e toque em <a href="#" id="sotg">gerar a chave só com o Telegram</a>.</p></div>
+<div class="card"><p>Faça isto <b>uma vez só</b>. Depois, é só tocar em <b>📣 DIVULGAR</b> no Publicador.</p></div>
 
 <div class="card"><h2><span class="n">5</span>Colar aqui e conectar</h2>
-<label for="app">ID do app <span class="mut">(passo 3)</span></label><input id="app" inputmode="numeric" autocomplete="off" placeholder="1234567890123456">
-<label for="sec">Chave secreta do app <span class="mut">(passo 3, preencha)</span></label><input id="sec" autocomplete="off" placeholder="letras e números">
-<div class="dica"><b>Jeito fácil:</b> com o ID do app (e a chave secreta) preenchidos acima, toque aqui e entre com o seu Facebook. Não precisa do código grande.</div>
+<label>ID do app</label><input id="app" inputmode="numeric" autocomplete="off" placeholder="1234567890123456" value="1169481185588897">
+<label>Chave secreta do app</label><input id="sec" autocomplete="off" placeholder="letras e números" type="password">
+<div class="dica"><b>Jeito fácil:</b> com ID e chave preenchidos, use Entrar com Facebook.</div>
 <button class="btn" id="entrar">🔵 Entrar com Facebook</button>
-<p class="mut">Se o Facebook mostrar <b>Invalid Scopes</b>, toque <a href="#" id="entrar2">aqui</a>.</p>
-<p class="mut">Ou, do jeito antigo, cole o código grande abaixo e toque em Conectar.</p>
-<details style="margin:8px 0"><summary class="mut">Só se o Claude pedir: ID da configuração</summary>
-<p class="mut">No app: <b>Login do Facebook para Empresas › Configurações › Criar configuração</b>. Tipo de token: <b>Token de acesso do usuário</b>. Marque <b>Páginas</b> e <b>Contas do Instagram</b> e as 6 permissões do passo 4. Copie o <b>ID da configuração</b> e cole aqui.</p>
-<input id="cfg" inputmode="numeric" autocomplete="off" placeholder="ID da configuração"></details>
-<label for="tok">Código grande <span class="mut">(passo 4, começa com EAA)</span></label><textarea id="tok" rows="3" autocomplete="off" placeholder="EAA..."></textarea>
+<p class="mut">Se der Invalid Scopes, <a href="#" id="entrar2">clique aqui</a>.</p>
+<label>Código grande (começa com EAA)</label><textarea id="tok" rows="3" autocomplete="off" placeholder="EAA..."></textarea>
 <button class="btn" id="ir">🔌 Conectar</button>
 <button class="btn" id="testar" style="background:#666">🔎 Testar este código</button>
 <div id="msg"></div>
-<div id="pag" class="hide"><label for="sel">Qual é a sua Página?</label><select id="sel"></select><button class="btn" id="usar">Usar esta Página</button></div>
+<div id="pag" class="hide"><label>Qual é a sua Página?</label><select id="sel"></select><button class="btn" id="usar">Usar esta Página</button></div>
 </div>
 
 <div class="card hide" id="fim"><h2><span class="n">6</span>Guardar a chave no GitHub</h2>
-<p>Falta só guardar a chave. Ela fica escondida, ninguém vê.</p>
 <button class="btn ok" id="cp">📋 Copiar a chave</button>
-<ol><li>Toque no botão azul abaixo. Entre no GitHub com a conta <b>serfico21-arch</b> (a dona do site). Se der erro 404, é porque entrou com outra conta: saia e entre com essa.</li>
-<li>Em <b>Name</b>, escreva: <code>META_CONFIG</code></li>
-<li>Em <b>Secret</b>, segure o dedo e <b>Cole</b>.</li>
-<li>Toque em <b>Add secret</b>. Pronto!</li></ol>
-<a class="btn" href="https://github.com/serfico21-arch/Pessoal/settings/secrets/actions/new" target="_blank" rel="noopener">Abrir o GitHub</a>
-<textarea id="chave" rows="3" readonly style="margin-top:12px" aria-label="Chave"></textarea>
-<div class="dica">✅ Depois disso, toque em <b>📣 DIVULGAR</b> no Publicador. Em alguns minutos o imóvel aparece no Facebook e no Instagram.</div></div>
+<textarea id="chave" rows="3" readonly style="margin-top:12px"></textarea>
+</div>
 </main>
 <script>
-(function(){"use strict";
-var G="https://graph.facebook.com/v27.0",paginas=[],VOLTA="https://serfico21-arch.github.io/Pessoal/conectar-meta.html";
+(function(){
+"use strict";
+var G="https://graph.facebook.com/v20.0",paginas=[],VOLTA="https://serfico21-arch.github.io/Pessoal/conectar-meta.html";
 function $(i){return document.getElementById(i)}
 function msg(t,ok){$("msg").innerHTML='<div class="'+(ok?"dica":"aviso")+'">'+t+'</div>'}
-function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]})}
 function get(u){return fetch(u).then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return j})}
-/* Se colar por cima de um código antigo, os dois ficam grudados e a Meta recusa.
-   Por isso: ao colar, o campo é trocado inteiro; e na hora de conectar usamos só o ÚLTIMO código que começa com EAA. */
-function pegaToken(v){v=String(v||"").replace(/\s/g,"");var p=v.split(/(?=EAA)/).filter(function(x){return /^EAA[A-Za-z0-9]{50,}$/.test(x)});return p.length?p[p.length-1]:v}
-$("tok").addEventListener("paste",function(e){var c=(e.clipboardData||window.clipboardData);if(!c)return;var x=c.getData("text");if(!x)return;e.preventDefault();this.value=x.trim()});
-function conectar(){var a=$("app").value.replace(/\D/g,""),s=$("sec").value.replace(/\s/g,""),t=pegaToken($("tok").value);
- if(!t){msg("Cole o código grande (passo 4) ou use o botão Entrar com Facebook.");return}
- msg("⏳ Conectando…",true);
- var tem=!!(a&&s),q={grant_type:"fb_exchange_token",client_id:a,client_secret:s,fb_exchange_token:t},ID="id,name,access_token,instagram_business_account{id,username}";
- function post(u,d){return fetch(u,{method:"POST",body:new URLSearchParams(d)}).then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return j})}
- /* Conferência pela chave do app (funciona com qualquer tipo de código, inclusive do "Login para Empresas"). */
- function confere(x){return get(G+"/debug_token?input_token="+encodeURIComponent(x)+"&access_token="+encodeURIComponent(a+"|"+s)).then(function(d){return d.data||{}})}
- /* Acha as Páginas: primeiro pela lista normal; se não vier, pelas Páginas que o código autorizou. */
- function paginasDe(lt){return get(G+"/me/accounts?fields="+ID+"&limit=50&access_token="+encodeURIComponent(lt)).then(function(j){return j.data||[]},function(){return[]})
-  .then(function(l){if(l.length||!tem)return l;return confere(lt).then(function(d){var ids=[];(d.granular_scopes||[]).forEach(function(g){if(/^pages_/.test(g.scope))(g.target_ids||[]).forEach(function(i){if(ids.indexOf(i)<0)ids.push(i)})});
-   return Promise.all(ids.map(function(i){return get(G+"/"+i+"?fields="+ID+"&access_token="+encodeURIComponent(lt)).catch(function(){return null})})).then(function(r){return r.filter(function(p){return p&&p.access_token})})})})}
- var pronto;
- if(tem){
-  /* com ID e chave: confere o código, troca por um de 60 dias (se der) e segue */
-  pronto=confere(t).then(function(d){if(d.is_valid===false)throw new Error("INVALIDO:"+((d.error&&d.error.message)||"código inválido"));return d},function(e){throw new Error("CHAVE:"+e.message)})
-  .then(function(d){if(d.type&&d.type!=="USER")return t; /* código de empresa: já é longo, não precisa trocar */
-   return post(G+"/oauth/access_token",q).catch(function(){return get(G+"/oauth/access_token?"+new URLSearchParams(q))}).then(function(j){return j.access_token||t},function(){return t})})
- }else{
-  pronto=get(G+"/me?fields=id&access_token="+encodeURIComponent(t)).catch(function(e){throw new Error("SEM_CHAVE:"+e.message)})
-  .then(function(){return get(G+"/debug_token?input_token="+encodeURIComponent(t)+"&access_token="+encodeURIComponent(t)).then(function(d){d=d.data||{};
-   if(d.expires_at&&d.expires_at*1000-Date.now()<3*864e5)throw new Error("FALTA_ESTENDER");return t},function(){throw new Error("FALTA_ESTENDER")})})
- }
- pronto.then(paginasDe)
- .then(function(l){paginas=l;if(!paginas.length){msg("O código foi aceito, mas não achei nenhuma Página. Toque em <b>Entrar com Facebook</b> de novo, toque em <b>Editar configurações</b> e marque a sua <b>Página</b> e o seu <b>Instagram</b>.");return}
-  $("sel").innerHTML=paginas.map(function(p,i){return'<option value="'+i+'">'+esc(p.name)+(p.instagram_business_account?" + Instagram @"+esc(p.instagram_business_account.username||""):" (sem Instagram)")+'</option>'}).join("");
-  var k=paginas.findIndex(function(p){return /costa|fcosta|rcm/i.test(p.name)});if(k>-1)$("sel").value=k;
-  $("pag").classList.remove("hide");msg("✅ Conectou! Agora escolha a sua Página.",true)})
- .catch(function(e){var m=e.message;
-  if(m==="FALTA_ESTENDER"){msg('Falta um passinho: <ol><li>Toque em <a href="https://developers.facebook.com/tools/debug/accesstoken/" target="_blank" rel="noopener"><b>Abrir o Depurador</b></a>.</li><li>Cole o <b>código grande</b> e toque em <b>Depurar</b>.</li><li>Lá embaixo, toque em <b>Estender token de acesso</b> (Extend Access Token) e digite sua senha.</li><li>Copie o código novo que aparece, cole no campo <b>Código grande</b> aqui e toque em <b>Conectar</b> de novo.</li></ol>');return}
-  if(/^SEM_CHAVE:/.test(m)){msg("Preencha também a <b>Chave secreta do app</b> (passo 3) e toque em <b>Entrar com Facebook</b> de novo. Com a chave, a página consegue conferir o código do jeito certo.");return}
-  if(/^CHAVE:/.test(m)){msg("O <b>ID do app</b> ou a <b>Chave secreta</b> não conferem ("+esc(m.slice(6))+").<br>Copie os dois de novo em <b>Configurações do app › Básico</b> (passo 3).");return}
-  if(/^INVALIDO:/.test(m)){msg("A Meta diz que o código não vale: "+esc(m.slice(9))+"<br>Toque em <b>Entrar com Facebook</b> de novo.");return}
-  msg("Não deu certo: "+esc(m)+"<br>Toque em <b>Entrar com Facebook</b> de novo. Se repetir, mande só esta frase para o Claude.")})}
+
+// CORREÇÃO AQUI: aceita EAA com -, _, . e pega sempre o último token válido
+function pegaToken(v){
+  v=String(v||"").trim();
+  if(!v) return "";
+  // remove quebras de linha e espaços duplicados
+  v=v.replace(/\s+/g,"");
+  // pega todos os tokens que começam com EAA
+  var m=v.match(/EAA[A-Za-z0-9_\-\.]+/g);
+  if(m && m.length){
+    // retorna o mais longo / último (quando cola por cima do antigo)
+    var best=m[m.length-1];
+    for(var i=0;i<m.length;i++){ if(m[i].length>best.length) best=m[i]; }
+    return best;
+  }
+  return v;
+}
+
+$("tok").addEventListener("paste",function(e){
+  var c=(e.clipboardData||window.clipboardData);
+  if(!c) return;
+  var x=c.getData("text");
+  if(!x) return;
+  e.preventDefault();
+  this.value=x.trim();
+});
+
+function conectar(){
+  var a=$("app").value.replace(/\D/g,""),s=$("sec").value.replace(/\s/g,""),t=pegaToken($("tok").value);
+  if(!t){msg("Cole o código grande (começa com EAA) ou use o botão Entrar com Facebook.");return}
+  if(t.length<50){msg("Esse código parece curto demais. Copie de novo no Explorador, começando com EAA.");return}
+  msg("⏳ Conectando…",true);
+  var tem=!!(a&&s),q={grant_type:"fb_exchange_token",client_id:a,client_secret:s,fb_exchange_token:t},ID="id,name,access_token,instagram_business_account{id,username}";
+  function post(u,d){return fetch(u,{method:"POST",body:new URLSearchParams(d)}).then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return j})}
+  function confere(x){return get(G+"/debug_token?input_token="+encodeURIComponent(x)+"&access_token="+encodeURIComponent(a+"|"+s)).then(function(d){return d.data||{}})}
+  function paginasDe(lt){return get(G+"/me/accounts?fields="+ID+"&limit=50&access_token="+encodeURIComponent(lt)).then(function(j){return j.data||[]},function(){return[]})}
+  var pronto;
+  if(tem){
+    pronto=confere(t).then(function(d){
+      if(d.is_valid===false) throw new Error("INVALIDO:"+(d.error&&d.error.message||"código inválido"));
+      return d;
+    },function(e){ throw new Error("CHAVE:"+e.message)})
+    .then(function(d){
+      if(d.type&&d.type!=="USER") return t;
+      return post(G+"/oauth/access_token",q).catch(function(){return get(G+"/oauth/access_token?"+new URLSearchParams(q))}).then(function(j){return j.access_token||t},function(){return t})
+    })
+  }else{
+    pronto=get(G+"/me?fields=id&access_token="+encodeURIComponent(t)).catch(function(e){throw new Error("SEM_CHAVE:"+e.message)})
+  }
+  pronto.then(paginasDe).then(function(l){
+    paginas=l;
+    if(!paginas.length){msg("O código foi aceito, mas não achei nenhuma Página. Toque em Entrar com Facebook de novo e marque sua Página e Instagram.");return}
+    $("sel").innerHTML=paginas.map(function(p,i){return '<option value="'+i+'">'+esc(p.name)+(p.instagram_business_account?" + Instagram @"+esc(p.instagram_business_account.username||""):" (sem Instagram)")+'</option>'}).join("");
+    var k=paginas.findIndex(function(p){return /costa|fcosta|rcm/i.test(p.name)}); if(k>-1) $("sel").value=k;
+    $("pag").classList.remove("hide"); msg("✅ Conectou! Agora escolha sua Página.",true)
+  }).catch(function(e){
+    var m=e.message;
+    if(/^CHAVE:/.test(m)){msg("O <b>ID ou Chave não conferem</b> ("+esc(m.slice(6))+").<br>1. Vá em Configurações do app > Básico<br>2. Copie o ID (só números)<br>3. Clique em Mostrar na Chave secreta, copie sem espaços<br>Se o erro ainda disser <b>input_token is required</b>, é porque o campo Código grande ficou vazio - cole o EAA de novo.");return}
+    if(/^INVALIDO:/.test(m)){msg("A Meta diz que o código não vale: "+esc(m.slice(9))+"<br>Gere um novo token no Explorador (passo 4) - ele vence em 1 hora.");return}
+    msg("Não deu certo: "+esc(m))
+  })
+}
 $("ir").onclick=conectar;
-/* Diagnóstico: abre a resposta da própria Meta numa aba nova. */
-$("testar").onclick=function(){var t=pegaToken($("tok").value);if(!t){msg("Cole o código grande primeiro.");return}
- window.open(G+"/me?fields=id,name&access_token="+encodeURIComponent(t),"_blank","noopener");
- msg("Abriu uma aba nova. Se lá aparecer o <b>seu nome</b>, o código está bom. Se aparecer <b>error</b>, tire um print <b>só da frase do erro</b> (sem o código) e mande para o Claude.",true)};
-/* Jeito fácil: Entrar com Facebook (volta para esta página com o código no endereço). */
-$("volta").value=VOLTA;
-$("cpvolta").onclick=function(){var a=$("volta");a.select();try{document.execCommand("copy")}catch(e){}try{navigator.clipboard.writeText(VOLTA)}catch(e){}this.textContent="✅ Copiado!"};
-function linkLogin(){var a=$("app").value.replace(/\D/g,"");$("abrelogin").href=a?"https://developers.facebook.com/apps/"+a+"/business-login/settings/":"https://developers.facebook.com/apps/"}
-$("app").addEventListener("input",linkLogin);
+$("testar").onclick=function(){
+  var t=pegaToken($("tok").value);
+  if(!t){msg("Cole o código grande primeiro.");return}
+  window.open(G+"/me?fields=id,name&access_token="+encodeURIComponent(t),"_blank","noopener");
+  msg("Abriu aba nova. Se aparecer seu nome, o código está bom.",true)
+};
 function PERM(velho){return "pages_show_list,pages_manage_posts,pages_read_engagement,instagram_basic,"+(velho?"instagram_content_publish":"instagram_manage_contents")+",business_management"}
-function entrar(velho){var a=$("app").value.replace(/\D/g,"");if(!a){msg("Cole o <b>ID do app</b> (passo 3) no primeiro campo.");return}
- try{sessionStorage.setItem("fc_login",JSON.stringify({app:a,sec:$("sec").value.replace(/\s/g,""),tgtok:$("tgtok").value.trim(),tgchat:$("tgchat").value.trim(),cfg:$("cfg").value.trim()}))}catch(e){}
- var cf=$("cfg").value.replace(/\D/g,""),o={client_id:a,redirect_uri:VOLTA,response_type:"token",state:"fc"};if(cf)o.config_id=cf;else o.scope=PERM(velho);
- location.href="https://www.facebook.com/v27.0/dialog/oauth?"+new URLSearchParams(o)}
+function entrar(velho){
+  var a=$("app").value.replace(/\D/g,"");
+  if(!a){msg("Cole o ID do app.");return}
+  try{sessionStorage.setItem("fc_login",JSON.stringify({app:a,sec:$("sec").value.replace(/\s/g,"")}))}catch(e){}
+  var o={client_id:a,redirect_uri:VOLTA,response_type:"token",scope:PERM(velho)};
+  location.href="https://www.facebook.com/v20.0/dialog/oauth?"+new URLSearchParams(o)
+}
 $("entrar").onclick=function(){entrar(false)};
 $("entrar2").onclick=function(e){e.preventDefault();entrar(true)};
-(function voltou(){var h=new URLSearchParams(location.hash.slice(1)),q=new URLSearchParams(location.search),t=h.get("access_token"),erro=h.get("error_description")||q.get("error_description")||q.get("error_message");
- if(!t&&!erro)return;
- try{history.replaceState(null,"",location.pathname)}catch(e){}
- var g={};try{g=JSON.parse(sessionStorage.getItem("fc_login")||"{}");sessionStorage.removeItem("fc_login")}catch(e){}
- if(g.app)$("app").value=g.app;if(g.sec)$("sec").value=g.sec;if(g.tgtok)$("tgtok").value=g.tgtok;if(g.tgchat)$("tgchat").value=g.tgchat;if(g.cfg)$("cfg").value=g.cfg;linkLogin();
- $("ir").scrollIntoView({block:"center"});
- if(!t){msg("O Facebook não deixou entrar ("+esc(erro)+").<br>Confira o quadro <b>★ Liberar esta página no app</b> e tente de novo.");return}
- $("tok").value=t;conectar()})();
-$("usar").onclick=function(){var p=paginas[+$("sel").value];if(!p)return;
- var c=Object.assign({token:p.access_token,page:p.id,ig:p.instagram_business_account?p.instagram_business_account.id:""},base());
- $("chave").value=JSON.stringify(c);$("fim").classList.remove("hide");
- if(!c.ig)msg("⚠️ Esta Página não tem Instagram ligado. O Facebook vai funcionar. Para o Instagram, faça o passo 1 e depois repita os passos 4 e 5.");
- $("fim").scrollIntoView({behavior:"smooth"});
- $("tok").value="";$("sec").value=""};
-function base(){var c={nome:"Sérgio Costa",creci:"CRECI-SP 294791-F",whats:"5511993509109"},t=$("tgtok").value.trim(),ch=$("tgchat").value.trim();
- if(t&&ch){ch=ch.replace(/^(https?:\/\/)?t\.me\//i,"");if(!/^@|^-?\d+$/.test(ch))ch="@"+ch;c.tgToken=t;c.tgChat=ch}return c}
-$("sotg").onclick=function(e){e.preventDefault();var c=base();if(!c.tgToken){$("tgmsg").innerHTML="⚠️ Preencha o código do robô e o endereço do canal.";return}
- $("chave").value=JSON.stringify(c);$("fim").classList.remove("hide");$("fim").scrollIntoView({behavior:"smooth"})};
-$("cp").onclick=function(){var a=$("chave");a.select();try{document.execCommand("copy")}catch(e){}try{navigator.clipboard.writeText(a.value)}catch(e){}this.textContent="✅ Copiada!"};
+(function voltou(){
+  var h=new URLSearchParams(location.hash.slice(1)),t=h.get("access_token"),erro=h.get("error_description");
+  if(!t&&!erro) return;
+  try{history.replaceState(null,"",location.pathname)}catch(e){}
+  var g={};try{g=JSON.parse(sessionStorage.getItem("fc_login")||"{}");}catch(e){}
+  if(g.app) $("app").value=g.app; if(g.sec) $("sec").value=g.sec;
+  if(!t){msg("Facebook não deixou entrar ("+esc(erro)+")");return}
+  $("tok").value=t; conectar()
+})();
+$("usar").onclick=function(){
+  var p=paginas[+$("sel").value]; if(!p) return;
+  var c={token:p.access_token,page:p.id,ig:p.instagram_business_account?p.instagram_business_account.id:"",nome:"Sérgio Costa",creci:"CRECI-SP 294791-F",whats:"5511993509109"};
+  $("chave").value=JSON.stringify(c); $("fim").classList.remove("hide");
+  $("fim").scrollIntoView({behavior:"smooth"});
+  $("tok").value=""; $("sec").value=""
+};
+$("cp").onclick=function(){navigator.clipboard.writeText($("chave").value).then(function(){msg("✅ Copiado! Cole no GitHub em META_CONFIG",true)})}
 })();
 </script>
 </body>
