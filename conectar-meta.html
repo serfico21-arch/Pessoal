@@ -75,6 +75,17 @@ a{color:var(--az)}
 <a class="btn" href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener">Abrir o Explorador</a>
 <div class="aviso">⏰ Esse código vence em <b>1 hora</b>. Cole aqui e toque em Conectar logo em seguida. Se vencer, é só gerar de novo.</div></div>
 
+<div class="card"><h2><span class="n">+</span>Telegram (opcional)</h2>
+<p>Se você tem um <b>canal no Telegram</b>, o robô posta lá também. Se não tem, pule este quadro.</p>
+<ol><li>No Telegram, procure <b>@BotFather</b> (tem um ✔️ azul) e toque em <b>Iniciar</b>.</li>
+<li>Mande <code>/newbot</code>. Ele pede um nome: mande <code>Divulgar FCosta</code>. Depois pede um apelido terminado em bot: mande, por exemplo, <code>divulgarfcosta_bot</code>.</li>
+<li>Ele responde com um <b>código</b> (tipo <code>123456:ABC-xyz…</code>). Copie e cole no campo <b>Código do robô do Telegram</b> abaixo.</li>
+<li>Abra o seu <b>canal</b> › toque no nome dele › <b>Administradores</b> › <b>Adicionar administrador</b> › procure o robô que você criou e deixe ele <b>postar mensagens</b>.</li>
+<li>No campo <b>Endereço do canal</b>, escreva o @ do canal (ex.: <code>@imoveisfcosta</code>).</li></ol>
+<label for="tgtok">Código do robô do Telegram</label><input id="tgtok" autocomplete="off" placeholder="123456:ABC-...">
+<label for="tgchat">Endereço do canal</label><input id="tgchat" autocomplete="off" placeholder="@meucanal">
+<p class="mut" id="tgmsg">Só quer o Telegram, sem Facebook? Preencha aqui e toque em <a href="#" id="sotg">gerar a chave só com o Telegram</a>.</p></div>
+
 <div class="card"><h2><span class="n">5</span>Colar aqui e conectar</h2>
 <label for="app">ID do app <span class="mut">(passo 3)</span></label><input id="app" inputmode="numeric" autocomplete="off" placeholder="1234567890123456">
 <label for="sec">Chave secreta do app <span class="mut">(passo 3)</span></label><input id="sec" autocomplete="off" placeholder="letras e números">
@@ -113,11 +124,15 @@ $("ir").onclick=function(){var a=$("app").value.trim(),s=$("sec").value.trim(),t
   $("pag").classList.remove("hide");msg("✅ Conectou! Agora escolha a sua Página.",true)})
  .catch(function(e){msg("Não deu certo: "+esc(e.message)+"<br>Confira o ID, a chave secreta e gere o código de novo no passo 4 (ele vence em 1 hora).")})};
 $("usar").onclick=function(){var p=paginas[+$("sel").value];if(!p)return;
- var c={token:p.access_token,page:p.id,ig:p.instagram_business_account?p.instagram_business_account.id:"",nome:"Sérgio Costa",creci:"CRECI-SP 294791-F",whats:"5511993509109"};
+ var c=Object.assign({token:p.access_token,page:p.id,ig:p.instagram_business_account?p.instagram_business_account.id:""},base());
  $("chave").value=JSON.stringify(c);$("fim").classList.remove("hide");
  if(!c.ig)msg("⚠️ Esta Página não tem Instagram ligado. O Facebook vai funcionar. Para o Instagram, faça o passo 1 e depois repita os passos 4 e 5.");
  $("fim").scrollIntoView({behavior:"smooth"});
  $("tok").value="";$("sec").value=""};
+function base(){var c={nome:"Sérgio Costa",creci:"CRECI-SP 294791-F",whats:"5511993509109"},t=$("tgtok").value.trim(),ch=$("tgchat").value.trim();
+ if(t&&ch){ch=ch.replace(/^(https?:\/\/)?t\.me\//i,"");if(!/^@|^-?\d+$/.test(ch))ch="@"+ch;c.tgToken=t;c.tgChat=ch}return c}
+$("sotg").onclick=function(e){e.preventDefault();var c=base();if(!c.tgToken){$("tgmsg").innerHTML="⚠️ Preencha o código do robô e o endereço do canal.";return}
+ $("chave").value=JSON.stringify(c);$("fim").classList.remove("hide");$("fim").scrollIntoView({behavior:"smooth"})};
 $("cp").onclick=function(){var a=$("chave");a.select();try{document.execCommand("copy")}catch(e){}try{navigator.clipboard.writeText(a.value)}catch(e){}this.textContent="✅ Copiada!"};
 })();
 </script>
