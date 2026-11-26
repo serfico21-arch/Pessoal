@@ -211,6 +211,25 @@ function acaoRede(k){var r=redes().filter(function(x){return x.k===k})[0];if(!r)
  toast(r.k==="fbgrupo1"?"Texto copiado. Na janela, escolha \"Compartilhar em um grupo\" e cole o texto":"Texto copiado! É só colar (segure o dedo e toque em Colar)");
  setTimeout(render,50);return false}
 
+/* ===== DIVULGAR EM TUDO: um botão só, que vai passando de rede em rede =====
+   O navegador só deixa abrir UMA janela por toque. Por isso: cada toque no botão
+   grande copia o texto certo e abre a próxima rede. A lista de redes fica em
+   S.cfg.tudo (dá para mudar em "Meus dados"). */
+var TUDO_PADRAO=["wast","wa","fbperfil","mkt","ig","gmn","tg","x","th","in","pin"];
+var TUDO_NOMES=[["wast","⭕","Status do WhatsApp"],["wa","🟢","WhatsApp"],["fbperfil","📘","Facebook (meu perfil)"],["fbgrupo1","👥","Facebook: escolher grupo"],["fbpag","📄","Minha página"],["mkt","🛒","Marketplace"],["msgr","💬","Messenger"],["ig","📸","Instagram"],["tt","🎵","TikTok"],["yt","▶️","YouTube"],["th","🧵","Threads"],["x","✖️","X (Twitter)"],["in","💼","LinkedIn"],["tg","✈️","Telegram"],["pin","📌","Pinterest"],["gmn","📍","Google Meu Negócio"],["olx","🟣","OLX"],["mail","✉️","E-mail"],["sms","💌","SMS"]];
+function tudoSel(){return Array.isArray(S.cfg.tudo)&&S.cfg.tudo.length?S.cfg.tudo:TUDO_PADRAO}
+function tudoLista(){var ok={};redes().forEach(function(r){ok[r.k]=r});return tudoSel().filter(function(k){return ok[k]}).map(function(k){return ok[k]})}
+function tudoPos(){return S.pos["tudo|"+(cur?cur.id:"")]||0}
+function telaTudo(){var l=tudoLista(),p=Math.min(tudoPos(),l.length),h='<div class="card" style="border:2px solid var(--az)"><h2>🚀 Divulgar em tudo</h2>';
+ if(p>=l.length)return h+'<div class="dica">🎉 <b>Pronto!</b> Este imóvel foi para '+l.length+' redes.</div><p class="mut">Se quiser, mande também nos seus grupos (parte 3, mais abaixo).</p><div class="row"><button class="btn" data-a="tudo0">🔁 Começar de novo</button></div></div>';
+ var r=l[p],nx=l[p+1],bar=Math.round(p/l.length*100);
+ return h+'<p class="mut">Toque no botão azul. O texto já vai copiado e a rede abre. Lá, <b>cole e publique</b>. Volte aqui e toque de novo para a próxima.</p>'
+ +'<div style="height:12px;background:var(--l);border-radius:99px;overflow:hidden;margin:8px 0"><div style="height:100%;width:'+bar+'%;background:var(--ok)"></div></div>'
+ +'<p style="font-weight:700">Rede '+(p+1)+' de '+l.length+'</p>'
+ +(r.share&&navigator.share?'<button class="btn pri big" data-tudo="'+r.k+'">'+r.ic+' Abrir '+esc(r.n)+'</button>':'<a class="btn pri big" data-tudo="'+r.k+'" href="'+esc(r.u)+'" target="_blank" rel="noopener">'+r.ic+' Abrir '+esc(r.n)+'</a>')
+ +'<p class="mut" style="margin-top:6px">'+esc(r.s)+(nx?' · Depois: '+nx.ic+' '+esc(nx.n):'')+'</p>'
+ +'<div class="row"><button class="btn" data-a="tudopula">Pular esta ⏭</button></div></div>'}
+
 /* ===== Listas (grupos e contatos) salvas uma única vez ===== */
 function normUrl(u){u=String(u||"").trim().replace(/[),.;]+$/,"");if(!u)return"";if(!/^[a-z][a-z0-9+.-]*:/i.test(u))u="https://"+u;
  u=u.replace(/^http:\/\//i,"https://").replace(/^https:\/\/(m|mbasic|web|touch|pt-br|business)\.facebook\.com/i,"https://www.facebook.com").replace(/^https:\/\/facebook\.com/i,"https://www.facebook.com");return u}
@@ -238,6 +257,7 @@ function telaDivulgar(){var h="";
  if(!cur){h+='<div class="card"><h2>1. Qual imóvel você quer divulgar?</h2><input id="busca" type="search" placeholder="Buscar por código, bairro ou título" value="'+esc(window._q||"")+'"><div id="lista" style="margin-top:10px">'+listaIm()+'</div></div>';return h}
  var i=cur,f=i.fotos[0];
  h+='<div class="card"><div class="imv sel" style="cursor:default">'+(f?'<img src="'+esc(cloud(f,300))+'" alt="">':'<div class="ph"></div>')+'<div><b>'+esc(i.titulo)+'</b><span>'+esc(i.codigo)+' · '+esc(onde(i))+' · '+esc(preco(i))+'</span></div></div><div class="row"><button class="btn" data-a="trocar">↩️ Trocar imóvel</button><a class="btn" href="'+esc(i.link)+'" target="_blank" rel="noopener">🔗 Ver no site</a></div></div>';
+ h+=telaTudo();
  diaOk();
  h+='<div class="dica">📊 Hoje você já fez <b>'+S.dia.n+'</b> publicação(ões). Meta boa para tráfego orgânico: <b>1 imóvel em 10 grupos + 1 status + 1 story</b> por dia.</div>';
  h+='<div class="card"><h2>2. Texto do anúncio</h2><p class="mut">Já vem pronto. Pode mudar o que quiser. Cada grupo recebe uma versão diferente automaticamente.</p><textarea id="txt" rows="10">'+esc(texto(i,"fb",S.v))+'</textarea><div class="row" style="margin-top:10px"><button class="btn pri" data-a="copiar">📋 Copiar texto</button><button class="btn" data-a="outro">🔄 Outro texto</button></div><div class="row" style="margin-top:10px">'+(navigator.share?'<button class="btn ok" id="bshare" data-a="share">📤 Compartilhar<small style="font-weight:400;font-size:13px;display:block">'+(i.fotos.length?"preparando fotos…":"texto")+'</small></button>':'')+'<button class="btn" data-a="fotos">⬇️ Baixar fotos ('+i.fotos.length+')</button></div></div>';
@@ -270,10 +290,11 @@ function telaListas(){var L=LISTAS[lt],lst=S.listas[lt];
 function telaCfg(){var c=S.cfg;function f(k,l,ph){return'<label for="c_'+k+'">'+l+'</label><input id="c_'+k+'" value="'+esc(c[k]||"")+'" placeholder="'+esc(ph||"")+'">'}
  return'<div class="card"><h2>⚙️ Meus dados</h2><p class="mut">Aparecem nos textos dos anúncios.</p>'+f("nome","Seu nome")+f("creci","CRECI")+f("whats","Seu WhatsApp (com DDD)","11 99350-9109")+f("fbpag","Sua página do Facebook (o que vem depois de facebook.com/)","SergioCostaRCM")+f("insta","Seu Instagram (sem @)","f.cost.a_corretor")
  +'<label><input type="checkbox" id="c_utm" style="width:auto;margin-right:8px"'+(c.utm?" checked":"")+'>Marcar os links para saber de qual rede veio cada visita (recomendado)</label><button class="btn pri big" data-a="salvacfg" style="margin-top:12px">💾 Salvar meus dados</button></div>'
+ +'<div class="card"><h3>🚀 Redes do "Divulgar em tudo"</h3><p class="mut">Marque onde você quer divulgar. O botão passa por elas nesta ordem.</p>'+TUDO_NOMES.map(function(r){return'<label style="font-weight:400"><input type="checkbox" class="ctudo" value="'+r[0]+'" style="width:auto;margin-right:8px"'+(tudoSel().indexOf(r[0])>-1?" checked":"")+'>'+r[1]+' '+esc(r[2])+'</label>'}).join("")+'<button class="btn pri big" data-a="salvatudo" style="margin-top:12px">💾 Salvar redes</button></div>'
  +'<div class="card"><h3>Usar em outro aparelho (backup)</h3><p class="mut">Os grupos ficam guardados neste aparelho. Para levar para o celular ou computador novo: baixe o backup aqui e abra lá em "Restaurar".</p><div class="row"><button class="btn" data-a="bkp">⬇️ Baixar backup</button><label class="btn" style="margin:0">⬆️ Restaurar<input type="file" id="rest" accept=".json,application/json" class="hide"></label></div></div>'
  +'<div class="card"><button class="btn" data-a="tema">◐ Tema claro / escuro</button></div>'}
 function telaAjuda(){return'<div class="card ajuda"><h2>❓ AJUDA – como usar</h2>'
- +'<details open><summary>Passo a passo (5 minutos por dia)</summary><ol><li>Cadastre o imóvel no <b>Painel ADM</b> do site, como sempre.</li><li>No Painel, toque em <b>📣 Publicar</b> no imóvel. Ou abra aqui e escolha o imóvel na lista.</li><li>Veja o texto pronto. Se quiser, toque em <b>Outro texto</b>.</li><li>Na parte <b>3</b>, toque no botão azul grande: o texto é copiado e o grupo abre.</li><li>No grupo, toque em <b>Escreva algo</b>, segure o dedo e toque em <b>Colar</b>. Publique.</li><li>Volte aqui e toque em <b>✓ Já postei, próximo</b>. Repita.</li><li>Depois toque nas outras redes da parte <b>4</b>.</li></ol></details>'
+ +'<details open><summary>Passo a passo (5 minutos por dia)</summary><ol><li>Cadastre o imóvel no <b>Painel ADM</b> do site, como sempre.</li><li>No Painel, toque em <b>📣 Publicar</b> no imóvel. Ou abra aqui e escolha o imóvel na lista.</li><li>No quadro <b>🚀 Divulgar em tudo</b>, toque no botão azul: o texto é copiado e a rede abre. Cole e publique. Volte e toque de novo para a próxima rede.</li><li>Veja o texto pronto. Se quiser, toque em <b>Outro texto</b>.</li><li>Na parte <b>3</b>, toque no botão azul grande: o texto é copiado e o grupo abre.</li><li>No grupo, toque em <b>Escreva algo</b>, segure o dedo e toque em <b>Colar</b>. Publique.</li><li>Volte aqui e toque em <b>✓ Já postei, próximo</b>. Repita.</li><li>Depois toque nas outras redes da parte <b>4</b>.</li></ol></details>'
  +'<details><summary>Por que não posta sozinho nos grupos?</summary><p>O Facebook <b>não permite</b> que nenhum site publique sozinho em grupos (ele bloqueou isso em 2018). Programas que prometem isso fazem o Facebook bloquear sua conta. Por isso aqui é assim: o texto já vai copiado e o grupo abre na hora, um por vez. É rápido e seguro.</p></details>'
  +'<details><summary>"Ficar logado" – como funciona</summary><p>Você entra no Facebook, WhatsApp e Instagram <b>uma vez</b> no seu navegador ou celular, normalmente. Eles ficam logados sozinhos. Os seus grupos e contatos você cola <b>uma vez</b> na aba <b>Grupos e contatos</b> e eles ficam guardados neste aparelho. Se trocar de aparelho, use o backup em <b>Meus dados</b>.</p></details>'
  +'<details><summary>O grupo não abre</summary><ul><li>Confira se o link começa com facebook.com/groups/…</li><li>No celular, o link pode abrir no aplicativo do Facebook. Isso é normal.</li><li>Se o Facebook pedir para entrar, entre uma vez e ele lembra.</li><li>Se o navegador mostrar "pop-up bloqueado", toque em <b>Permitir sempre</b>.</li></ul></details>'
@@ -291,16 +312,20 @@ function render(){$("t-div").innerHTML=telaDivulgar();$("t-lis").innerHTML=telaL
 function restaurar(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o||!o.listas)throw 0;var n=0;Object.keys(S.listas).forEach(function(k){(o.listas[k]||[]).forEach(function(it){if(it&&it.url&&!S.listas[k].some(function(x){return chave(x.url)===chave(it.url)})){S.listas[k].push(it);n++}})});if(o.cfg)S.cfg=Object.assign(S.cfg,o.cfg);save();render();toast(n+" item(ns) restaurado(s)")}catch(x){toast("Arquivo de backup inválido")}};r.readAsText(f)}
 
 /* ===== Cliques ===== */
-document.addEventListener("click",function(e){var t=e.target.closest("[data-tab],[data-a],[data-im],[data-lt],[data-rede],[data-item],[data-del],#rsync");if(!t)return;
+document.addEventListener("click",function(e){var t=e.target.closest("[data-tab],[data-a],[data-im],[data-lt],[data-rede],[data-tudo],[data-item],[data-del],#rsync");if(!t)return;
  if(t.id==="rsync"){e.preventDefault();carregar(true);return}
  if(t.dataset.tab){tab=t.dataset.tab;msgLista="";render();window.scrollTo(0,0);return}
  if(t.dataset.im){var i=IM.filter(function(x){return x.id===t.dataset.im})[0];if(i){escolhe(i);render()}return}
  if(t.dataset.lt){lt=t.dataset.lt;msgLista="";render();return}
+ if(t.dataset.tudo){var l0=tudoLista(),p0=tudoPos(),r1=l0[p0];if(r1){if(r1.u&&t.tagName==="A")t.href=r1.u;var kp=acaoRede(r1.k);if(kp)e.preventDefault();S.pos["tudo|"+cur.id]=p0+1;save();setTimeout(render,120)}return}
  if(t.dataset.rede){var r0=redes().filter(function(x){return x.k===t.dataset.rede})[0];if(r0&&r0.u&&t.tagName==="A")t.href=r0.u;var keep=acaoRede(t.dataset.rede);if(keep)e.preventDefault();return}
  if(t.dataset.item!=null){var it0=S.listas[lt][+t.dataset.item];if(it0&&t.tagName==="A")t.href=urlItem(lt,it0,+t.dataset.item);abreItem(lt,+t.dataset.item);setTimeout(render,80);return}
  if(t.dataset.del){if(!confirm("Apagar este item da lista?"))return;S.listas[lt]=S.listas[lt].filter(function(x){return x.id!==t.dataset.del});save();render();return}
  var a=t.dataset.a;
- if(a==="trocar"){cur=null;render()}
+ if(a==="tudopula"){S.pos["tudo|"+cur.id]=tudoPos()+1;save();render()}
+ else if(a==="tudo0"){S.pos["tudo|"+cur.id]=0;save();render()}
+ else if(a==="salvatudo"){var ks=[].slice.call(document.querySelectorAll(".ctudo")).filter(function(x){return x.checked}).map(function(x){return x.value});if(!ks.length){toast("Marque pelo menos uma rede");return}S.cfg.tudo=ks;save();render();toast("Redes salvas")}
+ else if(a==="trocar"){cur=null;render()}
  else if(a==="copiar"){copiar(txtAtual());toast("Texto copiado!")}
  else if(a==="outro"){S.v++;ED="";save();render()}
  else if(a==="share")compartilhar("fb");
