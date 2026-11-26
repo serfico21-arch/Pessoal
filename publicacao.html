@@ -101,13 +101,13 @@ var LISTAS={
  msg:{nome:"Contatos do Messenger",um:"contato",ic:"💬",cor:"fb",ex:"Maria https://m.me/maria.silva",dica:"Cole o link do perfil de quem você quer mandar no Messenger (m.me/nome ou facebook.com/nome). Um por linha."},
  wac:{nome:"Contatos de WhatsApp",um:"contato",ic:"📱",cor:"wa",ex:"João 11 98888-7777",dica:"Cole nome e telefone com DDD. Um por linha. A mensagem já vai escrita para cada um."}
 };
-var S={listas:{fb:[],wag:[],msg:[],wac:[]},cfg:{nome:"Sérgio Costa",creci:"CRECI-SP 294791-F",whats:"11993509109",fbpag:"SergioCostaRCM",insta:"f.cost.a_corretor",site:SITE,utm:true},hist:{},dia:{d:"",n:0,feito:{}},pos:{},v:0,mig:0,ult:""};
+var S={listas:{fb:[],wag:[],msg:[],wac:[]},cfg:{nome:"Sérgio Costa",creci:"CRECI-SP 294791-F",whats:"11993509109",fbpag:"SergioCostaRCM",insta:"f.cost.a_corretor",site:SITE,utm:true},hist:{},auto:{},dia:{d:"",n:0,feito:{}},pos:{},v:0,mig:0,ult:""};
 var IM=[],cur=null,tab="div",lt="fb",fotosProntas=[],msgLista="";
 function $(i){return document.getElementById(i)}
 function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function hojeS(){var d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()}
-function load(){try{var o=JSON.parse(localStorage.getItem(KEY)||"null");if(o&&typeof o==="object"){if(o.listas)Object.keys(S.listas).forEach(function(k){if(Array.isArray(o.listas[k]))S.listas[k]=o.listas[k]});if(o.cfg)S.cfg=Object.assign(S.cfg,o.cfg);["hist","pos"].forEach(function(k){if(o[k]&&typeof o[k]==="object")S[k]=o[k]});if(o.dia)S.dia=o.dia;S.v=+o.v||0;S.mig=o.mig||0;S.ult=o.ult||""}}catch(e){}}
+function load(){try{var o=JSON.parse(localStorage.getItem(KEY)||"null");if(o&&typeof o==="object"){if(o.listas)Object.keys(S.listas).forEach(function(k){if(Array.isArray(o.listas[k]))S.listas[k]=o.listas[k]});if(o.cfg)S.cfg=Object.assign(S.cfg,o.cfg);["hist","pos","auto"].forEach(function(k){if(o[k]&&typeof o[k]==="object")S[k]=o[k]});if(o.dia)S.dia=o.dia;S.v=+o.v||0;S.mig=o.mig||0;S.ult=o.ult||""}}catch(e){}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("Não consegui salvar neste navegador")}}
 var tt;function toast(m){var t=$("toast");t.textContent=m;t.style.display="block";clearTimeout(tt);tt=setTimeout(function(){t.style.display="none"},2600)}
 
@@ -211,6 +211,33 @@ function acaoRede(k){var r=redes().filter(function(x){return x.k===k})[0];if(!r)
  toast(r.k==="fbgrupo1"?"Texto copiado. Na janela, escolha \"Compartilhar em um grupo\" e cole o texto":"Texto copiado! É só colar (segure o dedo e toque em Colar)");
  setTimeout(render,50);return false}
 
+/* ===== BOTÃO ÚNICO "DIVULGAR" (automático) =====
+   Toque em DIVULGAR: o pedido vai para o Firebase (fcosta_publicacoes, auto:true).
+   O robô do GitHub (.github/workflows/divulgar-auto.yml) pega a cada 5 minutos e
+   posta na Página do Facebook e no Instagram (post + story). O resultado volta em
+   divulgar/status.json. Para ligar o robô: conectar-meta.html (uma vez só). */
+var ROBO=null,roboT=0;
+function lerRobo(cb){fetch("https://api.github.com/repos/serfico21-arch/Pessoal/contents/divulgar/status.json?ref=main&t="+Date.now(),{headers:{Accept:"application/vnd.github.raw"},cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()})
+ .catch(function(){return fetch("divulgar/status.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()})})
+ .then(function(j){ROBO=j;roboT=Date.now();if(cb)cb()}).catch(function(){})}
+function divulgar(){if(!cur)return;var b=$("bdiv");if(b){b.disabled=true;b.textContent="⏳ Enviando…"}
+ fetch(DB+"/fcosta_publicacoes.json",{method:"POST",body:JSON.stringify({imovelId:cur.id,codigo:cur.codigo,titulo:cur.titulo,capa:cur.fotos[0]||"",link:cur.link,canal:"Automático: Facebook + Instagram",ferramenta:"publicador",auto:true,criado:new Date().toISOString()})})
+ .then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){S.auto[cur.id]={k:j.name,t:Date.now()};diaOk();S.dia.n++;save();toast("✅ Enviado! O robô vai postar em alguns minutos");render()})
+ .catch(function(){toast("Não consegui enviar. Confira a internet e tente de novo");render()})}
+function linhaRede(nome,r,esperando){return'<li><span class="n">'+nome+'</span>'+(r?(r.ok?'<span class="tag ok">✅ postado</span>'+(r.link?' <a href="'+esc(r.link)+'" target="_blank" rel="noopener">ver</a>':''):'<span class="tag am" title="'+esc(r.erro||"")+'">❌ não foi</span>'):(esperando?'<span class="tag">⏳ na fila</span>':''))+'</li>'}
+function telaSimples(){var i=cur,a=S.auto[i.id],h='<div class="card" style="border:3px solid var(--ok)">';
+ var lig=ROBO&&ROBO.conectado;
+ if(ROBO&&!lig)h+='<div class="aviso">🔌 A postagem automática no Facebook e Instagram ainda não está ligada. <a href="conectar-meta.html"><b>Ligar agora (uma vez só)</b></a></div>';
+ h+='<button class="btn ok big" id="bdiv" data-a="divulgar" style="min-height:84px;font-size:26px">📣 DIVULGAR</button>';
+ h+='<p class="mut" style="margin-top:8px">Posta sozinho na sua <b>Página do Facebook</b> e no <b>Instagram</b>: post com fotos + story.</p>';
+ if(a){var it=ROBO&&ROBO.itens&&ROBO.itens[a.k],esp=!it;
+  h+='<p style="margin:10px 0 0"><b>Enviado '+quando(a.t)+' às '+new Date(a.t).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+'</b>'+(esp?' · o robô posta em até 15 minutos':'')+'</p><ul class="lst">'
+  +linhaRede("📘 Facebook (post)",it&&it.fb,esp)+linhaRede("📘 Facebook (story)",it&&it.fbs,esp)+linhaRede("📸 Instagram (post)",it&&it.ig,esp)+linhaRede("📸 Instagram (story)",it&&it.igs,esp)+'</ul>'+(it&&it.erro?'<div class="aviso">'+esc(it.erro)+'</div>':'')}
+ h+='<h3 style="margin-top:16px">Também com 1 toque:</h3><div class="row">'
+ +(navigator.share?'<button class="btn wa" data-a="zapshare">🟢 WhatsApp<br><small style="font-weight:400;font-size:13px">status e grupos, com fotos</small></button>':'<a class="btn wa" data-rede="wa" href="#">🟢 WhatsApp</a>')
+ +'<a class="btn fb" data-rede="msgr" href="#">💬 Messenger</a></div></div>';
+ return h}
+
 /* ===== DIVULGAR EM TUDO: um botão só, que vai passando de rede em rede =====
    O navegador só deixa abrir UMA janela por toque. Por isso: cada toque no botão
    grande copia o texto certo e abre a próxima rede. A lista de redes fica em
@@ -257,12 +284,15 @@ function telaDivulgar(){var h="";
  if(!cur){h+='<div class="card"><h2>1. Qual imóvel você quer divulgar?</h2><input id="busca" type="search" placeholder="Buscar por código, bairro ou título" value="'+esc(window._q||"")+'"><div id="lista" style="margin-top:10px">'+listaIm()+'</div></div>';return h}
  var i=cur,f=i.fotos[0];
  h+='<div class="card"><div class="imv sel" style="cursor:default">'+(f?'<img src="'+esc(cloud(f,300))+'" alt="">':'<div class="ph"></div>')+'<div><b>'+esc(i.titulo)+'</b><span>'+esc(i.codigo)+' · '+esc(onde(i))+' · '+esc(preco(i))+'</span></div></div><div class="row"><button class="btn" data-a="trocar">↩️ Trocar imóvel</button><a class="btn" href="'+esc(i.link)+'" target="_blank" rel="noopener">🔗 Ver no site</a></div></div>';
+ h+=telaSimples();
+ h+='<details id="mais"'+(window._mais?" open":"")+'><summary>⚙️ Mais opções (fazer à mão, rede por rede)</summary>';
  h+=telaTudo();
  diaOk();
  h+='<div class="dica">📊 Hoje você já fez <b>'+S.dia.n+'</b> publicação(ões). Meta boa para tráfego orgânico: <b>1 imóvel em 10 grupos + 1 status + 1 story</b> por dia.</div>';
  h+='<div class="card"><h2>2. Texto do anúncio</h2><p class="mut">Já vem pronto. Pode mudar o que quiser. Cada grupo recebe uma versão diferente automaticamente.</p><textarea id="txt" rows="10">'+esc(texto(i,"fb",S.v))+'</textarea><div class="row" style="margin-top:10px"><button class="btn pri" data-a="copiar">📋 Copiar texto</button><button class="btn" data-a="outro">🔄 Outro texto</button></div><div class="row" style="margin-top:10px">'+(navigator.share?'<button class="btn ok" id="bshare" data-a="share">📤 Compartilhar<small style="font-weight:400;font-size:13px;display:block">'+(i.fotos.length?"preparando fotos…":"texto")+'</small></button>':'')+'<button class="btn" data-a="fotos">⬇️ Baixar fotos ('+i.fotos.length+')</button></div></div>';
  h+=telaSeq();
  h+='<div class="card"><h2>4. Todas as redes</h2><p class="mut">Toque na rede: o texto é copiado e a rede abre. Lá, é só colar.</p><div class="grid">'+redes().map(function(r){var fz=feitoHoje(r.n);return r.share&&navigator.share?'<button class="rd'+(fz?" feito":"")+'" data-rede="'+r.k+'"><i>'+r.ic+'</i>'+esc(r.n)+'<small>'+(fz?"✓ feito hoje":esc(r.s))+'</small></button>':'<a class="rd'+(fz?" feito":"")+'" data-rede="'+r.k+'" href="'+esc(r.u)+'" target="_blank" rel="noopener"><i>'+r.ic+'</i>'+esc(r.n)+'<small>'+(fz?"✓ feito hoje":esc(r.s))+'</small></a>'}).join("")+'</div></div>';
+ h+='</details>';
  return h}
 function listaIm(){var q=(window._q||"").toLowerCase();var l=IM.filter(function(i){return!q||(i.codigo+" "+i.titulo+" "+i.bairro+" "+i.cidade).toLowerCase().indexOf(q)>-1});
  if(!IM.length)return'<p class="mut">Nenhum imóvel carregado ainda. Se você acabou de cadastrar no Painel ADM, toque em "atualizar" lá em cima.</p>';
@@ -307,6 +337,7 @@ function render(){$("t-div").innerHTML=telaDivulgar();$("t-lis").innerHTML=telaL
  document.querySelectorAll("nav button").forEach(function(b){b.classList.toggle("on",b.dataset.tab===tab)});
  var tg=$("txt");if(tg){if(ED)tg.value=ED;tg.oninput=function(){ED=this.value}}
  var bs=$("busca");if(bs)bs.oninput=function(){window._q=this.value;$("lista").innerHTML=listaIm()};
+ var dm=$("mais");if(dm)dm.ontoggle=function(){window._mais=dm.open};
  var rs=$("rest");if(rs)rs.onchange=restaurar;
  if(fotosProntas.length){var b=$("bshare");if(b)b.querySelector("small").textContent=fotosProntas.length+" foto(s) + texto"}}
 function restaurar(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o||!o.listas)throw 0;var n=0;Object.keys(S.listas).forEach(function(k){(o.listas[k]||[]).forEach(function(it){if(it&&it.url&&!S.listas[k].some(function(x){return chave(x.url)===chave(it.url)})){S.listas[k].push(it);n++}})});if(o.cfg)S.cfg=Object.assign(S.cfg,o.cfg);save();render();toast(n+" item(ns) restaurado(s)")}catch(x){toast("Arquivo de backup inválido")}};r.readAsText(f)}
@@ -322,7 +353,9 @@ document.addEventListener("click",function(e){var t=e.target.closest("[data-tab]
  if(t.dataset.item!=null){var it0=S.listas[lt][+t.dataset.item];if(it0&&t.tagName==="A")t.href=urlItem(lt,it0,+t.dataset.item);abreItem(lt,+t.dataset.item);setTimeout(render,80);return}
  if(t.dataset.del){if(!confirm("Apagar este item da lista?"))return;S.listas[lt]=S.listas[lt].filter(function(x){return x.id!==t.dataset.del});save();render();return}
  var a=t.dataset.a;
- if(a==="tudopula"){S.pos["tudo|"+cur.id]=tudoPos()+1;save();render()}
+ if(a==="divulgar")divulgar();
+ else if(a==="zapshare")compartilhar("wa");
+ else if(a==="tudopula"){S.pos["tudo|"+cur.id]=tudoPos()+1;save();render()}
  else if(a==="tudo0"){S.pos["tudo|"+cur.id]=0;save();render()}
  else if(a==="salvatudo"){var ks=[].slice.call(document.querySelectorAll(".ctudo")).filter(function(x){return x.checked}).map(function(x){return x.value});if(!ks.length){toast("Marque pelo menos uma rede");return}S.cfg.tudo=ks;save();render();toast("Redes salvas")}
  else if(a==="trocar"){cur=null;render()}
@@ -345,7 +378,8 @@ document.addEventListener("click",function(e){var t=e.target.closest("[data-tab]
 try{var tm=localStorage.getItem("pub2_tema");if(tm)document.documentElement.setAttribute("data-theme",tm)}catch(e){}
 load();if(!S.mig)migrar(false);
 if(/[#&]ajuda/.test(location.hash))tab="aju";
-render();carregar(false);
+render();carregar(false);lerRobo(render);
+setInterval(function(){var a=cur&&S.auto[cur.id];if(a&&Date.now()-a.t<36e5&&tab==="div"&&!(ROBO&&ROBO.itens&&ROBO.itens[a.k]))lerRobo(render)},45000);
 })();
 </script>
 </body>

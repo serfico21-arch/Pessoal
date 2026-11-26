@@ -1,0 +1,38 @@
+# ROBÔ DE DIVULGAÇÃO AUTOMÁTICA (Facebook + Instagram)
+# Quando o Sérgio toca em "DIVULGAR" no publicacao.html, o pedido vai para o
+# Firebase (fcosta_publicacoes, com auto:true). Este robô roda a cada 5 minutos,
+# pega os pedidos novos e posta na Página do Facebook e no Instagram.
+# A senha da Meta fica no segredo META_CONFIG (Settings > Secrets > Actions).
+name: Divulgar automático
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: divulgar-auto
+  cancel-in-progress: false
+jobs:
+  postar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Postar pedidos novos
+        env:
+          META_CONFIG: ${{ secrets.META_CONFIG }}
+        run: node .github/scripts/divulgar.mjs
+      - name: Salvar resultado
+        run: |
+          if [ -n "$(git status --porcelain divulgar/)" ]; then
+            git config user.name "robo-divulgar"
+            git config user.email "robo-divulgar@users.noreply.github.com"
+            git add divulgar/status.json
+            git commit -m "Robô: resultado da divulgação"
+            git pull --rebase -q || true
+            git push
+          fi
