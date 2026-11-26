@@ -1,0 +1,109 @@
+<!DOCTYPE html><!--
+  AJUDA — conectar-meta.html
+  Liga a postagem automática do Publicador na Página do Facebook e no Instagram.
+  Faz-se UMA VEZ só. Tudo roda neste navegador: as senhas vão só para o Facebook,
+  não ficam salvas aqui. No fim, a "chave" é colada no GitHub, no segredo META_CONFIG.
+  Quem posta é o robô .github/workflows/divulgar-auto.yml.
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ligar postagem automática</title>
+<meta name="robots" content="noindex">
+<style>
+:root{--bg:#f1f5fa;--c:#fff;--tx:#0d1b2e;--m:#4f5d75;--l:#d3dce8;--az:#1d6fb8;--ok:#0a7d3b;--okbg:#e5f6ec;--am:#9a5b00;--ambg:#fff4dd;--er:#b42318}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--c:#131d30;--tx:#eef3ff;--m:#a4b0c8;--l:#2a3854;--az:#5aa8ec;--ok:#4ade80;--okbg:#10291b;--am:#fbbf24;--ambg:#2b2110;--er:#f87171}}
+:root[data-theme="dark"]{--bg:#0b1220;--c:#131d30;--tx:#eef3ff;--m:#a4b0c8;--l:#2a3854;--az:#5aa8ec;--ok:#4ade80;--okbg:#10291b;--am:#fbbf24;--ambg:#2b2110;--er:#f87171}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:19px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:#1E3A5F;color:#fff;padding:14px 16px}
+header h1{margin:0;font-size:21px;max-width:760px;margin:0 auto}
+main{max-width:760px;margin:0 auto;padding:14px 16px 40px}
+.card{background:var(--c);border:1px solid var(--l);border-radius:16px;padding:16px;margin-bottom:14px}
+.n{display:inline-flex;width:38px;height:38px;border-radius:50%;background:var(--az);color:#fff;font-weight:800;align-items:center;justify-content:center;margin-right:8px}
+h2{font-size:20px;margin:0 0 10px;display:flex;align-items:center}
+ol,ul{padding-left:22px;margin:6px 0}li{margin-bottom:6px}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:58px;border-radius:14px;border:0;background:var(--az);color:#fff;font:700 18px system-ui,sans-serif;text-decoration:none;cursor:pointer;margin-top:10px;padding:8px 12px;text-align:center}
+.btn.ok{background:var(--ok)}
+label{display:block;font-weight:700;margin:12px 0 4px}
+input,textarea,select{width:100%;font:inherit;font-size:17px;padding:12px;border:1px solid var(--l);border-radius:12px;background:var(--bg);color:var(--tx)}
+code{background:var(--bg);border:1px solid var(--l);border-radius:6px;padding:1px 6px;font-size:16px}
+.aviso{background:var(--ambg);border:1px solid var(--am);border-radius:12px;padding:12px;margin-top:10px}
+.dica{background:var(--okbg);border:1px solid var(--ok);border-radius:12px;padding:12px;margin-top:10px}
+.mut{color:var(--m);font-size:16px}
+a{color:var(--az)}
+.hide{display:none}
+</style>
+</head>
+<body>
+<header><h1>🔌 Ligar a postagem automática</h1></header>
+<main>
+<div class="card"><p>Faça isto <b>uma vez só</b>. Depois, é só tocar em <b>📣 DIVULGAR</b> no Publicador e o robô posta sozinho na sua <b>Página do Facebook</b> e no <b>Instagram</b> (post e story).</p>
+<p class="mut">Se travar em algum passo, chame o Claude que ele faz junto com você.</p></div>
+
+<div class="card"><h2><span class="n">1</span>Instagram profissional</h2>
+<ol><li>No aplicativo do Instagram, toque na sua foto › <b>☰</b> › <b>Tipo de conta e ferramentas</b> › <b>Mudar para conta profissional</b> (escolha <b>Empresa</b>).</li>
+<li>Depois, em <b>Editar perfil</b> › <b>Página</b>, ligue à sua Página do Facebook.</li></ol>
+<p class="mut">Se já fez isso antes, pule.</p></div>
+
+<div class="card"><h2><span class="n">2</span>Criar o "app" no Facebook</h2>
+<ol><li>Toque no botão abaixo (entre com seu Facebook).</li>
+<li>Nome do app: <code>Divulgar FCosta</code>. Nas perguntas, escolha as opções de <b>Página</b> / <b>Instagram</b> / <b>Outro</b> e vá em <b>Avançar</b> até o fim.</li>
+<li>No app criado, abra <b>Configurações › Básico</b>. Copie o <b>ID do app</b> e a <b>Chave secreta</b> (toque em Mostrar).</li></ol>
+<a class="btn" href="https://developers.facebook.com/apps/creation/" target="_blank" rel="noopener">Abrir o Facebook para Desenvolvedores</a></div>
+
+<div class="card"><h2><span class="n">3</span>Pegar a permissão</h2>
+<ol><li>Toque no botão abaixo. À direita, em <b>App da Meta</b>, escolha <b>Divulgar FCosta</b>.</li>
+<li>Em <b>Permissões</b>, adicione: <code>pages_show_list</code> <code>pages_manage_posts</code> <code>pages_read_engagement</code> <code>instagram_basic</code> <code>instagram_content_publish</code> <code>business_management</code></li>
+<li>Toque em <b>Generate Access Token</b> (Gerar), aceite tudo e copie o código grande que aparece.</li></ol>
+<a class="btn" href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener">Abrir o Explorador</a></div>
+
+<div class="card"><h2><span class="n">4</span>Colar aqui</h2>
+<label for="app">ID do app</label><input id="app" inputmode="numeric" autocomplete="off">
+<label for="sec">Chave secreta do app</label><input id="sec" autocomplete="off">
+<label for="tok">Código grande (token)</label><textarea id="tok" rows="3" autocomplete="off"></textarea>
+<button class="btn" id="ir">🔌 Conectar</button>
+<div id="msg"></div>
+<div id="pag" class="hide"><label for="sel">Qual é a sua Página?</label><select id="sel"></select><button class="btn" id="usar">Usar esta Página</button></div>
+</div>
+
+<div class="card hide" id="fim"><h2><span class="n">5</span>Guardar a chave no GitHub</h2>
+<p>Falta só guardar a chave. Ela fica escondida, ninguém vê.</p>
+<button class="btn ok" id="cp">📋 Copiar a chave</button>
+<ol><li>Toque no botão azul abaixo (entre no GitHub).</li>
+<li>Em <b>Name</b>, escreva: <code>META_CONFIG</code></li>
+<li>Em <b>Secret</b>, segure o dedo e <b>Cole</b>.</li>
+<li>Toque em <b>Add secret</b>. Pronto!</li></ol>
+<a class="btn" href="https://github.com/serfico21-arch/Pessoal/settings/secrets/actions/new" target="_blank" rel="noopener">Abrir o GitHub</a>
+<textarea id="chave" rows="3" readonly style="margin-top:12px" aria-label="Chave"></textarea>
+<div class="dica">✅ Depois disso, toque em <b>📣 DIVULGAR</b> no Publicador. Em alguns minutos o imóvel aparece no Facebook e no Instagram.</div></div>
+</main>
+<script>
+(function(){"use strict";
+var G="https://graph.facebook.com/v23.0",paginas=[];
+function $(i){return document.getElementById(i)}
+function msg(t,ok){$("msg").innerHTML='<div class="'+(ok?"dica":"aviso")+'">'+t+'</div>'}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function get(u){return fetch(u).then(function(r){return r.json()}).then(function(j){if(j.error)throw new Error(j.error.message);return j})}
+$("ir").onclick=function(){var a=$("app").value.trim(),s=$("sec").value.trim(),t=$("tok").value.trim();
+ if(!a||!s||!t){msg("Preencha os três campos.");return}
+ msg("⏳ Conectando…",true);
+ get(G+"/oauth/access_token?grant_type=fb_exchange_token&client_id="+encodeURIComponent(a)+"&client_secret="+encodeURIComponent(s)+"&fb_exchange_token="+encodeURIComponent(t))
+ .then(function(j){return get(G+"/me/accounts?fields=id,name,access_token,instagram_business_account{id,username}&limit=50&access_token="+encodeURIComponent(j.access_token))})
+ .then(function(j){paginas=j.data||[];if(!paginas.length){msg("Não achei nenhuma Página. Confira se você marcou a sua Página quando o Facebook perguntou, e gere o código de novo (passo 3).");return}
+  $("sel").innerHTML=paginas.map(function(p,i){return'<option value="'+i+'">'+esc(p.name)+(p.instagram_business_account?" + Instagram @"+esc(p.instagram_business_account.username||""):" (sem Instagram)")+'</option>'}).join("");
+  var k=paginas.findIndex(function(p){return /costa|fcosta|rcm/i.test(p.name)});if(k>-1)$("sel").value=k;
+  $("pag").classList.remove("hide");msg("✅ Conectou! Agora escolha a sua Página.",true)})
+ .catch(function(e){msg("Não deu certo: "+esc(e.message)+"<br>Confira o ID, a chave secreta e gere o código de novo no passo 3 (ele vence em 1 hora).")})};
+$("usar").onclick=function(){var p=paginas[+$("sel").value];if(!p)return;
+ var c={token:p.access_token,page:p.id,ig:p.instagram_business_account?p.instagram_business_account.id:"",nome:"Sérgio Costa",creci:"CRECI-SP 294791-F",whats:"5511993509109"};
+ $("chave").value=JSON.stringify(c);$("fim").classList.remove("hide");
+ if(!c.ig)msg("⚠️ Esta Página não tem Instagram ligado. O Facebook vai funcionar. Para o Instagram, faça o passo 1 e depois repita os passos 3 e 4.");
+ $("fim").scrollIntoView({behavior:"smooth"});
+ $("tok").value="";$("sec").value=""};
+$("cp").onclick=function(){var a=$("chave");a.select();try{document.execCommand("copy")}catch(e){}try{navigator.clipboard.writeText(a.value)}catch(e){}this.textContent="✅ Copiada!"};
+})();
+</script>
+</body>
+</html>
