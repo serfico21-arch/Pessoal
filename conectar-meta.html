@@ -24,6 +24,7 @@ h1{margin:0;font:700 20px/1.25 'Sora',sans-serif}
 .bt:hover{background:#093070}
 .bt.ms{background:#1877f2}.bt.ms:hover{background:#1468d8}
 .bt.zp{background:#128c4a}.bt.zp:hover{background:#0e7a40}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:#0d1b2e;color:#fff;padding:12px 18px;border-radius:12px;font:700 15px 'DM Sans',sans-serif;z-index:50;display:none;max-width:90vw;text-align:center}
 .voltar{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;padding:12px 16px;border-radius:12px;border:1.5px solid var(--line);color:var(--tx);font:700 15px 'DM Sans',sans-serif;text-decoration:none}
 .voltar:hover{border-color:var(--sk)}
 </style>
@@ -34,7 +35,7 @@ h1{margin:0;font:700 20px/1.25 'Sora',sans-serif}
   <div class="aviso">Divulgação oficial via Meta - Sem robô, sem App. Você posta pelo Meta Business Suite.</div>
   <a class="bt" href="https://business.facebook.com/" target="_blank" rel="noopener">Postar no Facebook + Instagram via Meta Business Suite</a>
   <p class="nota">Abre o Meta Business Suite oficial. Lá você posta 1 vez e vai para o Feed e Story do Facebook e do Instagram juntos.</p>
-  <a class="bt ms" id="bt-msg" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Ffcostacorretor.com" target="_blank" rel="noopener">Compartilhar no Messenger do Facebook</a>
+  <a class="bt ms" id="bt-msg" href="fb-messenger://share?link=https%3A%2F%2Ffcostacorretor.com" rel="noopener">Compartilhar no Messenger do Facebook</a>
   <p class="nota">Abre o Messenger para mandar o imóvel para seus contatos.</p>
   <a class="bt zp" id="bt-zap" href="https://wa.me/?text=https%3A%2F%2Ffcostacorretor.com" target="_blank" rel="noopener">Compartilhar no WhatsApp</a>
   <p class="nota">Abre o WhatsApp para mandar para Status e grupos.</p>
@@ -42,6 +43,7 @@ h1{margin:0;font:700 20px/1.25 'Sora',sans-serif}
   <a class="voltar" href="publicacao.html">Escolher o imóvel para divulgar</a>
   <a class="voltar" href="index.html">Voltar para a FCosta</a>
 </main>
+<div id="toast" role="status" aria-live="polite">Texto copiado! Abra o Messenger, escolha a pessoa e cole.</div>
 <script>
 (function () {
   var SITE = 'https://fcostacorretor.com', link = SITE, texto = SITE, achou = false;
@@ -70,7 +72,16 @@ h1{margin:0;font:700 20px/1.25 'Sora',sans-serif}
     }
   } catch (e) {}
   if (!achou) document.getElementById('nt-im').textContent = 'Nenhum imóvel escolhido ainda: os botões levam o link do site. Para mandar um imóvel, escolha-o no Publicador.';
-  document.getElementById('bt-msg').href = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link);
+  var btMsg = document.getElementById('bt-msg');
+  btMsg.href = 'fb-messenger://share?link=' + encodeURIComponent(link);
+  /* Messenger: no celular abre o app; no computador copia o texto do imóvel. */
+  btMsg.addEventListener('click', function (e) {
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return;
+    e.preventDefault();
+    function ok() { var t = document.getElementById('toast'); t.style.display = 'block'; clearTimeout(ok.t); ok.t = setTimeout(function () { t.style.display = 'none'; }, 3500); }
+    function velho() { var ta = document.createElement('textarea'); ta.value = texto; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (x) { } ta.remove(); ok(); }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(texto).then(ok, velho); else velho();
+  });
   document.getElementById('bt-zap').href = 'https://wa.me/?text=' + encodeURIComponent(texto);
 })();
 </script>

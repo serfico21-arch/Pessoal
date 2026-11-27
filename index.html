@@ -1575,6 +1575,15 @@ var FERRAMENTAS = [
   }
   /* Divulgação oficial via Meta: 3 botões (Meta Business Suite, Messenger, WhatsApp).
      Usam o último imóvel escolhido no Publicador (guardado neste aparelho); sem imóvel, vai o link do site. */
+  /* Messenger: no celular abre o app (fb-messenger://share); no computador copia o texto do imóvel. */
+  window.fcMsgr = function (a) {
+    if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) return true;
+    var t = a.getAttribute('data-txt') || '';
+    function ok() { if (typeof avisar === 'function') avisar('Texto copiado! Abra o Messenger, escolha a pessoa e cole.'); }
+    function velho() { var ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); } catch (e) { } ta.remove(); ok(); }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(ok, velho); else velho();
+    return false;
+  };
   function metaDivulgarHtml() {
     var SITE = 'https://fcostacorretor.com', link = SITE, texto = SITE;
     var nota = 'Nenhum imóvel escolhido ainda: os botões levam o link do site. Escolha o imóvel em "Divulgar imóvel".';
@@ -1606,7 +1615,7 @@ var FERRAMENTAS = [
       '<div class="d3-aviso" role="note">Divulgação oficial via Meta - Sem robô, sem App. Você posta pelo Meta Business Suite.</div>' +
       '<a class="d3-bt bs" href="https://business.facebook.com/" target="_blank" rel="noopener">Postar no Facebook + Instagram via Meta Business Suite</a>' +
       '<p class="d3-nota">Abre o Meta Business Suite oficial. Lá você posta 1 vez e vai para o Feed e Story do Facebook e do Instagram juntos.</p>' +
-      '<a class="d3-bt ms" href="' + esc('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(link)) + '" target="_blank" rel="noopener">Compartilhar no Messenger do Facebook</a>' +
+      '<a class="d3-bt ms" href="' + esc('fb-messenger://share?link=' + encodeURIComponent(link)) + '" data-txt="' + esc(texto) + '" onclick="return window.fcMsgr(this)" rel="noopener">Compartilhar no Messenger do Facebook</a>' +
       '<p class="d3-nota">Abre o Messenger para mandar o imóvel para seus contatos.</p>' +
       '<a class="d3-bt zp" href="' + esc('https://wa.me/?text=' + encodeURIComponent(texto)) + '" target="_blank" rel="noopener">Compartilhar no WhatsApp</a>' +
       '<p class="d3-nota">Abre o WhatsApp para mandar para Status e grupos.</p>' +

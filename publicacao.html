@@ -227,7 +227,7 @@ function linkWa(){return"https://wa.me/?text="+encodeURIComponent(tx("wa",S.v))}
 function telaSimples(){var i=cur,h='<div class="card" style="border:3px solid var(--ok)">';
  h+='<a class="b3 bs" data-canal="Meta Business Suite" href="https://business.facebook.com/" target="_blank" rel="noopener">Postar no Facebook + Instagram via Meta Business Suite</a>';
  h+='<p class="n3">Abre o Meta Business Suite oficial. Lá você posta 1 vez e vai para o Feed e Story do Facebook e do Instagram juntos.</p>';
- h+='<a class="b3 ms" data-canal="Messenger" href="https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(lk(i,"messenger"))+'" target="_blank" rel="noopener">Compartilhar no Messenger do Facebook</a>';
+ h+='<a class="b3 ms" data-canal="Messenger" href="fb-messenger://share?link='+encodeURIComponent(lk(i,"messenger"))+'" rel="noopener">Compartilhar no Messenger do Facebook</a>';
  h+='<p class="n3">Abre o Messenger para mandar o imóvel para seus contatos.</p>';
  h+='<a class="b3 zp" data-canal="WhatsApp" href="'+esc(linkWa())+'" target="_blank" rel="noopener">Compartilhar no WhatsApp</a>';
  h+='<p class="n3" style="margin-bottom:0">Abre o WhatsApp para mandar para Status e grupos.</p></div>';
@@ -340,7 +340,7 @@ function restaurar(e){var f=e.target.files[0];if(!f)return;var r=new FileReader(
 /* ===== Cliques ===== */
 document.addEventListener("click",function(e){var t=e.target.closest("[data-tab],[data-a],[data-canal],[data-im],[data-lt],[data-rede],[data-tudo],[data-item],[data-del],#rsync");if(!t)return;
  if(t.id==="rsync"){e.preventDefault();carregar(true);return}
-  if(t.dataset.canal){if(t.dataset.canal==="WhatsApp"&&t.tagName==="A")t.href=linkWa();marca(t.dataset.canal);return}
+  if(t.dataset.canal){if(t.dataset.canal==="Messenger"&&!CELULAR){e.preventDefault();copiar(tx("wa",S.v));toast("Texto copiado! Abra o Messenger, escolha a pessoa e cole.");marca(t.dataset.canal);return}if(t.dataset.canal==="WhatsApp"&&t.tagName==="A")t.href=linkWa();marca(t.dataset.canal);return}
  if(t.dataset.tab){tab=t.dataset.tab;msgLista="";render();window.scrollTo(0,0);return}
  if(t.dataset.im){var i=IM.filter(function(x){return x.id===t.dataset.im})[0];if(i){escolhe(i);render()}return}
  if(t.dataset.lt){lt=t.dataset.lt;msgLista="";render();return}
