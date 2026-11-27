@@ -1,45 +1,21 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Conectar Meta - FCOSTA Imóveis</title>
-<style>
-  body{font-family:Arial,sans-serif;background:#f2f2f2;margin:0;padding:20px;text-align:center}
-  .card{background:#fff;max-width:480px;margin:20px auto;padding:24px;border-radius:16px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
-  h1{font-size:22px;margin:0 0 8px}
-  p{color:#555;line-height:1.5}
-  input{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:10px 0;box-sizing:border-box}
-  button{width:100%;padding:14px;border:0;border-radius:10px;font-size:16px;font-weight:bold;cursor:pointer;margin-top:8px}
-  .meta{background:#1877F2;color:#fff}
-  .wa{background:#25D366;color:#fff}
-  .link{font-size:13px;color:#888;margin-top:12px;display:block;word-break:break-all}
-</style>
-</head>
-<body>
-<div class="card">
-  <h1>Conectar Meta</h1>
-  <p>Cole o link do imóvel que você quer divulgar e compartilhe com 1 botão.</p>
-  <input id="link" type="url" placeholder="Cole aqui o link do imóvel - ex: https://serfico21-arch.github.io/Pessoal/divulgar/..." value="">
-  <button class="meta" onclick="compartilharMeta()">Compartilhar no Facebook</button>
-  <button class="wa" onclick="compartilharWhats()">Compartilhar no WhatsApp</button>
-  <span class="link" id="preview"></span>
-</div>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Conectar Meta - Facebook e Instagram</title>
 <script>
-function getLink(){
-  let v = document.getElementById('link').value.trim();
-  if(!v){ v = 'https://serfico21-arch.github.io/Pessoal/'; }
-  document.getElementById('preview').textContent = v;
-  return v;
-}
-function compartilharMeta(){
-  let url = encodeURIComponent(getLink());
-  window.open('https://www.facebook.com/sharer/sharer.php?u=' + url, '_blank');
-}
-function compartilharWhats(){
-  let url = encodeURIComponent(getLink());
-  window.open('https://wa.me/?text=' + encodeURIComponent('Olha esse imóvel: ' + getLink()), '_blank');
-}
+/* A conexão com o Facebook e o Instagram agora fica DENTRO do index (janela "Ligar redes").
+   Este arquivo só existe para links antigos (ex.: "Ligar agora"): ele leva para lá, saindo de qualquer moldura. */
+(function () {
+  var destino = "index.html#ligar-meta";
+  try { if (window.top && window.top !== window && window.top.__liberarSaida) window.top.__liberarSaida(true); } catch (e) {}
+  try { (window.top || window).location.replace(destino); } catch (e) { location.replace(destino); }
+})();
 </script>
+</head>
+<body style="margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,sans-serif;text-align:center;padding:24px">
+  <p>Abrindo a conexão dentro da FCosta…<br><a href="index.html#ligar-meta" target="_top">Toque aqui se não abrir</a></p>
 </body>
 </html>
