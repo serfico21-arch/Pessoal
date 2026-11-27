@@ -71,10 +71,16 @@ details{margin-bottom:10px}
 summary{cursor:pointer;font-weight:700;padding:8px 0;font-size:18px}
 .ajuda li{margin-bottom:8px}
 .hide{display:none!important}
+.wrapmeta{max-width:860px;margin:0 auto;padding:10px 16px 0}
+.wrapmeta .dica{margin:0;text-align:center;font-weight:700}
+.b3{display:flex;align-items:center;justify-content:center;width:100%;min-height:72px;padding:14px 16px;border-radius:16px;border:0;color:#fff;font:700 19px/1.25 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;text-align:center;text-decoration:none;cursor:pointer}
+.b3.bs{background:#0b2e6b}.b3.ms{background:var(--fb)}.b3.zp{background:var(--wa)}
+.n3{margin:8px 2px 18px;font-size:15px;color:var(--m)}
 </style>
 </head>
 <body>
-<header><div class="in"><h1>📣 Publicador FCosta</h1><a href="conectar-meta.html">🔌 Ligar redes</a><a href="https://fcostacorretor.com/painel_adm" target="_blank" rel="noopener">Painel ADM</a></div></header>
+<header><div class="in"><h1>📣 Publicador FCosta</h1><a href="https://fcostacorretor.com/painel_adm" target="_blank" rel="noopener">Painel ADM</a></div></header>
+<div class="wrapmeta"><div class="dica" role="note">Divulgação oficial via Meta - Sem robô, sem App. Você posta pelo Meta Business Suite.</div></div>
 <div id="st">Carregando imóveis do site…</div>
 <main>
  <section id="t-div"></section>
@@ -211,39 +217,15 @@ function acaoRede(k){var r=redes().filter(function(x){return x.k===k})[0];if(!r)
  toast(r.k==="fbgrupo1"?"Texto copiado. Na janela, escolha \"Compartilhar em um grupo\" e cole o texto":"Texto copiado! É só colar (segure o dedo e toque em Colar)");
  setTimeout(render,50);return false}
 
-/* ===== BOTÃO ÚNICO "DIVULGAR" (automático) =====
-   Toque em DIVULGAR: o pedido vai para o Firebase (fcosta_publicacoes, auto:true).
-   O robô do GitHub (.github/workflows/divulgar-auto.yml) pega a cada 5 minutos e
-   posta na Página do Facebook e no Instagram (post + story). O resultado volta em
-   divulgar/status.json. Para ligar o robô: conectar-meta.html (uma vez só). */
-var ROBO=null,roboT=0;
-/* Conexão feita em conectar-meta.html (guardada neste aparelho): fcosta_meta, fcosta_meta_page_id e fcosta_meta_ig_id */
-function metaLocal(){var r={on:false,venceu:false,nome:"",ig:false};
- try{var d=JSON.parse(localStorage.getItem("fcosta_meta")||"null"),pid=localStorage.getItem("fcosta_meta_page_id"),ig=localStorage.getItem("fcosta_meta_ig_id");
-  if(pid||(d&&d.conectado&&d.pagina)){r.nome=(d&&d.pagina&&d.pagina.nome)||"Página conectada";r.ig=!!(ig||(d&&d.instagram));
-   if(d&&d.expiraEm&&d.expiraEm<Date.now())r.venceu=true;else r.on=true}}catch(e){}
- return r}
-function lerRobo(cb){fetch("https://api.github.com/repos/serfico21-arch/Pessoal/contents/divulgar/status.json?ref=main&t="+Date.now(),{headers:{Accept:"application/vnd.github.raw"},cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()})
- .catch(function(){return fetch("divulgar/status.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()})})
- .then(function(j){ROBO=j;roboT=Date.now();if(cb)cb()}).catch(function(){})}
-function divulgar(){if(!cur)return;var b=$("bdiv");if(b){b.disabled=true;b.textContent="⏳ Enviando…"}
- fetch(DB+"/fcosta_publicacoes.json",{method:"POST",body:JSON.stringify({imovelId:cur.id,codigo:cur.codigo,titulo:cur.titulo,capa:cur.fotos[0]||"",link:cur.link,canal:"Automático: Facebook + Instagram",ferramenta:"publicador",auto:true,criado:new Date().toISOString()})})
- .then(function(r){if(!r.ok)throw 0;return r.json()}).then(function(j){S.auto[cur.id]={k:j.name,t:Date.now()};diaOk();S.dia.n++;save();toast("✅ Enviado! O robô vai postar em alguns minutos");render()})
- .catch(function(){toast("Não consegui enviar. Confira a internet e tente de novo");render()})}
-function linhaRede(nome,r,esperando){return'<li><span class="n">'+nome+'</span>'+(r?(r.ok?'<span class="tag ok">✅ postado</span>'+(r.link?' <a href="'+esc(r.link)+'" target="_blank" rel="noopener">ver</a>':''):'<span class="tag am" title="'+esc(r.erro||"")+'">❌ não foi</span>'):(esperando?'<span class="tag">⏳ na fila</span>':''))+'</li>'}
-function telaSimples(){var i=cur,a=S.auto[i.id],h='<div class="card" style="border:3px solid var(--ok)">';
- var M=metaLocal(),lig=M.on||(ROBO&&ROBO.conectado);
- if(M.on)h+='<div class="dica">✅ <b>Ligado: '+esc(M.nome)+'</b>'+(M.ig?' + Instagram':' (só Facebook)')+' · <a href="conectar-meta.html">trocar</a></div>';
- else if(M.venceu)h+='<div class="aviso">⚠️ A conexão com '+esc(M.nome)+' venceu. <a href="conectar-meta.html"><b>Renovar agora</b></a></div>';
- else if(!lig)h+='<div class="aviso">🔌 A postagem automática no Facebook e Instagram ainda não está ligada. <a href="conectar-meta.html"><b>Ligar agora (uma vez só)</b></a></div>';
- h+='<button class="btn ok big" id="bdiv" data-a="divulgar" style="min-height:84px;font-size:26px">📣 DIVULGAR</button>';
- h+='<p class="mut" style="margin-top:8px">Posta sozinho na sua <b>Página do Facebook</b> e no <b>Instagram</b> (post com fotos + story)'+(ROBO&&ROBO.redes&&ROBO.redes.tg?' e no seu <b>canal do Telegram</b>':'')+'.</p>';
- if(a){var it=ROBO&&ROBO.itens&&ROBO.itens[a.k],esp=!it;
-  h+='<p style="margin:10px 0 0"><b>Enviado '+quando(a.t)+' às '+new Date(a.t).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+'</b>'+(esp?' · o robô posta em até 15 minutos':'')+'</p><ul class="lst">'
-  +linhaRede("📘 Facebook (post)",it&&it.fb,esp)+linhaRede("📘 Facebook (story)",it&&it.fbs,esp)+linhaRede("📸 Instagram (post)",it&&it.ig,esp)+linhaRede("📸 Instagram (story)",it&&it.igs,esp)+((it&&it.tg)||(esp&&ROBO&&ROBO.redes&&ROBO.redes.tg)?linhaRede("✈️ Telegram",it&&it.tg,esp):"")+'</ul>'+(it&&it.erro?'<div class="aviso">'+esc(it.erro)+'</div>':'')}
- h+='<h3 style="margin-top:16px">Também com 1 toque:</h3><div class="row">'
- +(navigator.share?'<button class="btn wa" data-a="zapshare">🟢 WhatsApp<br><small style="font-weight:400;font-size:13px">status e grupos, com fotos</small></button>':'<a class="btn wa" data-rede="wa" href="#">🟢 WhatsApp</a>')
- +'<a class="btn fb" data-rede="msgr" href="#">💬 Messenger</a></div></div>';
+/* ===== DIVULGAR: 3 botões (Meta Business Suite, Messenger e WhatsApp). Sem robô, sem App, sem login. ===== */
+function linkWa(){return"https://wa.me/?text="+encodeURIComponent(tx("wa",S.v))}
+function telaSimples(){var i=cur,h='<div class="card" style="border:3px solid var(--ok)">';
+ h+='<a class="b3 bs" data-canal="Meta Business Suite" href="https://business.facebook.com/" target="_blank" rel="noopener">Postar no Facebook + Instagram via Meta Business Suite</a>';
+ h+='<p class="n3">Abre o Meta Business Suite oficial. Lá você posta 1 vez e vai para o Feed e Story do Facebook e do Instagram juntos.</p>';
+ h+='<a class="b3 ms" data-canal="Messenger" href="https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(lk(i,"messenger"))+'" target="_blank" rel="noopener">Compartilhar no Messenger do Facebook</a>';
+ h+='<p class="n3">Abre o Messenger para mandar o imóvel para seus contatos.</p>';
+ h+='<a class="b3 zp" data-canal="WhatsApp" href="'+esc(linkWa())+'" target="_blank" rel="noopener">Compartilhar no WhatsApp</a>';
+ h+='<p class="n3" style="margin-bottom:0">Abre o WhatsApp para mandar para Status e grupos.</p></div>';
  return h}
 
 /* ===== DIVULGAR EM TUDO: um botão só, que vai passando de rede em rede =====
@@ -351,8 +333,9 @@ function render(){$("t-div").innerHTML=telaDivulgar();$("t-lis").innerHTML=telaL
 function restaurar(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var o=JSON.parse(r.result);if(!o||!o.listas)throw 0;var n=0;Object.keys(S.listas).forEach(function(k){(o.listas[k]||[]).forEach(function(it){if(it&&it.url&&!S.listas[k].some(function(x){return chave(x.url)===chave(it.url)})){S.listas[k].push(it);n++}})});if(o.cfg)S.cfg=Object.assign(S.cfg,o.cfg);save();render();toast(n+" item(ns) restaurado(s)")}catch(x){toast("Arquivo de backup inválido")}};r.readAsText(f)}
 
 /* ===== Cliques ===== */
-document.addEventListener("click",function(e){var t=e.target.closest("[data-tab],[data-a],[data-im],[data-lt],[data-rede],[data-tudo],[data-item],[data-del],#rsync");if(!t)return;
+document.addEventListener("click",function(e){var t=e.target.closest("[data-tab],[data-a],[data-canal],[data-im],[data-lt],[data-rede],[data-tudo],[data-item],[data-del],#rsync");if(!t)return;
  if(t.id==="rsync"){e.preventDefault();carregar(true);return}
+  if(t.dataset.canal){if(t.dataset.canal==="WhatsApp"&&t.tagName==="A")t.href=linkWa();marca(t.dataset.canal);return}
  if(t.dataset.tab){tab=t.dataset.tab;msgLista="";render();window.scrollTo(0,0);return}
  if(t.dataset.im){var i=IM.filter(function(x){return x.id===t.dataset.im})[0];if(i){escolhe(i);render()}return}
  if(t.dataset.lt){lt=t.dataset.lt;msgLista="";render();return}
@@ -361,8 +344,7 @@ document.addEventListener("click",function(e){var t=e.target.closest("[data-tab]
  if(t.dataset.item!=null){var it0=S.listas[lt][+t.dataset.item];if(it0&&t.tagName==="A")t.href=urlItem(lt,it0,+t.dataset.item);abreItem(lt,+t.dataset.item);setTimeout(render,80);return}
  if(t.dataset.del){if(!confirm("Apagar este item da lista?"))return;S.listas[lt]=S.listas[lt].filter(function(x){return x.id!==t.dataset.del});save();render();return}
  var a=t.dataset.a;
- if(a==="divulgar")divulgar();
- else if(a==="zapshare")compartilhar("wa");
+  if(a==="zapshare")compartilhar("wa");
  else if(a==="tudopula"){S.pos["tudo|"+cur.id]=tudoPos()+1;save();render()}
  else if(a==="tudo0"){S.pos["tudo|"+cur.id]=0;save();render()}
  else if(a==="salvatudo"){var ks=[].slice.call(document.querySelectorAll(".ctudo")).filter(function(x){return x.checked}).map(function(x){return x.value});if(!ks.length){toast("Marque pelo menos uma rede");return}S.cfg.tudo=ks;save();render();toast("Redes salvas")}
@@ -386,8 +368,7 @@ document.addEventListener("click",function(e){var t=e.target.closest("[data-tab]
 try{var tm=localStorage.getItem("pub2_tema");if(tm)document.documentElement.setAttribute("data-theme",tm)}catch(e){}
 load();if(!S.mig)migrar(false);
 if(/[#&]ajuda/.test(location.hash))tab="aju";
-render();carregar(false);lerRobo(render);
-setInterval(function(){var a=cur&&S.auto[cur.id];if(a&&Date.now()-a.t<36e5&&tab==="div"&&!(ROBO&&ROBO.itens&&ROBO.itens[a.k]))lerRobo(render)},45000);
+render();carregar(false);
 })();
 </script>
 </body>
