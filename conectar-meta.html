@@ -50,13 +50,22 @@ h1{margin:0;font:700 20px/1.25 'Sora',sans-serif}
     if (typeof p === 'number') return p.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
     p = String(p).trim(); return /^R\$/.test(p) ? p : 'R$ ' + p;
   }
+  function areaFmt(a) { a = String(a == null ? '' : a).trim(); return a ? a + (/m/i.test(a) ? '' : ' m²') : ''; }
+  function msgZap(im) {
+    var q = function (v, s, pl) { v = +v || 0; return v ? v + ' ' + (v > 1 ? pl : s) : ''; };
+    var pr = dinheiro(im.preco); if (pr && im.status === 'aluguel') pr += '/mês';
+    var t = areaFmt(im.terreno), ct = areaFmt(im.construida), tit = [im.titulo, im.bairro, im.cidade].filter(Boolean).join(' - ');
+    return [tit ? '🏡 ' + tit : '', [pr, im.codigo].filter(Boolean).join(' - '),
+      [q(im.quartos, 'dormitório', 'dormitórios'), q(im.banheiros, 'banheiro', 'banheiros'), q(im.vagas, 'vaga', 'vagas')].filter(Boolean).join(' | '),
+      [t && t + ' terreno', ct && ct + ' construído'].filter(Boolean).join(' | '), im.link || '', 'Chama para agendar visita!'].filter(Boolean).join('\n');
+  }
   try {
     var cfg = JSON.parse(localStorage.getItem('pub2_fcosta') || 'null'), cache = JSON.parse(localStorage.getItem('pub2_imoveis') || 'null');
     var lista = (cache && cache.l) || [], im = null;
     for (var i = 0; i < lista.length; i++) { if (cfg && lista[i].id === cfg.ult) { im = lista[i]; break; } }
     if (im && im.link) {
       achou = true; link = im.link;
-      texto = '\uD83C\uDFE1 ' + (im.titulo || 'Imóvel') + (im.preco !== '' && im.preco != null ? ' – ' + dinheiro(im.preco) : '') + '\n' + link;
+      texto = msgZap(im);
       document.getElementById('nt-im').textContent = 'Imóvel que vai nos botões: ' + (im.titulo || 'Imóvel') + (im.codigo ? ' (' + im.codigo + ')' : '') + '.';
     }
   } catch (e) {}

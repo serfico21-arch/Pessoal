@@ -127,7 +127,7 @@ function achaFotos(d){var out=[];function add(u){if(typeof u==="string"&&/^https
  add(d.fotoDestaque);arr(d.fotos).forEach(function(f){if(typeof f==="string")add(f);else if(f&&typeof f==="object")add(f.url||f.src)});["foto","imagem","capa"].forEach(function(k){add(d[k])});return out}
 function cloud(u,w){return(u&&u.indexOf("res.cloudinary.com")>-1&&u.indexOf("/upload/")>-1)?u.replace("/upload/","/upload/f_jpg,q_auto,w_"+w+"/"):u}
 function norm(id,d){var st=d.status||"venda";var slug=String(d.slug||"").replace(/^\/+|\/+$/g,"");
- return{id:id,codigo:d.codigo||"",titulo:d.titulo||"Imóvel",status:st,tipo:d.tipo||"",preco:d.preco||"",area:d.area||"",quartos:+d.quartos||0,banheiros:+d.banheiros||0,vagas:+d.vagas||0,bairro:d.bairro||"",cidade:d.cidade||"",descricao:String(d.descricao||"").trim(),fotos:achaFotos(d),destaque:!!d.destaque,atualizado:d.atualizado||"",
+ return{id:id,codigo:d.codigo||"",titulo:d.titulo||"Imóvel",status:st,tipo:d.tipo||"",preco:d.preco||"",area:d.area||"",terreno:d.areaTotal||d.area_total||d.areaTerreno||d.area_terreno||d.terreno||"",construida:d.areaConstruida||d.area_construida||d.construida||d.areaUtil||"",quartos:+d.quartos||0,banheiros:+d.banheiros||0,vagas:+d.vagas||0,bairro:d.bairro||"",cidade:d.cidade||"",descricao:String(d.descricao||"").trim(),fotos:achaFotos(d),destaque:!!d.destaque,atualizado:d.atualizado||"",
   link:/^[a-z0-9-]+$/i.test(slug)?SITE+"/"+slug+"/":SITE+"/imovel?id="+encodeURIComponent(id)}}
 function carregar(manual,cb){window.syncMsg="🔄 Buscando imóveis do Painel ADM…";$("st").textContent=window.syncMsg;
  fetch(DB+"/fcosta_imoveis.json",{cache:"no-store"}).then(function(r){if(!r.ok)throw r.status;return r.json()}).then(function(d){
@@ -159,12 +159,17 @@ var ABRE=[
  function(i){return"🏠 "+i.titulo+" – "+preco(i)}
 ];
 var FECHA=["💬 Chama no WhatsApp que eu mando fotos e vídeo:","📲 Quer visitar? Fale comigo:","👉 Mais informações no WhatsApp:","📩 Me chama que eu explico tudo:","🤝 Agende sua visita:"];
+function areaFmt(a){a=String(a==null?"":a).trim();return a?a+(/m/i.test(a)?"":" m²"):""}
+/* Texto do WhatsApp: monta sozinho com os dados do imóvel selecionado (campo vazio fica de fora, nunca texto fixo) */
+function textoZap(i){var q=function(v,s,pl){v=+v||0;return v?v+" "+(v>1?pl:s):""},pr=(i.preco===""||i.preco==null)?"":preco(i),t=areaFmt(i.terreno),c=areaFmt(i.construida),tit=[i.titulo,i.bairro,i.cidade].filter(Boolean).join(" - ");
+ return[tit?"🏡 "+tit:"",[pr,i.codigo].filter(Boolean).join(" - "),[q(i.quartos,"dormitório","dormitórios"),q(i.banheiros,"banheiro","banheiros"),q(i.vagas,"vaga","vagas")].filter(Boolean).join(" | "),[t&&t+" terreno",c&&c+" construído"].filter(Boolean).join(" | "),lk(i,"whatsapp"),"Chama para agendar visita!"].filter(Boolean).join("\n")}
 function texto(i,rede,v){if(!i)return"";v=Math.abs(v||0);var a=ABRE[v%ABRE.length](i),f=FECHA[v%FECHA.length],c=S.cfg,ft=feats(i),src={grupo:"facebook_grupo",fb:"facebook",wa:"whatsapp",ig:"instagram",msg:"messenger",x:"x",tt:"tiktok",in:"linkedin",tg:"telegram",gmn:"google",mail:"email"}[rede]||rede;
  var assin=c.nome+" · "+c.creci;
  if(rede==="x")return(a+" 📍"+onde(i)+" 💰"+preco(i)+" "+lk(i,src)).slice(0,275);
  if(rede==="ig"||rede==="tt"){var tg=["#imoveis","#"+(i.status==="aluguel"?"aluguel":"imovelavenda"),"#corretordeimoveis","#casapropria"];if(i.bairro)tg.push("#"+i.bairro.normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/gi,"").toLowerCase());if(i.cidade)tg.push("#"+i.cidade.normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/gi,"").toLowerCase());
   return[a,"","📍 "+onde(i),"💰 "+preco(i),ft&&"🛏️ "+ft,"",curta(i,300),"",f+" "+zap(),"🔗 Link na bio · Cód. "+(i.codigo||""),"",assin,"",tg.join(" ")].filter(function(x){return x!==false&&x!==0&&x!=null}).join("\n").replace(/\n{3,}/g,"\n\n")}
- if(rede==="wa"||rede==="msg")return[a,"📍 "+onde(i),"💰 "+preco(i),ft&&"🛏️ "+ft,"","Veja fotos e detalhes: "+lk(i,src),"",assin].filter(function(x){return x!==false&&x!==0&&x!=null}).join("\n");
+ if(rede==="wa")return textoZap(i);
+ if(rede==="msg")return[a,"📍 "+onde(i),"💰 "+preco(i),ft&&"🛏️ "+ft,"","Veja fotos e detalhes: "+lk(i,src),"",assin].filter(function(x){return x!==false&&x!==0&&x!=null}).join("\n");
  return[a,"","📍 "+onde(i),"💰 "+preco(i),ft&&"🛏️ "+ft,"",curta(i,rede==="grupo"?450:700),"","🔗 Fotos e detalhes: "+lk(i,src),"",f+" "+zap(),"",assin+(i.codigo?" · Cód. "+i.codigo:"")].filter(function(x){return x!==false&&x!==0&&x!=null}).join("\n").replace(/\n{3,}/g,"\n\n")}
 function txtAtual(){var t=$("txt");return t?t.value:texto(cur,"fb",S.v)}
 var ED="";/* se o Sergio mudar o texto à mão, usamos o texto dele em tudo */
