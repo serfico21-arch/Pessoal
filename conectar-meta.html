@@ -2,20 +2,339 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
+<meta name="theme-color" content="#f5f3ee">
 <title>Conectar Meta - Facebook e Instagram</title>
 <script>
-/* A conexão com o Facebook e o Instagram agora fica DENTRO do index (janela "Ligar redes").
-   Este arquivo só existe para links antigos (ex.: "Ligar agora"): ele leva para lá, saindo de qualquer moldura. */
+/* =====================================================================
+   LIGAR REDES (FACEBOOK E INSTAGRAM) — CONFIGURAÇÃO
+   App: Divulga Fosta (developers.facebook.com).
+   Este endereço (REDIRECT_URI) tem que estar igual em "Facebook Login >
+   Configurações > URIs de redirecionamento do OAuth válidos".
+   ===================================================================== */
+const FACEBOOK_APP_ID = "1169481185588897";
+const REDIRECT_URI = "https://serfico21-arch.github.io/Pessoal/conectar-meta.html";
+const APP_DOMAIN = "serfico21-arch.github.io";
+/* Permissões pedidas ao Facebook (as 5 necessárias para o robô publicar) */
+const PERMISSOES_META = ["pages_manage_posts", "pages_read_engagement", "instagram_basic", "instagram_content_publish", "pages_show_list"];
+/* Versão da API do Facebook (versões antigas deixam de funcionar com o tempo) */
+const VERSAO_API_META = "v25.0";
+</script>
+<script>try{document.documentElement.setAttribute('data-theme',JSON.parse(localStorage.getItem('painel_tema2'))||'light')}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{--bg:#0e1525;--card:#161f35;--card2:#1b2540;--line:rgba(255,255,255,.09);--tx:#eef1f8;--texto-muted:#9aa6c0;--tx2:#cfd7ea;--in:#121a2e;--inb:rgba(255,255,255,.16);--okbg:rgba(95,208,163,.10);
+ --brand:#9db8f0;--onbrand:#0e1a36;--onb:#0e1525;--gold:#e0b25a;--wa:#5fd98f;
+ --cy:#62cfe0;--em:#5fd0a3;--am:#e0b25a;--vi:#b6a2f2;--ro:#f08a9b;--sk:#7fb0f5;--or:#f2a468;--pk:#e49ad0;--li:#b8d36a;--sl:#aab6cf;
+ --sombra:0 1px 2px rgba(0,0,0,.25),0 10px 28px -18px rgba(0,0,0,.65);--raio:18px}
+[data-theme=light]{--bg:#f5f3ee;--card:#fff;--card2:#fff;--line:rgba(20,33,61,.09);--tx:#14213d;--texto-muted:#6b7385;--tx2:#2b3752;--in:#f6f4ef;--inb:rgba(20,33,61,.16);--okbg:#eef7f2;
+ --brand:#1f3a6e;--onbrand:#fff;--onb:#fff;--gold:#b8892b;--wa:#12864a;
+ --cy:#1b8a9e;--em:#2a8f6a;--am:#b8892b;--vi:#6d55c2;--ro:#c2455e;--sk:#3a72c8;--or:#c9772a;--pk:#b5459a;--li:#7a9a2e;--sl:#5b6a86;
+ --sombra:0 1px 2px rgba(20,33,61,.05),0 12px 28px -20px rgba(20,33,61,.28)}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;display:grid;place-items:start center;padding:calc(20px + env(safe-area-inset-top,0)) 14px calc(28px + env(safe-area-inset-bottom,0));font:15px/1.45 'DM Sans',system-ui,sans-serif;color:var(--tx);background:var(--bg)}
+#pagina{width:min(560px,100%);background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:0 30px 70px -28px rgba(8,14,30,.35);padding:22px;display:grid;gap:14px}
+#pagina h3{font:700 19px/1.25 'Sora',sans-serif}
+#pagina h3,#pagina h4{margin:0}
+#pagina [hidden]{display:none!important}
+.mt-lead{font-size:16px;line-height:1.5;margin:0}
+.mt-meta-status{font-size:13.5px}
+.meta-on{color:var(--em);font-weight:700}.meta-off{color:var(--am);font-weight:700}
+/* ----- visual da janela "Ligar redes" (igual ao index) ----- */
+#pagina .mt-topo{display:flex;align-items:center;gap:12px}
+#pagina .mt-topo h3{flex:1;min-width:0}
+#pagina .mt-logo{width:44px;height:44px;border-radius:50%;flex:none;object-fit:cover;box-shadow:0 0 0 2px color-mix(in srgb,var(--am) 55%,transparent)}
+#pagina .mt-logo-fb{display:none;width:44px;height:44px;border-radius:50%;flex:none;align-items:center;justify-content:center;background:var(--brand);color:var(--onbrand);font-weight:800}
+.mt-lead{font-size:16px;line-height:1.5;margin:0}
+.mt-nota{font-size:13.5px;color:var(--texto-muted);line-height:1.45;margin:0}
+.mt-msg{border-radius:12px;padding:12px 14px;font-size:14.5px;line-height:1.45}
+.mt-msg strong{display:block;margin-bottom:2px}
+.mt-erro{background:color-mix(in srgb,var(--ro) 14%,var(--card));border:1px solid color-mix(in srgb,var(--ro) 45%,transparent);color:var(--tx)}
+.mt-aviso{background:color-mix(in srgb,var(--am) 14%,var(--card));border:1px solid color-mix(in srgb,var(--am) 45%,transparent);color:var(--tx)}
+.mt-fb{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;min-height:62px;padding:14px 18px;border:0;border-radius:14px;background:#1877f2;color:#fff;font:700 19px 'DM Sans',sans-serif;cursor:pointer}
+.mt-fb:hover{background:#1468d8}.mt-fb svg{width:26px;height:26px;flex:none;fill:#fff}
+.mt-sec,.mt-pri{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:52px;padding:12px 16px;border-radius:12px;font:700 15px 'DM Sans',sans-serif;text-align:center;cursor:pointer;color:var(--tx)}
+.mt-sec{border:1.5px solid var(--line);background:transparent}.mt-sec:hover{border-color:var(--sk)}
+.mt-pri{border:0;background:var(--brand);color:var(--onbrand)}
+.mt-link{background:none;border:0;padding:10px 4px;color:var(--texto-muted);text-decoration:underline;font:14px 'DM Sans',sans-serif;cursor:pointer}
+.mt-ok-topo{display:flex;align-items:center;gap:12px}
+.mt-ok-ic{width:44px;height:44px;border-radius:50%;flex:none;display:grid;place-items:center;background:color-mix(in srgb,var(--em) 18%,var(--card));color:var(--em);font-size:24px}
+.mt-ok-tit{font:800 21px/1.2 'Sora',sans-serif;color:var(--em)}
+.mt-dado{padding:11px 0;border-top:1px solid var(--line)}
+.mt-dado span{display:block;font-size:13px;color:var(--texto-muted)}.mt-dado b{font-size:18px;word-break:break-word}
+.mt-acoes{display:grid;gap:10px;margin-top:6px}
+.mt-paginas{display:grid;gap:8px}
+.mt-paginas label{display:flex;align-items:center;gap:12px;min-height:56px;padding:10px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--in);font-weight:600;cursor:pointer}
+.mt-paginas small{display:block;font-weight:500;font-size:13px;color:var(--texto-muted)}
+.mt-paginas input{width:20px;height:20px;flex:none;accent-color:#1877f2}
+.mt-paginas label:has(input:checked){border-color:#1877f2;background:color-mix(in srgb,#1877f2 10%,var(--card))}
+.mt-carrega{display:flex;align-items:center;gap:14px}
+.mt-giro{width:28px;height:28px;border-radius:50%;flex:none;border:3px solid var(--line);border-top-color:#1877f2;animation:mtgira .9s linear infinite}
+@keyframes mtgira{to{transform:rotate(360deg)}}
+#pagina details{font-size:14px;color:var(--texto-muted);margin-top:12px}
+#pagina summary{cursor:pointer;min-height:40px;padding:8px 0}
+#pagina details ol{padding-left:20px;margin:6px 0 10px}
+.mt-copiar{display:flex;gap:8px;margin:6px 0 4px}
+#pagina input[type=text],#pagina input[type=url]{width:100%;min-width:0;min-height:48px;padding:10px 12px;border-radius:10px;border:1px solid var(--inb);background:var(--in);color:var(--tx);font:15px 'DM Sans',sans-serif}
+.mt-copiar button{flex:none;min-height:48px;padding:0 14px;border-radius:10px;border:1.5px solid var(--line);background:transparent;color:var(--tx);font:600 14px 'DM Sans',sans-serif;cursor:pointer}
+.mt-manual{border-top:1px solid var(--line);margin-top:6px;padding-top:18px;display:grid;gap:10px}
+.mt-manual h4{margin:0;font:700 17px 'Sora',sans-serif}
+.mt-manual .mt-atencao{margin:0;font-size:14px;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--am) 14%,var(--card));color:var(--tx)}
+.mt-linha{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:380px){.mt-linha{grid-template-columns:1fr}}
+.sub-aba .meta-on{color:var(--em);font-weight:700}.sub-aba .meta-off{color:var(--am);font-weight:700}
+#pagina a.mt-pri,#pagina a.mt-sec{text-decoration:none}
+</style>
+</head>
+<body>
+<main id="pagina" aria-labelledby="mt-tit">
+  <div class="mt-topo">
+    <img class="mt-logo" id="mt-logo" src="icon-512.png?v=2" alt="FCosta" width="44" height="44">
+    <span class="mt-logo-fb" id="mt-logo-fb" aria-hidden="true">FC</span>
+    <h3 id="mt-tit">Conectar Meta - Facebook e Instagram</h3>
+  </div>
+  <p class="mt-lead" id="mt-lead">Clique abaixo para conectar seu Facebook e Instagram ao robô. Você vai ser levado para a tela oficial do Facebook para autorizar.</p>
+  <div class="mt-msg mt-erro" id="mt-erro" role="alert" hidden></div>
+  <div class="mt-msg mt-aviso" id="mt-aviso" role="status" hidden></div>
+
+  <section id="mt-inicio" style="display:grid;gap:12px">
+    <button type="button" class="mt-fb" id="mt-conectar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.69.24 2.69.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.88v2.26h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
+      Conectar com Facebook
+    </button>
+    <p class="mt-nota">Você vai autorizar o robô a publicar na sua Página do Facebook e no Instagram ligado a ela. Dá para desligar quando quiser.</p>
+    <details>
+      <summary>Ajuda para o administrador</summary>
+      <p>Antes do primeiro uso, no app <b>Divulga Fosta</b> em developers.facebook.com:</p>
+      <ol>
+        <li>Em Configurações &gt; Básico, coloque <b id="mt-dominio"></b> em "Domínios do aplicativo".</li>
+        <li>Em Facebook Login &gt; Configurações, ative "Login do OAuth do cliente".</li>
+        <li>Cole o endereço abaixo em "URIs de redirecionamento do OAuth válidos" e salve.</li>
+      </ol>
+      <div class="mt-copiar"><input type="text" id="mt-uri" readonly aria-label="Endereço de retorno"><button type="button" id="mt-copiar-uri">Copiar</button></div>
+      <p id="mt-status-appid" style="margin:8px 0 0"></p>
+    </details>
+    <a class="mt-link" href="index.html" style="text-align:center">Voltar para a FCosta</a>
+  </section>
+
+  <section id="mt-carregando" hidden>
+    <div class="mt-carrega" role="status" aria-live="polite"><div class="mt-giro" aria-hidden="true"></div><div><b>Finalizando a conexão…</b><div class="mt-nota">Buscando suas Páginas no Facebook.</div></div></div>
+  </section>
+
+  <section id="mt-escolher" hidden style="display:grid;gap:12px">
+    <h4 style="font:700 17px 'Sora',sans-serif">Escolha a Página do robô</h4>
+    <p class="mt-nota">Sua conta administra mais de uma Página. Marque a que o robô vai usar para publicar.</p>
+    <div class="mt-paginas" id="mt-lista" role="radiogroup" aria-label="Páginas do Facebook"></div>
+    <button type="button" class="mt-pri" id="mt-usar">Usar esta Página</button>
+  </section>
+
+  <section id="mt-ok" hidden style="display:grid;gap:4px">
+    <div class="mt-ok-topo"><div class="mt-ok-ic">✓</div><div class="mt-ok-tit">Conectado com sucesso</div></div>
+    <div class="mt-dado" style="margin-top:10px"><span>Página conectada</span><b id="mt-ok-pagina"></b></div>
+    <div class="mt-dado"><span>Instagram</span><b id="mt-ok-insta"></b></div>
+    <div class="mt-dado" id="mt-ok-val-box" hidden><span>Autorização vale até</span><b id="mt-ok-val"></b></div>
+    <div class="mt-acoes">
+      <a class="mt-pri" href="publicacao.html">Ir para o Publicador</a>
+      <a class="mt-sec" href="index.html">Voltar para a FCosta</a>
+      <button type="button" class="mt-sec" id="mt-reconectar">Conectar outra conta ou Página</button>
+      <button type="button" class="mt-link" id="mt-desconectar">Desligar o robô neste aparelho</button>
+    </div>
+  </section>
+</main>
+
+<script>
 (function () {
-  var destino = "index.html#ligar-meta";
-  try { if (window.top && window.top !== window && window.top.__liberarSaida) window.top.__liberarSaida(true); } catch (e) {}
-  try { (window.top || window).location.replace(destino); } catch (e) { location.replace(destino); }
+  var CHAVE_DADOS = 'fcosta_meta', CHAVE_STATE = 'fcosta_meta_state';
+  var NOMES = { pages_manage_posts: 'publicar na Página', pages_read_engagement: 'ler os dados da Página', instagram_basic: 'acessar o Instagram', instagram_content_publish: 'publicar no Instagram', pages_show_list: 'listar suas Páginas' };
+  var TELAS = ['mt-inicio', 'mt-carregando', 'mt-escolher', 'mt-ok'];
+  var contasPendentes = [], tokenPendente = '', validadePendente = 0;
+
+  function $(id) { return document.getElementById(id); }
+  function mostrar(qual) { TELAS.forEach(function (t) { $(t).hidden = (t !== qual); }); $('mt-lead').hidden = (qual !== 'mt-inicio'); }
+  function limpar() { $('mt-erro').hidden = true; $('mt-aviso').hidden = true; }
+  function erro(texto, titulo) {
+    var b = $('mt-erro'); b.textContent = '';
+    var s = document.createElement('strong'); s.textContent = titulo || 'Não deu certo';
+    b.appendChild(s); b.appendChild(document.createTextNode(texto)); b.hidden = false;
+  }
+  function aviso(t) { $('mt-aviso').textContent = t; $('mt-aviso').hidden = false; }
+  function appIdOk() { return /^\d{6,20}$/.test(String(FACEBOOK_APP_ID).trim()); }
+
+  /* ----- guardado só neste aparelho (as mesmas chaves que o index e o publicacao leem) ----- */
+  function ler() { try { return JSON.parse(localStorage.getItem(CHAVE_DADOS) || 'null'); } catch (e) { return null; } }
+  function gravar(d) {
+    try {
+      localStorage.setItem(CHAVE_DADOS, JSON.stringify(d));
+      localStorage.setItem('fcosta_meta_conectado', '1');
+      localStorage.setItem('fcosta_meta_page_id', d.pagina.id);
+      localStorage.setItem('fcosta_meta_page_token', d.pagina.token);
+      if (d.instagram) localStorage.setItem('fcosta_meta_ig_id', d.instagram.id); else localStorage.removeItem('fcosta_meta_ig_id');
+      return true;
+    } catch (e) { return false; }
+  }
+  function apagar() {
+    ['fcosta_meta', 'fcosta_meta_conectado', 'fcosta_meta_page_id', 'fcosta_meta_page_token', 'fcosta_meta_ig_id', CHAVE_STATE].forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} });
+  }
+
+  /* ----- chamadas ao Facebook ----- */
+  function graph(caminho, token) {
+    var url = 'https://graph.facebook.com/' + VERSAO_API_META + caminho + (caminho.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + encodeURIComponent(token);
+    return fetch(url).then(function (r) { return r.json(); }, function () { throw { rede: true }; })
+      .then(function (j) { if (j && j.error) throw { fb: j.error }; return j; });
+  }
+  function textoDoErro(e) {
+    if (e && e.msg) return e.msg;
+    if (e && e.rede) return 'Não consegui falar com o Facebook. Confira sua internet e tente de novo.';
+    if (e && e.fb) {
+      var c = e.fb.code;
+      if (c === 190) return 'A autorização venceu ou foi cancelada no Facebook. Clique em Conectar com Facebook para fazer de novo.';
+      if (c === 10 || c === 200 || c === 299) return 'Faltou aceitar alguma permissão. Clique em Conectar com Facebook e deixe todas as opções marcadas.';
+      if (c === 4 || c === 17 || c === 32 || c === 613) return 'O Facebook limitou os pedidos por agora. Espere alguns minutos e tente de novo.';
+      return 'O Facebook não aceitou o pedido. Tente conectar de novo. Se continuar assim, avise o suporte.';
+    }
+    return 'Algo deu errado na conexão. Tente de novo em alguns instantes.';
+  }
+
+  /* ----- botão principal: vai de verdade para o login oficial do Facebook ----- */
+  function conectar() {
+    limpar();
+    if (!appIdOk()) { erro('O APP ID do Facebook não está preenchido corretamente no começo do código (const FACEBOOK_APP_ID).', 'App ainda não configurado'); return; }
+    var arr = new Uint8Array(16), state = '';
+    try { (window.crypto || window.msCrypto).getRandomValues(arr); } catch (e) { for (var i = 0; i < 16; i++) arr[i] = Math.floor(Math.random() * 256); }
+    for (var k = 0; k < arr.length; k++) state += ('0' + arr[k].toString(16)).slice(-2);
+    try { localStorage.setItem(CHAVE_STATE, JSON.stringify({ s: state, t: Date.now() })); }
+    catch (e) { erro('Este navegador não deixa guardar a conexão. Saia do modo anônimo ou use outro navegador.', 'Não foi possível começar'); return; }
+
+    var url = 'https://www.facebook.com/' + VERSAO_API_META + '/dialog/oauth?' + [
+      'client_id=' + encodeURIComponent(String(FACEBOOK_APP_ID).trim()),
+      'redirect_uri=' + encodeURIComponent(REDIRECT_URI),
+      'state=' + state,
+      'response_type=token',
+      'auth_type=rerequest',
+      'scope=' + encodeURIComponent(PERMISSOES_META.join(','))
+    ].join('&');
+
+    try { if (window.top && window.top !== window) window.top.location.href = url; else window.location.href = url; }
+    catch (e) { window.open(url, '_blank', 'noopener'); }
+  }
+
+  /* ----- volta do Facebook ----- */
+  function lerRetorno() {
+    var h = new URLSearchParams(location.hash.replace(/^#/, '')), q = new URLSearchParams(location.search);
+    function pega(n) { return h.get(n) || q.get(n); }
+    if (!pega('access_token') && !pega('error')) return null;
+    var r = { token: pega('access_token'), expira: parseInt(pega('expires_in'), 10) || 0, state: pega('state'), erro: pega('error'), motivo: pega('error_reason') };
+    try { history.replaceState(null, '', location.pathname); } catch (e) {} /* tira o token do endereço */
+    return r;
+  }
+
+  function processarRetorno(r) {
+    var salvo = null;
+    try { salvo = JSON.parse(localStorage.getItem(CHAVE_STATE) || 'null'); localStorage.removeItem(CHAVE_STATE); } catch (e) {}
+    mostrar('mt-inicio');
+    if (r.erro) {
+      if (r.erro === 'access_denied' || r.motivo === 'user_denied') erro('Você cancelou a autorização no Facebook. Quando quiser, clique em Conectar com Facebook e aceite as opções.', 'Conexão cancelada');
+      else erro('O Facebook não liberou a conexão. Tente de novo.', 'Não deu certo');
+      return;
+    }
+    if (!salvo || salvo.s !== r.state || (Date.now() - salvo.t) > 15 * 60 * 1000) {
+      erro('Por segurança, a conexão foi recusada porque o pedido não confere ou demorou demais. Clique em Conectar com Facebook para começar de novo.', 'Conexão recusada');
+      return;
+    }
+    mostrar('mt-carregando');
+    graph('/me/permissions', r.token).then(function (p) {
+      var ok = {};
+      (p.data || []).forEach(function (x) { if (x.status === 'granted') ok[x.permission] = true; });
+      var faltam = PERMISSOES_META.filter(function (x) { return !ok[x]; });
+      if (faltam.length) throw { msg: 'Você não aceitou: ' + faltam.map(function (x) { return NOMES[x] || x; }).join(', ') + '. Clique em Conectar com Facebook de novo e deixe todas as opções marcadas.' };
+      return graph('/me/accounts?fields=id,name,access_token,instagram_business_account%7Bid,username,name%7D&limit=100', r.token);
+    }).then(function (c) {
+      var contas = (c.data || []).filter(function (x) { return x && x.id && x.access_token; });
+      if (!contas.length) throw { msg: 'Não encontrei nenhuma Página do Facebook na sua conta. Você precisa ser administrador de uma Página e deixá-la marcada na tela de autorização do Facebook.' };
+      tokenPendente = r.token; validadePendente = r.expira; contasPendentes = contas;
+      if (contas.length === 1) return finalizar(contas[0]);
+      listarPaginas(contas);
+    }).catch(function (e) {
+      if (e && e.fb) { try { console.error('Meta:', e.fb); } catch (x) {} }
+      mostrar('mt-inicio'); erro(textoDoErro(e), 'Não deu certo');
+    });
+  }
+
+  function listarPaginas(contas) {
+    var box = $('mt-lista'); box.textContent = '';
+    contas.forEach(function (c, i) {
+      var l = document.createElement('label'), inp = document.createElement('input'), sp = document.createElement('span'), pq = document.createElement('small');
+      inp.type = 'radio'; inp.name = 'mt-pagina'; inp.value = String(i); if (i === 0) inp.checked = true;
+      sp.textContent = c.name; pq.textContent = c.instagram_business_account ? 'Com Instagram ligado' : 'Sem Instagram ligado';
+      sp.appendChild(pq); l.appendChild(inp); l.appendChild(sp); box.appendChild(l);
+    });
+    mostrar('mt-escolher');
+  }
+
+  function finalizar(conta) {
+    var ig = conta.instagram_business_account || null, agora = Date.now();
+    var dados = {
+      conectado: true, appId: String(FACEBOOK_APP_ID).trim(),
+      pagina: { id: conta.id, nome: conta.name, token: conta.access_token },
+      instagram: ig ? { id: ig.id, usuario: ig.username || '', nome: ig.name || '' } : null,
+      usuarioToken: tokenPendente, permissoes: PERMISSOES_META.slice(),
+      conectadoEm: agora, expiraEm: validadePendente ? agora + validadePendente * 1000 : null
+    };
+    tokenPendente = ''; contasPendentes = [];
+    if (!gravar(dados)) { mostrar('mt-inicio'); erro('Conectou, mas este navegador não deixou guardar a conexão. Saia do modo anônimo ou use outro navegador.', 'Não foi possível salvar'); return; }
+    mostrarConectado(dados);
+  }
+
+  function mostrarConectado(d) {
+    limpar();
+    $('mt-ok-pagina').textContent = d.pagina.nome;
+    $('mt-ok-insta').textContent = d.instagram ? (d.instagram.usuario ? '@' + d.instagram.usuario : (d.instagram.nome || 'Conectado')) : 'Nenhum Instagram profissional ligado a esta Página';
+    if (d.expiraEm) { $('mt-ok-val').textContent = new Date(d.expiraEm).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }); $('mt-ok-val-box').hidden = false; }
+    else $('mt-ok-val-box').hidden = true;
+    if (!d.instagram) aviso('O robô só vai publicar no Facebook. Para publicar também no Instagram, ligue uma conta profissional do Instagram a esta Página e conecte de novo.');
+    mostrar('mt-ok');
+  }
+
+  function estadoInicial() {
+    var s = ler();
+    if (s && s.conectado && s.pagina) {
+      if (s.expiraEm && s.expiraEm < Date.now()) { mostrar('mt-inicio'); aviso('A conexão com a Página ' + s.pagina.nome + ' venceu. Clique em Conectar com Facebook para renovar.'); }
+      else mostrarConectado(s);
+    } else mostrar('mt-inicio');
+  }
+
+  /* ----- ligações ----- */
+  $('mt-uri').value = REDIRECT_URI;
+  $('mt-dominio').textContent = APP_DOMAIN;
+  $('mt-status-appid').textContent = appIdOk() ? 'APP ID: ' + String(FACEBOOK_APP_ID).trim() + ' (Divulga Fosta).' : 'APP ID: ainda não preenchido no código.';
+  var logo = $('mt-logo');
+  function semLogo() { logo.style.display = 'none'; $('mt-logo-fb').style.display = 'flex'; }
+  logo.addEventListener('error', semLogo); if (logo.complete && logo.naturalWidth === 0) semLogo();
+
+  $('mt-conectar').addEventListener('click', conectar);
+  $('mt-reconectar').addEventListener('click', function () { mostrar('mt-inicio'); conectar(); });
+  $('mt-desconectar').addEventListener('click', function () {
+    if (!confirm('Desligar o robô neste aparelho? Você pode conectar de novo quando quiser.')) return;
+    apagar(); limpar(); mostrar('mt-inicio'); aviso('Robô desligado neste aparelho.');
+  });
+  $('mt-usar').addEventListener('click', function () {
+    var sel = document.querySelector('input[name="mt-pagina"]:checked'), conta = sel && contasPendentes[parseInt(sel.value, 10)];
+    if (conta) finalizar(conta);
+  });
+  $('mt-copiar-uri').addEventListener('click', function () {
+    var campo = $('mt-uri'), b = $('mt-copiar-uri');
+    function feito() { b.textContent = 'Copiado'; setTimeout(function () { b.textContent = 'Copiar'; }, 1800); }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(campo.value).then(feito, function () { campo.select(); });
+    else { campo.select(); try { document.execCommand('copy'); feito(); } catch (e) {} }
+  });
+
+  var r = lerRetorno();
+  if (r) processarRetorno(r); else estadoInicial();
 })();
 </script>
-</head>
-<body style="margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,sans-serif;text-align:center;padding:24px">
-  <p>Abrindo a conexão dentro da FCosta…<br><a href="index.html#ligar-meta" target="_top">Toque aqui se não abrir</a></p>
 </body>
 </html>

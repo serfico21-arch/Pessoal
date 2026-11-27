@@ -29,14 +29,15 @@
 /* =====================================================================
    LIGAR REDES (FACEBOOK E INSTAGRAM) — CONFIGURAÇÃO
    ---------------------------------------------------------------------
-   1) Cole abaixo o APP ID do seu app em developers.facebook.com
-      (Meus Apps > seu app > Configurações > Básico > "ID do Aplicativo").
-   2) No mesmo app, em "Facebook Login > Configurações", ative
-      "Login do OAuth do cliente" e cole em "URIs de redirecionamento do
-      OAuth válidos" o endereço que aparece na janela "Ligar redes",
-      dentro de "Ajuda para o administrador".
+   App: Divulga Fosta (developers.facebook.com).
+   No app, em "Facebook Login > Configurações", ative "Login do OAuth do
+   cliente" e cole em "URIs de redirecionamento do OAuth válidos" o mesmo
+   endereço do REDIRECT_URI abaixo. Em "Configurações > Básico", coloque o
+   APP_DOMAIN em "Domínios do aplicativo".
    ===================================================================== */
-const FACEBOOK_APP_ID = "COLOQUE_SEU_APP_ID_AQUI";
+const FACEBOOK_APP_ID = "1169481185588897";
+const REDIRECT_URI = "https://serfico21-arch.github.io/Pessoal/conectar-meta.html";
+const APP_DOMAIN = "serfico21-arch.github.io";
 /* Permissões pedidas ao Facebook (as 5 necessárias para o robô publicar) */
 const PERMISSOES_META = ["pages_manage_posts", "pages_read_engagement", "instagram_basic", "instagram_content_publish", "pages_show_list"];
 /* Versão da API do Facebook (versões antigas deixam de funcionar com o tempo) */
@@ -844,7 +845,8 @@ var t0=Date.now(),fim=function(){setTimeout(function(){a.style.opacity="0";setTi
         <summary>Ajuda para o administrador</summary>
         <p>Antes do primeiro uso, no app em developers.facebook.com:</p>
         <ol>
-          <li>Cole o APP ID no começo do código do index (linha const FACEBOOK_APP_ID).</li>
+          <li>O APP ID (Divulga Fosta) já está no começo do código do index.</li>
+          <li>Em Configurações &gt; Básico, coloque <b id="mt-dominio"></b> em "Domínios do aplicativo".</li>
           <li>Em Facebook Login &gt; Configurações, ative "Login do OAuth do cliente".</li>
           <li>Cole o endereço abaixo em "URIs de redirecionamento do OAuth válidos" e salve.</li>
         </ol>
@@ -3262,7 +3264,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   }
   function aviso(t) { $('mt-aviso').textContent = t; $('mt-aviso').hidden = false; }
   function appIdOk() { return /^\d{6,20}$/.test(String(FACEBOOK_APP_ID).trim()); }
-  function enderecoRetorno() { return location.origin + location.pathname.replace(/index\.html$/i, ''); }
+  function enderecoRetorno() { return REDIRECT_URI; }
 
   function abrirMeta() {
     [].forEach.call(document.querySelectorAll('dialog[open]'), function (d) { if (d !== dlg && d.close) d.close(); });
@@ -3307,7 +3309,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   /* ----- botão principal: vai de verdade para o login oficial do Facebook ----- */
   function conectar() {
     limpar();
-    if (!appIdOk()) { erro('Falta colocar o APP ID do Facebook no começo do código do index (a linha const FACEBOOK_APP_ID).', 'App ainda não configurado'); return; }
+    if (!appIdOk()) { erro('O APP ID do Facebook não está preenchido corretamente no começo do código (const FACEBOOK_APP_ID).', 'App ainda não configurado'); return; }
     var arr = new Uint8Array(16), state = '';
     try { (window.crypto || window.msCrypto).getRandomValues(arr); } catch (e) { for (var i = 0; i < 16; i++) arr[i] = Math.floor(Math.random() * 256); }
     for (var k = 0; k < arr.length; k++) state += ('0' + arr[k].toString(16)).slice(-2);
@@ -3434,8 +3436,9 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
 
   /* ----- ligações ----- */
   $('mt-uri').value = enderecoRetorno();
+  $('mt-dominio').textContent = APP_DOMAIN;
   $('mt-link').value = LINK_COMPARTILHAR_PADRAO;
-  $('mt-status-appid').textContent = appIdOk() ? 'APP ID: preenchido.' : 'APP ID: ainda não preenchido no código.';
+  $('mt-status-appid').textContent = appIdOk() ? 'APP ID: ' + String(FACEBOOK_APP_ID).trim() + ' (Divulga Fosta).' : 'APP ID: ainda não preenchido no código.';
   var logo = $('mt-logo');
   function semLogo() { logo.style.display = 'none'; $('mt-logo-fb').style.display = 'flex'; }
   logo.addEventListener('error', semLogo); if (logo.complete && logo.naturalWidth === 0) semLogo();

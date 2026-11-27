@@ -217,6 +217,12 @@ function acaoRede(k){var r=redes().filter(function(x){return x.k===k})[0];if(!r)
    posta na Página do Facebook e no Instagram (post + story). O resultado volta em
    divulgar/status.json. Para ligar o robô: conectar-meta.html (uma vez só). */
 var ROBO=null,roboT=0;
+/* Conexão feita em conectar-meta.html (guardada neste aparelho): fcosta_meta, fcosta_meta_page_id e fcosta_meta_ig_id */
+function metaLocal(){var r={on:false,venceu:false,nome:"",ig:false};
+ try{var d=JSON.parse(localStorage.getItem("fcosta_meta")||"null"),pid=localStorage.getItem("fcosta_meta_page_id"),ig=localStorage.getItem("fcosta_meta_ig_id");
+  if(pid||(d&&d.conectado&&d.pagina)){r.nome=(d&&d.pagina&&d.pagina.nome)||"Página conectada";r.ig=!!(ig||(d&&d.instagram));
+   if(d&&d.expiraEm&&d.expiraEm<Date.now())r.venceu=true;else r.on=true}}catch(e){}
+ return r}
 function lerRobo(cb){fetch("https://api.github.com/repos/serfico21-arch/Pessoal/contents/divulgar/status.json?ref=main&t="+Date.now(),{headers:{Accept:"application/vnd.github.raw"},cache:"no-store"}).then(function(r){if(!r.ok)throw 0;return r.json()})
  .catch(function(){return fetch("divulgar/status.json?t="+Date.now(),{cache:"no-store"}).then(function(r){return r.json()})})
  .then(function(j){ROBO=j;roboT=Date.now();if(cb)cb()}).catch(function(){})}
@@ -226,8 +232,10 @@ function divulgar(){if(!cur)return;var b=$("bdiv");if(b){b.disabled=true;b.textC
  .catch(function(){toast("Não consegui enviar. Confira a internet e tente de novo");render()})}
 function linhaRede(nome,r,esperando){return'<li><span class="n">'+nome+'</span>'+(r?(r.ok?'<span class="tag ok">✅ postado</span>'+(r.link?' <a href="'+esc(r.link)+'" target="_blank" rel="noopener">ver</a>':''):'<span class="tag am" title="'+esc(r.erro||"")+'">❌ não foi</span>'):(esperando?'<span class="tag">⏳ na fila</span>':''))+'</li>'}
 function telaSimples(){var i=cur,a=S.auto[i.id],h='<div class="card" style="border:3px solid var(--ok)">';
- var lig=ROBO&&ROBO.conectado;
- if(ROBO&&!lig)h+='<div class="aviso">🔌 A postagem automática no Facebook e Instagram ainda não está ligada. <a href="conectar-meta.html"><b>Ligar agora (uma vez só)</b></a></div>';
+ var M=metaLocal(),lig=M.on||(ROBO&&ROBO.conectado);
+ if(M.on)h+='<div class="dica">✅ <b>Ligado: '+esc(M.nome)+'</b>'+(M.ig?' + Instagram':' (só Facebook)')+' · <a href="conectar-meta.html">trocar</a></div>';
+ else if(M.venceu)h+='<div class="aviso">⚠️ A conexão com '+esc(M.nome)+' venceu. <a href="conectar-meta.html"><b>Renovar agora</b></a></div>';
+ else if(!lig)h+='<div class="aviso">🔌 A postagem automática no Facebook e Instagram ainda não está ligada. <a href="conectar-meta.html"><b>Ligar agora (uma vez só)</b></a></div>';
  h+='<button class="btn ok big" id="bdiv" data-a="divulgar" style="min-height:84px;font-size:26px">📣 DIVULGAR</button>';
  h+='<p class="mut" style="margin-top:8px">Posta sozinho na sua <b>Página do Facebook</b> e no <b>Instagram</b> (post com fotos + story)'+(ROBO&&ROBO.redes&&ROBO.redes.tg?' e no seu <b>canal do Telegram</b>':'')+'.</p>';
  if(a){var it=ROBO&&ROBO.itens&&ROBO.itens[a.k],esp=!it;
