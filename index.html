@@ -38,8 +38,10 @@
 const FACEBOOK_APP_ID = "1169481185588897";
 const REDIRECT_URI = "https://serfico21-arch.github.io/Pessoal/conectar-meta.html";
 const APP_DOMAIN = "serfico21-arch.github.io";
-/* Permissões pedidas ao Facebook (as 5 necessárias para o robô publicar) */
-const PERMISSOES_META = ["pages_manage_posts", "pages_read_engagement", "instagram_basic", "instagram_content_publish", "pages_show_list"];
+/* Permissões pedidas ao Facebook (SÓ as básicas, para teste. pages_manage_posts e instagram_content_publish ficam de fora até o app ser aprovado) */
+const PERMISSOES_META = ["public_profile", "email", "pages_show_list", "pages_read_engagement"];
+/* Permissões que realmente precisam vir marcadas para o fluxo seguir */
+const PERMISSOES_OBRIGATORIAS = ["pages_show_list", "pages_read_engagement"];
 /* Versão da API do Facebook (versões antigas deixam de funcionar com o tempo) */
 const VERSAO_API_META = "v25.0";
 /* Link que já vem preenchido nos botões manuais de compartilhar */
@@ -3250,7 +3252,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
 (function () {
   var dlg = document.getElementById('dlg-meta'); if (!dlg) return;
   var CHAVE_DADOS = 'fcosta_meta', CHAVE_STATE = 'fcosta_meta_state';
-  var NOMES = { pages_manage_posts: 'publicar na Página', pages_read_engagement: 'ler os dados da Página', instagram_basic: 'acessar o Instagram', instagram_content_publish: 'publicar no Instagram', pages_show_list: 'listar suas Páginas' };
+  var NOMES = { public_profile: 'ver seu perfil público', email: 'ver seu e-mail', pages_manage_posts: 'publicar na Página', pages_read_engagement: 'ler os dados da Página', instagram_basic: 'acessar o Instagram', instagram_content_publish: 'publicar no Instagram', pages_show_list: 'listar suas Páginas' };
   var TELAS = ['mt-inicio', 'mt-carregando', 'mt-escolher', 'mt-ok'];
   var contasPendentes = [], tokenPendente = '', validadePendente = 0;
 
@@ -3298,6 +3300,8 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     if (e && e.rede) return 'Não consegui falar com o Facebook. Confira sua internet e tente de novo.';
     if (e && e.fb) {
       var c = e.fb.code;
+      var det = (e.fb.message || e.fb.type || 'motivo não informado') + (c ? ' (código ' + c + (e.fb.error_subcode ? '/' + e.fb.error_subcode : '') + ')' : '');
+      return 'Erro do Facebook: ' + det;
       if (c === 190) return 'A autorização venceu ou foi cancelada no Facebook. Clique em Conectar com Facebook para fazer de novo.';
       if (c === 10 || c === 200 || c === 299) return 'Faltou aceitar alguma permissão. Clique em Conectar com Facebook e deixe todas as opções marcadas.';
       if (c === 4 || c === 17 || c === 32 || c === 613) return 'O Facebook limitou os pedidos por agora. Espere alguns minutos e tente de novo.';
@@ -3336,7 +3340,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     var h = new URLSearchParams(location.hash.replace(/^#/, '')), q = new URLSearchParams(location.search);
     function pega(n) { return h.get(n) || q.get(n); }
     if (!pega('access_token') && !pega('error')) return null;
-    var r = { token: pega('access_token'), expira: parseInt(pega('expires_in'), 10) || 0, state: pega('state'), erro: pega('error'), motivo: pega('error_reason') };
+    var r = { token: pega('access_token'), expira: parseInt(pega('expires_in'), 10) || 0, state: pega('state'), erro: pega('error'), motivo: pega('error_reason'), descricao: pega('error_description') || pega('error_message'), codigo: pega('error_code') };
     try { history.replaceState(null, '', location.pathname); } catch (e) {} /* tira o token do endereço */
     return r;
   }
@@ -3347,7 +3351,10 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     mostrar('mt-inicio');
     if (r.erro) {
       if (r.erro === 'access_denied' || r.motivo === 'user_denied') erro('Você cancelou a autorização no Facebook. Quando quiser, clique em Conectar com Facebook e aceite as opções.', 'Conexão cancelada');
-      else erro('O Facebook não liberou a conexão. Tente de novo.', 'Não deu certo');
+      else {
+        var partes = [r.descricao, r.motivo, r.erro].filter(function (x, i, a) { return x && a.indexOf(x) === i; });
+        erro('Erro do Facebook: ' + (partes.join(' | ') || 'motivo não informado') + (r.codigo ? ' (código ' + r.codigo + ')' : ''), 'Conexão não concluída');
+      }
       return;
     }
     if (!salvo || salvo.s !== r.state || (Date.now() - salvo.t) > 15 * 60 * 1000) {
@@ -3358,7 +3365,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     graph('/me/permissions', r.token).then(function (p) {
       var ok = {};
       (p.data || []).forEach(function (x) { if (x.status === 'granted') ok[x.permission] = true; });
-      var faltam = PERMISSOES_META.filter(function (x) { return !ok[x]; });
+      var faltam = PERMISSOES_OBRIGATORIAS.filter(function (x) { return !ok[x]; });
       if (faltam.length) throw { msg: 'Você não aceitou: ' + faltam.map(function (x) { return NOMES[x] || x; }).join(', ') + '. Clique em Conectar com Facebook de novo e deixe todas as opções marcadas.' };
       return graph('/me/accounts?fields=id,name,access_token,instagram_business_account%7Bid,username,name%7D&limit=100', r.token);
     }).then(function (c) {
