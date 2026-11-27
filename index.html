@@ -3011,11 +3011,11 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
 (function () {
   var BASE = 'https://serfico21-arch.github.io/Pessoal/';
   var PAGINAS_SHARE = [
-    { n: 'Anuncie seu imóvel', d: 'Página para o dono do imóvel mandar os dados', u: BASE + 'captacao-fcosta.html',
+    { n: 'Anuncie seu imóvel', d: 'Página para o dono do imóvel mandar os dados', u: BASE + 'captacao-fcosta.html', f: 'icone',
       m: 'Quer vender ou alugar seu imóvel? 🏠 Preencha em 3 minutos, tire as fotos de cada cômodo e me mande pelo WhatsApp. Sérgio Costa, corretor de imóveis, CRECI-SP 294791-F. Toque no link abaixo 👇' },
-    { n: 'Imóveis à venda', d: 'Minha vitrine de imóveis para o cliente', u: BASE + 'portfolio-fcosta.html',
+    { n: 'Imóveis à venda', d: 'Minha vitrine de imóveis para o cliente', u: BASE + 'portfolio-fcosta.html', f: 'imoveis',
       m: 'Veja os imóveis que tenho à venda. Sérgio Costa, corretor de imóveis, CRECI-SP 294791-F.' },
-    { n: 'Site FCosta', d: 'fcostacorretor.com', u: 'https://fcostacorretor.com',
+    { n: 'Site FCosta', d: 'fcostacorretor.com', u: 'https://fcostacorretor.com', f: 'icone',
       m: 'Conheça o site da FCosta Corretor de Imóveis.' }
   ];
   var dlg = document.getElementById('dlg-compartilhar'); if (!dlg) return;
@@ -3024,7 +3024,43 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
   caixa.innerHTML = PAGINAS_SHARE.map(function (p, i) {
     return '<label><input type="radio" name="sh-pg" value="' + i + '"' + (i ? '' : ' checked') + '><span>' + esc(p.n) + '<small>' + esc(p.d) + '</small></span></label>';
   }).join('');
-  function escolher(i) { atual = i; texto.value = PAGINAS_SHARE[i].m; aviso.textContent = ''; }
+  /* ----- Imagens que vão junto (o link sozinho só mostra imagem se a página tiver og:image) -----
+     Captação e Site: o ícone da FCosta. Imóveis à venda: a foto de capa de até 4 imóveis do site. */
+  var DB = 'https://fcosta2026-847c3-default-rtdb.firebaseio.com', prontas = {}, pedidas = {};
+  function cloud(u) { return (u && u.indexOf('res.cloudinary.com') > -1 && u.indexOf('/upload/') > -1) ? u.replace('/upload/', '/upload/f_jpg,q_auto,w_1280/') : u; }
+  function blobFile(u, nome) {
+    return fetch(u).then(function (r) { if (!r.ok) throw 0; return r.blob(); })
+      .then(function (b) { return new File([b], nome + (/png/.test(b.type) ? '.png' : '.jpg'), { type: b.type || 'image/jpeg' }); })
+      .catch(function () { return null; });
+  }
+  function urlsImoveis() {
+    return fetch(DB + '/fcosta_imoveis.json').then(function (r) { return r.json(); }).then(function (d) {
+      var out = [];
+      Object.keys(d || {}).forEach(function (k) {
+        var x = d[k]; if (!x || typeof x !== 'object' || x.publicado === false || x._del === true || x._excluido === true || x.status === 'panfleto' || x.status === 'vendido') return;
+        var fs = x.fotos; if (fs && !Array.isArray(fs) && typeof fs === 'object') fs = Object.keys(fs).map(function (q) { return fs[q]; });
+        var f = x.fotoDestaque; if (!f && Array.isArray(fs) && fs[0]) f = typeof fs[0] === 'string' ? fs[0] : (fs[0].url || fs[0].src);
+        if (typeof f === 'string' && /^https?:\/\/\S+$/.test(f) && !/\.(mp4|mov|webm|pdf)(\?|$)/i.test(f) && !/supabase\.co\//i.test(f)) out.push({ f: f, d: x.destaque ? 1 : 0, a: String(x.atualizado || '') });
+      });
+      out.sort(function (a, b) { return (b.d - a.d) || b.a.localeCompare(a.a); });
+      return out.slice(0, 4).map(function (o) { return cloud(o.f); });
+    });
+  }
+  function msgFotos(i) { return prontas[i] && prontas[i].length ? '📷 ' + prontas[i].length + ' imagem(ns) pronta(s): WhatsApp, Instagram e "Outros apps" enviam com imagem.' : ''; }
+  function prepara(i) {
+    if (pedidas[i] || !navigator.canShare) return; pedidas[i] = 1;
+    var fonte = PAGINAS_SHARE[i].f === 'imoveis' ? urlsImoveis() : Promise.resolve([BASE + 'icon-512.png']);
+    fonte.then(function (us) { return Promise.all(us.map(function (u, n) { return blobFile(u, 'fcosta-' + (n + 1)); })); })
+      .then(function (fs) { prontas[i] = fs.filter(Boolean); if (atual === i) aviso.textContent = msgFotos(i); })
+      .catch(function () { pedidas[i] = 0; });
+  }
+  /* Manda imagens + mensagem + link da PÁGINA ESCOLHIDA (nunca o contato). Devolve false se o aparelho não suporta. */
+  function comFotos(tudo) {
+    var fs = prontas[atual]; if (!fs || !fs.length || !navigator.share || !navigator.canShare) return false;
+    var d = { files: fs, text: tudo }; if (!navigator.canShare(d)) return false;
+    navigator.share(d).catch(function () {}); return true;
+  }
+  function escolher(i) { atual = i; texto.value = PAGINAS_SHARE[i].m; aviso.textContent = msgFotos(i); prepara(i); }
   escolher(0);
   /* Botão com data-sh-pg: já abre na página certa (ex.: Captação) */
   document.addEventListener('click', function (e) {
@@ -3044,7 +3080,7 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
     var b = e.target.closest('[data-rede-sh]'); if (!b) return;
     var p = PAGINAS_SHARE[atual], u = p.u, m = texto.value.trim(), e1 = encodeURIComponent(u), em = encodeURIComponent(m), tudo = m + '\n' + u;
     switch (b.getAttribute('data-rede-sh')) {
-      case 'whatsapp': abrir('https://wa.me/?text=' + encodeURIComponent(tudo)); break;
+      case 'whatsapp': if (comFotos(tudo)) break; abrir('https://wa.me/?text=' + encodeURIComponent(tudo)); break;
       case 'facebook': abrir('https://www.facebook.com/sharer/sharer.php?u=' + e1); break;
       case 'telegram': abrir('https://t.me/share/url?url=' + e1 + '&text=' + em); break;
       case 'x': abrir('https://twitter.com/intent/tweet?text=' + em + '&url=' + e1); break;
@@ -3053,8 +3089,9 @@ if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
       case 'copiar': copiar(tudo, '✔ Mensagem e link copiados! Agora é só colar.'); break;
       case 'instagram':
         copiar(tudo, '✔ Copiado! No Instagram, cole na legenda, no story ou na bio.');
+        if (comFotos(tudo)) break;
         setTimeout(function () { abrir('https://www.instagram.com/'); }, 900); break;
-      case 'celular': navigator.share({ title: p.n, text: m, url: u }).catch(function () {}); break;
+      case 'celular': if (comFotos(tudo)) break; navigator.share({ title: p.n, text: m, url: u }).catch(function () {}); break;
     }
   });
 })();
